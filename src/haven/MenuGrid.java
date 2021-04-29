@@ -1412,17 +1412,17 @@ public class MenuGrid extends Widget {
                 wdgmsg("act", new Object[]{"tracking"});
                 ui.gui.trackautotgld = true;
             }
-            if (Config.autoconnectarddiscord && !discordconnected) {
-                new Thread(new Discord(ui.gui, "ard")).start();
-                ui.gui.discordconnected = true;
-            }
-            if (Config.autoconnectdiscord && !ui.gui.discordconnected) {
-                if (Resource.getLocString(Resource.BUNDLE_LABEL, Config.discordbotkey) != null) {
-                    new Thread(new Discord(ui.gui, "normal")).start();
-                    ui.gui.discordconnected = true;
-                }
-            } else if (ui.gui.discordconnected)
-                PBotUtils.sysMsg(ui, "Discord is already connected, you can only connect to one server at a time.", Color.white);
+//            if (Config.autoconnectarddiscord && !discordconnected) {
+//                new Thread(new Discord(ui.gui, "ard")).start();
+//                ui.gui.discordconnected = true;
+//            }
+//            if (Config.autoconnectdiscord && !ui.gui.discordconnected) {
+//                if (Config.discordtoken != null) {
+//                    new Thread(new Discord(ui.gui, "normal")).start();
+//                    ui.gui.discordconnected = true;
+//                }
+//            } else if (ui.gui.discordconnected)
+//                PBotUtils.sysMsg(ui, "Discord is already connected, you can only connect to one server at a time.", Color.white);
 
             if (Config.enablecrime && !GameUI.crimeon) {
                 ui.gui.crimeautotgld = true;

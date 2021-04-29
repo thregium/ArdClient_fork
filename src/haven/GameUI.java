@@ -324,8 +324,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             Utils.loadprefchklist("treessel_" + chrid, Config.trees);
             Utils.loadprefchklist("iconssel_" + chrid, Config.icons);
             opts.setMapSettings();
-            Config.discordchat = Utils.getprefb("discordchat_" + chrid, false);
-            opts.discordcheckbox.a = Config.discordchat;
+//            Config.discordchat = Utils.getprefb("discordchat_" + chrid, false);
+//            opts.discordcheckbox.a = Config.discordchat;
         }
 
         zerg = add(new Zergwnd(), new Coord(187, 50));

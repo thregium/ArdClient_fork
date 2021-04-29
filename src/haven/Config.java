@@ -29,7 +29,6 @@ package haven;
 import haven.error.ErrorHandler;
 import haven.purus.Iconfinder;
 import haven.sloth.util.ObservableMap;
-import integrations.mapv4.MappingClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -87,7 +86,7 @@ public class Config {
     public static String mapperUrl = Utils.getpref("mapperUrl", Utils.getpref("navigationEndpoint", "http://example.com"));
     public static boolean mapperHashName = Utils.getprefb("mapperHashName", true);
     public static boolean mapperEnabled = Utils.getprefb("mapperEnabled", true);
-//    public static boolean vendanMapv4 = Utils.getprefb("vendan-mapv4", false);
+    //    public static boolean vendanMapv4 = Utils.getprefb("vendan-mapv4", false);
 //    public static boolean vendanGreenMarkers = Utils.getprefb("vendan-mapv4-green-markers", false);
 //    public static boolean enableNavigationTracking = Utils.getprefb("enableNavigationTracking", false);
 //    public static boolean sendCustomMarkers = Utils.getprefb("sendCustomMarkers", false);
@@ -220,7 +219,7 @@ public class Config {
     public static boolean dropMinedCatGold = Utils.getprefb("dropMinedCatGold", false);
     public static boolean dropMinedSeaShells = Utils.getprefb("dropMinedSeaShells", false);
     public static boolean dropMinedCrystals = Utils.getprefb("dropMinedCrystals", false);
-    public static boolean dropMinedQuarryquartz  = Utils.getprefb("dropMinedQuarryquartz", false);
+    public static boolean dropMinedQuarryquartz = Utils.getprefb("dropMinedQuarryquartz", false);
     public static boolean dropsmelterstones = Utils.getprefb("dropsmelterstones", true);
     public static boolean showdframestatus = Utils.getprefb("showdframestatus", true);
     public static boolean showcoopstatus = Utils.getprefb("showcoopstatus", true);
@@ -266,7 +265,7 @@ public class Config {
     public static boolean temporaryswimming = Utils.getprefb("temporaryswimming", false);
     public static boolean disableelev = Utils.getprefb("disableelev", false);
     public static boolean obviousridges = Utils.getprefb("obviousridges", false);
-//    public static String treeboxclr = Utils.getpref("treeboxclr", "D7FF00");
+    //    public static String treeboxclr = Utils.getpref("treeboxclr", "D7FF00");
     public static String discordtoken = Utils.getpref("discordtoken", "Null");
     public static String discordchannel = Utils.getpref("discordchannel", "");
     public static String discordalertstring = Utils.getpref("discordalertstring", "Null");
@@ -276,7 +275,7 @@ public class Config {
     public static String chatalert = Utils.getpref("chatalert", "Null");
     public static String AlertChannel = Utils.getpref("AlertChannel", "Null");
     public static boolean discordchat = Utils.getprefb("", false);//invoked in gameui once you have a char name
-    public static String discordbotkey = Utils.getpref("discordbotkey", "Null");
+    //    public static String discordbotkey = Utils.getpref("discordbotkey", "Null");
     public static boolean highlightpots = Utils.getprefb("highlightpots", false);
     public static boolean abandonrightclick = Utils.getprefb("abandonrightclick", false);
     public static boolean DropEntrails = Utils.getprefb("DropEntrails", false);

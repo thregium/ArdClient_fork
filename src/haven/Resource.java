@@ -312,6 +312,13 @@ public class Resource implements Serializable {
     }
 
     public static class FileSource implements ResSource, Serializable {
+        public static final Collection<String> wintraps =
+                new HashSet<>(Arrays.asList("con", "prn", "aux", "nul",
+                        "com0", "com1", "com2", "com3", "com4",
+                        "com5", "com6", "com7", "com8", "com9",
+                        "lpt0", "lpt1", "lpt2", "lpt3", "lpt4",
+                        "lpt5", "lpt6", "lpt7", "lpt8", "lpt9"));
+        public static final boolean windows = System.getProperty("os.name", "").startsWith("Windows");
         File base;
 
         public FileSource(File base) {

@@ -444,9 +444,10 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
         setupres();
         DefSettings.init(); //init after res has been setup...
         try {
-            PBotDiscord.initalize();
+            if (Config.autoconnectdiscord)
+                PBotDiscord.initalize();
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         MainFrame f = (instance = new MainFrame(null));
         if (Utils.getprefb("fullscreen", false))

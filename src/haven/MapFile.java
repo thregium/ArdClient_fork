@@ -226,40 +226,6 @@ public class MapFile {
         }
     }
 
-    public static void saveols(Message fp, Collection<haven.MapFile.Overlay> ols) {
-        for (haven.MapFile.Overlay ol : ols) {
-            fp.addstring(ol.olid.name);
-            fp.adduint16(ol.olid.ver);
-            for (int i = 0; i < ol.ol.length; i += 8) {
-                int b = 0;
-                for (int o = 0; o < Math.min(8, ol.ol.length - i); o++) {
-                    if (ol.ol[i + o])
-                        b |= 1 << o;
-                }
-                fp.adduint8(b);
-            }
-        }
-        fp.addstring("");
-    }
-
-    public static void loadols(Collection<haven.MapFile.Overlay> buf, Message fp, String nm) {
-        while (true) {
-            String resnm = fp.string();
-            if (resnm.equals(""))
-                break;
-            int resver = fp.uint16();
-            boolean[] ol = new boolean[cmaps.x * cmaps.y];
-            for (int i = 0, p = 0; i < ol.length; i += 8) {
-                p = fp.uint8();
-                for (int o = 0; o < Math.min(8, ol.length - i); o++) {
-                    if ((p & (1 << o)) != 0)
-                        ol[i + o] = true;
-                }
-            }
-            buf.add(new haven.MapFile.Overlay(new Resource.Spec(Resource.remote(), resnm, resver), ol));
-        }
-    }
-
     private static Runnable locked(Runnable r, Lock lock) {
         return (() -> {
             lock.lock();
@@ -627,7 +593,7 @@ public class MapFile {
                 if (!errors && dids.contains(gd.b))
                     continue;
                 MessageBuf buf = new MessageBuf();
-                buf.adduint8(2);
+                buf.adduint8(3);
                 buf.addint64(gd.b);
                 buf.addint64(seg.id);
                 buf.addint64(grid.mtime);
@@ -641,6 +607,7 @@ public class MapFile {
                 buf.addint32(cmaps.x * cmaps.y);
                 buf.addbytes(grid.tiles);
                 DataGrid.savez(buf, grid.z);
+                DataGrid.saveols(buf, grid.ols);
                 byte[] od = buf.fin();
                 zout.addstring("grid");
                 zout.addint32(od.length);
@@ -965,6 +932,40 @@ public class MapFile {
                 throw (new Message.FormatError(String.format("Unknown grid z-map format for %s: %d", nm, fmt)));
             }
             return (ret);
+        }
+
+        public static void saveols(Message fp, Collection<haven.MapFile.Overlay> ols) {
+            for (haven.MapFile.Overlay ol : ols) {
+                fp.addstring(ol.olid.name);
+                fp.adduint16(ol.olid.ver);
+                for (int i = 0; i < ol.ol.length; i += 8) {
+                    int b = 0;
+                    for (int o = 0; o < Math.min(8, ol.ol.length - i); o++) {
+                        if (ol.ol[i + o])
+                            b |= 1 << o;
+                    }
+                    fp.adduint8(b);
+                }
+            }
+            fp.addstring("");
+        }
+
+        public static void loadols(Collection<haven.MapFile.Overlay> buf, Message fp, String nm) {
+            while (true) {
+                String resnm = fp.string();
+                if (resnm.equals(""))
+                    break;
+                int resver = fp.uint16();
+                boolean[] ol = new boolean[cmaps.x * cmaps.y];
+                for (int i = 0, p = 0; i < ol.length; i += 8) {
+                    p = fp.uint8();
+                    for (int o = 0; o < Math.min(8, ol.length - i); o++) {
+                        if ((p & (1 << o)) != 0)
+                            ol[i + o] = true;
+                    }
+                }
+                buf.add(new haven.MapFile.Overlay(new Resource.Spec(Resource.remote(), resnm, resver), ol));
+            }
         }
 
         private static Color olcol(MCache.OverlayInfo olid) {
@@ -1802,10 +1803,11 @@ public class MapFile {
         public TileInfo[] tilesets;
         public byte[] tiles;
         public int[] zmap;
+        public Collection<Overlay> ols = new ArrayList<>();
 
         ImportedGrid(Message data) {
             int ver = data.uint8();
-            if ((ver < 1) || (ver > 2))
+            if ((ver < 1) || (ver > 3))
                 throw (new Message.FormatError("Unknown grid data version: " + ver));
             gid = data.int64();
             segid = data.int64();
@@ -1826,6 +1828,8 @@ public class MapFile {
                     throw (new Message.FormatError("Bad grid data dimensions: " + tiles.length));
                 zmap = new int[cmaps.x * cmaps.y];
             }
+            if (ver >= 3)
+                DataGrid.loadols(ols, data, String.format("%x", gid));
             for (byte td : tiles) {
                 if ((td & 0xff) >= tiles.length)
                     throw (new Message.FormatError(String.format("Bad grid data contents: Tileset ID %d does not exist among 0-%d", (td & 0xff), tiles.length - 1)));
@@ -1833,7 +1837,9 @@ public class MapFile {
         }
 
         Grid togrid() {
-            return (new Grid(gid, tilesets, tiles, zmap, mtime));
+            Grid ret = new Grid(gid, tilesets, tiles, zmap, mtime);
+            ret.ols.addAll(ols);
+            return (ret);
         }
     }
 

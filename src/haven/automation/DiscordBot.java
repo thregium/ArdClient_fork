@@ -15,10 +15,10 @@ public class DiscordBot {
             try {
                 jda = new JDABuilder(AccountType.BOT).setToken(Config.discordtoken).buildAsync();
                 jda.getPresence().setStatus(OnlineStatus.ONLINE);
-                jda.getPresence().setGame(Game.playing("Revived Bot"));
+                jda.getPresence().setGame(Game.playing("Haven and Heart"));
             } catch (Exception e) {
                 System.out.println("DiscordBot getJDA: Invalid Token");
-                e.printStackTrace();
+//                e.printStackTrace();
             }
         }
         return jda;

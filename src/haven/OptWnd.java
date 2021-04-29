@@ -27,8 +27,8 @@
 package haven;
 
 
-import haven.automation.Discord;
 import haven.purus.pathfinder.Pathfinder;
+import haven.purus.pbot.PBotDiscord;
 import haven.purus.pbot.PBotUtils;
 import haven.resutil.BPRadSprite;
 import haven.resutil.FoodInfo;
@@ -364,46 +364,46 @@ public class OptWnd extends Window {
         main.add(new PButton(200, "Mapping", 'z', mapping), new Coord(420, 180));
         main.add(new PButton(200, "Modification", 'z', modification), new Coord(0, 240));
         if (gopts) {
-            main.add(new Button(200, "Disconnect Discord") {
-                public void click() {
-                    ui.gui.discordconnected = false;
-                    if (Discord.jdalogin != null) {
-                        PBotUtils.sysMsg(ui, "Discord Disconnected", Color.white);
-                        ui.gui.discordconnected = false;
-                        Discord.jdalogin.shutdownNow();
-                        Discord.jdalogin = null;
-                        for (int i = 0; i < 15; i++) {
-                            for (Widget w = ui.gui.chat.lchild; w != null; w = w.prev) {
-                                if (w instanceof ChatUI.DiscordChat)
-                                    w.destroy();
-                            }
-                        }
-                    } else
-                        PBotUtils.sysMsg(ui, "Not currently connected.", Color.white);
-                }
-            }, new Coord(210, 150));
-            main.add(new Button(200, "Join Village Discord") {
-                public void click() {
-                    if (!ui.gui.discordconnected) {
-                        if (Resource.getLocString(Resource.BUNDLE_LABEL, Config.discordbotkey) != null) {
-                            new Thread(new Discord(ui.gui, "normal")).start();
-                            ui.gui.discordconnected = true;
-                        } else
-                            PBotUtils.sysMsg(ui, "No Key Detected, if there is one in chat settings you might need to relog.", Color.white);
-                    } else
-                        PBotUtils.sysMsg(ui, "Already connected.", Color.white);
-                }
-            }, new Coord(210, 180));
-            main.add(new Button(200, "Join Ingame Discord") {
-                public void click() {
-                    if (ui.gui.discordconnected)
-                        PBotUtils.sysMsg(ui, "Already Connected.", Color.white);
-                    else {
-                        new Thread(new Discord(ui.gui, "ard")).start();
-                        ui.gui.discordconnected = true;
-                    }
-                }
-            }, new Coord(210, 210));
+//            main.add(new Button(200, "Disconnect Discord") {
+//                public void click() {
+//                    ui.gui.discordconnected = false;
+//                    if (Discord.jdalogin != null) {
+//                        PBotUtils.sysMsg(ui, "Discord Disconnected", Color.white);
+//                        ui.gui.discordconnected = false;
+//                        Discord.jdalogin.shutdownNow();
+//                        Discord.jdalogin = null;
+//                        for (int i = 0; i < 15; i++) {
+//                            for (Widget w = ui.gui.chat.lchild; w != null; w = w.prev) {
+//                                if (w instanceof ChatUI.DiscordChat)
+//                                    w.destroy();
+//                            }
+//                        }
+//                    } else
+//                        PBotUtils.sysMsg(ui, "Not currently connected.", Color.white);
+//                }
+//            }, new Coord(210, 150));
+//            main.add(new Button(200, "Join Village Discord") {
+//                public void click() {
+//                    if (!ui.gui.discordconnected) {
+//                        if (Config.discordtoken != null) {
+//                            new Thread(new Discord(ui.gui, "normal")).start();
+//                            ui.gui.discordconnected = true;
+//                        } else
+//                            PBotUtils.sysMsg(ui, "No Key Detected, if there is one in chat settings you might need to relog.", Color.white);
+//                    } else
+//                        PBotUtils.sysMsg(ui, "Already connected.", Color.white);
+//                }
+//            }, new Coord(210, 180));
+//            main.add(new Button(200, "Join Ingame Discord") {
+//                public void click() {
+//                    if (ui.gui.discordconnected)
+//                        PBotUtils.sysMsg(ui, "Already Connected.", Color.white);
+//                    else {
+//                        new Thread(new Discord(ui.gui, "ard")).start();
+//                        ui.gui.discordconnected = true;
+//                    }
+//                }
+//            }, new Coord(210, 210));
             /*
             main.add(new Button(200, "Join ArdClient Discord") {
                 public void click() {
@@ -1910,21 +1910,21 @@ public class OptWnd extends Window {
                     }
                 });
         appender.addRow(new CheckBox("Lock bad camera elevator") {
-                    {
-                        a = configuration.badcamelevlock;
-                    }
+            {
+                a = configuration.badcamelevlock;
+            }
 
-                    public void set(boolean val) {
-                        Utils.setprefb("badcamelevlock", val);
-                        configuration.badcamelevlock = val;
-                        a = val;
-                    }
+            public void set(boolean val) {
+                Utils.setprefb("badcamelevlock", val);
+                configuration.badcamelevlock = val;
+                a = val;
+            }
 
-                    @Override
-                    public Object tooltip(Coord c0, Widget prev) {
-                        return Text.render("Override with shift").tex();
-                    }
-                });
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Override with shift").tex();
+            }
+        });
         appender.add(new CheckBox("Use French (AZERTY) keyboard layout") {
             {
                 a = Config.userazerty;
@@ -2652,6 +2652,23 @@ public class OptWnd extends Window {
 
         appender.setVerticalMargin(VERTICAL_MARGIN);
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
+
+        appender.addRow(new CheckBox("Auto Connect") {
+            {
+                a = Config.autoconnectdiscord;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("autoconnectdiscord", val);
+                Config.autoconnectdiscord = val;
+                a = val;
+            }
+        }, new Button("Connect") {
+            @Override
+            public void click() {
+                PBotDiscord.initalize();
+            }
+        });
 
         appender.addRow(new Label("Discord Token: "),
                 new TextEntry(240, Utils.getpref("discordtoken", "")) {
@@ -4857,116 +4874,116 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.addRow(new Label("Enter Village name for Chat Alert sound, and village chat relay."),
-                new TextEntry(150, Config.chatalert) {
-                    @Override
-                    public boolean type(char c, KeyEvent ev) {
-                        if (!parent.visible)
-                            return false;
-
-                        boolean ret = buf.key(ev);
-                        if (text.length() > 0) {
-                            Utils.setpref("chatalert", text);
-                            Config.chatalert = text;
-                        }
-
-                        return ret;
-                    }
-                }
-        );
-        appender.addRow(new Label("Enter Discord Channel for Alerts to be sent to."),
-                new TextEntry(150, Config.AlertChannel) {
-                    @Override
-                    public boolean type(char c, KeyEvent ev) {
-                        if (!parent.visible)
-                            return false;
-
-                        boolean ret = buf.key(ev);
-                        if (text.length() > 0) {
-                            Utils.setpref("AlertChannel", text);
-                            Config.AlertChannel = text;
-                        }
-
-                        return ret;
-                    }
-                }
-        );
-        appender.addRow(new Label("Enter Discord Bot Key"),
-                new TextEntry(475, Config.discordtoken) {
-                    @Override
-                    public boolean type(char c, KeyEvent ev) {
-                        if (!parent.visible)
-                            return false;
-
-                        boolean ret = buf.key(ev);
-                        if (text.length() > 0) {
-                            Utils.setpref("discordtoken", text);
-                            Config.discordtoken = text;
-                        }
-
-                        return ret;
-                    }
-                }
-        );
-        appender.add(new CheckBox("Connect to Discord on Login") {
-            {
-                a = Config.autoconnectdiscord;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("autoconnectdiscord", val);
-                Config.autoconnectdiscord = val;
-                a = val;
-            }
-        });
-        discordcheckbox = new CheckBox("Log village chat to Discord - Warning, best used if only one person is using on an alt.") {
-            {
-                a = Config.discordchat;
-            }
-
-            public void set(boolean val) {
-                final String charname = ui.gui.chrid;
-                Utils.setprefb("discordchat_" + charname, val);
-                Config.discordchat = val;
-                a = val;
-            }
-        };
-        appender.add(discordcheckbox);
-        appender.addRow(new Label("Enter Discord channel name for village chat output."),
-                new TextEntry(150, Config.discordchannel) {
-                    @Override
-                    public boolean type(char c, KeyEvent ev) {
-                        if (!parent.visible)
-                            return false;
-
-                        boolean ret = buf.key(ev);
-                        if (text.length() > 0) {
-                            Utils.setpref("discordchannel", text);
-                            Config.discordchannel = text;
-                        }
-
-                        return ret;
-                    }
-                }
-        );
-
-        appender.addRow(new Label("Enter Discord Name For Bot."),
-                new TextEntry(150, Config.charname) {
-                    @Override
-                    public boolean type(char c, KeyEvent ev) {
-                        if (!parent.visible)
-                            return false;
-
-                        boolean ret = buf.key(ev);
-                        if (text.length() > 0) {
-                            Utils.setpref("charname", text);
-                            Config.charname = text;
-                        }
-
-                        return ret;
-                    }
-                }
-        );
+//        appender.addRow(new Label("Enter Village name for Chat Alert sound, and village chat relay."),
+//                new TextEntry(150, Config.chatalert) {
+//                    @Override
+//                    public boolean type(char c, KeyEvent ev) {
+//                        if (!parent.visible)
+//                            return false;
+//
+//                        boolean ret = buf.key(ev);
+//                        if (text.length() > 0) {
+//                            Utils.setpref("chatalert", text);
+//                            Config.chatalert = text;
+//                        }
+//
+//                        return ret;
+//                    }
+//                }
+//        );
+//        appender.addRow(new Label("Enter Discord Channel for Alerts to be sent to."),
+//                new TextEntry(150, Config.AlertChannel) {
+//                    @Override
+//                    public boolean type(char c, KeyEvent ev) {
+//                        if (!parent.visible)
+//                            return false;
+//
+//                        boolean ret = buf.key(ev);
+//                        if (text.length() > 0) {
+//                            Utils.setpref("AlertChannel", text);
+//                            Config.AlertChannel = text;
+//                        }
+//
+//                        return ret;
+//                    }
+//                }
+//        );
+//        appender.addRow(new Label("Enter Discord Bot Key"),
+//                new TextEntry(475, Config.discordtoken) {
+//                    @Override
+//                    public boolean type(char c, KeyEvent ev) {
+//                        if (!parent.visible)
+//                            return false;
+//
+//                        boolean ret = buf.key(ev);
+//                        if (text.length() > 0) {
+//                            Utils.setpref("discordtoken", text);
+//                            Config.discordtoken = text;
+//                        }
+//
+//                        return ret;
+//                    }
+//                }
+//        );
+//        appender.add(new CheckBox("Connect to Discord on Login") {
+//            {
+//                a = Config.autoconnectdiscord;
+//            }
+//
+//            public void set(boolean val) {
+//                Utils.setprefb("autoconnectdiscord", val);
+//                Config.autoconnectdiscord = val;
+//                a = val;
+//            }
+//        });
+//        discordcheckbox = new CheckBox("Log village chat to Discord - Warning, best used if only one person is using on an alt.") {
+//            {
+//                a = Config.discordchat;
+//            }
+//
+//            public void set(boolean val) {
+//                final String charname = ui.gui.chrid;
+//                Utils.setprefb("discordchat_" + charname, val);
+//                Config.discordchat = val;
+//                a = val;
+//            }
+//        };
+//        appender.add(discordcheckbox);
+//        appender.addRow(new Label("Enter Discord channel name for village chat output."),
+//                new TextEntry(150, Config.discordchannel) {
+//                    @Override
+//                    public boolean type(char c, KeyEvent ev) {
+//                        if (!parent.visible)
+//                            return false;
+//
+//                        boolean ret = buf.key(ev);
+//                        if (text.length() > 0) {
+//                            Utils.setpref("discordchannel", text);
+//                            Config.discordchannel = text;
+//                        }
+//
+//                        return ret;
+//                    }
+//                }
+//        );
+//
+//        appender.addRow(new Label("Enter Discord Name For Bot."),
+//                new TextEntry(150, Config.charname) {
+//                    @Override
+//                    public boolean type(char c, KeyEvent ev) {
+//                        if (!parent.visible)
+//                            return false;
+//
+//                        boolean ret = buf.key(ev);
+//                        if (text.length() > 0) {
+//                            Utils.setpref("charname", text);
+//                            Config.charname = text;
+//                        }
+//
+//                        return ret;
+//                    }
+//                }
+//        );
 
 
 //Maybe someday he will return
