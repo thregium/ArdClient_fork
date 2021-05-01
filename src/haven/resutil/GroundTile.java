@@ -95,6 +95,21 @@ public class GroundTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
             buf.new Face(mv[f[i]], mv[f[i + 1]], mv[f[i + 2]]);
     }
 
+    public void _faces(MapMesh m, Tex tex, int z, Surface.Vertex[] v, float[] tcx, float[] tcy, int[] f) {
+        float tl = tex.tcx(0), tt = tex.tcy(0), tw = tex.tcx(tex.sz().x) - tl, th = tex.tcy(tex.sz().y) - tt;
+        GLState st = stfor(tex, z, true);
+        MeshBuf buf = MapMesh.Model.get(m, st);
+
+        MeshBuf.Tex btex = buf.layer(MeshBuf.tex);
+        MeshVertex[] mv = new MeshVertex[v.length];
+        for (int i = 0; i < v.length; i++) {
+            mv[i] = new MeshVertex(buf, v[i]);
+            btex.set(mv[i], new Coord3f(tl + (tw * tcx[i]), tt + (th * tcy[i]), 0));
+        }
+        for (int i = 0; i < f.length; i += 3)
+            buf.new Face(mv[f[i]], mv[f[i + 1]], mv[f[i + 2]]);
+    }
+
     public void faces(MapMesh m, MPart d) {
         _faces(m, set.ground.pick(m.rnd(d.lc)), 0, d.v, d.tcx, d.tcy, d.f);
     }

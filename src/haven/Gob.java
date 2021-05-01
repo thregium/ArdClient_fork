@@ -1095,6 +1095,20 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 rl.prepc(WaterTile.surfmat);
                 rl.prepc(States.xray);
             }
+            if (configuration.resizegob) {
+                try {
+                    configuration.GobScale rmulti = configuration.getItem(this.getres().name);
+                    if (rmulti != null && rmulti.enable()) {
+                        rl.prepc(new Location(rmulti.getMatrix()));
+                    }
+                } catch (Exception e) {
+                }
+
+                configuration.GobScale rsingle = configuration.resizablegobsid.get(this.id);
+                if (rsingle != null && rsingle.enable()) {
+                    rl.prepc(new Location(rsingle.getMatrix()));
+                }
+            }
 
             final GobHealth hlt = getattr(GobHealth.class);
             if (hlt != null)

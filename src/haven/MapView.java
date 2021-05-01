@@ -83,7 +83,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
-import java.util.function.Function;
 
 import static haven.DefSettings.DARKMODE;
 import static haven.DefSettings.DRAWGRIDRADIUS;
@@ -648,7 +647,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
         public void tick2(double dt) {
             dt *= tf;
-            float cf = 1f - (float)Math.pow(500, -dt);
+            float cf = 1f - (float) Math.pow(500, -dt);
             Coord3f mc = getcc();
             mc.y = -mc.y;
             if (Config.disableelev)
@@ -2635,7 +2634,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         //we're inspecting an object, prepared to intercept the system message.
                         ui.gui.inspectedgobid = gob.id;
                     }
-                     if (gob != null && gob.type == Type.TAMEDANIMAL && ui.modflags() == UI.MOD_CTRL && clickb == 1 && Config.shooanimals) {
+                    if (gob != null && gob.type == Type.TAMEDANIMAL && ui.modflags() == UI.MOD_CTRL && clickb == 1 && Config.shooanimals) {
                         Resource res = gob.getres();
                         if (res != null && (res.name.startsWith("gfx/kritter/horse") ||
                                 res.name.startsWith("gfx/kritter/sheep") ||
@@ -3524,6 +3523,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     case 7: //Mark gob to custom marks
                         resources.customMarks.put(g.getres().name, true);
                         break;
+                    case 8: //Resizable gob
+                        ui.root.adda(configuration.gobScaleWindow(g), ui.root.sz.div(2), 0.5, 1.5);
+                        break;
                 }
             }, "Mark for party",
                     !HighlightData.isHighlighted(name) ? "Highlight" : "Remove Highlight",
@@ -3532,7 +3534,8 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     "Delete",
                     "Custom overlays",
                     "Mark on map",
-                    "Add to custom marks");
+                    "Add to custom marks",
+                    "Resize");
             ui.root.add(modmenu, ui.mc);
         });
     }

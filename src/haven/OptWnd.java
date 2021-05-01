@@ -3154,6 +3154,17 @@ public class OptWnd extends Window {
                 ui.root.adda(w, ui.root.sz.div(2), 0.5, 0.5);
             }
         });
+        appender.add(new CheckBox("Gob resizer") {
+            {
+                a = configuration.resizegob;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("resizegob", val);
+                configuration.resizegob = val;
+                a = val;
+            }
+        });
         appender.add(new CheckBox("Player Status tooltip") {
             {
                 a = configuration.statustooltip;

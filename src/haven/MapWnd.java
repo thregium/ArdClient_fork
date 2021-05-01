@@ -1534,7 +1534,7 @@ public class MapWnd extends ResizableWnd {
             if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
                 MappingClient.getInstance(ui.sess.username).ProcessMap(view.file, (m) -> {
                     if (m instanceof MapFile.PMarker && configuration.loadMapSetting(ui.sess.username, "green")) {
-                        return ((MapFile.PMarker) m).color.equals(Color.GREEN);
+                        return ((MapFile.PMarker) m).color.equals(Color.GREEN) && !m.name().equals("");
                     }
                     return true;
                 });

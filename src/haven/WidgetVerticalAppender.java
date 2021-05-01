@@ -1,5 +1,7 @@
 package haven;
 
+import java.util.Collection;
+
 public class WidgetVerticalAppender {
     public WidgetVerticalAppender(Widget widget) {
         this.widget = widget;
@@ -28,6 +30,19 @@ public class WidgetVerticalAppender {
     public <T extends Widget> void add(T child) {
         widget.add(child, new Coord(x, y));
         y += child.sz.y + verticalMargin;
+    }
+
+    public void addRow(Collection<? extends Widget> children) {
+        int x = this.x;
+        int maxHeight = 0;
+        for (Widget child : children) {
+            widget.add(child, new Coord(x, y));
+            x += child.sz.x + horizontalMargin;
+            if (maxHeight < child.sz.y) {
+                maxHeight = child.sz.y;
+            }
+        }
+        y += maxHeight + verticalMargin;
     }
 
     public void addRow(Widget... children) {

@@ -625,7 +625,8 @@ public class SeedCropFarmer extends Window implements Runnable {
                 boolean isbarrel = containers.get(0).getres().basename().contains("barrel");
                 if (cropName.contains("carrot") || cropName.contains("yellowonion") || cropName.contains("redonion") || cropName.contains("beet")
                         || cropName.contains("leek") || cropName.contains("turnip") || cropName.contains("pumpkin")) {
-                    groundname = seedName.replace("invobjs", "terobjs/items");
+                    if ((!isbarrel) || (isbarrel && cropName.contains("seed")))
+                        groundname = seedName.replace("invobjs", "terobjs/items");
                 } else {
                     if (cropName.contains("pipeweed")) {
                         groundname = seedName.replace("invobjs", "terobjs/items");

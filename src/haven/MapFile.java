@@ -1107,43 +1107,46 @@ public class MapFile {
                 if (configuration.allowtexturemap) {
                     for (c.y = 0; c.y < cmaps.y; c.y++) {
                         for (c.x = 0; c.x < cmaps.x; c.x++) {
-                            int t = gettile(c);
-                            BufferedImage tex;
-                            if (configuration.cavetileonmap && isContains(t, "gfx/tiles/rocks/")) {
-                                final String tname = tileName(t);
+                            try {
+                                int t = gettile(c);
+                                BufferedImage tex;
+                                if (configuration.cavetileonmap && isContains(t, "gfx/tiles/rocks/")) {
+                                    final String tname = tileName(t);
 //                                final String newtype = "gfx/tiles/paving/" + tname.substring(tname.lastIndexOf("/") + 1);
-                                final String newtype = "gfx/terobjs/bumlings/" + tname.substring(tname.lastIndexOf("/") + 1);
-                                tex = tiletex(t, texes, cached, newtype);
-                            } else tex = tiletex(t, texes, cached);
-                            int rgb = 0;
-                            if (tex != null) {
-                                switch (MAPTYPE.get()) {
-                                    case 1:
-                                        rgb = tex.getRGB(Utils.floormod(c.x + off.x, tex.getWidth()), Utils.floormod(c.y + off.y, tex.getHeight()));
+                                    final String newtype = "gfx/terobjs/bumlings/" + tname.substring(tname.lastIndexOf("/") + 1);
+                                    tex = tiletex(t, texes, cached, newtype);
+                                } else tex = tiletex(t, texes, cached);
+                                int rgb = 0;
+                                if (tex != null) {
+                                    switch (MAPTYPE.get()) {
+                                        case 1:
+                                            rgb = tex.getRGB(Utils.floormod(c.x + off.x, tex.getWidth()), Utils.floormod(c.y + off.y, tex.getHeight()));
 
-                                        int mixrgb = tex.getRGB(20, 45);
+                                            int mixrgb = tex.getRGB(20, 45);
 
-                                        Color mixtempColor = new Color(mixrgb, true);
-                                        Color tempColor = new Color(rgb, true);
+                                            Color mixtempColor = new Color(mixrgb, true);
+                                            Color tempColor = new Color(rgb, true);
 
-                                        tempColor = Utils.blendcol(tempColor, mixtempColor, configuration.simplelmapintens);
-                                        rgb = tempColor.getRGB();
-                                        break;
-                                    case 2:
-                                        Color simple_color = simple_tile_img(tex);
-                                        if (simple_color != null)
-                                            rgb = simple_color.getRGB();
-                                        break;
-                                    default:
-                                        rgb = tex.getRGB(Utils.floormod(c.x + off.x, tex.getWidth()), Utils.floormod(c.y + off.y, tex.getHeight()));
-                                        break;
+                                            tempColor = Utils.blendcol(tempColor, mixtempColor, configuration.simplelmapintens);
+                                            rgb = tempColor.getRGB();
+                                            break;
+                                        case 2:
+                                            Color simple_color = simple_tile_img(tex);
+                                            if (simple_color != null)
+                                                rgb = simple_color.getRGB();
+                                            break;
+                                        default:
+                                            rgb = tex.getRGB(Utils.floormod(c.x + off.x, tex.getWidth()), Utils.floormod(c.y + off.y, tex.getHeight()));
+                                            break;
+                                    }
                                 }
-                            }
 
-                            buf.setSample(c.x, c.y, 0, (rgb & 0x00ff0000) >>> 16);
-                            buf.setSample(c.x, c.y, 1, (rgb & 0x0000ff00) >>> 8);
-                            buf.setSample(c.x, c.y, 2, (rgb & 0x000000ff) >>> 0);
-                            buf.setSample(c.x, c.y, 3, (rgb & 0xff000000) >>> 24);
+                                buf.setSample(c.x, c.y, 0, (rgb & 0x00ff0000) >>> 16);
+                                buf.setSample(c.x, c.y, 1, (rgb & 0x0000ff00) >>> 8);
+                                buf.setSample(c.x, c.y, 2, (rgb & 0x000000ff) >>> 0);
+                                buf.setSample(c.x, c.y, 3, (rgb & 0xff000000) >>> 24);
+                            } catch (Exception e) {
+                            }
                         }
                     }
                 }

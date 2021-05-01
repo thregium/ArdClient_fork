@@ -1066,7 +1066,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
                     if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
                         MappingClient.getInstance(ui.sess.username).ProcessMap(file, (m) -> {
                             if (m instanceof MapFile.PMarker && configuration.loadMapSetting(ui.sess.username, "green")) {
-                                return ((MapFile.PMarker) m).color.equals(Color.GREEN);
+                                return ((MapFile.PMarker) m).color.equals(Color.GREEN) && !m.name().equals("");
                             }
                             return true;
                         });

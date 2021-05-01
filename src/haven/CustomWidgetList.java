@@ -146,7 +146,8 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
             this.name = name;
 
             cb = add(new CheckBox(name), 3, 3);
-            cb.a = customlist.get(name);
+            Boolean b = customlist.get(name);
+            cb.a = b != null && b;
             cb.canactivate = true;
 
             add(cl = new Button(24, "X") {

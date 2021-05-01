@@ -1,18 +1,23 @@
 package modification;
 
+import haven.CheckBox;
 import haven.CheckListboxItem;
 import haven.Config;
 import haven.Coord;
 import haven.Coord2d;
 import haven.Gob;
 import haven.MainFrame;
+import haven.Matrix4f;
 import haven.OCache;
 import haven.PUtils;
 import haven.Resource;
 import haven.Session;
 import haven.Tex;
 import haven.TexI;
+import haven.TextEntry;
 import haven.Utils;
+import haven.WidgetVerticalAppender;
+import haven.Window;
 import haven.sloth.gfx.SnowFall;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -22,6 +27,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.image.AffineTransformOp;
@@ -37,9 +43,12 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -952,5 +961,297 @@ public class configuration {
 
     public static String randomNick() {
         return (elfpreffix[new Random().nextInt(elfpreffix.length)] + elfsuffix[new Random().nextInt(elfsuffix.length)]);
+    }
+
+    public static boolean resizegob = Utils.getprefb("resizegob", false);
+    public static Map<Long, GobScale> resizablegobsid = new HashMap<>();
+    public static JSONObject resizablegobjson = configuration.loadjson("GobResize.json");
+    public static Map<String, GobScale> resizablegobsstring = getGobMap(resizablegobjson);
+
+    public static Map<String, GobScale> getGobMap(JSONObject jo) {
+        Map<String, GobScale> map = new HashMap<>();
+        try {
+            for (String name : jo.keySet()) {
+                map.put(name, new GobScale(jo.getJSONObject(name)));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return (map);
+    }
+
+    public static GobScale getItem(String name) {
+        for (String n : resizablegobsstring.keySet())
+            if (name.contains(n))
+                return (resizablegobsstring.get(n));
+        return (resizablegobsstring.get(name));
+    }
+
+    public static class GobScale {
+        private final float[][] scale = new float[][]{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}};
+        private boolean enable = false;
+
+        public GobScale() {
+        }
+
+        public GobScale(JSONObject jo) {
+            try {
+                enable = jo.getBoolean("enable");
+                for (int i = 0; i < scale.length; i++) {
+                    for (int j = 0; j < scale[i].length; j++) {
+                        scale[i][j] = (float) jo.getDouble(Integer.toString(i * scale.length + j));
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        public boolean setScale(int row, int column, float val) {
+            if (row > 3 || row < 0 || column > 3 || column < 0)
+                return (false);
+            scale[row][column] = val;
+            save();
+            return (true);
+        }
+
+        public void onoff(boolean a) {
+            this.enable = a;
+            save();
+        }
+
+        public boolean enable() {
+            return (enable);
+        }
+
+        /*public boolean setScale(int number, float val) {
+            if (number > 15 || number < 0)
+                return (false);
+            int row = number / scale.length;
+            int column = number - (scale[row].length * row);
+            scale[row][column] = val;
+            return (true);
+        }*/
+
+        public float[][] getScale() {
+            return (scale);
+        }
+
+        public Matrix4f getMatrix() {
+            return (new Matrix4f(
+                    scale[0][0], scale[0][1], scale[0][2], scale[0][3],
+                    scale[1][0], scale[1][1], scale[1][2], scale[1][3],
+                    scale[2][0], scale[2][1], scale[2][2], scale[2][3],
+                    scale[3][0], scale[3][1], scale[3][2], scale[3][3])
+            );
+        }
+
+        public void createjson() {
+            JSONObject nall = new JSONObject();
+            for (Map.Entry<String, GobScale> entry : resizablegobsstring.entrySet()) {
+                JSONObject o = new JSONObject();
+                o.put("enable", entry.getValue().enable());
+                for (int i = 0; i < entry.getValue().getScale().length; i++) {
+                    for (int j = 0; j < entry.getValue().getScale()[i].length; j++) {
+                        o.put(Integer.toString(i * entry.getValue().getScale().length + j), entry.getValue().getScale()[i][j]);
+                    }
+                }
+                nall.put(entry.getKey(), o);
+            }
+            resizablegobjson = nall;
+        }
+
+        public void save() {
+            createjson();
+            FileWriter jsonWriter = null;
+            try {
+                jsonWriter = new FileWriter("GobResize.json");
+                jsonWriter.write(resizablegobjson.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    if (jsonWriter != null) {
+                        jsonWriter.flush();
+                        jsonWriter.close();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public static Window gobScaleWindow(Gob gob) {
+        String resname = gob.getres().name;
+
+        Window window = new Window(Coord.z, "Gob Scale");
+        WidgetVerticalAppender wva1 = new WidgetVerticalAppender(window);
+        WidgetVerticalAppender wva2 = new WidgetVerticalAppender(window);
+        wva1.setY(20);
+        wva2.setY(20);
+        wva2.setX(220);
+
+        GobScale singlef = resizablegobsid.get(gob.id);
+        if (singlef == null)
+            resizablegobsid.put(gob.id, singlef = new GobScale());
+        final GobScale single = singlef;
+        float[][] sscale = single.getScale();
+
+        CheckBox gobid = new CheckBox(gob.id + "") {
+            {
+                a = single.enable();
+            }
+
+            @Override
+            public void set(boolean a) {
+                single.onoff(a);
+                this.a = a;
+            }
+        };
+        wva1.add(gobid);
+
+        TextEntry[][] singlescale = new TextEntry[sscale.length][sscale[0].length];
+        for (int i = 0; i < singlescale.length; i++) {
+            List<TextEntry> list = new ArrayList<>();
+            for (int j = 0; j < singlescale[i].length; j++) {
+                int row = i;
+                int column = j;
+                singlescale[i][j] = new TextEntry(50, Float.toString(sscale[row][column])) {
+                    public boolean type(char c, KeyEvent ev) {
+                        if ((c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9) || c == ',' || c == '.' || c == '\b' || c == '-' || c == KeyEvent.VK_DELETE) {
+                            return buf.key(ev);
+                        } else if (c == '\n') {
+                            try {
+                                float val = Float.parseFloat(text.replace(',', '.'));
+                                single.setScale(row, column, val);
+                                return (true);
+                            } catch (NumberFormatException e) {
+                            }
+                        }
+                        return (false);
+                    }
+
+                    public boolean mousewheel(Coord c, int amount) {
+                        try {
+                            float val = Float.parseFloat(text.replace(',', '.'));
+                            boolean yep = true;
+                            if (amount < 0) {
+                                for (int i = 0; yep; i++) {
+                                    float add = (float) (1 / Math.pow(10, i));
+                                    if (val >= add) {
+                                        val += add;
+                                        yep = false;
+                                    }
+                                }
+                            } else {
+                                for (int i = 0; yep; i++) {
+                                    float sub = (float) (1 / Math.pow(10, i));
+                                    if (val > sub) {
+                                        val -= sub;
+                                        yep = false;
+                                    }
+                                }
+                            }
+                            settext(Float.toString(val));
+                            single.setScale(row, column, val);
+                            return (true);
+                        } catch (Exception e) {
+                        }
+                        return (super.mousewheel(c, amount));
+                    }
+                };
+                list.add(singlescale[i][j]);
+            }
+            wva1.addRow(list);
+        }
+
+        GobScale multif = resizablegobsstring.get(resname);
+        if (multif == null)
+            resizablegobsstring.put(resname, multif = new GobScale());
+        final GobScale multi = multif;
+        float[][] mscale = multi.getScale();
+
+        CheckBox gobresname = new CheckBox(resname) {
+            {
+                a = multi.enable();
+            }
+
+            @Override
+            public void set(boolean a) {
+                multi.onoff(a);
+                this.a = a;
+            }
+        };
+        wva2.add(gobresname);
+
+        TextEntry[][] multiscale = new TextEntry[mscale.length][mscale[0].length];
+        for (int i = 0; i < multiscale.length; i++) {
+            List<TextEntry> list = new ArrayList<>();
+            for (int j = 0; j < multiscale[i].length; j++) {
+                int row = i;
+                int column = j;
+                multiscale[i][j] = new TextEntry(50, Float.toString(mscale[row][column])) {
+                    public boolean type(char c, KeyEvent ev) {
+                        if ((c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9) || c == ',' || c == '.' || c == '\b' || c == '-' || c == KeyEvent.VK_DELETE) {
+                            return buf.key(ev);
+                        } else if (c == '\n') {
+                            try {
+                                float val = Float.parseFloat(text.replace(',', '.'));
+                                multi.setScale(row, column, val);
+                                return (true);
+                            } catch (NumberFormatException e) {
+                            }
+                        }
+                        return (false);
+                    }
+
+                    public boolean mousewheel(Coord c, int amount) {
+                        try {
+                            float val = Float.parseFloat(text.replace(',', '.'));
+                            boolean yep = true;
+                            if (amount < 0) {
+                                for (int i = 0; yep; i++) {
+                                    float add = (float) (1 / Math.pow(10, i));
+                                    if (val >= add) {
+                                        val = new BigDecimal(Float.toString(val)).add(new BigDecimal(Float.toString(add))).floatValue();
+                                        yep = false;
+                                    }
+                                }
+                            } else {
+                                for (int i = 0; yep; i++) {
+                                    float sub = (float) (1 / Math.pow(10, i));
+                                    if (val > sub) {
+                                        val = new BigDecimal(Float.toString(val)).subtract(new BigDecimal(Float.toString(sub))).floatValue();
+                                        yep = false;
+                                    }
+                                }
+                            }
+                            settext(Float.toString(val));
+                            multi.setScale(row, column, val);
+                            return (true);
+                        } catch (Exception e) {
+                        }
+                        return (super.mousewheel(c, amount));
+                    }
+                };
+                list.add(multiscale[i][j]);
+            }
+            wva2.addRow(list);
+        }
+
+        window.pack();
+        window.adda(new CheckBox("Gob resizer") {
+            {
+                a = resizegob;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("resizegob", val);
+                resizegob = val;
+                a = val;
+            }
+        }, new Coord(window.sz.x / 2, 0), 0.5, 0);
+        return (window);
     }
 }

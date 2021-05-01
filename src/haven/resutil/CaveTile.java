@@ -29,6 +29,7 @@ package haven.resutil;
 import haven.Config;
 import haven.Coord;
 import haven.Coord3f;
+import haven.GLState;
 import haven.MapMesh;
 import haven.MapMesh.Scan;
 import haven.Material;
@@ -36,9 +37,13 @@ import haven.MeshBuf;
 import haven.Resource;
 import haven.Surface;
 import haven.Surface.Vertex;
+import haven.Tex;
+import haven.TexGL;
 import haven.Tiler;
 import haven.Tileset;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class CaveTile extends Tiler {
@@ -167,6 +172,8 @@ public class CaveTile extends Tiler {
         }
     }
 
+    public static final Map<Material, Tex> tiles = new HashMap<>();
+
     public void lay(MapMesh m, Random rnd, Coord lc, Coord gc) {
         Walls w = null;
         for (int i = 0; i < 4; i++) {
@@ -176,8 +183,29 @@ public class CaveTile extends Tiler {
             if (w == null) w = m.data(walls);
             mkwall(m, w, lc.add(tccs[(i + 1) % 4]), lc.add(tccs[i]));
         }
-        if (ground != null)
-            ground.lay(m, rnd, lc, gc);
+        if (ground != null) {
+            Tex tex = tiles.get(wtex);
+            if (tex == null) {
+                for (GLState gs : wtex.states) {
+                    if (gs instanceof TexGL.TexDraw) {
+                        if (gs.toString().contains("gfx/tiles/mountain-tex"))
+                            break;
+                        tiles.put(wtex, tex = ((TexGL.TexDraw) gs).tex);
+                        break;
+                    }
+                }
+            }
+            if (tex != null) {
+                if (ground instanceof GroundTile) {
+                    MapMesh.MapSurface s = m.data(m.gnd);
+                    GroundTile grn = ((GroundTile) ground);
+                    MPart d = MPart.splitquad(lc, gc, s.fortilea(lc), s.split[s.ts.o(lc)]);
+                    grn._faces(m, tex, 0, d.v, d.tcx, d.tcy, d.f);
+                } else
+                    ground.lay(m, rnd, lc, gc);
+            } else
+                ground.lay(m, rnd, lc, gc);
+        }
     }
 
     public void trans(MapMesh m, Random rnd, Tiler gt, Coord lc, Coord gc, int z, int bmask, int cmask) {
