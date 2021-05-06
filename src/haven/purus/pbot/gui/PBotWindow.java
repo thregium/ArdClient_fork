@@ -61,6 +61,9 @@ public class PBotWindow extends Window {
      */
     public PBotCheckbox addCheckbox(String name, String label, boolean initialState, int x, int y) {
         PBotCheckbox checkbox = new PBotCheckbox(label, initialState) {
+            {
+                a = initialState;
+            }
             @Override
             public void set(boolean val) {
                 a = val;
