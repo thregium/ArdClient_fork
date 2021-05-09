@@ -27,6 +27,7 @@
 package haven;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
@@ -64,6 +65,16 @@ public class PUtils {
 
     public static BufferedImage rasterimg(WritableRaster img) {
         return (new BufferedImage(TexI.glcm, img, false, null));
+    }
+
+    public static BufferedImage coercergba(BufferedImage img) {
+        int w = img.getWidth(), h = img.getHeight();
+        WritableRaster buf = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE, w, h, 4, null);
+        BufferedImage tgt = new BufferedImage(TexI.glcm, buf, false, null);
+        Graphics g = tgt.createGraphics();
+        g.drawImage(img, 0, 0, w, h, 0, 0, w, h, null);
+        g.dispose();
+        return (tgt);
     }
 
     public static WritableRaster imggrow(WritableRaster img, int rad) {
@@ -430,8 +441,7 @@ public class PUtils {
         }
     }
 
-    public static BufferedImage convolvedown(BufferedImage img, Coord tsz, Convolution filter) {
-        Raster in = img.getRaster();
+    public static WritableRaster convolvedown(Raster in, Coord tsz, Convolution filter) {
         int w = in.getWidth(), h = in.getHeight(), nb = in.getNumBands();
         double xf = (double) w / (double) tsz.x, ixf = 1.0 / xf;
         double yf = (double) h / (double) tsz.y, iyf = 1.0 / yf;
@@ -507,11 +517,14 @@ public class PUtils {
                 }
             }
         }
-        return (new BufferedImage(img.getColorModel(), res, false, null));
+        return (res);
     }
 
-    public static BufferedImage convolveup(BufferedImage img, Coord tsz, Convolution filter) {
-        Raster in = img.getRaster();
+    public static BufferedImage convolvedown(BufferedImage img, Coord tsz, Convolution filter) {
+        return (new BufferedImage(img.getColorModel(), convolvedown(img.getRaster(), tsz, filter), false, null));
+    }
+
+    public static WritableRaster convolveup(Raster in, Coord tsz, Convolution filter) {
         int w = in.getWidth(), h = in.getHeight(), nb = in.getNumBands();
         double xf = (double) w / (double) tsz.x, ixf = 1.0 / xf;
         double yf = (double) h / (double) tsz.y, iyf = 1.0 / yf;
@@ -587,17 +600,28 @@ public class PUtils {
                 }
             }
         }
-        return (new BufferedImage(img.getColorModel(), res, false, null));
+        return (res);
     }
 
-    public static BufferedImage convolve(BufferedImage img, Coord tsz, Convolution filter) {
+    public static BufferedImage convolveup(BufferedImage img, Coord tsz, Convolution filter) {
+        return (new BufferedImage(img.getColorModel(), convolveup(img.getRaster(), tsz, filter), false, null));
+    }
+
+    public static WritableRaster convolve(Raster img, Coord tsz, Convolution filter) {
         if ((tsz.x <= img.getWidth()) && (tsz.y <= img.getHeight()))
             return (convolvedown(img, tsz, filter));
         if ((tsz.x >= img.getWidth()) && (tsz.y >= img.getHeight()))
             return (convolveup(img, tsz, filter));
         System.out.println("Can only scale images up or down in both dimensions");
-        return (img);
-//        throw (new IllegalArgumentException("Can only scale images up or down in both dimensions"));
+        throw (new IllegalArgumentException("Can only scale images up or down in both dimensions"));
+    }
+
+    public static BufferedImage convolve(BufferedImage img, Coord tsz, Convolution filter) {
+        try {
+            return (new BufferedImage(img.getColorModel(), convolve(img.getRaster(), tsz, filter), false, null));
+        } catch (Exception e) {
+            return (img);
+        }
     }
 
     private static final Convolution uifilter = new Lanczos(3);
@@ -607,6 +631,13 @@ public class PUtils {
         if (tsz.equals(sz))
             return (img);
         return (convolve(img, tsz, uifilter));
+    }
+
+    public static Raster uiscale(Raster img, Coord tsz) {
+        Coord sz = imgsz(img);
+        if(tsz.equals(sz))
+            return(img);
+        return(convolve(img, tsz, uifilter));
     }
 
     public static void main(String[] args) throws Exception {

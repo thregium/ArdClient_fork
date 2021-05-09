@@ -964,9 +964,9 @@ public class configuration {
     }
 
     public static boolean resizegob = Utils.getprefb("resizegob", false);
-    public static Map<Long, GobScale> resizablegobsid = new HashMap<>();
+    public static final Map<Long, GobScale> resizablegobsid = new HashMap<>();
     public static JSONObject resizablegobjson = configuration.loadjson("GobResize.json");
-    public static Map<String, GobScale> resizablegobsstring = getGobMap(resizablegobjson);
+    public static final Map<String, GobScale> resizablegobsstring = getGobMap(resizablegobjson);
 
     public static Map<String, GobScale> getGobMap(JSONObject jo) {
         Map<String, GobScale> map = new HashMap<>();
@@ -1113,7 +1113,7 @@ public class configuration {
 
         TextEntry[][] singlescale = new TextEntry[sscale.length][sscale[0].length];
         for (int i = 0; i < singlescale.length; i++) {
-            List<TextEntry> list = new ArrayList<>();
+            final List<TextEntry> list = new ArrayList<>();
             for (int j = 0; j < singlescale[i].length; j++) {
                 int row = i;
                 int column = j;
@@ -1130,35 +1130,6 @@ public class configuration {
                             }
                         }
                         return (false);
-                    }
-
-                    public boolean mousewheel(Coord c, int amount) {
-                        try {
-                            float val = Float.parseFloat(text.replace(',', '.'));
-                            boolean yep = true;
-                            if (amount < 0) {
-                                for (int i = 0; yep; i++) {
-                                    float add = (float) (1 / Math.pow(10, i));
-                                    if (val >= add) {
-                                        val += add;
-                                        yep = false;
-                                    }
-                                }
-                            } else {
-                                for (int i = 0; yep; i++) {
-                                    float sub = (float) (1 / Math.pow(10, i));
-                                    if (val > sub) {
-                                        val -= sub;
-                                        yep = false;
-                                    }
-                                }
-                            }
-                            settext(Float.toString(val));
-                            single.setScale(row, column, val);
-                            return (true);
-                        } catch (Exception e) {
-                        }
-                        return (super.mousewheel(c, amount));
                     }
                 };
                 list.add(singlescale[i][j]);
@@ -1187,7 +1158,7 @@ public class configuration {
 
         TextEntry[][] multiscale = new TextEntry[mscale.length][mscale[0].length];
         for (int i = 0; i < multiscale.length; i++) {
-            List<TextEntry> list = new ArrayList<>();
+            final List<TextEntry> list = new ArrayList<>();
             for (int j = 0; j < multiscale[i].length; j++) {
                 int row = i;
                 int column = j;
@@ -1204,35 +1175,6 @@ public class configuration {
                             }
                         }
                         return (false);
-                    }
-
-                    public boolean mousewheel(Coord c, int amount) {
-                        try {
-                            float val = Float.parseFloat(text.replace(',', '.'));
-                            boolean yep = true;
-                            if (amount < 0) {
-                                for (int i = 0; yep; i++) {
-                                    float add = (float) (1 / Math.pow(10, i));
-                                    if (val >= add) {
-                                        val = new BigDecimal(Float.toString(val)).add(new BigDecimal(Float.toString(add))).floatValue();
-                                        yep = false;
-                                    }
-                                }
-                            } else {
-                                for (int i = 0; yep; i++) {
-                                    float sub = (float) (1 / Math.pow(10, i));
-                                    if (val > sub) {
-                                        val = new BigDecimal(Float.toString(val)).subtract(new BigDecimal(Float.toString(sub))).floatValue();
-                                        yep = false;
-                                    }
-                                }
-                            }
-                            settext(Float.toString(val));
-                            multi.setScale(row, column, val);
-                            return (true);
-                        } catch (Exception e) {
-                        }
-                        return (super.mousewheel(c, amount));
                     }
                 };
                 list.add(multiscale[i][j]);

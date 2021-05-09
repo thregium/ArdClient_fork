@@ -565,7 +565,7 @@ public class MapFileWidget extends Widget {
                         if (ui.modmeta && !ui.modshift && !ui.modctrl) {
                             ui.gui.map.queuemove(mc);
                         } else if (ui.modshift && !ui.modmeta && !ui.modctrl)
-                            Defer.later(() -> ui.gui.map.pathto(mc));
+                            ui.gui.map.pathto(mc);
                         else if (ui.modctrl && !ui.modmeta && !ui.modshift) {
                             ui.gui.map.moveto(mc);
                         }

@@ -277,8 +277,6 @@ public class Widget {
     }
 
 
-
-
     private <T extends Widget> T add0(T child) {
         if ((child.ui == null) && (this.ui != null))
             ((Widget) child).attach(this.ui);
@@ -505,15 +503,15 @@ public class Widget {
 
     public void link() {
         Widget prev;
-        for(prev = parent.lchild; (prev != null) && (prev.z > this.z); prev = prev.prev);
-        if(prev != null) {
-            if((this.next = prev.next) != null)
+        for (prev = parent.lchild; (prev != null) && (prev.z > this.z); prev = prev.prev) ;
+        if (prev != null) {
+            if ((this.next = prev.next) != null)
                 this.next.prev = this;
             else
                 parent.lchild = this;
             (this.prev = prev).next = this;
         } else {
-            if((this.next = parent.child) != null)
+            if ((this.next = parent.child) != null)
                 this.next.prev = this;
             else
                 parent.lchild = this;
@@ -523,15 +521,15 @@ public class Widget {
 
     public void linkfirst() {
         Widget next;
-        for(next = parent.child; (next != null) && (next.z < this.z); next = next.next);
-        if(next != null) {
-            if((this.prev = next.prev) != null)
+        for (next = parent.child; (next != null) && (next.z < this.z); next = next.next) ;
+        if (next != null) {
+            if ((this.prev = next.prev) != null)
                 this.prev.next = this;
             else
                 parent.child = this;
             (this.next = next).prev = this;
         } else {
-            if((this.prev = parent.lchild) != null)
+            if ((this.prev = parent.lchild) != null)
                 this.prev.next = this;
             else
                 parent.child = this;
@@ -737,6 +735,10 @@ public class Widget {
                         setfocus(w);
                 }
             }
+        } else if (msg == "pack") {
+            pack();
+        } else if (msg == "z") {
+            z((Integer) args[0]);
         } else if (msg == "curs") {
             if (args.length == 0)
                 cursor = null;
@@ -1057,9 +1059,9 @@ public class Widget {
     }
 
     public void z(int z) {
-        if(z != this.z) {
+        if (z != this.z) {
             this.z = z;
-            if(parent != null) {
+            if (parent != null) {
                 unlink();
                 link();
             }

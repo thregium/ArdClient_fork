@@ -508,7 +508,7 @@ public abstract class ItemInfo {
                 throw (new ClassCastException("Unexpected object type " + o.getClass() + " in item info array."));
             }
         }
-        String s;
+        String s = null;
         try {
             if (owner instanceof ResOwner)
                 s = ((ResOwner) owner).resource().name;
@@ -516,12 +516,14 @@ public abstract class ItemInfo {
                 s = ((MenuGrid.PagButton) owner).res.name;
             else if (owner instanceof MenuGrid.Pagina)
                 s = ((MenuGrid.Pagina) owner).res().name;
+            else if (owner.getClass().getCanonicalName().equalsIgnoreCase("TipLabel")) {}
             else
                 s = owner.toString();
         } catch(Exception e) {
             s = owner.toString();
         }
-        ret.add(new AdHoc(owner, "\n" + s));
+        if (s != null)
+            ret.add(new AdHoc(owner, "\n" + s));
         return (ret);
     }
 

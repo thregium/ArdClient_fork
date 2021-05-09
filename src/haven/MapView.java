@@ -2615,7 +2615,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
                 if (inf == null) {
                     if (Config.pf && clickb == 1 && curs != null && !curs.name.equals("gfx/hud/curs/study")) {
-                        Defer.later(() -> pathto(mc));
+                        pathto(mc);
                         //      purusPfLeftClick(mc.floor(), null);
                     } else if (clickb == 1 && ui.modmeta && ui.gui.vhand == null && curs != null && curs.name.equals("gfx/hud/curs/arw")) {
                         //Queued movement
@@ -3030,7 +3030,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         // we really don't want dropping, so click is moving
                         if (Config.pf) {
                             // purusPfLeftClick(mc.floor(), null);
-                            Defer.later(() -> pathto(mc));
+                            pathto(mc);
                         } else {
                             wdgmsg("click", pc, mc.floor(posres), 1, 0);
                             pllastcc = mc;

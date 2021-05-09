@@ -94,6 +94,10 @@ public abstract class Listbox<T> extends ListWidget<T> {
             change(item);
     }
 
+    protected void itemclick(T item, Coord c, int button) {
+        itemclick(item, button);
+    }
+
     public Coord idxc(int idx) {
         return (new Coord(0, (idx - sb.val) * itemh));
     }
@@ -143,18 +147,15 @@ public abstract class Listbox<T> extends ListWidget<T> {
     }
 
     public boolean mousedown(Coord c, int button) {
-        if (super.mousedown(c, button))
-            return (true);
-        final Optional<Integer> idx = itemato(c);
-        if (idx.isPresent()) {
-            selindex = idx.get();
-            T item = listitem(selindex);
-            itemclick(item, button);
-        } else if (button == 1) {
+        if(super.mousedown(c, button))
+            return(true);
+        int idx = idxat(c);
+        T item = (idx >= listitems()) ? null : listitem(idx);
+        if((item == null) && (button == 1))
             change(null);
-            selindex = -1;
-        }
-        return (true);
+        else if(item != null)
+            itemclick(item, c.sub(idxc(idx)), button);
+        return(true);
     }
 
     @Override

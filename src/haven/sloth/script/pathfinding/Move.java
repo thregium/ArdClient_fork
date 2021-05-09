@@ -78,9 +78,9 @@ public class Move {
 
         public void apply(MapView mv) {
             if (g != null)
-                Defer.later(() -> mv.pathto(g));
+                mv.pathto(g);
             else
-                Defer.later(() -> mv.pathto(goal));
+                mv.pathto(goal);
         }
     }
 }

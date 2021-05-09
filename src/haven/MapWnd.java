@@ -88,6 +88,7 @@ public class MapWnd extends ResizableWnd {
     public final Collection<String> overlays = new java.util.concurrent.CopyOnWriteArraySet<>();
     private int markerseq = -1;
     private boolean domark = false;
+    private int olalpha = 64;
     public Tex zoomtex = null;
     private final Collection<Runnable> deferred = new LinkedList<>();
     private static final Tex plx = Text.renderstroked("\u2716", Color.red, Color.BLACK, Text.num12boldFnd).tex();
@@ -183,7 +184,14 @@ public class MapWnd extends ResizableWnd {
             compact(a);
             Utils.setprefb("compact-map", a);
         });
-        toolbar.add(new ICheckBox("gfx/hud/mmap/prov", "", "-d", "-h", "-dh"))
+        toolbar.add(new ICheckBox("gfx/hud/mmap/prov", "", "-d", "-h", "-dh") {
+            public boolean mousewheel(Coord c, int amount) {
+                if(!checkhit(c) || !ui.modshift || !a)
+                    return(super.mousewheel(c, amount));
+                olalpha = Utils.clip(olalpha + (amount * -32), 32, 256);
+                return(true);
+            }
+        })
                 .changed(a -> toggleol("realm", a))
                 .settip("Display provinces");
         toolbar.pack();
@@ -600,7 +608,7 @@ public class MapWnd extends ResizableWnd {
                 try {
                     Tex img = disp.olimg(tag);
                     if (img != null) {
-                        g.chcolor(255, 255, 255, 64);
+                        g.chcolor(255, 255, 255, olalpha);
                         g.image(img, ul, cmaps.div(scalef()));
                     }
                 } catch (Loading l) {
