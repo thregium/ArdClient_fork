@@ -71,6 +71,7 @@ public class dev {
         if (logging) {
             for (Object s : strings) {
                 if (s instanceof Object[]) {
+                    System.out.print(" || ");
                     argsMethod((Object[]) s);
                 } else
                     System.out.print(s == null ? "null" : s.toString() + " ");
@@ -110,32 +111,9 @@ public class dev {
 
             System.out.print(" || " + msg);
             addMsg(msg);
-            System.out.print(" || [" + args.length + "]:");
 
-
-            try {
-                for (int i = 0; i < args.length; i++) {
-                    if (args[i] instanceof AuthClient.NativeCred) {
-                        AuthClient.NativeCred arg = (AuthClient.NativeCred) args[i];
-                        System.out.print("{(AuthClient.NativeCred):" + arg.name() + "}");
-                    } else if (args[i] instanceof Integer) {
-                        System.out.print("{i:[" + args[i] + "]}");
-                    } else if (args[i] instanceof Long) {
-                        System.out.print("{l:[" + args[i] + "]}");
-                    } else if (args[i] instanceof String) {
-                        System.out.print("{s:[" + args[i] + "]}");
-                    } else if (args[i] instanceof Boolean) {
-                        System.out.print("{b:[" + args[i] + "]}");
-                    } else if (args[i] instanceof Coord) {
-                        Coord coord = (Coord) args[i];
-                        System.out.print("{x:" + coord.x + ",y:" + coord.y + "}");
-                    } else {
-                        System.out.print("{" + args[i] + "}");
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            System.out.print(" || ");
+            argsMethod(args);
             System.out.println();
         }
     }
@@ -177,7 +155,11 @@ public class dev {
                     System.out.print(")");
             }
 
+            if (pargs != null)
+                System.out.print(" || ");
             argsMethod(pargs);
+            if (cargs != null)
+                System.out.print(" || ");
             argsMethod(cargs);
 
             System.out.println();
@@ -186,9 +168,14 @@ public class dev {
 
     private static void argsMethod(Object[] pargs) {
         if (pargs != null) {
-            System.out.print(" || [" + pargs.length + "]:");
+            System.out.print("[" + pargs.length + "]:");
             for (int i = 0; i < pargs.length; i++) {
-                System.out.print("{" + pargs[i] + "}");
+                if (pargs[i] instanceof Object[]) {
+                    System.out.print("{");
+                    argsMethod((Object[]) pargs[i]);
+                    System.out.print("}");
+                } else
+                    System.out.print("[" + pargs[i] + "]");
             }
         }
     }

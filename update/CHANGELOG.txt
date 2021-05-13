@@ -1,9 +1,16 @@
 Details in https://github.com/Cediner/ArdClient/commits/Unstable
+2021.05.13
+-- Fixed map
+-- Added the ability to remove grids on the map using Ctrl+Alt+RMB (Quick removal of marks Ctrl+Alt+LMB)
+-- Added villages and claims overlays on the map (Display personal/village claims buttons)
+~
+
 2021.05.10
 -- Some merges
 -- Some fixes
 -- Some...
 ~
+
 2021.05.02
 -- Gob Resizer - ALT+RMB
 -- Cave tiles

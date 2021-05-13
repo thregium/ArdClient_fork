@@ -548,6 +548,41 @@ public class MapFileWidget extends Widget {
         if (curloc != null)
             tc = c.sub(sz.div(2)).add(curloc.tc);
         if (tc != null) {
+            if (button == 3 && ui.modflags() == (UI.MOD_CTRL | UI.MOD_META)) {
+                file.lock.writeLock().lock();
+                try {
+                    Coord gridc = c.sub(sz.div(2)).mul(scalef()).add(curloc.tc.mul(scalef())).div(cmaps);
+                    long gridid = curloc.seg.gridid(gridc);
+                    curloc.seg.remove(gridc);
+
+                    try {
+                        String gridstring = String.format("grid-%x", gridid);
+                        StringBuilder buf = new StringBuilder();
+                        buf.append("map/");
+                        if (!file.filename.equals("")) {
+                            buf.append(file.filename);
+                            buf.append('/');
+                        }
+                        buf.append(gridstring);
+                        File base = HashDirCache.findbase();
+                        long h = configuration.namehash(configuration.namehash(0, Config.resurl.toString()), buf.toString());
+                        File gridfile = new File(base, String.format("%016x.0", h));
+                        if (gridfile.delete())
+                            System.out.println(gridfile.getAbsolutePath() + " deleted");
+                        else
+                            System.err.println(gridfile.getAbsolutePath() + " failed");
+                    } catch (Exception er) {
+                        er.printStackTrace();
+                    }
+
+                    file.updategrids(ui.sess.glob.map, ui.sess.glob.map.grids.values());
+                    refreshDisplayGrid();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    file.lock.writeLock().unlock();
+                }
+            }
             if (clickloc(new Location(curloc.seg, tc.mul(scalef())), button))
                 return (true);
             if (button == 1 && (ui.modctrl || ui.modmeta || ui.modshift)) {
@@ -555,7 +590,7 @@ public class MapFileWidget extends Widget {
                 try {
                     //   tc = c.sub(sz.div(2)).add(curloc.tc);
                     final Location pl = resolve(new MapLocator(ui.gui.map));
-                    if (curloc != null && curloc.seg == pl.seg) {
+                    if (curloc != null && curloc.seg.id == pl.seg.id) {
                         final Coord2d plc = new Coord2d(ui.sess.glob.oc.getgob(ui.gui.map.plgob).getc());
                         //Offset in terms of loftar map coordinates
                         //XXX: Previous worlds had randomized north/south/east/west directions, still the case? Assuming not for now.

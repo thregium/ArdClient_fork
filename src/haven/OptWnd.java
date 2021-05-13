@@ -1385,7 +1385,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         }, 10, 350);
-        map.add(new CheckBox("Disable map updating") {
+        map.add(new CheckBox("Disable map updating(dontwork)") {
             {
                 a = Config.stopmapupdate;
             }

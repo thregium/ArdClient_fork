@@ -30,8 +30,10 @@ public class DowseFx extends Sprite {
     public final double a1; //Arc is a1 to a2, a1 < a2
     public final double a2;
 
-    private States.ColState col = new States.ColState(new Color(255, 0, 0, 128));
+    private Color col = new Color(255, 0, 0, 128);
     private boolean delete = false;
+    private boolean hidden = false;
+    private long start = System.currentTimeMillis();
 
     public DowseFx(Owner owner, Resource res, Message msg) {
         super(owner, res);
@@ -50,8 +52,12 @@ public class DowseFx extends Sprite {
         if (owner instanceof Gob) {
             final Gob g = (Gob) owner;
             final UI ui = g.glob.ui.get();
-            if (ui != null) {
-                ui.gui.makeDowseWnd(g.rc, a1, a2, col -> this.col = new States.ColState(col), this::delete);
+            if (ui != null && ui.gui != null) {
+                ui.gui.makeDowseWnd(g.rc, a1, a2, col -> {
+                    this.col = col;
+                    hidden = false;
+                    start = System.currentTimeMillis();
+                    }, this::delete);
             }
         }
     }
@@ -61,20 +67,28 @@ public class DowseFx extends Sprite {
     }
 
     public void draw(GOut g) {
-        g.state(col);
-        g.apply();
-        //render just the arrow 100 units out from us in an arc
-        //The color
-        g.gl.glBegin(GL2.GL_TRIANGLE_FAN);
-        //center point, our gob
-        g.gl.glVertex3f(0.0F, 0.0F, 0.0F);
-        //Arc edges a1 -> a2
-        for (double d1 = this.a1; d1 < this.a2; d1 += Math.PI / 64) {
-            g.gl.glVertex3f((float) (Math.cos(d1) * 100.0D), (float) (Math.sin(d1) * 100.0D), 15.0F);
+        if (!hidden) {
+            float time = (System.currentTimeMillis() - start) / 1000f;
+            if (time >= 10) {
+                hidden = true;
+                return;
+            }
+            int alpha = (int) (col.getAlpha() * ((10f - time) / 10f));
+            g.state(new States.ColState(new Color(col.getRed(), col.getGreen(), col.getBlue(), alpha)));
+            g.apply();
+            //render just the arrow 100 units out from us in an arc
+            //The color
+            g.gl.glBegin(GL2.GL_TRIANGLE_FAN);
+            //center point, our gob
+            g.gl.glVertex3f(0.0F, 0.0F, 0.0F);
+            //Arc edges a1 -> a2
+            for (double d1 = this.a1; d1 < this.a2; d1 += Math.PI / 64) {
+                g.gl.glVertex3f((float) (Math.cos(d1) * 100.0D), (float) (Math.sin(d1) * 100.0D), 15.0F);
+            }
+            //final end point
+            g.gl.glVertex3f((float) (Math.cos(this.a2) * 100.0D), (float) (Math.sin(this.a2) * 100.0D), 15.0F);
+            g.gl.glEnd();
         }
-        //final end point
-        g.gl.glVertex3f((float) (Math.cos(this.a2) * 100.0D), (float) (Math.sin(this.a2) * 100.0D), 15.0F);
-        g.gl.glEnd();
     }
 
     public boolean setup(RenderList rl) {

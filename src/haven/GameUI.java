@@ -2053,9 +2053,11 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         return (super.mousewheel(c, amount));
     }
 
-    public void makeDowseWnd(final Coord2d startc, final double a1, final double a2, final Consumer<Color> changeCol, final Runnable onClose) {
+    public DowseWnd makeDowseWnd(final Coord2d startc, final double a1, final double a2, final Consumer<Color> changeCol, final Runnable onClose) {
         synchronized (dowsewnds) {
-            dowsewnds.add(add(new DowseWnd(startc, a1, a2, changeCol, onClose)));
+            DowseWnd dwnd = new DowseWnd(startc, a1, a2, changeCol, onClose);
+            dowsewnds.add(add(dwnd));
+            return (dwnd);
         }
     }
 

@@ -732,19 +732,21 @@ public class MCache {
     }
 
     public void ctick(int dt) {
+        Collection<Grid> copy;
         synchronized (grids) {
-            for (Grid g : grids.values()) {
-                g.tick(dt);
-            }
+            copy = new ArrayList<>(grids.values());
         }
+        for (Grid g : copy)
+            g.tick(dt);
     }
 
     public void invalidateAll() {
+        Collection<Grid> copy;
         synchronized (grids) {
-            for (final Grid g : grids.values()) {
-                g.invalidate();
-            }
+            copy = new ArrayList<>(grids.values());
         }
+        for (Grid gr : copy)
+            gr.invalidate();
     }
 
     public void invalidate(Coord cc) {
@@ -761,9 +763,13 @@ public class MCache {
         } else if (type == 1) {
             Coord ul = msg.coord();
             Coord lr = msg.coord();
-            trim(ul, lr);
+            synchronized (this) {
+                trim(ul, lr);
+            }
         } else if (type == 2) {
-            trimall();
+            synchronized (this) {
+                trimall();
+            }
         }
     }
 

@@ -42,8 +42,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -135,11 +137,8 @@ public class MapFile {
                 long storedid = z.int64();
                 if (storedid != id)
                     throw (new Message.FormatError(String.format("Segment ID mismatch: expected %x, got %x", id, storedid)));
-                for (int i = 0, no = z.int32(); i < no; i++) {
-                    final Coord sc = z.coord();
-                    final long gid = z.int64();
-                    seg.map.put(sc, gid);
-                }
+                for (int i = 0, no = z.int32(); i < no; i++)
+                    seg.map.put(z.coord(), z.int64());
                 return (seg);
             } else {
                 throw (new Message.FormatError("Unknown segment data version: " + ver));
@@ -171,9 +170,8 @@ public class MapFile {
             ZMessage z = new ZMessage(out);
             z.addint64(seg.id);
             z.addint32(seg.map.size());
-            for (Map.Entry<Coord, Long> e : seg.map.entrySet()) {
+            for (Map.Entry<Coord, Long> e : seg.map.entrySet())
                 z.addcoord(e.getKey()).addint64(e.getValue());
-            }
             z.finish();
         }
         if (knownsegs.add(id))
@@ -472,7 +470,7 @@ public class MapFile {
                 }
                 Grid cur = seg.loaded(g.id);
                 //I want to force update on anything still sporting NOZ or day old grids..
-                if (cur == null || cur.useq != g.seq || g.z[0] == NOZ) {
+                if (cur == null || cur.useq != g.seq || g.z[0] == NOZ || cur.ols.isEmpty()) {
                     Grid sg = Grid.from(map, g);
                     Grid prev = cur;
                     if (prev == null)
@@ -480,8 +478,8 @@ public class MapFile {
                     if (prev != null)
                         sg = sg.mergeprev(prev);
                     sg.save(MapFile.this);
-                    seg.include(sg, g.gc.add(moff)); //XXX: Write lock required
-                    //seg.updateGrid(sg.id, sg);
+                    seg.include(sg, info.sc); //XXX: Write lock required
+//                    seg.updateGrid(sg.id, sg);
                 }
                 if (seg.id != mseg) {
                     if (merge == null)
@@ -981,6 +979,31 @@ public class MapFile {
             return (bc != null ? new Color(Math.round(bc.r * 255), Math.round(bc.g * 255), Math.round(bc.b * 255), 255) : (null));
         }
 
+        private static Color olcol(Collection<String> tags) {
+            if (tags.contains("vlg")) {
+                if (tags.contains("own"))
+                    return (new Color(0, 0, 255));
+                else if (tags.contains("!own"))
+                    return (new Color(128, 0, 255));
+            } else if (tags.contains("cplot")) {
+                if (tags.contains("own"))
+                    return (new Color(255, 0, 128));
+                else if (tags.contains("!own"))
+                    return (new Color(255, 0, 0));
+            }
+            return (null);
+//            new Color(255, 0, 128, 32);
+//            new Color(0, 0, 255, 32);
+//            new Color(255, 0, 0, 32);
+//            new Color(128, 0, 255, 32);
+//            new Color(255, 255, 255, 32);
+//            new Color(0, 255, 128, 32);
+//            new Color(0, 0, 0, 64);
+//            new Color(0, 255, 0, 32);
+//            new Color(255, 255, 0, 32);
+//            new Color(29, 196, 51, 60);
+        }
+
         public int gettile(Coord c) {
             return (tiles[c.x + (c.y * cmaps.x)] & 0xff);
         }
@@ -1227,9 +1250,17 @@ public class MapFile {
             WritableRaster buf = PUtils.imgraster(cmaps);
             for (Overlay ol : ols) {
                 MCache.ResOverlay olid = ol.olid.loadsaved().layer(MCache.ResOverlay.class);
-                if (!olid.tags().contains(tag))
+                String ovl = null;
+                Iterator<String> i = olid.tags().iterator();
+                while (i.hasNext()) {
+                    ovl = i.next();
+                    break;
+                }
+                if (ovl == null || !ovl.equals(tag))
                     continue;
                 Color col = olcol(olid);
+                if (col == null)
+                    col = olcol(olid.tags());
                 if (col == null)
                     continue;
                 Coord c = new Coord();
@@ -1245,6 +1276,23 @@ public class MapFile {
                 }
             }
             return (PUtils.rasterimg(buf));
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof DataGrid)) return false;
+            DataGrid dataGrid = (DataGrid) o;
+            return mtime == dataGrid.mtime && Arrays.equals(tilesets, dataGrid.tilesets) && Arrays.equals(tiles, dataGrid.tiles) && Arrays.equals(z, dataGrid.z) && ols.equals(dataGrid.ols) && simple_textures.equals(dataGrid.simple_textures);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Objects.hash(ols, mtime, simple_textures);
+            result = 31 * result + Arrays.hashCode(tilesets);
+            result = 31 * result + Arrays.hashCode(tiles);
+            result = 31 * result + Arrays.hashCode(z);
+            return result;
         }
     }
 
@@ -1287,9 +1335,8 @@ public class MapFile {
                     prios[tmap[i]] = tn++;
             }
             TileInfo[] infos = new TileInfo[nt];
-            for (int i = 0; i < nt; i++) {
+            for (int i = 0; i < nt; i++)
                 infos[i] = new TileInfo(sets[i], prios[i]);
-            }
             byte[] tiles = new byte[cmaps.x * cmaps.y];
             int[] z = new int[cmaps.x * cmaps.y];
             for (int i = 0; i < cg.tiles.length; i++) {
@@ -1400,7 +1447,8 @@ public class MapFile {
                 else
                     ntiles[i] = this.tiles[i];
             }
-            Grid g = new Grid(this.id, ntilesets, ntiles, prev.z, this.mtime);
+            Grid g = new Grid(this.id, ntilesets, ntiles, this.z, this.mtime);
+            g.ols.addAll(this.ols);
             g.useq = this.useq;
             return (g);
         }
@@ -1446,6 +1494,22 @@ public class MapFile {
 
         public void remove() {
             useq = -2;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Grid)) return false;
+            if (!super.equals(o)) return false;
+            Grid grid = (Grid) o;
+            return id == grid.id && useq == grid.useq && Arrays.equals(norepl, grid.norepl);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Objects.hash(super.hashCode(), id, useq);
+            result = 31 * result + Arrays.hashCode(norepl);
+            return result;
         }
     }
 
@@ -1777,6 +1841,20 @@ public class MapFile {
                 save(out);
             }
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof ZoomGrid)) return false;
+            if (!super.equals(o)) return false;
+            ZoomGrid zoomGrid = (ZoomGrid) o;
+            return seg == zoomGrid.seg && lvl == zoomGrid.lvl && sc.equals(zoomGrid.sc);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(super.hashCode(), seg, lvl, sc);
+        }
     }
 
     public static class ZoomCoord {
@@ -1897,6 +1975,22 @@ public class MapFile {
         private final Map<Long, Cached> cache = new CacheMap<>(CacheMap.RefType.WEAK);
         private final Map<Coord, ByCoord> ccache = new CacheMap<>(CacheMap.RefType.WEAK);
         private final Map<ZoomCoord, ByZCoord> zcache = new CacheMap<>(CacheMap.RefType.WEAK);
+
+        public void remove(Coord coord) {
+            Long gridid = map.get(coord);
+            if (gridid != null) {
+                map.remove(coord);
+                cache.remove(gridid);
+                ccache.remove(coord);
+                int zl = ZoomGrid.inval(MapFile.this, this.id, coord);
+                synchronized (zcache) {
+                    for (int lvl = 1; lvl < zl; lvl++) {
+                        ZoomCoord zc = new ZoomCoord(lvl, new Coord(coord.x & ~((1 << lvl) - 1), coord.y & ~((1 << lvl) - 1)));
+                        zcache.remove(zc);
+                    }
+                }
+            }
+        }
 
         public Segment(long id) {
             this.id = id;

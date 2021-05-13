@@ -43,7 +43,6 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1195,5 +1194,11 @@ public class configuration {
             }
         }, new Coord(window.sz.x / 2, 0), 0.5, 0);
         return (window);
+    }
+
+    public static long namehash(long h, String name) {
+        for (int i = 0; i < name.length(); i++)
+            h = (h * 31) + name.charAt(i);
+        return (h);
     }
 }

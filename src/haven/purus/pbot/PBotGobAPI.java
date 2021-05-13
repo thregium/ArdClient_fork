@@ -160,7 +160,6 @@ public class PBotGobAPI {
                         }
                     }
                     if (matches) {
-                        min = dist;
                         list.add(new PBotGob(gob));
                     }
                 }
@@ -195,7 +194,6 @@ public class PBotGobAPI {
                         }
                     }
                     if (matches) {
-                        min = dist;
                         list.add(new PBotGob(gob));
                     }
                 }
@@ -228,7 +226,6 @@ public class PBotGobAPI {
                         }
                     }
                     if (matches) {
-                        min = dist;
                         list.add(new PBotGob(gob));
                     }
                 }

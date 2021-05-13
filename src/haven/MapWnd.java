@@ -186,10 +186,10 @@ public class MapWnd extends ResizableWnd {
         });
         toolbar.add(new ICheckBox("gfx/hud/mmap/prov", "", "-d", "-h", "-dh") {
             public boolean mousewheel(Coord c, int amount) {
-                if(!checkhit(c) || !ui.modshift || !a)
-                    return(super.mousewheel(c, amount));
+                if (!checkhit(c) || !ui.modshift)
+                    return (super.mousewheel(c, amount));
                 olalpha = Utils.clip(olalpha + (amount * -32), 32, 256);
-                return(true);
+                return (true);
             }
         })
                 .changed(a -> toggleol("realm", a))
@@ -362,51 +362,26 @@ public class MapWnd extends ResizableWnd {
         public ToolBar() {
             super(Coord.z);
             final int spacer = 5;
-            final ToggleButton2 pclaim = add(new ToggleButton2("gfx/hud/wndmap/btns/claim", "gfx/hud/wndmap/btns/claim-d", DefSettings.SHOWPCLAIM.get()) {
-                {
-                    tooltip = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Display personal claims"));
+            final ICheckBox pclaim = new ICheckBox("gfx/hud/wndmap/btns/claim", "", "-d", "", "") {
+                public boolean mousewheel(Coord c, int amount) {
+                    if (!checkhit(c) || !ui.modshift)
+                        return (super.mousewheel(c, amount));
+                    olalpha = Utils.clip(olalpha + (amount * -32), 32, 256);
+                    return (true);
                 }
-
-                public void click() {
-                    if ((ui.gui.map != null) && !ui.gui.map.visol("cplot")) {
-                        ui.gui.map.enol("cplot");
-                        DefSettings.SHOWPCLAIM.set(true);
-                    } else {
-                        ui.gui.map.disol("cplot");
-                        DefSettings.SHOWPCLAIM.set(false);
-                    }
+            };
+            add(pclaim).changed(a -> toggleol("cplot", a)).settip(Resource.getLocString(Resource.BUNDLE_LABEL, "Display personal claims"));
+            final ICheckBox vclaim = new ICheckBox("gfx/hud/wndmap/btns/vil", "", "-d", "", "") {
+                public boolean mousewheel(Coord c, int amount) {
+                    if (!checkhit(c) || !ui.modshift)
+                        return (super.mousewheel(c, amount));
+                    olalpha = Utils.clip(olalpha + (amount * -32), 32, 256);
+                    return (true);
                 }
-            }, new Coord(0, 0));
-            final ToggleButton2 vclaim = add(new ToggleButton2("gfx/hud/wndmap/btns/vil", "gfx/hud/wndmap/btns/vil-d", DefSettings.SHOWVCLAIM.get()) {
-                {
-                    tooltip = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Display village claims"));
-                }
-
-                public void click() {
-                    if ((ui.gui.map != null) && !ui.gui.map.visol("vlg")) {
-                        ui.gui.map.enol("vlg");
-                        DefSettings.SHOWVCLAIM.set(true);
-                    } else {
-                        ui.gui.map.disol("vlg");
-                        DefSettings.SHOWVCLAIM.set(false);
-                    }
-                }
-            }, pclaim.c.add(pclaim.sz.x + spacer, 0));
-            final ToggleButton2 realm = add(new ToggleButton2("gfx/hud/wndmap/btns/realm", "gfx/hud/wndmap/btns/realm-d", DefSettings.SHOWKCLAIM.get()) {
-                {
-                    tooltip = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Display realms"));
-                }
-
-                public void click() {
-                    if ((ui.gui.map != null) && !ui.gui.map.visol("realm")) {
-                        ui.gui.map.enol("realm");
-                        DefSettings.SHOWKCLAIM.set(true);
-                    } else {
-                        ui.gui.map.disol("realm");
-                        DefSettings.SHOWKCLAIM.set(false);
-                    }
-                }
-            }, vclaim.c.add(vclaim.sz.x + spacer, 0));
+            };
+            add(vclaim, pclaim.c.add(pclaim.sz.x + spacer, 0)).changed(a -> toggleol("vlg", a)).settip(Resource.getLocString(Resource.BUNDLE_LABEL, "Display village claims"));
+//            final ICheckBox realm = new ICheckBox("gfx/hud/wndmap/btns/realm", "", "-d", "", "");
+//            add(realm, vclaim.c.add(vclaim.sz.x + spacer, 0)).changed(a -> toggleol("realm", a)).settip(Resource.getLocString(Resource.BUNDLE_LABEL, "Display realms"));
             final IButton geoloc = new IButton("gfx/hud/wndmap/btns/geoloc", "", "", "") {
                 private Coord2d locatedAC = null;
                 private Coord2d detectedAC = null;
@@ -481,7 +456,7 @@ public class MapWnd extends ResizableWnd {
                     g.dispose();
                 }
             };
-            add(geoloc, realm.c.add(realm.sz.x + spacer, 0));
+            add(geoloc, vclaim.c.add(vclaim.sz.x + spacer, 0));
             final IButton oddigeoloc = new IButton("gfx/hud/wndmap/btns/geoloc", "", "", "") {
                 private Pair<String, String> coords = null;
                 private BufferedImage green = Resource.loadimg("hud/geoloc-green");
