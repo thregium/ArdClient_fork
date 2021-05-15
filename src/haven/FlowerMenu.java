@@ -53,6 +53,7 @@ public class FlowerMenu extends Widget {
     public Petal[] opts;
     private UI.Grab mg, kg;
     private static String nextAutoSel;
+    private static boolean nextAutoSelb;
     private static long nextAutoSelTimeout;
     public static String lastSel;
     public Thread horsemounter;
@@ -162,8 +163,9 @@ public class FlowerMenu extends Widget {
                                 }
                             }
                         if (itm != null && itm.selected && !ui.modctrl && (!ignoreAutoSetting || p.name.equals("Peer into")) ||
-                                p.name.equals(nextAutoSel) && System.currentTimeMillis() - nextAutoSelTimeout < 2000) {
+                                p.name.equals(nextAutoSel) || (nextAutoSelb && opts.length == (CLOSEFORMENU.get() ? 2 : 1)) && System.currentTimeMillis() - nextAutoSelTimeout < 2000) {
                             nextAutoSel = null;
+                            nextAutoSelb = false;
 //                        try {
 //                            if (p.name.equals("Cargo") && ui.gui.map.player() != null && ui.gui.map.player().getattr(HeldBy.class) != null) {
 //                                ui.root.wdgmsg("gk", 27);
@@ -510,6 +512,11 @@ public class FlowerMenu extends Widget {
 
     public static void setNextSelection(String name) {
         nextAutoSel = name;
+        nextAutoSelTimeout = System.currentTimeMillis();
+    }
+
+    public static void setNextSelection() {
+        nextAutoSelb = true;
         nextAutoSelTimeout = System.currentTimeMillis();
     }
 }

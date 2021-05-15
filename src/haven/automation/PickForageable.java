@@ -4,6 +4,7 @@ package haven.automation;
 import haven.CheckListboxItem;
 import haven.Config;
 import haven.Coord2d;
+import haven.FlowerMenu;
 import haven.GameUI;
 import haven.Gob;
 import haven.Loading;
@@ -109,6 +110,8 @@ public class PickForageable implements Runnable {
         }
         if (herb == null)
             return;
+        if (configuration.quickactionauto)
+            FlowerMenu.setNextSelection();
         gui.map.wdgmsg("click", herb.sc, herb.rc.floor(posres), 3, 0, 0, (int) herb.id, herb.rc.floor(posres), 0, -1);
         gui.map.pllastcc = herb.rc;
 

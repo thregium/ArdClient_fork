@@ -4604,7 +4604,7 @@ public class OptWnd extends Window {
     }
 
     private void initquickactionsettings() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(quickactionsettings, new Coord(620, 310)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(quickactionsettings, new Coord(620, 350)));
 
 //        appender.setVerticalMargin(VERTICAL_MARGIN);
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
@@ -4657,6 +4657,17 @@ public class OptWnd extends Window {
             @Override
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Quick action radius: " + configuration.quickradius + " tiles").tex();
+            }
+        });
+        appender.add(new CheckBox("Autochoice single petal") {
+            {
+                a = configuration.quickactionauto;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("quickactionauto", val);
+                configuration.quickactionauto = val;
+                a = val;
             }
         });
         appender.add(new CheckBox("Disable pick forage keybind (Q by Default) opening/closing gates.") {

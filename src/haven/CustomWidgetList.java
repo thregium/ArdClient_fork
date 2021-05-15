@@ -68,7 +68,6 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
                     customlist.remove(name);
                 }
                 Utils.saveCustomList(customlist, jsonname);
-                removeitem((Item) sender, true);
                 update();
                 break;
             }
@@ -123,7 +122,7 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
     public void remove(String key) {
         Item item = getItem(key);
         if (item != null) {
-            list.remove(item);
+            removeitem(item, true);
             if (customlist.containsKey(key)) {
                 synchronized (customlist) {
                     customlist.remove(key);
