@@ -27,6 +27,7 @@
 package haven;
 
 import haven.automation.Discord;
+import haven.sloth.gob.AggroMark;
 import haven.sloth.gob.Mark;
 import modification.configuration;
 import net.dv8tion.jda.core.entities.TextChannel;
@@ -784,7 +785,8 @@ public class ChatUI extends Widget {
 
         public SimpleChat(boolean closable, String name) {
             super(closable);
-            this.name = Resource.getLocString(Resource.BUNDLE_LABEL, name);;
+            this.name = Resource.getLocString(Resource.BUNDLE_LABEL, name);
+            ;
         }
 
         public void uimsg(String msg, Object... args) {
@@ -992,7 +994,8 @@ public class ChatUI extends Widget {
 
         public DiscordChat(boolean closable, String name, int urgency) {
             super(closable);
-            this.name = Resource.getLocString(Resource.BUNDLE_LABEL, name);;
+            this.name = Resource.getLocString(Resource.BUNDLE_LABEL, name);
+            ;
             this.urgency = urgency;
         }
 
@@ -1059,8 +1062,35 @@ public class ChatUI extends Widget {
                         final long gid = Long.parseLong(match.group(1));
                         final int life = Integer.parseInt(match.group(2));
                         final Gob g = ui.sess.glob.oc.getgob(gid);
+
+                        GameUI gui = getparent(GameUI.class);
+                        boolean fight = false;
+                        if (gui != null && gui.fv.current != null) {
+                            synchronized (gui.fv.lsrel) {
+                                for (Fightview.Relation rel : gui.fv.lsrel) {
+                                    if (gid == rel.gobid) {
+                                        fight = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                         if (g != null) {
-                            g.mark(life);
+                            if (fight) {
+                                synchronized (gui.fv.lsrel) {
+                                    for (Fightview.Relation rel : gui.fv.lsrel) {
+                                        final Gob gob = ui.sess.glob.oc.getgob(rel.gobid);
+                                        if (gob != null) {
+                                            final Gob.Overlay ol = gob.findol(AggroMark.id);
+                                            if (ol != null) {
+                                                gob.ols.remove(ol);
+                                            }
+                                        }
+                                    }
+                                }
+                                g.aggromark(life);
+                            } else
+                                g.mark(life);
                         }
                         return;
                     } else {
@@ -1146,7 +1176,7 @@ public class ChatUI extends Widget {
                         if (configuration.ignorepm && (buddy == null || buddy.online == -1)) {
                             skip = true;
                         }
-                    } else  {
+                    } else {
                         skip = true;
                     }
                     if (!skip) notify(cmsg, 3);

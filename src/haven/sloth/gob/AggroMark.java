@@ -15,11 +15,27 @@ public class AggroMark extends SkelSprite implements Gob.Overlay.SetupMod {
     private static final Resource tgtfx = Resource.local().loadwait("custom/fx/partytgt");
     public static final int id = -4214129;
 
-    private boolean alive = true;
+    private boolean alive;
     private boolean current = false;
+    private int life;
+    private long time;
 
-    public AggroMark() {
+    public AggroMark(final int life) {
         super(null, tgtfx, Message.nil);
+        this.life = life;
+        alive = life != -1;
+    }
+
+    public void setLife(final int life) {
+        if (alive)
+            this.life = life;
+        if (life == -1)
+            alive = false;
+    }
+
+    public void revoke() {
+        alive = true;
+        life = 0;
     }
 
 
@@ -29,7 +45,13 @@ public class AggroMark extends SkelSprite implements Gob.Overlay.SetupMod {
 
     public boolean tick(int dt) {
         super.tick(dt);
-        return !alive;
+        time += dt;
+        if (alive) {
+            life -= dt;
+            return life <= 0;
+        } else {
+            return false;
+        }
     }
 
     @Override

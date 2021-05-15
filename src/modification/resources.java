@@ -296,4 +296,11 @@ public class resources {
         }
         return (res);
     }
+
+    public static List<String> defaultQuickActions = new ArrayList<>(Arrays.asList(
+            ".*cart",
+            "gfx/terobjs/herbs.*",
+            "gfx/kritter/.*"
+    ));
+    public static ObservableMap<String, Boolean> customQuickActions = Utils.loadCustomList(defaultQuickActions, "QuickPattern", true);
 }

@@ -137,7 +137,7 @@ public class OptWnd extends Window {
     private static final List<String> AutoDrinkTime = Arrays.asList("1", "3", "5", "10", "15", "20", "25", "30", "45", "60");
     private static final List<String> menuSize = Arrays.asList("4", "5", "6", "7", "8", "9", "10");
     private static List<String> pictureList = configuration.findFiles(configuration.picturePath, Arrays.asList(".png", ".jpg", ".gif"));
-    public final Panel main, video, audio, display, map, general, combat, control, uis, uip, quality, mapping, flowermenus, soundalarms, hidesettings, studydesksettings, autodropsettings, keybindsettings, chatsettings, clearboulders, clearbushes, cleartrees, clearhides, discord, additions, modification;
+    public final Panel main, video, audio, display, map, general, combat, control, uis, uip, quality, mapping, flowermenus, quickactionsettings, soundalarms, hidesettings, studydesksettings, autodropsettings, keybindsettings, chatsettings, clearboulders, clearbushes, cleartrees, clearhides, discord, additions, modification;
     public Panel waterPanel, qualityPanel, mapPanel, devPanel;
     public Panel current;
     public CheckBox discordcheckbox, menugridcheckbox;
@@ -158,6 +158,7 @@ public class OptWnd extends Window {
         uip = add(new Panel());
         quality = add(new Panel());
         flowermenus = add(new Panel());
+        quickactionsettings = add(new Panel());
         soundalarms = add(new Panel());
         hidesettings = add(new Panel());
         studydesksettings = add(new Panel());
@@ -188,6 +189,7 @@ public class OptWnd extends Window {
         initTheme();
         initQuality();
         initFlowermenus();
+        initquickactionsettings();
         initSoundAlarms();
         initHideMenu();
         initstudydesksettings();
@@ -352,16 +354,17 @@ public class OptWnd extends Window {
         main.add(new PButton(200, "UI", 'u', uis), new Coord(210, 90));
         main.add(new PButton(200, "Item overlay", 'q', quality), new Coord(420, 0));
         main.add(new PButton(200, "Pop-up Menu", 'f', flowermenus), new Coord(420, 30));
-        main.add(new PButton(200, "Sound Alarms", 's', soundalarms), new Coord(420, 60));
-        main.add(new PButton(200, "Hidden Objects", 'h', hidesettings), new Coord(420, 90));
+        main.add(new PButton(200, "Quick Actions", 'b', quickactionsettings), new Coord(420, 60));
+        main.add(new PButton(200, "Sound Alarms", 's', soundalarms), new Coord(420, 90));
+        main.add(new PButton(200, "Hidden Objects", 'h', hidesettings), new Coord(420, 120));
         main.add(new PButton(200, "Study Desk", 'o', studydesksettings), new Coord(0, 120));
         main.add(new PButton(200, "Keybinds", 'p', keybindsettings), new Coord(210, 120));
-        main.add(new PButton(200, "Chat", 'c', chatsettings), new Coord(420, 120));
+        main.add(new PButton(200, "Chat", 'c', chatsettings), new Coord(420, 150));
         main.add(new PButton(200, "Theme", 't', uip), new Coord(0, 150));
-        main.add(new PButton(200, "Autodrop", 's', autodropsettings), new Coord(420, 150));
+        main.add(new PButton(200, "Autodrop", 's', autodropsettings), new Coord(420, 180));
         main.add(new PButton(200, "Additional settings", 'z', additions), new Coord(0, 180));
         main.add(new PButton(200, "PBotDiscord", 'z', discord), new Coord(0, 210));
-        main.add(new PButton(200, "Mapping", 'z', mapping), new Coord(420, 180));
+        main.add(new PButton(200, "Mapping", 'z', mapping), new Coord(420, 210));
         main.add(new PButton(200, "Modification", 'z', modification), new Coord(0, 240));
         if (gopts) {
 //            main.add(new Button(200, "Disconnect Discord") {
@@ -2021,39 +2024,6 @@ public class OptWnd extends Window {
             public void set(boolean val) {
                 Utils.setprefb("disabledrinkhotkey", val);
                 Config.disabledrinkhotkey = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Disable pick forage keybind (Q by Default) opening/closing gates.") {
-            {
-                a = Config.disablegatekeybind;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("disablegatekeybind", val);
-                Config.disablegatekeybind = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Disable pick forage keybind (Q by Default) opening/closing visitor gates.") {
-            {
-                a = Config.disablevgatekeybind;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("disablevgatekeybind", val);
-                Config.disablevgatekeybind = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Disable pick forage keybind (Q by Default) picking up/dropping carts.") {
-            {
-                a = Config.disablecartkeybind;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("disablecartkeybind", val);
-                Config.disablecartkeybind = val;
                 a = val;
             }
         });
@@ -4631,6 +4601,100 @@ public class OptWnd extends Window {
 
         flowermenus.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
         flowermenus.pack();
+    }
+
+    private void initquickactionsettings() {
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(quickactionsettings, new Coord(620, 310)));
+
+//        appender.setVerticalMargin(VERTICAL_MARGIN);
+        appender.setHorizontalMargin(HORIZONTAL_MARGIN);
+
+        appender.add(new Label("Choose/add gobs for quick action (Q) (Pattern type):"));
+        final CustomWidgetList list = new CustomWidgetList(resources.customQuickActions, "QuickPattern");
+
+        appender.add(list);
+        final TextEntry value = new TextEntry(150, "") {
+            @Override
+            public void activate(String text) {
+                list.add(text);
+                settext("");
+            }
+        };
+
+        appender.add(value);
+        appender.addRow(new Button(45, "Add") {
+            @Override
+            public void click() {
+                list.add(value.text);
+                value.settext("");
+            }
+        }, new Button(45, "Load Default") {
+            @Override
+            public void click() {
+                for (String dact : resources.defaultQuickActions) {
+                    boolean exist = false;
+                    for (String act : resources.customQuickActions.keySet()) {
+                        if (dact.equalsIgnoreCase(act)) {
+                            exist = true;
+                            break;
+                        }
+                    }
+                    if (!exist)
+                        list.put(dact, true);
+                }
+            }
+        });
+
+        appender.setX(list.sz.x);
+        appender.setY(list.c.y);
+        appender.addRow(new Label("Quick radius"), new HSlider(200, 1, 100, configuration.quickradius) {
+            @Override
+            public void changed() {
+                configuration.quickradius = val;
+                Utils.setprefd("quickradius", configuration.quickradius);
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Quick action radius: " + configuration.quickradius + " tiles").tex();
+            }
+        });
+        appender.add(new CheckBox("Disable pick forage keybind (Q by Default) opening/closing gates.") {
+            {
+                a = Config.disablegatekeybind;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("disablegatekeybind", val);
+                Config.disablegatekeybind = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Disable pick forage keybind (Q by Default) opening/closing visitor gates.") {
+            {
+                a = Config.disablevgatekeybind;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("disablevgatekeybind", val);
+                Config.disablevgatekeybind = val;
+                a = val;
+            }
+        });
+//        appender.add(new CheckBox("Disable pick forage keybind (Q by Default) picking up/dropping carts.") {
+//            {
+//                a = Config.disablecartkeybind;
+//            }
+//
+//            public void set(boolean val) {
+//                Utils.setprefb("disablecartkeybind", val);
+//                Config.disablecartkeybind = val;
+//                a = val;
+//            }
+//        });
+
+        quickactionsettings.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
+        quickactionsettings.pack();
     }
 
     private void initstudydesksettings() {

@@ -37,6 +37,7 @@ import haven.purus.pbot.PBotScriptlist;
 import haven.purus.pbot.PBotScriptlistOld;
 import haven.purus.pbot.PBotUtils;
 import haven.resutil.FoodInfo;
+import haven.sloth.gob.AggroMark;
 import haven.sloth.gob.Mark;
 import haven.sloth.gui.DeletedManager;
 import haven.sloth.gui.DowseWnd;
@@ -76,6 +77,7 @@ import static haven.Action.TOGGLE_KIN_LIST;
 import static haven.Action.TOGGLE_OPTIONS;
 import static haven.Action.TOGGLE_SEARCH;
 import static haven.KeyBinder.KeyBind;
+import static haven.MCache.tilesz;
 
 public class GameUI extends ConsoleHost implements Console.Directory {
     public static final Text.Foundry msgfoundry = new Text.Foundry(Text.dfont, Text.cfg.msg);
@@ -494,11 +496,22 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             if (fv != null && fv.current != null)
                 g = map.glob.oc.getgob(fv.current.gobid);
             if (g != null) {
-                g.mark(20000);
+                synchronized (fv.lsrel) {
+                    for (Fightview.Relation rel : fv.lsrel) {
+                        final Gob gob = ui.sess.glob.oc.getgob(rel.gobid);
+                        if (gob != null) {
+                            final Gob.Overlay ol = gob.findol(AggroMark.id);
+                            if (ol != null) {
+                                gob.ols.remove(ol);
+                            }
+                        }
+                    }
+                }
+                g.aggromark(10000);
                 for (Widget wdg = chat.lchild; wdg != null; wdg = wdg.prev) {
                     if (wdg instanceof ChatUI.PartyChat) {
                         final ChatUI.PartyChat chat = (ChatUI.PartyChat) wdg;
-                        chat.send(String.format(Mark.CHAT_FMT, g.id, 20000));
+                        chat.send(String.format(Mark.CHAT_FMT, g.id, 10000));
                     }
                 }
             }
@@ -1600,6 +1613,26 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         }
     }
 
+    public void switchmarkedtarget() {
+        Fightview.Relation cur = fv.current;
+        if (cur != null) {
+            synchronized (fv.lsrel) {
+                for (Fightview.Relation rel : fv.lsrel) {
+                    final Gob gob = ui.sess.glob.oc.getgob(rel.gobid);
+                    if (gob != null) {
+                        final Gob.Overlay ol = gob.findol(AggroMark.id);
+                        if (ol != null) {
+                            fv.lsrel.remove(cur);
+                            fv.lsrel.addLast(cur);
+                            fv.wdgmsg("bump", (int) gob.id);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public void toggleGobs() {
         Config.showboundingboxes = !Config.showboundingboxes;
         Utils.setprefb("showboundingboxes", Config.showboundingboxes);
@@ -1809,6 +1842,13 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public void harvestForageable() {
         Thread t = new Thread(new PickForageable(this), "PickForageable");
         t.start();
+    }
+
+    public void harvestMForageable() {
+        if (map != null && map.lastmovemc != null) {
+            Thread t = new Thread(new PickForageable(this, map.lastmovemc), "PickMForageable");
+            t.start();
+        }
     }
 
     public void traverse() {

@@ -393,7 +393,7 @@ public class MappingClient {
 
         @Override
         public void run() {
-            if (trackingEnabled) {
+            if (trackingEnabled && CheckEndpoint()) {
                 JSONObject upload = new JSONObject();
                 try {
                     Glob g = Glob.getByReference(accName);

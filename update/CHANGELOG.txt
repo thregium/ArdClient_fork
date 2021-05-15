@@ -1,4 +1,13 @@
 Details in https://github.com/Cediner/ArdClient/commits/Unstable
+2021.05.15
+-- Redrawed fight UI
+-- Key Z(default) - mark current target for party
+-- Key Shift+Space(default) - target marked
+-- Added option Quick Action (Custom Q)
+-- Added proximity mouse Quick Action - Alt+Q(default)
+-- Some fixes
+~
+
 2021.05.13
 -- Fixed map
 -- Added the ability to remove grids on the map using Ctrl+Alt+RMB (Quick removal of marks Ctrl+Alt+LMB)

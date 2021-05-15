@@ -123,7 +123,7 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
     private final AttrCache<Tex> nmeteri = new AttrCache<>(this::info, AttrCache.map1s(GItem.NumberInfo.class, ninf -> new TexI(GItem.NumberInfo.numrender(ninf.itemnum(), ninf.numcolor()))));
     private final AttrCache<Double> cmeteri = new AttrCache<>(this::info, AttrCache.map1(GItem.MeterInfo.class, minf -> minf::meter));
 
-    private static final Map<String, Color> openings = new HashMap<String, Color>(4) {{
+    public static final Map<String, Color> openings = new HashMap<String, Color>(4) {{
         put("paginae/atk/dizzy", new Color(8, 103, 136));
         put("paginae/atk/offbalance", new Color(8, 103, 1));
         put("paginae/atk/cornered", new Color(221, 28, 26));
@@ -147,7 +147,7 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
      * Fight Buffs don't have meters aside from the ameter.
      * Fight buffs also use the cframe always
      */
-    public void fightdraw(final GOut g) {
+    public void fightdraw(final GOut g, float scale) {
         final Coord sz = scframe.sz();
 
         try {
@@ -157,31 +157,54 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
                 g.chcolor(255, 255, 255, a);
                 Double ameter = (this.ameter >= 0) ? (this.ameter / 100.0) : ameteri.get();
                 if (ameter != null) {
-                    g.image(scframe, Coord.z);
+                    g.image(scframe, Coord.z, scframe.sz().mul(scale));
                     g.chcolor(0, 0, 0, a);
-                    g.frect(sameteroff, sametersz);
+                    g.frect(sameteroff.mul(scale), sametersz.mul(scale));
                     g.chcolor(255, 255, 255, a);
-                    g.frect(sameteroff, new Coord((int) Math.floor(ameter * sametersz.x), sametersz.y));
+                    g.frect(sameteroff.mul(scale), new Coord((int) Math.floor(ameter * sametersz.x), sametersz.y).mul(scale));
                 }
 
                 g.chcolor(clr);
-                g.frect(imgoff, simpleOpeningSmallSz);
+                g.frect(imgoff.mul(scale), simpleOpeningSmallSz.mul(scale));
                 g.chcolor();
 
                 if (ameter != null) {
                     final int width = FastText.textw(this.ameter + "");
-                    final Coord c = new Coord(sz.x / 2 - width / 2, sz.y / 2 - 5);
+                    final Coord c = new Coord(sz.x / 2 - width / 2, sz.y / 2 - 5).mul(scale);
                     final Coord tc = c.sub(0, 3);
                     final Coord tsz = new Coord(width, 10);
                     g.chcolor(new Color(64, 64, 64, 215));
-                    g.frect(c, c.add(tsz.x, 0), c.add(tsz), c.add(0, tsz.y));
+                    g.frect(c.mul(scale), c.add(tsz.x, 0).mul(scale), c.add(tsz).mul(scale), c.add(0, tsz.y).mul(scale));
                     g.chcolor();
-                    FastText.printf(g, tc, "%d", this.ameter);
+                    FastText.printf(g, tc.mul(scale), "%d", this.ameter);
                 }
             }
         } catch (Loading l) {
             //do nothing
         }
+    }
+
+    public void fightdraw(final GOut g) {
+        fightdraw(g, 1.0f);
+    }
+
+    public void stancedraw(final GOut g, float scale) {
+        try {
+            final Resource res = this.res.get();
+            Tex img = res.layer(Resource.imgc).tex();
+            if (img != null) {
+                g.image(img, Coord.z, img.sz().mul(scale));
+                g.chcolor(new Color(64, 64, 64, 215));
+                g.rect(Coord.z, img.sz().mul(scale));
+                g.chcolor();
+            }
+        } catch (Loading l) {
+            //do nothing
+        }
+    }
+
+    public void stancedraw(final GOut g) {
+        stancedraw(g, 1.0f);
     }
 
     public void sessdraw(final GOut g, Coord bc) {

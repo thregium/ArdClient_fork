@@ -39,6 +39,7 @@ import haven.resutil.WaterTile;
 import haven.sloth.gfx.GobSpeedSprite;
 import haven.sloth.gfx.HitboxMesh;
 import haven.sloth.gfx.SnowFall;
+import haven.sloth.gob.AggroMark;
 import haven.sloth.gob.Alerted;
 import haven.sloth.gob.Deleted;
 import haven.sloth.gob.Halo;
@@ -541,6 +542,14 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             daddol(Mark.id, new Mark(life));
         } else {
             ((Mark) (findol(Mark.id).spr)).setLife(life);
+        }
+    }
+
+    public void aggromark(final int life) {
+        if (findol(AggroMark.id) == null) {
+            daddol(AggroMark.id, new AggroMark(life));
+        } else {
+            ((AggroMark) (findol(AggroMark.id).spr)).setLife(life);
         }
     }
 

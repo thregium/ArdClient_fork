@@ -90,6 +90,7 @@ public class Hitbox {
         hitboxes.put("gfx/kritter/pig", new Hitbox[]{new Hitbox(new Coord(-6, -3), new Coord(6, 3))});
         hitboxes.put("gfx/kritter/goat", new Hitbox[]{new Hitbox(new Coord(-3, -2), new Coord(4, 2))});
         hitboxes.put("gfx/kritter/sheep/lamb", new Hitbox[]{new Hitbox(new Coord(-4, -2), new Coord(5, 2))});
+        hitboxes.put("gfx/terobjs/boostspeed", new Hitbox[]{new Hitbox(new Coord(-4, -4), new Coord(4, 4))});
 
 //        hitboxes.put("gfx/terobjs/cupboard", new Hitbox[]{new Hitbox(new Coord(-5, -5), new Coord(5, 5))});
 

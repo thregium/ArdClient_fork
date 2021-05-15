@@ -562,6 +562,10 @@ public class Utils {
     }
 
     public static ObservableMap<String, Boolean> loadCustomList(List<String> defaultlist, String jsonname) {
+        return loadCustomList(defaultlist, jsonname, false);
+    }
+
+    public static ObservableMap<String, Boolean> loadCustomList(List<String> defaultlist, String jsonname, boolean init) {
         String json = Config.loadFile(jsonname + ".json");
         ObservableMap<String, Boolean> list = new ObservableMap<>(new HashMap<>());
         if (json != null) {
@@ -574,7 +578,7 @@ public class Utils {
             }
         }
         if (list.size() == 0) {
-            defaultlist.forEach(k -> list.put(k, false));
+            defaultlist.forEach(k -> list.put(k, init));
         }
         return list;
     }

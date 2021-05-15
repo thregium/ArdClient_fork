@@ -3,15 +3,18 @@ package haven.automation;
 
 import haven.CheckListboxItem;
 import haven.Config;
+import haven.Coord2d;
 import haven.GameUI;
 import haven.Gob;
 import haven.Loading;
 import haven.Resource;
 import haven.Utils;
-import haven.sloth.gob.Type;
+import modification.configuration;
+import modification.resources;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.regex.Pattern;
 
 import static haven.OCache.posres;
 
@@ -23,6 +26,13 @@ public class PickForageable implements Runnable {
         this.gui = gui;
     }
 
+    private Coord2d center;
+
+    public PickForageable(GameUI gui, Coord2d center) {
+        this.gui = gui;
+        this.center = center;
+    }
+
     @Override
     public void run() {
         Gob herb = null;
@@ -30,30 +40,30 @@ public class PickForageable implements Runnable {
             if (gui.map.player() == null)
                 return;//player is null, possibly taking a road, don't bother trying to do all of the below.
             for (Gob gob : gui.map.glob.oc) {
-                if (gob.type == Type.TAMEDANIMAL)
-                    continue; //don't evaluate tamed horses
+//                if (gob.type == Type.TAMEDANIMAL)
+//                    continue; //don't evaluate tamed horses
                 Resource res = null;
                 boolean gate = false;
-                boolean cart = false;
+//                boolean cart = false;
                 try {
                     res = gob.getres();
                 } catch (Loading l) {
                 }
                 if (res != null) {
-                    CheckListboxItem itm = Config.icons.get(res.basename());
-                    Boolean hidden = Boolean.FALSE;
+//                    CheckListboxItem itm = Config.icons.get(res.basename());
+//                    Boolean hidden = Boolean.FALSE;
                     if (!Config.disablegatekeybind)
                         gate = gates.contains(res.basename());
-                    if (!Config.disablecartkeybind)
-                        cart = res.basename().equals("cart");
-                    if (itm == null) {
-                        itm = Config.oldicons.get(res.basename());
-                        if (itm == null) {
-                            hidden = null;
-                        }
-                    }
-                    else if (itm.selected)
-                        hidden = Boolean.TRUE;
+//                    if (!Config.disablecartkeybind)
+//                        cart = res.basename().equals("cart");
+//                    if (itm == null) {
+//                        itm = Config.oldicons.get(res.basename());
+//                        if (itm == null) {
+//                            hidden = null;
+//                        }
+//                    }
+//                    else if (itm.selected)
+//                        hidden = Boolean.TRUE;
 
                     try {
                         if (gate) {
@@ -68,16 +78,27 @@ public class PickForageable implements Runnable {
                         fucknulls.printStackTrace();
                     }
 
-                    if (hidden == null && res.name.startsWith("gfx/terobjs/herbs") || (hidden == Boolean.FALSE && !res.name.startsWith("gfx/terobjs/vehicle") && !cart) || gate || cart) {
-                        double distFromPlayer = gob.rc.dist(gui.map.player().rc);
-                        if (distFromPlayer <= 20 * 11 && (herb == null || distFromPlayer < herb.rc.dist(gui.map.player().rc)))
+                    boolean matches = false;
+                    for (String act : resources.customQuickActions.keySet()) {
+                        if (resources.customQuickActions.get(act)) {
+                            Pattern pattern = Pattern.compile(act);
+                            if (pattern.matcher(res.name).matches()) {
+                                matches = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (matches || gate) {
+                        double distFromPlayer = gob.rc.dist(center != null ? center : gui.map.player().rc);
+                        if (distFromPlayer <= configuration.quickradius * 11 && (herb == null || distFromPlayer < herb.rc.dist(center != null ? center : gui.map.player().rc)))
                             herb = gob;
                     }
-                    if (gob.type == Type.SMALLANIMAL) {
-                        double distFromPlayer = gob.rc.dist(gui.map.player().rc);
-                        if (distFromPlayer <= 20 * 11 && (herb == null || distFromPlayer < herb.rc.dist(gui.map.player().rc)))
-                            herb = gob;
-                    }
+//                    if (gob.type == Type.SMALLANIMAL) {
+//                        double distFromPlayer = gob.rc.dist(gui.map.player().rc);
+//                        if (distFromPlayer <= 20 * 11 && (herb == null || distFromPlayer < herb.rc.dist(gui.map.player().rc)))
+//                            herb = gob;
+//                    }
                 }
             }
         }

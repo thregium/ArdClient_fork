@@ -209,20 +209,20 @@ public class Fightview extends MovableWidget {
 
         public void tick() {
             updateDefWeights();
-            final Gob g = ui.sess.glob.oc.getgob(gobid);
-            if (g != null) {
-                if (DefSettings.COLORIZEAGGRO.get()) {
-                    if (g.findol(AggroMark.id) == null) {
-                        g.addol(new Gob.Overlay(AggroMark.id, new AggroMark()));
-                    }
-                } else {
-                    final Gob.Overlay ol = g.findol(AggroMark.id);
-                    final AggroMark mark = ol != null ? (AggroMark) ol.spr : null;
-                    if (mark != null) {
-                        mark.rem();
-                    }
-                }
-            }
+//            final Gob g = ui.sess.glob.oc.getgob(gobid);
+//            if (g != null) {
+//                if (DefSettings.COLORIZEAGGRO.get() && this.equals(current)) {
+//                    if (g.findol(AggroMark.id) == null) {
+//                        g.addol(new Gob.Overlay(AggroMark.id, new AggroMark()));
+//                    }
+//                } else {
+//                    final Gob.Overlay ol = g.findol(AggroMark.id);
+//                    final AggroMark mark = ol != null ? (AggroMark) ol.spr : null;
+//                    if (mark != null) {
+//                        mark.rem();
+//                    }
+//                }
+//            }
         }
 
         public void destroy() {
@@ -316,8 +316,11 @@ public class Fightview extends MovableWidget {
                 if (gob != null) {
                     final Gob.Overlay ol = gob.findol(GobCombatSprite.id);
                     if (ol != null) {
-                        ((GobCombatSprite) ol.spr).update(rel);
-                    } else {
+                        if (rel.equals(current))
+                            gob.ols.remove(ol);
+                        else
+                            ((GobCombatSprite) ol.spr).update(rel);
+                    } else if (!rel.equals(current)) {
                         gob.addol(new Gob.Overlay(GobCombatSprite.id, new GobCombatSprite(gob, rel)));
                     }
                 }
@@ -598,7 +601,7 @@ public class Fightview extends MovableWidget {
 //                    FastText.printf(g, new Coord(12, y + 64), "Speed: %f", gob.getv());
 //                    FastText.printf(g, new Coord(12, y + 72), "Distance: %f", gob.getc().dist(ui.sess.glob.oc.getgob(ui.gui.map.plgob).getc()) / 11.0);
 
-                    g.image(RichText.render(String.format("$b{Speed: %.1f : Distance: %.2f}", gob.getv(), gob.getc().dist(ui.sess.glob.oc.getgob(ui.gui.map.plgob).getc()) / 11.0), -1).tex(), new Coord(12, y + 54));
+                    g.image(RichText.render(String.format("$bg[35,35,35,192]{$b{Speed: %.1f : Distance: %.2f}}", gob.getv(), gob.getc().dist(ui.sess.glob.oc.getgob(ui.gui.map.plgob).getc()) / 11.0), -1).tex(), new Coord(12, y + 68));
                 }
                 g.chcolor();
                 y += bg.sz().y + ymarg + 16;

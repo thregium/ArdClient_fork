@@ -725,14 +725,12 @@ public class MapFileWidget extends Widget {
         final Coord gc = tc.div(cmaps);
         String newsegment;
         try {
-            newsegment = curloc.seg.gridid(gc) + "";
+            newsegment = curloc.seg.gridid(gc) + " " + gc;
         } catch (Exception e) {
             newsegment = "null";
         }
-        if (!newsegment.equals(seginfo)) {
+        if (!newsegment.equals(seginfo))
             seginfo = newsegment;
-            return Text.render(newsegment);
-        }
         return Text.render(seginfo);
     }
 

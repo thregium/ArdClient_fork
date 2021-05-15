@@ -161,6 +161,7 @@ public class configuration {
     public static double rotateworldvalz = Utils.getprefd("rotateworldvalz", 0);
     public static boolean transparencyworld = Utils.getprefb("transparencyworld", false);
     public static boolean shieldnotify = Utils.getprefb("shieldnotify", false);
+    public static int quickradius = Utils.getprefi("quickradius", 20);
 
     public static boolean privatechatalerts = Utils.getprefb("privatechatalerts", true);
     public static boolean ignorepm = Utils.getprefb("ignorepm", false);
