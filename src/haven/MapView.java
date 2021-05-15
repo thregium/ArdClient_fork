@@ -2859,15 +2859,13 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         return (true);
     }
 
-    public Coord2d takemc(Coord c) {
-        final Coord2d[] lmc = {null};
+    public void takemc(Coord c, Callback<Coord2d> mouse) {
         delay(new Hittest(c, ui.modflags()) {
             @Override
             protected void hit(Coord pc, Coord2d mc, ClickInfo inf) {
-                lmc[0] = mc;
+                mouse.done(mc);
             }
         });
-        return (lmc[0]);
     }
 
     public void mousemove(Coord c) {

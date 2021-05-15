@@ -77,7 +77,6 @@ import static haven.Action.TOGGLE_KIN_LIST;
 import static haven.Action.TOGGLE_OPTIONS;
 import static haven.Action.TOGGLE_SEARCH;
 import static haven.KeyBinder.KeyBind;
-import static haven.MCache.tilesz;
 
 public class GameUI extends ConsoleHost implements Console.Directory {
     public static final Text.Foundry msgfoundry = new Text.Foundry(Text.dfont, Text.cfg.msg);
@@ -1846,11 +1845,10 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
     public void harvestMForageable() {
         if (map != null) {
-            Coord2d mc = map.takemc(ui.mc);
-            if (mc != null) {
+            map.takemc(ui.mc, mc -> {
                 Thread t = new Thread(new PickForageable(this, mc), "PickMForageable");
                 t.start();
-            }
+            });
         }
     }
 

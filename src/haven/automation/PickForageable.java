@@ -9,6 +9,7 @@ import haven.Gob;
 import haven.Loading;
 import haven.Resource;
 import haven.Utils;
+import haven.sloth.gob.HeldBy;
 import modification.configuration;
 import modification.resources;
 
@@ -37,11 +38,15 @@ public class PickForageable implements Runnable {
     public void run() {
         Gob herb = null;
         synchronized (gui.map.glob.oc) {
-            if (gui.map.player() == null)
+            Gob player = gui.map.player();
+            if (player == null)
                 return;//player is null, possibly taking a road, don't bother trying to do all of the below.
+            HeldBy held = player.getattr(HeldBy.class);
             for (Gob gob : gui.map.glob.oc) {
-//                if (gob.type == Type.TAMEDANIMAL)
-//                    continue; //don't evaluate tamed horses
+                if (player == gob)
+                    continue;
+                if (held != null && held.holder == gob)
+                    continue; //don't evaluate tamed horses
                 Resource res = null;
                 boolean gate = false;
 //                boolean cart = false;
