@@ -156,7 +156,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     public boolean PBotAPISelect = false;
     private Coord2d movingto;
     private Coord2d lastrc;
-    public Coord2d lastmovemc;
     private double mspeed, totaldist = 0, mspeedavg, totaldt = 0;
     public haven.purus.pathfinder.Pathfinder pastaPathfinder;
     private long lastMove = System.currentTimeMillis();
@@ -2860,14 +2859,18 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         return (true);
     }
 
-    public void mousemove(Coord c) {
+    public Coord2d takemc(Coord c) {
+        final Coord2d[] lmc = {null};
         delay(new Hittest(c, ui.modflags()) {
             @Override
             protected void hit(Coord pc, Coord2d mc, ClickInfo inf) {
-                if (!lastmovemc.equals(mc))
-                    lastmovemc = mc;
+                lmc[0] = mc;
             }
         });
+        return (lmc[0]);
+    }
+
+    public void mousemove(Coord c) {
         if (configuration.autoclick)
             if (ismousedown && ui.modflags() == 0)
                 delay(new Click(c, ui.modflags(), 1));

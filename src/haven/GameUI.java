@@ -1845,9 +1845,12 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void harvestMForageable() {
-        if (map != null && map.lastmovemc != null) {
-            Thread t = new Thread(new PickForageable(this, map.lastmovemc), "PickMForageable");
-            t.start();
+        if (map != null) {
+            Coord2d mc = map.takemc(ui.mc);
+            if (mc != null) {
+                Thread t = new Thread(new PickForageable(this, mc), "PickMForageable");
+                t.start();
+            }
         }
     }
 
