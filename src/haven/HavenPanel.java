@@ -794,7 +794,7 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
                                     if (now - frames[ckf] > 1000)
                                         break;
                                 }
-                                fps = (i * 1000) / (now - frames[ckf]);
+                                fps =  (i * 1000L) / (now - frames[ckf]);
                                 uidle = ((double) twait) / ((double) (now - frames[ckf]));
                             }
                             framep = (framep + 1) % frames.length;

@@ -10,13 +10,16 @@ import haven.Gob;
 import haven.Loading;
 import haven.Resource;
 import haven.Utils;
+import haven.purus.pbot.PBotGob;
 import haven.sloth.gob.HeldBy;
 import modification.configuration;
 import modification.resources;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static haven.OCache.posres;
 
@@ -43,6 +46,8 @@ public class PickForageable implements Runnable {
             if (player == null)
                 return;//player is null, possibly taking a road, don't bother trying to do all of the below.
             HeldBy held = player.getattr(HeldBy.class);
+            ArrayList<PBotGob> gobs = new ArrayList<>();
+            gobs.stream().filter(gob -> gob.getResname().contains("stockpile") && gob.getResname().endsWith("wblock")).collect(Collectors.toList());
             for (Gob gob : gui.map.glob.oc) {
                 if (player == gob)
                     continue;
@@ -85,14 +90,18 @@ public class PickForageable implements Runnable {
                     }
 
                     boolean matches = false;
-                    for (String act : resources.customQuickActions.keySet()) {
-                        if (resources.customQuickActions.get(act)) {
-                            Pattern pattern = Pattern.compile(act);
-                            if (pattern.matcher(res.name).matches()) {
-                                matches = true;
-                                break;
+                    try {
+                        for (String act : resources.customQuickActions.keySet()) {
+                            if (resources.customQuickActions.get(act)) {
+                                Pattern pattern = Pattern.compile(act);
+                                if (pattern.matcher(res.name).matches()) {
+                                    matches = true;
+                                    break;
+                                }
                             }
                         }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
 
                     if (matches || gate) {
