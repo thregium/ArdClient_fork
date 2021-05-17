@@ -516,7 +516,10 @@ public class RenderList {
                 continue;
             }
             g.st.set(s.os);
-            render(g, s.r);
+            try {
+                render(g, s.r);
+            } catch (Exception e) {
+            }
             if (s.disp != null)
                 s.disp.dispose();
             if (s.instnum > 0) {

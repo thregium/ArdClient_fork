@@ -175,8 +175,9 @@ public abstract class TexGL extends Tex {
             if (draw == null) {
                 sampler = lbind(g, tex);
             } else {
-                if (draw.tex != this.tex)
+                if (draw.tex != this.tex) {
                     throw (new RuntimeException(String.format("TexGL does not support different clip (%s) and draw (%s) textures.", this.tex, draw.tex)));
+                }
             }
             if (g.gc.pref.alphacov.val) {
                 g.gl.glEnable(GL2.GL_SAMPLE_ALPHA_TO_COVERAGE);
