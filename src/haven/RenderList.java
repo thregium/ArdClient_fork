@@ -518,7 +518,8 @@ public class RenderList {
             g.st.set(s.os);
             try {
                 render(g, s.r);
-            } catch (Exception e) {
+            } catch (Loading e) {
+                e.printStackTrace();
             }
             if (s.disp != null)
                 s.disp.dispose();

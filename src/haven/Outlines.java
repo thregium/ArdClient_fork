@@ -74,7 +74,7 @@ import static haven.glsl.Type.SAMPLER2DMS;
 import static haven.glsl.Type.VEC3;
 
 public class Outlines implements Rendered {
-    private boolean symmetric;
+    private final IndirSetting<Boolean> symmetric;
 
     public void draw(GOut g) {
     }
@@ -171,7 +171,7 @@ public class Outlines implements Rendered {
         shaders[3] = shader(true, true);
     }
 
-    public Outlines(final boolean symmetric) {
+    public Outlines(IndirSetting<Boolean> symmetric) {
         this.symmetric = symmetric;
     }
 
@@ -182,7 +182,7 @@ public class Outlines implements Rendered {
         ctx.cfg.tdepth = true;
         ctx.cfg.add(nrm);
         rl.prepc(Rendered.postfx);
-        rl.add(new Rendered.ScreenQuad(), new States.AdHoc(shaders[(symmetric ? 2 : 0) | (ms ? 1 : 0)]) {
+        rl.add(new Rendered.ScreenQuad(), new States.AdHoc(shaders[(symmetric.get() ? 2 : 0) | (ms ? 1 : 0)]) {
             private TexUnit tnrm;
             private TexUnit tdep;
 

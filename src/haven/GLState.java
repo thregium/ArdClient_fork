@@ -626,16 +626,20 @@ public abstract class GLState {
             }
             cur.copy(old);
             for (int i = deplist.length - 1; i >= 0; i--) {
-                int id = deplist[i].id;
-                if (repl[id]) {
-                    if (cur.states[id] != null) {
-                        cur.states[id].unapply(g);
-                        if (debug)
-                            stcheckerr(g, "unapply", cur.states[id]);
+                try {
+                    int id = deplist[i].id;
+                    if (repl[id]) {
+                        if (cur.states[id] != null) {
+                            cur.states[id].unapply(g);
+                            if (debug)
+                                stcheckerr(g, "unapply", cur.states[id]);
+                        }
+                        cur.states[id] = null;
+                        proghash ^= System.identityHashCode(shaders[id]);
+                        shaders[id] = null;
                     }
-                    cur.states[id] = null;
-                    proghash ^= System.identityHashCode(shaders[id]);
-                    shaders[id] = null;
+                } catch (Exception e) {
+//                    e.printStackTrace();
                 }
             }
             /* Note on invariants: States may exit non-locally
@@ -645,34 +649,38 @@ public abstract class GLState {
              * state. If they exit non-locally after GL state has
              * been altered, future results are undefined. */
             for (int i = 0; i < deplist.length; i++) {
-                int id = deplist[i].id;
-                if (repl[id]) {
-                    if (next.states[id] != null) {
-                        next.states[id].apply(g);
+                try {
+                    int id = deplist[i].id;
+                    if (repl[id]) {
+                        if (next.states[id] != null) {
+                            next.states[id].apply(g);
+                            cur.states[id] = next.states[id];
+                            proghash ^= System.identityHashCode(shaders[id]) ^ System.identityHashCode(nshaders[id]);
+                            shaders[id] = nshaders[id];
+                            if (debug)
+                                stcheckerr(g, "apply", cur.states[id]);
+                        }
+                        if (!pdirty)
+                            prog.adirty(deplist[i]);
+                    } else if (trans[id]) {
+                        cur.states[id].applyto(g, next.states[id]);
+                        if (debug)
+                            stcheckerr(g, "applyto", cur.states[id]);
+                        next.states[id].applyfrom(g, cur.states[id]);
                         cur.states[id] = next.states[id];
                         proghash ^= System.identityHashCode(shaders[id]) ^ System.identityHashCode(nshaders[id]);
                         shaders[id] = nshaders[id];
                         if (debug)
-                            stcheckerr(g, "apply", cur.states[id]);
+                            stcheckerr(g, "applyfrom", cur.states[id]);
+                        if (!pdirty)
+                            prog.adirty(deplist[i]);
+                    } else if (pdirty && (shaders[id] != null)) {
+                        cur.states[id].reapply(g);
+                        if (debug)
+                            stcheckerr(g, "reapply", cur.states[id]);
                     }
-                    if (!pdirty)
-                        prog.adirty(deplist[i]);
-                } else if (trans[id]) {
-                    cur.states[id].applyto(g, next.states[id]);
-                    if (debug)
-                        stcheckerr(g, "applyto", cur.states[id]);
-                    next.states[id].applyfrom(g, cur.states[id]);
-                    cur.states[id] = next.states[id];
-                    proghash ^= System.identityHashCode(shaders[id]) ^ System.identityHashCode(nshaders[id]);
-                    shaders[id] = nshaders[id];
-                    if (debug)
-                        stcheckerr(g, "applyfrom", cur.states[id]);
-                    if (!pdirty)
-                        prog.adirty(deplist[i]);
-                } else if (pdirty && (shaders[id] != null)) {
-                    cur.states[id].reapply(g);
-                    if (debug)
-                        stcheckerr(g, "reapply", cur.states[id]);
+                } catch (Exception e) {
+//                    e.printStackTrace();
                 }
             }
             if (cproj != proj) {

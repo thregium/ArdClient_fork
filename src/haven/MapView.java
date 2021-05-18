@@ -93,6 +93,7 @@ import static haven.DefSettings.NVSPECCOC;
 import static haven.DefSettings.SHOWKCLAIM;
 import static haven.DefSettings.SHOWPCLAIM;
 import static haven.DefSettings.SHOWVCLAIM;
+import static haven.DefSettings.SYMMETRICOUTLINES;
 import static haven.Gob.createBPRadSprite;
 import static haven.MCache.tilesz;
 import static haven.OCache.posres;
@@ -892,32 +893,17 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         public boolean setup(RenderList rl) {
             Coord cc = MapView.this.cc.floor(tilesz).div(MCache.cutsz);
             Coord o = new Coord();
-            if (Config.noloadscreen) {
-                for (o.y = -view; o.y <= view; o.y++) {
-                    for (o.x = -view; o.x <= view; o.x++) {
-                        Coord2d pc = cc.add(o).mul(MCache.cutsz).mul(tilesz);
-                        try {
-                            MapMesh cut = glob.map.getcut(cc.add(o));
-                            if (cut != null) {
-                                rl.add(cut, Location.xlate(new Coord3f((float) pc.x, -(float) pc.y, 0)));
-                            }
-                        } catch (Exception e) {
-                        }
+            for (o.y = -view; o.y <= view; o.y++) {
+                for (o.x = -view; o.x <= view; o.x++) {
+                    Coord2d pc = cc.add(o).mul(MCache.cutsz).mul(tilesz);
+                    MapMesh cut = null;
+                    try {
+                        cut = glob.map.getcut(cc.add(o));
+                    } catch (Loading e) {
+//                        e.printStackTrace();
                     }
-                }
-            } else {
-                for (o.y = -view; o.y <= view; o.y++) {
-                    for (o.x = -view; o.x <= view; o.x++) {
-                        Coord2d pc = cc.add(o).mul(MCache.cutsz).mul(tilesz);
-                        try {
-                            MapMesh cut = glob.map.getcut(cc.add(o));
-                            if (cut != null) {
-                                rl.add(cut, Location.xlate(new Coord3f((float) pc.x, -(float) pc.y, 0)));
-                            }
-                        } catch (Defer.DeferredException e) {
-                            // there seems to be a rare problem with fetching gridcuts when teleporting, not sure why...
-                            // we ignore Defer.DeferredException to prevent the client for crashing
-                        }
+                    if (cut != null) {
+                        rl.add(cut, Location.xlate(new Coord3f((float) pc.x, -(float) pc.y, 0)));
                     }
                 }
             }
@@ -939,12 +925,14 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             for (o.y = -view; o.y <= view; o.y++) {
                 for (o.x = -view; o.x <= view; o.x++) {
                     Coord2d pc = cc.add(o).mul(MCache.cutsz).mul(tilesz);
+                    FastMesh cut = null;
                     try {
-                        FastMesh cut = glob.map.getgcut(cc.add(o));
-                        if (cut != null) {
-                            rl.add(cut, Location.xlate(new Coord3f((float) pc.x, (float) -pc.y, 0)));
-                        }
+                        cut = glob.map.getgcut(cc.add(o));
                     } catch (Loading e) {
+//                        e.printStackTrace();
+                    }
+                    if (cut != null) {
+                        rl.add(cut, Location.xlate(new Coord3f((float) pc.x, (float) -pc.y, 0)));
                     }
                 }
             }
@@ -1001,7 +989,12 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             for (Coord gc : va) {
                 Coord2d pc = gc.mul(MCache.cutsz).mul(tilesz);
                 for (OverlayInfo olid : visol) {
-                    Rendered olcut = glob.map.getolcut(olid, gc);
+                    Rendered olcut = null;
+                    try {
+                        olcut = glob.map.getolcut(olid, gc);
+                    } catch (Loading e) {
+//                        e.printStackTrace();
+                    }
                     if (olcut != null) {
                         try {
                             rl.add(olcut, GLState.compose(Location.xlate(new Coord3f((float) pc.x, -(float) pc.y, 0)), olid.mat()));
@@ -1308,8 +1301,13 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         public boolean setup(RenderList rl) {
             synchronized (oc) {
                 update();
-                for (GobSet set : all)
-                    rl.add(set, null);
+                for (GobSet set : all) {
+                    try {
+                        rl.add(set, null);
+                    } catch (Exception e) { //???
+                        e.printStackTrace();
+                    }
+                }
                 ticks++;
             }
             return (false);
@@ -1375,7 +1373,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     public DirLight amb = null;
-    private Outlines outlines = new Outlines(false);
+    private Outlines outlines = new Outlines(SYMMETRICOUTLINES);
 
     public void setup(RenderList rl) {
         Gob pl = player();
@@ -1420,12 +1418,14 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
         if (rl.cfg.pref.outline.val)
             rl.add(outlines, null);
-        rl.add(map, null);
+        if (DefSettings.SHOWMAP.get())
+            rl.add(map, null);
         if (showgrid) {
             rl.add(Config.slothgrid ? grid : gridol, null);
         }
         rl.add(mapol, null);
-        rl.add(gobs, null);
+        if (DefSettings.SHOWGOBS.get())
+            rl.add(gobs, null);
         if (placing != null)
             addgob(rl, placing);
         synchronized (extradraw) {
@@ -1441,18 +1441,22 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 Coord pltc = new Coord((int) player().getc().x / 11, (int) player().getc().y / 11);
                 for (int x = -44; x < 44; x++) {
                     for (int y = -44; y < 44; y++) {
-                        int t = glob.map.gettile(pltc.sub(x, y));
-                        Resource res = glob.map.tilesetr(t);
-                        if (res == null)
-                            continue;
+                        try {
+                            int t = glob.map.gettile(pltc.sub(x, y));
+                            Resource res = glob.map.tilesetr(t);
+                            if (res == null)
+                                continue;
 
-                        String name = res.name;
-                        if (name.equals("gfx/tiles/mine") ||
-                                name.equals("gfx/tiles/boards")) {
+                            String name = res.name;
+                            if (name.equals("gfx/tiles/mine") ||
+                                    name.equals("gfx/tiles/boards")) {
+                                skyb = false;
+                                break;
+                            }
+                        } catch (Loading e) {
                             skyb = false;
-                            break;
+//                            e.printStackTrace();
                         }
-
                     }
                 }
             }
@@ -1943,6 +1947,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 // we ignore Defer.DeferredException to prevent the client for crashing
             }
         } catch (Loading e) {
+            e.printStackTrace();
             lastload = e;
             String text = e.getMessage();
             if (text == null)

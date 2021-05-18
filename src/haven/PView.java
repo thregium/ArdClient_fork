@@ -271,7 +271,8 @@ public abstract class PView extends Widget {
                     curf.add("apply", g.st.time);
                     curf.tick("render", g.st.time);
                 }
-            } catch (Exception e) {
+            } catch (Exception e) { //for test
+                e.printStackTrace();
                 //    System.out.println("Skipped a frame due to error");
             }
         } finally {

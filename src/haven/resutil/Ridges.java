@@ -31,6 +31,7 @@ import haven.Coord;
 import haven.Coord3f;
 import haven.GLState;
 import haven.Light;
+import haven.Loading;
 import haven.MCache;
 import haven.MapMesh;
 import haven.MapMesh.Model;
@@ -164,7 +165,12 @@ public class Ridges extends MapMesh.Hooks {
         for (c.y = ts.ul.y; c.y < ts.br.y; c.y++) {
             for (c.x = ts.ul.x; c.x < ts.br.x; c.x++) {
                 MCache map = m.map;
-                Tiler t = map.tiler(map.gettile(m.ul.add(c)));
+                Tiler t = null;
+                try {
+                    t = map.tiler(map.gettile(m.ul.add(c)));
+                } catch (Loading e) {
+//                    e.printStackTrace();
+                }
                 if (t instanceof RidgeTile)
                     bz[ts.o(c)] = ((RidgeTile) t).breakz();
                 else
@@ -174,14 +180,18 @@ public class Ridges extends MapMesh.Hooks {
         boolean[] breaks = new boolean[(m.sz.x + 1) * (m.sz.y + 1) * 2];
         for (c.y = 0; c.y <= m.sz.y; c.y++) {
             for (c.x = 0; c.x <= m.sz.x; c.x++) {
-                Coord tc = m.ul.add(c);
-                int ul = m.map.getz(tc);
-                int xd = Math.abs(ul - m.map.getz(tc.add(1, 0)));
-                if ((xd > bz[ts.o(c.x, c.y)]) && (xd > bz[ts.o(c.x, c.y - 1)]))
-                    breaks[eo(c, 0)] = true;
-                int yd = Math.abs(ul - m.map.getz(tc.add(0, 1)));
-                if ((yd > bz[ts.o(c.x, c.y)]) && (yd > bz[ts.o(c.x - 1, c.y)]))
-                    breaks[eo(c, 3)] = true;
+                try {
+                    Coord tc = m.ul.add(c);
+                    int ul = m.map.getz(tc);
+                    int xd = Math.abs(ul - m.map.getz(tc.add(1, 0)));
+                    if ((xd > bz[ts.o(c.x, c.y)]) && (xd > bz[ts.o(c.x, c.y - 1)]))
+                        breaks[eo(c, 0)] = true;
+                    int yd = Math.abs(ul - m.map.getz(tc.add(0, 1)));
+                    if ((yd > bz[ts.o(c.x, c.y)]) && (yd > bz[ts.o(c.x - 1, c.y)]))
+                        breaks[eo(c, 3)] = true;
+                } catch (Loading e) {
+//                    e.printStackTrace();
+                }
             }
         }
         return (breaks);

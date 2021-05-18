@@ -48,11 +48,11 @@ public class Context {
         thr.start();
     }
 
-    public synchronized void launchLispScript(final String script, final SessionDetails session) {
-        final Script thr = new LispScript(script, idpool.next(), session);
-        scripts.put(thr.sid(), thr);
-        thr.start();
-    }
+//    public synchronized void launchLispScript(final String script, final SessionDetails session) {
+//        final Script thr = new LispScript(script, idpool.next(), session);
+//        scripts.put(thr.sid(), thr);
+//        thr.start();
+//    }
 
     public synchronized void launchLuaScript(final String script, final SessionDetails session) {
         final Script thr = new LuaScript(script, idpool.next(), session);

@@ -26,6 +26,8 @@
 
 package haven;
 
+import modification.dev;
+
 import java.util.function.Consumer;
 
 public class Loading extends RuntimeException implements Waitable {
@@ -151,6 +153,9 @@ public class Loading extends RuntimeException implements Waitable {
      */
     @Override
     public synchronized Throwable fillInStackTrace() {
-        return this;
+        if (dev.reslog)
+            return super.fillInStackTrace();
+        else
+            return this;
     }
 }

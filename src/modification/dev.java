@@ -1,9 +1,7 @@
 package modification;
 
-import haven.AuthClient;
 import haven.CheckListbox;
 import haven.CheckListboxItem;
-import haven.Coord;
 import haven.GItem;
 import haven.Resource;
 import haven.UI;

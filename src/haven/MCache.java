@@ -44,6 +44,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 public class MCache {
@@ -66,24 +67,51 @@ public class MCache {
     private final Reference<Tileset>[] csets = new Reference[256];
     @SuppressWarnings("unchecked")
     private final Reference<Tiler>[] tiles = new Reference[256];
-    Map<Coord, Request> req = new HashMap<>();
+    private final Waitable.Queue gridwait = new Waitable.Queue();
+    final Map<Coord, Request> req = new HashMap<>();
     final Map<Coord, Grid> grids = new HashMap<>();
     Session sess;
-    Set<Overlay> ols = new HashSet<>();
+    final Set<Overlay> ols = new HashSet<>();
     public int olseq = 0;
-    Map<Integer, Defrag> fragbufs = new TreeMap<>();
+    final Map<Integer, Defrag> fragbufs = new TreeMap<>();
 
     public static class LoadingMap extends Loading {
         public final Coord gc;
+        private transient final MCache map;
 
-        public LoadingMap(Coord gc) {
+        public LoadingMap(MCache map, Coord gc) {
             super("Waiting for map data...");
             this.gc = gc;
+            this.map = map;
         }
 
-        public LoadingMap(Loading cause) {
-            super(cause);
-            this.gc = null;
+        public void waitfor(Runnable callback, Consumer<Waiting> reg) {
+            synchronized (map.grids) {
+                if (map.grids.containsKey(gc)) {
+                    reg.accept(Waiting.dummy);
+                    callback.run();
+                } else {
+                    reg.accept(new Waitable.Checker(callback) {
+                        protected Object monitor() {
+                            return (map.grids);
+                        }
+
+                        double st = Utils.rtime();
+
+                        protected boolean check() {
+                            if ((Utils.rtime() - st > 5)) {
+                                st = Utils.rtime();
+                                return (true);
+                            }
+                            return (map.grids.containsKey(gc));
+                        }
+
+                        protected Waitable.Waiting add() {
+                            return (map.gridwait.add(this));
+                        }
+                    }.addi());
+                }
+            }
         }
     }
 
@@ -152,7 +180,7 @@ public class MCache {
 
     public class Overlay {
         private Area a;
-        private OverlayInfo id;
+        private final OverlayInfo id;
 
         public Overlay(Area a, OverlayInfo id) {
             this.a = a;
@@ -209,7 +237,6 @@ public class MCache {
             .map();
 
     public class Grid {
-        public final String mnm = null;
         public final Coord gc, ul;
         public final int tiles[] = new int[cmaps.x * cmaps.y];
         public final float z[] = new float[cmaps.x * cmaps.y];
@@ -352,6 +379,7 @@ public class MCache {
                 if (cut.dmesh.done() || (cut.mesh == null)) {
                     MapMesh old = cut.mesh;
                     cut.mesh = cut.dmesh.get();
+                    cut.dmesh = null;
                     cut.ols.clear();
                     if (old != null)
                         old.dispose();
@@ -781,7 +809,7 @@ public class MCache {
                 cached = grids.get(gc);
                 if (cached == null) {
                     request(gc);
-                    throw (new LoadingMap(gc));
+                    throw (new LoadingMap(this, gc));
                 }
             }
             return (cached);
@@ -856,7 +884,7 @@ public class MCache {
     }
 
     public double getfz(Coord tc) {
-        haven.MCache.Grid g = getgridt(tc);
+        Grid g = getgridt(tc);
         return (g.getz(tc.sub(g.ul)));
     }
 
@@ -921,18 +949,26 @@ public class MCache {
     public Collection<OverlayInfo> getols(Area a) {
         Collection<OverlayInfo> ret = new ArrayList<>();
         for (Coord gc : a.div(cmaps)) {
-            Grid g = getgrid(gc);
-            if (g.ols == null)
-                continue;
-            for (Indir<Resource> res : g.ols) {
-                OverlayInfo id = res.get().layer(ResOverlay.class);
-                if (!ret.contains(id))
-                    ret.add(id);
+            try {
+                Grid g = getgrid(gc);
+                if (g.ols == null)
+                    continue;
+                for (Indir<Resource> res : g.ols) {
+                    OverlayInfo id = res.get().layer(ResOverlay.class);
+                    if (!ret.contains(id))
+                        ret.add(id);
+                }
+            } catch (Loading e) {
+//                e.printStackTrace();
             }
         }
         for (Overlay lol : ols) {
-            if ((lol.a.overlap(a) != null) && !ret.contains(lol.id))
-                ret.add(lol.id);
+            try {
+                if ((lol.a.overlap(a) != null) && !ret.contains(lol.id))
+                    ret.add(lol.id);
+            } catch (Exception e) { ///???
+                e.printStackTrace();
+            }
         }
         return (ret);
     }
@@ -1000,20 +1036,7 @@ public class MCache {
                     g.fill(msg);
                     req.remove(c);
                     olseq++;
-                    final Grid _g = g;
-                    final MCache _this = this;
-                    if (Config.savemmap) {
-                        Defer.later(new Defer.Callable<Void>() {
-                            public Void call() {
-                                try {
-                                    new MapGridSave(_this, _g);
-                                } catch (Loading e) {
-                                    Defer.later(this);
-                                }
-                                return null;
-                            }
-                        });
-                    }
+                    gridwait.wnotify();
                 }
             }
         }
@@ -1067,12 +1090,7 @@ public class MCache {
                 Resource res = tilesetr(i);
                 if (res == null)
                     return (null);
-                try {
-                    cset = res.layer(Tileset.class);
-                } catch (Loading e) {
-                    throw (new LoadingMap(e));
-                }
-                csets[i] = new SoftReference<Tileset>(cset);
+                csets[i] = new SoftReference<Tileset>(cset = res.layer(Tileset.class));
             }
             return (cset);
         }
@@ -1101,6 +1119,7 @@ public class MCache {
                 req.clear();
                 cached = null;
             }
+            gridwait.wnotify();
         }
     }
 
@@ -1124,6 +1143,7 @@ public class MCache {
                     }
                     cached = null;
                 }
+                gridwait.wnotify();
             }
         }
     }
@@ -1151,6 +1171,7 @@ public class MCache {
 
     public void sendreqs() {
         long now = System.currentTimeMillis();
+        boolean updated = false;
         synchronized (req) {
             for (Iterator<Map.Entry<Coord, Request>> i = req.entrySet().iterator(); i.hasNext(); ) {
                 Map.Entry<Coord, Request> e = i.next();
@@ -1160,12 +1181,18 @@ public class MCache {
                     r.lastreq = now;
                     if (++r.reqs >= 5) {
                         i.remove();
+                        updated = true;
                     } else {
                         PMessage msg = new PMessage(Session.MSG_MAPREQ);
                         msg.addcoord(c);
                         sess.sendmsg(msg);
                     }
                 }
+            }
+        }
+        if (updated) {
+            synchronized (grids) {
+                gridwait.wnotify();
             }
         }
     }

@@ -1,4 +1,9 @@
 Details in https://github.com/Cediner/ArdClient/commits/Unstable
+2021.05.19
+-- Reworked graphics ot the world (will load a little faster) (need testing) (not new render)
+-- Added some graphic options (Video)
+~
+
 2021.05.15
 -- Redrawed fight UI
 -- Key Z(default) - mark current target for party

@@ -35,6 +35,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static haven.DefSettings.SYMMETRICOUTLINES;
 import static haven.Inventory.invsq;
 
 public class Equipory extends Widget implements DTarget {
@@ -128,7 +129,7 @@ public class Equipory extends Widget implements DTarget {
                 super.draw(g);
             }
 
-            Outlines outlines = new Outlines(true);
+            Outlines outlines = new Outlines(SYMMETRICOUTLINES);
 
             protected void setup(RenderList rl) {
                 super.setup(rl);

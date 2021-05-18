@@ -12,7 +12,7 @@ import haven.sloth.io.ForagableData;
 import haven.sloth.io.HiddenWndData;
 import haven.sloth.io.HighlightData;
 import haven.sloth.io.Storage;
-import haven.sloth.script.LispScript;
+//import haven.sloth.script.LispScript;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -344,7 +344,7 @@ public class DefSettings {
         HUDTHEME.ensure("ardclient");
         MENUTHEME.ensure("default");
 
-        new Thread(LispScript::reloadConfig).start();
+//        new Thread(LispScript::reloadConfig).start();
 
         {
             final Color slothc = new Color(85, 144, 87, 228);

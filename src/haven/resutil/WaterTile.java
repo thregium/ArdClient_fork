@@ -36,6 +36,7 @@ import haven.GOut;
 import haven.Glob;
 import haven.HavenPanel;
 import haven.Light;
+import haven.Loading;
 import haven.MCache;
 import haven.MapMesh;
 import haven.MapMesh.Scan;
@@ -121,7 +122,12 @@ public class WaterTile extends Tiler {
             ed = new int[ss.l];
             for (int y = ds.ul.y; y < ds.br.y; y++) {
                 for (int x = ds.ul.x; x < ds.br.x; x++) {
-                    Tiler t = map.tiler(map.gettile(m.ul.add(x, y)));
+                    Tiler t = null;
+                    try {
+                        t = map.tiler(map.gettile(m.ul.add(x, y)));
+                    } catch (Loading e) {
+//                        e.printStackTrace();
+                    }
                     if (t instanceof WaterTile)
                         d[ds.o(x, y)] = ((WaterTile) t).depth;
                     else

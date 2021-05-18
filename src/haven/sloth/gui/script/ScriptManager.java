@@ -12,7 +12,7 @@ import haven.Widget;
 import haven.Window;
 import haven.sloth.gui.TabManager;
 import haven.sloth.gui.layout.LinearGrouping;
-import haven.sloth.script.LispScript;
+//import haven.sloth.script.LispScript;
 import haven.sloth.script.Script;
 import haven.sloth.util.ObservableMapListener;
 
@@ -40,23 +40,23 @@ public class ScriptManager extends Window implements ObservableMapListener<Long,
         void run(final UI ui);
     }
 
-    private static class LispScriptItm implements ScriptItm {
-        final String name;
-
-        public LispScriptItm(final String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String name() {
-            return "[Lisp]" + name;
-        }
-
-        @Override
-        public void run(final UI ui) {
-            ui.sess.details.context.launchLispScript(name, ui.sess.details);
-        }
-    }
+//    private static class LispScriptItm implements ScriptItm {
+//        final String name;
+//
+//        public LispScriptItm(final String name) {
+//            this.name = name;
+//        }
+//
+//        @Override
+//        public String name() {
+//            return "[Lisp]" + name;
+//        }
+//
+//        @Override
+//        public void run(final UI ui) {
+//            ui.sess.details.context.launchLispScript(name, ui.sess.details);
+//        }
+//    }
 
     private static class LuaScriptItm implements ScriptItm {
         final String name;
@@ -137,7 +137,7 @@ public class ScriptManager extends Window implements ObservableMapListener<Long,
                 if (files != null) {
                     for (final File f : files) {
                         if (f.getName().endsWith(".lisp")) {
-                            scripts.add(new LispScriptItm(f.getName().substring(0, f.getName().lastIndexOf(".lisp"))));
+//                            scripts.add(new LispScriptItm(f.getName().substring(0, f.getName().lastIndexOf(".lisp"))));
                         } else if (f.getName().endsWith(".lua")) {
                             scripts.add(new LuaScriptItm(f.getName().substring(0, f.getName().lastIndexOf(".lua"))));
                         }
@@ -158,7 +158,7 @@ public class ScriptManager extends Window implements ObservableMapListener<Long,
 
         Coord c = new Coord(0, 0);
         managertab = new Widget();
-        c.y += managertab.add(new Button(300, "Reload Config", LispScript::reloadConfig)).sz.y + 5;
+//        c.y += managertab.add(new Button(300, "Reload Config", LispScript::reloadConfig)).sz.y + 5;
         scripts = managertab.add(new LinearGrouping("Running Scripts", 5), c.copy());
         managertab.pack();
     }

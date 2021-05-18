@@ -464,18 +464,21 @@ public class LoginScreen extends Widget {
                 try {
                     URL url = new URL("http://www.havenandhearth.com/portal/index/status");
                     while (true) {
-                        Scanner scan = new Scanner(url.openStream());
-                        while (scan.hasNextLine()) {
-                            String line = scan.nextLine();
-                            if (line.contains("h2")) {
-                                statusbtn.change(line.substring(line.indexOf("<h2>") + 4, line.indexOf("</h2>")), Color.WHITE);
+                        try (InputStream is = url.openStream()) {
+                            try (Scanner scan = new Scanner(is)) {
+                                while (scan.hasNextLine()) {
+                                    String line = scan.nextLine();
+                                    if (line.contains("h2")) {
+                                        statusbtn.change(line.substring(line.indexOf("<h2>") + 4, line.indexOf("</h2>")), Color.WHITE);
+                                    }
+                                }
+
+                                if (ui != null && ui.gui != null && ui.sess != null && ui.sess.alive()) {
+                                    break;
+                                }
+                                Thread.sleep(5000);
                             }
                         }
-
-                        if (ui != null && ui.gui != null && ui.sess != null && ui.sess.alive()) {
-                            break;
-                        }
-                        Thread.sleep(5000);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

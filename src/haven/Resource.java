@@ -421,12 +421,10 @@ public class Resource implements Serializable {
 
         private Loading(Pool.Queued res) {
             super("Waiting for resource " + res.name + "...");
-            if (dev.reslog) dev.sysPrintStackTrace(res + " Loading");
             this.res = res;
         }
 
         public String toString() {
-            if (dev.reslog) dev.sysPrintStackTrace(res + "Loading toString");
             return ("#<Resource " + res.name + ">");
         }
 

@@ -106,13 +106,16 @@ import static haven.DefSettings.RESEARCHUNTILGOAL;
 import static haven.DefSettings.SHOWANIMALPATH;
 import static haven.DefSettings.SHOWFKBELT;
 import static haven.DefSettings.SHOWGOBPATH;
+import static haven.DefSettings.SHOWGOBS;
 import static haven.DefSettings.SHOWHALO;
 import static haven.DefSettings.SHOWHALOONHEARTH;
+import static haven.DefSettings.SHOWMAP;
 import static haven.DefSettings.SHOWNBELT;
 import static haven.DefSettings.SHOWNPBELT;
 import static haven.DefSettings.SHOWPLAYERPATH;
 import static haven.DefSettings.SLIDERCOL;
 import static haven.DefSettings.SUPPORTDANGERCOLOR;
+import static haven.DefSettings.SYMMETRICOUTLINES;
 import static haven.DefSettings.THEMES;
 import static haven.DefSettings.TROUGHCOLOR;
 import static haven.DefSettings.TXBCOL;
@@ -6078,6 +6081,17 @@ public class OptWnd extends Window {
                 final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(this, new Coord(620, 350)));
                 appender.setVerticalMargin(VERTICAL_MARGIN);
                 appender.setHorizontalMargin(HORIZONTAL_MARGIN);
+                appender.add(new CheckBox("Show Entering/Leaving Messages in Sys Log instead of large Popup - FPS increase?") {
+                    {
+                        a = Config.DivertPolityMessages;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("DivertPolityMessages", val);
+                        Config.DivertPolityMessages = val;
+                        a = val;
+                    }
+                });
                 appender.add(new CheckBox("Per-fragment lighting") {
                     {
                         a = cf.flight.val;
@@ -6099,15 +6113,25 @@ public class OptWnd extends Window {
                         cf.dirty = true;
                     }
                 });
-                appender.add(new CheckBox("Show Entering/Leaving Messages in Sys Log instead of large Popup - FPS increase?") {
+                appender.add(new CheckBox("Cel shading") {
                     {
-                        a = Config.DivertPolityMessages;
+                        a = cf.cel.val;
                     }
 
                     public void set(boolean val) {
-                        Utils.setprefb("DivertPolityMessages", val);
-                        Config.DivertPolityMessages = val;
+                        if (val) {
+                            try {
+                                cf.cel.set(true);
+                            } catch (GLSettings.SettingException e) {
+                                if (ui.gui != null)
+                                    ui.gui.error(e.getMessage());
+                                return;
+                            }
+                        } else {
+                            cf.cel.set(false);
+                        }
                         a = val;
+                        cf.dirty = true;
                     }
                 });
                 appender.add(new CheckBox("Render shadows") {
@@ -6139,6 +6163,62 @@ public class OptWnd extends Window {
                     public void set(boolean val) {
                         try {
                             cf.fsaa.set(val);
+                        } catch (GLSettings.SettingException e) {
+                            if (ui.gui != null)
+                                ui.gui.error(e.getMessage());
+                            return;
+                        }
+                        a = val;
+                        cf.dirty = true;
+                    }
+                });
+                appender.add(new CheckBox("Alpha to coverage") {
+                    {
+                        a = cf.alphacov.val;
+                    }
+
+                    public void set(boolean val) {
+                        if (val) {
+                            try {
+                                cf.alphacov.set(true);
+                            } catch (GLSettings.SettingException e) {
+                                if (ui.gui != null)
+                                    ui.gui.error(e.getMessage());
+                                return;
+                            }
+                        } else {
+                            cf.alphacov.set(false);
+                        }
+                        a = val;
+                        cf.dirty = true;
+                    }
+                });
+                appender.add(new CheckBox("Outline") {
+                    {
+                        a = cf.outline.val;
+                    }
+
+                    public void set(boolean val) {
+                        try {
+                            cf.outline.set(val);
+                        } catch (GLSettings.SettingException e) {
+                            if (ui.gui != null)
+                                ui.gui.error(e.getMessage());
+                            return;
+                        }
+                        a = val;
+                        cf.dirty = true;
+                    }
+                });
+                appender.add(new IndirCheckBox("Symmetric Outlines", SYMMETRICOUTLINES));
+                appender.add(new CheckBox("Instancing") {
+                    {
+                        a = cf.instancing.val;
+                    }
+
+                    public void set(boolean val) {
+                        try {
+                            cf.instancing.set(val);
                         } catch (GLSettings.SettingException e) {
                             if (ui.gui != null)
                                 ui.gui.error(e.getMessage());
@@ -6276,11 +6356,13 @@ public class OptWnd extends Window {
 //                    }
 //                });
                 appender.addRow(new IndirLabel(() -> String.format("Map View Distance: %d",
-                        DRAWGRIDRADIUS.get())), new IndirHSlider(200, 1, 5, DRAWGRIDRADIUS, val -> {
+                        DRAWGRIDRADIUS.get())), new IndirHSlider(200, 1, 6, DRAWGRIDRADIUS, val -> {
                     if (ui.gui != null && ui.gui.map != null) {
                         ui.gui.map.view = val;
                     }
                 }));
+                appender.add(new IndirCheckBox("Show Map", SHOWMAP));
+                appender.add(new IndirCheckBox("Show Gobs", SHOWGOBS));
                 appender.add(new CheckBox("Disable biome tile transitions") {
                     {
                         a = Config.disabletiletrans;

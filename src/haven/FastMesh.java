@@ -385,10 +385,7 @@ public class FastMesh implements FRendered, Rendered.Instanced, Disposable {
         if (compiler != null) {
             compiler.get(g).draw(g);
         } else {
-            try {
-                cdraw(g);
-            } catch (Exception e) {
-            }
+            cdraw(g);
         }
         GOut.checkerr(gl);
     }

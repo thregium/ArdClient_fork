@@ -1105,17 +1105,19 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 rl.prepc(States.xray);
             }
             if (configuration.resizegob) {
-                try {
-                    configuration.GobScale rmulti = configuration.getItem(this.getres().name);
-                    if (rmulti != null && rmulti.enable()) {
-                        rl.prepc(new Location(rmulti.getMatrix()));
+                if (this.res().isPresent()) {
+                    try {
+                        configuration.GobScale rmulti = configuration.getItem(this.res().get().name);
+                        if (rmulti != null && rmulti.enable()) {
+                            rl.prepc(new Location(rmulti.getMatrix()));
+                        }
+                    } catch (Exception e) {
                     }
-                } catch (Exception e) {
-                }
 
-                configuration.GobScale rsingle = configuration.resizablegobsid.get(this.id);
-                if (rsingle != null && rsingle.enable()) {
-                    rl.prepc(new Location(rsingle.getMatrix()));
+                    configuration.GobScale rsingle = configuration.resizablegobsid.get(this.id);
+                    if (rsingle != null && rsingle.enable()) {
+                        rl.prepc(new Location(rsingle.getMatrix()));
+                    }
                 }
             }
 
@@ -1527,12 +1529,14 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     }
 
     public Optional<Resource> res() {
-        final Drawable d = getattr(Drawable.class);
+        Resource res = null;
         try {
-            return d != null ? Optional.of(d.getres()) : Optional.empty();
-        } catch (Exception e) {
-            return Optional.empty();
+            res = getres();
+        } catch (Loading e) {
         }
+        if (res == null)
+            return Optional.empty();
+        return Optional.of(res);
     }
 
     public Resource getres() {
