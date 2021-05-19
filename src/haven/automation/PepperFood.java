@@ -8,6 +8,7 @@ import haven.GameUI;
 import haven.Inventory;
 import haven.WItem;
 import haven.Widget;
+import haven.purus.pbot.PBotInventory;
 import haven.purus.pbot.PBotUtils;
 
 import java.awt.Color;
@@ -58,19 +59,20 @@ public class PepperFood implements Runnable {
                 return;
             }
         }
-        synchronized (gui.ui.root.lchild) {
-            for (Widget q = gui.ui.root.lchild; q != null; q = q.rnext()) {
-                if (q instanceof Inventory) {
-                    List<WItem> invfoods = getFood((Inventory) q);
-                    for (WItem fooditem : invfoods) {
-                        GItem fooditemlol = fooditem.item;
-                        fooditemlol.wdgmsg("itemact", 0);
-                    }
-                    invfoods.clear();
-                }
 
+        for (PBotInventory q : PBotUtils.getAllInventories(gui.ui)) {
+            try {
+                List<WItem> invfoods = getFood(q.inv);
+                for (WItem fooditem : invfoods) {
+                    GItem fooditemlol = fooditem.item;
+                    fooditemlol.wdgmsg("itemact", 0);
+                }
+                invfoods.clear();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
+
         f.wdgmsg("drop", nolbucket ? 7 : 6);
         if (nolbucket && norbucket) {
             PBotUtils.sysMsg(gui.ui, "No equipped Bucket Found", Color.white);

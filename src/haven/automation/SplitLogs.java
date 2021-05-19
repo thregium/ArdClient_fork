@@ -26,8 +26,9 @@ public class SplitLogs implements Runnable {
             blocks.addAll(PBotUtils.getPlayerInvContentsPartial(gui.ui, "Block"));
             startsize = blocks.size();
         } catch (Exception q) {
+            q.printStackTrace();
         }
-        if (blocks.size() == 0) {
+        if (blocks.isEmpty()) {
             PBotUtils.sysMsg(gui.ui, "No blocks found.", Color.white);
             return;
         }

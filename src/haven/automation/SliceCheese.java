@@ -8,6 +8,7 @@ import haven.Inventory;
 import haven.WItem;
 import haven.Widget;
 import haven.Window;
+import haven.purus.pbot.PBotInventory;
 import haven.purus.pbot.PBotUtils;
 
 import java.awt.Color;
@@ -28,21 +29,18 @@ public class SliceCheese implements Runnable {
         List<WItem> trays = new ArrayList<>();
         List<WItem> trays2 = new ArrayList<>();
         Window cupboard = null;
-        synchronized (gui.ui.root.lchild) {
+
+        for (PBotInventory q : PBotUtils.getAllInventories(gui.ui)) {
             try {
-                for (Widget q = gui.ui.root.lchild; q != null; q = q.rnext()) {
-                    if (q instanceof Inventory) {
-                        tray = getTrays2((Inventory) q);
-                        if (tray != null) {
-                            trays = getTrays((Inventory) q);
-                        }
-                    }
-
+                tray = getTrays2(q.inv);
+                if (tray != null) {
+                    trays = getTrays(q.inv);
                 }
-
-            } catch (NullPointerException q) {
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
+
         //BotUtils.sysMsg("inv found is : "+children.size(),Color.white);
         // BotUtils.sysMsg("trays found is : "+trays.size(),Color.white);
 
