@@ -1074,16 +1074,16 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             mmapwnd = adda(new MinimapWnd(mmap), new Coord(sz.x, 0), 1, 0);
             if (ResCache.global != null) {
                 MapFile file = MapFile.load(ResCache.global, mapfilename());
-//                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
-//                    if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
-//                        MappingClient.getInstance(ui.sess.username).ProcessMap(file, (m) -> {
-//                            if (m instanceof MapFile.PMarker && configuration.loadMapSetting(ui.sess.username, "green")) {
-//                                return ((MapFile.PMarker) m).color.equals(Color.GREEN) && !m.name().equals("");
-//                            }
-//                            return true;
-//                        });
-//                    }
-//                }
+                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                    if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
+                        MappingClient.getInstance(ui.sess.username).ProcessMap(file, (m) -> {
+                            if (m instanceof MapFile.PMarker && configuration.loadMapSetting(ui.sess.username, "green")) {
+                                return ((MapFile.PMarker) m).color.equals(Color.GREEN) && !m.name().equals("");
+                            }
+                            return true;
+                        });
+                    }
+                }
                 mmap.save(file);
                 mapfile = new MapWnd(mmap.save, map, Utils.getprefc("wndsz-map", new Coord(700, 500)), "Map");
                 mapfile.hide();

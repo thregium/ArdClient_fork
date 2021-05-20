@@ -616,7 +616,7 @@ public class MapWnd extends ResizableWnd {
                 file.add(nm);
                 focus(nm);
                 domark = false;
-                uploadMarks();
+//                uploadMarks();
                 return (true);
             }
             return (false);
