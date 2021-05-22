@@ -54,6 +54,7 @@ import haven.automation.MinerAlert;
 import haven.automation.MothKiller;
 import haven.automation.OysterOpener;
 import haven.automation.PepperBotPro;
+import haven.automation.PepperBotUp;
 import haven.automation.PepperFood;
 import haven.automation.PlaceTrays;
 import haven.automation.SliceCheese;
@@ -791,6 +792,22 @@ public class MenuGrid extends Widget {
                         if (ui.gui.getwnd("Pepper Bot") == null) {
                             PepperBotPro sw = new PepperBotPro();
                             ui.gui.map.pepperbotpro = sw;
+                            ui.gui.add(sw, new Coord(ui.gui.sz.x / 2 - sw.sz.x / 2, ui.gui.sz.y / 2 - sw.sz.y / 2 - 200));
+                            synchronized (GobSelectCallback.class) {
+                                // ui.gui.map.registerAreaSelect(sw);
+                                ui.gui.map.registerGobSelect(sw);
+                            }
+                        }
+                    }
+                }
+        ));
+        addSpecial(new SpecialPagina(this, "paginae::amber::pepperbotupdated",
+                Resource.local().load("paginae/amber/pepperupdate"),
+                (pag) -> {
+                    if (ui.gui != null) {
+                        if (ui.gui.getwnd("Pepper Bot Updated") == null) {
+                            PepperBotUp sw = new PepperBotUp();
+                            ui.gui.map.pepperbotup = sw;
                             ui.gui.add(sw, new Coord(ui.gui.sz.x / 2 - sw.sz.x / 2, ui.gui.sz.y / 2 - sw.sz.y / 2 - 200));
                             synchronized (GobSelectCallback.class) {
                                 // ui.gui.map.registerAreaSelect(sw);

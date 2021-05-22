@@ -37,6 +37,7 @@ import haven.automation.MinerAlert;
 import haven.automation.MusselPicker;
 import haven.automation.PepperBot;
 import haven.automation.PepperBotPro;
+import haven.automation.PepperBotUp;
 import haven.automation.ShieldChecker;
 import haven.automation.ShooTargeted;
 import haven.automation.SteelRefueler;
@@ -143,6 +144,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     public CoalToSmelters coaltosmelters;
     public PepperBot pepperbot;
     public PepperBotPro pepperbotpro;
+    public PepperBotUp pepperbotup;
     public FlaxBot flaxbot;
     public MinerAlert mineralert;
     private Thread musselPicker;
@@ -2419,7 +2421,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 g.apply();
                 gl.glClear(GL.GL_DEPTH_BUFFER_BIT | GL.GL_COLOR_BUFFER_BIT);
                 checkmapclick(g, clickc, mc -> {
-                    mapcl = mc;
+                    mapcl = Config.tilecenter ? mc.div(11).floord().mul(11).add(5.5, 5.5) : mc;
                     ckdone(1);
                 });
                 g.st.set(bk);
@@ -3062,10 +3064,10 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         delay(new Hittest(cc, ui.modflags()) {
             public void hit(Coord pc, Coord2d mc, ClickInfo inf) {
                 lastItemactClickArgs = null;
-                if (inf == null && Config.tilecenter) {
-                    mc.x = ((int) mc.x / 11) * 11 + Integer.signum((int) mc.x) * 5;
-                    mc.y = ((int) mc.y / 11) * 11 + Integer.signum((int) mc.y) * 5;
-                }
+//                if (inf == null && Config.tilecenter) {
+//                    mc.x = Math.floor(mc.x / 11f) * 11f + 5.5;
+//                    mc.y = Math.floor(mc.y / 11f) * 11f + 5.5;
+//                }
 
                 Object[] args = {pc, mc.floor(posres), ui.modflags()};
                 args = Utils.extend(args, gobclickargs(inf));
