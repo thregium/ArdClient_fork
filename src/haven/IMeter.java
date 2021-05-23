@@ -29,8 +29,10 @@ package haven;
 import haven.sloth.gui.MovableWidget;
 
 import java.awt.Color;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -83,6 +85,8 @@ public class IMeter extends MovableWidget {
         }
     }
 
+    public final Map<String, Tex> infocached = new HashMap<>();
+
     public void draw(GOut g) {
         try {
             Tex bg = this.bg.get().layer(Resource.imgc).tex();
@@ -97,7 +101,8 @@ public class IMeter extends MovableWidget {
                 if (Config.showmetertext) {
                     g.chcolor();
 //                    new Coord(msz.x / 2 + 10, msz.y / 2 - 1)
-                    g.atextstroked(meterinfo, sz.div(2).add(10, -1), 0.5, 0.5, Color.WHITE, Color.BLACK, Text.num10Fnd);
+                    Tex info = infocached.computeIfAbsent(meterinfo, i -> Text.renderstroked(i, Color.WHITE, Color.BLACK, Text.num10Fnd).tex());
+                    g.aimage(info, sz.div(2).add(10, -1), 0.5, 0.5);
                 }
             }
             g.chcolor();

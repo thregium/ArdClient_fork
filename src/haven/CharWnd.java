@@ -589,7 +589,7 @@ public class CharWnd extends Window {
             this.nm = attr;
             this.img = res.layer(Resource.imgc).tex();
             this.rnm = attrf.render(res.layer(Resource.tooltip).t);
-            this.attr = glob.cattr.get(attr);
+            this.attr = glob.getcattr(attr);//glob.cattr.get(attr);
             this.bg = bg;
             adda(new IButton("gfx/hud/buttons/add", "u", "d", null) {
                 public void click() {
@@ -605,7 +605,8 @@ public class CharWnd extends Window {
 
 
         public void tick(double dt) {
-            if ((attr.base != cbv) || (attr.comp != ccv)) {
+            if ((attr.base != cbv) ||
+                    (attr.comp != ccv)) {
                 cbv = attr.base;
             }
             if (attr.comp != ccv) {
