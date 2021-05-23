@@ -248,8 +248,8 @@ public class Fightview extends MovableWidget {
                     final double blockweight;
                     if (c instanceof Attack || c == Cards.flex) {
                         final Attacks atk = (Attacks) c;
-                        final int ua = ui.sess.glob.cattr.get("unarmed").comp;
-                        final int mc = ui.sess.glob.cattr.get("melee").comp;
+                        final int ua = ui.sess.glob.getcattr("unarmed").comp;
+                        final int mc = ui.sess.glob.getcattr("melee").comp;
                         final int cards = ui.gui.chrwdg.fight.cards(Fightview.this.lastact.get().name);
                         if (maneuver == Cards.oakstance) {
                             final double atkweight = atk.getAttackweight(Fightview.this.maneuver, Fightview.this.maneuvermeter, ua, mc, cards);

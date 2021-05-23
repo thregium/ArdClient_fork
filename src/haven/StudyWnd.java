@@ -35,7 +35,7 @@ public class StudyWnd extends GameUI.Hidewnd {
         };
         private final Text.UText<?> twt = new Text.UText<String>(Text.std) {
             public String value() {
-                return (tw + "/" + ui.sess.glob.cattr.get("int").comp);
+                return (tw + "/" + ui.sess.glob.getcattr("int").comp);
             }
         };
         private final Text.UText<?> tenct = new Text.UText<Integer>(Text.std) {

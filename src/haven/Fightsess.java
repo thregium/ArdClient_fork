@@ -233,8 +233,8 @@ public class Fightsess extends Widget {
 //                                    g.chcolor();
                                         g.aimage(tex, ic.add(img.sz().mul(actionscale).x / 2, img.sz().mul(actionscale).y), 0.5, 0);
 //                            FastText.printsf(g, ic.add(0, 35), "%d/%d", Math.round(dmg.a), Math.round(dmg.b));
-                                        final int ua = ui.sess.glob.cattr.get("unarmed").comp;
-                                        final int mc = ui.sess.glob.cattr.get("melee").comp;
+                                        final int ua = ui.sess.glob.getcattr("unarmed").comp;
+                                        final int mc = ui.sess.glob.getcattr("melee").comp;
 
                                         final Map<DefenseType, Double> newWeights = atk.calculateEnemyDefWeights(fv.maneuver, fv.maneuvermeter, ua, mc, act.cards, fv.current.defweights, fv.current.estimatedBlockWeight);
 //                                    Tex texa = RichText.render("$b{$font" + ffont + "{$bg" + colgrey + "{$col" + colred + "{" + Math.round(newWeights.get(DefenseType.RED) * 100) + "} / $col" + colgreen + "{" + Math.round(newWeights.get(DefenseType.GREEN) * 100) + "} / $col" + colblue + "{" + Math.round(newWeights.get(DefenseType.BLUE) * 100) + "} / $col" + colyellow + "{" + Math.round(newWeights.get(DefenseType.YELLOW) * 100) + "}}}}", -1).tex();
@@ -263,8 +263,8 @@ public class Fightsess extends Widget {
 //                                    Math.round(newWeights.get(DefenseType.BLUE) * 100),
 //                                    Math.round(newWeights.get(DefenseType.YELLOW) * 100));
                                         if (act.card == Cards.flex) {
-                                            final int ua = ui.sess.glob.cattr.get("unarmed").comp;
-                                            final int mc = ui.sess.glob.cattr.get("melee").comp;
+                                            final int ua = ui.sess.glob.getcattr("unarmed").comp;
+                                            final int mc = ui.sess.glob.getcattr("melee").comp;
 
                                             final Map<DefenseType, Double> enemyWeights = restro.calculateEnemyDefWeights(fv.maneuver, fv.maneuvermeter, ua, mc, act.cards, fv.current.defweights, fv.current.estimatedBlockWeight);
 //                                        Tex texa = RichText.render("$b{$font" + ffont + "{$bg" + colgrey + "{$col" + colred + "{" + Math.round(enemyWeights.get(DefenseType.RED) * 100) + "} / $col" + colgreen + "{" + Math.round(enemyWeights.get(DefenseType.GREEN) * 100) + "} / $col" + colblue + "{" + Math.round(enemyWeights.get(DefenseType.BLUE) * 100) + "} / $col" + colyellow + "{" + Math.round(enemyWeights.get(DefenseType.YELLOW) * 100) + "}}}}", -1).tex();
@@ -811,7 +811,7 @@ public class Fightsess extends Widget {
     }
 
     private int str() {
-        final Glob.CAttr strattr = ui.sess.glob.cattr.get("str");
+        final Glob.CAttr strattr = ui.sess.glob.getcattr("str");
         return strattr.comp;
     }
 
