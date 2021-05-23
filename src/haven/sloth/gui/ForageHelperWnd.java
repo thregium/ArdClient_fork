@@ -159,8 +159,8 @@ public class ForageHelperWnd extends Window implements Observer {
     @Override
     protected void added() {
         super.added();
-        final Glob.CAttr prc = ui.sess.glob.cattr.get("prc");
-        final Glob.CAttr exp = ui.sess.glob.cattr.get("explore");
+        final Glob.CAttr prc = ui.sess.glob.getcattr("prc");
+        final Glob.CAttr exp = ui.sess.glob.getcattr("explore");
         prc.addObserver(this);
         exp.addObserver(this);
         this.prc = prc.comp;
@@ -185,8 +185,8 @@ public class ForageHelperWnd extends Window implements Observer {
     @Override
     protected void removed() {
         super.removed();
-        ui.sess.glob.cattr.get("prc").deleteObserver(this);
-        ui.sess.glob.cattr.get("explore").deleteObserver(this);
+        ui.sess.glob.getcattr("prc").deleteObserver(this);
+        ui.sess.glob.getcattr("explore").deleteObserver(this);
     }
 
     @Override
