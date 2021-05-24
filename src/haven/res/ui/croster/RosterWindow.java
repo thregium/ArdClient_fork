@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class RosterWindow extends Window {
     static {
-        dev.checkFileVersion("ui/croster", 68);
+        dev.checkFileVersion("ui/croster", 69);
     }
 
     public static final Map<Glob, RosterWindow> rosters = new HashMap<>();

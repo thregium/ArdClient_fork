@@ -8,7 +8,7 @@ import modification.dev;
 
 public class Ochs extends Entry {
     static {
-        dev.checkFileVersion("gfx/hud/rosters/cow", 68);
+        dev.checkFileVersion("gfx/hud/rosters/cow", 69);
     }
 
     public int meat, milk;

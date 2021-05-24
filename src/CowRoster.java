@@ -11,7 +11,7 @@ import java.util.List;
 
 public class CowRoster extends CattleRoster<Ochs> {
     static {
-        dev.checkFileVersion("gfx/hud/rosters/cow", 68);
+        dev.checkFileVersion("gfx/hud/rosters/cow", 69);
     }
 
     public static List<Column> cols = initcols(

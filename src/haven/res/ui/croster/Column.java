@@ -12,7 +12,7 @@ import java.util.Comparator;
 
 public class Column<E extends Entry> {
     static {
-        dev.checkFileVersion("ui/croster", 68);
+        dev.checkFileVersion("ui/croster", 69);
     }
 
     public final Tex head;

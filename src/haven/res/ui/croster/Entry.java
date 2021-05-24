@@ -20,7 +20,7 @@ import java.util.function.Predicate;
 
 public class Entry extends Widget {
     static {
-        dev.checkFileVersion("ui/croster", 68);
+        dev.checkFileVersion("ui/croster", 69);
     }
 
     public static final int WIDTH = CattleRoster.WIDTH;

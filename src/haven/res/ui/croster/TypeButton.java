@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
 
 public class TypeButton extends IButton {
     static {
-        dev.checkFileVersion("ui/croster", 68);
+        dev.checkFileVersion("ui/croster", 69);
     }
 
     public final int order;

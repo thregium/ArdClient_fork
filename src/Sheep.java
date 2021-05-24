@@ -5,7 +5,7 @@ import modification.dev;
 
 public class Sheep extends Entry {
     static {
-        dev.checkFileVersion("gfx/hud/rosters/sheep", 57);
+        dev.checkFileVersion("gfx/hud/rosters/sheep", 58);
     }
 
     public int meat, milk, wool;

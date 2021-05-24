@@ -7,7 +7,7 @@ import modification.dev;
 
 public class CattleId extends GAttrib {
     static {
-        dev.checkFileVersion("ui/croster", 68);
+        dev.checkFileVersion("ui/croster", 69);
     }
 
     public final long id;

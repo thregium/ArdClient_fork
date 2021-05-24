@@ -8,7 +8,7 @@ import modification.dev;
 
 public class RosterButton extends MenuGrid.PagButton {
     static {
-        dev.checkFileVersion("ui/croster", 68);
+        dev.checkFileVersion("ui/croster", 69);
     }
 
     public final GameUI gui;

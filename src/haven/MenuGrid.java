@@ -119,6 +119,27 @@ public class MenuGrid extends Widget {
         }
     }
 
+    public static class Interaction {
+        public final int btn, modflags;
+        public final Coord2d mc;
+        public final MapView.ClickInfo click;
+
+        public Interaction(int btn, int modflags, Coord2d mc, MapView.ClickInfo click) {
+            this.btn = btn;
+            this.modflags = modflags;
+            this.mc = mc;
+            this.click = click;
+        }
+
+        public Interaction(int btn, int modflags) {
+            this(btn, modflags, null, null);
+        }
+
+        public Interaction() {
+            this(1, 0);
+        }
+    }
+
     public static class PagButton implements ItemInfo.Owner {
         public final Pagina pag;
         public final Resource res;

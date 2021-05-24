@@ -31,7 +31,7 @@ import java.util.Set;
 
 public abstract class CattleRoster<T extends Entry> extends Widget {
     static {
-        dev.checkFileVersion("ui/croster", 68);
+        dev.checkFileVersion("ui/croster", 69);
     }
 
     public static final int WIDTH = UI.scale(1050);
