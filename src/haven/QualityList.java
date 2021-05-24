@@ -24,7 +24,7 @@ public class QualityList extends ItemInfo {
         super(null);
         qualities = new LinkedList<Quality>();
         for (ItemInfo inf : list) {
-            if (inf.getClass().getName().equals(classname)) {
+            if (inf.getClass().getName().endsWith(classname)) {
                 String name = Reflect.getFieldValueString(inf, "name");
                 double q = Reflect.getFieldValueDouble(inf, "q");
                 try {
