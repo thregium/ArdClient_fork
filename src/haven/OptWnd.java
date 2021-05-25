@@ -3561,6 +3561,23 @@ public class OptWnd extends Window {
         appender.add(new IndirCheckBox("Never delete grids", KEEPGRIDS));
         appender.add(new IndirCheckBox("Never delete gobs", KEEPGOBS));
 
+        appender.add(new CheckBox("Caching Gemstone") {
+            {
+                a = configuration.cachedGem;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("cachedGem", val);
+                configuration.cachedGem = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Caching Gemstone for fast loading").tex();
+            }
+        });
+
         appender.add(new Label("Pathfinder"));
         final String[] tiers = {"Perfect", "Medium", "Fastest"};
         appender.addRow(new IndirLabel(() -> String.format("Pathfinding Tier: %s", tiers[PATHFINDINGTIER.get()])), new IndirHSlider(200, 0, 2, PATHFINDINGTIER));
@@ -6208,6 +6225,24 @@ public class OptWnd extends Window {
                         }
                         a = val;
                         cf.dirty = true;
+                    }
+                });
+                appender.addRow(new Label("Outlines COLOR"), new ColorPreview(new Coord(20, 20), new Color(configuration.outlinecolor, true), val -> {
+                    configuration.outlinecolor = val.hashCode();
+                    Utils.setprefi("outlinecolor", val.hashCode());
+                    Outlines.shadersupdate();
+                }));
+                appender.addRow(new Label("Outline height ()"), new HSlider(100, 0, 10, (int) (configuration.outlineh)) {
+                    @Override
+                    public void changed() {
+                        configuration.outlineh = val;
+                        Utils.setprefd("outlineh", configuration.outlineh);
+                        Outlines.shadersupdate();
+                    }
+
+                    @Override
+                    public Object tooltip(Coord c0, Widget prev) {
+                        return Text.render("Outline height: " + configuration.outlineh).tex();
                     }
                 });
                 appender.add(new IndirCheckBox("Symmetric Outlines", SYMMETRICOUTLINES));

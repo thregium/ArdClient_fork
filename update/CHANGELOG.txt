@@ -1,4 +1,11 @@
 Details in https://github.com/Cediner/ArdClient/commits/Unstable
+2021.05.25
+-- Some fixes
+-- Odditown locator fixed
+-- Inventory sorter (just Alt+RMB on window with inventory)
+-- Some options with outline (Video)
+~
+
 2021.05.19
 -- Reworked graphics ot the world (will load a little faster) (need testing) (not new render)
 -- Added some graphic options (Video)

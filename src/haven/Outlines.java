@@ -37,6 +37,7 @@ import haven.glsl.Return;
 import haven.glsl.ShaderMacro;
 import haven.glsl.Tex2D;
 import haven.glsl.Uniform;
+import modification.configuration;
 
 import java.awt.Color;
 
@@ -87,12 +88,13 @@ public class Outlines implements Rendered {
 
     private static ShaderMacro shader(final boolean symmetric, final boolean ms) {
         return (new ShaderMacro() {
-            Color color = Color.BLACK;
+            Color color = new Color(configuration.outlinecolor, true);
+            int val = configuration.outlineh;
             Coord[] points = {
-                    new Coord(-1, 0),
-                    new Coord(1, 0),
-                    new Coord(0, -1),
-                    new Coord(0, 1),
+                    new Coord(-val, 0),
+                    new Coord(val, 0),
+                    new Coord(0, -val),
+                    new Coord(0, val),
             };
 
             Expression sample(boolean nrm, Expression c, Expression s, Coord o) {
@@ -162,13 +164,21 @@ public class Outlines implements Rendered {
         });
     }
 
-    static {
-        /* XXX: It would be good to have some kind of more convenient
-         * shader internation. */
+    public static void shadersupdate() {
         shaders[0] = shader(false, false);
         shaders[1] = shader(false, true);
         shaders[2] = shader(true, false);
         shaders[3] = shader(true, true);
+    }
+
+    static {
+        /* XXX: It would be good to have some kind of more convenient
+         * shader internation. */
+        shadersupdate();
+//        shaders[0] = shader(false, false);
+//        shaders[1] = shader(false, true);
+//        shaders[2] = shader(true, false);
+//        shaders[3] = shader(true, true);
     }
 
     public Outlines(IndirSetting<Boolean> symmetric) {

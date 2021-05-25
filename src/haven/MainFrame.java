@@ -343,30 +343,35 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
             try {
                 Session sess = null;
                 while (true) {
-                    UI.Runner fun;
-                    lui.reset(new Coord(p.w, p.h));
-                    if (sess == null) {
-                        Bootstrap bill = new Bootstrap(Config.defserv, Config.mainport);
-                        if ((Config.authuser != null) && (Config.authck != null)) {
-                            bill.setinitcookie(Config.authuser, Config.authck);
-                            Config.authck = null;
+                    try {
+                        UI.Runner fun;
+                        lui.reset(new Coord(p.w, p.h));
+                        if (sess == null) {
+                            Bootstrap bill = new Bootstrap(Config.defserv, Config.mainport);
+                            if ((Config.authuser != null) && (Config.authck != null)) {
+                                bill.setinitcookie(Config.authuser, Config.authck);
+                                Config.authck = null;
+                            }
+                            fun = bill;
+                            if (configuration.customTitleBoolean)
+                                setTitle(configuration.tittleCheck(sess));
+                            else
+                                setTitle(TITLE);
+                        } else {
+                            fun = new RemoteUI(sess);
+                            lui.setSession(sess);
+                            if (configuration.customTitleBoolean)
+                                setTitle(configuration.tittleCheck(sess));
+                            else
+                                setTitle(sess.username + " \u2013 " + TITLE);
                         }
-                        fun = bill;
-                        if (configuration.customTitleBoolean)
-                            setTitle(configuration.tittleCheck(sess));
-                        else
-                            setTitle(TITLE);
-                    } else {
-                        fun = new RemoteUI(sess);
-                        lui.setSession(sess);
-                        if (configuration.customTitleBoolean)
-                            setTitle(configuration.tittleCheck(sess));
-                        else
-                            setTitle(sess.username + " \u2013 " + TITLE);
+                        sess = fun.run(lui);
+                    } catch (InterruptedException e) {
+                        break;
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    sess = fun.run(lui);
                 }
-            } catch (InterruptedException e) {
             } finally {
                 //p.removeUI(lui);
                 p.removeUIS();

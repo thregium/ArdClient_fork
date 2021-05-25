@@ -37,9 +37,12 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static haven.DefSettings.CURIOHIGH;
@@ -763,6 +766,9 @@ public class Window extends MovableWidget implements DTarget {
     public boolean mousedown(Coord c, int button) {
         if (button == 4 || button == 5) //ignore these because why allow every mousedown to move the window?
             return false;
+        if (button == 3 && ui.modflags() == UI.MOD_META && showSpecialMenu()) {
+            return (true);
+        }
         if (super.mousedown(c, button)) {
             parent.setfocus(this);
             raise();
@@ -893,5 +899,55 @@ public class Window extends MovableWidget implements DTarget {
 
         //  statmap.forEach((k, v) -> System.out.println("Key : "+k+" value : "+v));
         return statmap;
+    }
+
+    /**
+     * Special menu for windows
+     * using: list.put("Name", runnable);
+     */
+
+    public boolean showSpecialMenu() {
+        Map<String, Runnable> list = new HashMap<>();
+
+        Set<Inventory> invs = children(Inventory.class);
+        if (!invs.isEmpty()) {
+            Runnable run = () -> {
+                Inventory inv = invs.iterator().next();
+                ui.root.adda(inv.sortingWindow(), ui.mc, 0.5, 0.5);
+            };
+            list.put("Sort", run);
+        }
+        if (!list.isEmpty()) {
+            String[] options = new String[list.size()];
+            Iterator<Map.Entry<String, Runnable>> it = list.entrySet().iterator();
+            for (int i = 0; i < options.length; i++) {
+                options[i] = it.next().getKey();
+            }
+            Consumer<Integer> callback = selection -> {
+                Iterator<Map.Entry<String, Runnable>> iterator = list.entrySet().iterator();
+                Map.Entry<String, Runnable> entry = iterator.next();
+                for (int i = 0; i < selection; i++) {
+                    if (iterator.hasNext())
+                        entry = iterator.next();
+                    else
+                        return;
+                }
+                try {
+                    entry.getValue().run();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            };
+            final FlowerMenu modmenu = new FlowerMenu(callback, options);
+            ui.root.add(modmenu, ui.mc);
+            return (true);
+        } else {
+            return (false);
+        }
+    }
+
+    public void info() {
+        System.out.println(this);
+        PBotUtils.sysMsg(ui, this.toString());
     }
 }

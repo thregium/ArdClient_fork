@@ -37,6 +37,10 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class Inventory extends Widget implements DTarget {
     public static final Coord sqsz = UI.scale(new Coord(33, 33));
@@ -106,13 +110,15 @@ public class Inventory extends Widget implements DTarget {
         }
     }
 
+    public final Map<String, Tex> cached = new HashMap<>();
+
     public void draw(GOut g) {
         Coord c = new Coord();
         for (c.y = 0; c.y < isz.y; c.y++) {
             for (c.x = 0; c.x < isz.x; c.x++) {
                 g.image(invsq, c.mul(sqsz));
                 if (configuration.showinvnumber)
-                    g.aimage(Text.render(c.y * isz.x + c.x + 1 + "", new Color(255, 255, 255, 100)).tex(), c.mul(sqsz).add(invsq.sz().div(2)), 0.5, 0.5);
+                    g.aimage(cached.computeIfAbsent(c.y * isz.x + c.x + 1 + "", s -> Text.render(s, new Color(255, 255, 255, 100)).tex()), c.mul(sqsz).add(invsq.sz().div(2)), 0.5, 0.5);
             }
         }
         super.draw(g);
@@ -476,5 +482,304 @@ public class Inventory extends Widget implements DTarget {
 
     public static Coord sqoff(Coord c) {
         return c.mul(invsq.sz());
+    }
+
+    /**
+     * Sorting system
+     */
+    public Window sortingWindow() {
+        Window window = new Window(Coord.z, "Sorting");
+        final String[] t = {"reverse", "none", "normal"};
+        Label ql = new Label("Quality ");
+        Label qt = new Label("none      ");
+        HSlider quality = new HSlider(50, 0, 2, 2) {
+            @Override
+            public void changed() {
+                qt.settext(t[val]);
+            }
+        };
+        Label rl = new Label("ResName ");
+        Label rt = new Label("none      ");
+        HSlider resname = new HSlider(50, 0, 2, 2) {
+            @Override
+            public void changed() {
+                rt.settext(t[val]);
+            }
+        };
+        Label nl = new Label("Name ");
+        Label nt = new Label("none      ");
+        HSlider name = new HSlider(50, 0, 2, 2) {
+            @Override
+            public void changed() {
+                nt.settext(t[val]);
+            }
+        };
+        Button sort = new Button("Sorting") {
+            @Override
+            public void click() {
+                Defer.later(() -> {
+                    try {
+                        String s = "";
+                        if (quality.val == 2)
+                            s = s.concat("q");
+                        else if (quality.val == 0)
+                            s = s.concat("!q");
+                        if (resname.val == 2)
+                            s = s.concat("r");
+                        else if (resname.val == 0)
+                            s = s.concat("!r");
+                        if (name.val == 2)
+                            s = s.concat("n");
+                        else if (name.val == 0)
+                            s = s.concat("!n");
+                        sort(s);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        PBotUtils.sysMsg(ui, "Sorting Error!");
+                    }
+                    return (null);
+                });
+                window.reqdestroy();
+            }
+        };
+        WidgetVerticalAppender wva = new WidgetVerticalAppender(window);
+        wva.addRow(ql, qt, quality);
+        wva.addRow(rl, rt, resname);
+        wva.addRow(nl, nt, name);
+        wva.add(sort);
+        window.pack();
+        return (window);
+    }
+
+    public void sort(String s) { //string with q n r
+        PBotUtils.sysMsg(ui, "Sorting! Please don't move!");
+        List<InvItem> items = new ArrayList<>();
+        for (Widget wdg = child; wdg != null; wdg = wdg.next) {
+            if (wdg instanceof WItem) {
+                InvItem item = new InvItem((WItem) wdg);
+                if (!item.getSize().equals(new Coord(1, 1))) {
+                    PBotUtils.sysMsg(ui, "Not support large items! " + item.getName());
+                    return;
+                }
+                items.add(item);
+            }
+        }
+
+        items.sort(Comparator.comparing(InvItem::getSloti));
+        if (s.contains("!q"))
+            items.sort((o1, o2) -> {
+                if (o1.getQuality() == null && o2.getQuality() == null) return (0);
+                if (o1.getQuality() == null && o2.getQuality() != null) return (-1);
+                if (o1.getQuality() != null && o2.getQuality() == null) return (1);
+                return Objects.requireNonNull(o2.getQuality()).compareTo(o1.getQuality());
+            });
+        else if (s.contains("q"))
+            items.sort((o1, o2) -> {
+                if (o1.getQuality() == null && o2.getQuality() == null) return (0);
+                if (o1.getQuality() == null && o2.getQuality() != null) return (1);
+                if (o1.getQuality() != null && o2.getQuality() == null) return (-1);
+                return Objects.requireNonNull(o1.getQuality()).compareTo(o2.getQuality());
+            });
+
+        if (s.contains("!r"))
+            items.sort((o1, o2) -> o2.getResname().compareTo(o1.getResname()));
+        else if (s.contains("r"))
+            items.sort(Comparator.comparing(InvItem::getResname));
+        if (s.contains("!n"))
+            items.sort((o1, o2) -> o2.getName().compareTo(o1.getName()));
+        else if (s.contains("n"))
+            items.sort(Comparator.comparing(InvItem::getName));
+
+        sort:
+        for (int i = 0; i < items.size(); i++) { //ugly пиздец страшно, плохо сортирует, не проверяет тот же объект, думай лучше
+            InvItem invItem = items.get(i);
+            InvItem iItem = getItem(invItem.getSlot());
+            if (invItem.equals(iItem) && invItem.getSloti() != i) {
+                if (invItem.take() == null)
+                    break;
+                InvItem item = getItem(slotiToCoord(i));
+                if (!drop(slotiToCoord(i)))
+                    break;
+                while (item != null && ui.gui.vhand != null) {
+                    Integer in = getInt(items, item);
+                    if (in == null)
+                        break;
+                    item = getItem(slotiToCoord(in));
+                    if (!drop(slotiToCoord(in)))
+                        break sort;
+                }
+            }
+        }
+        PBotUtils.sysMsg(ui, "Sorting finished!");
+    }
+
+    public Integer getInt(List<InvItem> items, InvItem item) {
+        for (int i = 0; i < items.size(); i++)
+            if (items.get(i).equals(item))
+                return (i);
+        return (null);
+    }
+
+    public InvItem getItem(Coord slot) {
+        InvItem item = null;
+        for (Widget wdg = child; wdg != null; wdg = wdg.next) {
+            if (wdg instanceof WItem) {
+                WItem w = (WItem) wdg;
+                if (w.c.sub(1, 1).div(sqsz.x, sqsz.y).equals(slot)) {
+                    item = new InvItem(w);
+                    break;
+                }
+            }
+        }
+        return (item);
+    }
+
+    public boolean drop(Coord slot) {
+        InvItem item = getItem(slot);
+        wdgmsg("drop", slot);
+        InvItem nitem = getItem(slot);
+        for (int sleep = 10; nitem == null || nitem == item; ) {
+            nitem = getItem(slot);
+            PBotUtils.sleep(sleep);
+        }
+        return (true);
+    }
+
+    public Coord slotiToCoord(int slot) {
+        int y = slot / isz.x;
+        int x = slot - y * isz.x;
+        return (new Coord(x, y));
+    }
+
+    public class InvItem {
+        private final WItem wItem;
+        private GItem gItem;
+        private String resname;
+        private String name;
+        private boolean qinit = false;
+        private Double quality;
+        private Coord slot;
+        private Integer sloti;
+        private Coord size;
+
+        public InvItem(WItem wItem) {
+            this.wItem = wItem;
+        }
+
+        public WItem getWItem() {
+            return (this.wItem);
+        }
+
+        public GItem getGItem() {
+            if (this.gItem == null)
+                this.gItem = getWItem().item;
+            return (this.gItem);
+        }
+
+        public String getResname() {
+            if (this.resname == null) {
+                Resource res = null;
+                for (int sleep = 10; res == null; ) {
+                    res = getGItem().resource();
+                    PBotUtils.sleep(sleep);
+                }
+                this.resname = res.name;
+            }
+            return (this.resname);
+        }
+
+        public String getName() {
+            if (this.name == null) {
+                Optional<String> n = getGItem().name();
+                for (int sleep = 10; !n.isPresent(); ) {
+                    n = getGItem().name();
+                    PBotUtils.sleep(sleep);
+                }
+                this.name = n.get();
+            }
+            return (this.name);
+        }
+
+        public Double getQuality() {
+            if (!this.qinit) {
+                QBuff qBuff = getGItem().quality();
+                this.quality = qBuff == null ? null : qBuff.q;
+                this.qinit = true;
+            }
+            return (this.quality);
+        }
+
+        public Coord getSlot() {
+            if (this.slot == null) {
+                this.slot = getWItem().c.sub(1, 1).div(sqsz.x, sqsz.y);
+            }
+            return (this.slot);
+        }
+
+        public Integer getSloti() {
+            if (this.sloti == null) {
+                this.sloti = slotToInt(getSlot());
+            }
+            return (this.sloti);
+        }
+
+        public Coord getSize() {
+            if (this.size == null) {
+                GSprite spr = null;
+                for (int sleep = 10; spr == null;) {
+                    spr = getGItem().spr();
+                    PBotUtils.sleep(sleep);
+                }
+                this.size = spr.sz().div(30);
+            }
+            return (this.size);
+        }
+
+        public WItem take() {
+            for (int i = 0; i < 5; i++) {
+                getGItem().wdgmsg("take", Coord.z);
+
+                for (int t = 0, sleep = 10; ui.gui.vhand == null; t += sleep) {
+                    if (t >= 1000)
+                        break;
+                    else
+                        PBotUtils.sleep(sleep);
+                }
+                if (ui.gui.vhand != null)
+                    break;
+            }
+            return (ui.gui.vhand);
+        }
+
+        public Integer slotToInt(Coord slot) {
+            return (slot.y * isz.x + slot.x);
+        }
+
+        @Override
+        public String toString() {
+            return "InvItem{" +
+                    "wItem=" + wItem +
+                    ", resname='" + resname + '\'' +
+                    ", name='" + name + '\'' +
+                    ", quality=" + quality +
+                    ", slot=" + slot +
+                    ", sloti=" + sloti +
+                    ", slotrollback=" + slotiToCoord(sloti) +
+                    ", size=" + size +
+                    '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof InvItem)) return false;
+            InvItem invItem = (InvItem) o;
+            return getWItem().equals(invItem.getWItem());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(wItem);
+        }
     }
 }

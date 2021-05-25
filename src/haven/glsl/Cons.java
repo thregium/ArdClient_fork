@@ -155,6 +155,10 @@ public class Cons {
         return (new FloatLiteral(val));
     }
 
+    public static Vec5Cons vec5(Expression... els) {
+        return (new Vec5Cons(els));
+    }
+
     public static Vec4Cons vec4(Expression... els) {
         return (new Vec4Cons(els));
     }

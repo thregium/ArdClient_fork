@@ -62,35 +62,41 @@ public class Gemstone extends GSprite implements GSprite.ImageSprite, haven.res.
             Resource cut = rr.getres(sdt.uint16()).get();
             int texid = sdt.uint16();
             if (texid != 65535) {
-                BufferedImage cimg = cachedImg.get(cmsg);
-                if (cimg == null) {
-                    Resource tex = rr.getres(texid).get();
-                    this.tex = new TexI(this.img = construct(cut, tex));
-                    name = cut.layer(Resource.tooltip).t + " " + tex.layer(Resource.tooltip).t;
-                    cachedImg.put(cmsg, this.img);
-                    cachedTex.put(cmsg, this.tex);
-                    cachedName.put(cmsg, this.name);
-                    try {
-                        JSONObject cache = new JSONObject();
-                        cache.put("BufferedImage", configuration.imageToBytes(this.img));
-                        cache.put("Name", this.name);
-                        object.put(cmsg, cache);
-                        configuration.savejson("Gemstones.json", object);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                if (configuration.cachedGem) {
+                    BufferedImage cimg = cachedImg.get(cmsg);
+                    if (cimg == null) {
+                        Resource tex = rr.getres(texid).get();
+                        this.tex = new TexI(this.img = construct(cut, tex));
+                        this.name = cut.layer(Resource.tooltip).t + " " + tex.layer(Resource.tooltip).t;
+                        cachedImg.put(cmsg, this.img);
+                        cachedTex.put(cmsg, this.tex);
+                        cachedName.put(cmsg, this.name);
+                        try {
+                            JSONObject cache = new JSONObject();
+                            cache.put("BufferedImage", configuration.imageToBytes(this.img));
+                            cache.put("Name", this.name);
+                            object.put(cmsg, cache);
+                            configuration.savejson("Gemstones.json", object);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        this.img = cimg;
+                        this.tex = cachedTex.get(cmsg);
+                        this.name = cachedName.get(cmsg);
                     }
                 } else {
-                    this.img = cimg;
-                    this.tex = cachedTex.get(cmsg);
-                    this.name = cachedName.get(cmsg);
+                    Resource tex = rr.getres(texid).get();
+                    this.tex = new TexI(this.img = construct(cut, tex));
+                    this.name = cut.layer(Resource.tooltip).t + " " + tex.layer(Resource.tooltip).t;
                 }
             } else {
                 this.tex = new TexI(this.img = construct(cut, null));
-                name = cut.layer(Resource.tooltip).t + " Gemstone";
+                this.name = cut.layer(Resource.tooltip).t + " Gemstone";
             }
         } else {
             this.tex = new TexI(this.img = TexI.mkbuf(new Coord(32, 32)));
-            name = "Broken gem";
+            this.name = "Broken gem";
         }
     }
 
