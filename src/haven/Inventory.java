@@ -491,7 +491,7 @@ public class Inventory extends Widget implements DTarget {
         Window window = new Window(Coord.z, "Sorting");
         final String[] t = {"reverse", "none", "normal"};
         Label ql = new Label("Quality ");
-        Label qt = new Label("none      ");
+        Label qt = new Label("normal    ");
         HSlider quality = new HSlider(50, 0, 2, 2) {
             @Override
             public void changed() {
@@ -499,7 +499,7 @@ public class Inventory extends Widget implements DTarget {
             }
         };
         Label rl = new Label("ResName ");
-        Label rt = new Label("none      ");
+        Label rt = new Label("normal    ");
         HSlider resname = new HSlider(50, 0, 2, 2) {
             @Override
             public void changed() {
@@ -507,7 +507,7 @@ public class Inventory extends Widget implements DTarget {
             }
         };
         Label nl = new Label("Name ");
-        Label nt = new Label("none      ");
+        Label nt = new Label("normal    ");
         HSlider name = new HSlider(50, 0, 2, 2) {
             @Override
             public void changed() {

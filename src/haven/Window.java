@@ -752,7 +752,7 @@ public class Window extends MovableWidget implements DTarget {
         Coord cpc = c.sub(cl.sz().x, 0);
         Coord cprc = c.sub(sz.x - cr.sz().x, 0);
         //content size
-        return c.isect(ctl, csz) ||
+        return ui.modflags() == 0 && btn == 1 && (c.isect(ctl, csz) ||
                 //or left caption
                 (c.isect(Coord.z, cl.sz()) && cl.back.getRaster().getSample(c.x, c.y, 3) >= 128) ||
                 //or right caption
@@ -760,18 +760,18 @@ public class Window extends MovableWidget implements DTarget {
                         cr.back.getRaster().getSample(cprc.x % cr.back.getWidth(), cprc.y, 3) >= 128) ||
                 //or mid caption
                 (c.isect(new Coord(cl.sz().x, 0), new Coord(sz.x - cr.sz().x - cl.sz().x, cm.sz().y)) &&
-                        (cm.back.getRaster().getSample(cpc.x % cm.back.getWidth(), cpc.y, 3) >= 128));
+                        (cm.back.getRaster().getSample(cpc.x % cm.back.getWidth(), cpc.y, 3) >= 128)));
     }
 
     public boolean mousedown(Coord c, int button) {
         if (button == 4 || button == 5) //ignore these because why allow every mousedown to move the window?
             return false;
-        if (button == 3 && ui.modflags() == UI.MOD_META && showSpecialMenu()) {
-            return (true);
-        }
         if (super.mousedown(c, button)) {
             parent.setfocus(this);
             raise();
+            return (true);
+        }
+        if (button == 3 && ui.modflags() == UI.MOD_META && showSpecialMenu()) {
             return (true);
         }
         return (false);
