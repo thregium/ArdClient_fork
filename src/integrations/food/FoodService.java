@@ -31,11 +31,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.GZIPInputStream;
 
 public class FoodService {
     public static final String API_ENDPOINT = "https://hnhfood.vatsul.com/api/";
     private static final String FOOD_DATA_URL = "https://hnhfood.vatsul.com/api/data/food-info.json";
     private static final File FOOD_DATA_CACHE_FILE = new File("food_data.json");
+    private static String token = "Purus-Pasta-the-new-2";  //Config.confid maybe ArdClient also works
 
     private static final Map<String, ParsedFoodInfo> cachedItems = new ConcurrentHashMap<>();
     private static final Queue<HashedFoodInfo> sendQueue = new ConcurrentLinkedQueue<>();
@@ -83,10 +85,11 @@ public class FoodService {
             if (System.currentTimeMillis() - lastModified > TimeUnit.MINUTES.toMillis(30)) {
                 try {
                     HttpsURLConnection connection = (HttpsURLConnection) new URL(FOOD_DATA_URL).openConnection();
-                    connection.setRequestProperty("User-Agent", "H&H Client");
+                    connection.setRequestProperty("Accept-Encoding", "gzip");
+                    connection.setRequestProperty("User-Agent", "H&H Client/" + token);
                     connection.setRequestProperty("Cache-Control", "no-cache");
                     StringBuilder stringBuilder = new StringBuilder();
-                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(connection.getInputStream())))) {
                         stringBuilder.append(reader.readLine());
                     } finally {
                         connection.disconnect();
@@ -110,10 +113,10 @@ public class FoodService {
      * Check item info and determine if it is food and we need to send it
      */
     public static void checkFood(List<ItemInfo> infoList, String resName) {
-        if (!Resource.language.equals("en")) {
-            // Do not process localized items
-            return;
-        }
+//        if (!Resource.language.equals("en")) {
+//            // Do not process localized items
+//            return;
+//        }
         try {
             FoodInfo foodInfo = ItemInfo.find(FoodInfo.class, infoList);
             if (foodInfo != null) {
@@ -194,7 +197,7 @@ public class FoodService {
                         (HttpsURLConnection) new URL(API_ENDPOINT + "food").openConnection();
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Content-Type", "application/json");
-                connection.setRequestProperty("User-Agent", "H&H Client");
+                connection.setRequestProperty("User-Agent", "H&H Client/" + token);
                 connection.setDoOutput(true);
                 try (OutputStream out = connection.getOutputStream()) {
                     out.write(new JSONArray(toSend.toArray()).toString().getBytes(StandardCharsets.UTF_8));

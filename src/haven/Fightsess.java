@@ -73,6 +73,7 @@ public class Fightsess extends Widget {
     private final Tex[] keystex = new Tex[10];
     private final Tex[] keysftex = new Tex[10];
     private final Tex[] keysfftex = new Tex[10];
+    private final Tex[] keysitex = new Tex[10];
 
     private static final Map<String, Color> openings = new HashMap<String, Color>(4) {{
         put("paginae/atk/dizzy", new Color(8, 103, 136));
@@ -169,6 +170,7 @@ public class Fightsess extends Widget {
             else
                 keysftex[i] = Text.renderstroked(FightWnd.keysf[i - 5], grey, Color.WHITE, Text.num20Fnd).tex();
             keysfftex[i] = Text.renderstroked(FightWnd.keysf[i], grey, Color.WHITE, Text.num20Fnd).tex();
+            keysitex[i] = Text.renderstroked(FightWnd.keysi[i], grey, Color.WHITE, Text.num20Fnd).tex();
         }
     }
 
@@ -289,8 +291,10 @@ public class Fightsess extends Widget {
                                     key = keystex[i];
                                 } else if (Config.combatkeys == 1) {
                                     key = keysftex[i];
-                                } else {
+                                } else if (Config.combatkeys == 2) {
                                     key = keysfftex[i];
+                                } else {
+                                    key = keysitex[i];
                                 }
                                 g.aimage(key, ca.add((int) (pitch / 2), (int) (pitch / 2)), 0.5, 0.5);
                             }
@@ -931,7 +935,7 @@ public class Fightsess extends Widget {
                         break;
                 }
             }
-        } else { // F1-F10
+        } else if (Config.combatkeys == 2)  { // F1-F10
             if (key == 0) {
 
                 switch (ev.getKeyCode()) {
@@ -963,6 +967,42 @@ public class Fightsess extends Widget {
                         n = 8;
                         break;
                     case KeyEvent.VK_F10:
+                        n = 9;
+                        break;
+                }
+            }
+        } else { // 1-10
+            if (key == 0) {
+
+                switch (ev.getKeyCode()) {
+                    case KeyEvent.VK_1:
+                        n = 0;
+                        break;
+                    case KeyEvent.VK_2:
+                        n = 1;
+                        break;
+                    case KeyEvent.VK_3:
+                        n = 2;
+                        break;
+                    case KeyEvent.VK_4:
+                        n = 3;
+                        break;
+                    case KeyEvent.VK_5:
+                        n = 4;
+                        break;
+                    case KeyEvent.VK_6:
+                        n = 5;
+                        break;
+                    case KeyEvent.VK_7:
+                        n = 6;
+                        break;
+                    case KeyEvent.VK_8:
+                        n = 7;
+                        break;
+                    case KeyEvent.VK_9:
+                        n = 8;
+                        break;
+                    case KeyEvent.VK_0:
                         n = 9;
                         break;
                 }

@@ -132,7 +132,8 @@ public class OptWnd extends Window {
     private static final Pair[] combatkeys = new Pair[]{
             new Pair<>("[1-5] and [shift + 1-5]", 0),
             new Pair<>("[1-5] and [F1-F5]", 1),
-            new Pair<>("[F1-F10]", 2)
+            new Pair<>("[F1-F10]", 2),
+            new Pair<>("[1-10]", 3)
     };
     private static final List<Integer> fontSize = Arrays.asList(10, 11, 12, 13, 14, 15, 16);
     private static final List<String> statSize = Arrays.asList("1", "2", "5", "10", "25", "50", "100", "200", "500", "1000");
