@@ -2155,15 +2155,18 @@ public class OptWnd extends Window {
                 Config.quickslots = val;
                 a = val;
 
-                try {
-                    Widget qs = ((GameUI) parent.parent.parent).quickslots;
+                Set<GameUI> guis = ui.root.children(GameUI.class);
+                if (!guis.isEmpty()) {
+                    GameUI gui = guis.iterator().next();
+                    Widget qs = configuration.newQuickSlotWdg ? gui.newquickslots : gui.quickslots;
+
                     if (qs != null) {
-                        if (val)
+                        if (val) {
                             qs.show();
-                        else
+                        } else {
                             qs.hide();
+                        }
                     }
-                } catch (ClassCastException e) { // in case we are at the login screen
                 }
             }
         });
