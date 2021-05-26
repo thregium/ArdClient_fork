@@ -54,7 +54,7 @@ public class Updater {
         String[] kv;
 
 		//check if already updated
-        if (files.length > 0 && old.length > 0 && files[0].equals(old[0]) && skip) {
+        if (files.length > 0 && old.length > 0 && files[0].equals(old[0])) {
             Logging.log("No update required");
             return null;
         }
