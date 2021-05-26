@@ -954,20 +954,20 @@ public class MenuGrid extends Widget {
                     }
             ));
         }
-        if (Config.showPBotOld) {
-            addSpecial(new SpecialPagina(this, "paginae::purus::pbotmenuold",
-                    Resource.local().load("paginae/purus/PBotMenuOld"),
-                    (pag) -> {
-                        if (ui.gui != null) {
-                            if (ui.gui.PBotScriptlistold.show(!ui.gui.PBotScriptlistold.visible)) {
-                                ui.gui.PBotScriptlistold.raise();
-                                ui.gui.fitwdg(ui.gui.PBotScriptlistold);
-                                setfocus(ui.gui.PBotScriptlistold);
-                            }
-                        }
-                    }
-            ));
-        }
+//        if (Config.showPBotOld) {
+//            addSpecial(new SpecialPagina(this, "paginae::purus::pbotmenuold",
+//                    Resource.local().load("paginae/purus/PBotMenuOld"),
+//                    (pag) -> {
+//                        if (ui.gui != null) {
+//                            if (ui.gui.PBotScriptlistold.show(!ui.gui.PBotScriptlistold.visible)) {
+//                                ui.gui.PBotScriptlistold.raise();
+//                                ui.gui.fitwdg(ui.gui.PBotScriptlistold);
+//                                setfocus(ui.gui.PBotScriptlistold);
+//                            }
+//                        }
+//                    }
+//            ));
+//        }
 
         addSpecial(new haven.MenuGrid.SpecialPagina(this, "paginae::amber::destroyarea",
                 Resource.local().load("paginae/amber/DestroyArea"),

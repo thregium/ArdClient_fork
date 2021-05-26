@@ -336,7 +336,7 @@ public class Config {
     public static final boolean isUpdate;
     private static String username, playername;
     public static boolean showPBot = Utils.getprefb("showPBot", true);
-    public static boolean showPBotOld = Utils.getprefb("showPBotOld", true);
+//    public static boolean showPBotOld = Utils.getprefb("showPBotOld", true);
     public static double alertsvol = Utils.getprefd("alertsvol", 0.8);
     public static boolean chatalarm = Utils.getprefb("chatalarm", true);
     public static double chatalarmvol = Utils.getprefd("chatalarmvol", 0.8);
