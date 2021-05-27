@@ -1175,9 +1175,9 @@ public class MenuGrid extends Widget {
 //                    }
 //                }
 //        ));
-        addSpecial(new SpecialPagina(this, "management::scripts",
-                Resource.local().load("custom/paginae/default/wnd/scripts"),
-                (pag) -> ui.gui.toggleScripts()));
+//        addSpecial(new SpecialPagina(this, "management::scripts",
+//                Resource.local().load("custom/paginae/default/wnd/scripts"),
+//                (pag) -> ui.gui.toggleScripts()));
         addSpecial(new SpecialPagina(this, "management::foragehelper",
                 Resource.local().load("custom/paginae/default/wnd/foragehelper"),
                 (pag) -> ui.gui.toggleForageHelper()));
