@@ -1,7 +1,13 @@
+import haven.Indir;
+import haven.ItemInfo;
 import haven.ItemInfo.Layout.ID;
 import haven.ItemInfo.Tip;
+import haven.Message;
+import haven.MessageBuf;
+import haven.ResData;
 import haven.Resource;
 import haven.RichText;
+import haven.res.lib.tspec.Spec;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -11,17 +17,30 @@ import java.util.List;
 
 public class Ingredient extends Tip {
     public final String name;
+    public final String oname;
     public final Double val;
     public static final ID<Line> id = Line::new;
 
     public Ingredient(Owner owner, String name, Double val) {
         super(owner);
+        this.oname = name;
+        this.name = name;
+        this.val = val;
+    }
+
+    public Ingredient(Owner owner, String oname, String name, Double val) {
+        super(owner);
+        this.oname = oname;
         this.name = name;
         this.val = val;
     }
 
     public Ingredient(Owner owner, String name) {
-        this(owner, name, null);
+        this(owner, name, name, null);
+    }
+
+    public Ingredient(Owner owner, String oname, String name) {
+        this(owner, oname, name, null);
     }
 
     public void prepare(Layout var1) {
@@ -32,6 +51,32 @@ public class Ingredient extends Tip {
         return this.val == null ?
                 Resource.getLocString(Resource.BUNDLE_LABEL, name) :
                 String.format("%s (%d%%)", Resource.getLocString(Resource.BUNDLE_INGREDIENT, name), Integer.valueOf((int) Math.floor(this.val.doubleValue() * 100.0D)));
+    }
+
+    public static class Fac implements InfoFactory {
+        public ItemInfo build(Owner owner, Object... args) {
+            int a = 1;
+            String name;
+            String oname;
+            if (args[a] instanceof String) {
+                name = (String) args[a++];
+                oname = name;
+            } else if (args[1] instanceof Integer) {
+                Indir<Resource> res = owner.context(Resource.Resolver.class).getres((Integer) args[a++]);
+                Message sdt = Message.nil;
+                if ((args.length > a) && (args[a] instanceof byte[]))
+                    sdt = new MessageBuf((byte[]) args[a++]);
+                Spec spec = new Spec(new ResData(res, sdt), owner, null);
+                oname = res.get().layer(Resource.tooltip).origt;
+                name = spec.name();
+            } else {
+                throw (new IllegalArgumentException());
+            }
+            Double val = null;
+            if (args.length > a)
+                val = (args[a] == null) ? null : ((Number) args[a]).doubleValue();
+            return (new Ingredient(owner, oname, name, val));
+        }
     }
 
     public static class Line extends Tip {

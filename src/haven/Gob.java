@@ -1137,16 +1137,40 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 else
                     rl.prepc(cRackEmpty);
             }
-            if (Config.showcupboardstatus && type == Type.CUPBOARD) {
-                int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
-                // BotUtils.sysLogAppend("Stage : "+stage,"white");
-                // BotUtils.sysLogAppend("Stage : "+stage,"white");
-                if (stage == 30 || stage == 29)
-                    rl.prepc(cupboardfull);
-                if (stage == 1 || stage == 2)
-                    rl.prepc(cupboardempty);
-                //if(ols.size()>0)
-                //  rl.prepc(cupboardfull);
+            if (Config.showcupboardstatus) {
+                if (type == Type.CUPBOARD) {
+                    int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
+                    if (stage == 30 || stage == 29)
+                        rl.prepc(cupboardfull);
+                    if (stage == 1 || stage == 2)
+                        rl.prepc(cupboardempty);
+                } else if (this.resname().isPresent()) {
+                    if (this.resname().get().endsWith("/metalcabinet")) {
+                        int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
+                        if (stage == 65 || stage == 66)
+                            rl.prepc(cupboardfull);
+                        if (stage == 1 || stage == 2)
+                            rl.prepc(cupboardempty);
+                    } else if (this.resname().get().endsWith("/chest")) {
+                        int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
+                        if (stage == 29 || stage == 30)
+                            rl.prepc(cupboardfull);
+                        if (stage == 1 || stage == 2)
+                            rl.prepc(cupboardempty);
+                    } else if (this.resname().get().endsWith("/crate")) {
+                        int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
+                        if (stage == 16)
+                            rl.prepc(cupboardfull);
+                        if (stage == 0)
+                            rl.prepc(cupboardempty);
+                    } else if (this.resname().get().endsWith("/largechest")) {
+                        int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
+                        if (stage == 29 || stage == 30)
+                            rl.prepc(cupboardfull);
+                        if (stage == 1 || stage == 2)
+                            rl.prepc(cupboardempty);
+                    }
+                }
             }
             if (configuration.showtreeberry && (type == Type.TREE || type == Type.BUSH)) {
                 int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);

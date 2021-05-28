@@ -166,6 +166,10 @@ public class MenuGrid extends Widget {
             pag.use();
         }
 
+        public void use(Interaction iact) {
+            pag.use();
+        }
+
         public String sortkey() {
             AButton ai = pag.act();
 
@@ -1354,7 +1358,7 @@ public class MenuGrid extends Widget {
     }
 
 
-    public void use(PagButton r, boolean reset) {
+    public void use(PagButton r, Interaction iact, boolean reset) {
         Collection<PagButton> sub = new ArrayList<>();
         cons(r.pag, sub);
         selectCraft(r.pag);
@@ -1425,7 +1429,7 @@ public class MenuGrid extends Widget {
                     confirmwnd.show();
                 } else {
                     r.pag.newp = 0;
-                    r.use();
+                    r.use(iact);
                     if (reset) {
                         this.cur = null;
                         curoff = 0;
@@ -1514,7 +1518,7 @@ public class MenuGrid extends Widget {
                 dragging = null;
             } else if (pressed != null) {
                 if (pressed == h)
-                    use(h, false);
+                    use(h, new Interaction(), false);
                 pressed = null;
             }
             grab.remove();
@@ -1593,14 +1597,14 @@ public class MenuGrid extends Widget {
             updlayout();
             return (true);
         } else if ((k == 'N') && (layout[gsz.x - 2][gsz.y - 1] == next)) {
-            use(next, false);
+            use(next, new Interaction(), false);
             return (true);
         }
         PagButton r = hotmap.get(Character.toUpperCase(k));
         if (r != null) {
             if (Config.disablemagaicmenugrid && r.res.name.startsWith("paginae/seid/"))
                 return (false);
-            use(r, true);
+            use(r, new Interaction(), true);
             return (true);
         }
         return (false);

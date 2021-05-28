@@ -771,7 +771,10 @@ public class Window extends MovableWidget implements DTarget {
             raise();
             return (true);
         }
-        if (button == 3 && ui.modflags() == UI.MOD_META && showSpecialMenu()) {
+        if ((button == 1 && ui.modflags() != 0) || (button == 3 && ui.modflags() != UI.MOD_META)) { //miss click
+            return (true);
+        }
+        if (button == 3 && ui.modflags() == UI.MOD_META && showSpecialMenu()) { //need move to inventory widget
             return (true);
         }
         return (false);

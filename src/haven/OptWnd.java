@@ -1062,7 +1062,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Highlight cupboards based on amount of contents. Requires restart.") {
+        appender.add(new CheckBox("Highlight storages based on amount of contents.") {
             {
                 a = Config.showcupboardstatus;
             }
@@ -1073,7 +1073,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Highlight sheds based on amount of contents. Requires restart.") {
+        appender.add(new CheckBox("Highlight sheds based on amount of contents.") {
             {
                 a = Config.showshedstatus;
             }
@@ -1084,7 +1084,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Highlight empty/full cheese racks. Requires restart.") {
+        appender.add(new CheckBox("Highlight empty/full cheese racks.") {
             {
                 a = Config.showrackstatus;
             }
@@ -1107,7 +1107,7 @@ public class OptWnd extends Window {
             }
         });
         appender.add(ColorPreWithLabel("Cheese rack missing color: ", CHEESERACKMISSINGCOLOR, val -> BPRadSprite.cRackMissing = new Material.Colors(CHEESERACKMISSINGCOLOR.get())));
-        appender.add(new CheckBox("Highlight finished garden pots. Requires restart.") {
+        appender.add(new CheckBox("Highlight finished garden pots.") {
             {
                 a = Config.highlightpots;
             }

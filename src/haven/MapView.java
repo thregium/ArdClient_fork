@@ -1407,9 +1407,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             rl.add((Rendered) w, null);
                     }
                 } catch (Exception e) {
-                    if (!Config.noloadscreen) {
-                        throw e;
-                    }
+                    //e.printStackTrace();
                 }
             }
         }

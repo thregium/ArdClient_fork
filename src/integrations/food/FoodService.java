@@ -112,12 +112,13 @@ public class FoodService {
     /**
      * Check item info and determine if it is food and we need to send it
      */
-    public static void checkFood(List<ItemInfo> infoList, String resName) {
+    public static void checkFood(List<ItemInfo> infoList, Resource res) {
 //        if (!Resource.language.equals("en")) {
 //            // Do not process localized items
 //            return;
 //        }
         try {
+            String resName = res.name;
             FoodInfo foodInfo = ItemInfo.find(FoodInfo.class, infoList);
             if (foodInfo != null) {
                 QBuff qBuff = ItemInfo.find(QBuff.class, infoList);
@@ -144,14 +145,14 @@ public class FoodService {
                         }
                     }
                     if (info instanceof ItemInfo.Name) {
-                        parsedFoodInfo.itemName = ((ItemInfo.Name) info).str.text;
+                        parsedFoodInfo.itemName = res.layer(Resource.tooltip).origt;
                     }
                     if (info.getClass().getName().equals("Ingredient")) {
-                        String name = (String) info.getClass().getField("name").get(info);
+                        String name = (String) info.getClass().getField("oname").get(info);
                         Double value = (Double) info.getClass().getField("val").get(info);
                         parsedFoodInfo.ingredients.add(new FoodIngredient(name, (int) (value * 100)));
                     } else if (info.getClass().getName().equals("Smoke")) {
-                        String name = (String) info.getClass().getField("name").get(info);
+                        String name = (String) info.getClass().getField("oname").get(info);
                         Double value = (Double) info.getClass().getField("val").get(info);
                         parsedFoodInfo.ingredients.add(new FoodIngredient(name, (int) (value * 100)));
                     }

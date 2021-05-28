@@ -35,12 +35,13 @@ import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class Inventory extends Widget implements DTarget {
     public static final Coord sqsz = UI.scale(new Coord(33, 33));
@@ -726,7 +727,7 @@ public class Inventory extends Widget implements DTarget {
         public Coord getSize() {
             if (this.size == null) {
                 GSprite spr = null;
-                for (int sleep = 10; spr == null;) {
+                for (int sleep = 10; spr == null; ) {
                     spr = getGItem().spr();
                     PBotUtils.sleep(sleep);
                 }
