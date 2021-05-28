@@ -406,12 +406,12 @@ public class PepperBotUpRun extends Window implements Runnable {
             PBotUtils.PathfinderRightClick(ui, cauldron, 0);
             PBotUtils.sleep(1000);
 
-            PBotUtils.pfLeftClick(ui, playerCoord.x, playerCoord.y);
+            pathTo(playerCoord, 0);
             PBotUtils.mapClick(ui, retain.x, retain.y, 3, 0);
             PBotUtils.sleep(1000);
 
             FlowerMenu.setNextSelection("Open");
-            PBotUtils.PathfinderRightClick(ui, water, 0);
+            PBotUtils.PathfinderRightClick(ui, cauldron, 0);
             PBotUtils.sleep(2000);
             PBotUtils.craftItem(ui, "boiledpepper", 1);
             PBotUtils.sleep(2000);
@@ -426,12 +426,12 @@ public class PepperBotUpRun extends Window implements Runnable {
             PBotUtils.PathfinderRightClick(ui, cauldron, 0);
             PBotUtils.sleep(1000);
 
-            PBotUtils.pfLeftClick(ui, playerCoord.x, playerCoord.y);
+            pathTo(playerCoord, 0);
             PBotUtils.mapClick(ui, retain.x, retain.y, 3, 0);
             PBotUtils.sleep(1000);
 
             FlowerMenu.setNextSelection("Open");
-            PBotUtils.PathfinderRightClick(ui, water, 0);
+            PBotUtils.PathfinderRightClick(ui, cauldron, 0);
             PBotUtils.sleep(2000);
             PBotUtils.craftItem(ui, "boiledpepper", 1);
             PBotUtils.sleep(2000);
@@ -454,6 +454,19 @@ public class PepperBotUpRun extends Window implements Runnable {
 
     public boolean pathTo(Gob g, double offset) {
         Coord2d gCoord = g.rc;
+
+        lblProg2.settext("Find path");
+        for (Coord2d c2d : near(gCoord, offset)) {
+            if (PBotUtils.pfLeftClick(ui, c2d.x, c2d.y)) {
+                PBotUtils.mapClick(ui, c2d, 1, 0);
+                return (waitmove(2000, c2d));
+            }
+        }
+
+        return false;
+    }
+
+    public boolean pathTo(Coord2d gCoord, double offset) {
 
         lblProg2.settext("Find path");
         for (Coord2d c2d : near(gCoord, offset)) {
