@@ -229,7 +229,7 @@ public class MenuGrid extends Widget {
 
 
     public final PagButton next = new PagButton(new Pagina(this, Resource.local().loadwait("gfx/hud/sc-next").indir())) {
-        public void use() {
+        public void use(Interaction iact) {
             if ((curoff + cap) >= curbtns.size())
                 curoff = 0;
             else
@@ -242,7 +242,7 @@ public class MenuGrid extends Widget {
     };
 
     public final PagButton bk = new PagButton(new Pagina(this, Resource.local().loadwait("gfx/hud/sc-back").indir())) {
-        public void use() {
+        public void use(Interaction iact) {
             if ((curoff - cap) >= 0)
                 curoff -= cap;
             else {

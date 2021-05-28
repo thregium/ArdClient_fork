@@ -38,7 +38,7 @@ public class RosterButton extends MenuGrid.PagButton {
         }
     }
 
-    public void use() {
+    public void use(MenuGrid.Interaction iact) {
         if (pag.scm.ui.modshift) {
             pag.scm.wdgmsg("act", "croster", "a");
         } else if (wnd == null) {
