@@ -236,6 +236,12 @@ public class PepperBotUpRun extends Window implements Runnable {
                                             tablesblacklist.clear();
                                         }
 
+                                        if (!pathTo(g, 14)) {
+                                            tables.remove(htable);
+                                            htable = null;
+                                            cwnd = null;
+                                            continue;
+                                        }
                                         PBotUtils.doClick(ui, htable, 3, 0);
                                         int retry = 0;
                                         while (ui.gui.getwnd("Herbalist Table") == null) {
@@ -259,7 +265,12 @@ public class PepperBotUpRun extends Window implements Runnable {
                                             }
                                         }
                                         PBotUtils.sleep(1500);
-                                        pathTo(htable);
+                                        if (!pathTo(g, 14)) {
+                                            tables.remove(htable);
+                                            htable = null;
+                                            cwnd = null;
+                                            continue;
+                                        }
                                         PBotUtils.doClick(ui, htable, 3, 0);
                                         PBotUtils.waitForWindow(ui, "Herbalist Table");
                                         if (ui.gui.getwnd("Herbalist Table") != null) {
@@ -382,32 +393,45 @@ public class PepperBotUpRun extends Window implements Runnable {
         }
 
         PBotUtils.sleep(600);
-        if (barrel.ols.size() == 0 && water != null) {
+        if (barrel.ols.isEmpty() && water != null) {
             lblProg2.settext("Refill Barrel");
+
+            PBotUtils.PathfinderRightClick(ui, barrel, 0);
+            PBotUtils.sleep(1000);
+            Coord2d playerCoord = PBotGobAPI.player(ui).getRcCoords();
             PBotUtils.liftGob(ui, barrel);
-            PBotUtils.sleep(2000);
-            gui.map.wdgmsg("click", water.sc, water.rc.floor(posres), 3, 0, 0, (int) water.id, water.rc.floor(posres), 0, -1);
-            PBotUtils.sleep(3500);
-            gui.map.wdgmsg("click", cauldron.sc, cauldron.rc.floor(posres), 3, 0, 0, (int) cauldron.id, cauldron.rc.floor(posres), 0, -1);
+            PBotUtils.sleep(1000);
+            PBotUtils.PathfinderRightClick(ui, water, 0);
+            PBotUtils.sleep(1000);
+            PBotUtils.PathfinderRightClick(ui, cauldron, 0);
+            PBotUtils.sleep(1000);
+
+            PBotUtils.pfLeftClick(ui, playerCoord.x, playerCoord.y);
+            PBotUtils.mapClick(ui, retain.x, retain.y, 3, 0);
+            PBotUtils.sleep(1000);
+
             FlowerMenu.setNextSelection("Open");
-            PBotUtils.sleep(2000);
-            gui.map.wdgmsg("click", Coord.z, retain, 3, 0);
-            PBotUtils.sleep(2000);
-            gui.map.wdgmsg("click", cauldron.sc, cauldron.rc.floor(posres), 3, 0, 0, (int) cauldron.id, cauldron.rc.floor(posres), 0, -1);
-            FlowerMenu.setNextSelection("Open");
+            PBotUtils.PathfinderRightClick(ui, water, 0);
             PBotUtils.sleep(2000);
             PBotUtils.craftItem(ui, "boiledpepper", 1);
             PBotUtils.sleep(2000);
         } else {
             lblProg2.settext("Refill Cauldron");
+
+            PBotUtils.PathfinderRightClick(ui, barrel, 0);
+            PBotUtils.sleep(1000);
+            Coord2d playerCoord = PBotGobAPI.player(ui).getRcCoords();
             PBotUtils.liftGob(ui, barrel);
-            PBotUtils.sleep(2000);
-            gui.map.wdgmsg("click", cauldron.sc, cauldron.rc.floor(posres), 3, 0, 0, (int) cauldron.id, cauldron.rc.floor(posres), 0, -1);
-            PBotUtils.sleep(2000);
-            gui.map.wdgmsg("click", Coord.z, retain, 3, 0);
-            PBotUtils.sleep(2000);
-            gui.map.wdgmsg("click", cauldron.sc, cauldron.rc.floor(posres), 3, 0, 0, (int) cauldron.id, cauldron.rc.floor(posres), 0, -1);
+            PBotUtils.sleep(1000);
+            PBotUtils.PathfinderRightClick(ui, cauldron, 0);
+            PBotUtils.sleep(1000);
+
+            PBotUtils.pfLeftClick(ui, playerCoord.x, playerCoord.y);
+            PBotUtils.mapClick(ui, retain.x, retain.y, 3, 0);
+            PBotUtils.sleep(1000);
+
             FlowerMenu.setNextSelection("Open");
+            PBotUtils.PathfinderRightClick(ui, water, 0);
             PBotUtils.sleep(2000);
             PBotUtils.craftItem(ui, "boiledpepper", 1);
             PBotUtils.sleep(2000);
@@ -428,9 +452,26 @@ public class PepperBotUpRun extends Window implements Runnable {
         return false;
     }
 
+    public boolean pathTo(Gob g, double offset) {
+        Coord2d gCoord = g.rc;
+
+        lblProg2.settext("Find path");
+        for (Coord2d c2d : near(gCoord, offset)) {
+            if (PBotUtils.pfLeftClick(ui, c2d.x, c2d.y)) {
+                PBotUtils.mapClick(ui, c2d, 1, 0);
+                return (waitmove(2000, c2d));
+            }
+        }
+
+        return false;
+    }
+
     public List<Coord2d> near(Coord2d coord2d) {
+        return near(coord2d, 11);
+    }
+
+    public List<Coord2d> near(Coord2d coord2d, double distance) {
         List<Coord2d> coord2ds = new ArrayList<>();
-        double distance = 11;
         coord2ds.add(new Coord2d(coord2d.x + distance, coord2d.y));
         coord2ds.add(new Coord2d(coord2d.x - distance, coord2d.y));
         coord2ds.add(new Coord2d(coord2d.x, coord2d.y + distance));

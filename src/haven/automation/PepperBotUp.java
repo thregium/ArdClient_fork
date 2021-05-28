@@ -246,13 +246,18 @@ public class PepperBotUp extends Window implements GobSelectCallback {
     }
 
     public void areaselect(Coord a, Coord b) {
-        System.out.println("Area select triggered.");
-        this.ca = a;
-        this.cb = b;
-        crops = Crops(true, this.ca, this.cb);
-        tables = Tables(this.ca, this.cb);
-        sec.settext("Crops : " + crops.size() + " Tables : " + tables.size());
-        PBotUtils.mapInteractLeftClick(ui, 0);
+        try {
+            System.out.println("Area select triggered.");
+            this.ca = a;
+            this.cb = b;
+            crops = Crops(true, this.ca, this.cb);
+            tables = Tables(this.ca, this.cb);
+            sec.settext("Crops : " + crops.size() + " Tables : " + tables.size());
+            PBotUtils.mapInteractLeftClick(ui, 0);
+        } catch (Exception e) {
+            PBotUtils.sysMsg(ui, e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @Override
