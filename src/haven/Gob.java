@@ -1165,7 +1165,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                             rl.prepc(cupboardempty);
                     } else if (this.resname().get().endsWith("/largechest")) {
                         int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
-                        if (stage == 29 || stage == 30)
+                        if (stage == 17 || stage == 18)
                             rl.prepc(cupboardfull);
                         if (stage == 1 || stage == 2)
                             rl.prepc(cupboardempty);

@@ -167,7 +167,7 @@ public class MenuGrid extends Widget {
         }
 
         public void use(Interaction iact) {
-            pag.use();
+            use();
         }
 
         public String sortkey() {
