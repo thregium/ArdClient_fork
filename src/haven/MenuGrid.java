@@ -1357,6 +1357,9 @@ public class MenuGrid extends Widget {
         }
     }
 
+    public void use(PagButton r, boolean reset) {
+        use(r, new Interaction(), reset);
+    }
 
     public void use(PagButton r, Interaction iact, boolean reset) {
         Collection<PagButton> sub = new ArrayList<>();
@@ -1376,7 +1379,7 @@ public class MenuGrid extends Widget {
         } else {
             Resource.AButton act = r.pag.act();
             if (act == null) {
-                r.use();
+                r.use(iact);
             } else {
                 String[] ad = r.pag.act().ad;
                 if (ad.length > 0 && (ad[0].equals("craft") || ad[0].equals("bp"))) {

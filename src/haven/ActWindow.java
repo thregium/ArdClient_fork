@@ -61,7 +61,7 @@ public class ActWindow extends GameUI.Hidewnd {
     }
 
     private void act(Pagina pagina) {
-        ui.gui.menu.use(pagina.button(), false);
+        ui.gui.menu.use(pagina.button(), new MenuGrid.Interaction(),false);
         ActWindow.this.hide();
     }
 

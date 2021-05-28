@@ -197,7 +197,7 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<P
                             item = menu.getParent(item);
                         }
                         if ((mode.reparent && filter.line.isEmpty()) || !item.isAction()) {
-                            menu.use(item.button(), false);
+                            menu.use(item.button(), new MenuGrid.Interaction(),false);
                         } else {
                             select(item, true, true);
                         }
@@ -237,7 +237,7 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<P
                     return;
                 }
                 select(data, false, false);
-                ui.gui.menu.use(data.button(), false);
+                ui.gui.menu.use(data.button(), new MenuGrid.Interaction(),false);
             }
         }, new Coord(0, 28));
         Pagina selected = current;

@@ -78,7 +78,7 @@ public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pa
 
     public void act(MenuGrid.Pagina act) {
         if (ui.gui != null) {
-            ui.gui.menu.use(act.button(), false);
+            ui.gui.menu.use(act.button(), new MenuGrid.Interaction(),false);
         }
     }
 
