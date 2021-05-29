@@ -2688,6 +2688,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         if (clickb == 1 || gobargs.length > 0) {
                             clearmovequeue();
                         }
+                        canceltasks();
                         wdgmsg("click", args);
                         pllastcc = mc;
                         if (gob.getres() != null) {

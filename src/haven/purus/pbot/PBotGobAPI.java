@@ -46,9 +46,11 @@ public class PBotGobAPI {
         put("gfx/terobjs/chickencoop", "Chicken Coop");
         put("gfx/terobjs/htable", "Herbalist Table");
         put("gfx/terobjs/studydesk", "Study Desk");
-        put("gfx/terobjs/cupboard", "");
+        put("gfx/terobjs/cupboard", "Cupboard");
         put("gfx/terobjs/ttub", "Tub");
         put("gfx/terobjs/chest", "Chest");
+        put("gfx/terobjs/largechest", "Large Chest");
+        put("gfx/terobjs/matalcabinet", "Metal Cabinet");
     }};
 
     /**
