@@ -1196,4 +1196,16 @@ public class MCache {
             }
         }
     }
+
+    public void clearTiles() {
+        synchronized (tiles) {
+            Arrays.fill(tiles, null);
+        }
+        synchronized (sets) {
+            Arrays.fill(sets, null);
+        }
+        synchronized (csets) {
+            Arrays.fill(csets, null);
+        }
+    }
 }

@@ -32,6 +32,7 @@ import haven.purus.pbot.PBotDiscord;
 import haven.purus.pbot.PBotUtils;
 import haven.resutil.BPRadSprite;
 import haven.resutil.FoodInfo;
+import haven.resutil.WaterTile;
 import haven.sloth.gfx.GobSpeedSprite;
 import haven.sloth.gfx.HitboxMesh;
 import haven.sloth.gfx.SnowFall;
@@ -100,9 +101,12 @@ import static haven.DefSettings.MINIMAPTYPE;
 import static haven.DefSettings.NVAMBIENTCOL;
 import static haven.DefSettings.NVDIFFUSECOL;
 import static haven.DefSettings.NVSPECCOC;
+import static haven.DefSettings.OCEANWATERCOL;
 import static haven.DefSettings.PATHFINDINGTIER;
 import static haven.DefSettings.PLAYERPATHCOL;
 import static haven.DefSettings.RESEARCHUNTILGOAL;
+import static haven.DefSettings.SHALLOWOCEANWATERCOL;
+import static haven.DefSettings.SHALLOWWATERCOL;
 import static haven.DefSettings.SHOWANIMALPATH;
 import static haven.DefSettings.SHOWFKBELT;
 import static haven.DefSettings.SHOWGOBPATH;
@@ -119,6 +123,7 @@ import static haven.DefSettings.SYMMETRICOUTLINES;
 import static haven.DefSettings.THEMES;
 import static haven.DefSettings.TROUGHCOLOR;
 import static haven.DefSettings.TXBCOL;
+import static haven.DefSettings.WATERCOL;
 import static haven.DefSettings.WIREFRAMEMODE;
 import static haven.DefSettings.WNDCOL;
 
@@ -983,12 +988,21 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(ColorPreWithLabel("Deep Ocean Color: (requires relog)", DEEPWATERCOL));
-        appender.add(ColorPreWithLabel("All Other Water Color: (requires relog)", ALLWATERCOL));
-        appender.add(ColorPreWithLabel("Ocean Color: (requires relog)", DefSettings.OCEANWATERCOL));
-        appender.add(ColorPreWithLabel("Shallow Ocean Color: (requires relog)", DefSettings.SHALLOWOCEANWATERCOL));
-        appender.add(ColorPreWithLabel("Water Color: (requires relog)", DefSettings.WATERCOL));
-        appender.add(ColorPreWithLabel("Shallow Water Ocean Color: (requires relog)", DefSettings.SHALLOWWATERCOL));
+        final Consumer<Color> fog = val -> {
+            WaterTile.updateFog();
+            if (ui.sess != null && ui.sess.glob != null && ui.sess.glob.map != null) {
+                ui.sess.glob.map.clearTiles();
+                ui.sess.glob.map.invalidateAll();
+            }
+
+        };
+        appender.add(ColorPreWithLabel("Deep Ocean Color: ", DEEPWATERCOL, fog));
+        appender.add(ColorPreWithLabel("Ocean Color: ", OCEANWATERCOL, fog));
+        appender.add(ColorPreWithLabel("Shallow Water Ocean Color: ", SHALLOWOCEANWATERCOL, fog));
+        appender.add(ColorPreWithLabel("Water Color: ", WATERCOL, fog));
+        appender.add(ColorPreWithLabel("Shallow Water Color: ", SHALLOWWATERCOL, fog));
+        appender.add(ColorPreWithLabel("All Other Water Color: ", ALLWATERCOL, fog));
+
         appender.add(ColorPreWithLabel("Beehive radius color: ", BEEHIVECOLOR, val -> {
             BPRadSprite.smatBeehive = new States.ColState(val);
             if (ui.gui != null) {

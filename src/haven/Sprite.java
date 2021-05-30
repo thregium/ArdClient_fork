@@ -155,6 +155,14 @@ public abstract class Sprite implements Rendered {
     }
 
     public static Sprite create(Owner owner, Resource res, Message sdt) {
+        if (res.name.equals("gfx/terobjs/coronationstone")) {
+            Factory f = new modification.Corostone();
+            return (f.create(owner, res, sdt));
+        }
+        if (res.name.equals("gfx/terobjs/thingwall")) {
+            Factory f = new modification.Thingwall();
+            return (f.create(owner, res, sdt));
+        }
         {
             Factory f = res.getcode(Factory.class, false);
             if (f != null)

@@ -425,13 +425,22 @@ public class WaterTile extends Tiler {
     }
 
 
-    public static final BottomFog waterfog = new BottomFog(DefSettings.ALLWATERCOL.get());
-    public static final BottomFog deepfog = new BottomFog(DefSettings.DEEPWATERCOL.get());
-    public static final BottomFog shallowoceanfog = new BottomFog(DefSettings.SHALLOWOCEANWATERCOL.get());
-    public static final BottomFog shallowfog = new BottomFog(DefSettings.SHALLOWWATERCOL.get());
-    public static final BottomFog oceanfog = new BottomFog(DefSettings.OCEANWATERCOL.get());
-    public static final BottomFog wfog = new BottomFog(DefSettings.WATERCOL.get());
+    public static BottomFog waterfog = new BottomFog(DefSettings.ALLWATERCOL.get());
+    public static BottomFog deepfog = new BottomFog(DefSettings.DEEPWATERCOL.get());
+    public static BottomFog shallowoceanfog = new BottomFog(DefSettings.SHALLOWOCEANWATERCOL.get());
+    public static BottomFog shallowfog = new BottomFog(DefSettings.SHALLOWWATERCOL.get());
+    public static BottomFog oceanfog = new BottomFog(DefSettings.OCEANWATERCOL.get());
+    public static BottomFog wfog = new BottomFog(DefSettings.WATERCOL.get());
     private static final GLState boff = new States.DepthOffset(4, 4);
+
+    public static void updateFog() {
+        waterfog = new BottomFog(DefSettings.ALLWATERCOL.get());
+        deepfog = new BottomFog(DefSettings.DEEPWATERCOL.get());
+        shallowoceanfog = new BottomFog(DefSettings.SHALLOWOCEANWATERCOL.get());
+        shallowfog = new BottomFog(DefSettings.SHALLOWWATERCOL.get());
+        oceanfog = new BottomFog(DefSettings.OCEANWATERCOL.get());
+        wfog = new BottomFog(DefSettings.WATERCOL.get());
+    }
 
     public static final GLState obfog = new GLState.StandAlone(GLState.Slot.Type.DRAW) {
         {

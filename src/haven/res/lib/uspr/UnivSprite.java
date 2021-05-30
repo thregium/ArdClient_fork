@@ -198,6 +198,11 @@ public class UnivSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
         }
     }
 
+    public void update(int fl) {
+        this.fl = fl;
+        update();
+    }
+
     public void update(Message sdt) {
         fl = sdt.eom() ? 0xffff0000 : decnum(sdt);
         update();
