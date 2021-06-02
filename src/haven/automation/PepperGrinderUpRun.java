@@ -116,7 +116,7 @@ public class PepperGrinderUpRun extends Window implements Runnable {
                         return;
                     }
                     lblProg.settext("Status - Collecting");
-                    while (htable == null && !stopThread) {
+                    while (!tables.isEmpty() && htable == null && !stopThread) {
                         finishtimeout++;
                         if (finishtimeout > 10000) {
                             stopThread = true;
@@ -129,6 +129,8 @@ public class PepperGrinderUpRun extends Window implements Runnable {
                                 blacklist.add(tablelol);
                         }
                     }
+                    if (tables.isEmpty())
+                        break;
                     if (stopThread)
                         return;
                     tables.removeAll(blacklist);
@@ -170,19 +172,22 @@ public class PepperGrinderUpRun extends Window implements Runnable {
                     for (Widget w = herbtable.lchild; w != null; w = w.prev) {
                         if (w instanceof Inventory) {
                             Inventory inv = (Inventory) w;
-                            List<WItem> items = PBotUtils.getInventoryContents(inv);
-                            for (WItem item : items) {
+                            List<PBotItem> items = new PBotInventory(inv).getInventoryItemsByResnames(".*pepperdrupedried");
+                            for (PBotItem item : items) {
                                 freeslots = PBotUtils.invFreeSlots(ui);
                                 if (freeslots > 16) {
                                     System.out.println("Transferring pepper freeslots : " + freeslots);
-                                    item.item.wdgmsg("transfer", Coord.z);
+                                    item.gitem.wdgmsg("transfer", Coord.z);
                                 } else if (freeslots > 2) {
                                     System.out.println("Transferring pepper freeslots : " + freeslots);
-                                    item.item.wdgmsg("transfer", Coord.z);
+                                    item.gitem.wdgmsg("transfer", Coord.z);
                                     PBotUtils.sleep(300);
                                 } else
                                     break;
                             }
+                            items = new PBotInventory(inv).getInventoryItemsByResnames(".*pepperdrupedried");
+                            if (items.isEmpty())
+                                tables.remove(htable);
                         }
                     }
                     herbtable.close();
