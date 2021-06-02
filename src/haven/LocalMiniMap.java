@@ -129,6 +129,45 @@ public class LocalMiniMap extends Widget {
         return biome;
     }
 
+    public String tileName(int t) {
+        Resource r = ui.sess.glob.map.tilesetr(t);
+        if (r == null)
+            return (null);
+        return r.name;
+    }
+
+    public boolean isContains(int t, String type) {
+        Resource r = ui.sess.glob.map.tilesetr(t);
+        if (r == null)
+            return (false);
+        return ui.sess.glob.map.tilesetr(t).name.contains(type);
+    }
+
+    private BufferedImage tileimg(int t, BufferedImage[] texes, String res) {
+        BufferedImage img = texes[t];
+        if (img == null) {
+            Resource.Image ir = null;
+            TexR tr = null;
+            Resource r = ui.sess.glob.map.tilesetr(t);
+            if (r != null)
+                ir = r.layer(Resource.imgc);
+            if (r == null || ir == null)
+                r = Resource.remote().loadwait(res);
+            if (r != null && ir == null) {
+                ir = r.layer(Resource.imgc);
+                tr = r.layer(TexR.class);
+            }
+            if (ir != null)
+                img = ir.img;
+            else if (tr != null)
+                img = tr.tex.fill();
+            else
+                return (null);
+            texes[t] = img;
+        }
+        return (img);
+    }
+
     private BufferedImage tileimg(int t, BufferedImage[] texes) {
         BufferedImage img = texes[t];
         if (img == null) {
@@ -153,7 +192,12 @@ public class LocalMiniMap extends Widget {
         for (c.y = 0; c.y < sz.y; c.y++) {
             for (c.x = 0; c.x < sz.x; c.x++) {
                 int t = m.gettile(ul.add(c));
-                BufferedImage tex = tileimg(t, texes);
+                BufferedImage tex;
+                if (configuration.cavetileonmap && isContains(t, "gfx/tiles/rocks/")) {
+                    final String tname = tileName(t);
+                    final String newtype = "gfx/terobjs/bumlings/" + tname.substring(tname.lastIndexOf("/") + 1);
+                    tex = tileimg(t, texes, newtype);
+                } else tex = tileimg(t, texes);
                 int rgb = 0;
                 if (tex != null) {
                     switch (MINIMAPTYPE.get()) {
@@ -169,7 +213,7 @@ public class LocalMiniMap extends Widget {
                             rgb = tempColor.getRGB();
                             break;
                         case 2:
-                            Color simple_color = simple_tile_img(t, texes);
+                            Color simple_color = simple_tile_img(tex);
 
                             if (simple_color != null)
                                 rgb = simple_color.getRGB();
@@ -218,21 +262,9 @@ public class LocalMiniMap extends Widget {
     }
 
     @SuppressWarnings("Duplicates")
-    private Color simple_tile_img(int t, BufferedImage[] texes) {
-        int sumr = 0, sumg = 0, sumb = 0;
-
-        BufferedImage img = texes[t];
-
-        if (!simple_textures.containsKey(img)) {
-            Resource r = ui.sess.glob.map.tilesetr(t);
-            if (r == null)
-                return (null);
-            Resource.Image ir = r.layer(Resource.imgc);
-            if (ir == null)
-                return (null);
-            img = ir.img;
-            texes[t] = img;
-
+    private Color simple_tile_img(BufferedImage img) {
+        return simple_textures.computeIfAbsent(img, i -> {
+            int sumr = 0, sumg = 0, sumb = 0;
             for (int x = 0; x < img.getWidth(); x++) {
                 for (int y = 0; y < img.getHeight(); y++) {
                     int rgb = img.getRGB(x, y);
@@ -248,19 +280,8 @@ public class LocalMiniMap extends Widget {
             }
 
             int num = img.getWidth() * img.getHeight();
-            simple_textures.put(img, new Color(sumr / num, sumg / num, sumb / num));
-        }
-
-
-//        int t = m.gettile(ul.add(c));
-//        BufferedImage tex = tileimg(t, texes);
-//        int rgb = 0;
-//        if (tex != null)
-//            rgb = tex.getRGB(Utils.floormod(c.x + ul.x, tex.getWidth()),
-//                    Utils.floormod(c.y + ul.y, tex.getHeight()));
-//        buf.setRGB(c.x, c.y, rgb);
-
-        return simple_textures.get(img);
+            return new Color(sumr / num, sumg / num, sumb / num);
+        });
     }
 
     public void save(MapFile file) {

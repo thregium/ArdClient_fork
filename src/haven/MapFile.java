@@ -1135,7 +1135,6 @@ public class MapFile {
                                 BufferedImage tex;
                                 if (configuration.cavetileonmap && isContains(t, "gfx/tiles/rocks/")) {
                                     final String tname = tileName(t);
-//                                final String newtype = "gfx/tiles/paving/" + tname.substring(tname.lastIndexOf("/") + 1);
                                     final String newtype = "gfx/terobjs/bumlings/" + tname.substring(tname.lastIndexOf("/") + 1);
                                     tex = tiletex(t, texes, cached, newtype);
                                 } else tex = tiletex(t, texes, cached);
@@ -1220,11 +1219,8 @@ public class MapFile {
 
         @SuppressWarnings("Duplicates")
         private Color simple_tile_img(BufferedImage img) {
-            int sumr = 0, sumg = 0, sumb = 0;
-
-            Color color = simple_textures.get(img);
-
-            if (color == null) {
+            return simple_textures.computeIfAbsent(img, i -> {
+                int sumr = 0, sumg = 0, sumb = 0;
                 for (int x = 0; x < img.getWidth(); x++) {
                     for (int y = 0; y < img.getHeight(); y++) {
                         int rgb = img.getRGB(x, y);
@@ -1240,10 +1236,8 @@ public class MapFile {
                 }
 
                 int num = img.getWidth() * img.getHeight();
-                simple_textures.put(img, new Color(sumr / num, sumg / num, sumb / num));
-            }
-
-            return color;
+                return new Color(sumr / num, sumg / num, sumb / num);
+            });
         }
 
         public BufferedImage olrender(Coord off, String tag) {

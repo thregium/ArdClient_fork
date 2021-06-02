@@ -42,7 +42,7 @@ public class PepperBotUp extends Window implements GobSelectCallback {
     private CheckBox onlyStorage = new CheckBox("Only Storages");
 
     public PepperBotUp() {
-        super(new Coord(180, 200), "Pepper Bot Updated");
+        super(new Coord(300, 200), "Pepper Bot Updated");
     }
 
     public void added() {
@@ -134,7 +134,7 @@ public class PepperBotUp extends Window implements GobSelectCallback {
                     allowrun = false;
                 }
                 if (ca != null && cb != null && allowrun) {
-                    PepperGrinderUpRun bf = new PepperGrinderUpRun(ca, cb, grinder);
+                    PepperGrinderUpRun bf = new PepperGrinderUpRun(ca, cb, grinder, onlyStorage.a);
                     ui.gui.add(bf, new Coord(ui.gui.sz.x / 2 - bf.sz.x / 2, ui.gui.sz.y / 2 - bf.sz.y / 2 - 200));
                     new Thread(bf).start();
                     this.parent.destroy();

@@ -2375,29 +2375,29 @@ public class OptWnd extends Window {
         appender.add(autoopenlist);
 
 
-        Button resetWndBtn = new Button(220, "Reset Windows (req. logout)") {
-            @Override
-            public void click() {
-                try {
-                    for (String key : Utils.prefs().keys()) {
-                        if (key.endsWith("_c")) {
-                            Utils.delpref(key);
-                        }
-                    }
-                } catch (BackingStoreException e) {
-                }
-                Utils.delpref("mmapc");
-                Utils.delpref("mmapwndsz");
-                Utils.delpref("mmapsz");
-                Utils.delpref("quickslotsc");
-                Utils.delpref("chatsz");
-                Utils.delpref("chatvis");
-                Utils.delpref("menu-visible");
-                Utils.delpref("fbelt_vertical");
-                Utils.delpref("haven.study.position");
-            }
-        };
-        uis.add(resetWndBtn, new Coord(620 / 2 - resetWndBtn.sz.x / 2, 320));
+//        Button resetWndBtn = new Button(220, "Reset Windows (req. logout)") {
+//            @Override
+//            public void click() {
+//                try {
+//                    for (String key : Utils.prefs().keys()) {
+//                        if (key.endsWith("_c")) {
+//                            Utils.delpref(key);
+//                        }
+//                    }
+//                } catch (BackingStoreException e) {
+//                }
+//                Utils.delpref("mmapc");
+//                Utils.delpref("mmapwndsz");
+//                Utils.delpref("mmapsz");
+//                Utils.delpref("quickslotsc");
+//                Utils.delpref("chatsz");
+//                Utils.delpref("chatvis");
+//                Utils.delpref("menu-visible");
+//                Utils.delpref("fbelt_vertical");
+//                Utils.delpref("haven.study.position");
+//            }
+//        };
+//        uis.add(resetWndBtn, new Coord(620 / 2 - resetWndBtn.sz.x / 2, 320));
         uis.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
         uis.pack();
     }
@@ -3422,7 +3422,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("New livestock manager") {
+        appender.add(new CheckBox("New livestock manager - need open Livestock Manager Sloth from Xtensions") {
             {
                 a = configuration.forcelivestock;
             }
@@ -4038,6 +4038,22 @@ public class OptWnd extends Window {
                 return Text.render("Simple map blend: " + val / 100f).tex();
             }
         });
+        appender.add(new CheckBox("Draw cave tiles on map") {
+            {
+                a = configuration.cavetileonmap;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("cavetileonmap", val);
+                configuration.cavetileonmap = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Draw cave tiles on large map. Outline nust be disable.").tex();
+            }
+        });
 
         appender.add(new Label(""));
         appender.add(new Label("Minimap"));
@@ -4207,22 +4223,6 @@ public class OptWnd extends Window {
             @Override
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Draw ridges on large map").tex();
-            }
-        });
-        appender.add(new CheckBox("Draw cave tiles on map") {
-            {
-                a = configuration.cavetileonmap;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("cavetileonmap", val);
-                configuration.cavetileonmap = val;
-                a = val;
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Draw cave tiles on large map. Outline nust be disable.").tex();
             }
         });
 

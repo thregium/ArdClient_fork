@@ -92,7 +92,7 @@ public class PepperBotUpRun extends Window implements Runnable {
             ui.gui.wdgmsg("act", "craft", "boiledpepper");
             PBotUtils.waitForWindow(ui, "Crafting");
 
-            while (!onlyStorages && !this.crops.isEmpty()) {
+            while (!onlyStorages && !this.crops.isEmpty() && !stopThread) {
                 if (harvest) {
                     retain = barrel.rc;
                     // Initialise crop list
@@ -169,7 +169,7 @@ public class PepperBotUpRun extends Window implements Runnable {
                         int retryharvest = 0;
 
                         // Wait for harvest menu to appear
-                        while (!PBotUtils.petalExists(ui)) {
+                        while (!PBotUtils.petalExists(ui) && !stopThread) {
                             if (stopThread)
                                 break;
                             retryharvest++;
@@ -190,7 +190,7 @@ public class PepperBotUpRun extends Window implements Runnable {
                         this.crops.remove(g);
 
                         // Wait until stage has changed = harvested
-                        while (true) {
+                        while (!stopThread) {
                             if (stopThread)
                                 break;
                             retryharvest++;
@@ -227,7 +227,7 @@ public class PepperBotUpRun extends Window implements Runnable {
                 PBotUtils.sleep(6000);
                 lblProg2.settext("Moving to harvest");
             }
-            while (!this.storages.isEmpty()) {
+            while (!this.storages.isEmpty() && !stopThread) {
                 if (harvest) {
                     retain = barrel.rc;
                     // Initialise crop list
@@ -366,11 +366,11 @@ public class PepperBotUpRun extends Window implements Runnable {
                     lblProg2.settext("Tables");
                     PBotUtils.sleep(1000);
 
-                    while (ui.gui.maininv.getItemPartialCount("Drupe") > 0) {
+                    while (ui.gui.maininv.getItemPartialCount("Drupe") > 0 && !stopThread) {
                         if (stopThread) // Checks if aborted
                             break;
                         lblProg2.settext("Tables");
-                        while (htable == null) {
+                        while (htable == null && !stopThread) {
                             if (tables.isEmpty()) {
                                 PBotUtils.sysMsg(ui, "Tables is now empty for some reason, all tables full?", Color.white);
                                 stopBtn.click();
@@ -400,7 +400,7 @@ public class PepperBotUpRun extends Window implements Runnable {
                         }
                         PBotUtils.doClick(ui, htable, 3, 0);
                         int retry = 0;
-                        while (ui.gui.getwnd("Herbalist Table") == null) {
+                        while (ui.gui.getwnd("Herbalist Table") == null && !stopThread) {
                             retry++;
                             if (retry > 500) {
                                 retry = 0;
@@ -455,7 +455,7 @@ public class PepperBotUpRun extends Window implements Runnable {
 
                 if (PBotUtils.invFreeSlots(ui) > freeslots)
                     return;
-                waitres(PBotUtils.playerInventory(ui).inv);
+                waitres(PBotUtils.playerInventory(ui));
                 List<PBotItem> peppers = PBotUtils.playerInventory(ui).getInventoryItemsByResnames("gfx/invobjs/peppercorn");
                 if (peppers.isEmpty())
                     return;
@@ -464,7 +464,7 @@ public class PepperBotUpRun extends Window implements Runnable {
                 PBotUtils.pfRightClick(ui, cauldron, 0);
                 FlowerMenu.setNextSelection("Open");
                 int tryagaintimer = 0;
-                while (ui.gui.getwnd("Cauldron") == null) {
+                while (ui.gui.getwnd("Cauldron") == null && !stopThread) {
                     if (stopThread) // Checks if aborted
                         break;
                     PBotUtils.sleep(10);
@@ -491,7 +491,7 @@ public class PepperBotUpRun extends Window implements Runnable {
                 if (vm.amount < 30)
                     RefillCauldron(ui.gui);
 
-                while (ui.gui.prog >= 0) {
+                while (ui.gui.prog >= 0 && !stopThread) {
                     if (stopThread) // Checks if aborted
                         break;
                     lblProg2.settext("Boiling");
@@ -654,11 +654,28 @@ public class PepperBotUpRun extends Window implements Runnable {
     }
 
     public void waitres(Inventory inv) {
+        lblProg.settext("Resource debug");
         List<PBotItem> a = new PBotInventory(inv).getInventoryContents();
         for (PBotItem i : a) {
-            while (i.getResname() == null) {
+            while (i.getResname() == null && !stopThread) {
                 PBotUtils.sleep(100);
             }
         }
+    }
+
+    public void waitres(PBotInventory inv) {
+        lblProg.settext("Resource debug");
+        List<PBotItem> a = inv.getInventoryContents();
+        for (PBotItem i : a) {
+            while (i.getResname() == null && !stopThread) {
+                PBotUtils.sleep(100);
+            }
+        }
+    }
+
+    @Override
+    public void close() {
+        stopThread = true;
+        stop();
     }
 }

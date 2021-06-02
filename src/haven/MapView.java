@@ -2629,6 +2629,10 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         args = Utils.extend(args, gobargs);
                         if (clickb == 1 || gobargs.length > 0) {
                             clearmovequeue();
+                            canceltasks();
+                            if (pastaPathfinder != null && pastaPathfinder.isAlive() && !pastaPathfinder.isInterrupted()) {
+                                pastaPathfinder.interrupt();
+                            }
                         }
                         wdgmsg("click", args);
                         pllastcc = mc;
@@ -2687,8 +2691,11 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         args = Utils.extend(args, gobargs);
                         if (clickb == 1 || gobargs.length > 0) {
                             clearmovequeue();
+                            canceltasks();
+                            if (pastaPathfinder != null && pastaPathfinder.isAlive() && !pastaPathfinder.isInterrupted()) {
+                                pastaPathfinder.interrupt();
+                            }
                         }
-                        canceltasks();
                         wdgmsg("click", args);
                         pllastcc = mc;
                         if (gob.getres() != null) {

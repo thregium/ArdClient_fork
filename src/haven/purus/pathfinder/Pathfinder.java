@@ -99,7 +99,7 @@ public class Pathfinder extends Thread {
         if (coordToTile(gui.map.player().rc.sub(origin)).equals(tile))
             return (true);
         clickTile(tile, origin);
-        for (int i = 0, sleep = 25; gui.map.player().isMoving() || !coordToTile(gui.map.player().rc.sub(origin)).equals(tile); ) { // For now lets assume that player starts from different tile so we only have to check that he has moved to correct tile and is not walking anymore
+        for (int i = 0, sleep = 25; (gui.map.player().isMoving() || !coordToTile(gui.map.player().rc.sub(origin)).equals(tile)) && !stop; ) { // For now lets assume that player starts from different tile so we only have to check that he has moved to correct tile and is not walking anymore
             if (!gui.map.player().isMoving()) {
                 if (i > 1000) {
                     return (false);
