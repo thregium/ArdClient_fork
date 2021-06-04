@@ -456,18 +456,18 @@ public abstract class ItemInfo {
     private static final Map<String, ItemInfo.InfoFactory> customFactories = new HashMap<>();
 
     static {
-        customFactories.put("paginae/gov/enact/backwater", new BackwaterFactory());
-        customFactories.put("paginae/gov/enact/bullmyth", new BullmythFactory());
-        customFactories.put("paginae/gov/enact/centeroflearning", new CenteroflearningFactory());
-        customFactories.put("paginae/gov/enact/fecundearth", new FecundearthFactory());
-        customFactories.put("paginae/gov/enact/foundingmythos", new FoundingmythosFactory());
-        customFactories.put("paginae/gov/enact/gamekeeping", new GamekeepingFactory());
-        customFactories.put("paginae/gov/enact/guardedmarches", new GuardedmarchesFactory());
-        customFactories.put("paginae/gov/enact/heraldicswan", new HeraldicswanFactory());
-        customFactories.put("paginae/gov/enact/localcuisine", new LocalcuisineFactory());
-        customFactories.put("paginae/gov/enact/mountaintradition", new MountaintraditionFactory());
-        customFactories.put("paginae/gov/enact/seamarriage", new SeamarriageFactory());
-        customFactories.put("paginae/gov/enact/woodlandrealm", new WoodlandrealmFactory());
+//        customFactories.put("paginae/gov/enact/backwater", new BackwaterFactory());
+//        customFactories.put("paginae/gov/enact/bullmyth", new BullmythFactory());
+//        customFactories.put("paginae/gov/enact/centeroflearning", new CenteroflearningFactory());
+//        customFactories.put("paginae/gov/enact/fecundearth", new FecundearthFactory());
+//        customFactories.put("paginae/gov/enact/foundingmythos", new FoundingmythosFactory());
+//        customFactories.put("paginae/gov/enact/gamekeeping", new GamekeepingFactory());
+//        customFactories.put("paginae/gov/enact/guardedmarches", new GuardedmarchesFactory());
+//        customFactories.put("paginae/gov/enact/heraldicswan", new HeraldicswanFactory());
+//        customFactories.put("paginae/gov/enact/localcuisine", new LocalcuisineFactory());
+//        customFactories.put("paginae/gov/enact/mountaintradition", new MountaintraditionFactory());
+//        customFactories.put("paginae/gov/enact/seamarriage", new SeamarriageFactory());
+//        customFactories.put("paginae/gov/enact/woodlandrealm", new WoodlandrealmFactory());
 
         customFactories.put("ui/tt/armor", new ArmorFactory());
         customFactories.put("ui/tt/wear", new WearFactory());
