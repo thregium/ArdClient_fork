@@ -125,11 +125,9 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
                 }
             }
             if (!stckpl()) break main;
-            PBotUtils.sysMsg(ui, "Finish!", Color.GREEN);
-        } catch (Loading | NullPointerException q) {
         } catch (Exception e) {
-            PBotUtils.sysMsg(ui, "Something went wrong. Restart", Color.GREEN);
-            System.err.println("Something went wrong. Restart");
+            PBotUtils.sysMsg(ui, "Something went wrong. Restart! " + e.getMessage());
+            e.printStackTrace();
         }
         PBotUtils.sysMsg(ui, "Finish!", Color.GREEN);
         stop();
@@ -194,24 +192,29 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
 
         @Override
         public void run() {
-            if (StockpileFiller2.this.stockpiles.size() == 0) {
-                PBotUtils.sysMsg(ui, "Please select a first stockpile Alt + Click - try again.");
-                return;
-            }
-            PBotUtils.selectArea(ui);
-            Coord aPnt = PBotUtils.getSelectedAreaA();
-            Coord bPnt = PBotUtils.getSelectedAreaB();
-            if (Math.abs(aPnt.x - bPnt.x) > 22 && Math.abs(aPnt.y - bPnt.y) > 22) {
-                PBotUtils.sysMsg(ui, "Please select an area at least 2 tiles wide - try again.");
-                return;
-            }
-            ArrayList<PBotGob> gobs = PBotUtils.gobsInArea(ui, aPnt, bPnt);
-            int i = 0;
-            while (i < gobs.size()) {
-                if (gobs.get((int) i).gob.getres().basename().equals(((Gob) StockpileFiller2.this.stockpiles.get(0)).getres().basename())) {
-                    StockpileFiller2.this.gobselect(gobs.get((int) i).gob);
+            try {
+                if (StockpileFiller2.this.stockpiles.isEmpty()) {
+                    PBotUtils.sysMsg(ui, "Please select a first stockpile Alt + Click - try again.");
+                    return;
                 }
-                ++i;
+                PBotUtils.selectArea(ui);
+                Coord aPnt = PBotUtils.getSelectedAreaA();
+                Coord bPnt = PBotUtils.getSelectedAreaB();
+                if (Math.abs(aPnt.x - bPnt.x) > 22 && Math.abs(aPnt.y - bPnt.y) > 22) {
+                    PBotUtils.sysMsg(ui, "Please select an area at least 2 tiles wide - try again.");
+                    return;
+                }
+                ArrayList<PBotGob> gobs = PBotUtils.gobsInArea(ui, aPnt, bPnt);
+                int i = 0;
+                while (i < gobs.size()) {
+                    if (gobs.get(i).gob.getres().basename().equals((StockpileFiller2.this.stockpiles.get(0)).getres().basename())) {
+                        StockpileFiller2.this.gobselect(gobs.get(i).gob);
+                    }
+                    ++i;
+                }
+            } catch (Exception e) {
+                PBotUtils.sysMsg(ui, "Error: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }
@@ -292,7 +295,7 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
             return (false);
         }
 
-        while (PBotUtils.playerInventory(ui).getInventoryItemsByResnames(invobj).size() > 0 && !stop) {
+        while (!PBotUtils.playerInventory(ui).getInventoryItemsByResnames(invobj).isEmpty() && !stop) {
             while (!stockpiles.isEmpty() && !stop) {
                 Gob stock = null;
                 PBotGob fstock = null;
@@ -429,7 +432,7 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
         int stoping = 0;
         int maxstoping = 5000;
         int time = 10;
-        while (PBotUtils.playerInventory(ui).getInventoryItemsByResnames(invobj).size() > 0 && !gob.stockpileIsFull() && !stop) {
+        while (!PBotUtils.playerInventory(ui).getInventoryItemsByResnames(invobj).isEmpty() && !gob.stockpileIsFull() && !stop) {
             if (stoping >= maxstoping)
                 break;
             PBotUtils.sleep(time);
