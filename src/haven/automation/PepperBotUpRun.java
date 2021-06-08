@@ -1,6 +1,7 @@
 package haven.automation;
 
 import haven.Button;
+import haven.CheckBox;
 import haven.Coord;
 import haven.Coord2d;
 import haven.FlowerMenu;
@@ -47,12 +48,13 @@ public class PepperBotUpRun extends Window implements Runnable {
     private Coord2d retain;
     private Boolean boilmode = false;
     private Coord finalloc;
+    private CheckBox pftype = new CheckBox("Path purus/sloth");
 
     private boolean onlyStorages = false;
 
 
     public PepperBotUpRun(ArrayList crops, ArrayList storages, ArrayList tables, boolean onlyStorages, boolean harvest, Gob barrel, Gob water, Gob cauldron, Gob hfire) {
-        super(new Coord(140, 55), "Trellis Farmer");
+        super(new Coord(140, 85), "Trellis Farmer");
         this.harvest = harvest;
         this.water = water;
         this.hfire = hfire;
@@ -83,6 +85,7 @@ public class PepperBotUpRun extends Window implements Runnable {
             }
         };
         add(stopBtn, new Coord(10, 0));
+        add(pftype, new Coord(10, 65));
     }
 
     public void run() {
@@ -287,7 +290,7 @@ public class PepperBotUpRun extends Window implements Runnable {
                             if (stopThread)
                                 break;
                             lblProg2.settext("Collecting");
-                            if (!PBotUtils.pfRightClick(ui, g, 0)) {
+                            if (!pfRight(g, 0)) {
                                 PBotUtils.sysMsg(ui, "Not found the path");
                                 // Update progression
                                 cropsHarvested++;
@@ -461,23 +464,19 @@ public class PepperBotUpRun extends Window implements Runnable {
                     return;
                 pepperlist.clear();
                 lblProg2.settext("Boiling");
-                PBotUtils.pfRightClick(ui, cauldron, 0);
+                pfRight(cauldron, 0);
                 FlowerMenu.setNextSelection("Open");
                 int tryagaintimer = 0;
                 while (ui.gui.getwnd("Cauldron") == null && !stopThread) {
                     if (stopThread) // Checks if aborted
                         break;
                     PBotUtils.sleep(10);
-                    try {
-                        Thread.sleep(10);
-                        tryagaintimer++;
-                        if (tryagaintimer >= 500) {
-                            tryagaintimer = 0;
-                            PBotUtils.sysLogAppend(ui, "Retrying cauldron open", "white");
-                            PBotUtils.pfRightClick(ui, cauldron, 0);
-                            FlowerMenu.setNextSelection("Open");
-                        }
-                    } catch (InterruptedException idk) {
+                    tryagaintimer++;
+                    if (tryagaintimer >= 500) {
+                        tryagaintimer = 0;
+                        PBotUtils.sysLogAppend(ui, "Retrying cauldron open", "white");
+                        pfRight(cauldron, 0);
+                        FlowerMenu.setNextSelection("Open");
                     }
                 }
                 PBotUtils.sleep(500);
@@ -489,7 +488,7 @@ public class PepperBotUpRun extends Window implements Runnable {
                 PBotUtils.sleep(2000);
 
                 if (vm.amount < 30)
-                    RefillCauldron(ui.gui);
+                    RefillCauldron();
 
                 while (ui.gui.prog >= 0 && !stopThread) {
                     if (stopThread) // Checks if aborted
@@ -514,7 +513,7 @@ public class PepperBotUpRun extends Window implements Runnable {
             super.wdgmsg(sender, msg, args);
     }
 
-    private void RefillCauldron(GameUI gui) {
+    private void RefillCauldron() {
         try {
             List<Gob> allgobs = PBotUtils.getGobs(ui);
             for (Gob gobz : allgobs) {
@@ -530,12 +529,12 @@ public class PepperBotUpRun extends Window implements Runnable {
         if (barrel.ols.isEmpty() && water != null) {
             lblProg2.settext("Refill Barrel");
 
-            PBotUtils.pfRightClick(ui, barrel, 0);
+            pfRight(barrel, 0);
             PBotUtils.sleep(1000);
             Coord2d playerCoord = PBotGobAPI.player(ui).getRcCoords();
             PBotUtils.liftGob(ui, barrel);
             PBotUtils.sleep(1000);
-            PBotUtils.pfRightClick(ui, water, 0);
+            pfRight(water, 0);
             PBotUtils.sleep(1000);
             pathTo(cauldron);
             PBotUtils.doClick(ui, cauldron, 3, 0);
@@ -546,14 +545,14 @@ public class PepperBotUpRun extends Window implements Runnable {
             PBotUtils.sleep(1000);
 
             FlowerMenu.setNextSelection("Open");
-            PBotUtils.pfRightClick(ui, cauldron, 0);
+            pfRight(cauldron, 0);
             PBotUtils.sleep(2000);
             PBotUtils.craftItem(ui, "boiledpepper", 1);
             PBotUtils.sleep(2000);
         } else {
             lblProg2.settext("Refill Cauldron");
 
-            PBotUtils.pfRightClick(ui, barrel, 0);
+            pfRight(barrel, 0);
             PBotUtils.sleep(1000);
             Coord2d playerCoord = PBotGobAPI.player(ui).getRcCoords();
             PBotUtils.liftGob(ui, barrel);
@@ -567,7 +566,7 @@ public class PepperBotUpRun extends Window implements Runnable {
             PBotUtils.sleep(1000);
 
             FlowerMenu.setNextSelection("Open");
-            PBotUtils.pfRightClick(ui, cauldron, 0);
+            pfRight(cauldron, 0);
             PBotUtils.sleep(2000);
             PBotUtils.craftItem(ui, "boiledpepper", 1);
             PBotUtils.sleep(2000);
@@ -579,7 +578,7 @@ public class PepperBotUpRun extends Window implements Runnable {
 
         lblProg2.settext("Find path");
         for (Coord2d c2d : near(gCoord)) {
-            if (PBotUtils.pfLeftClick(ui, c2d.x, c2d.y)) {
+            if (pfLeft(c2d)) {
                 PBotUtils.mapClick(ui, c2d, 1, 0);
                 return (waitmove(2000, c2d));
             }
@@ -593,7 +592,7 @@ public class PepperBotUpRun extends Window implements Runnable {
 
         lblProg2.settext("Find path");
         for (Coord2d c2d : near(gCoord, offset)) {
-            if (PBotUtils.pfLeftClick(ui, c2d.x, c2d.y)) {
+            if (pfLeft(c2d)) {
                 PBotUtils.mapClick(ui, c2d, 1, 0);
                 return (waitmove(2000, c2d));
             }
@@ -606,13 +605,21 @@ public class PepperBotUpRun extends Window implements Runnable {
 
         lblProg2.settext("Find path");
         for (Coord2d c2d : near(gCoord, offset)) {
-            if (PBotUtils.pfLeftClick(ui, c2d.x, c2d.y)) {
+            if (pfLeft(c2d)) {
                 PBotUtils.mapClick(ui, c2d, 1, 0);
                 return (waitmove(2000, c2d));
             }
         }
 
         return false;
+    }
+
+    public boolean pfRight(Gob g, int mod) {
+        return (pftype.a ? PBotUtils.PathfinderRightClick(ui, g, mod) : PBotUtils.pfRightClick(ui, g, mod));
+    }
+
+    public boolean pfLeft(Coord2d c2d) {
+        return (pftype.a ? PBotUtils.pfmove(ui, c2d.x, c2d.y) : PBotUtils.pfLeftClick(ui, c2d.x, c2d.y));
     }
 
     public List<Coord2d> near(Coord2d coord2d) {
@@ -648,13 +655,16 @@ public class PepperBotUpRun extends Window implements Runnable {
         if (ui.gui.map.pfthread != null) {
             ui.gui.map.pfthread.interrupt();
         }
+        if (ui.gui.map.pastaPathfinder != null) {
+            ui.gui.map.pastaPathfinder.interrupt();
+        }
         stopThread = true;
         harvest = false;
         this.destroy();
     }
 
     public void waitres(Inventory inv) {
-        lblProg.settext("Resource debug");
+        lblProg2.settext("Resource debug");
         List<PBotItem> a = new PBotInventory(inv).getInventoryContents();
         for (PBotItem i : a) {
             while (i.getResname() == null && !stopThread) {
@@ -664,7 +674,7 @@ public class PepperBotUpRun extends Window implements Runnable {
     }
 
     public void waitres(PBotInventory inv) {
-        lblProg.settext("Resource debug");
+        lblProg2.settext("Resource debug");
         List<PBotItem> a = inv.getInventoryContents();
         for (PBotItem i : a) {
             while (i.getResname() == null && !stopThread) {

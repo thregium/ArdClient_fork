@@ -273,7 +273,7 @@ public class TrellisFarmer2 extends Window implements Runnable {
             this.destroy();
         } catch (Exception e) {
             e.printStackTrace();
-            PBotUtils.sysMsg(ui, e.getMessage());
+            PBotUtils.sysMsg(ui, "Some error, check log!");
         }
     }
 

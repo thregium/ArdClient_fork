@@ -1,6 +1,7 @@
 package haven.automation;
 
 import haven.Button;
+import haven.CheckBox;
 import haven.Coord;
 import haven.Coord2d;
 import haven.FastMesh;
@@ -46,6 +47,7 @@ public class PepperGrinderUpRun extends Window implements Runnable {
     private final int rowgap = 4200;
     private final int travel = 20000;
     public boolean onlyStorages = false;
+    private CheckBox pftype = new CheckBox("Path purus/sloth");
 
     private static final List<String> storagesTypes = new ArrayList<String>() {{
         add("gfx/terobjs/woodbox");
@@ -63,7 +65,7 @@ public class PepperGrinderUpRun extends Window implements Runnable {
     private Thread t;
 
     public PepperGrinderUpRun(Coord rc1, Coord rc2, Gob grinder, boolean onlyStorages) {
-        super(new Coord(120, 45), "Pepper Grinder");
+        super(new Coord(120, 75), "Pepper Grinder");
         this.grinder = grinder;
         this.rc1 = rc1;
         this.rc2 = rc2;
@@ -72,7 +74,7 @@ public class PepperGrinderUpRun extends Window implements Runnable {
         // Initialise arraylists
 
         lblProg = new Label("Initialising...");
-        add(lblProg, new Coord(0, 35));
+        add(lblProg, new Coord(15, 35));
 
         stopBtn = new Button(120, "Stop") {
             @Override
@@ -82,6 +84,7 @@ public class PepperGrinderUpRun extends Window implements Runnable {
             }
         };
         add(stopBtn, new Coord(0, 0));
+        add(pftype, new Coord(0, 55));
     }
 
     public void run() {
@@ -160,7 +163,7 @@ public class PepperGrinderUpRun extends Window implements Runnable {
                                 retrycount = 0;
                                 PBotUtils.sleep(1000);
                             }
-                            PBotUtils.pfRightClick(ui, htable, 0);
+                            pfRight(htable, 0);
                         }
                         PBotUtils.sleep(10);
                     }
@@ -266,7 +269,7 @@ public class PepperGrinderUpRun extends Window implements Runnable {
                         if (stopThread)
                             break;
                         lblProg.settext("Collecting");
-                        if (!PBotUtils.pfRightClick(ui, g, 0)) {
+                        if (!pfRight(g, 0)) {
                             PBotUtils.sysMsg(ui, "Not found the path");
                             // Update progression
                             lblProg.settext("Status - Collecting");
@@ -480,7 +483,7 @@ public class PepperGrinderUpRun extends Window implements Runnable {
 
         lblProg.settext("Find path");
         for (Coord2d c2d : near(gCoord)) {
-            if (PBotUtils.pfLeftClick(ui, c2d.x, c2d.y)) {
+            if (pfLeft(c2d)) {
                 PBotUtils.mapClick(ui, c2d, 1, 0);
                 return (waitmove(2000, c2d));
             }
@@ -494,7 +497,7 @@ public class PepperGrinderUpRun extends Window implements Runnable {
 
         lblProg.settext("Find path");
         for (Coord2d c2d : near(gCoord, offset)) {
-            if (PBotUtils.pfLeftClick(ui, c2d.x, c2d.y)) {
+            if (pfLeft(c2d)) {
                 PBotUtils.mapClick(ui, c2d, 1, 0);
                 return (waitmove(2000, c2d));
             }
@@ -507,13 +510,21 @@ public class PepperGrinderUpRun extends Window implements Runnable {
 
         lblProg.settext("Find path");
         for (Coord2d c2d : near(gCoord, offset)) {
-            if (PBotUtils.pfLeftClick(ui, c2d.x, c2d.y)) {
+            if (pfLeft(c2d)) {
                 PBotUtils.mapClick(ui, c2d, 1, 0);
                 return (waitmove(2000, c2d));
             }
         }
 
         return false;
+    }
+
+    public boolean pfRight(Gob g, int mod) {
+        return (pftype.a ? PBotUtils.PathfinderRightClick(ui, g, mod) : PBotUtils.pfRightClick(ui, g, mod));
+    }
+
+    public boolean pfLeft(Coord2d c2d) {
+        return (pftype.a ? PBotUtils.pfmove(ui, c2d.x, c2d.y) : PBotUtils.pfLeftClick(ui, c2d.x, c2d.y));
     }
 
     public List<Coord2d> near(Coord2d coord2d) {
@@ -569,6 +580,9 @@ public class PepperGrinderUpRun extends Window implements Runnable {
         //ui.gui.map.wdgmsg("click", Coord.z, ui.gui.map.player().rc.floor(posres), 1, 0);
         if (ui.gui.map.pfthread != null) {
             ui.gui.map.pfthread.interrupt();
+        }
+        if (ui.gui.map.pastaPathfinder != null) {
+            ui.gui.map.pastaPathfinder.interrupt();
         }
         stopThread = true;
         this.destroy();

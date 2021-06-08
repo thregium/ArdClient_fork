@@ -96,7 +96,7 @@ public class LocalMiniMap extends Widget {
     public List<DisplayIcon> icons = Collections.emptyList();
     public GobIcon.Settings iconconf;
     public long lastnewgid;
-    private HashMap<BufferedImage, Color> simple_textures = new HashMap<>();
+    private final HashMap<BufferedImage, Color> simple_textures = new HashMap<>();
     private String biome;
     private Coord cc = null;
     private UI.Grab dragging;
@@ -263,25 +263,27 @@ public class LocalMiniMap extends Widget {
 
     @SuppressWarnings("Duplicates")
     private Color simple_tile_img(BufferedImage img) {
-        return simple_textures.computeIfAbsent(img, i -> {
-            int sumr = 0, sumg = 0, sumb = 0;
-            for (int x = 0; x < img.getWidth(); x++) {
-                for (int y = 0; y < img.getHeight(); y++) {
-                    int rgb = img.getRGB(x, y);
+        synchronized (simple_textures) {
+            return simple_textures.computeIfAbsent(img, i -> {
+                int sumr = 0, sumg = 0, sumb = 0;
+                for (int x = 0; x < img.getWidth(); x++) {
+                    for (int y = 0; y < img.getHeight(); y++) {
+                        int rgb = img.getRGB(x, y);
 
-                    int red = (rgb >> 16) & 0xFF;
-                    int green = (rgb >> 8) & 0xFF;
-                    int blue = rgb & 0xFF;
+                        int red = (rgb >> 16) & 0xFF;
+                        int green = (rgb >> 8) & 0xFF;
+                        int blue = rgb & 0xFF;
 
-                    sumr += red;
-                    sumg += green;
-                    sumb += blue;
+                        sumr += red;
+                        sumg += green;
+                        sumb += blue;
+                    }
                 }
-            }
 
-            int num = img.getWidth() * img.getHeight();
-            return new Color(sumr / num, sumg / num, sumb / num);
-        });
+                int num = img.getWidth() * img.getHeight();
+                return new Color(sumr / num, sumg / num, sumb / num);
+            });
+        }
     }
 
     public void save(MapFile file) {
