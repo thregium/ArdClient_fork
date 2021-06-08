@@ -64,17 +64,18 @@ public class PepperGrinderUpRun extends Window implements Runnable {
     private Coord finalloc;
     private Thread t;
 
-    public PepperGrinderUpRun(Coord rc1, Coord rc2, Gob grinder, boolean onlyStorages) {
+    public PepperGrinderUpRun(Coord rc1, Coord rc2, Gob grinder, Gob hfire, boolean onlyStorages) {
         super(new Coord(120, 75), "Pepper Grinder");
         this.grinder = grinder;
         this.rc1 = rc1;
         this.rc2 = rc2;
+        this.hfire = hfire;
         this.onlyStorages = onlyStorages;
 
         // Initialise arraylists
 
         lblProg = new Label("Initialising...");
-        add(lblProg, new Coord(15, 35));
+        add(lblProg, new Coord(0, 35));
 
         stopBtn = new Button(120, "Stop") {
             @Override
@@ -201,6 +202,8 @@ public class PepperGrinderUpRun extends Window implements Runnable {
                     List<PBotItem> peppers = PBotUtils.playerInventory(ui).getInventoryItemsByResnames(".*pepperdrupedried");
                     if (!peppers.isEmpty()) {
                         lblProg.settext("Status - Going to Grind");
+                        ui.gui.act("travel", "hearth");
+                        PBotUtils.sleep(6000);
                         pathTo(grinder);
                         PBotUtils.doClick(ui, grinder, 3, 0);
                         PBotUtils.sleep(1000); //sleep 6 seconds to walk to grinder
@@ -219,20 +222,23 @@ public class PepperGrinderUpRun extends Window implements Runnable {
                             }
                             if (PBotUtils.getStamina(ui) > 50) {
                                 PBotUtils.craftItem(ui, "blackpepper", 1);
-                                PBotUtils.sleep(2000);
-                                retrycount++;
-                                if (retrycount > 1) {
-                                    lblProg.settext("Unstucking");
-                                    Gob player = ui.gui.map.player();
-                                    Coord location = player.rc.floor(posres);
-                                    int x = location.x + +getrandom();
-                                    int y = location.y + +getrandom();
-                                    Coord finalloc = new Coord(x, y);
-                                    ui.gui.map.wdgmsg("click", Coord.z, finalloc, 1, 0);
-                                    retrycount = 0;
-                                    PBotUtils.sleep(1000);
-                                    pathTo(grinder);
-                                    PBotUtils.doClick(ui, grinder, 3, 0);
+                                PBotUtils.waitForHourglass(ui, 1000);
+//                                PBotUtils.sleep(2000);
+                                if (!PBotGobAPI.player(ui).getRcCoords().equals(grinder.rc)) {
+                                    retrycount++;
+                                    if (retrycount > 1) {
+                                        lblProg.settext("Unstucking");
+                                        Gob player = ui.gui.map.player();
+                                        Coord location = player.rc.floor(posres);
+                                        int x = location.x + +getrandom();
+                                        int y = location.y + +getrandom();
+                                        Coord finalloc = new Coord(x, y);
+                                        ui.gui.map.wdgmsg("click", Coord.z, finalloc, 1, 0);
+                                        retrycount = 0;
+                                        PBotUtils.sleep(1000);
+                                        pathTo(grinder);
+                                        PBotUtils.doClick(ui, grinder, 3, 0);
+                                    }
                                 }
                             } else {
                                 lblProg.settext("Status - Drinking");
@@ -241,6 +247,14 @@ public class PepperGrinderUpRun extends Window implements Runnable {
                             }
                             peppers = PBotUtils.playerInventory(ui).getInventoryItemsByResnames(".*pepperdrupedried");
                         }
+                        lblProg.settext("Unstucking");
+                        Gob player = ui.gui.map.player();
+                        Coord location = player.rc.floor(posres);
+                        int x = location.x + +getrandom();
+                        int y = location.y + +getrandom();
+                        Coord finalloc = new Coord(x, y);
+                        ui.gui.map.wdgmsg("click", Coord.z, finalloc, 1, 0);
+                        PBotUtils.sleep(1000);
                     }
                 }
             }
@@ -318,7 +332,7 @@ public class PepperGrinderUpRun extends Window implements Runnable {
                             peppers = PBotUtils.playerInventory(ui).getInventoryItemsByResnames(".*pepperdrupedried");
                             while (peppers.size() > 5 && !stopThread) {
                                 timeout++;
-                                if (timeout > 5000 && !stopThread) {
+                                if (timeout > 5000) {
                                     ui.gui.maininv.getItemPartial("Dried").item.wdgmsg("drop", Coord.z);
                                     timeout = 0;
                                 }
@@ -328,20 +342,23 @@ public class PepperGrinderUpRun extends Window implements Runnable {
                                 }
                                 if (PBotUtils.getStamina(ui) > 50) {
                                     PBotUtils.craftItem(ui, "blackpepper", 1);
-                                    PBotUtils.sleep(2000);
-                                    retrycount++;
-                                    if (retrycount > 1) {
-                                        lblProg.settext("Unstucking");
-                                        Gob player = ui.gui.map.player();
-                                        Coord location = player.rc.floor(posres);
-                                        int x = location.x + +getrandom();
-                                        int y = location.y + +getrandom();
-                                        Coord finalloc = new Coord(x, y);
-                                        ui.gui.map.wdgmsg("click", Coord.z, finalloc, 1, 0);
-                                        retrycount = 0;
-                                        PBotUtils.sleep(1000);
-                                        pathTo(grinder);
-                                        PBotUtils.doClick(ui, grinder, 3, 0);
+                                    PBotUtils.waitForHourglass(ui, 1000);
+//                                PBotUtils.sleep(2000);
+                                    if (!PBotGobAPI.player(ui).getRcCoords().equals(grinder.rc)) {
+                                        retrycount++;
+                                        if (retrycount > 1) {
+                                            lblProg.settext("Unstucking");
+                                            Gob player = ui.gui.map.player();
+                                            Coord location = player.rc.floor(posres);
+                                            int x = location.x + +getrandom();
+                                            int y = location.y + +getrandom();
+                                            Coord finalloc = new Coord(x, y);
+                                            ui.gui.map.wdgmsg("click", Coord.z, finalloc, 1, 0);
+                                            retrycount = 0;
+                                            PBotUtils.sleep(1000);
+                                            pathTo(grinder);
+                                            PBotUtils.doClick(ui, grinder, 3, 0);
+                                        }
                                     }
                                 } else {
                                     lblProg.settext("Status - Drinking");
@@ -350,6 +367,14 @@ public class PepperGrinderUpRun extends Window implements Runnable {
                                 }
                                 peppers = PBotUtils.playerInventory(ui).getInventoryItemsByResnames(".*pepperdrupedried");
                             }
+                            lblProg.settext("Unstucking");
+                            Gob player = ui.gui.map.player();
+                            Coord location = player.rc.floor(posres);
+                            int x = location.x + +getrandom();
+                            int y = location.y + +getrandom();
+                            Coord finalloc = new Coord(x, y);
+                            ui.gui.map.wdgmsg("click", Coord.z, finalloc, 1, 0);
+                            PBotUtils.sleep(1000);
                         }
                     }
                 }
@@ -494,7 +519,7 @@ public class PepperGrinderUpRun extends Window implements Runnable {
 
     public boolean pathTo(Gob g, double offset) {
         Coord2d gCoord = g.rc;
-
+        g.mark(5000);
         lblProg.settext("Find path");
         for (Coord2d c2d : near(gCoord, offset)) {
             if (pfLeft(c2d)) {
@@ -520,6 +545,7 @@ public class PepperGrinderUpRun extends Window implements Runnable {
     }
 
     public boolean pfRight(Gob g, int mod) {
+        g.mark(5000);
         return (pftype.a ? PBotUtils.PathfinderRightClick(ui, g, mod) : PBotUtils.pfRightClick(ui, g, mod));
     }
 

@@ -129,12 +129,16 @@ public class PepperBotUp extends Window implements GobSelectCallback {
             @Override
             public void click() {
                 allowrun = true;
+                if (hfire == null) {
+                    PBotUtils.sysMsg(ui, "No Hearthfire Selected.", Color.white);
+                    allowrun = false;
+                }
                 if (grinder == null) {
                     PBotUtils.sysMsg(ui, "No grinder Selected.", Color.white);
                     allowrun = false;
                 }
                 if (ca != null && cb != null && allowrun) {
-                    PepperGrinderUpRun bf = new PepperGrinderUpRun(ca, cb, grinder, onlyStorage.a);
+                    PepperGrinderUpRun bf = new PepperGrinderUpRun(ca, cb, grinder, hfire, onlyStorage.a);
                     ui.gui.add(bf, new Coord(ui.gui.sz.x / 2 - bf.sz.x / 2, ui.gui.sz.y / 2 - bf.sz.y / 2 - 200));
                     new Thread(bf).start();
                     this.parent.destroy();

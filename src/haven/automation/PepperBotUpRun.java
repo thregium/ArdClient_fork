@@ -575,7 +575,7 @@ public class PepperBotUpRun extends Window implements Runnable {
 
     public boolean pathTo(Gob g) {
         Coord2d gCoord = g.rc;
-
+        g.mark(5000);
         lblProg2.settext("Find path");
         for (Coord2d c2d : near(gCoord)) {
             if (pfLeft(c2d)) {
@@ -589,7 +589,7 @@ public class PepperBotUpRun extends Window implements Runnable {
 
     public boolean pathTo(Gob g, double offset) {
         Coord2d gCoord = g.rc;
-
+        g.mark(5000);
         lblProg2.settext("Find path");
         for (Coord2d c2d : near(gCoord, offset)) {
             if (pfLeft(c2d)) {
@@ -615,6 +615,7 @@ public class PepperBotUpRun extends Window implements Runnable {
     }
 
     public boolean pfRight(Gob g, int mod) {
+        g.mark(5000);
         return (pftype.a ? PBotUtils.PathfinderRightClick(ui, g, mod) : PBotUtils.pfRightClick(ui, g, mod));
     }
 
