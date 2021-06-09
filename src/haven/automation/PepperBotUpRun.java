@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.List;
+import java.util.Random;
 
 import static haven.OCache.posres;
 
@@ -169,28 +170,27 @@ public class PepperBotUpRun extends Window implements Runnable {
                             PBotUtils.sysMsg(ui, "Null pointer when harvesting, ping related?", Color.white);
                         }
 
+                        PBotUtils.waitForFlowerMenu(ui, 1000);
                         int retryharvest = 0;
 
                         // Wait for harvest menu to appear
-                        while (!PBotUtils.petalExists(ui) && !stopThread) {
+                        while (!PBotUtils.petalExists(ui) && !stopThread && retryharvest < 10) {
                             if (stopThread)
                                 break;
                             retryharvest++;
-                            PBotUtils.sleep(10);
-                            if (retryharvest >= 500) {
-                                PBotUtils.sysLogAppend(ui, "Retrying harvest", "white");
-                                lblProg2.settext("Retry Harvest");
-                                PBotUtils.doClick(ui, g, 3, 0);
-                                retryharvest = 0;
-                            }
-                        }
-
-                        // Select the harvest option
-                        if (PBotUtils.petalExists(ui)) {
-                            PBotUtils.choosePetal(ui, "Harvest");
+                            PBotUtils.sysLogAppend(ui, "Retrying harvest", "white");
+                            lblProg2.settext("Retry Harvest");
+                            PBotUtils.doClick(ui, g, 3, 0);
+                            PBotUtils.waitForFlowerMenu(ui, 1000);
                         }
 
                         this.crops.remove(g);
+                        // Select the harvest option
+                        if (PBotUtils.petalExists(ui)) {
+                            PBotUtils.choosePetal(ui, "Harvest");
+                        } else {
+                            continue;
+                        }
 
                         // Wait until stage has changed = harvested
                         while (!stopThread) {
@@ -348,11 +348,11 @@ public class PepperBotUpRun extends Window implements Runnable {
                 lblProg2.settext("Moving to storages");
             }
             boil(PBotUtils.invFreeSlots(ui) + 1);
-            stopThread = true;
-            stop();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        stopThread = true;
+        stop();
     }
 
     public void boil(int freeslots) {
@@ -401,6 +401,7 @@ public class PepperBotUpRun extends Window implements Runnable {
                             cwnd = null;
                             continue;
                         }
+                        lblProg2.settext("Tables");
                         PBotUtils.doClick(ui, htable, 3, 0);
                         int retry = 0;
                         while (ui.gui.getwnd("Herbalist Table") == null && !stopThread) {
@@ -479,16 +480,22 @@ public class PepperBotUpRun extends Window implements Runnable {
                         FlowerMenu.setNextSelection("Open");
                     }
                 }
-                PBotUtils.sleep(500);
-                cwnd = ui.gui.getwnd("Cauldron");
                 PBotUtils.waitForWindow(ui, "Cauldron", 2000);
+                cwnd = ui.gui.getwnd("Cauldron");
                 PBotUtils.sleep(1000);
                 VMeter vm = cwnd.getchild(VMeter.class);
                 PBotUtils.craftItem(ui, "boiledpepper", 1);
                 PBotUtils.sleep(2000);
 
-                if (vm.amount < 30)
+                while (vm.amount < 30) {
                     RefillCauldron();
+                    PBotUtils.waitForWindow(ui, "Cauldron", 2000);
+                    cwnd = ui.gui.getwnd("Cauldron");
+                    vm = cwnd.getchild(VMeter.class);
+                }
+
+                PBotUtils.craftItem(ui, "boiledpepper", 1);
+                PBotUtils.waitForHourglass(ui, 1000);
 
                 while (ui.gui.prog >= 0 && !stopThread) {
                     if (stopThread) // Checks if aborted
@@ -499,7 +506,7 @@ public class PepperBotUpRun extends Window implements Runnable {
                 if (PBotCharacterAPI.getStamina(ui) < 50) {
                     PBotUtils.craftItem(ui, "boiledpepper", 1);
                 }
-
+                unstuck();
             }
         }
     }
@@ -534,7 +541,8 @@ public class PepperBotUpRun extends Window implements Runnable {
             Coord2d playerCoord = PBotGobAPI.player(ui).getRcCoords();
             PBotUtils.liftGob(ui, barrel);
             PBotUtils.sleep(1000);
-            pfRight(water, 0);
+            pathTo(water, 30);
+            PBotUtils.doClick(ui, water, 3, 0);
             PBotUtils.sleep(1000);
             pathTo(cauldron);
             PBotUtils.doClick(ui, cauldron, 3, 0);
@@ -546,8 +554,6 @@ public class PepperBotUpRun extends Window implements Runnable {
 
             FlowerMenu.setNextSelection("Open");
             pfRight(cauldron, 0);
-            PBotUtils.sleep(2000);
-            PBotUtils.craftItem(ui, "boiledpepper", 1);
             PBotUtils.sleep(2000);
         } else {
             lblProg2.settext("Refill Cauldron");
@@ -567,8 +573,6 @@ public class PepperBotUpRun extends Window implements Runnable {
 
             FlowerMenu.setNextSelection("Open");
             pfRight(cauldron, 0);
-            PBotUtils.sleep(2000);
-            PBotUtils.craftItem(ui, "boiledpepper", 1);
             PBotUtils.sleep(2000);
         }
     }
@@ -621,6 +625,23 @@ public class PepperBotUpRun extends Window implements Runnable {
 
     public boolean pfLeft(Coord2d c2d) {
         return (pftype.a ? PBotUtils.pfmove(ui, c2d.x, c2d.y) : PBotUtils.pfLeftClick(ui, c2d.x, c2d.y));
+    }
+
+    public void unstuck() {
+        lblProg.settext("Unstucking");
+        Gob player = ui.gui.map.player();
+        Coord location = player.rc.floor(posres);
+        int x = location.x + +getrandom();
+        int y = location.y + +getrandom();
+        Coord finalloc = new Coord(x, y);
+        ui.gui.map.wdgmsg("click", Coord.z, finalloc, 1, 0);
+        PBotUtils.sleep(1000);
+    }
+
+    public int getrandom() {
+        Random r = new Random();
+        int randomNumber = r.ints(1, -6000, 6000).findFirst().getAsInt();
+        return randomNumber;
     }
 
     public List<Coord2d> near(Coord2d coord2d) {
