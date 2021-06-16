@@ -194,36 +194,36 @@ public class GobHitbox extends Sprite {
 //                            }
 //                        }
                     }
-                    if (l instanceof RenderLink.AmbientLink) {
-                        RenderLink.AmbientLink al = (RenderLink.AmbientLink) l;
-                        if (al.res != null) {
-                            Resource.Neg ng = al.res.get().layer(Resource.Neg.class);
-                            if (ng != null) {
-                                neg = ng;
-                                break;
-                            }
-                        }
-                    }
-                    if (l instanceof RenderLink.Collect) {
-                        RenderLink.Collect cl = (RenderLink.Collect) l;
-                        if (cl.from != null) {
-                            Resource.Neg ng = cl.from.get().layer(Resource.Neg.class);
-                            if (ng != null) {
-                                neg = ng;
-                                break;
-                            }
-                        }
-                    }
-                    if (l instanceof RenderLink.Parameters) {
-                        RenderLink.Parameters pl = (RenderLink.Parameters) l;
-                        if (pl.res != null) {
-                            Resource.Neg ng = pl.res.get().layer(Resource.Neg.class);
-                            if (ng != null) {
-                                neg = ng;
-                                break;
-                            }
-                        }
-                    }
+//                    if (l instanceof RenderLink.AmbientLink) {
+//                        RenderLink.AmbientLink al = (RenderLink.AmbientLink) l;
+//                        if (al.res != null) {
+//                            Resource.Neg ng = al.res.get().layer(Resource.Neg.class);
+//                            if (ng != null) {
+//                                neg = ng;
+//                                break;
+//                            }
+//                        }
+//                    }
+//                    if (l instanceof RenderLink.Collect) {
+//                        RenderLink.Collect cl = (RenderLink.Collect) l;
+//                        if (cl.from != null) {
+//                            Resource.Neg ng = cl.from.get().layer(Resource.Neg.class);
+//                            if (ng != null) {
+//                                neg = ng;
+//                                break;
+//                            }
+//                        }
+//                    }
+//                    if (l instanceof RenderLink.Parameters) {
+//                        RenderLink.Parameters pl = (RenderLink.Parameters) l;
+//                        if (pl.res != null) {
+//                            Resource.Neg ng = pl.res.get().layer(Resource.Neg.class);
+//                            if (ng != null) {
+//                                neg = ng;
+//                                break;
+//                            }
+//                        }
+//                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -253,42 +253,42 @@ public class GobHitbox extends Sprite {
                                 obsts.add(ng);
                                 break;
                             }
-                        } else if (mm.mat != null && mm.mat.get() != null) {
-                            Resource.Obst ng = mm.mat.get().layer(Resource.Obst.class);
-                            if (ng != null) {
-                                obsts.add(ng);
-                                break;
-                            }
-                        }
-                    } else if (l instanceof RenderLink.AmbientLink) {
-                        RenderLink.AmbientLink al = (RenderLink.AmbientLink) l;
-                        if (al.res != null && al.res.get() != null) {
-                            Resource.Obst ng = al.res.get().layer(Resource.Obst.class);
-                            if (ng != null) {
-                                obsts.add(ng);
-                                break;
-                            }
-                        }
-                    } else if (l instanceof RenderLink.Collect) {
-                        RenderLink.Collect cl = (RenderLink.Collect) l;
-                        if (cl.from != null && cl.from.get() != null) {
-                            Resource.Obst ng = cl.from.get().layer(Resource.Obst.class);
-                            if (ng != null) {
-                                obsts.add(ng);
-                                break;
-                            }
-                        }
-                    } else if (l instanceof RenderLink.Parameters) {
-                        RenderLink.Parameters pl = (RenderLink.Parameters) l;
-                        if (pl.res != null && pl.res.get() != null) {
-                            Resource.Obst ng = pl.res.get().layer(Resource.Obst.class);
-                            if (ng != null) {
-                                obsts.add(ng);
-                                break;
-                            }
-                        }
-
-                    }
+                        } //else if (mm.mat != null && mm.mat.get() != null) {
+//                            Resource.Obst ng = mm.mat.get().layer(Resource.Obst.class);
+//                            if (ng != null) {
+//                                obsts.add(ng);
+//                                break;
+//                            }
+//                        }
+                    } //else if (l instanceof RenderLink.AmbientLink) {
+//                        RenderLink.AmbientLink al = (RenderLink.AmbientLink) l;
+//                        if (al.res != null && al.res.get() != null) {
+//                            Resource.Obst ng = al.res.get().layer(Resource.Obst.class);
+//                            if (ng != null) {
+//                                obsts.add(ng);
+//                                break;
+//                            }
+//                        }
+//                    } else if (l instanceof RenderLink.Collect) {
+//                        RenderLink.Collect cl = (RenderLink.Collect) l;
+//                        if (cl.from != null && cl.from.get() != null) {
+//                            Resource.Obst ng = cl.from.get().layer(Resource.Obst.class);
+//                            if (ng != null) {
+//                                obsts.add(ng);
+//                                break;
+//                            }
+//                        }
+//                    } else if (l instanceof RenderLink.Parameters) {
+//                        RenderLink.Parameters pl = (RenderLink.Parameters) l;
+//                        if (pl.res != null && pl.res.get() != null) {
+//                            Resource.Obst ng = pl.res.get().layer(Resource.Obst.class);
+//                            if (ng != null) {
+//                                obsts.add(ng);
+//                                break;
+//                            }
+//                        }
+//
+//                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

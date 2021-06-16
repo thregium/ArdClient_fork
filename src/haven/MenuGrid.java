@@ -30,6 +30,7 @@ import haven.Resource.AButton;
 import haven.automation.AddBranchesToOven;
 import haven.automation.AddCoalToSmelter;
 import haven.automation.AddWoodToSmokeShed;
+import haven.automation.AggroAll;
 import haven.automation.AreaPicker;
 import haven.automation.ButcherFish;
 import haven.automation.CoalToSmelters;
@@ -941,6 +942,14 @@ public class MenuGrid extends Widget {
                 (pag) -> {
                     if (ui.gui != null) {
                         new Thread(new Dismount(ui.gui), "Dismount").start();
+                    }
+                }
+        ));
+        addSpecial(new SpecialPagina(this, "paginae::amber::aggroall",
+                Resource.local().load("paginae/amber/aggroall"),
+                (pag) -> {
+                    if (ui.gui != null) {
+                        new Thread(new AggroAll(ui), "AggroAll").start();
                     }
                 }
         ));
