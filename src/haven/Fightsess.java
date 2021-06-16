@@ -153,7 +153,10 @@ public class Fightsess extends Widget {
             }
 
             if (!Config.attackedsfx.equals("None"))
-                Audio.play(Resource.local().loadwait(Config.attackedsfx), Config.attackedvol);
+                Defer.later(() -> {
+                    Audio.play(Resource.local().loadwait(Config.attackedsfx), Config.attackedvol);
+                    return (null);
+                });
             return (new Fightsess(nact));
         }
     }

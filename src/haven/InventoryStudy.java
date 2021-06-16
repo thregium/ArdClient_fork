@@ -146,7 +146,10 @@ public class InventoryStudy extends Inventory {
                         ui.gui.syslog.append(tt.t + " LP: " + ci.exp, Color.LIGHT_GRAY);
 
                     if (!Config.alarmstudy.equals("None"))
-                        Audio.play(Resource.local().loadwait(Config.alarmstudy), Config.studyalarmvol);
+                        Defer.later(() -> {
+                            Audio.play(Resource.local().loadwait(Config.alarmstudy), Config.studyalarmvol);
+                            return (null);
+                        });
 
                     if (Config.autostudy) {
                         Window invwnd = ui.gui.getwnd("Inventory");

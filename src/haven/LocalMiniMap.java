@@ -556,6 +556,11 @@ public class LocalMiniMap extends Widget {
         return super.tooltip(c, prev);
     }
 
+    static {
+        Resource.local().loadwait(Config.alarmredplayer);
+        Resource.local().loadwait(Config.alarmredplayer);
+    }
+
     public void tick(double dt) {
         OCache oc = ui.sess.glob.oc;
         Gob pl = oc.getgob(mv.plgob);
@@ -610,7 +615,10 @@ public class LocalMiniMap extends Widget {
                     boolean enemy = false;
                     if (!Config.alarmunknownplayer.equals("None") && kininfo == null) {
                         sgobs.add(gob.id);
-                        Audio.play(Resource.local().loadwait(Config.alarmunknownplayer), Config.alarmunknownvol);
+                        Defer.later(() -> {
+                            Audio.play(Resource.local().loadwait(Config.alarmunknownplayer), Config.alarmunknownvol);
+                            return (null);
+                        });
                         if (Config.discordplayeralert) {
                             if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
                                 if (Config.discorduser) {
@@ -625,7 +633,10 @@ public class LocalMiniMap extends Widget {
                         enemy = true;
                     } else if (!Config.alarmredplayer.equals("None") && kininfo != null && kininfo.group == 2) {
                         sgobs.add(gob.id);
-                        Audio.play(Resource.local().loadwait(Config.alarmredplayer), Config.alarmredvol);
+                        Defer.later(() -> {
+                            Audio.play(Resource.local().loadwait(Config.alarmredplayer), Config.alarmredvol);
+                            return (null);
+                        });
                         if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
                             if (Config.discorduser) {
                                 PBotDiscord.mapAlert(ui.sess.username, Config.discordalertstring, "Player");

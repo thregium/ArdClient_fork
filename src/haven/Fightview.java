@@ -156,7 +156,10 @@ public class Fightview extends MovableWidget {
                 if (lastact != null)
                     if (lastact.get().basename().contains("cleave") && Config.cleavesound) {
                         try {
-                            Audio.play(Resource.local().loadwait(Config.cleavesfx), Config.cleavesoundvol);
+                            Defer.later(() -> {
+                                Audio.play(Resource.local().loadwait(Config.cleavesfx), Config.cleavesoundvol);
+                                return (null);
+                            });
                         } catch (Exception e) {
                         }//ignore because a crash here would prob get someone killed
                     }
@@ -356,7 +359,10 @@ public class Fightview extends MovableWidget {
         if (lastact != null)
             if (lastact.get().basename().contains("cleave") && Config.cleavesound) {
                 try {
-                    Audio.play(Resource.local().loadwait(Config.cleavesfx), Config.cleavesoundvol);
+                    Defer.later(() -> {
+                        Audio.play(Resource.local().loadwait(Config.cleavesfx), Config.cleavesoundvol);
+                        return (null);
+                    });
                 } catch (Exception e) {
                 }//ignore because a crash here would prob get someone killed
             }
