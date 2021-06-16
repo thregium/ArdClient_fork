@@ -557,7 +557,7 @@ public class LocalMiniMap extends Widget {
     }
 
     static {
-        Resource.local().loadwait(Config.alarmredplayer);
+        Resource.local().loadwait(Config.alarmunknownplayer);
         Resource.local().loadwait(Config.alarmredplayer);
     }
 
