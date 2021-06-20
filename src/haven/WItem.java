@@ -102,7 +102,7 @@ public class WItem extends Widget implements DTarget2 {
         return (longtip(item, info));
     }
 
-    public class ItemTip implements Indir<Tex> {
+    public class ItemTip implements Indir<Tex>, ItemInfo.InfoTip {
         private final TexI tex;
 
         public ItemTip(BufferedImage img) {
@@ -114,6 +114,8 @@ public class WItem extends Widget implements DTarget2 {
         public GItem item() {
             return (item);
         }
+
+        public List<ItemInfo> info() {return(item.info());}
 
         public Tex get() {
             return (tex);

@@ -28,15 +28,18 @@ package haven;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class VMeter extends Widget {
+public class VMeter extends Widget implements ItemInfo.Owner {
     static Tex bg = Theme.tex("vm", 0);
     static Tex fg = Theme.tex("vm", 1);
     Color cl;
     public int amount;
+    private ItemInfo.Raw rawinfo = null;
+    private List<ItemInfo> info = Collections.emptyList();
     private static final Map<String, Integer> levels = new HashMap<String, Integer>(3) {{
         put("Oven", 3 * 4);   // amount per unit * number of units
         put("Finery Forge", 6 * 2);
@@ -171,6 +174,71 @@ public class VMeter extends Widget {
         }
     }
 
+    private static final OwnerContext.ClassResolver<VMeter> ctxr = new OwnerContext.ClassResolver<VMeter>()
+            .add(Glob.class, wdg -> wdg.ui.sess.glob)
+            .add(Session.class, wdg -> wdg.ui.sess);
+
+    public <T> T context(Class<T> cl) {
+        return (ctxr.context(cl, this));
+    }
+
+    public List<ItemInfo> info() {
+        if (info == null)
+            info = ItemInfo.buildinfo(this, rawinfo);
+        return (info);
+    }
+
+    private double hoverstart;
+    private Tex shorttip, longtip;
+
+    public Object tooltip(Coord c, Widget prev) {
+        if (rawinfo == null) {
+            Widget p = this.parent;
+            if (p instanceof Window) {
+                for (Kit kit : kits) {
+                    if (((Window) p).cap.text.equals(kit.windowName)) {
+                        for (TypeLimit tl : kit.typeLimit) {
+                            if (cl.equals(tl.color)) {
+                                String ca = (tl.limit * amount / 100 % 1 == 0 ? String.format("%.0f", tl.limit * amount / 100) : tl.limit * amount / 100) + "";
+                                String cl = (tl.limit % 1 == 0 ? String.format("%.0f", tl.limit) : tl.limit) + "";
+                                String stt = "$b{$col[255,223,5]{" + ca + " / " + cl + " " + tl.subText + " (" + amount + "%)}}";
+                                if (ui.modctrl) {
+                                    return RichText.render(stt + tl.tooltip + tl.addTooltip, -1).tex();
+                                } else {
+                                    return RichText.render(stt, -1).tex();
+                                }
+                            }
+                        }
+                    }
+                }
+                if (((Window) p).cap.text.equals("Ore Smelter")) {
+                    if (ui.modctrl) {
+                        return RichText.render("$b{$col[255,223,5]{" + amount + "/100 units.}}" + "\n40 units to smelt.\n30 units to smelt well mined.", -1).tex();
+                    } else {
+                        return RichText.render("$b{$col[255,223,5]{" + amount + "/100 units}}", -1).tex();
+                    }
+                }
+            }
+            return RichText.render("$b{$col[255,223,5]{" + amount + "%}}", -1).tex();
+        }
+        double now = Utils.rtime();
+        if (prev != this)
+            hoverstart = now;
+        try {
+            if (now - hoverstart < 1.0) {
+                if (shorttip == null)
+                    shorttip = new TexI(ItemInfo.shorttip(info()));
+                return (shorttip);
+            } else {
+                if (longtip == null)
+                    longtip = new TexI(ItemInfo.longtip(info()));
+                return (longtip);
+            }
+        } catch (Loading e) {
+            return ("...");
+        }
+    }
+
     public void uimsg(String msg, Object... args) {
         if (msg == "set") {
             amount = (Integer) args[0];
@@ -178,40 +246,16 @@ public class VMeter extends Widget {
                 cl = (Color) args[1];
         } else if (msg == "col") {
             cl = (Color) args[0];
+        } else if (msg == "tip") {
+            if (args[0] instanceof Object[]) {
+                rawinfo = new ItemInfo.Raw((Object[]) args[0]);
+                info = null;
+                shorttip = longtip = null;
+            } else {
+                super.uimsg(msg, args);
+            }
         } else {
             super.uimsg(msg, args);
         }
-    }
-
-    @Override
-    public Object tooltip(Coord c, Widget prev) {
-        if (super.tooltip != null) return super.tooltip;
-        Widget p = this.parent;
-        if (p instanceof Window) {
-            for (Kit kit : kits) {
-                if (((Window) p).cap.text.equals(kit.windowName)) {
-                    for (TypeLimit tl : kit.typeLimit) {
-                        if (cl.equals(tl.color)) {
-                            String ca = (tl.limit * amount / 100 % 1 == 0 ? String.format("%.0f", tl.limit * amount / 100) : tl.limit * amount / 100) + "";
-                            String cl = (tl.limit % 1 == 0 ? String.format("%.0f", tl.limit) : tl.limit) + "";
-                            String stt = "$b{$col[255,223,5]{" + ca + " / " + cl + " " + tl.subText + " (" + amount + "%)}}";
-                            if (ui.modctrl) {
-                                return RichText.render(stt + tl.tooltip + tl.addTooltip, -1).tex();
-                            } else {
-                                return RichText.render(stt, -1).tex();
-                            }
-                        }
-                    }
-                }
-            }
-            if (((Window) p).cap.text.equals("Ore Smelter")) {
-                if (ui.modctrl) {
-                    return RichText.render("$b{$col[255,223,5]{" + amount + "/100 units.}}" + "\n40 units to smelt.\n30 units to smelt well mined.", -1).tex();
-                } else {
-                    return RichText.render("$b{$col[255,223,5]{" + amount + "/100 units}}", -1).tex();
-                }
-            }
-        }
-        return RichText.render("$b{$col[255,223,5]{" + amount + "%}}", -1).tex();
     }
 }

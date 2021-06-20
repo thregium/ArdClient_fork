@@ -475,7 +475,7 @@ public abstract class ItemInfo {
     }
 
     public static List<ItemInfo> buildinfo(Owner owner, Raw raw) {
-        List<ItemInfo> ret = new ArrayList<ItemInfo>();
+        List<ItemInfo> ret = new ArrayList<>();
         for (Object o : raw.data) {
             if (o instanceof Object[]) {
                 Object[] a = (Object[]) o;
@@ -716,5 +716,9 @@ public abstract class ItemInfo {
                 return (() -> result);
             });
         }
+    }
+
+    public static interface InfoTip {
+        public List<ItemInfo> info();
     }
 }
