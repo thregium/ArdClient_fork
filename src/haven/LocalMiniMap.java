@@ -557,8 +557,10 @@ public class LocalMiniMap extends Widget {
     }
 
     static {
-        Resource.local().loadwait(Config.alarmunknownplayer);
-        Resource.local().loadwait(Config.alarmredplayer);
+        if (!Config.alarmunknownplayer.equals("None"))
+            Resource.local().loadwait(Config.alarmunknownplayer);
+        if (!Config.alarmredplayer.equals("None"))
+            Resource.local().loadwait(Config.alarmredplayer);
     }
 
     public void tick(double dt) {

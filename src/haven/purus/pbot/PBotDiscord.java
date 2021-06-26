@@ -3,21 +3,73 @@ package haven.purus.pbot;
 import haven.Config;
 import haven.automation.DiscordBot;
 import integrations.mapv4.MappingClient;
-import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Role;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Vareckeska
+ * @edited Naylok
  */
-public class PBotDiscord extends ListenerAdapter {
+public class PBotDiscord {
     static List<TextChannel> channels;
+    public static final Map<String, MessageListener> messageListeners = new HashMap<>();
+
+    public static class MessageListener {
+        public final List<MessageReceivedEvent> lastMessages = new ArrayList<>();
+        public final String name;
+
+        public MessageListener(String name) {
+            this.name = name;
+        }
+
+        public void add(MessageReceivedEvent event) {
+            synchronized (lastMessages) {
+                lastMessages.add(event);
+            }
+        }
+
+        public MessageReceivedEvent getLastMessage() {
+            synchronized (lastMessages) {
+                return (lastMessages.get(lastMessages.size() - 1));
+            }
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof MessageListener)) return false;
+            MessageListener that = (MessageListener) o;
+            return Objects.equals(name, that.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name);
+        }
+    }
+
+    public static MessageListener addMessageListener(String listener) {
+        synchronized (messageListeners) {
+            return (messageListeners.computeIfAbsent(listener, MessageListener::new));
+        }
+    }
+
+    public static void removeMessageListener(String listener) {
+        synchronized (messageListeners) {
+            messageListeners.remove(listener);
+        }
+    }
 
     /***
      * Sets up JDA and retrieves discord channels.

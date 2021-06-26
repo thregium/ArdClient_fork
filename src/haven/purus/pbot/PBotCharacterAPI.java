@@ -108,7 +108,6 @@ public class PBotCharacterAPI {
         if (Discord.jdalogin != null)
             ui.gui.DiscordToggle();
         ui.gui.act("lo", "cs");
-
     }
 
 //    public static void logoutChar() {

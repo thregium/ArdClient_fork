@@ -44,6 +44,7 @@ public class VMeter extends Widget implements ItemInfo.Owner {
         put("Oven", 3 * 4);   // amount per unit * number of units
         put("Finery Forge", 6 * 2);
         put("Ore Smelter", (int) (3.3 * 12));
+        put("Smith's Smelter", (int) (3.3 * 12));
     }};
     public static final List<Kit> kits = new ArrayList<Kit>() {{
         add(new Kit("Cauldron", new ArrayList<TypeLimit>() {{
@@ -61,6 +62,15 @@ public class VMeter extends Widget implements ItemInfo.Owner {
         }}));
         add(new Kit("Oven", new ArrayList<TypeLimit>() {{
             add(new TypeLimit(new Color(255, 128, 0), 30f, "ticks", TypeLimit.Tooltip.fuel, "$b{$col[255,128,0]{\n4 ticks to cook}}"));
+        }}));
+        add(new Kit("Ore Smelter", new ArrayList<TypeLimit>() {{
+            add(new TypeLimit(new Color(255, 128, 0), 30f, "ticks", TypeLimit.Tooltip.smeltery, "$b{$col[255,128,0]{\n12 ticks to smelt\n9 ticks to smelt well mined}}"));
+        }}));
+        add(new Kit("Smith's Smelter", new ArrayList<TypeLimit>() {{
+            add(new TypeLimit(new Color(255, 128, 0), 30f, "ticks", TypeLimit.Tooltip.smeltery, "$b{$col[255,128,0]{\n12 ticks to smelt.\n9 ticks to smelt well mined}}"));
+        }}));
+        add(new Kit("Steelbox", new ArrayList<TypeLimit>() {{
+            add(new TypeLimit(new Color(255, 128, 0), 18f, "ticks", TypeLimit.Tooltip.crucible, "$b{$col[255,128,0]{\n84 ticks to steel}}"));
         }}));
     }};
 
@@ -112,7 +122,7 @@ public class VMeter extends Widget implements ItemInfo.Owner {
         }
 
         enum Tooltip {
-            fuel, fireplace
+            fuel, fireplace, smeltery, crucible
         }
 
         public String getTooltip(Tooltip type) {
@@ -122,6 +132,10 @@ public class VMeter extends Widget implements ItemInfo.Owner {
                     return "\n1 tick = 4 minutes 50 seconds\n1 branch = 1 tick\nCoal, Black coal = 2 ticks\nBlock of Wood = 5 ticks\nTarsticks = 20 ticks";
                 case fireplace:
                     return "\n1 tick = 6 minutes\n1 branch = 1 tick\nCoal, Black coal = 2 ticks\nBlock of Wood = 5 ticks\nTarsticks = 20 ticks";
+                case smeltery:
+                    return "\n1 tick = 4 minutes 50 seconds\nCoal, Black coal = 1 ticks";
+                case crucible:
+                    return "\n1 tick = 40 minutes\n1 branch = 1 tick\nCoal, Black coal = 2 ticks\nBlock of Wood = 5 ticks\nTarsticks = 20 ticks";
                 default:
                     return "";
             }
@@ -209,13 +223,6 @@ public class VMeter extends Widget implements ItemInfo.Owner {
                                 }
                             }
                         }
-                    }
-                }
-                if (((Window) p).cap.text.equals("Ore Smelter")) {
-                    if (ui.modctrl) {
-                        return RichText.render("$b{$col[255,223,5]{" + amount + "/100 units.}}" + "\n40 units to smelt.\n30 units to smelt well mined.", -1).tex();
-                    } else {
-                        return RichText.render("$b{$col[255,223,5]{" + amount + "/100 units}}", -1).tex();
                     }
                 }
             }
