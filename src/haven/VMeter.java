@@ -210,7 +210,7 @@ public class VMeter extends Widget implements ItemInfo.Owner {
             Widget p = this.parent;
             if (p instanceof Window) {
                 for (Kit kit : kits) {
-                    if (((Window) p).cap.text.equals(kit.windowName)) {
+                    if (((Window) p).origcap.equals(kit.windowName)) {
                         for (TypeLimit tl : kit.typeLimit) {
                             if (cl.equals(tl.color)) {
                                 String ca = (tl.limit * amount / 100 % 1 == 0 ? String.format("%.0f", tl.limit * amount / 100) : tl.limit * amount / 100) + "";
