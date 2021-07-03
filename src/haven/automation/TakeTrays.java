@@ -24,19 +24,23 @@ public class TakeTrays implements Runnable {
     public void run() {
         Thread t = new Thread(new OpenRacks(gui), "OpenRacks");
         t.start();
-        // while (t.isAlive()) {
-        PBotUtils.sleep(500);
-        // }
+        try {
+            t.join(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         List<WItem> trays;
 
         for (PBotInventory q : PBotUtils.getAllInventories(gui.ui)) {
             try {
-                trays = (q.inv.getItemsPartial("Tray"));
-                System.out.println("trays2 size : " + trays.size());
-                if (!trays.isEmpty()) {
-                    for (WItem item : trays)
-                        item.item.wdgmsg("transfer", new Coord(item.item.sz.x / 2, item.item.sz.y / 2), -1);
-                    trays.clear();
+                if (q.inv != gui.maininv) {
+                    trays = (q.inv.getItemsPartial("Tray"));
+                    System.out.println("trays2 size : " + trays.size());
+                    if (!trays.isEmpty()) {
+                        for (WItem item : trays)
+                            item.item.wdgmsg("transfer", new Coord(item.item.sz.x / 2, item.item.sz.y / 2), -1);
+                        trays.clear();
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
