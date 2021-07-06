@@ -115,9 +115,9 @@ public class RectSprite extends Sprite {
         int p = posa.size() / 2;
         try {
             float rz = (float) glob.map.getcz(rc);
-            pos = Location.xlate(new Coord3f((float) rc.x, -(float) rc.y, rz));
+            pos = Location.xlate(new Coord3f((float) rc.x, -(float) rc.y, Config.disableelev ? 0 : rz));
             for (int i = 0; i < p; i++) {
-                float z = (float) glob.map.getcz(rc.x + pa.get(i * 3), rc.y - pa.get(i * 3 + 1)) - rz;
+                float z = Config.disableelev ? 0 : (float) glob.map.getcz(rc.x + pa.get(i * 3), rc.y - pa.get(i * 3 + 1)) - rz;
                 pa.put(i * 3 + 2, z + 10);
                 pa.put((p + i) * 3 + 2, z - 10);
             }
@@ -129,12 +129,12 @@ public class RectSprite extends Sprite {
 
     public boolean tick(int dt) {
         Coord2d cc = ((Gob) owner).rc;
+        Coord2d rc = ((Gob) owner).rc;
         if (fixator != null)
             cc = cc.floor(fixator).mul(fixator).add(fixator.div(2));
-        if ((lc == null) || !lc.equals(cc)) {
-            if (!Config.disableelev)
-                setz(owner.context(Glob.class), cc);
-            lc = cc;
+        if ((lc == null) || !lc.equals(rc)) {
+            setz(owner.context(Glob.class), cc);
+            lc = rc;
         }
         return (false);
     }

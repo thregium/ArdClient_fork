@@ -77,7 +77,7 @@ public class BPRadSprite extends Sprite {
             float rz = (float) glob.map.getcz(rc);
 
             for (int i = 0; i < p; i++) {
-                float z = (float) glob.map.getcz(rc.x + pa.get(i * 3), rc.y - pa.get(i * 3 + 1)) - rz;
+                float z = Config.disableelev ? 0 : (float) glob.map.getcz(rc.x + pa.get(i * 3), rc.y - pa.get(i * 3 + 1)) - rz;
                 pa.put(i * 3 + 2, z + 10.0F);
                 pa.put((p + i) * 3 + 2, z - 10.0F);
             }
@@ -88,8 +88,7 @@ public class BPRadSprite extends Sprite {
     public boolean tick(int dt) {
         Coord2d rc = ((Gob) owner).rc;
         if (lc == null || !lc.equals(rc)) {
-            if (!Config.disableelev)
-                setz(this.owner.context(Glob.class), rc);
+            setz(this.owner.context(Glob.class), rc);
             lc = rc;
         }
 

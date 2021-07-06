@@ -1483,9 +1483,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     ols.add(new Overlay(borderhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(9)), () -> new Color(configuration.playerbordercolor, true), new Coord2d(MCache.cmaps))));
                 if (border != null && !configuration.playerbordersprite)
                     ols.remove(border);
-                if (box == null && configuration.playerbordersprite)
+                if (box == null && configuration.playerboxsprite)
                     ols.add(new Overlay(boxhash, new RectSprite(this, new Coord2d(MCache.cmaps), () -> new Color(configuration.playerboxcolor, true), new Coord2d(MCache.cmaps))));
-                if (box != null && !configuration.playerbordersprite)
+                if (box != null && !configuration.playerboxsprite)
                     ols.remove(box);
             }
         }

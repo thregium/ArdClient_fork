@@ -3292,31 +3292,11 @@ public class OptWnd extends Window {
             configuration.showtreeberryemi = val.hashCode();
             Utils.setprefi("showtreeberryemi", val.hashCode());
         }));
-        appender.addRow(new CheckBox("Show player distance border") {
-            {
-                a = configuration.playerbordersprite;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("playerbordersprite", val);
-                configuration.playerbordersprite = val;
-                a = val;
-            }
-        }, new ColorPreview(new Coord(20, 20), new Color(configuration.playerbordercolor, true), val -> {
+        appender.addRow(new CheckBox("Show player distance border", val -> Utils.setprefb("playerbordersprite", configuration.playerbordersprite = val), configuration.playerbordersprite), new ColorPreview(new Coord(20, 20), new Color(configuration.playerbordercolor, true), val -> {
             configuration.playerbordercolor = val.hashCode();
             Utils.setprefi("playerbordercolor", val.hashCode());
         }));
-        appender.addRow(new CheckBox("Show player distance box") {
-            {
-                a = configuration.playerboxsprite;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("playerboxsprite", val);
-                configuration.playerboxsprite = val;
-                a = val;
-            }
-        }, new ColorPreview(new Coord(20, 20), new Color(configuration.playerboxcolor, true), val -> {
+        appender.addRow(new CheckBox("Show player distance box", val -> Utils.setprefb("playerboxsprite", configuration.playerboxsprite = val), configuration.playerboxsprite), new ColorPreview(new Coord(20, 20), new Color(configuration.playerboxcolor, true), val -> {
             configuration.playerboxcolor = val.hashCode();
             Utils.setprefi("playerboxcolor", val.hashCode());
         }));
