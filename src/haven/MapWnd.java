@@ -920,7 +920,7 @@ public class MapWnd extends ResizableWnd {
                 Location loc = this.curloc;
                 if (loc != null) {
                     Coord hsz = sz.div(2);
-                    Coord rcd = getRealCoord(player.rc.floor(sgridsz).sub(4, 4).mul(sgridsz).floor(tilesz));
+                    Coord rcd = getRealCoord(player.rc.floor(sgridsz).mul(sgridsz).sub(sgridsz.mul(4)).floor(tilesz));
                     Coord rc = hsz.sub(loc.tc).add(rcd.div(scalef()));
                     g.chcolor(new Color(configuration.distanceviewcolor, true));
                     g.rect(rc, MCache.cmaps.mul(9).div(tilesz.floor()).div(scalef()));

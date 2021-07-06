@@ -1200,6 +1200,9 @@ public class MenuGrid extends Widget {
 //        addSpecial(new SpecialPagina(this, "management::slothtimers",
 //                Resource.local().load("custom/paginae/default/wnd/slothtimers"),
 //                (pag) -> ui.gui.toggleTimers()));
+        addSpecial(new SpecialPagina(this, "modification::builderwindow",
+                Resource.local().load("custom/paginae/default/wnd/builderwindow"),
+                (pag) -> ui.gui.toggleOverlaySettings()));
     }
 
     protected void updlayout() {

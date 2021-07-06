@@ -71,7 +71,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.prefs.BackingStoreException;
 import java.util.stream.Collectors;
 
 import static haven.DefSettings.ALLWATERCOL;
@@ -361,11 +360,11 @@ public class OptWnd extends Window {
         main.add(new PButton(200, "Combat", 'c', combat), new Coord(210, 30));
         main.add(new PButton(200, "Control", 'k', control), new Coord(210, 60));
         main.add(new PButton(200, "UI", 'u', uis), new Coord(210, 90));
-        main.add(new PButton(200, "Item overlay", 'q', quality), new Coord(420, 0));
+        main.add(new PButton(200, "Item Overlay", 'q', quality), new Coord(420, 0));
         main.add(new PButton(200, "Pop-up Menu", 'f', flowermenus), new Coord(420, 30));
         main.add(new PButton(200, "Quick Actions", 'b', quickactionsettings), new Coord(420, 60));
         main.add(new PButton(200, "Sound Alarms", 's', soundalarms), new Coord(420, 90));
-        main.add(new PButton(200, "Hidden Objects", 'h', hidesettings), new Coord(420, 120));
+        main.add(new PButton(200, "World Overlay", 'h', hidesettings), new Coord(420, 120));
         main.add(new PButton(200, "Study Desk", 'o', studydesksettings), new Coord(0, 120));
         main.add(new PButton(200, "Keybinds", 'p', keybindsettings), new Coord(210, 120));
         main.add(new PButton(200, "Chat", 'c', chatsettings), new Coord(420, 150));
@@ -3293,6 +3292,34 @@ public class OptWnd extends Window {
             configuration.showtreeberryemi = val.hashCode();
             Utils.setprefi("showtreeberryemi", val.hashCode());
         }));
+        appender.addRow(new CheckBox("Show player distance border") {
+            {
+                a = configuration.playerbordersprite;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("playerbordersprite", val);
+                configuration.playerbordersprite = val;
+                a = val;
+            }
+        }, new ColorPreview(new Coord(20, 20), new Color(configuration.playerbordercolor, true), val -> {
+            configuration.playerbordercolor = val.hashCode();
+            Utils.setprefi("playerbordercolor", val.hashCode());
+        }));
+        appender.addRow(new CheckBox("Show player distance box") {
+            {
+                a = configuration.playerboxsprite;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("playerboxsprite", val);
+                configuration.playerboxsprite = val;
+                a = val;
+            }
+        }, new ColorPreview(new Coord(20, 20), new Color(configuration.playerboxcolor, true), val -> {
+            configuration.playerboxcolor = val.hashCode();
+            Utils.setprefi("playerboxcolor", val.hashCode());
+        }));
         appender.addRow(new CheckBox("Resizable World") {
             {
                 a = configuration.resizableworld;
@@ -3650,24 +3677,6 @@ public class OptWnd extends Window {
                     @Override
                     public Object tooltip(Coord c0, Widget prev) {
                         return Text.render("Minimal distance for free camera : " + configuration.badcamdistminimaldefault).tex();
-                    }
-                }
-        );
-        appender.addRow(new Label("Place Grid: "),
-                new HSlider(200, 0, 255, Utils.getprefi("placegridval", 8)) {
-                    @Override
-                    public void changed() {
-                        try {
-                            ui.cons.run(new String[]{"placegrid", Integer.toString(val)});
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            Utils.setprefi("placegridval", val);
-                        }
-                    }
-
-                    @Override
-                    public Object tooltip(Coord c0, Widget prev) {
-                        return Text.render("Object placement grid: " + val).tex();
                     }
                 }
         );
@@ -5128,121 +5137,104 @@ public class OptWnd extends Window {
 
     private void initHideMenu() {
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(hidesettings, new Coord(620, 350)));
-
-        appender.setVerticalMargin(VERTICAL_MARGIN);
+        appender.setVerticalMargin(2);
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
 
-        appender.add(new Label("Toggle bulk hide by pressing the keybind you assign in Keybind Settings"));
-        appender.add(new Label("These hides are for all objects of this type, to hide individual ones instead please utilize the alt + right click menu."));
-        appender.add(new CheckBox("Hide trees") {
-            {
-                a = Config.hideTrees;
-            }
+        appender.addRow(
+                new CheckBox("Show tile grid", val -> {
+                    Utils.setprefb("showgridlines", Config.showgridlines = val);
+                    GameUI gui = getparent(GameUI.class);
+                    if (gui != null && gui.map != null)
+                        gui.map.togglegrid();
+                }, Config.showgridlines),
+                new CheckBox("Grid type (old/new)", val -> Utils.setprefb("slothgrid", Config.slothgrid = val), Config.slothgrid),
+                new IndirColorPreview(Coord.of(20, 20), GUIDESCOLOR, val -> {
+                    GobHitbox.bbclrstate = new States.ColState(val);
+                    TileOutline.color = new States.ColState(val.getRed(), val.getGreen(), val.getBlue(), (int) (val.getAlpha() * 0.5));
+                    if (ui.sess != null) {
+                        ui.sess.glob.oc.changeAllGobs();
+                    }
+                })
+        );
+        appender.add(
+                new CheckBox("Display hitboxes", val -> {
+                    Utils.setprefb("showboundingboxes", Config.showboundingboxes = val);
+                    GameUI gui = getparent(GameUI.class);
+                    if (gui != null && gui.map != null) {
+                        gui.map.refreshGobsAll();
+                    }
+                }, Config.showboundingboxes)
+        );
+        Label placegridtext = new Label("Place Grid (" + Utils.getprefi("placegridval", 8) + "): ");
+        appender.addRow(
+                placegridtext,
+                new HSlider(200, 0, 255, Utils.getprefi("placegridval", 8)) {
+                    @Override
+                    public void changed() {
+                        placegridtext.settext("Place Grid (" + Utils.getprefi("placegridval", 8) + "): ");
+                        try {
+                            ui.cons.run(new String[]{"placegrid", Integer.toString(val)});
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Utils.setprefi("placegridval", val);
+                        }
+                    }
 
-            public void set(boolean val) {
-                Utils.setprefb("hideTrees", val);
-                Config.hideTrees = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Hide boulders") {
-            {
-                a = Config.hideboulders;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("hideboulders", val);
-                Config.hideboulders = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Hide crops") {
-            {
-                a = Config.hideCrops;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("hideCrops", val);
-                Config.hideCrops = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Hide bushes") {
-            {
-                a = Config.hideBushes;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("hideBushes", val);
-                Config.hideBushes = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Draw colored overlay for hidden objects. Hide will need to be toggled") {
-            {
-                a = Config.showoverlay;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("showoverlay", val);
-                Config.showoverlay = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Show overlays while hidden") {
-            {
-                a = configuration.showhiddenoverlay;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("showhiddenoverlay", val);
-                configuration.showhiddenoverlay = val;
-                a = val;
-            }
-        });
-        appender.add(ColorPreWithLabel("Hidden/Hitbox color: ", HIDDENCOLOR, val -> {
-            GobHitbox.fillclrstate = new States.ColState(val);
-            HitboxMesh.updateColor(new States.ColState(val));
-            if (ui.sess != null) {
-                ui.sess.glob.oc.changeAllGobs();
-            }
-        }));
-        appender.add(ColorPreWithLabel("Guidelines color: ", GUIDESCOLOR, val -> {
-            GobHitbox.bbclrstate = new States.ColState(val);
-            TileOutline.color = new States.ColState(
-                    val.getRed(),
-                    val.getGreen(),
-                    val.getBlue(),
-                    (int) (val.getAlpha() * 0.5)
-            );
-            if (ui.sess != null) {
-                ui.sess.glob.oc.changeAllGobs();
-            }
-        }));
-        appender.add(new CheckBox("New grid type") {
-            {
-                a = Config.slothgrid;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("slothgrid", val);
-                Config.slothgrid = val;
-                a = val;
-            }
-        });
-        appender.add(new Button(200, "New Hidden System", false) {
-            public void click() {
-                if (ui.gui != null)
-                    ui.gui.toggleHidden();
-            }
-        });
-        appender.add(new Button(200, "New Deleted System", false) {
-            public void click() {
-                if (ui.gui != null)
-                    ui.gui.toggleDeleted();
-            }
-        });
-        appender.setVerticalMargin(0);
+                    @Override
+                    public Object tooltip(Coord c0, Widget prev) {
+                        return Text.render("Object placement grid: " + val).tex();
+                    }
+                }
+        );
+        appender.add(
+                new CheckBox("Tile centering", val -> {
+                    Utils.setprefb("tilecenter", Config.tilecenter = val);
+                    GameUI gui = getparent(GameUI.class);
+                    if (gui != null)
+                        gui.msg("Tile centering is now turned " + (Config.tilecenter ? "on." : "off."), Color.WHITE);
+                }, Config.tilecenter)
+        );
+        appender.addRow(
+                new CheckBox("Hide game objects", val -> {
+                    Utils.setprefb("hidegobs", Config.hidegobs = val);
+                    GameUI gui = getparent(GameUI.class);
+                    if (gui != null && gui.map != null) {
+                        gui.map.refreshGobsAll();
+                        gui.msg("Gobs are now" + (Config.hidegobs ? " " : " NOT ") + "hidden.", Color.WHITE);
+                    }
+                }, Config.hidegobs),
+                new CheckBox("Hide trees", val -> Utils.setprefb("hideTrees", Config.hideTrees = val), Config.hideTrees),
+                new CheckBox("Hide boulders", val -> Utils.setprefb("hideboulders", Config.hideboulders = val), Config.hideboulders),
+                new CheckBox("Hide crops", val -> Utils.setprefb("hideCrops", Config.hideCrops = val), Config.hideCrops),
+                new CheckBox("Hide bushes", val -> Utils.setprefb("hideBushes", Config.hideBushes = val), Config.hideBushes)
+        );
+        appender.addRow(
+                new CheckBox("Hide unique game objects", val -> {
+                    Utils.setprefb("hideuniquegobs", Config.hideuniquegobs = val);
+                    GameUI gui = getparent(GameUI.class);
+                    if (gui != null && gui.map != null) {
+                        gui.map.refreshGobsAll();
+                        gui.msg("Unique gobs are now" + (Config.hideuniquegobs ? " " : " NOT ") + "hidden.", Color.WHITE);
+                    }
+                }, Config.hideuniquegobs).wsettip("Toggle bulk hide by pressing the keybind you assign in Keybind Settings"),
+                new IndirColorPreview(Coord.of(20, 20), HIDDENCOLOR, val -> {
+                    GobHitbox.fillclrstate = new States.ColState(val);
+                    HitboxMesh.updateColor(new States.ColState(val));
+                    if (ui.sess != null) {
+                        ui.sess.glob.oc.changeAllGobs();
+                    }
+                }),
+                new Button("New Hidden System", () -> {
+                    if (ui.gui != null)
+                        ui.gui.toggleHidden();
+                }).wsettip("These hides are for all objects of this type, to hide individual ones instead please utilize the alt + right click menu."),
+                new Button("New Deleted System", () -> {
+                    if (ui.gui != null)
+                        ui.gui.toggleDeleted();
+                })
+        );
+        appender.add(new CheckBox("Draw colored overlay for hidden objects. Hide will need to be toggled", val -> Utils.setprefb("showoverlay", Config.showoverlay = val), Config.showoverlay));
+        appender.add(new CheckBox("Show game object overlays while hidden", val -> Utils.setprefb("showhiddenoverlay", configuration.showhiddenoverlay = val), configuration.showhiddenoverlay));
         hidesettings.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
         hidesettings.pack();
     }

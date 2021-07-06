@@ -764,14 +764,13 @@ public class Widget {
     }
 
     public void wdgmsg(Widget sender, String msg, Object... args) {
-
-        if (!sender.toString().contains("Changer") && msg.equals("click") && args.length >= 5 && (int) args[3] == 1) {
-            //   System.out.println("shift right click detected");
+        if (!sender.toString().contains("Changer") && msg.equals("click") && args.length >= 5 && (int) args[2] == 3 && ((int) args[3] == 1 || (int) args[3] == 3 || (int) args[3] == 5)) {
             try {
-                CheckListboxItem itm = Config.disableshiftclick.get(ui.sess.glob.oc.getgob(Long.valueOf((int) args[5])).getres().basename());
+                CheckListboxItem itm = Config.disableshiftclick.get(ui.sess.glob.oc.getgob((int) args[5]).getres().basename());
                 if (itm != null && itm.selected)
                     return;
-            } catch (NullPointerException fucknulls) {//do nothing because fuck nulls}
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
@@ -1451,6 +1450,11 @@ public class Widget {
 
     public void settip(String text) {
         tooltip = Text.render(text);
+    }
+
+    public Widget wsettip(String text) {
+        tooltip = Text.render(text);
+        return (this);
     }
 
     public <T extends Widget> T getparent(Class<T> cl) {

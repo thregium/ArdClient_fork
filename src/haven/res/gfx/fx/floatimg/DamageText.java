@@ -30,9 +30,23 @@ public class DamageText extends FloatSprite {
     }
 
     private void remake() {
-        final BufferedImage img = Utils.hconcat(fnd.render(shp + " ", shpcol).img,
-                fnd.render(hhp + " ", hhpcol).img, fnd.render(armor + "", armorcol).img);
-        updateTex(new TexI(Utils.outline2(img, Color.BLACK)));
+        int[] ind = new int[]{shp, hhp, armor};
+        Color[] cind = new Color[]{shpcol, hhpcol, armorcol};
+
+        BufferedImage img = null;
+        for (int i = 0; i < ind.length; i++) {
+            if (ind[i] != 0) {
+                if (img != null) {
+                    img = Utils.hconcat(img, fnd.render( " " + ind[i], cind[i]).img);
+                } else {
+                    img = Utils.hconcat(fnd.render(ind[i] + "", cind[i]).img);
+                }
+            }
+        }
+
+        if (img != null) {
+            updateTex(new TexI(Utils.outline2(img, Color.BLACK)));
+        }
     }
 
     void incshp(final int shp) {

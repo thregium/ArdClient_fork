@@ -35,6 +35,7 @@ import haven.res.lib.vmat.VarSprite;
 import haven.res.ui.croster.CattleId;
 import haven.res.ui.croster.CattleIdSprite;
 import haven.resutil.BPRadSprite;
+import haven.resutil.RectSprite;
 import haven.resutil.WaterTile;
 import haven.sloth.gfx.GobSpeedSprite;
 import haven.sloth.gfx.HitboxMesh;
@@ -1471,6 +1472,21 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                         cattleId.sprite = (CattleIdSprite) co.spr;
                     }
                 }
+            }
+
+            if (isplayer()) {
+                int borderhash = Arrays.hashCode("playerborder".getBytes());
+                int boxhash = Arrays.hashCode("playerbox".getBytes());
+                Overlay border = findol(borderhash);
+                Overlay box = findol(boxhash);
+                if (border == null && configuration.playerbordersprite)
+                    ols.add(new Overlay(borderhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(9)), () -> new Color(configuration.playerbordercolor, true), new Coord2d(MCache.cmaps))));
+                if (border != null && !configuration.playerbordersprite)
+                    ols.remove(border);
+                if (box == null && configuration.playerbordersprite)
+                    ols.add(new Overlay(boxhash, new RectSprite(this, new Coord2d(MCache.cmaps), () -> new Color(configuration.playerboxcolor, true), new Coord2d(MCache.cmaps))));
+                if (box != null && !configuration.playerbordersprite)
+                    ols.remove(box);
             }
         }
 

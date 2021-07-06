@@ -140,6 +140,10 @@ public class configuration {
     public static boolean showtroughstatus = Utils.getprefb("showtroughstatus", false);
     public static boolean showbeehivestatus = Utils.getprefb("showbeehivestatus", false);
     public static boolean showtreeberry = Utils.getprefb("showtreeberry", false);
+    public static boolean playerbordersprite = Utils.getprefb("playerbordersprite", false);
+    public static int playerbordercolor = Utils.getprefi("playerbordercolor", new Color(192, 0, 0, 128).hashCode());
+    public static boolean playerboxsprite = Utils.getprefb("playerbordersprite", false);
+    public static int playerboxcolor = Utils.getprefi("playerboxcolor", new Color(192, 0, 0, 128).hashCode());
     public static int showtreeberryamb = Utils.getprefi("showtreeberryamb", Color.WHITE.hashCode());
     public static int showtreeberrydif = Utils.getprefi("showtreeberrydif", Color.BLUE.hashCode());
     public static int showtreeberryspc = Utils.getprefi("showtreeberryspc", Color.RED.hashCode());

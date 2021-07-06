@@ -123,10 +123,15 @@ public class Button extends SIWidget {
         this.cont = cont;
     }
 
+    public Button(String text, Runnable action) {
+        this(text);
+        this.action = action;
+    }
+
     public Button(final String text) {
         this(0, false);
         change(text);
-        sz = new Coord(cont.getWidth() + ul.getWidth() + um.getWidth() + ur.getWidth(), ul.getHeight());
+        sz = new Coord(cont.getWidth() + ul.getWidth() + ur.getWidth(), ul.getHeight());
         this.action = () -> wdgmsg("activate");
     }
 

@@ -19,6 +19,7 @@ import haven.Utils;
 import haven.VertexBuf.NormalArray;
 import haven.VertexBuf.VertexArray;
 
+import javax.media.opengl.GL;
 import java.awt.Color;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -47,12 +48,12 @@ public class BPRadSprite extends Sprite {
 
         this.smat = smat;
 
-        int per = Math.max(24, (int) (2 * Math.PI * (double) rad / 11.0D));
+        int per = Math.max(24, (int) (2 * Math.PI * rad / 11.0));
         FloatBuffer pa = Utils.mkfbuf(per * 3 * 2);
         FloatBuffer na = Utils.mkfbuf(per * 3 * 2);
         ShortBuffer sa = Utils.mksbuf(per * 6);
 
-        for (int i = 0; i < per; ++i) {
+        for (int i = 0; i < per; i++) {
             float s = (float) Math.sin(2 * Math.PI * (double) i / (double) per);
             float c = (float) Math.cos(2 * Math.PI * (double) i / (double) per);
             pa.put(i * 3 + 0, c * rad).put(i * 3 + 1, s * rad).put(i * 3 + 2, 10.0F);
@@ -70,28 +71,26 @@ public class BPRadSprite extends Sprite {
     }
 
     private void setz(Glob glob, Coord2d rc) {
-        FloatBuffer pa = this.posa.data;
-        int p = this.posa.size() / 2;
-
+        FloatBuffer pa = posa.data;
+        int p = posa.size() / 2;
         try {
-            float rz = (float) glob.map.getcz(rc.x, rc.y);
+            float rz = (float) glob.map.getcz(rc);
 
-            for (int i = 0; i < p; ++i) {
-                float z = (float) glob.map.getcz(rc.x + (double) pa.get(i * 3), rc.y - (double) pa.get(i * 3 + 1)) - rz;
+            for (int i = 0; i < p; i++) {
+                float z = (float) glob.map.getcz(rc.x + pa.get(i * 3), rc.y - pa.get(i * 3 + 1)) - rz;
                 pa.put(i * 3 + 2, z + 10.0F);
                 pa.put((p + i) * 3 + 2, z - 10.0F);
             }
-        } catch (Loading var8) {
+        } catch (Loading e) {
         }
-
     }
 
     public boolean tick(int dt) {
-        Coord2d rc = ((Gob) this.owner).rc;
-        if (this.lc == null || !this.lc.equals(rc)) {
+        Coord2d rc = ((Gob) owner).rc;
+        if (lc == null || !lc.equals(rc)) {
             if (!Config.disableelev)
-                this.setz(this.owner.context(Glob.class), rc);
-            this.lc = rc;
+                setz(this.owner.context(Glob.class), rc);
+            lc = rc;
         }
 
         return false;
@@ -112,11 +111,13 @@ public class BPRadSprite extends Sprite {
     public void draw(GOut g) {
         g.state(smat);
         g.apply();
-        this.posa.bind(g, false);
-        this.nrma.bind(g, false);
-        this.sidx.rewind();
-        g.gl.glDrawElements(4, this.sidx.capacity(), 5123, this.sidx);
-        this.posa.unbind(g);
-        this.nrma.unbind(g);
+
+        posa.bind(g, false);
+        nrma.bind(g, false);
+        sidx.rewind();
+        g.gl.glDrawElements(GL.GL_TRIANGLES, sidx.capacity(), GL.GL_UNSIGNED_SHORT, sidx);
+
+        posa.unbind(g);
+        nrma.unbind(g);
     }
 }

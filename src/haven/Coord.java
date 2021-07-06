@@ -120,6 +120,10 @@ public class Coord implements Comparable<Coord>, java.io.Serializable {
         return (new Coord(x + ax, y + ay));
     }
 
+    public Coord add(float ax, float ay) {
+        return (new Coord((int) (x + ax), (int) (y + ay)));
+    }
+
     public Coord add(Coord b) {
         return (add(b.x, b.y));
     }

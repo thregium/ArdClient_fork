@@ -458,6 +458,18 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         }
     }
 
+    public void toggleOverlaySettings() {
+        if (!opts.visible) {
+            opts.show();
+            opts.raise();
+            fitwdg(opts);
+            setfocus(opts);
+            opts.chpanel(opts.hidesettings);
+        } else {
+            opts.show(false);
+        }
+    }
+
     public void toggleMapSettings() {
         if (!opts.visible) {
             opts.show();
