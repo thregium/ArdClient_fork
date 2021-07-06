@@ -1005,8 +1005,9 @@ public class MapWnd extends ResizableWnd {
             for (TempMark cm : marks) {
                 PBotGob g = PBotGobAPI.findGobById(ui, cm.id);
                 if (g == null) {
-                    if (mv.player() != null)
-                        if ((System.currentTimeMillis() - cm.start > configuration.tempmarkstime * 1000) || (cm.near && mv.player().rc.dist(cm.rc) < 40 * 10)) {
+                    Gob player = mv.player();
+                    if (player != null)
+                        if ((System.currentTimeMillis() - cm.start > configuration.tempmarkstime * 1000) || (cm.near && player.rc.dist(cm.rc) < 40 * 10)) {
                             tempMarkList.remove(cm);
                         } else if (cm.near)
                             cm.near = false;
