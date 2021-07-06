@@ -54,6 +54,7 @@ import static haven.Action.TOGGLE_CRAFTWND;
 import static haven.Action.TOGGLE_CURSOR;
 import static haven.Action.TOGGLE_DANGER_RADIUS;
 import static haven.Action.TOGGLE_DAYLIGHT;
+import static haven.Action.TOGGLE_DISTANCE_BORDER;
 import static haven.Action.TOGGLE_EQUIPMENT;
 import static haven.Action.TOGGLE_FLOWERMENUSETTINGS;
 import static haven.Action.TOGGLE_GOB_HITBOX;
@@ -131,6 +132,7 @@ public class KeyBinder {
         //add(KeyEvent.VK_F, ALT, FILTER);
         add(KeyEvent.VK_P, CTRL, TOGGLE_GOB_INFO);
         add(KeyEvent.VK_B, SHIFT, TOGGLE_GOB_HITBOX);
+        add(KeyEvent.VK_B, 6, TOGGLE_DISTANCE_BORDER);
         add(KeyEvent.VK_D, CTRL, TOGGLE_DANGER_RADIUS);
         add(KeyEvent.VK_D, SHIFT, TOGGLE_SAFE_RADIUS);
         //add(KeyEvent.VK_G, CTRL, TOGGLE_TILE_GRID);

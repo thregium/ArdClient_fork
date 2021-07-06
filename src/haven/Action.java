@@ -1,6 +1,8 @@
 package haven;
 
 
+import modification.configuration;
+
 public enum Action {
     TOGGLE_INVENTORY(GameUI::toggleInventory, "Inventory"),
     TOGGLE_EQUIPMENT(GameUI::toggleEquipment, "Equipment"),
@@ -33,6 +35,17 @@ public enum Action {
     //  FILTER(gui -> gui.filter.toggle(), "Show item filter"),
     TOGGLE_GOB_INFO(GameUI::toggleTreeStage, "Display Tree/Crop Stages", "Display crop/tree growth and object health overlay"),
     TOGGLE_GOB_HITBOX(GameUI::toggleGobs, "Display hitboxes"),
+    TOGGLE_DISTANCE_BORDER(h -> {
+        int sum = (configuration.playerbordersprite ? 1 : 0) + (configuration.playerboxsprite ? 2 : 0);
+        if (sum == 0)
+            configuration.playerbordersprite = true;
+        else if (sum == 1)
+            configuration.playerboxsprite = true;
+        else if (sum == 2)
+            configuration.playerboxsprite = false;
+        else if (sum == 3)
+            configuration.playerbordersprite = false;
+    }, "Display view border"),
     TOGGLE_DANGER_RADIUS(GameUI::toggleDangerRadius, "Toggles Mine/Animal Radii", "Toggles display of mine/animal danger radii"),
     TOGGLE_SAFE_RADIUS(GameUI::toggleSafeRadius, "Toggles Trough/Beehive Radii", "Toggles between modes of displaying Trough/Beehive radii"),
     LOCAL_SCREENSHOT(GameUI::localScreenshot, "Take and save a local screenshot"),
