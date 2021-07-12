@@ -710,9 +710,9 @@ public class Config {
         put("gfx/terobjs/fishingnet", Resource.loadtex("gfx/icons/fishingnet"));
         put("gfx/kritter/horse/stallion", Resource.loadtex("gfx/icons/stallionicon"));
         put("gfx/kritter/horse/mare", Resource.loadtex("gfx/icons/mareicon"));
-        put("gfx/kritter/stalagoomba/stalagoomba", Resource.loadtex("gfx/invobjs/stalagoomba"));
-        put("gfx/kritter/dryad/dryad", Resource.loadtex("gfx/invobjs/leaf-mulberrytree"));
-        put("gfx/kritter/ent/ent", Resource.loadtex("gfx/invobjs/wblock-oak"));
+        put("gfx/kritter/stalagoomba/stalagoomba", Resource.loadtex("gfx/icons/lobsterpot"));
+        put("gfx/kritter/dryad/dryad", Resource.loadtex("gfx/icons/lobsterpot"));
+        put("gfx/kritter/ent/ent", Resource.loadtex("gfx/icons/lobsterpot"));
     }};
 
     public final static HashMap<String, CheckListboxItem> alarmitems = new HashMap<String, CheckListboxItem>() {{
