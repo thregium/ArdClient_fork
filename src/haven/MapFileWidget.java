@@ -426,8 +426,14 @@ public class MapFileWidget extends Widget {
             } catch (Loading l) {
                 continue;
             }
-            if (configuration.bigmapshowgrid)
+            if (configuration.bigmapshowgrid) {
                 g.image(gridred, ul, cmaps.div(scalef()));
+//                g.chcolor(Color.RED);
+//                Coord rect = cmaps.div(scalef());
+//                g.dottedline(ul, ul.add(rect.x, 0), 1);
+//                g.dottedline(ul, ul.add(0, rect.y), 1);
+//                g.chcolor();
+            }
         }
         if ((markers == null) || (file.markerseq != markerseq))
             remark(loc, dext);

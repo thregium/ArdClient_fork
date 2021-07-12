@@ -5151,7 +5151,7 @@ public class OptWnd extends Window {
                 new HSlider(200, 0, 255, Utils.getprefi("placegridval", 8)) {
                     @Override
                     public void changed() {
-                        placegridtext.settext("Place Grid (" + Utils.getprefi("placegridval", 8) + "): ");
+                        placegridtext.settext("Place Grid (" + val + "): ");
                         try {
                             ui.cons.run(new String[]{"placegrid", Integer.toString(val)});
                         } catch (Exception e) {

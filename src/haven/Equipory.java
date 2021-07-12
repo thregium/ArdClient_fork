@@ -141,8 +141,7 @@ public class Equipory extends Widget implements DTarget {
             }
         }, new Coord(invsq.sz().x, 0));
         ava.color = null;
-        bonuses = add(new AttrBonusesWdg(isz.y), isz.x + 5, 0);
-        pack();
+        bonuses = add(new AttrBonusesWdg(bg.sz().sub(10, 10)), Coord.of(invsq.sz().x, 0).add(5, 5));
     }
 
     @Override
@@ -355,12 +354,11 @@ public class Equipory extends Widget implements DTarget {
             }
         }
         if (armorclass != null)
-            g.image(armorclass, new Coord(acx - armorclass.sz().x / 2, bg.sz().y - armorclass.sz().y));
+            g.aimage(armorclass, new Coord(rx - 10, bg.sz().y - 10), 1, 1);
         if (percexp == null) {
             int h = 0, s = 0, x;
             CharWnd chrwdg = null;
             try {
-                //   chrwdg = ((GameUI) parent).chrwdg;
                 chrwdg = ui.gui.chrwdg;
                 for (CharWnd.Attr attr : chrwdg.base) {
                     if (attr.attr.nm.contains("prc"))
@@ -375,12 +373,11 @@ public class Equipory extends Widget implements DTarget {
             }
         }
         if (percexp != null)
-            g.image(percexp, new Coord(acx - percexp.sz().x / 2, bg.sz().y - percexp.sz().y - 10));
+            g.aimage(percexp, new Coord(rx - 10, bg.sz().y - 20), 1, 1);
         if (intste == null) {
             int h = 0, s = 0, x;
             CharWnd chrwdg = null;
             try {
-                //   chrwdg = ((GameUI) parent).chrwdg;
                 chrwdg = ui.gui.chrwdg;
                 for (CharWnd.Attr attr : chrwdg.base) {
                     if (attr.attr.nm.contains("int"))
@@ -395,7 +392,7 @@ public class Equipory extends Widget implements DTarget {
             }
         }
         if (intste != null)
-            g.image(intste, new Coord(acx - intste.sz().x / 2, bg.sz().y - intste.sz().y - 20));
+            g.aimage(intste, new Coord(rx - 10, bg.sz().y - 30), 1, 1);
     }
 
     public boolean iteminteract(Coord cc, Coord ul) {

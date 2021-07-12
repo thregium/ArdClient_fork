@@ -1,6 +1,7 @@
 package haven;
 
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,10 +30,10 @@ public class AttrBonusesWdg extends Widget implements ItemInfo.Owner {
 
     private CharWnd charWnd = null;
 
-    public AttrBonusesWdg(int y) {
-        super(new Coord(175, y));
-        add(new Label("Equipment bonuses:"));
-        bar = adda(new Scrollbar(y - bonusc.y, 0, 0), sz.x, bonusc.y, 1, 0);
+    public AttrBonusesWdg(Coord sz) {
+        super(sz);
+        add(new Label("Equipment bonuses:", Text.std, Color.BLACK));
+        bar = adda(new Scrollbar(sz.y - bonusc.y, 0, 0), sz.x, bonusc.y, 1, 0);
     }
 
     @Override
@@ -57,7 +58,11 @@ public class AttrBonusesWdg extends Widget implements ItemInfo.Owner {
             if (bar.visible) {
                 c = c.sub(0, bar.val);
             }
-            g.reclip(bonusc, sz).image(tip, c);
+            GOut gtip = g.reclip(bonusc, sz);
+            gtip.chcolor(new Color(60, 60, 60, 180));
+            gtip.frect(c, Coord.of(tip.getWidth(), tip.getHeight()));
+            gtip.chcolor();
+            gtip.image(tip, c);
         }
         super.draw(g);
     }

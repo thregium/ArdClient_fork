@@ -31,6 +31,8 @@ public class HSlider extends Widget {
     private static final Tex schainm = Theme.tex("scroll/horizontal", 1);
     private static final Tex schainr = Theme.tex("scroll/horizontal", 2);
     private static final Tex sflarp = Theme.tex("scroll/horizontal", 3);
+    private final IButton plus = new IButton(Theme.fullres("buttons/circular/small/add"), this::plus);
+    private final IButton minus = new IButton(Theme.fullres("buttons/circular/small/sub"), this::minus);
 
     public int val, min, max;
     private UI.Grab drag = null;
@@ -43,51 +45,102 @@ public class HSlider extends Widget {
         this.max = max;
     }
 
+    @Override
+    protected void added() {
+        super.added();
+        adda(plus, Coord.of(sz.x, sz.y / 2), 1, 0.5);
+        adda(minus, Coord.of(0, sz.y / 2), 0, 0.5);
+    }
+
     public void draw(GOut g) {
         g.chcolor(DefSettings.SLIDERCOL.get());
         //y offset incase sflarp.sz.y > schain.sz.y
         int cy = (sflarp.sz().y / 2) - (schainl.sz().y / 2);
         //Top
-        g.image(schainl, new Coord(0, cy));
+        g.image(schainl, new Coord(0 + minus.sz.x, cy));
         //middle
-        for (int x = schainl.sz().x; x < sz.x - schainr.sz().x; x += schainm.sz().x)
+        for (int x = schainl.sz().x + minus.sz.x; x < sz.x - schainr.sz().x - plus.sz.x; x += schainm.sz().x)
             g.image(schainm, new Coord(x, cy));
         //bottom
-        g.image(schainr, new Coord(sz.x - schainr.sz().x, cy));
+        g.image(schainr, new Coord(sz.x - schainr.sz().x - plus.sz.x, cy));
         //slider
-        int fx = ((sz.x - sflarp.sz().x) * (val - min)) / (max - min);
+        int fx = ((sz.x - sflarp.sz().x - minus.sz.x - plus.sz.x) * (val - min)) / (max - min) + minus.sz.x;
         g.image(sflarp, new Coord(fx, 0));
         g.chcolor();
+        plus.draw(g.reclip(Coord.of(sz.x - plus.sz.x, -((plus.sz.y - sz.y) / 2)), Coord.of(plus.sz.x, sz.y + ((plus.sz.y - sz.y) / 2))));
+        minus.draw(g.reclip(Coord.of(0, -((minus.sz.y - sz.y) / 2)), Coord.of(minus.sz.x, sz.y + ((minus.sz.y - sz.y) / 2))));
+    }
+
+    public void plus() {
+        final int v;
+        if (ui.modshift)
+            v = 1 * 10;
+        else if (ui.modctrl)
+            v = 1 * 5;
+        else
+            v = 1;
+        val = Math.min(val + v, max);
+        changed();
+    }
+
+    public void minus() {
+        final int v;
+        if (ui.modshift)
+            v = 1 * 10;
+        else if (ui.modctrl)
+            v = 1 * 5;
+        else
+            v = 1;
+        val = Math.max(val - v, min);
+        changed();
     }
 
     public boolean mousedown(Coord c, int button) {
-        if (button != 1)
-            return (false);
-        drag = ui.grabmouse(this);
-        mousemove(c);
-        return (true);
+        if (c.isect(Coord.z, Coord.of(minus.sz.x, sz.y)))
+            return (minus.mousedown(c, button));
+        else if (c.isect(Coord.of(sz.x - plus.sz.x, 0), Coord.of(plus.sz.x, sz.y)))
+            return (plus.mousedown(c.sub(sz.x - plus.sz.x, 0), button));
+        else {
+            if (button != 1)
+                return (false);
+            drag = ui.grabmouse(this);
+            mousemove(c);
+            return (true);
+        }
     }
 
     public void mousemove(Coord c) {
-        if (drag != null) {
-            double a = (double) (c.x - (sflarp.sz().x / 2)) / (double) (sz.x - sflarp.sz().x);
-            if (a < 0)
-                a = 0;
-            if (a > 1)
-                a = 1;
-            val = (int) Math.round(a * (max - min)) + min;
-            changed();
+        if (c.isect(Coord.z, Coord.of(minus.sz.x, sz.y)))
+            minus.mousemove(c);
+        else if (c.isect(Coord.of(sz.x - plus.sz.x, 0), Coord.of(plus.sz.x, sz.y)))
+            plus.mousemove(c.sub(sz.x - plus.sz.x, 0));
+        else {
+            if (drag != null) {
+                double a = (double) (c.x - (sflarp.sz().x / 2) - minus.sz.x) / (double) (sz.x - sflarp.sz().x - minus.sz.x - plus.sz.x);
+                if (a < 0)
+                    a = 0;
+                if (a > 1)
+                    a = 1;
+                val = (int) Math.round(a * (max - min)) + min;
+                changed();
+            }
         }
     }
 
     public boolean mouseup(Coord c, int button) {
         if (button != 1)
             return (false);
-        if (drag == null)
+        if (drag == null) {
+            if (c.isect(Coord.z, Coord.of(minus.sz.x, sz.y)))
+                return (minus.mouseup(c, button));
+            if (c.isect(Coord.of(sz.x - plus.sz.x, 0), Coord.of(plus.sz.x, sz.y)))
+                return (plus.mouseup(c.sub(sz.x - plus.sz.x, 0), button));
             return (false);
-        drag.remove();
-        drag = null;
-        return (true);
+        } else {
+            drag.remove();
+            drag = null;
+            return (true);
+        }
     }
 
     public boolean mousewheel(Coord c, int amount) {

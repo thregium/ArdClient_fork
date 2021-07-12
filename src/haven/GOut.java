@@ -425,6 +425,8 @@ public class GOut {
 
     //Alternative to line, uses GL_POINTS, surprisingly better than lines tbh
     public void dottedline(Coord c1, Coord c2, float w) {
+        if (TexGL.disableall)
+            return;
         final float m = (float) (c2.y - c1.y) / (c2.x - c1.x);
         if (Float.isFinite(m) && m != 0) {
             final float b = c2.y - m * c2.x;

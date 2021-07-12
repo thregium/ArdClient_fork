@@ -514,6 +514,9 @@ public class Config {
         put("boostspeed", new CheckListboxItem("Speed Boost"));
         put("frog", new CheckListboxItem("Frog"));
         put("toad", new CheckListboxItem("Toad"));
+        put("stalagoomba", new CheckListboxItem("Stalagoomba"));
+        put("dryad", new CheckListboxItem("Dryad"));
+        put("ent", new CheckListboxItem("Ent"));
 //old icons
         put("dandelion", new CheckListboxItem("Dandelion"));
         put("chantrelle", new CheckListboxItem("Chantrelle"));
@@ -707,6 +710,9 @@ public class Config {
         put("gfx/terobjs/fishingnet", Resource.loadtex("gfx/icons/fishingnet"));
         put("gfx/kritter/horse/stallion", Resource.loadtex("gfx/icons/stallionicon"));
         put("gfx/kritter/horse/mare", Resource.loadtex("gfx/icons/mareicon"));
+        put("gfx/kritter/stalagoomba/stalagoomba", Resource.loadtex("gfx/invobjs/stalagoomba"));
+        put("gfx/kritter/dryad/dryad", Resource.loadtex("gfx/invobjs/leaf-mulberrytree"));
+        put("gfx/kritter/ent/ent", Resource.loadtex("gfx/invobjs/wblock-oak"));
     }};
 
     public final static HashMap<String, CheckListboxItem> alarmitems = new HashMap<String, CheckListboxItem>() {{

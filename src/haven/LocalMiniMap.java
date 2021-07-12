@@ -319,7 +319,7 @@ public class LocalMiniMap extends Widget {
                         if (itm != null && !itm.selected) {
                             Tex tex;
                             if (icon != null)
-                                tex = gob.isDead() == Boolean.TRUE ? icon.texgrey() : icon.tex();
+                                tex = gob.isDead() ? icon.texgrey() : icon.tex();
                             else
                                 tex = Config.additonalicons.get(res.name);
                             g.image(tex, p2c(gob.rc).sub(tex.sz().mul(iconZoom).div(2)).add(delta), tex.dim.mul(iconZoom));
@@ -757,8 +757,12 @@ public class LocalMiniMap extends Widget {
                                 continue;
                             Coord mtc = new Coord(mtcx, mtcy);
                             g.image(mt, mtc, ts);
-                            if (Config.mapshowgrid)
-                                g.image(gridred, mtc, ts);
+                            if (Config.mapshowgrid) {
+                                g.chcolor(Color.RED);
+                                g.dottedline(mtc, mtc.add(ts.x, 0), 1);
+                                g.dottedline(mtc, mtc.add(0, ts.y), 1);
+                                g.chcolor();
+                            }
                         }
                     }
                 }
@@ -839,7 +843,11 @@ public class LocalMiniMap extends Widget {
             if (player != null) {
                 Coord rc = p2c(player.rc.floor(sgridsz).mul(sgridsz).sub(sgridsz.mul(4))).add(delta);
                 g.chcolor(new Color(configuration.distanceviewcolor, true));
-                g.rect(rc, MCache.cmaps.mul(9).div(tilesz.floor()).mul(zoom));
+                Coord rect = MCache.cmaps.mul(9).div(tilesz.floor()).mul(zoom);
+                g.dottedline(rc, rc.add(rect.x - 1, 0), 1);
+                g.dottedline(rc.add(rect.x - 1, 0), rc.add(rect), 1);
+                g.dottedline(rc.add(rect).sub(1, 1), rc.add(0, rect.y - 1), 1);
+                g.dottedline(rc.add(0, rect.y - 1), rc, 1);
                 g.chcolor();
             }
         });

@@ -443,7 +443,8 @@ public class OCache implements Iterable<Gob> {
     public synchronized void cmpmod(Gob g, List<Composited.MD> mod) {
         Composite cmp = (Composite) g.getattr(Drawable.class);
         if (cmp == null)
-            throw (new RuntimeException(String.format("cmpmod on non-composed object: %s", mod)));
+            return;
+//            throw (new RuntimeException(String.format("cmpmod on non-composed object: %s", mod)));
         cmp.chmod(mod);
         changed(g);
     }
@@ -479,7 +480,8 @@ public class OCache implements Iterable<Gob> {
     public synchronized void cmpequ(Gob g, List<Composited.ED> equ) {
         Composite cmp = (Composite) g.getattr(Drawable.class);
         if (cmp == null)
-            throw (new RuntimeException(String.format("cmpequ on non-composed object: %s", equ)));
+            return;
+//            throw (new RuntimeException(String.format("cmpequ on non-composed object: %s", equ)));
         cmp.chequ(equ);
         changed(g);
     }

@@ -1474,7 +1474,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 }
             }
 
-            if (isplayer()) {
+            if (name().equals("gfx/borka/body") && isplayer()) {
                 int borderhash = Arrays.hashCode("playerborder".getBytes());
                 int boxhash = Arrays.hashCode("playerbox".getBytes());
                 Overlay border = findol(borderhash);
