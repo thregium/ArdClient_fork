@@ -29,6 +29,7 @@ package haven;
 import haven.error.ErrorHandler;
 import haven.purus.Iconfinder;
 import haven.sloth.util.ObservableMap;
+import modification.configuration;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -710,9 +711,9 @@ public class Config {
         put("gfx/terobjs/fishingnet", Resource.loadtex("gfx/icons/fishingnet"));
         put("gfx/kritter/horse/stallion", Resource.loadtex("gfx/icons/stallionicon"));
         put("gfx/kritter/horse/mare", Resource.loadtex("gfx/icons/mareicon"));
-        put("gfx/kritter/stalagoomba/stalagoomba", Resource.loadtex("gfx/icons/lobsterpot"));
-        put("gfx/kritter/dryad/dryad", Resource.loadtex("gfx/icons/lobsterpot"));
-        put("gfx/kritter/ent/ent", Resource.loadtex("gfx/icons/lobsterpot"));
+        put("gfx/kritter/stalagoomba/stalagoomba", configuration.imageToTex(configuration.modificationPath + "/gfx/icons/stalagoomba.png", Coord.of(20, 20)));
+        put("gfx/kritter/dryad/dryad", configuration.imageToTex(configuration.modificationPath + "/gfx/icons/dryad.png"));
+        put("gfx/kritter/ent/ent", configuration.imageToTex(configuration.modificationPath + "/gfx/icons/ent.png"));
     }};
 
     public final static HashMap<String, CheckListboxItem> alarmitems = new HashMap<String, CheckListboxItem>() {{
