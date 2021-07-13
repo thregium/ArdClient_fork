@@ -117,6 +117,15 @@ public class Equipory extends Widget implements DTarget {
             ava.avagob = getparent(GameUI.class).plid;
     }
 
+    private final IButton plus = new IButton(Theme.fullres("buttons/circular/small/add"), () -> showBonuses(true));
+    private final IButton minus = new IButton(Theme.fullres("buttons/circular/small/sub"), () -> showBonuses(false));
+
+    public void showBonuses(boolean show) {
+        plus.show(!show);
+        bonuses.show(show);
+        minus.show(show);
+    }
+
     public Equipory(long gobid) {
         super(isz);
         ava = add(new Avaview(bg.sz(), gobid, "equcam") {
@@ -141,7 +150,10 @@ public class Equipory extends Widget implements DTarget {
             }
         }, new Coord(invsq.sz().x, 0));
         ava.color = null;
-        bonuses = add(new AttrBonusesWdg(bg.sz().sub(10, 10)), Coord.of(invsq.sz().x, 0).add(5, 5));
+        bonuses = add(new AttrBonusesWdg(bg.sz().sub(0, invsq.sz().y + 10)), invsq.sz().add(5, 5));
+        adda(plus, Coord.of(rx, 0), 1, 0);
+        adda(minus, Coord.of(rx, 0), 1, 0);
+        plus.hide();
     }
 
     @Override

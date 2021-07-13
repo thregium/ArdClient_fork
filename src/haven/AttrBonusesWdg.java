@@ -75,6 +75,8 @@ public class AttrBonusesWdg extends Widget implements ItemInfo.Owner {
                 tip = null;
             }
 
+            if (tip != null)
+                bar.move(Coord.of(tip.getWidth() + bar.sz.x, bar.c.y));
             int delta = tip != null ? tip.getHeight() : 0;
             bar.visible = delta > bar.sz.y;
             bar.max = delta - bar.sz.y;
