@@ -45,6 +45,9 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1165,7 +1168,7 @@ public class Config {
             "Spine00"
     ));
 
-    public static final Map<Long, Pair<String, String>> gridIdsMap = new HashMap<>(58000);
+    public static final Map<Long, Coord> gridIdsMap = new HashMap<>();
 
     static {
         Utils.loadprefchklist("disableanim", Config.disableanim);
@@ -1221,26 +1224,18 @@ public class Config {
 
 
         // populate grid ids map
-        BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new FileReader("grid_ids.txt"));
-            String line;
-            while ((line = reader.readLine()) != null) {
+            Path file = Paths.get("grid_ids.txt");
+            List<String> lines = Files.readAllLines(file);
+            for (String line : lines) {
                 String[] tknzed = line.split(",");
                 try {
-                    gridIdsMap.put(Long.parseLong(tknzed[2]), new Pair<>(tknzed[0], tknzed[1]));
+                    gridIdsMap.put(Long.parseLong(tknzed[2]), Coord.of(Integer.parseInt(tknzed[0]), Integer.parseInt(tknzed[1])));
                 } catch (NumberFormatException nfe) {
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) { // ignored
-                }
-            }
         }
 
         loadLogins();

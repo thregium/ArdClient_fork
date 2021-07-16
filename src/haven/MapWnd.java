@@ -458,7 +458,7 @@ public class MapWnd extends ResizableWnd {
             };
             add(geoloc, vclaim.c.add(vclaim.sz.x + spacer, 0));
             final IButton oddigeoloc = new IButton("gfx/hud/wndmap/btns/geoloc", "", "", "") {
-                private Pair<String, String> coords = null;
+                private Coord coords = null;
                 private BufferedImage green = Resource.loadimg("hud/geoloc-green");
                 private BufferedImage red = Resource.loadimg("hud/geoloc-red");
 
@@ -466,10 +466,10 @@ public class MapWnd extends ResizableWnd {
 
                 @Override
                 public Object tooltip(Coord c, Widget prev) {
-                    Pair<String, String> coords = getCurCoords();
+                    Coord coords = getCurCoords();
                     if (coords != null) {
                         this.coords = coords;
-                        tooltip = Text.render(String.format("Current location: %s x %s", coords.a, coords.b));
+                        tooltip = Text.render(String.format("Current location: %d x %d", coords.x, coords.y));
                     } else
                         tooltip = Text.render("Unable to determine your current location.");
                     return super.tooltip(c, prev);
@@ -477,11 +477,11 @@ public class MapWnd extends ResizableWnd {
 
                 @Override
                 public void click() {
-                    Pair<String, String> coords = getCurCoords();
+                    Coord coords = getCurCoords();
                     if (coords != null) {
                         this.coords = coords;
                         try {
-                            WebBrowser.self.show(new URL(String.format("http://odditown.com/haven/map/#x=%s&y=%s&zoom=9", coords.a, coords.b)));
+                            WebBrowser.self.show(new URL(String.format("http://odditown.com/haven/map/#x=%d&y=%d&zoom=9", coords.x, coords.y)));
                         } catch (WebBrowser.BrowserException e) {
                             getparent(GameUI.class).error("Could not launch web browser.");
                         } catch (MalformedURLException e) {
@@ -495,7 +495,7 @@ public class MapWnd extends ResizableWnd {
                 public void draw(GOut g) {
                     boolean redraw = false;
 
-                    Pair<String, String> coords = getCurCoords();
+                    Coord coords = getCurCoords();
                     if (coords != null) {
                         this.coords = coords;
                         if (!state) {
@@ -523,7 +523,7 @@ public class MapWnd extends ResizableWnd {
                     g.dispose();
                 }
 
-                private Pair<String, String> getCurCoords() {
+                private Coord getCurCoords() {
                     try {
                         Coord mpc = new Coord2d(mv.getcc()).floor(tilesz);
                         MCache.Grid obg = ui.sess.glob.map.getgrid(mpc.div(cmaps));

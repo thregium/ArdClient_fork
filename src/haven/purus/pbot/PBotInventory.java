@@ -186,6 +186,10 @@ public class PBotInventory {
         return ret;
     }
 
+    public boolean isFreeSlot(Coord coord) {
+        return (containerMatrix()[coord.x][coord.y] == 0);
+    }
+
     /**
      * Drop item from the hand to given slot in inventory
      *
