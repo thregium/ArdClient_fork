@@ -335,7 +335,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         questwnd = add(new QuestWnd(), new Coord(0, sz.y - 200));
         chatwnd = add(new ChatWnd(chat = new ChatUI(600, 150)), new Coord(20, sz.y - 200));
         if (Config.autowindows.get("Chat") != null && Config.autowindows.get("Chat").selected)
-            chatwnd.visible = false;
+            chatwnd.hide();
         syslog = chat.add(new ChatUI.Log("System"));
         botlog = chat.add(new ChatUI.BotChat());
         opts.c = sz.sub(opts.sz).div(2);
@@ -447,7 +447,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleMenuSettings() {
-        if (!opts.visible) {
+        if (!opts.visible()) {
             opts.show();
             opts.raise();
             fitwdg(opts);
@@ -459,7 +459,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleOverlaySettings() {
-        if (!opts.visible) {
+        if (!opts.visible()) {
             opts.show();
             opts.raise();
             fitwdg(opts);
@@ -471,7 +471,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleMapSettings() {
-        if (!opts.visible) {
+        if (!opts.visible()) {
             opts.show();
             opts.raise();
             fitwdg(opts);
@@ -483,7 +483,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleWaterSettings() {
-        if (!opts.visible) {
+        if (!opts.visible()) {
             opts.show();
             opts.raise();
             fitwdg(opts);
@@ -550,14 +550,14 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleInventory() {
-        if ((invwnd != null) && invwnd.show(!invwnd.visible)) {
+        if ((invwnd != null) && invwnd.show(!invwnd.visible())) {
             invwnd.raise();
             fitwdg(invwnd);
         }
     }
 
     public void toggleEquipment() {
-        if ((equwnd != null) && equwnd.show(!equwnd.visible)) {
+        if ((equwnd != null) && equwnd.show(!equwnd.visible())) {
             equwnd.raise();
             fitwdg(equwnd);
         }
@@ -638,7 +638,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleCharacter() {
-        if ((chrwdg != null) && chrwdg.show(!chrwdg.visible)) {
+        if ((chrwdg != null) && chrwdg.show(!chrwdg.visible())) {
             chrwdg.raise();
             fitwdg(chrwdg);
             setfocus(chrwdg);
@@ -646,7 +646,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleKinList() {
-        if (zerg.show(!zerg.visible)) {
+        if (zerg.show(!zerg.visible())) {
             zerg.raise();
             fitwdg(zerg);
             //  setfocus(zerg);
@@ -654,7 +654,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleQuestHelper() {
-        if (questhelper.visible) {
+        if (questhelper.visible()) {
             questhelper.show(false);
             questhelper.active = false;
         } else {
@@ -666,7 +666,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleOptions() {
-        if (opts.show(!opts.visible)) {
+        if (opts.show(!opts.visible())) {
             opts.raise();
             fitwdg(opts);
             setfocus(opts);
@@ -674,7 +674,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleMap() {
-        if ((mapfile != null) && mapfile.show(!mapfile.visible)) {
+        if ((mapfile != null) && mapfile.show(!mapfile.visible())) {
             mapfile.raise();
             fitwdg(mapfile);
             setfocus(mapfile);
@@ -948,7 +948,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleStudy() {
-        studywnd.show(!studywnd.visible);
+        studywnd.show(!studywnd.visible());
     }
 
     public void takeScreenshot() {
@@ -1031,7 +1031,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
                     if (!(wdg instanceof Window))
                         continue;
                     Window wnd = (Window) wdg;
-                    if (!wnd.visible)
+                    if (!wnd.visible())
                         continue;
                     Area warea = wnd.parentarea(this);
                     if (warea.isects(tarea)) {
@@ -1281,7 +1281,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             drawprog(g, prog);
         int bx = blpw;
         int by = sz.y;
-        if (chatwnd.visible) {
+        if (chatwnd.visible()) {
             bx = Math.max(bx, chatwnd.c.x);
             by = Math.min(by, chatwnd.c.y);
         }
@@ -1652,7 +1652,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     void toggleTimers() {
-        if (timers != null && timers.show(!timers.visible)) {
+        if (timers != null && timers.show(!timers.visible())) {
             timers.raise();
             fitwdg(timers);
             setfocus(timers);
@@ -1660,7 +1660,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     void toggleScripts() {
-        if (scripts != null && scripts.show(!scripts.visible)) {
+        if (scripts != null && scripts.show(!scripts.visible())) {
             scripts.raise();
             fitwdg(scripts);
             setfocus(scripts);
@@ -1668,7 +1668,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     void toggleHighlight() {
-        if (highlighted != null && highlighted.show(!highlighted.visible)) {
+        if (highlighted != null && highlighted.show(!highlighted.visible())) {
             highlighted.raise();
             fitwdg(highlighted);
             setfocus(highlighted);
@@ -1676,7 +1676,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     void toggleOverlay() {
-        if (overlayed != null && overlayed.show(!overlayed.visible)) {
+        if (overlayed != null && overlayed.show(!overlayed.visible())) {
             overlayed.raise();
             fitwdg(overlayed);
             setfocus(overlayed);
@@ -1684,7 +1684,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     void toggleHidden() {
-        if (hidden != null && hidden.show(!hidden.visible)) {
+        if (hidden != null && hidden.show(!hidden.visible())) {
             hidden.raise();
             fitwdg(hidden);
             setfocus(hidden);
@@ -1692,7 +1692,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void OpenChat() {
-        if (chatwnd != null && chatwnd.show(!chatwnd.visible)) {
+        if (chatwnd != null && chatwnd.show(!chatwnd.visible())) {
             chatwnd.raise();
             fitwdg(chatwnd);
             setfocus(chatwnd);
@@ -1700,7 +1700,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     void toggleAlerted() {
-        if (alerted != null && alerted.show(!alerted.visible)) {
+        if (alerted != null && alerted.show(!alerted.visible())) {
             alerted.raise();
             fitwdg(alerted);
             setfocus(alerted);
@@ -1708,7 +1708,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     void toggleGobSpawner() {
-        if (gobspawner != null && gobspawner.show(!gobspawner.visible)) {
+        if (gobspawner != null && gobspawner.show(!gobspawner.visible())) {
             gobspawner.raise();
             fitwdg(gobspawner);
             setfocus(gobspawner);
@@ -1716,7 +1716,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleKin() {
-        if (zerg.show(!zerg.visible)) {
+        if (zerg.show(!zerg.visible())) {
             zerg.raise();
             fitwdg(zerg);
             setfocus(zerg);
@@ -1724,7 +1724,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     void toggleInv() {
-        if ((invwnd != null) && invwnd.show(!invwnd.visible)) {
+        if ((invwnd != null) && invwnd.show(!invwnd.visible())) {
             invwnd.raise();
             fitwdg(invwnd);
             setfocus(invwnd);
@@ -1733,7 +1733,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
 
     void toggleCharWnd() {
-        if ((chrwdg != null) && chrwdg.show(!chrwdg.visible)) {
+        if ((chrwdg != null) && chrwdg.show(!chrwdg.visible())) {
             chrwdg.raise();
             fitwdg(chrwdg);
             setfocus(chrwdg);
@@ -1741,7 +1741,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleMapfile() {
-        if ((mapfile != null) && mapfile.show(!mapfile.visible)) {
+        if ((mapfile != null) && mapfile.show(!mapfile.visible())) {
             mapfile.raise();
             fitwdg(mapfile);
             setfocus(mapfile);
@@ -1749,7 +1749,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleForageHelper() {
-        if (foragehelper != null && foragehelper.show(!foragehelper.visible)) {
+        if (foragehelper != null && foragehelper.show(!foragehelper.visible())) {
             foragehelper.raise();
             fitwdg(foragehelper);
             setfocus(foragehelper);
@@ -1757,13 +1757,13 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleChat() {
-        if (chatwnd.visible && !chat.hasfocus) {
+        if (chatwnd.visible() && !chat.hasfocus) {
             setfocus(chat);
-        } else if (chatwnd.visible && chat.hasfocus) {
+        } else if (chatwnd.visible() && chat.hasfocus) {
             // OpenChat();
             setfocus(maininv);
         } else {
-            if (!chatwnd.visible) {
+            if (!chatwnd.visible()) {
                 OpenChat();
             } else {
                 setfocus(chat);
@@ -1772,7 +1772,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleMinimap() {
-        if (mmapwnd != null && mmapwnd.show(!mmapwnd.visible)) {
+        if (mmapwnd != null && mmapwnd.show(!mmapwnd.visible())) {
             mmapwnd.raise();
             fitwdg(mmapwnd);
             setfocus(mmapwnd);
@@ -1823,7 +1823,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
     public void toggleSearch() {
         KeyBind k = KeyBinder.get(TOGGLE_SEARCH);
-        if (menuSearch.show(!menuSearch.visible)) {
+        if (menuSearch.show(!menuSearch.visible())) {
             menuSearch.raise();
             fitwdg(menuSearch);
             if (k.mods == 4)
@@ -1840,7 +1840,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleFilter() {
-        if (filter.show(!filter.visible)) {
+        if (filter.show(!filter.visible())) {
             filter.raise();
             fitwdg(filter);
         }
@@ -1923,7 +1923,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     void toggleDeleted() {
-        if (deleted != null && deleted.show(!deleted.visible)) {
+        if (deleted != null && deleted.show(!deleted.visible())) {
             deleted.raise();
             fitwdg(deleted);
             setfocus(deleted);

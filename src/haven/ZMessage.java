@@ -29,15 +29,16 @@ package haven;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
-public class ZMessage extends Message implements Cloneable, Closeable, Flushable {
-    private Inflater zi = null;
-    private Deflater zo = null;
+public class ZMessage extends Message implements Cloneable, Closeable, Flushable, Serializable {
+    private transient Inflater zi = null;
+    private transient Deflater zo = null;
     private boolean eof;
-    private final Message bk;
+    private final transient Message bk;
 
     public ZMessage(Message from) {
         this.bk = from;
@@ -79,7 +80,7 @@ public class ZMessage extends Message implements Cloneable, Closeable, Flushable
                     if (zi.needsInput()) {
                         if (bk.rt - bk.rh < 1) {
                             if (!bk.underflow(128))
-                                throw (new EOF("Unterminated z-blob"));
+                                throw (new EOF("Unterminated z-blob").msg(this));
                         }
                         zi.setInput(bk.rbuf, bk.rh, bk.rt - bk.rh);
                         bk.rh = bk.rt;
@@ -90,7 +91,7 @@ public class ZMessage extends Message implements Cloneable, Closeable, Flushable
                 }
             }
         } catch (DataFormatException e) {
-            throw (new FormatError("Malformed z-blob", e));
+            throw (new FormatError("Malformed z-blob", e).msg(this));
         }
     }
 
