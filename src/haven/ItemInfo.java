@@ -45,6 +45,7 @@ import haven.res.ui.tt.attrmod.AttrMod;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -493,19 +494,20 @@ public abstract class ItemInfo {
                     throw (new ClassCastException("Unexpected info specification " + a[0].getClass()));
                 }
 
-                if (f == null) {
-                    f = customFactories.get(ttres.name);
+                if (ttres != null) {
+                    if (f == null)
+                        f = customFactories.get(ttres.name);
                     if (f == null)
                         f = ttres.getcode(InfoFactory.class, true);
-                }
 
-                try {
-                    ItemInfo inf = f.build(owner, raw, a);
-                    if (inf != null)
-                        ret.add(inf);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    if (f != null) {
+                        ItemInfo inf = f.build(owner, raw, a);
+                        if (inf != null)
+                            ret.add(inf);
+                    }
                 }
+                if (ttres == null || f == null)
+                    System.err.printf("ItemInfo for %s %s %s %s %s failed!%n", ttres, f, owner, raw, Arrays.toString(a));
             } else if (o instanceof String) {
                 ret.add(new AdHoc(owner, (String) o));
             } else {

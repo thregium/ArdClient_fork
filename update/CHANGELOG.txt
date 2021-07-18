@@ -1,6 +1,6 @@
 Details in https://github.com/Cediner/ArdClient/commits/Unstable
 2021.07.19
--- ... --
+-- Ingredient fix --
 ~
 
 2021.06.26
