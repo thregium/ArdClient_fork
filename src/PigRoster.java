@@ -11,7 +11,7 @@ import java.util.List;
 
 public class PigRoster extends CattleRoster<Pig> {
     static {
-        dev.checkFileVersion("gfx/hud/rosters/pig", 57);
+        dev.checkFileVersion("gfx/hud/rosters/pig", 58);
     }
 
     public static List<Column> cols = initcols(

@@ -31,7 +31,7 @@ import java.util.Set;
 
 public abstract class CattleRoster<T extends Entry> extends Widget {
     static {
-        dev.checkFileVersion("ui/croster", 69);
+        dev.checkFileVersion("ui/croster", 70);
     }
 
     public static final int WIDTH = UI.scale(1050);
@@ -118,6 +118,7 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
             redisplay(ndisp);
             dirty = false;
         }
+        super.tick(dt);
     }
 
     protected abstract List<Column> cols();
@@ -252,9 +253,9 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
     public abstract TypeButton button();
 
     public static TypeButton typebtn(Indir<Resource> up, Indir<Resource> dn) {
-        Resource ur = Loading.waitfor(() -> up.get());
+        Resource ur = Loading.waitfor(up);
         Resource.Image ui = ur.layer(Resource.imgc);
-        Resource.Image di = Loading.waitfor(() -> dn.get()).layer(Resource.imgc);
+        Resource.Image di = Loading.waitfor(dn).layer(Resource.imgc);
         TypeButton ret = new TypeButton(ui.scaled(), di.scaled(), ui.z);
         Resource.Tooltip tip = ur.layer(Resource.tooltip);
         if (tip != null)

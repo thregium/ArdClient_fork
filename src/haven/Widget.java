@@ -231,6 +231,34 @@ public class Widget {
         }
     }
 
+    /**
+     * Local with ignore version
+     * @param name
+     * @return
+     * @throws InterruptedException
+     */
+    public static Factory gettype3(String name) throws InterruptedException {
+        if (name.indexOf('/') < 0) {
+            synchronized (types) {
+                return (types.get(name));
+            }
+        } else {
+            int ver = -1, p;
+            if ((p = name.indexOf(':')) > 0) {
+//                ver = Integer.parseInt(name.substring(p + 1));
+                name = name.substring(0, p);
+            }
+            Indir<Resource> res = Resource.local().load(name, ver, 10);
+            while (true) {
+                try {
+                    return (res.get().getcode(Factory.class, true));
+                } catch (Loading l) {
+                    l.waitfor();
+                }
+            }
+        }
+    }
+
     public static Factory gettype(String name) {
         long start = System.currentTimeMillis();
         Factory f;

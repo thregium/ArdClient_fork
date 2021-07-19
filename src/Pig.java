@@ -5,7 +5,7 @@ import modification.dev;
 
 public class Pig extends Entry {
     static {
-        dev.checkFileVersion("gfx/hud/rosters/pig", 57);
+        dev.checkFileVersion("gfx/hud/rosters/pig", 58);
     }
 
     public int meat, milk;

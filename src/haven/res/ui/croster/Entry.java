@@ -20,7 +20,7 @@ import java.util.function.Predicate;
 
 public class Entry extends Widget {
     static {
-        dev.checkFileVersion("ui/croster", 69);
+        dev.checkFileVersion("ui/croster", 70);
     }
 
     public static final int WIDTH = CattleRoster.WIDTH;
@@ -30,17 +30,17 @@ public class Entry extends Widget {
     public static final Function<Integer, String> percent = v -> String.format("%d%%", v);
     public static final Function<Number, String> quality = v -> String.format("%.1f", v.doubleValue());
     public static final Function<Entry, Tex> namerend = e -> (CharWnd.attrf.render(e.name, BuddyWnd.gc[e.grp]).tex());
-    public static final Tex male = Loading.waitfor(Resource.local().load("gfx/hud/rosters/male")::get).layer(Resource.imgc).tex();
-    public static final Tex female = Loading.waitfor(Resource.local().load("gfx/hud/rosters/female")::get).layer(Resource.imgc).tex();
+    public static final Tex male = Loading.waitfor(Resource.local().load("gfx/hud/rosters/male")).layer(Resource.imgc).tex();
+    public static final Tex female = Loading.waitfor(Resource.local().load("gfx/hud/rosters/female")).layer(Resource.imgc).tex();
     public static final Function<Boolean, Tex> sex = v -> (v ? male : female);
-    public static final Tex adult = Loading.waitfor(Resource.local().load("gfx/hud/rosters/adult")::get).layer(Resource.imgc).tex();
-    public static final Tex child = Loading.waitfor(Resource.local().load("gfx/hud/rosters/child")::get).layer(Resource.imgc).tex();
+    public static final Tex adult = Loading.waitfor(Resource.local().load("gfx/hud/rosters/adult")).layer(Resource.imgc).tex();
+    public static final Tex child = Loading.waitfor(Resource.local().load("gfx/hud/rosters/child")).layer(Resource.imgc).tex();
     public static final Function<Boolean, Tex> growth = v -> (v ? child : adult);
-    public static final Tex dead = Loading.waitfor(Resource.local().load("gfx/hud/rosters/dead")::get).layer(Resource.imgc).tex();
-    public static final Tex alive = Loading.waitfor(Resource.local().load("gfx/hud/rosters/alive")::get).layer(Resource.imgc).tex();
+    public static final Tex dead = Loading.waitfor(Resource.local().load("gfx/hud/rosters/dead")).layer(Resource.imgc).tex();
+    public static final Tex alive = Loading.waitfor(Resource.local().load("gfx/hud/rosters/alive")).layer(Resource.imgc).tex();
     public static final Function<Boolean, Tex> deadrend = v -> (v ? dead : alive);
-    public static final Tex pregy = Loading.waitfor(Resource.local().load("gfx/hud/rosters/pregnant-y")::get).layer(Resource.imgc).tex();
-    public static final Tex pregn = Loading.waitfor(Resource.local().load("gfx/hud/rosters/pregnant-n")::get).layer(Resource.imgc).tex();
+    public static final Tex pregy = Loading.waitfor(Resource.local().load("gfx/hud/rosters/pregnant-y")).layer(Resource.imgc).tex();
+    public static final Tex pregn = Loading.waitfor(Resource.local().load("gfx/hud/rosters/pregnant-n")).layer(Resource.imgc).tex();
     public static final Function<Boolean, Tex> pregrend = v -> (v ? pregy : pregn);
     public final long id;
     public String name;

@@ -213,7 +213,11 @@ public class UI {
             type = "inv-study";
         }
 
-        Widget.Factory f = Widget.gettype2(type);
+        Widget.Factory f;
+        if (type.startsWith("gfx/hud/rosters/"))
+            f = Widget.gettype3(type);
+        else
+            f = Widget.gettype2(type);
         synchronized (this) {
             if (parent == beltWndId)
                 f = Widget.gettype2("inv-belt");
