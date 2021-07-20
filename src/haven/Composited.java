@@ -30,6 +30,7 @@ import haven.MapView.ClickInfo;
 import haven.Skeleton.Pose;
 import haven.Skeleton.PoseMod;
 import haven.sloth.gob.Type;
+import modification.configuration;
 import modification.resources;
 
 import java.util.ArrayList;
@@ -38,6 +39,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Composited implements Rendered, MapView.Clickable {
     public final Skeleton skel;
@@ -154,12 +157,10 @@ public class Composited implements Rendered, MapView.Clickable {
             return (1);
         }
 
-        private final Rendered.RComparator<Model.Layer> cmp = new Rendered.RComparator<Model.Layer>() {
-            public int compare(Model.Layer a, Model.Layer b, GLState.Buffer sa, GLState.Buffer sb) {
-                if (a.z1 != b.z1)
-                    return (a.z1 - b.z1);
-                return (a.z2 - b.z2);
-            }
+        private final Rendered.RComparator<Model.Layer> cmp = (a, b, sa, sb) -> {
+            if (a.z1 != b.z1)
+                return (a.z1 - b.z1);
+            return (a.z2 - b.z2);
         };
 
         public Rendered.RComparator<Model.Layer> cmp() {
@@ -246,24 +247,6 @@ public class Composited implements Rendered, MapView.Clickable {
 
         private SpriteEqu(ED ed) {
             super(ed);
-//            Sprite s = null;
-//            for (String hat : configuration.hatslist) {
-//                if (ed.res.res.get().name.equals(hat)) {
-//                    try {
-//                        Resource r = Resource.remote().loadwait(configuration.hatreplace);
-//                        s = Sprite.create(eqowner, r, ed.res.sdt.clone());
-//                        break;
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                        Resource r = Resource.remote().loadwait(configuration.defaultbrokenhat);
-//                        s = Sprite.create(eqowner, r, ed.res.sdt.clone());
-//                        break;
-//                    }
-//                }
-//            }
-//            if (s == null)
-//                s = Sprite.create(eqowner, ed.res.res.get(), ed.res.sdt.clone());
-//            this.spr = s;
             this.spr = Sprite.create(eqowner, ed.res.res.get(), ed.res.sdt.clone());
         }
 
@@ -373,7 +356,7 @@ public class Composited implements Rendered, MapView.Clickable {
         public MD clone() {
             try {
                 MD ret = (MD) super.clone();
-                ret.tex = new ArrayList<ResData>(tex);
+                ret.tex = new ArrayList<>(tex);
                 return (ret);
             } catch (CloneNotSupportedException e) {
                 /* This is ridiculous. */
@@ -429,7 +412,7 @@ public class Composited implements Rendered, MapView.Clickable {
         }
     }
 
-    public static class Desc {
+    public static class Desc implements Cloneable {
         public Indir<Resource> base;
         public List<MD> mod = new ArrayList<>();
         public List<ED> equ = new ArrayList<>();
@@ -471,6 +454,15 @@ public class Composited implements Rendered, MapView.Clickable {
                 Coord3f off = new Coord3f(((Number) qa[n + 0]).floatValue(), ((Number) qa[n + 1]).floatValue(), ((Number) qa[n + 2]).floatValue());
                 ret.equ.add(new ED(t, at, new ResData(res, sdt), off));
             }
+            return (ret);
+        }
+
+        public Desc clone() {
+            Desc ret = new Desc(base);
+            for (MD mod : this.mod)
+                ret.mod.add(mod.clone());
+            for (ED equ : this.equ)
+                ret.equ.add(equ.clone());
             return (ret);
         }
 
@@ -553,11 +545,7 @@ public class Composited implements Rendered, MapView.Clickable {
         }
         if (nequ.isEmpty()) {
             nequ = null;
-            for (Iterator<Equ> i = this.equ.iterator(); i.hasNext(); ) {
-                Equ equ = i.next();
-                if (!equ.matched)
-                    i.remove();
-            }
+            this.equ.removeIf(equ -> !equ.matched);
         }
     }
 
@@ -644,11 +632,18 @@ public class Composited implements Rendered, MapView.Clickable {
     public void draw(GOut g) {
     }
 
+    private final AtomicLong ticktime = new AtomicLong(System.currentTimeMillis());
+    private int buffertime = 0;
     public void tick(int dt) {
-        if (poses != null)
-            poses.tick(dt / 1000.0f);
-        for (Equ equ : this.equ)
-            equ.tick(dt);
+        if (configuration.allowAnim(ticktime)) {
+            if (poses != null)
+                poses.tick((buffertime + dt) / 1000.0f);
+            for (Equ equ : this.equ)
+                equ.tick(buffertime + dt);
+            buffertime = 0;
+        } else {
+            buffertime += dt;
+        }
     }
 
     @Deprecated

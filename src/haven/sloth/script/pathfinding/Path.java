@@ -12,9 +12,9 @@ public class Path implements Comparable<Path> {
     //The coordinate we're on in this path
     public final Coord c;
     //The path we came from
-    private Path parent;
+    private final Path parent;
     //The depth of this path in our solution tree
-    private int depth;
+    private final int depth;
     //The value of this path, in our case distance from the goal
     final double gval;
     //The heuristic value of this path, depth + gval;

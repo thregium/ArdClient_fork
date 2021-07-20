@@ -1,5 +1,7 @@
 package haven;
 
+import modification.configuration;
+
 import javax.media.opengl.GL2;
 import java.nio.BufferOverflowException;
 import java.nio.FloatBuffer;
@@ -11,12 +13,7 @@ public class TileOutline implements Rendered {
     private final MCache map;
     private final FloatBuffer[] vertexBuffers;
     private int area;
-    public static States.ColState color = new States.ColState(
-            DefSettings.GUIDESCOLOR.get().getRed(),
-            DefSettings.GUIDESCOLOR.get().getGreen(),
-            DefSettings.GUIDESCOLOR.get().getBlue(),
-            (int) (DefSettings.GUIDESCOLOR.get().getAlpha() * 0.5)
-    );
+    public static States.ColState color = new States.ColState(DefSettings.GUIDESCOLOR.get());
     private Location location;
     private Coord ul;
     private int curIndex;
@@ -26,7 +23,6 @@ public class TileOutline implements Rendered {
         this.mapView = mapView;
         this.map = mapView.glob.map;
         this.area = (MCache.cutsz.x * 5) * (MCache.cutsz.y * 5) * (2 * mapView.view);
-        //this.color = new States.ColState(255, 255, 255, 64);
         // double-buffer to prevent flickering
         vertexBuffers = new FloatBuffer[2];
         vertexBuffers[0] = Utils.mkfbuf(this.area * 3 * 4);
@@ -51,9 +47,10 @@ public class TileOutline implements Rendered {
     public boolean setup(RenderList rl) {
         if (location != null)
             rl.prepo(location);
-        rl.prepo(States.ndepthtest);
         rl.prepo(last);
         rl.prepo(color);
+        if (!configuration.showaccgridlines)
+            rl.prepo(States.ndepthtest);
         return true;
     }
 
@@ -66,7 +63,7 @@ public class TileOutline implements Rendered {
             vertexBuffers[1] = Utils.mkfbuf(this.area * 3 * 4);
             curIndex = (curIndex + 1) % 2; // swap buffers
             Coord c = new Coord();
-            Coord size = ul.add(MCache.cutsz.mul(mapView.view * 2 + 1)); //75(1)(25*3) 125(2)(25*5) 175(3)(25*7) 225(4)(25*9) 275(5)(25*11)
+            Coord size = ul.add(MCache.cutsz.mul(mapView.view * 2 + 1));
             for (c.y = ul.y; c.y < size.y; c.y++)
                 for (c.x = ul.x; c.x < size.x; c.x++)
                     addLineStrip(mapToScreen(c), mapToScreen(c.add(1, 0)), mapToScreen(c.add(1, 1)));

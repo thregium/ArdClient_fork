@@ -575,7 +575,7 @@ public class FastMesh implements FRendered, Rendered.Instanced, Disposable {
         }
 
         public String toString() {
-            StringBuilder sb  = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             sb.append("<MeshRes ");
             sb.append(layerid()).append(" ");
             sb.append(mat).append(" ");

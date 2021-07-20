@@ -69,6 +69,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
@@ -91,6 +92,7 @@ import static haven.DefSettings.GARDENPOTDONECOLOR;
 import static haven.DefSettings.GOBPATHCOL;
 import static haven.DefSettings.GUIDESCOLOR;
 import static haven.DefSettings.HIDDENCOLOR;
+import static haven.DefSettings.HITBOXCOLOR;
 import static haven.DefSettings.HUDTHEME;
 import static haven.DefSettings.KEEPGOBS;
 import static haven.DefSettings.KEEPGRIDS;
@@ -2345,6 +2347,7 @@ public class OptWnd extends Window {
                 new Label("Increase font size by (req. restart):"),
                 new HSlider(160, 0, 3, Config.fontadd) {
                     public void added() {
+                        super.added();
                         updateLabel();
                     }
 
@@ -5127,23 +5130,25 @@ public class OptWnd extends Window {
                     if (gui != null && gui.map != null)
                         gui.map.togglegrid();
                 }, Config.showgridlines),
+                new CheckBox("Accurate", val -> Utils.setprefb("showaccgridlines", configuration.showaccgridlines = val), configuration.showaccgridlines),
                 new CheckBox("Grid type (old/new)", val -> Utils.setprefb("slothgrid", Config.slothgrid = val), Config.slothgrid),
-                new IndirColorPreview(Coord.of(20, 20), GUIDESCOLOR, val -> {
-                    GobHitbox.bbclrstate = new States.ColState(val);
-                    TileOutline.color = new States.ColState(val.getRed(), val.getGreen(), val.getBlue(), (int) (val.getAlpha() * 0.5));
-                    if (ui.sess != null) {
-                        ui.sess.glob.oc.changeAllGobs();
-                    }
-                })
+                new IndirColorPreview(Coord.of(20, 20), GUIDESCOLOR, val -> TileOutline.color = new States.ColState(val.getRed(), val.getGreen(), val.getBlue(), (int) (val.getAlpha() * 0.5)))
         );
-        appender.add(
+        appender.addRow(
                 new CheckBox("Display hitboxes", val -> {
                     Utils.setprefb("showboundingboxes", Config.showboundingboxes = val);
                     GameUI gui = getparent(GameUI.class);
                     if (gui != null && gui.map != null) {
                         gui.map.refreshGobsAll();
                     }
-                }, Config.showboundingboxes)
+                }, Config.showboundingboxes),
+                new CheckBox("Accurate", val -> Utils.setprefb("showaccboundingboxes", configuration.showaccboundingboxes = val), configuration.showaccboundingboxes),
+                new IndirColorPreview(Coord.of(20, 20), HITBOXCOLOR, val -> {
+                    GobHitbox.bbclrstate = new States.ColState(val);
+                    if (ui.sess != null) {
+                        ui.sess.glob.oc.changeAllGobs();
+                    }
+                })
         );
         Label placegridtext = new Label("Place Grid (" + Utils.getprefi("placegridval", 8) + "): ");
         appender.addRow(
@@ -6086,7 +6091,7 @@ public class OptWnd extends Window {
             public CPanel(GLSettings gcf) {
                 this.cf = gcf;
                 final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(this, new Coord(620, 350)));
-                appender.setVerticalMargin(VERTICAL_MARGIN);
+                appender.setVerticalMargin(2);
                 appender.setHorizontalMargin(HORIZONTAL_MARGIN);
                 appender.add(new CheckBox("Show Entering/Leaving Messages in Sys Log instead of large Popup - FPS increase?") {
                     {
@@ -6321,6 +6326,7 @@ public class OptWnd extends Window {
                     appender.addRow(
                             new HSlider(160, (int) (cf.anisotex.min() * 2), (int) (cf.anisotex.max() * 2), (int) (cf.anisotex.val * 2)) {
                                 protected void added() {
+                                    super.added();
                                     dpy();
                                 }
 
@@ -6369,6 +6375,34 @@ public class OptWnd extends Window {
                         a = val;
                     }
                 });
+                Function<Integer, String> animtext = i -> {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Animation ");
+                    if (i == 0)
+                        sb.append("on");
+                    else if (i == 5000)
+                        sb.append("off");
+                    else
+                        sb.append(i);
+                    sb.append(" : ");
+                    return (sb.toString());
+                };
+                Label frequencytext = new Label(animtext.apply(configuration.animationfrequency));
+                appender.addRow(
+                        frequencytext,
+                        new HSlider(200, 0, 5000, configuration.animationfrequency) {
+                            @Override
+                            public void changed() {
+                                frequencytext.settext(animtext.apply(val));
+                                Utils.setprefi("animationfrequency", configuration.animationfrequency = val);
+                            }
+
+                            @Override
+                            public Object tooltip(Coord c0, Widget prev) {
+                                return RichText.render(RichText.Parser.quote("Animation cooldown: " + val + "\n0 - always on, 5000 - always off"), 300).tex();
+                            }
+                        }
+                );
 //                appender.add(new CheckBox("Lower terrain draw distance - Will increase performance, but look like shit. (requires logout)") {
 //                    {
 //                        a = Config.lowerterraindistance;

@@ -1,6 +1,12 @@
-Details in https://github.com/Cediner/ArdClient/commits/Unstable
+Details in https://github.com/Cediner/ArdClient/commits/
+2021.07.21
+-- Grid and hitbox outline rework (need to setting)
+-- Animation cooldown (Video) (Disable animation alternative)
+-- Some small fix
+~
+
 2021.07.19
--- Ingredient fix --
+-- Ingredient fix
 ~
 
 2021.06.26

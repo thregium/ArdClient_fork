@@ -43,7 +43,7 @@ public enum Action {
             configuration.playerboxsprite = true;
         else if (sum == 2)
             configuration.playerboxsprite = false;
-        else if (sum == 3)
+        else
             configuration.playerbordersprite = false;
     }, "Display view border"),
     TOGGLE_DANGER_RADIUS(GameUI::toggleDangerRadius, "Toggles Mine/Animal Radii", "Toggles display of mine/animal danger radii"),

@@ -21,12 +21,12 @@ import haven.glsl.FragmentContext;
 import haven.glsl.Function;
 import haven.glsl.Macro1;
 import haven.glsl.MiscLib;
-import haven.glsl.ProgramContext;
 import haven.glsl.Return;
 import haven.glsl.ShaderMacro;
 import haven.glsl.Tex2D;
 import haven.glsl.Uniform;
 import haven.res.lib.env.Environ;
+import modification.configuration;
 import modification.dev;
 
 import javax.media.opengl.GL;
@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static haven.glsl.Cons.add;
 import static haven.glsl.Cons.div;
@@ -56,7 +57,7 @@ public class ISmoke extends Sprite implements Gob.Overlay.CDel {
 
     FloatBuffer posb = null, colb = null;
     final Material mat;
-    final List<Boll> bollar = new ArrayList<Boll>();
+    final List<Boll> bollar = new ArrayList<>();
     final Random rnd = new Random();
     final GLState loc;
     final Color col;
@@ -83,22 +84,28 @@ public class ISmoke extends Sprite implements Gob.Overlay.CDel {
 
     float de = 0;
 
+    private final AtomicLong ticktime = new AtomicLong(System.currentTimeMillis());
+    private int buffertime = 0;
     public boolean tick(int idt) {
-        if (Config.disableAllAnimations) return (false);
-        float dt = idt / 1000.0f;
-        de += dt;
-        while (spawn && (de > 0.1)) {
-            de -= 0.1;
-            int n = (int) ((1.0f + (rnd.nextFloat() * 0.5f)) * den);
-            for (int i = 0; i < n; i++)
-                bollar.add(new Boll(Coord3f.o.sadd(0, rnd.nextFloat() * (float) Math.PI * 2, (float) Math.sqrt(rnd.nextFloat()) * srad)));
-        }
-        Coord3f nv = Environ.get(((Gob) owner).glob).wind().mul(0.4f);
-        nv = nv.rot(Coord3f.zu, (float) ((Gob) owner).a);
-        for (Iterator<Boll> i = bollar.iterator(); i.hasNext(); ) {
-            Boll boll = i.next();
-            if (boll.tick(dt, nv))
-                i.remove();
+        if (configuration.allowAnim(ticktime)) {
+            float dt = (buffertime + idt) / 1000.0f;
+            de += dt;
+            while (spawn && (de > 0.1)) {
+                de -= 0.1;
+                int n = (int) ((1.0f + (rnd.nextFloat() * 0.5f)) * den);
+                for (int i = 0; i < n; i++)
+                    bollar.add(new Boll(Coord3f.o.sadd(0, rnd.nextFloat() * (float) Math.PI * 2, (float) Math.sqrt(rnd.nextFloat()) * srad)));
+            }
+            Coord3f nv = Environ.get(((Gob) owner).glob).wind().mul(0.4f);
+            nv = nv.rot(Coord3f.zu, (float) ((Gob) owner).a);
+            for (Iterator<Boll> i = bollar.iterator(); i.hasNext(); ) {
+                Boll boll = i.next();
+                if (boll.tick(dt, nv))
+                    i.remove();
+            }
+            buffertime = 0;
+        } else {
+            buffertime += idt;
         }
         return (!spawn && bollar.isEmpty());
     }
@@ -152,50 +159,48 @@ public class ISmoke extends Sprite implements Gob.Overlay.CDel {
         gl.glDisable(GL2.GL_POINT_SPRITE);
     }
 
+    private final AtomicLong updtime = new AtomicLong(System.currentTimeMillis());
+
     private void updpos(GOut d) {
-        if (bollar.size() < 1) {
-            posb = colb = null;
-            return;
+        if (configuration.allowAnim(updtime)) {
+            if (bollar.size() < 1) {
+                posb = colb = null;
+                return;
+            }
+            if ((posb == null) || (posb.capacity() < bollar.size() * 3)) {
+                int n = 3 * bollar.size() / 2;
+                posb = Utils.mkfbuf(n * 3);
+                colb = Utils.mkfbuf(n * 4);
+            }
+            float r = col.getRed() / 255.0f;
+            float g = col.getGreen() / 255.0f;
+            float b = col.getBlue() / 255.0f;
+            float a = col.getAlpha() / 255.0f;
+            FloatBuffer tpos = Utils.wfbuf(3 * bollar.size()), tcol = Utils.wfbuf(4 * bollar.size());
+            for (Boll boll : bollar) {
+                tpos.put(boll.x).put(boll.y).put(boll.z);
+                tcol.put(r).put(g).put(b).put(a * (float) Utils.clip(1.0 - Math.pow(boll.t / life, fadepow), 0, 1));
+            }
+            d.gl.bglCopyBufferf(posb, 0, tpos, 0, tpos.capacity());
+            d.gl.bglCopyBufferf(colb, 0, tcol, 0, tcol.capacity());
         }
-        if ((posb == null) || (posb.capacity() < bollar.size() * 3)) {
-            int n = 3 * bollar.size() / 2;
-            posb = Utils.mkfbuf(n * 3);
-            colb = Utils.mkfbuf(n * 4);
-        }
-        float r = col.getRed() / 255.0f;
-        float g = col.getGreen() / 255.0f;
-        float b = col.getBlue() / 255.0f;
-        float a = col.getAlpha() / 255.0f;
-        FloatBuffer tpos = Utils.wfbuf(3 * bollar.size()), tcol = Utils.wfbuf(4 * bollar.size());
-        for (Boll boll : bollar) {
-            tpos.put(boll.x).put(boll.y).put(boll.z);
-            tcol.put(r).put(g).put(b).put(a * (float) Utils.clip(1.0 - Math.pow(boll.t / life, fadepow), 0, 1));
-        }
-        d.gl.bglCopyBufferf(posb, 0, tpos, 0, tpos.capacity());
-        d.gl.bglCopyBufferf(colb, 0, tcol, 0, tcol.capacity());
     }
 
     private static final Uniform bollsz = new Uniform(FLOAT);
-    private static final ShaderMacro prog = new ShaderMacro() {
-        public void modify(final ProgramContext prog) {
-            prog.vctx.ptsz.mod(new Macro1<Expression>() {
-                final Function pdiv = new Function.Def(FLOAT) {{
-                    Expression vec = param(PDir.IN, VEC4).ref();
-                    code.add(new Return(div(pick(vec, "x"), pick(vec, "w"))));
-                }};
+    private static final ShaderMacro prog = prog -> {
+        prog.vctx.ptsz.mod(new Macro1<Expression>() {
+            final Function pdiv = new Function.Def(FLOAT) {{
+                Expression vec = param(PDir.IN, VEC4).ref();
+                code.add(new Return(div(pick(vec, "x"), pick(vec, "w"))));
+            }};
 
-                public Expression expand(Expression in) {
-                    return (mul(sub(pdiv.call(prog.vctx.projxf(add(prog.vctx.eyev.depref(), vec4(bollsz.ref(), l(0.0), l(0.0), l(0.0))))),
-                            pdiv.call(prog.vctx.posv.depref())),
-                            pick(MiscLib.screensize.ref(), "x")));
-                }
-            }, 0);
-            Tex2D.texcoord(prog.fctx).mod(new Macro1<Expression>() {
-                public Expression expand(Expression in) {
-                    return (FragmentContext.gl_PointCoord.ref());
-                }
-            }, 0);
-        }
+            public Expression expand(Expression in) {
+                return (mul(sub(pdiv.call(prog.vctx.projxf(add(prog.vctx.eyev.depref(), vec4(bollsz.ref(), l(0.0), l(0.0), l(0.0))))),
+                        pdiv.call(prog.vctx.posv.depref())),
+                        pick(MiscLib.screensize.ref(), "x")));
+            }
+        }, 0);
+        Tex2D.texcoord(prog.fctx).mod(in -> (FragmentContext.gl_PointCoord.ref()), 0);
     };
 
     private final GLState projsz = new States.ProgPointSize(prog) {

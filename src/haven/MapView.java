@@ -1420,10 +1420,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             rl.add(outlines, null);
         if (DefSettings.SHOWMAP.get())
             rl.add(map, null);
-        if (showgrid) {
-            rl.add(Config.slothgrid ? grid : gridol, null);
-        }
         rl.add(mapol, null);
+        if (showgrid)
+            rl.add(Config.slothgrid ? grid : gridol, null);
         if (DefSettings.SHOWGOBS.get())
             rl.add(gobs, null);
         if (placing != null)

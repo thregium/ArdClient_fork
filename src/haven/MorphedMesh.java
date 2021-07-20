@@ -26,20 +26,23 @@
 
 package haven;
 
+import modification.configuration;
+
 import java.nio.FloatBuffer;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class MorphedMesh extends FastMesh {
-    private static Map<Morpher.Factory, Collection<MorphedBuf>> bufs = new CacheMap<Morpher.Factory, Collection<MorphedBuf>>(CacheMap.RefType.WEAK);
+    private static Map<Morpher.Factory, Collection<MorphedBuf>> bufs = new CacheMap<>(CacheMap.RefType.WEAK);
 
     private static MorphedBuf buf(VertexBuf buf, Morpher.Factory morph) {
         Collection<MorphedBuf> bl;
         synchronized (bufs) {
             bl = bufs.get(morph);
             if (bl == null)
-                bufs.put(morph, bl = new LinkedList<MorphedBuf>());
+                bufs.put(morph, bl = new LinkedList<>());
         }
         synchronized (bl) {
             for (MorphedBuf b : bl) {
@@ -56,13 +59,17 @@ public class MorphedMesh extends FastMesh {
         super(mesh, buf(mesh.vert, pose));
     }
 
+    private final AtomicLong setuptime = new AtomicLong(System.currentTimeMillis());
     public boolean setup(RenderList rl) {
-        ((MorphedBuf) vert).update();
+        if (configuration.allowAnim(setuptime))
+            ((MorphedBuf) vert).update();
         return (super.setup(rl));
     }
 
+    private final AtomicLong drawtime = new AtomicLong(System.currentTimeMillis());
     public void cdraw(GOut g) {
-        ((MorphedBuf) vert).update2(g);
+        if (configuration.allowAnim(drawtime))
+            ((MorphedBuf) vert).update2(g);
         super.cdraw(g);
     }
 
@@ -171,36 +178,34 @@ public class MorphedMesh extends FastMesh {
     }
 
     public static Morpher.Factory combine(final Morpher.Factory... parts) {
-        return (new Morpher.Factory() {
-            public Morpher create(MorphedBuf vb) {
-                final Morpher[] mparts = new Morpher[parts.length];
-                for (int i = 0; i < parts.length; i++)
-                    mparts[i] = parts[i].create(vb);
-                return (new Morpher() {
-                    public boolean update() {
-                        boolean ret = false;
-                        for (Morpher p : mparts) {
-                            if (p.update())
-                                ret = true;
-                        }
-                        return (ret);
+        return (vb -> {
+            final Morpher[] mparts = new Morpher[parts.length];
+            for (int i = 0; i < parts.length; i++)
+                mparts[i] = parts[i].create(vb);
+            return (new Morpher() {
+                public boolean update() {
+                    boolean ret = false;
+                    for (Morpher p : mparts) {
+                        if (p.update())
+                            ret = true;
                     }
+                    return (ret);
+                }
 
-                    public void morphp(FloatBuffer dst, FloatBuffer src) {
-                        for (Morpher p : mparts) {
-                            p.morphp(dst, src);
-                            src = dst;
-                        }
+                public void morphp(FloatBuffer dst, FloatBuffer src) {
+                    for (Morpher p : mparts) {
+                        p.morphp(dst, src);
+                        src = dst;
                     }
+                }
 
-                    public void morphd(FloatBuffer dst, FloatBuffer src) {
-                        for (Morpher p : mparts) {
-                            p.morphd(dst, src);
-                            src = dst;
-                        }
+                public void morphd(FloatBuffer dst, FloatBuffer src) {
+                    for (Morpher p : mparts) {
+                        p.morphd(dst, src);
+                        src = dst;
                     }
-                });
-            }
+                }
+            });
         });
     }
 }

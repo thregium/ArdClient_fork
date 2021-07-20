@@ -19,7 +19,7 @@ import java.util.Set;
 public class NBAPathfinder extends Pathfinder {
     enum Side {
         SOURCE,
-        GOAL;
+        GOAL
     }
 
     private final int level;

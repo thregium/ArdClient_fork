@@ -1,18 +1,21 @@
 package haven;
 
 import haven.sloth.gob.Type;
+import modification.configuration;
 
 import javax.media.opengl.GL2;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GobHitbox extends Sprite {
     public static States.ColState fillclrstate = new States.ColState(DefSettings.HIDDENCOLOR.get());
-    public static States.ColState bbclrstate = new States.ColState(DefSettings.GUIDESCOLOR.get());
+    public static States.ColState bbclrstate = new States.ColState(DefSettings.HITBOXCOLOR.get());
     private BBox[] b;
     private int mode;
     private States.ColState clrstate;
     private boolean wall = false;
+    private final FloatBuffer[] buffers;
 
     public GobHitbox(Gob gob, BBox[] b, boolean fill) {
         super(gob, null);
@@ -35,11 +38,32 @@ public class GobHitbox extends Sprite {
 //        c = new Coordf(bc.x, bc.y);
 //        d = new Coordf(bc.x, ac.y);
         this.b = b;
+
+        int type = getType();
+        buffers = new FloatBuffer[b.length];
+        for (int i = 0; i < b.length; i++) {
+            buffers[i] = Utils.mkfbuf(b[i].points.length * 3);
+            for (int p = 0; p < b[i].points.length; p++) {
+                Coord2d point = b[i].points[p];
+                buffers[i].put((float) point.x).put((float) ((type == 2 ? -1 : 1) * point.y)).put((float) (type == 3 ? 11 : 1));
+            }
+            buffers[i].rewind();
+        }
+    }
+
+    public int getType() {
+        if (mode == GL2.GL_LINE_LOOP && !wall) {
+            return (1);
+        } else if (!wall) {
+            return (2);
+        } else {
+            return (3);
+        }
     }
 
     public boolean setup(RenderList rl) {
         rl.prepo(clrstate);
-        if (mode == GL2.GL_LINE_LOOP)
+        if (mode == GL2.GL_LINE_LOOP && !configuration.showaccboundingboxes)
             rl.prepo(States.xray);
         return true;
     }
@@ -47,25 +71,13 @@ public class GobHitbox extends Sprite {
     public void draw(GOut g) {
         g.apply();
         BGL gl = g.gl;
+        if (getType() == 1)
+            gl.glLineWidth(2.0F);
         for (int i = 0; i < b.length; i++) {
-            if (mode == GL2.GL_LINE_LOOP && !wall) {
-                gl.glLineWidth(2.0F);
-                gl.glBegin(mode);
-                for (int j = 0; j < b[i].points.length; j++) {
-                    gl.glVertex3f((float) b[i].points[j].x, (float) b[i].points[j].y, 1);
-                }
-            } else if (!wall) {
-                gl.glBegin(mode);
-                for (int j = 0; j < b[i].points.length; j++) {
-                    gl.glVertex3f((float) b[i].points[j].x, (float) -b[i].points[j].y, 1);
-                }
-            } else {
-                gl.glBegin(mode);
-                for (int j = 0; j < b[i].points.length; j++) {
-                    gl.glVertex3f((float) b[i].points[j].x, (float) b[i].points[j].y, 11);
-                }
-            }
-            gl.glEnd();
+            gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+            gl.glVertexPointer(3, GL2.GL_FLOAT, 0, buffers[i]);
+            gl.glDrawArrays(mode, 0, b[i].points.length);
+            gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
         }
     }
 
@@ -91,7 +103,7 @@ public class GobHitbox extends Sprite {
     private static final BBox[] bboxGoat = new BBox[]{new BBox(new Coord(-3, -2), new Coord(4, 2))};
     private static final BBox[] bboxPig = new BBox[]{new BBox(new Coord(-6, -3), new Coord(6, 3))};
     private static final BBox[] bboxBoost = new BBox[]{new BBox(new Coord(-4, -4), new Coord(4, 4))};
-//    private static final BBox[] bboxCattle = new BBox[]{new BBox(new Coord(-12, -4), new Coord(12, 4))};
+    //    private static final BBox[] bboxCattle = new BBox[]{new BBox(new Coord(-12, -4), new Coord(12, 4))};
     private static final BBox[] bboxHorse = new BBox[]{new BBox(new Coord(-8, -4), new Coord(8, 4))};
 //    private static final BBox[] bboxSmelter = new BBox[]{new BBox(new Coord(-12, -12), new Coord(12, 20))};
 //    private static final BBox[] bboxWallseg = new BBox[]{new BBox(new Coord(-5, -6), new Coord(6, 5))};
@@ -125,7 +137,7 @@ public class GobHitbox extends Sprite {
         else if (name.startsWith("gfx/terobjs/boostspeed"))
             return bboxBoost;
 
-            // dual state gobs
+        // dual state gobs
 //        if (name.endsWith("gate") && name.startsWith("gfx/terobjs/arch")) {
 //            GAttrib rd = gob.getattr(ResDrawable.class);
 //            if (rd == null)     // shouldn't happen

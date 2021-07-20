@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class configuration {
     public static String modificationPath = "modification";
@@ -189,6 +190,21 @@ public class configuration {
     public static boolean showinvnumber = Utils.getprefb("showinvnumber", false);
     public static boolean moredetails = Utils.getprefb("moredetails", false);
     public static boolean showhiddenoverlay = Utils.getprefb("showhiddenoverlay", true);
+    public static boolean showaccgridlines = Utils.getprefb("showaccgridlines", false);
+    public static boolean showaccboundingboxes = Utils.getprefb("showaccboundingboxes", false);
+    public static int animationfrequency = Utils.getprefi("animationfrequency", 0);
+
+    public static boolean allowAnim(AtomicLong time) {
+        if (animationfrequency == 0)
+            return (true);
+        if (animationfrequency == 5000)
+            return (false);
+        if (System.currentTimeMillis() - time.get() >= animationfrequency) {
+            time.set(System.currentTimeMillis());
+            return (true);
+        }
+        return (false);
+    }
 
     public static boolean scalingmarks = Utils.getprefb("scalingmarks", false);
     public static boolean bigmapshowgrid = Utils.getprefb("bigmapshowgrid", false);

@@ -581,6 +581,7 @@ public class Window extends MovableWidget implements DTarget {
                     curiosliderlabel = add(new Label("Curio Time Target:"), new Coord(0, y + 50));
                     curioslider = add(new HSlider(130, 0, 10080, Config.curiotimetarget) {
                         public void added() {
+                            super.added();
                             val = (Config.curiotimetarget);
                             updateLabel();
                         }
@@ -927,6 +928,8 @@ public class Window extends MovableWidget implements DTarget {
                 options[i] = it.next().getKey();
             }
             Consumer<Integer> callback = selection -> {
+                if (selection == -1)
+                    return;
                 Iterator<Map.Entry<String, Runnable>> iterator = list.entrySet().iterator();
                 Map.Entry<String, Runnable> entry = iterator.next();
                 for (int i = 0; i < selection; i++) {

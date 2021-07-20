@@ -105,7 +105,8 @@ public class DefSettings {
     public static final IndirSetting<Boolean> SHOWHITBOX = new IndirSetting<>(global, "gameplay.show-hitbox");               //[Bool] Toggle hitbox squares
     public static final IndirSetting<Boolean> SHOWHIDDEN = new IndirSetting<>(global, "gameplay.show-hidden");               //[Bool] Toggle hidden squares
     public static final IndirSetting<Color> HIDDENCOLOR = new IndirSetting<>(global, "gameplay.hidden-color");               //[RGBA] Color of hidden squares
-    public static final IndirSetting<Color> GUIDESCOLOR = new IndirSetting<>(global, "gameplay.guides-color");               //[RGBA] Color of guide lines (grids and boundboxes)
+    public static final IndirSetting<Color> GUIDESCOLOR = new IndirSetting<>(global, "gameplay.guides-color");               //[RGBA] Color of guide lines (grids)
+    public static final IndirSetting<Color> HITBOXCOLOR = new IndirSetting<>(global, "gameplay.hitbox-color");               //[RGBA] Color of guide lines (boundboxes)
     public static final IndirSetting<Color> TROUGHCOLOR = new IndirSetting<>(global, "gameplay.trough-color");               //[RGBA] Color trough radii circles
     public static final IndirSetting<Color> BEEHIVECOLOR = new IndirSetting<>(global, "gameplay.beehive-color");             //[RGBA] Color beehive radii circles
     public static final IndirSetting<Color> ANIMALDANGERCOLOR = new IndirSetting<>(global, "gameplay.danger-color");         //[RGBA] Color of animal radii circles
@@ -279,6 +280,7 @@ public class DefSettings {
         SHOWHIDDEN.ensure(true);
         HIDDENCOLOR.ensure(Color.RED);
         GUIDESCOLOR.ensure(Color.WHITE);
+        HITBOXCOLOR.ensure(Color.WHITE);
         TROUGHCOLOR.ensure(new Color(0, 0, 255, 80));
         BEEHIVECOLOR.ensure(new Color(255, 255, 0, 80));
         ANIMALDANGERCOLOR.ensure(new Color(255, 0, 0, 80));

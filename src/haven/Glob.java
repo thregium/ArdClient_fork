@@ -46,7 +46,6 @@ public class Glob {
     public final GobHitmap gobhitmap;
     public static final double SERVER_TIME_RATIO = 3.29d;
     public double serverEpoch, localEpoch = Utils.rtime();
-    //public final GobHitmap gobhitmap;
     public Astronomy ast;
     public OCache oc = new OCache(this);
     public MCache map;

@@ -63,7 +63,7 @@ public class SessionDisplay extends MovableWidget implements ObservableListener<
         MainFrame.instance.p.sessions.addListener(this);
     }
 
-    private void newSession() {
+    private synchronized void newSession() {
         MainFrame.instance.makeNewSession();
     }
 

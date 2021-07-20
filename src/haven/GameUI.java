@@ -495,8 +495,9 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleGridLines() {
-        Config.showgridlines = !Config.showgridlines;
-        Utils.setprefb("showgridlines", Config.showgridlines);
+        int sum = (Config.showgridlines ? 1 : 0) + (configuration.showaccgridlines ? 1 : 0);
+        Utils.setprefb("showgridlines", Config.showgridlines = (sum == 0 || sum == 1));
+        Utils.setprefb("showaccgridlines", configuration.showaccgridlines = sum == 1);
         if (map != null)
             map.togglegrid();
     }
@@ -1645,8 +1646,9 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleGobs() {
-        Config.showboundingboxes = !Config.showboundingboxes;
-        Utils.setprefb("showboundingboxes", Config.showboundingboxes);
+        int sum = (Config.showboundingboxes ? 1 : 0) + (configuration.showaccboundingboxes ? 1 : 0);
+        Utils.setprefb("showboundingboxes", Config.showboundingboxes = (sum == 0 || sum == 1));
+        Utils.setprefb("showaccboundingboxes", configuration.showaccboundingboxes = sum == 1);
         if (map != null)
             map.refreshGobsAll();
     }

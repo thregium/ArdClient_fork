@@ -32,6 +32,7 @@ import haven.Skeleton.Pose;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -162,9 +163,65 @@ public class PoseMorph implements Morpher.Factory {
                     }
                 }
             }
+//            int tbn = 4;
+//            if(mba > tbn) {
+//                sortweights(bw, ba, mba);
+//                IntBuffer tba = Utils.wibuf(nv * tbn);
+//                FloatBuffer tbw = Utils.wfbuf(nv * tbn);
+//                for(int i = 0, off = 0, toff = 0; i < nv; i++, off += mba, toff += tbn) {
+//                    for(int o = 0; o < tbn; o++) {
+//                        tbw.put(toff + o, bw.get(off + o));
+//                        tba.put(toff + o, ba.get(off + o));
+//                    }
+//                }
+//                ba = tba; bw = tbw; mba = tbn;
+//            } else if(mba < tbn) {
+//                IntBuffer tba = Utils.wibuf(nv * tbn);
+//                FloatBuffer tbw = Utils.wfbuf(nv * tbn);
+//                for(int i = 0, off = 0, toff = 0; i < nv; i++, off += mba, toff += tbn) {
+//                    for(int o = 0; o < mba; o++) {
+//                        tbw.put(toff + o, bw.get(off + o));
+//                        tba.put(toff + o, ba.get(off + o));
+//                    }
+//                    for(int o = mba; o < tbn; o++)
+//                        tba.put(toff + o, -1);
+//                }
+//                ba = tba; bw = tbw; mba = tbn;
+//            }
             normweights(bw, ba, mba);
             dst.add(new BoneArray(mba, ba, bones.toArray(new String[0])));
             dst.add(new WeightArray(mba, bw));
+        }
+    }
+
+    public static void sortweights(FloatBuffer bw, IntBuffer ba, int mba) {
+        Integer[] p = new Integer[mba];
+        float[] cw = new float[mba];
+        int[] ca = new int[mba];
+        for(int i = 0; i < bw.capacity(); i += mba) {
+            int n = 0;
+            for(int o = 0; o < mba; o++) {
+                if(ba.get(i + o) < 0)
+                    break;
+                p[n++] = Integer.valueOf(o);
+            }
+            int ci = i;
+            Arrays.sort(p, 0, n, (a, b) -> {
+                float wa = bw.get(ci + a), wb = bw.get(ci + b);
+                if(wa < wb)
+                    return(1);
+                else if(wa > wb)
+                    return(-1);
+                return(0);
+            });
+            for(int o = 0; o < n; o++) {
+                cw[o] = bw.get(i + o);
+                ca[o] = ba.get(i + o);
+            }
+            for(int o = 0; o < n; o++) {
+                bw.put(i + o, cw[p[o]]);
+                ba.put(i + o, ca[p[o]]);
+            }
         }
     }
 

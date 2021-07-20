@@ -355,7 +355,7 @@ public abstract class Pathfinder {
      * <p>
      * Our pathfinder guarantees that X -> X+1 is SAFE, but not X -> X+n where n >= 2
      */
-    final ArrayList<Move> advreduce(List<Coord> lines) {
+    final ArrayList<Move> advreduce(final List<Coord> lines) {
         if (lines != null) {
             if (DefSettings.DEBUG.get())
                 debugl(lines);
