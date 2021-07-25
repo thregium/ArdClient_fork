@@ -476,13 +476,13 @@ public class OptWnd extends Window {
         final WidgetVerticalAppender appender2 = new WidgetVerticalAppender(audio);
         appender2.setVerticalMargin(0);
 
-        resources.sfxlist = new HSliderListbox(140, 17);
+        resources.sfxlist = new HSliderListbox(200, 17);
         synchronized (resources.sfxmenus) {
             Utils.loadprefsliderlist("customsfxvol", resources.sfxmenus);
             resources.sfxmenus.forEach(s -> resources.sfxlist.addItem(configuration.createSFXSlider(s)));
         }
         appender2.add(resources.sfxlist);
-        resources.sfxsearch = new TextEntry(140, "") {
+        resources.sfxsearch = new TextEntry(200, "") {
             @Override
             public void changed() {
                 update();
@@ -514,7 +514,7 @@ public class OptWnd extends Window {
             }
         };
         appender2.add(resources.sfxsearch);
-        appender2.add(new Button(140, "Clear") {
+        appender2.add(new Button(200, "Clear") {
             @Override
             public boolean mousedown(Coord mc, int btn) {
                 if (ui.modctrl && btn == 1) {
@@ -532,8 +532,8 @@ public class OptWnd extends Window {
             }
         });
 
-        Scrollport scroll = withScroll(audio, new Coord(620 - 150, 350));
-        scroll.move(Coord.of(150, 0));
+        Scrollport scroll = withScroll(audio, new Coord(620 - 210, 350));
+        scroll.move(Coord.of(210, 0));
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(scroll.cont);
 
         appender.add(new Label("Master audio volume"));

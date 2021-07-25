@@ -514,7 +514,13 @@ public class Utils {
     public static void loadprefsliderlist(String prefname, List<HSliderListboxItem> data) {
         try {
             data.clear();
-            JSONObject jsonobj = new JSONObject(Utils.getpref(prefname, "{}"));
+            String json = Config.loadFile(prefname + ".json");
+            JSONObject jsonobj;
+            try {
+                jsonobj = new JSONObject(json);
+            } catch (Exception e) {
+                jsonobj = new JSONObject();
+            }
             for (String itm : jsonobj.keySet())
                 data.add(new HSliderListboxItem(itm, jsonobj.getInt(itm)));
         } catch (SecurityException e) {
@@ -529,7 +535,7 @@ public class Utils {
             for (HSliderListboxItem itm : data) {
                 jsonobj.put(itm.name, itm.val);
             }
-            Utils.setpref(prefname, jsonobj.toString());
+            Config.saveFile(prefname + ".json", jsonobj.toString());
         } catch (SecurityException e) {
         } catch (Exception ex) {
             ex.printStackTrace();

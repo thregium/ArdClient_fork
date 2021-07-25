@@ -27,7 +27,9 @@
 package haven;
 
 import haven.Audio.VolAdjust;
+import modification.configuration;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class ClipAmbiance implements Rendered, Rendered.Instanced {
@@ -66,8 +68,10 @@ public class ClipAmbiance implements Rendered, Rendered.Instanced {
 
         private void addclip(final int chan, final int idx) {
             Resource.Audio clip = AudioSprite.randoom(chans[chan].getres(), chans[chan].cnms[idx]);
+            int clipid = AudioSprite.getRandomID(AudioSprite.clips(chans[chan].getres(), chans[chan].cnms[idx]), clip);
             final VolAdjust[] clist = cur[chan];
             synchronized (this) {
+                double volume = configuration.addSFX(chans[chan].getres().name + "_" + chans[chan].cnms[idx] + "_" + clipid) / 100.0;
                 clist[idx] = new VolAdjust(new Audio.Monitor(clip.stream()) {
                     protected void eof() {
                         synchronized (Glob.this) {
@@ -75,7 +79,7 @@ public class ClipAmbiance implements Rendered, Rendered.Instanced {
                             curn--;
                         }
                     }
-                }, 0.0);
+                }, volume);
                 curn++;
             }
         }
@@ -159,8 +163,7 @@ public class ClipAmbiance implements Rendered, Rendered.Instanced {
             }
             vacc = 0.0;
             ns = 0;
-            for (int i = 0; i < n.length; i++)
-                n[i] = 0;
+            Arrays.fill(n, 0);
             lastupd = now;
             for (int i = 0; (i < cur.length) && (cur[i] != null); i++) {
                 for (VolAdjust clip : cur[i]) {

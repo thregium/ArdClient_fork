@@ -33,8 +33,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AudioSprite {
+    public static int getRandomID(List<Resource.Audio> list, Resource.Audio clip) {
+        for (int i = 0; i < list.size(); i++)
+            if (list.get(i).equals(clip))
+                return (i);
+        return (-1);
+    }
+
     public static List<Resource.Audio> clips(Resource res, String id) {
-        List<Resource.Audio> cl = new ArrayList<Resource.Audio>();
+        List<Resource.Audio> cl = new ArrayList<>();
         for (Resource.Audio clip : res.layers(Resource.audio)) {
             if (clip.id == id)
                 cl.add(clip);
@@ -45,7 +52,7 @@ public class AudioSprite {
     public static Resource.Audio randoom(Resource res, String id) {
         List<Resource.Audio> cl = clips(res, id);
         if (!cl.isEmpty())
-            return(cl.get((int)(Math.random() * cl.size())));
+            return (cl.get((int) (Math.random() * cl.size())));
         return (null);
     }
 
@@ -105,7 +112,8 @@ public class AudioSprite {
             super(owner, res);
             haven.Audio.CS stream = clip.stream();
 
-            double volume = configuration.addSFX(res.name) / 100.0;
+            int clipid = getRandomID(clips(res, "cl"), clip);
+            double volume = configuration.addSFX(res.name + "_cl_" + clipid) / 100.0;
             stream = new Audio.VolAdjust(stream, volume);
 
             this.clip = new ActAudio.PosClip(new Audio.Monitor(stream) {
@@ -158,10 +166,12 @@ public class AudioSprite {
     public static class RepeatSprite extends Sprite implements Gob.Overlay.CDel {
         private ActAudio.PosClip clip;
         private final Resource.Audio end;
+        private Resource res;
 
         public RepeatSprite(Owner owner, Resource res, final Resource.Audio beg, final List<Resource.Audio> clips, Resource.Audio end) {
             super(owner, res);
             this.end = end;
+            this.res = res;
             CS rep = new Audio.Repeater() {
                 private boolean f = true;
 
@@ -173,7 +183,7 @@ public class AudioSprite {
                     return (clips.get((int) (Math.random() * clips.size())).stream());
                 }
             };
-            double volume = configuration.addSFX(res.name) / 100.0;
+            double volume = configuration.addSFX(res.name + "_rep") / 100.0;
             rep = new Audio.VolAdjust(rep, volume);
 
             this.clip = new ActAudio.PosClip(rep);
@@ -194,14 +204,16 @@ public class AudioSprite {
         }
 
         public void delete() {
-            if (end != null)
+            if (end != null) {
+                int clipid = getRandomID(clips(res, "end"), end);
+                double volume = configuration.addSFX(res.name + "_end_" + clipid) / 100.0;
                 clip = new ActAudio.PosClip(new Audio.Monitor(end.stream()) {
                     protected void eof() {
                         super.eof();
                         RepeatSprite.this.clip = null;
                     }
-                });
-            else
+                }, volume);
+            } else
                 clip = null;
         }
 
@@ -219,7 +231,7 @@ public class AudioSprite {
             if (clamb != null) {
                 this.amb = clamb.spr;
             } else {
-                double volume = configuration.addSFX(res.name) / 100.0;
+                double volume = configuration.addSFX(res.name + "_amb") / 100.0;
                 this.amb = new ActAudio.Ambience(res, volume);
             }
 

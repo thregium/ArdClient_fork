@@ -120,6 +120,10 @@ public class ActAudio extends GLState.Abstract {
             this(new VolAdjust(clip));
         }
 
+        public PosClip(CS clip, double vol) {
+            this(new VolAdjust(clip, vol));
+        }
+
         public void draw(GOut g) {
             g.apply();
             ActAudio list = g.st.cur(slot);
@@ -234,11 +238,7 @@ public class ActAudio extends GLState.Abstract {
     }
 
     public void cycle() {
-        for (Iterator<Global> i = global.keySet().iterator(); i.hasNext(); ) {
-            Global glob = i.next();
-            if (glob.cycle(this))
-                i.remove();
-        }
+        global.keySet().removeIf(glob -> glob.cycle(this));
         pos.cycle();
         amb.cycle();
     }

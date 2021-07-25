@@ -672,7 +672,7 @@ public class configuration {
     }
 
     public static HSliderNamed createSFXSlider(HSliderListboxItem item) {
-        return (new HSliderNamed(item, 120, 0, 100,  () -> {
+        return (new HSliderNamed(item, 180, 0, 100,  () -> {
             synchronized (resources.sfxmenus) {
                 Utils.setprefsliderlst("customsfxvol", resources.sfxmenus);
             }

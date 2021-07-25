@@ -17,10 +17,17 @@ public class HSliderNamed extends Widget implements Comparable<HSliderNamed> {
             public void changed() {
                 super.changed();
                 item.val = val;
-                changed.run();
             }
         };
+        this.save = changed;
         resize(slider.sz);
+    }
+
+    Runnable save;
+
+    public void save() {
+        if (save != null)
+            save.run();
     }
 
     @Override

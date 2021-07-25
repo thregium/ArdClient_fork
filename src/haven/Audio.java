@@ -265,8 +265,7 @@ public class Audio {
                 return (ret);
             if (cvol.length != nch)
                 cvol = new double[nch];
-            for (int i = 0; i < cvol.length; i++)
-                cvol[i] = vol;
+            Arrays.fill(cvol, vol);
             if (bal < 0)
                 cvol[1] *= 1.0 + bal;
             if (bal > 0)

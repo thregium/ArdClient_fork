@@ -73,6 +73,7 @@ public class HSliderListbox extends Listbox<HSliderNamed> {
             change(null);
         else if (item != null && item.equals(holded)) {
             holded = null;
+            item.save();
             return (item.mouseup(c.sub(idxc(idx)), button));
         }
         return (super.mouseup(c, button));
