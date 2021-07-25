@@ -50,7 +50,7 @@ public class GobHitbox extends Sprite {
                 Coord2d point = b[i].points[p];
                 buffers[i].put((float) point.x).put((float) ((type == 2 ? -1 : 1) * point.y)).put((float) (type == 3 ? 11 : 1));
             }
-            buffers[i].rewind();
+            //buffers[i].rewind();
         }
     }
 
