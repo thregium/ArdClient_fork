@@ -232,7 +232,6 @@ public class Hitbox {
                     for (int i = 0; i < o.ep.length; i++) {
                         boolean hitable = checkHitable(gob, o);
                         Hitbox hb = new Hitbox(o.ep[i], hitable);
-                        hb.zplus = 10;
                         hitlist.add(hb);
                     }
                 }
@@ -240,8 +239,6 @@ public class Hitbox {
                     for (int i = 0; i < o.ep.length; i++) {
                         boolean hitable = checkHitable(gob);
                         Hitbox hb = new Hitbox(o.bc, o.bs, hitable, false);
-                        if (gob.type == Type.WALLSEG && Config.flatwalls)
-                            hb.zplus = 10;
                         hitlist.add(hb);
                     }
                 }

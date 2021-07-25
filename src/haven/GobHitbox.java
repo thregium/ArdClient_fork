@@ -50,7 +50,6 @@ public class GobHitbox extends Sprite {
                 Coord2d point = b[i].points[p];
                 buffers[i].put((float) point.x).put((float) ((type == 2 ? -1 : 1) * point.y)).put((float) (type == 3 ? 11 : 1));
             }
-            //buffers[i].rewind();
         }
     }
 
@@ -72,15 +71,20 @@ public class GobHitbox extends Sprite {
     }
 
     public void draw(GOut g) {
-        g.apply();
-        BGL gl = g.gl;
-        if (getType() == 1)
-            gl.glLineWidth(2.0F);
-        for (int i = 0; i < b.length; i++) {
-            gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
-            gl.glVertexPointer(3, GL2.GL_FLOAT, 0, buffers[i]);
-            gl.glDrawArrays(mode, 0, b[i].points.length);
-            gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
+        try {
+            g.apply();
+            BGL gl = g.gl;
+            if (getType() == 1)
+                gl.glLineWidth(2.0F);
+            for (int i = 0; i < b.length; i++) {
+                buffers[i].rewind();
+                gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+                gl.glVertexPointer(3, GL2.GL_FLOAT, 0, buffers[i]);
+                gl.glDrawArrays(mode, 0, b[i].points.length);
+                gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
