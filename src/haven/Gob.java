@@ -1059,6 +1059,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     public void draw(GOut g) {
     }
 
+    public Overlay gobHitbox;
     public boolean setup(RenderList rl) {
         loc.tick();
         final Hidden hid = getattr(Hidden.class);
@@ -1333,8 +1334,12 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     if (!(hid != null && Config.hideuniquegobs)) {
                         if (Config.hidegobs && ((type == Type.TREE && Config.hideTrees) || (type == Type.BUSH && Config.hideBushes) || (type == Type.BOULDER && Config.hideboulders))) {
                             GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
-                            if (bbox != null && Config.showoverlay)
-                                rl.add(new Overlay(new GobHitbox(this, bbox, true)), null);
+                            if (bbox != null && Config.showoverlay) {
+                                if (gobHitbox == null)
+                                    gobHitbox = new Overlay(new GobHitbox(this, bbox, true));
+                                if (gobHitbox != null)
+                                    rl.add(gobHitbox, null);
+                            }
                         } else {
                             d.setup(rl);
                         }
