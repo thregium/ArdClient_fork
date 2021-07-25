@@ -32,7 +32,9 @@ import haven.glsl.Varying;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import static haven.GOut.checkerr;
 
@@ -458,10 +460,6 @@ public abstract class TexGL extends Tex {
     }
 
     static {
-        Console.setscmd("texdis", new Console.Command() {
-            public void run(Console cons, String[] args) {
-                disableall = (Integer.parseInt(args[1]) != 0);
-            }
-        });
+        Console.setscmd("texdis", (cons, args) -> disableall = (Integer.parseInt(args[1]) != 0));
     }
 }

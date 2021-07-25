@@ -4,6 +4,7 @@ import haven.Config;
 import haven.Coord;
 import haven.Coord2d;
 import haven.Gob;
+import haven.Indir;
 import haven.MessageBuf;
 import haven.RenderLink;
 import haven.ResDrawable;
@@ -178,14 +179,14 @@ public class Hitbox {
                 ResDrawable rd = gob.getattr(ResDrawable.class);
                 if (rd != null && rd.sdt.rbuf.length >= 4) {
                     MessageBuf buf = rd.sdt.clone();
-                    return new Hitbox[]{new Hitbox(new Coord(buf.rbuf[0], buf.rbuf[1]), new Coord(buf.rbuf[2], buf.rbuf[3]))};
+                    return (new Hitbox[]{new Hitbox(new Coord(buf.rbuf[0], buf.rbuf[1]), new Coord(buf.rbuf[2], buf.rbuf[3]))});
                 }
             }
 
             if (res.name.endsWith("/trellis")) {
                 Optional<Hitbox[]> hitbox = hitboxes.getc(res.name);
                 if (hitbox.isPresent()) {
-                    return hitbox.get();
+                    return (hitbox.get());
                 }
             } else {
                 Optional<Hitbox[]> hitbox = hitboxes.get(res.name);
@@ -195,181 +196,53 @@ public class Hitbox {
                             h.zplus = 10;
                         }
                     }
-                    return hitbox.get();
+                    return (hitbox.get());
                 }
             }
 
-            Resource.Neg neg = res.layer(Resource.Neg.class);
-            if (neg == null) {
+            try {
+                List<Resource.Neg> negs = new ArrayList<>(res.layers(Resource.Neg.class));
+                List<Resource.Obst> obsts = new ArrayList<>(res.layers(Resource.Obst.class));
                 for (RenderLink.Res link : res.layers(RenderLink.Res.class)) {
-//                if (link.mesh().isPresent()) {
-//                    neg = link.mesh().get().layer(Resource.Neg.class);
-//                    break;
-//                }
-                    try {
-                        RenderLink l = link.l;
-                        if (l instanceof RenderLink.MeshMat) {
-                            RenderLink.MeshMat mm = (RenderLink.MeshMat) l;
-                            if (mm.srcres != null) {
-                                Resource.Neg ng = mm.srcres.layer(Resource.Neg.class);
-                                if (ng != null) {
-                                    neg = ng;
-                                    break;
-                                }
-                            }
-                            if (mm.mesh != null) {
-                                Resource.Neg ng = mm.mesh.get().layer(Resource.Neg.class);
-                                if (ng != null) {
-                                    neg = ng;
-                                    break;
-                                }
-                            }
-//                            if (mm.mat != null) {
-//                                Resource.Neg ng = mm.mat.get().layer(Resource.Neg.class);
-//                                if (ng != null) {
-//                                    neg = ng;
-//                                    break;
-//                                }
-//                            }
-                        }
-                        if (l instanceof RenderLink.AmbientLink) {
-                            RenderLink.AmbientLink al = (RenderLink.AmbientLink) l;
-                            if (al.res != null) {
-                                Resource.Neg ng = al.res.get().layer(Resource.Neg.class);
-                                if (ng != null) {
-                                    neg = ng;
-                                    break;
-                                }
-                            }
-                        }
-                        if (l instanceof RenderLink.Collect) {
-                            RenderLink.Collect cl = (RenderLink.Collect) l;
-                            if (cl.from != null) {
-                                Resource.Neg ng = cl.from.get().layer(Resource.Neg.class);
-                                if (ng != null) {
-                                    neg = ng;
-                                    break;
-                                }
-                            }
-                        }
-                        if (l instanceof RenderLink.Parameters) {
-                            RenderLink.Parameters pl = (RenderLink.Parameters) l;
-                            if (pl.res != null) {
-                                Resource.Neg ng = pl.res.get().layer(Resource.Neg.class);
-                                if (ng != null) {
-                                    neg = ng;
-                                    break;
-                                }
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    RenderLink l = link.l;
+                    if (l instanceof RenderLink.MeshMat) {
+                        RenderLink.MeshMat mm = (RenderLink.MeshMat) l;
+                        addIf(negs, getLayer(Resource.Neg.class, mm.srcres.indir(), mm.mesh));
+                        addIf(obsts, getLayer(Resource.Obst.class, mm.srcres.indir(), mm.mesh));
+                    }
+                    if (l instanceof RenderLink.AmbientLink) {
+                        RenderLink.AmbientLink al = (RenderLink.AmbientLink) l;
+                        addIf(negs, getLayer(Resource.Neg.class, al.res));
+                        addIf(obsts, getLayer(Resource.Obst.class, al.res));
+                    }
+                    if (l instanceof RenderLink.Collect) {
+                        RenderLink.Collect cl = (RenderLink.Collect) l;
+                        addIf(negs, getLayer(Resource.Neg.class, cl.from));
+                        addIf(obsts, getLayer(Resource.Obst.class, cl.from));
+                    }
+                    if (l instanceof RenderLink.Parameters) {
+                        RenderLink.Parameters pl = (RenderLink.Parameters) l;
+                        addIf(negs, getLayer(Resource.Neg.class, pl.res));
+                        addIf(obsts, getLayer(Resource.Obst.class, pl.res));
                     }
                 }
-            }
 
-            List<Resource.Obst> obsts = new ArrayList<>(res.layers(Resource.Obst.class));
-            if (obsts.size() == 0) {
-                for (RenderLink.Res link : res.layers(RenderLink.Res.class)) {
-//                if (link.mesh().isPresent()) {
-//                    obst = link.mesh().get().layer(Resource.Obst.class);
-//                    break;
-//                }
-                    try {
-                        RenderLink l = link.l;
-                        if (l instanceof RenderLink.MeshMat) {
-                            RenderLink.MeshMat mm = (RenderLink.MeshMat) l;
-                            if (mm.srcres != null) {
-                                Resource.Obst ng = mm.srcres.layer(Resource.Obst.class);
-                                if (ng != null) {
-                                    obsts.add(ng);
-                                    break;
-                                }
-                            } else if (mm.mesh != null && mm.mesh.get() != null) {
-                                Resource.Obst ng = mm.mesh.get().layer(Resource.Obst.class);
-                                if (ng != null) {
-                                    obsts.add(ng);
-                                    break;
-                                }
-                            } else if (mm.mat != null && mm.mat.get() != null) {
-                                Resource.Obst ng = mm.mat.get().layer(Resource.Obst.class);
-                                if (ng != null) {
-                                    obsts.add(ng);
-                                    break;
-                                }
-                            }
-                        } else if (l instanceof RenderLink.AmbientLink) {
-                            RenderLink.AmbientLink al = (RenderLink.AmbientLink) l;
-                            if (al.res != null && al.res.get() != null) {
-                                Resource.Obst ng = al.res.get().layer(Resource.Obst.class);
-                                if (ng != null) {
-                                    obsts.add(ng);
-                                    break;
-                                }
-                            }
-                        } else if (l instanceof RenderLink.Collect) {
-                            RenderLink.Collect cl = (RenderLink.Collect) l;
-                            if (cl.from != null && cl.from.get() != null) {
-                                Resource.Obst ng = cl.from.get().layer(Resource.Obst.class);
-                                if (ng != null) {
-                                    obsts.add(ng);
-                                    break;
-                                }
-                            }
-                        } else if (l instanceof RenderLink.Parameters) {
-                            RenderLink.Parameters pl = (RenderLink.Parameters) l;
-                            if (pl.res != null && pl.res.get() != null) {
-                                Resource.Obst ng = pl.res.get().layer(Resource.Obst.class);
-                                if (ng != null) {
-                                    obsts.add(ng);
-                                    break;
-                                }
-                            }
-
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            if (obsts.size() > 0) {
-                int obs = 0;
+                final List<Hitbox> hitlist = new ArrayList<>();
                 for (Resource.Obst o : obsts) {
                     for (int i = 0; i < o.ep.length; i++) {
-                        obs++;
+                        boolean hitable = checkHitable(gob, o);
+                        Hitbox hb = new Hitbox(o.ep[i], hitable);
+                        hb.zplus = 10;
+                        hitlist.add(hb);
                     }
                 }
-
-                final Hitbox[] hb = new Hitbox[obs];
-                obs = 0;
-                for (int o = 0; o < obsts.size(); o++) {
-                    for (int i = 0; i < obsts.get(o).ep.length; i++) {
-                        boolean hitable = checkHitable(gob, obsts.get(o));
-                        hb[obs] = new Hitbox(obsts.get(o).ep[i], hitable);
-                        obs++;
-                    }
-                }
-
-//                Resource.Obst obst = null;
-//                for (Resource.Obst ob : obsts) {
-//                    ResDrawable rd = gob.getattr(ResDrawable.class);
-//                    if (rd != null) {
-//                        if (ob.vc == rd.sdt.peekrbuf(0)) {
-//                            obst = ob;
-//                            break;
-//                        }
-//                    }
-//                }
-//                if (obst == null) obst = obsts.get(0);
-//
-//                final Hitbox[] hb = new Hitbox[obst.ep.length * obsts.size()];
-//                for (int i = 0; i < obst.ep.length; i++) {
-//                    hb[i] = new Hitbox(obst.ep[i], true);
-//                }
-                if (gob.type == Type.WALLSEG && Config.flatwalls) {
-                    for (Hitbox h : hb) {
-                        h.zplus = 10;
+                for (Resource.Neg o : negs) {
+                    for (int i = 0; i < o.ep.length; i++) {
+                        boolean hitable = checkHitable(gob);
+                        Hitbox hb = new Hitbox(o.bc, o.bs, hitable, false);
+                        if (gob.type == Type.WALLSEG && Config.flatwalls)
+                            hb.zplus = 10;
+                        hitlist.add(hb);
                     }
                 }
                 boolean isAdd = true;
@@ -378,25 +251,36 @@ public class Hitbox {
                         isAdd = false;
                         break;
                     }
+                Hitbox[] hbs = hitlist.toArray(new Hitbox[0]);
                 if (isAdd)
-                    hitboxes.put(res.name, hb);
-                return hb;
-            }
-            if (neg != null) {
-                boolean hitable = checkHitable(gob);
-                final Hitbox[] hb = new Hitbox[]{new Hitbox(neg.bc, neg.bs, hitable, false)};
-                boolean isAdd = true;
-                for (String s : nocacheends)
-                    if (res.name.endsWith(s)) {
-                        isAdd = false;
-                        break;
-                    }
-                if (isAdd)
-                    hitboxes.put(res.name, hb);
-                return hb;
+                    hitboxes.put(res.name, hbs);
+                return (hbs);
+            } catch (Exception ignore) {
             }
         }
         return null;
+    }
+
+    @SafeVarargs
+    public static <T extends Resource.Layer> List<T> getLayer(final Class<T> layer, Indir<Resource>... reses) {
+        final List<T> list = new ArrayList<>();
+        for (Indir<Resource> ires : reses) {
+            if (ires != null) {
+                Resource res = ires.get();
+                if (res != null) {
+                    T l = res.layer(layer);
+                    if (l != null)
+                        list.add(layer.cast(l));
+                }
+            }
+        }
+        return (list);
+    }
+
+    public static <T extends Resource.Layer> void addIf(final List<T> end, final List<T> start) {
+        for (T l : start)
+            if (!end.contains(l))
+                end.add(l);
     }
 
     public static boolean checkOverlay(Gob gob, String id) {
@@ -438,8 +322,8 @@ public class Hitbox {
             if (rd != null)
                 if (res.name.endsWith("/pow") && (rd.sdt.peekrbuf(0) == 33 || rd.sdt.peekrbuf(0) == 17))
                     return (false);
-                if (res.name.equals("gfx/terobjs/vflag"))
-                    return (false);
+            if (res.name.equals("gfx/terobjs/vflag"))
+                return (false);
 //            if (checkOverlay(gob, id)) return (false);
         }
         return (true);

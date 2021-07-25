@@ -239,7 +239,8 @@ public class GLSettings implements java.io.Serializable {
 
     public final BoolSetting wsurf = new BoolSetting("wsurf") {
         public Boolean defval() {
-            return (cfg.glmajver >= 3);
+            return (WATERSURFACE.get());
+            //return (cfg.glmajver >= 3);
         }
 
         public void validate(Boolean val) {

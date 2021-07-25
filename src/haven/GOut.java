@@ -203,6 +203,8 @@ public class GOut {
     }
 
     private void crender(TextureAtlas.Img tex, Coord c, Coord sz, Coord ul, Coord br) {
+        if (TexGL.disableall)
+            return;
         final Tex texture = tex.tex();
         if (sz.x == 0 || sz.y == 0)
             return;

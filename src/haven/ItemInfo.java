@@ -26,21 +26,10 @@
 
 package haven;
 
-import haven.factories.BackwaterFactory;
-import haven.factories.BullmythFactory;
-import haven.factories.CenteroflearningFactory;
-import haven.factories.FecundearthFactory;
-import haven.factories.FoundingmythosFactory;
-import haven.factories.GamekeepingFactory;
-import haven.factories.GuardedmarchesFactory;
-import haven.factories.HeraldicswanFactory;
-import haven.factories.LocalcuisineFactory;
-import haven.factories.MountaintraditionFactory;
-import haven.factories.SeamarriageFactory;
-import haven.factories.WoodlandrealmFactory;
 import haven.res.ui.tt.ArmorFactory;
 import haven.res.ui.tt.WearFactory;
 import haven.res.ui.tt.attrmod.AttrMod;
+import haven.res.ui.tt.wpn.Damage;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -473,6 +462,7 @@ public abstract class ItemInfo {
         customFactories.put("ui/tt/armor", new ArmorFactory());
         customFactories.put("ui/tt/wear", new WearFactory());
         customFactories.put("ui/tt/attrmod", new AttrMod.Fac());
+        customFactories.put("ui/tt/wpn/dmg", new Damage.Fac());
     }
 
     public static List<ItemInfo> buildinfo(Owner owner, Raw raw) {
@@ -514,6 +504,7 @@ public abstract class ItemInfo {
                 throw (new ClassCastException("Unexpected object type " + o.getClass() + " in item info array."));
             }
         }
+        final List<String> skipList = new ArrayList<>(Arrays.asList("TipLabel", "haven.VMeter"));
         String s = null;
         try {
             if (owner instanceof ResOwner)
@@ -522,10 +513,10 @@ public abstract class ItemInfo {
                 s = ((MenuGrid.PagButton) owner).res.name;
             else if (owner instanceof MenuGrid.Pagina)
                 s = ((MenuGrid.Pagina) owner).res().name;
-            else if (owner.getClass().getCanonicalName().equalsIgnoreCase("TipLabel")) {}
-            else
+            else if (skipList.contains(owner.getClass().getCanonicalName())) {
+            } else
                 s = owner.toString();
-        } catch(Exception e) {
+        } catch (Exception e) {
             s = owner.toString();
         }
         if (s != null)

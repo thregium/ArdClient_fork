@@ -116,6 +116,11 @@ public class PBotScriptlist extends GameUI.Hidewnd {
         private UI.Grab grab;
         PBotScriptlistItem mdItem;
 
+        public PBotScriptlistItem getScript(String filename) {
+            File f = new File(filename);
+            return (new PBotScriptlistItem(ui, f.getName(), f));
+        }
+
         public ScriptList(int w, int h) {
             super(w, h, 24);
         }
@@ -149,6 +154,12 @@ public class PBotScriptlist extends GameUI.Hidewnd {
 
         @Override
         public boolean mousedown(Coord c, int button) {
+            Coord cc = xlate(sb.c, true);
+            if (c.isect(cc, sb.sz)) {
+                if (sb.mousedown(c.add(cc.inv()), button)) {
+                    return (true);
+                }
+            }
             mdItem = itemat(c);
             if (button == 1 && mdItem != null) {
                 grab = ui.grabmouse(this);
@@ -280,5 +291,9 @@ public class PBotScriptlist extends GameUI.Hidewnd {
             itemList.remove(item);
             PBotScriptmanager.scripts.remove(item.getKey());
         }
+    }
+
+    public PBotScriptlistItem getScript(String name) {
+        return (list.getScript(name));
     }
 }

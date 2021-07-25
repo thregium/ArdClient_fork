@@ -552,7 +552,6 @@ public class Audio {
 
     public static void stop(CS clip) {
         Player pl = ckpl(false);
-        ;
         if (pl != null)
             ((Mixer) pl.stream).stop(clip);
     }
@@ -564,7 +563,7 @@ public class Audio {
         }
     }
 
-    private static Map<Resource, Resource.Audio> reslastc = new HashMap<Resource, Resource.Audio>();
+    private static Map<Resource, Resource.Audio> reslastc = new HashMap<>();
 
     public static CS fromres(Resource res) {
         Collection<Resource.Audio> clips = res.layers(Resource.audio);

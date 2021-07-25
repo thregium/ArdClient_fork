@@ -70,13 +70,13 @@ public class OCache implements Iterable<Gob> {
     public static final int OD_END = 255;
     public static final Coord2d posres = new Coord2d(0x1.0p-10, 0x1.0p-10).mul(11, 11);
     /* XXX: Use weak refs */
-    private Collection<Collection<Gob>> local = new LinkedList<Collection<Gob>>();
-    private Map<Long, Gob> objs = new TreeMap<Long, Gob>();
-    private Map<Long, Integer> deleted = new TreeMap<Long, Integer>();
+    private Collection<Collection<Gob>> local = new LinkedList<>();
+    private Map<Long, Gob> objs = new TreeMap<>();
+    private Map<Long, Integer> deleted = new TreeMap<>();
     private Glob glob;
-    private Map<Long, DamageSprite> gobdmgs = new HashMap<Long, DamageSprite>();
+    private Map<Long, DamageSprite> gobdmgs = new HashMap<>();
     public boolean isfight = false;
-    private final Collection<ChangeCallback> cbs = new WeakList<ChangeCallback>();
+    private final Collection<ChangeCallback> cbs = new WeakList<>();
 
 
     public interface ChangeCallback {

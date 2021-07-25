@@ -81,20 +81,12 @@ public class GobIcon extends GAttrib {
 
         public Image(Resource.Image rimg) {
             this.rimg = rimg;
-            TexI tex = rimg.texi();
-            if ((tex.sz().x > size) || (tex.sz().y > size)) {
-                BufferedImage buf = rimg.img;
-                buf = PUtils.rasterimg(PUtils.blurmask2(buf.getRaster(), 1, 1, Color.BLACK));
-//                Coord tsz;
-//                if (buf.getWidth() > buf.getHeight())
-//                    tsz = new Coord(size, (size * buf.getHeight()) / buf.getWidth());
-//                else
-//                    tsz = new Coord((size * buf.getWidth()) / buf.getHeight(), size);
+            BufferedImage buf = PUtils.copy(rimg.img);
+            buf = PUtils.rasterimg(PUtils.blurmask2(buf.getRaster(), 1, 1, Color.BLACK));
+            if ((buf.getWidth() > size) || (buf.getHeight() > size)) {
                 buf = PUtils.convolve(buf, new Coord(20, 20), filter);
-                tex = new TexI(buf);
             }
-//            if ((tex.sz().x != size) || (tex.sz().y != size))
-//                tex = new TexI(configuration.scaleImage(rimg.img, new Coord(20, 20)));
+            TexI tex = new TexI(buf);
             this.tex = tex;
             this.cc = tex.sz().div(2);
             byte[] data = rimg.kvdata.get("mm/rot");
@@ -111,12 +103,11 @@ public class GobIcon extends GAttrib {
         public TexI texgrey() {
             if (texgrey == null) {
                 BufferedImage bimg = PUtils.monochromize(rimg.img, Color.WHITE);
-                texgrey = new TexI(bimg);
-                if ((texgrey.sz().x > size) && (texgrey.sz().y > size)) {
-                    bimg = PUtils.rasterimg(PUtils.blurmask2(bimg.getRaster(), 1, 1, Color.BLACK));
+                bimg = PUtils.rasterimg(PUtils.blurmask2(bimg.getRaster(), 1, 1, Color.BLACK));
+                if ((bimg.getWidth() > size) && (bimg.getHeight() > size)) {
                     bimg = PUtils.convolvedown(bimg, new Coord(20, 20), filter);
-                    texgrey = new TexI(bimg);
                 }
+                texgrey = new TexI(bimg);
             }
             return (texgrey);
         }

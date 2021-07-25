@@ -27,6 +27,7 @@
 package haven;
 
 import haven.Audio.CS;
+import modification.configuration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,44 +44,38 @@ public class AudioSprite {
 
     public static Resource.Audio randoom(Resource res, String id) {
         List<Resource.Audio> cl = clips(res, id);
-        if (!cl.isEmpty()) {
-            int rnd = (int) (Math.random() * cl.size());
-            if (rnd == 1 && "sfx/items/pickaxe".equals(res.name))
-                rnd = 0;
-            return cl.get(rnd);
-        }
+        if (!cl.isEmpty())
+            return(cl.get((int)(Math.random() * cl.size())));
         return (null);
     }
 
-    public static final Sprite.Factory fact = new Sprite.Factory() {
-        public Sprite create(Sprite.Owner owner, Resource res, Message sdt) {
-            final UI ui;
-            if (owner instanceof Gob) {
-                ui = ((Gob) owner).glob.ui.get();
-            } else {
-                ui = null;
-            }
-
-            if (DefSettings.PAUSED.get() || DefSettings.NOGOBAUDIO.get() ||
-                    (ui != null && !MainFrame.instance.p.isActiveUI(ui))) {
-                return new IgnoreSprite(owner, res);
-            }
-            {
-                Resource.Audio clip = randoom(res, "cl");
-                if (clip != null)
-                    return (new ClipSprite(owner, res, clip));
-            }
-            {
-                List<Resource.Audio> clips = clips(res, "rep");
-                if (!clips.isEmpty())
-                    return (new RepeatSprite(owner, res, randoom(res, "beg"), clips, randoom(res, "end")));
-            }
-            {
-                if ((res.layer(Resource.audio, "amb") != null) || (res.layer(ClipAmbiance.Desc.class) != null))
-                    return (new Ambience(owner, res));
-            }
-            return (null);
+    public static final Sprite.Factory fact = (owner, res, sdt) -> {
+        final UI ui;
+        if (owner instanceof Gob) {
+            ui = ((Gob) owner).glob.ui.get();
+        } else {
+            ui = null;
         }
+
+        if (DefSettings.PAUSED.get() || DefSettings.NOGOBAUDIO.get() ||
+                (ui != null && !MainFrame.instance.p.isActiveUI(ui))) {
+            return new IgnoreSprite(owner, res);
+        }
+        {
+            Resource.Audio clip = randoom(res, "cl");
+            if (clip != null)
+                return (new ClipSprite(owner, res, clip));
+        }
+        {
+            List<Resource.Audio> clips = clips(res, "rep");
+            if (!clips.isEmpty())
+                return (new RepeatSprite(owner, res, randoom(res, "beg"), clips, randoom(res, "end")));
+        }
+        {
+            if ((res.layer(Resource.audio, "amb") != null) || (res.layer(ClipAmbiance.Desc.class) != null))
+                return (new Ambience(owner, res));
+        }
+        return (null);
     };
 
     public static class IgnoreSprite extends Sprite {
@@ -109,23 +104,9 @@ public class AudioSprite {
         public ClipSprite(Owner owner, Resource res, Resource.Audio clip) {
             super(owner, res);
             haven.Audio.CS stream = clip.stream();
-            if (Config.sfxchipvol != 1.0 && "sfx/chip".equals(res.name))
-                stream = new Audio.VolAdjust(stream, Config.sfxchipvol);
-            else if ("sfx/squeak".equals(res.name))
-                stream = new Audio.VolAdjust(stream, 0.2);
-            else if (Config.sfxquernvol != 1.0 && "sfx/terobjs/quern".equals(res.name))
-                stream = new Audio.VolAdjust(stream, Config.sfxquernvol);
-            else if (Config.sfxdoorvol != 1.0 && "sfx/terobjs/arch/door".equals(res.name))
-                stream = new Audio.VolAdjust(stream, Config.sfxdoorvol);
-            else if (Config.sfxclapvol != 1.0 && "sfx/borka/clap".equals(res.name))
-                stream = new Audio.VolAdjust(stream, Config.sfxclapvol);
-            else if (Config.sfxchatvol != 1.0 && "sfx/hud/chat".equals(res.name))
-                stream = new Audio.VolAdjust(stream, Config.sfxchatvol);
-            else if (Config.sfxwhistlevol != 1.0 && "sfx/borka/whistle".equals(res.name))
-                stream = new Audio.VolAdjust(stream, Config.sfxwhistlevol);
-            else if (Config.sfxdingvol != 1.0 && "sfx/msg".equals(res.name))
-                stream = new Audio.VolAdjust(stream, Config.sfxdingvol);
 
+            double volume = configuration.addSFX(res.name) / 100.0;
+            stream = new Audio.VolAdjust(stream, volume);
 
             this.clip = new ActAudio.PosClip(new Audio.Monitor(stream) {
                 protected void eof() {
@@ -133,6 +114,23 @@ public class AudioSprite {
                     done = true;
                 }
             });
+
+//            if (Config.sfxchipvol != 1.0 && "sfx/chip".equals(res.name))
+//                stream = new Audio.VolAdjust(stream, Config.sfxchipvol);
+//            else if ("sfx/squeak".equals(res.name))
+//                stream = new Audio.VolAdjust(stream, 0.2);
+//            else if (Config.sfxquernvol != 1.0 && "sfx/terobjs/quern".equals(res.name))
+//                stream = new Audio.VolAdjust(stream, Config.sfxquernvol);
+//            else if (Config.sfxdoorvol != 1.0 && "sfx/terobjs/arch/door".equals(res.name))
+//                stream = new Audio.VolAdjust(stream, Config.sfxdoorvol);
+//            else if (Config.sfxclapvol != 1.0 && "sfx/borka/clap".equals(res.name))
+//                stream = new Audio.VolAdjust(stream, Config.sfxclapvol);
+//            else if (Config.sfxchatvol != 1.0 && "sfx/hud/chat".equals(res.name))
+//                stream = new Audio.VolAdjust(stream, Config.sfxchatvol);
+//            else if (Config.sfxwhistlevol != 1.0 && "sfx/borka/whistle".equals(res.name))
+//                stream = new Audio.VolAdjust(stream, Config.sfxwhistlevol);
+//            else if (Config.sfxdingvol != 1.0 && "sfx/msg".equals(res.name))
+//                stream = new Audio.VolAdjust(stream, Config.sfxdingvol);
         }
 
         public boolean setup(RenderList r) {
@@ -175,10 +173,13 @@ public class AudioSprite {
                     return (clips.get((int) (Math.random() * clips.size())).stream());
                 }
             };
-            if (Config.sfxbeehivevol != 1.0 && "sfx/kritter/beeswarm".equals(res.name))
-                rep = new Audio.VolAdjust(rep, Config.sfxbeehivevol);
+            double volume = configuration.addSFX(res.name) / 100.0;
+            rep = new Audio.VolAdjust(rep, volume);
 
             this.clip = new ActAudio.PosClip(rep);
+
+//            if (Config.sfxbeehivevol != 1.0 && "sfx/kritter/beeswarm".equals(res.name))
+//                rep = new Audio.VolAdjust(rep, Config.sfxbeehivevol);
         }
 
 
@@ -218,13 +219,16 @@ public class AudioSprite {
             if (clamb != null) {
                 this.amb = clamb.spr;
             } else {
-                if (Config.sfxfirevol != 1.0 && "sfx/fire".equals(res.name))
-                    this.amb = new ActAudio.Ambience(res, Config.sfxfirevol);
-                else if (Config.sfxcauldronvol != 1.0 && res.basename().contains("cauldron"))
-                    this.amb = new ActAudio.Ambience(res, Config.sfxcauldronvol);
-                else
-                    this.amb = new ActAudio.Ambience(res);
+                double volume = configuration.addSFX(res.name) / 100.0;
+                this.amb = new ActAudio.Ambience(res, volume);
             }
+
+//            if (Config.sfxfirevol != 1.0 && "sfx/fire".equals(res.name))
+//                this.amb = new ActAudio.Ambience(res, Config.sfxfirevol);
+//            else if (Config.sfxcauldronvol != 1.0 && res.basename().contains("cauldron"))
+//                this.amb = new ActAudio.Ambience(res, Config.sfxcauldronvol);
+//            else
+//                this.amb = new ActAudio.Ambience(res);
         }
 
         public boolean setup(RenderList r) {

@@ -1,10 +1,13 @@
 package haven;
 
+import haven.purus.pbot.PBotScriptlistItem;
+import haven.purus.pbot.PBotUtils;
 import haven.sloth.gui.MovableWidget;
 
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.Optional;
 
 /**
@@ -27,6 +30,7 @@ public class BeltWnd extends MovableWidget {
         //What to render, either a Pagina or a Resource, never both
         private MenuGrid.Pagina pag;
         private Indir<Resource> res;
+        private PBotScriptlistItem script;
         //For dragging this btn if it has anything
         private boolean dragging = false;
         private UI.Grab dm = null;
@@ -54,6 +58,8 @@ public class BeltWnd extends MovableWidget {
                 }
             } else if (pag != null) {
                 return Optional.of(pag.img.get());
+            } else if (script != null) {
+                return Optional.of(script.getIconTex());
             }
             return Optional.empty();
         }
@@ -84,6 +90,7 @@ public class BeltWnd extends MovableWidget {
             res = null;
             pag = null;
             tt = null;
+            script = null;
         }
 
         private void setSlot(final int slot) {
@@ -91,6 +98,7 @@ public class BeltWnd extends MovableWidget {
             tt = null;
             res = null;
             pag = null;
+            script = null;
             if (ui.gui != null) {
                 if (ui.gui.belt[slot] != null) {
                     res = ui.gui.belt[slot];
@@ -98,8 +106,13 @@ public class BeltWnd extends MovableWidget {
                     data.remove(slot);
                 } else {
                     //Check for any pagina int his slot from db
-                    if (ui.gui.menu != null)
-                        data.get(slot).ifPresent(key -> pag = ui.gui.menu.specialpag.get(key));
+                    if (ui.gui.menu != null && ui.gui.PBotScriptlist != null)
+                        data.get(slot).ifPresent(key -> {
+                            if (key.startsWith("script:"))
+                                script = ui.gui.PBotScriptlist.getScript(key.substring("script:".length()));
+                            else
+                                pag = ui.gui.menu.specialpag.get(key);
+                        });
                 }
             }
         }
@@ -109,6 +122,17 @@ public class BeltWnd extends MovableWidget {
             this.pag = pag;
             res = null;
             tt = null;
+            script = null;
+        }
+
+        private void setScript(PBotScriptlistItem script) {
+            try {
+                data.add(slot, "script:" + script.scriptFile.getCanonicalPath().substring(System.getProperty("user.dir").length() + 1));
+                res = null;
+                tt = null;
+                this.script = script;
+            } catch (IOException e) {
+            }
         }
 
         @Override
@@ -122,6 +146,9 @@ public class BeltWnd extends MovableWidget {
                 } else {
                     tt = Text.render(res.get().layer(Resource.tooltip).t).tex();
                 }
+                return tt;
+            } else if (script != null) {
+                tt = script.getNameTex();
                 return tt;
             }/* else if (ui.gui != null && ui.gui.menu != null && res != null) {
                 MenuGrid.PagButton pagb = ui.gui.menu.paginafor(res).button();
@@ -189,8 +216,11 @@ public class BeltWnd extends MovableWidget {
                     confirmwnd.show();
                 } else
                     ui.gui.wdgmsg("belt", slot, 1, ui.modflags());
-            } else if (pag != null)
+            } else if (pag != null) {
                 pag.use();
+            } else if (script != null) {
+                script.runScript();
+            }
         }
 
         @Override
@@ -207,7 +237,7 @@ public class BeltWnd extends MovableWidget {
 
         @Override
         public boolean mousedown(Coord c, int button) {
-            if (((res != null && res.get() != null) || pag != null) && ui.modflags() == 0) {
+            if (((res != null && res.get() != null) || pag != null || script != null) && ui.modflags() == 0) {
                 dm = ui.grabmouse(this);
                 return true;
             }
@@ -226,8 +256,12 @@ public class BeltWnd extends MovableWidget {
                             //delete anything that might already belong to this slot
                             ui.gui.wdgmsg("setbelt", slot, 1);
                         }
-                    } else {
+                    } else if (pag != null) {
                         if (!locked() && ui.dropthing(ui.root, ui.mc, pag)) {
+                            reset();
+                        }
+                    } else if (script != null) {
+                        if (!locked() && ui.dropthing(ui.root, ui.mc, script)) {
                             reset();
                         }
                     }
@@ -272,18 +306,26 @@ public class BeltWnd extends MovableWidget {
             //don't drop things on yourself..
             if (!dragging) {
                 //Dropping "things" on us, mainly menugrid items
-                if (!locked() && thing instanceof Resource) {
-                    //Normal server-side menu items
-                    ui.gui.wdgmsg("setbelt", slot, ((Resource) thing).name);
-                    //reset for now and wait for server to send us uimsg if this was valid drop
-                    reset();
-                    return true;
-                } else if (!locked() && thing instanceof MenuGrid.SpecialPagina) {
-                    //Not normal stuff.
-                    setPag((MenuGrid.SpecialPagina) thing);
-                    //delete anything that might already belong to this slot
-                    ui.gui.wdgmsg("setbelt", slot, 1);
-                    return true;
+                if (!locked()) {
+                    if (thing instanceof Resource) {
+                        //Normal server-side menu items
+                        ui.gui.wdgmsg("setbelt", slot, ((Resource) thing).name);
+                        //reset for now and wait for server to send us uimsg if this was valid drop
+                        reset();
+                        return true;
+                    } else if (thing instanceof MenuGrid.SpecialPagina){
+                        //Not normal stuff.
+                        setPag((MenuGrid.SpecialPagina) thing);
+                        //delete anything that might already belong to this slot
+                        ui.gui.wdgmsg("setbelt", slot, 1);
+                        return true;
+                    } else if (thing instanceof PBotScriptlistItem){
+                        //Not normal stuff.
+                        setScript((PBotScriptlistItem) thing);
+                        //delete anything that might already belong to this slot
+                        ui.gui.wdgmsg("setbelt", slot, 1);
+                        return true;
+                    }
                 }
             }
             return false;

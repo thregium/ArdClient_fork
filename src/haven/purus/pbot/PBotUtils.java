@@ -27,6 +27,7 @@ import haven.purus.pbot.gui.PBotWindow;
 import net.dv8tion.jda.core.entities.TextChannel;
 
 import java.awt.Color;
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -613,8 +614,8 @@ public class PBotUtils {
      *
      * @return List of inventories
      */
-    public static ArrayList<PBotInventory> getAllInventories(UI ui) {
-        ArrayList<PBotInventory> ret = new ArrayList<>();
+    public static List<PBotInventory> getAllInventories(UI ui) {
+        List<PBotInventory> ret = new ArrayList<>();
         for (Widget window = ui.gui.lchild; window != null; window = window.prev) {
             if (window instanceof Window) {
                 for (Widget wdg = window.lchild; wdg != null; wdg = wdg.prev) {
@@ -1613,7 +1614,7 @@ public class PBotUtils {
             }
             PBotUtils.sleep(sleep);
         }
-        return(true);
+        return (true);
     }
 
     public static void unplaceThing(UI ui) {
@@ -1628,7 +1629,7 @@ public class PBotUtils {
             }
             PBotUtils.sleep(sleep);
         }
-        return(true);
+        return (true);
     }
 
 //    public static void placeThing(int x, int y) {
@@ -2089,4 +2090,11 @@ public class PBotUtils {
         return a.gob.rc.y;
     }
 
+    public static void runScript(UI ui, File scriptFile) {
+        try {
+            PBotScriptmanager.startScript(ui, scriptFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

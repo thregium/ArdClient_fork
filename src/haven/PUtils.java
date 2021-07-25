@@ -361,6 +361,27 @@ public class PUtils {
         return (ret);
     }
 
+    public static BufferedImage copy(BufferedImage img) {
+        Coord sz = Utils.imgsz(img);
+        BufferedImage ret = TexI.mkbuf(sz);
+        Raster src = img.getRaster();
+        WritableRaster dst = ret.getRaster();
+        boolean hasalpha = (src.getNumBands() == 4);
+        for (int y = 0; y < sz.y; y++) {
+            for (int x = 0; x < sz.x; x++) {
+                int r = src.getSample(x, y, 0);
+                int g = src.getSample(x, y, 1);
+                int b = src.getSample(x, y, 2);
+                int a = hasalpha ? src.getSample(x, y, 3) : 255;
+                dst.setSample(x, y, 0, r);
+                dst.setSample(x, y, 1, g);
+                dst.setSample(x, y, 2, b);
+                dst.setSample(x, y, 3, a);
+            }
+        }
+        return (ret);
+    }
+
     public static interface Convolution {
         public double cval(double td);
 

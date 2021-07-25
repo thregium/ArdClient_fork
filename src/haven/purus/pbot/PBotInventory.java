@@ -199,6 +199,21 @@ public class PBotInventory {
         inv.wdgmsg("drop", coord);
     }
 
+    public boolean dropItemToInventory(Coord coord, int limit) {
+        int cycles = 0;
+        int sleeptime = 25;
+        inv.wdgmsg("drop", coord);
+        while (PBotUtils.getItemAtHand(ui) == null) {
+            if (cycles == limit) {
+                return (false);
+            } else {
+                PBotUtils.sleep(sleeptime);
+                cycles += sleeptime;
+            }
+        }
+        return (true);
+    }
+
     /**
      * Amount of free slots in the inventory
      *

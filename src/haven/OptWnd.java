@@ -228,6 +228,12 @@ public class OptWnd extends Window {
         return scroll.cont;
     }
 
+    static private Scrollport withScroll(Widget widget, Coord sz) {
+        final Scrollport scroll = new Scrollport(sz);
+        widget.add(scroll, new Coord(0, 0));
+        return scroll;
+    }
+
     public void chpanel(Panel p) {
         if (current != null)
             current.hide();
@@ -467,8 +473,69 @@ public class OptWnd extends Window {
     }
 
     private void initAudioFirstColumn() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(audio, new Coord(620, 350)));
-        appender.setVerticalMargin(0);
+        final WidgetVerticalAppender appender2 = new WidgetVerticalAppender(audio);
+        appender2.setVerticalMargin(0);
+
+        resources.sfxlist = new HSliderListbox(140, 17);
+        synchronized (resources.sfxmenus) {
+            Utils.loadprefsliderlist("customsfxvol", resources.sfxmenus);
+            resources.sfxmenus.forEach(s -> resources.sfxlist.addItem(configuration.createSFXSlider(s)));
+        }
+        appender2.add(resources.sfxlist);
+        resources.sfxsearch = new TextEntry(140, "") {
+            @Override
+            public void changed() {
+                update();
+            }
+
+            @Override
+            public boolean mousedown(Coord mc, int btn) {
+                if (btn == 3) {
+                    settext("");
+                    update();
+                    return true;
+                } else {
+                    return super.mousedown(mc, btn);
+                }
+            }
+
+            public void update() {
+                synchronized (resources.sfxmenus) {
+                    resources.sfxlist.clear();
+                    resources.sfxmenus.forEach(s -> {
+                        if (s.contains(text))
+                            resources.sfxlist.addItem(configuration.createSFXSlider(s));
+                    });
+                }
+            }
+
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Right Click to clear entry").tex();
+            }
+        };
+        appender2.add(resources.sfxsearch);
+        appender2.add(new Button(140, "Clear") {
+            @Override
+            public boolean mousedown(Coord mc, int btn) {
+                if (ui.modctrl && btn == 1) {
+                    synchronized (resources.sfxmenus) {
+                        resources.sfxmenus.clear();
+                        resources.sfxlist.clear();
+                        Utils.setprefsliderlst("customsfxvol", resources.sfxmenus);
+                    }
+                }
+                return (true);
+            }
+
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Clear all list if something went wrong (CTRL + LMB). Don't click!").tex();
+            }
+        });
+
+        Scrollport scroll = withScroll(audio, new Coord(620 - 150, 350));
+        scroll.move(Coord.of(150, 0));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(scroll.cont);
+
         appender.add(new Label("Master audio volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, (int) (Audio.volume * 1000)) {
@@ -546,21 +613,6 @@ public class OptWnd extends Window {
                 Utils.setprefd("alertsvol", vol);
             }
         });
-        appender.setVerticalMargin(0);
-        appender.add(new Label("'Chip' sound volume"));
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.sfxchipvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.sfxchipvol = vol;
-                Utils.setprefd("sfxchipvol", vol);
-            }
-        });
         appender.add(new Label("'Ding' sound volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
@@ -573,36 +625,6 @@ public class OptWnd extends Window {
                 double vol = val / 1000.0;
                 Config.sfxdingvol = vol;
                 Utils.setprefd("sfxdingvol", vol);
-            }
-        });
-        appender.setVerticalMargin(0);
-        appender.add(new Label("Quern sound volume"));
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.sfxquernvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.sfxquernvol = vol;
-                Utils.setprefd("sfxquernvol", vol);
-            }
-        });
-        appender.setVerticalMargin(0);
-        appender.add(new Label("Door close sound volume"));
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.sfxdoorvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.sfxdoorvol = vol;
-                Utils.setprefd("sfxdoorvol", vol);
             }
         });
         appender.setVerticalMargin(0);
@@ -621,95 +643,50 @@ public class OptWnd extends Window {
             }
         });
         appender.setVerticalMargin(0);
-        appender.add(new Label("Fireplace sound volume (req. restart)"));
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.sfxfirevol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.sfxfirevol = vol;
-                Utils.setprefd("sfxfirevol", vol);
-            }
-        });
-        appender.setVerticalMargin(0);
-        appender.add(new Label("Clapping sound volume"));
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.sfxclapvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.sfxclapvol = vol;
-                Utils.setprefd("sfxclapvol", vol);
-            }
-        });
-        appender.setVerticalMargin(0);
-        appender.add(new Label("Cauldron sound volume - Changes are not immediate, will trigger on next cauldon sound start."));
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.sfxcauldronvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.sfxcauldronvol = vol;
-                Utils.setprefd("sfxcauldronvol", vol);
-            }
-        });
-        appender.setVerticalMargin(0);
-        appender.add(new Label("Whistling sound volume"));
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.sfxwhistlevol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.sfxwhistlevol = vol;
-                Utils.setprefd("sfxwhistlevol", vol);
-            }
-        });
-        appender.setVerticalMargin(0);
-        appender.add(new Label("Beehive sound volume"));
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.sfxbeehivevol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.sfxbeehivevol = vol;
-                Utils.setprefd("sfxbeehivevol", vol);
-            }
-        });
-        appender.setVerticalMargin(0);
-        appender.add(new Label("Chat message volume"));
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.sfxchatvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.sfxchatvol = vol;
-                Utils.setprefd("sfxchatvol", vol);
-            }
-        });
+//        appender.add(new Label("Fireplace sound volume (req. restart)"));
+//        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
+//        appender.add(new HSlider(200, 0, 1000, 0) {
+//            protected void added() {
+//                super.added();
+//                val = (int) (Config.sfxfirevol * 1000);
+//            }
+//
+//            public void changed() {
+//                double vol = val / 1000.0;
+//                Config.sfxfirevol = vol;
+//                Utils.setprefd("sfxfirevol", vol);
+//            }
+//        });
+//        appender.setVerticalMargin(0);
+//        appender.add(new Label("Cauldron sound volume - Changes are not immediate, will trigger on next cauldon sound start."));
+//        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
+//        appender.add(new HSlider(200, 0, 1000, 0) {
+//            protected void added() {
+//                super.added();
+//                val = (int) (Config.sfxcauldronvol * 1000);
+//            }
+//
+//            public void changed() {
+//                double vol = val / 1000.0;
+//                Config.sfxcauldronvol = vol;
+//                Utils.setprefd("sfxcauldronvol", vol);
+//            }
+//        });
+//        appender.setVerticalMargin(0);
+//        appender.add(new Label("Beehive sound volume"));
+//        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
+//        appender.add(new HSlider(200, 0, 1000, 0) {
+//            protected void added() {
+//                super.added();
+//                val = (int) (Config.sfxbeehivevol * 1000);
+//            }
+//
+//            public void changed() {
+//                double vol = val / 1000.0;
+//                Config.sfxbeehivevol = vol;
+//                Utils.setprefd("sfxbeehivevol", vol);
+//            }
+//        });
 
         appender.add(new CheckBox("Enable error sounds.") {
             {
@@ -1768,6 +1745,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("Display info above current enemies", (val) -> Utils.setprefb("showcurrentenemieinfo", configuration.showcurrentenemieinfo = val), configuration.showcurrentenemieinfo));
         appender.add(new CheckBox("Display additional info about actions and the enemy") {
             {
                 a = configuration.showactioninfo;
@@ -6399,7 +6377,7 @@ public class OptWnd extends Window {
 
                             @Override
                             public Object tooltip(Coord c0, Widget prev) {
-                                return RichText.render(RichText.Parser.quote("Animation cooldown: " + val + "\n0 - always on, 5000 - always off"), 300).tex();
+                                return RichText.render(RichText.Parser.quote("Animation cooldown: " + val + " ms\n0 - always on, 5000 - always off"), 300).tex();
                             }
                         }
                 );

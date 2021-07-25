@@ -6,6 +6,8 @@ import haven.Config;
 import haven.Coord;
 import haven.Coord2d;
 import haven.Gob;
+import haven.HSliderListboxItem;
+import haven.HSliderNamed;
 import haven.MainFrame;
 import haven.Matrix4f;
 import haven.OCache;
@@ -14,8 +16,10 @@ import haven.Resource;
 import haven.Session;
 import haven.Tex;
 import haven.TexI;
+import haven.Text;
 import haven.TextEntry;
 import haven.Utils;
+import haven.Widget;
 import haven.WidgetVerticalAppender;
 import haven.Window;
 import haven.sloth.gfx.SnowFall;
@@ -186,6 +190,7 @@ public class configuration {
     public static boolean drinkmessage = Utils.getprefb("drinkmessage", false);
     public static boolean autocleardamage = Utils.getprefb("autocleardamage", false);
     public static boolean showcombatborder = Utils.getprefb("showcombatborder", false);
+    public static boolean showcurrentenemieinfo = Utils.getprefb("showcurrentenemieinfo", false);
     public static boolean showactioninfo = Utils.getprefb("showactioninfo", false);
     public static boolean showinvnumber = Utils.getprefb("showinvnumber", false);
     public static boolean moredetails = Utils.getprefb("moredetails", false);
@@ -648,6 +653,35 @@ public class configuration {
                 Config.flowerlist.items.add(ci);
             Utils.setcollection("petalcol", Config.flowermenus.keySet());
         }
+    }
+
+    public static int addSFX(String name) {
+        synchronized (resources.sfxmenus) {
+            HSliderListboxItem h = HSliderListboxItem.contains(resources.sfxmenus, name);
+            if (h == null) {
+                h = new HSliderListboxItem(name, 100);
+                resources.sfxmenus.add(h);
+                if (resources.sfxsearch != null && resources.sfxlist != null && resources.sfxsearch.text.equals(""))
+                    resources.sfxlist.addItem(createSFXSlider(h));
+                Utils.setprefsliderlst("customsfxvol", resources.sfxmenus);
+                return (100);
+            } else {
+                return (h.val);
+            }
+        }
+    }
+
+    public static HSliderNamed createSFXSlider(HSliderListboxItem item) {
+        return (new HSliderNamed(item, 120, 0, 100,  () -> {
+            synchronized (resources.sfxmenus) {
+                Utils.setprefsliderlst("customsfxvol", resources.sfxmenus);
+            }
+        }) {
+            @Override
+            public Object tooltip(Coord c, Widget prev) {
+                return (Text.render(item.name + " volume " + item.val));
+            }
+        });
     }
 
 

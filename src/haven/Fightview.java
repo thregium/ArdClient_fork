@@ -36,6 +36,7 @@ import haven.sloth.gui.fight.Card;
 import haven.sloth.gui.fight.Cards;
 import haven.sloth.gui.fight.DefenseType;
 import haven.sloth.gui.fight.Maneuver;
+import modification.configuration;
 
 import java.awt.Color;
 import java.util.Arrays;
@@ -319,11 +320,15 @@ public class Fightview extends MovableWidget {
                 if (gob != null) {
                     final Gob.Overlay ol = gob.findol(GobCombatSprite.id);
                     if (ol != null) {
-                        if (rel.equals(current))
+                        if (Config.showothercombatinfo) {
+                            if (rel.equals(current) && !configuration.showcurrentenemieinfo)
+                                gob.ols.remove(ol);
+                            else
+                                ((GobCombatSprite) ol.spr).update(rel);
+                        } else {
                             gob.ols.remove(ol);
-                        else
-                            ((GobCombatSprite) ol.spr).update(rel);
-                    } else if (!rel.equals(current)) {
+                        }
+                    } else if (Config.showothercombatinfo && (configuration.showcurrentenemieinfo || !rel.equals(current))) {
                         gob.addol(new Gob.Overlay(GobCombatSprite.id, new GobCombatSprite(gob, rel)));
                     }
                 }

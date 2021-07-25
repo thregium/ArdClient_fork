@@ -16,274 +16,263 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MusicBot {
-	public static final int NOTE_ON = 0x90;
-	public static final int NOTE_OFF = 0x80;
-	public static final String[] NOTE_NAMES = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
-	public static String pathName = configuration.modificationPath + File.separator + "music" + File.separator;
-	public static String justName = "Allwood_Richard_-_Claro_Pascali_Gaudio";
-	public static String midExp = ".mid";
-	public static String jsonExp = ".json";
-	public static String musicName = pathName + justName + midExp;
-	public static String jsonName = pathName + justName + jsonExp;
-	public static boolean log = false;
-	public static JSONArray jsonArray = new JSONArray();
-	public static ArrayList<JSONArray> tracksList = new ArrayList<>();
+    public static final int NOTE_ON = 0x90;
+    public static final int NOTE_OFF = 0x80;
+    public static final String[] NOTE_NAMES = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
+    public static String pathName = configuration.modificationPath + File.separator + "music" + File.separator;
+    public static String justName = "Allwood_Richard_-_Claro_Pascali_Gaudio";
+    public static String midExp = ".mid";
+    public static String jsonExp = ".json";
+    public static String musicName = pathName + justName + midExp;
+    public static String jsonName = pathName + justName + jsonExp;
+    public static boolean log = false;
+    public static JSONArray jsonArray = new JSONArray();
+    public static ArrayList<JSONArray> tracksList = new ArrayList<>();
 
-	static void loggingln(Object string) {
-		if (log) System.out.println(string);
-	}
-	static void loggingln() {
-		if (log) System.out.println();
-	}
-	static void logging(Object string) {
-		if (log) System.out.print(string);
-	}
+    static void loggingln(Object string) {
+        if (log) System.out.println(string);
+    }
 
-	public static ArrayList<String> findAllFiles(String pathName, String expansionwithdot) {
-		try {
-			File folder = new File(pathName);
-			ArrayList<String> list = new ArrayList<>();
-			String[] files = folder.list(new FilenameFilter() {
+    static void loggingln() {
+        if (log) System.out.println();
+    }
 
-				@Override
-				public boolean accept(File folder, String name) {
-					return name.endsWith(expansionwithdot);
-				}
-			});
+    static void logging(Object string) {
+        if (log) System.out.print(string);
+    }
 
-			for (String fileName : files) {
-				fileName = fileName.substring(0, fileName.length() - expansionwithdot.length());
-				System.out.println("File: " + fileName + " : " + expansionwithdot);
-				list.add(fileName);
-			}
-			return list;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+    public static List<String> findAllFiles(String pathName, String expansionwithdot) {
+        try {
+            File folder = new File(pathName);
+            List<String> list = new ArrayList<>();
+            String[] files = folder.list((folder1, name) -> name.endsWith(expansionwithdot));
 
-	public static String readFile(String pathName, String name, String expansion) {
-		String result = "";
-		BufferedReader br = null;
-		try {
-			br = new BufferedReader(new FileReader(pathName + name + expansion));
-			StringBuilder sb = new StringBuilder();
-			String line = br.readLine();
-			while (line != null) {
-				sb.append(line);
-				line = br.readLine();
-			}
-			result = sb.toString();
+            for (String fileName : files) {
+                fileName = fileName.substring(0, fileName.length() - expansionwithdot.length());
+                System.out.println("File: " + fileName + " : " + expansionwithdot);
+                list.add(fileName);
+            }
+            return list;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-		} catch(Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				br.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		return result;
-	}
+    public static String readFile(String pathName, String name, String expansion) {
+        String result = "";
+        try (BufferedReader br = new BufferedReader(new FileReader(pathName + name + expansion))) {
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
+            while (line != null) {
+                sb.append(line);
+                line = br.readLine();
+            }
+            result = sb.toString();
 
-	public static void createJSONmusicfile(String pathName, String name, String expansion) {
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 
-		FileWriter jsonWriter = null;
-		try {
-			jsonWriter = new FileWriter(pathName + name + jsonExp);
+    public static void createJSONmusicfile(String pathName, String name, String expansion) {
 
-			jsonWriter.write(createJSON(pathName, name, expansion).toString());
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				jsonWriter.flush();
-				jsonWriter.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
+        FileWriter jsonWriter = null;
+        try {
+            jsonWriter = new FileWriter(pathName + name + jsonExp);
 
-	public static JSONArray readJSONmusicfile(String pathName, String name, String expansion) {
-		try {
-			JSONObject jsonFile = new JSONObject(readFile(pathName, name, expansion));
-			jsonArray = new JSONArray(jsonFile.getJSONArray("tracks").toString());
-			return jsonArray;
-		} catch(Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+            jsonWriter.write(createJSON(pathName, name, expansion).toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                jsonWriter.flush();
+                jsonWriter.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-	public static JSONArray readJSON(String pathName, String name, String expansion) {
-		try {
-			JSONObject jsonFile = createJSON(pathName, name, expansion);
-			jsonArray = new JSONArray(jsonFile.getJSONArray("tracks").toString());
-			return jsonArray;
-		} catch(Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+    public static JSONArray readJSONmusicfile(String pathName, String name, String expansion) {
+        try {
+            JSONObject jsonFile = new JSONObject(readFile(pathName, name, expansion));
+            jsonArray = new JSONArray(jsonFile.getJSONArray("tracks").toString());
+            return jsonArray;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-	public static JSONObject createJSON(String pathName, String name, String expansion) {
-		Sequence sequence = null;
-		System.out.println("createJSONmusicfile " + name);
-		try{
-			sequence = MidiSystem.getSequence(new File(pathName + name + expansion));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+    public static JSONArray readJSON(String pathName, String name, String expansion) {
+        try {
+            JSONObject jsonFile = createJSON(pathName, name, expansion);
+            jsonArray = new JSONArray(jsonFile.getJSONArray("tracks").toString());
+            return jsonArray;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-		int trackNumber = 0;
+    public static JSONObject createJSON(String pathName, String name, String expansion) {
+        Sequence sequence = null;
+        System.out.println("createJSONmusicfile " + name);
+        try {
+            sequence = MidiSystem.getSequence(new File(pathName + name + expansion));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-		JSONObject jtracks = new JSONObject();
-		JSONArray jatrack = new JSONArray();
+        int trackNumber = 0;
 
-		for (Track track : sequence.getTracks()) {
-			trackNumber++;
-			loggingln("Track " + trackNumber + ": size = " + track.size());
-			loggingln();
+        JSONObject jtracks = new JSONObject();
+        JSONArray jatrack = new JSONArray();
 
-			JSONArray jtrack = new JSONArray();
-			JSONObject jnumber = new JSONObject();
-			JSONObject jsize = new JSONObject();
+        for (Track track : sequence.getTracks()) {
+            trackNumber++;
+            loggingln("Track " + trackNumber + ": size = " + track.size());
+            loggingln();
 
-			jnumber.put("number", trackNumber);
-			jsize.put("size", track.size());
+            JSONArray jtrack = new JSONArray();
+            JSONObject jnumber = new JSONObject();
+            JSONObject jsize = new JSONObject();
 
-			jtrack.put(jnumber);
-			jtrack.put(jsize);
+            jnumber.put("number", trackNumber);
+            jsize.put("size", track.size());
 
-			JSONArray jnotes = new JSONArray();
-			for (int i = 0; i < track.size(); i++) {
-				MidiEvent event = track.get(i);
-				logging("@" + event.getTick() + " ");
+            jtrack.put(jnumber);
+            jtrack.put(jsize);
 
-				JSONArray jnote = new JSONArray();
+            JSONArray jnotes = new JSONArray();
+            for (int i = 0; i < track.size(); i++) {
+                MidiEvent event = track.get(i);
+                logging("@" + event.getTick() + " ");
 
-				JSONObject jmsg = new JSONObject();
-				JSONObject jtick = new JSONObject();
-				JSONObject jchannel = new JSONObject();
-				JSONObject jkey = new JSONObject();
-				JSONObject jvelocity = new JSONObject();
+                JSONArray jnote = new JSONArray();
 
-				MidiMessage message = event.getMessage();
-				if (message instanceof ShortMessage) {
-					ShortMessage sm = (ShortMessage) message;
-					logging("Channel: " + sm.getChannel() + " ");
-					if (sm.getCommand() == NOTE_ON) {
-						int key = sm.getData1();
-						int octave = key / 12;
-						int note = key % 12;
-						String noteName = NOTE_NAMES[note];
-						int velocity = sm.getData2();
-						loggingln("Note on, " + noteName + octave + " key=" + key + " velocity: " + velocity);
+                JSONObject jmsg = new JSONObject();
+                JSONObject jtick = new JSONObject();
+                JSONObject jchannel = new JSONObject();
+                JSONObject jkey = new JSONObject();
+                JSONObject jvelocity = new JSONObject();
 
-						jmsg.put("msg", sm.getCommand());
-						jtick.put("tick", event.getTick());
-						jchannel.put("channel", sm.getChannel());
-						jkey.put("key", sm.getData1());
-						jvelocity.put("velocity", sm.getData2());
+                MidiMessage message = event.getMessage();
+                if (message instanceof ShortMessage) {
+                    ShortMessage sm = (ShortMessage) message;
+                    logging("Channel: " + sm.getChannel() + " ");
+                    if (sm.getCommand() == NOTE_ON) {
+                        int key = sm.getData1();
+                        int octave = key / 12;
+                        int note = key % 12;
+                        String noteName = NOTE_NAMES[note];
+                        int velocity = sm.getData2();
+                        loggingln("Note on, " + noteName + octave + " key=" + key + " velocity: " + velocity);
 
-						jnote.put(jmsg);
-						jnote.put(jtick);
-						jnote.put(jchannel);
-						jnote.put(jkey);
-						jnote.put(jvelocity);
+                        jmsg.put("msg", sm.getCommand());
+                        jtick.put("tick", event.getTick());
+                        jchannel.put("channel", sm.getChannel());
+                        jkey.put("key", sm.getData1());
+                        jvelocity.put("velocity", sm.getData2());
 
-						jnotes.put(jnote);
-					} else if (sm.getCommand() == NOTE_OFF) {
-						int key = sm.getData1();
-						int octave = key / 12;
-						int note = key % 12;
-						String noteName = NOTE_NAMES[note];
-						int velocity = sm.getData2();
-						loggingln("Note off, " + noteName + octave + " key=" + key + " velocity: " + velocity);
+                        jnote.put(jmsg);
+                        jnote.put(jtick);
+                        jnote.put(jchannel);
+                        jnote.put(jkey);
+                        jnote.put(jvelocity);
 
-						jmsg.put("msg", sm.getCommand());
-						jtick.put("tick", event.getTick());
-						jchannel.put("channel", sm.getChannel());
-						jkey.put("key", sm.getData1());
-						jvelocity.put("velocity", sm.getData2());
+                        jnotes.put(jnote);
+                    } else if (sm.getCommand() == NOTE_OFF) {
+                        int key = sm.getData1();
+                        int octave = key / 12;
+                        int note = key % 12;
+                        String noteName = NOTE_NAMES[note];
+                        int velocity = sm.getData2();
+                        loggingln("Note off, " + noteName + octave + " key=" + key + " velocity: " + velocity);
 
-						jnote.put(jmsg);
-						jnote.put(jtick);
-						jnote.put(jchannel);
-						jnote.put(jkey);
-						jnote.put(jvelocity);
+                        jmsg.put("msg", sm.getCommand());
+                        jtick.put("tick", event.getTick());
+                        jchannel.put("channel", sm.getChannel());
+                        jkey.put("key", sm.getData1());
+                        jvelocity.put("velocity", sm.getData2());
 
-						jnotes.put(jnote);
-					} else {
-						loggingln("Command:" + sm.getCommand());
+                        jnote.put(jmsg);
+                        jnote.put(jtick);
+                        jnote.put(jchannel);
+                        jnote.put(jkey);
+                        jnote.put(jvelocity);
 
-						jmsg.put("msg", sm.getCommand());
-						jtick.put("tick", event.getTick());
-						jchannel.put("channel", sm.getChannel());
+                        jnotes.put(jnote);
+                    } else {
+                        loggingln("Command:" + sm.getCommand());
 
-						jnote.put(jmsg);
-						jnote.put(jtick);
-						jnote.put(jchannel);
+                        jmsg.put("msg", sm.getCommand());
+                        jtick.put("tick", event.getTick());
+                        jchannel.put("channel", sm.getChannel());
 
-						jnotes.put(jnote);
-					}
-				} else {
-					loggingln("Other message: " + message.getClass());
+                        jnote.put(jmsg);
+                        jnote.put(jtick);
+                        jnote.put(jchannel);
 
-					jmsg.put("msg", message.getClass());
-					jtick.put("tick", event.getTick());
+                        jnotes.put(jnote);
+                    }
+                } else {
+                    loggingln("Other message: " + message.getClass());
 
-					jnote.put(jmsg);
-					jnote.put(jtick);
+                    jmsg.put("msg", message.getClass());
+                    jtick.put("tick", event.getTick());
 
-					jnotes.put(jnote);
-				}
+                    jnote.put(jmsg);
+                    jnote.put(jtick);
 
-			}
-			jtrack.put(jnotes);
+                    jnotes.put(jnote);
+                }
 
-			jatrack.put(jtrack);
+            }
+            jtrack.put(jnotes);
 
-		}
+            jatrack.put(jtrack);
 
-		jtracks.put("tracks", jatrack);
+        }
 
-		return jtracks;
-	}
+        jtracks.put("tracks", jatrack);
 
-	public static ArrayList<midiTrack> getTracksFromJSON() {
-		ArrayList<JSONArray> ja = new ArrayList<>();
-		ArrayList<midiTrack> midiTrackArrayList = new ArrayList<>();
-		for (int i = 0; i < jsonArray.length(); i++) {
-			ja.add(jsonArray.getJSONArray(i));
+        return jtracks;
+    }
 
-			try {
-				Integer number = (Integer) ja.get(i).getJSONObject(0).get("number");
-				Integer size = (Integer) ja.get(i).getJSONObject(1).get("size");
-				ArrayList<JSONArray> notes = new ArrayList<>();
-				for (int m = 0; m < ja.get(i).getJSONArray(2).length(); m++) {
-					notes.add(ja.get(i).getJSONArray(2).getJSONArray(m));
-				}
-				midiTrackArrayList.add(new midiTrack(number, size, notes));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		tracksList = ja;
-		return midiTrackArrayList;
-	}
+    public static ArrayList<midiTrack> getTracksFromJSON() {
+        ArrayList<JSONArray> ja = new ArrayList<>();
+        ArrayList<midiTrack> midiTrackArrayList = new ArrayList<>();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            ja.add(jsonArray.getJSONArray(i));
 
-	public static void main(String[] args) {
-		createJSONmusicfile(pathName, justName, midExp);
-		readJSONmusicfile(pathName, justName, jsonExp);
-		findAllFiles(pathName, midExp);
-		findAllFiles(pathName, jsonExp);
-	}
+            try {
+                Integer number = (Integer) ja.get(i).getJSONObject(0).get("number");
+                Integer size = (Integer) ja.get(i).getJSONObject(1).get("size");
+                ArrayList<JSONArray> notes = new ArrayList<>();
+                for (int m = 0; m < ja.get(i).getJSONArray(2).length(); m++) {
+                    notes.add(ja.get(i).getJSONArray(2).getJSONArray(m));
+                }
+                midiTrackArrayList.add(new midiTrack(number, size, notes));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        tracksList = ja;
+        return midiTrackArrayList;
+    }
+
+    public static void main(String[] args) {
+        createJSONmusicfile(pathName, justName, midExp);
+        readJSONmusicfile(pathName, justName, jsonExp);
+        findAllFiles(pathName, midExp);
+        findAllFiles(pathName, jsonExp);
+    }
 
 }
 

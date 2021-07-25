@@ -75,6 +75,9 @@ public class PBotItem {
         return (true);
     }
 
+    public Coord coord() {
+        return (witem.c.div(33));
+    }
 
     /**
      * Transfer an item to the active inventory, does not wait for item to transfer

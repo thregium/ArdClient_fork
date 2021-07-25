@@ -45,6 +45,8 @@ public enum Action {
             configuration.playerboxsprite = false;
         else
             configuration.playerbordersprite = false;
+        Utils.setprefb("playerbordersprite", configuration.playerbordersprite);
+        Utils.setprefb("playerboxsprite", configuration.playerboxsprite);
     }, "Display view border"),
     TOGGLE_DANGER_RADIUS(GameUI::toggleDangerRadius, "Toggles Mine/Animal Radii", "Toggles display of mine/animal danger radii"),
     TOGGLE_SAFE_RADIUS(GameUI::toggleSafeRadius, "Toggles Trough/Beehive Radii", "Toggles between modes of displaying Trough/Beehive radii"),

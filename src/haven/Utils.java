@@ -511,6 +511,31 @@ public class Utils {
         }
     }
 
+    public static void loadprefsliderlist(String prefname, List<HSliderListboxItem> data) {
+        try {
+            data.clear();
+            JSONObject jsonobj = new JSONObject(Utils.getpref(prefname, "{}"));
+            for (String itm : jsonobj.keySet())
+                data.add(new HSliderListboxItem(itm, jsonobj.getInt(itm)));
+        } catch (SecurityException e) {
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public static void setprefsliderlst(String prefname, List<HSliderListboxItem> data) {
+        try {
+            JSONObject jsonobj = new JSONObject();
+            for (HSliderListboxItem itm : data) {
+                jsonobj.put(itm.name, itm.val);
+            }
+            Utils.setpref(prefname, jsonobj.toString());
+        } catch (SecurityException e) {
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
     public static ArrayList<String> loadcollection(String prefname) {
         ArrayList<String> a = new ArrayList<>();
         try {

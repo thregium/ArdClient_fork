@@ -13,7 +13,7 @@ import java.io.IOException;
 public class PBotScriptlistItem {
 
     private String name;
-    private File scriptFile;
+    public File scriptFile;
     private Tex iconTex, nameTex;
     public String filename;
     public final UI ui;
@@ -41,7 +41,11 @@ public class PBotScriptlistItem {
     }
 
     public void runScript() {
-        PBotScriptmanager.startScript(ui, scriptFile);
+        try {
+            PBotScriptmanager.startScript(ui, scriptFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public Tex getIconTex() {

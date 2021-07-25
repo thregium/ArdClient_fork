@@ -1775,6 +1775,25 @@ public class Resource implements Serializable {
         public Audio(byte[] coded, String id) {
             this.coded = coded;
             this.id = id.intern();
+            if (dev.decodeCode) decode();
+        }
+
+        public void decode() {
+            Path path = Paths.get("decode").resolve(Resource.this.toString().replace("/", File.separator));
+            String filename = name.substring(name.replace("/", File.separator).lastIndexOf(File.separator) + 1);
+            Path file = path.resolve(String.format("%s_%s_%s.wav", filename, id, Arrays.hashCode(coded)));
+            if (!Files.exists(file)) {
+                Defer.later(() -> {
+                    try {
+                        Files.createDirectories(path);
+                        Files.write(file, coded, StandardOpenOption.CREATE_NEW);
+                        dev.resourceLog("audio", file.toString(), "CREATED");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return (null);
+                });
+            }
         }
 
         public Audio(Message buf) {

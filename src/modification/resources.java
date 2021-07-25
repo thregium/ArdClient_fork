@@ -1,5 +1,10 @@
 package modification;
 
+import haven.CheckListbox;
+import haven.CheckListboxItem;
+import haven.HSliderListbox;
+import haven.HSliderListboxItem;
+import haven.HSliderNamed;
 import haven.Indir;
 import haven.Light;
 import haven.Material;
@@ -9,6 +14,7 @@ import haven.Resource;
 import haven.States;
 import haven.Tex;
 import haven.Text;
+import haven.TextEntry;
 import haven.Utils;
 import haven.resutil.WaterTile;
 import haven.sloth.util.ObservableMap;
@@ -23,6 +29,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class resources {
     public static String picturePath = "modification/picture";
@@ -303,4 +310,8 @@ public class resources {
             "gfx/kritter/.*"
     ));
     public static ObservableMap<String, Boolean> customQuickActions = Utils.loadCustomList(defaultQuickActions, "QuickPattern", true);
+
+    public static HSliderListbox sfxlist = null;
+    public static TextEntry sfxsearch = null;
+    public static final List<HSliderListboxItem> sfxmenus = new TreeList<>();
 }

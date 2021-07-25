@@ -5,18 +5,20 @@ import modification.configuration;
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class StatusWdg extends Widget {
-    private static final ThreadGroup tg = new ThreadGroup("StatusUpdaterThreadGroup");
     private static final Tex hearthlingsplayingdef = Text.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Players: %s"), "?"), Color.WHITE).tex();
     private static final Tex pingtimedef = Text.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Ping: %s ms"), "?"), Color.WHITE).tex();
     private Tex players = hearthlingsplayingdef;
@@ -26,47 +28,34 @@ public class StatusWdg extends Widget {
     // Windows IPv6:    Reply from 2a01:4f8:130:7393::2: time=71ms
     // GNU ping IPv4:   64 bytes from ansgar.seatribe.se (213.239.201.139): icmp_seq=1 ttl=50 time=72.5 ms
     // GNU ping IPv6:   64 bytes from ansgar.seatribe.se: icmp_seq=1 ttl=53 time=15.3 ms
-    private final static Pattern pattern = Pattern.compile(Config.iswindows ? ".+?=(\\d+)[^ \\d\\s]" : ".+?time=(\\d+\\.?\\d*) ms");
+    private static final Pattern pattern = Pattern.compile(Config.iswindows ? ".+?=(\\d+)[^ \\d\\s]" : ".+?time=(\\d+\\.?\\d*) ms");
+    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     public StatusWdg() {
-        tg.interrupt();
-        startUpdater();
+        executor.scheduleWithFixedDelay(this::startUpdater, 0, 5, TimeUnit.SECONDS);
     }
 
     private void updatepingtime() {
         String ping = "?";
 
-        java.util.List<String> command = new ArrayList<>();
+        final List<String> command = new ArrayList<>();
         command.add("ping");
         command.add(Config.iswindows ? "-n" : "-c");
         command.add("1");
         command.add("game.havenandhearth.com");
 
-        BufferedReader standardOutput = null;
-        try {
-            ProcessBuilder processBuilder = new ProcessBuilder(command);
-            Process process = processBuilder.start();
+        final List<String> lines = new ArrayList<>();
+        try (BufferedReader standardOutput = new BufferedReader(new InputStreamReader(new ProcessBuilder(command).start().getInputStream()))) {
+            lines.addAll(standardOutput.lines().collect(Collectors.toList()));
+        } catch (IOException ignore) {
+        }
 
-            standardOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        StringBuilder output = new StringBuilder();
+        lines.forEach(output::append);
 
-            String output = "";
-            String line;
-            while ((line = standardOutput.readLine()) != null) {
-                output += line;
-            }
-
-            Matcher matcher = pattern.matcher(output);
-            if (matcher.find()) {
-                ping = matcher.group(1);
-            }
-        } catch (IOException ex) {
-            // NOP
-        } finally {
-            if (standardOutput != null)
-                try {
-                    standardOutput.close();
-                } catch (IOException e) { // ignored
-                }
+        Matcher matcher = pattern.matcher(output.toString());
+        if (matcher.find()) {
+            ping = matcher.group(1);
         }
 
         if (ping.isEmpty())
@@ -78,84 +67,44 @@ public class StatusWdg extends Widget {
     }
 
     private void startUpdater() {
-        Thread statusupdaterthread = new Thread(tg, () -> {
+        try {
             updatepingtime();
-            while (true) {
-                URL url_;
-                BufferedReader br = null;
-                HttpURLConnection conn = null;
-
-                try {
-                    url_ = new URL("http://www.havenandhearth.com/portal/index/status");
-                    conn = (HttpURLConnection) url_.openConnection();
-                    InputStream is = conn.getInputStream();
-                    br = new BufferedReader(new InputStreamReader(is));
-
-                    String line, brt = "";
-                    while ((line = br.readLine()) != null) {
-                        if (line.contains("There are")) {
-                            String p = line.substring("<p>There are  ".length(), line.length() - " hearthlings playing.</p>".length()); //need testing
-                            players = Text.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Players: %s"), p), Color.WHITE).tex();
-                        }
-                        if (configuration.statustooltip) {
-                            if (!line.contains("<div class")) {
-                                line = line.replace("<p>", "");
-                                line = line.replace("</p>", "");
-                                line = line.replace("<h2>", "");
-                                line = line.replace("</h2>", "");
-                                line = line.replace("</div>", "");
-                                while (line.length() > 0 && line.startsWith(" ")) {
-                                    line = line.substring(" ".length());
-                                }
-                                if (brt.equals(""))
-                                    brt = line;
-                                else brt = brt + "\n" + line;
-                            }
-                            tooltip = RichText.Parser.quote(String.format("%s", brt));
-                            tooltip = RichText.render((String) tooltip, 250);
-                        }
-
-                        // Update ping at least every 5 seconds.
-                        // This of course might take more than 5 seconds in case there were no new logins/logouts
-                        // but it's not critical.
-                        long now = System.currentTimeMillis();
-                        if (now - lastPingUpdate > 5000) {
-                            lastPingUpdate = now;
-                            updatepingtime();
-                        }
-
-                        if (Thread.interrupted())
-                            return;
-                    }
-                } catch (SocketException se) {
-                    // don't print socket exceptions when network is unreachable to prevent console spamming on bad connections
-                    if (!se.getMessage().equals("Network is unreachable"))
-                        se.printStackTrace();
-                } catch (MalformedURLException mue) {
-                    mue.printStackTrace();
-                } catch (IOException ioe) {
-                    ioe.printStackTrace();
-                } finally {
-                    try {
-                        if (br != null)
-                            br.close();
-                    } catch (IOException ioe) {
-                    }
-                    if (conn != null)
-                        conn.disconnect();
-                }
-
-                if (Thread.interrupted())
-                    return;
-
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException ex) {
-                    return;
-                }
+            HttpURLConnection conn = (HttpURLConnection) new URL("http://www.havenandhearth.com/portal/index/status").openConnection();
+            final List<String> lines = new ArrayList<>();
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+                lines.addAll(br.lines().collect(Collectors.toList()));
+            } finally {
+                conn.disconnect();
             }
-        }, "StatusUpdater");
-        statusupdaterthread.start();
+            lines.forEach(line -> {
+                if (line.contains("There are")) {
+                    String p = line.substring("<p>There are  ".length(), line.length() - " hearthlings playing.</p>".length()); //need testing
+                    players = Text.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Players: %s"), p), Color.WHITE).tex();
+                }
+                StringBuilder brt = new StringBuilder();
+                if (configuration.statustooltip) {
+                    if (!line.contains("<div class")) {
+                        line = line.replace("<p>", "");
+                        line = line.replace("</p>", "");
+                        line = line.replace("<h2>", "");
+                        line = line.replace("</h2>", "");
+                        line = line.replace("</div>", "");
+                        while (line.length() > 0 && line.startsWith(" ")) {
+                            line = line.substring(" ".length());
+                        }
+                        brt.append(line).append("\n");
+                    }
+                    tooltip = RichText.Parser.quote(String.format("%s", brt));
+                    tooltip = RichText.render((String) tooltip, 250);
+                }
+            });
+        } catch (SocketException se) {
+            // don't print socket exceptions when network is unreachable to prevent console spamming on bad connections
+            if (!se.getMessage().equals("Network is unreachable"))
+                se.printStackTrace();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
     }
 
     @Override
@@ -171,7 +120,7 @@ public class StatusWdg extends Widget {
 
     @Override
     public void reqdestroy() {
-        tg.interrupt();
+        executor.shutdown();
         super.reqdestroy();
     }
 

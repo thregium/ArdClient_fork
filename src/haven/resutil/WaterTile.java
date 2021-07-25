@@ -31,6 +31,7 @@ import haven.Coord;
 import haven.Coord3f;
 import haven.DefSettings;
 import haven.GLConfig;
+import haven.GLSettings;
 import haven.GLState;
 import haven.GOut;
 import haven.Glob;
@@ -419,7 +420,7 @@ public class WaterTile extends Tiler {
         }
 
         public void prep(Buffer buf) {
-            if (buf.cfg.pref.wsurf.val)
+            if (buf.cfg.pref.WATERSURFACE.get())
                 super.prep(buf);
         }
     }
@@ -553,7 +554,7 @@ public class WaterTile extends Tiler {
     }
 
     public GLState drawstate(Glob glob, GLConfig cfg, Coord3f c) {
-        if (cfg.pref.wsurf.val) {
+        if (cfg.pref.WATERSURFACE.get()) {
             return fog;
         }
         return (null);

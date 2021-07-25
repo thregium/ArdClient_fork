@@ -47,6 +47,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
     public static final int width = UI.scale(263);
@@ -283,16 +284,16 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
                         if (fc.showOpenDialog(null) != JFileChooser.APPROVE_OPTION)
                             return;
                         File file = fc.getSelectedFile();
-                        FileReader fr = new FileReader(file);
-                        BufferedReader reader = new BufferedReader(fr);
-                        String line = reader.readLine();
-                        while (line != null) {
+                        final List<String> lines;
+                        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                            lines = reader.lines().collect(Collectors.toList());
+                        }
+                        lines.forEach(line -> {
                             if (allrandom) {
                                 setpname(configuration.randomNick());
                             }
                             BuddyWnd.this.wdgmsg("bypwd", line);
-                            line = reader.readLine();
-                        }
+                        });
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

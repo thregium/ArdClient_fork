@@ -28,7 +28,6 @@ package haven;
 
 import haven.glsl.AutoVarying;
 import haven.glsl.Expression;
-import haven.glsl.Macro1;
 import haven.glsl.ProgramContext;
 import haven.glsl.ShaderMacro;
 import haven.glsl.Type;
@@ -73,7 +72,6 @@ public class DropSky extends Sprite implements Rendered {
         g.apply();
         BGL gl = g.gl;
         Matrix4f mvxf = PView.mvxf(g);
-        ;
         Matrix4f pmvxf = g.st.cur(PView.proj).fin(Matrix4f.id).mul(mvxf);
         Matrix4f ixf = pmvxf.invert();
         float[] oc = mvxf.invert().mul4(new float[]{0, 0, 0, 1});
@@ -97,11 +95,7 @@ public class DropSky extends Sprite implements Rendered {
                 };
 
                 public void modify(ProgramContext prog) {
-                    prog.fctx.fragcol.mod(new Macro1<Expression>() {
-                        public Expression expand(Expression in) {
-                            return (mul(in, textureCube(ssky.ref(), texcoord.ref())));
-                        }
-                    }, 0);
+                    prog.fctx.fragcol.mod(in -> (mul(in, textureCube(ssky.ref(), texcoord.ref()))), 0);
                 }
             }
     };

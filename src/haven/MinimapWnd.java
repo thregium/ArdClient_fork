@@ -156,27 +156,48 @@ public class MinimapWnd extends ResizableWnd {
             @Override
             public Object tooltip(Coord c, Widget prev) {
                 Coord coords = getCurCoords();
+                String oddi = "";
+                String vatsul = "";
                 if (coords != null) {
                     this.coords = coords;
-                    tooltip = Text.render(String.format("Current location: %d x %d", coords.x, coords.y));
+                    oddi = String.format("Current location: %d x %d", coords.x, coords.y);
                 } else
-                    tooltip = Text.render("Unable to determine your current location.");
-                return super.tooltip(c, prev);
+                    oddi = "Location not found";
+
+                MCache.Grid g = minimap.cur.grid;
+                if (g != null) {
+                    vatsul = String.format("Current grid id: %d", g.id);
+                } else
+                    vatsul = "Grid not found";
+                String addinfo = "Click to open the Odditownmap\nShfit+Click to open the Vatsul map";
+
+                tooltip = RichText.render(oddi + "\n" + vatsul + "\n" + addinfo, 300).tex();
+                return (super.tooltip(c, prev));
             }
 
             @Override
             public void click() {
-                Coord coords = getCurCoords();
-                if (coords != null) {
-                    this.coords = coords;
-                    try {
-                        WebBrowser.self.show(new URL(String.format("http://odditown.com/haven/map/#x=%d&y=%d&zoom=9", coords.x, coords.y)));
-                    } catch (WebBrowser.BrowserException e) {
-                        getparent(GameUI.class).error("Could not launch web browser.");
-                    } catch (MalformedURLException e) {
+                if (ui.modflags() != UI.MOD_SHIFT) {
+                    Coord coords = getCurCoords();
+                    if (coords != null) {
+                        this.coords = coords;
+                        try {
+                            WebBrowser.self.show(new URL(String.format("http://odditown.com/haven/map/#x=%d&y=%d&zoom=9", coords.x, coords.y)));
+                        } catch (WebBrowser.BrowserException e) {
+                            getparent(GameUI.class).error("Could not launch web browser.");
+                        } catch (MalformedURLException e) {
+                        }
+                    } else {
+                        getparent(GameUI.class).error("Unable to determine your current location.");
                     }
                 } else {
-                    getparent(GameUI.class).error("Unable to determine your current location.");
+                    try {
+                        MCache.Grid g = minimap.cur.grid;
+                        if (g != null)
+                            WebBrowser.self.show(new URL("https://vatsul.com/HnHMap/whereis/" + g.id));
+                    } catch (NullPointerException | MalformedURLException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 

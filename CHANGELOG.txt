@@ -1,4 +1,12 @@
 Details in https://github.com/Cediner/ArdClient/commits/
+2021.07.25
+-- Custom sound volume -> Audio
+-- Scripts on belt
+-- Combat last enemy cooldown sprite -> Combat
+-- Vatsul map location
+-- Small fix (water gl2, combat damage calculator) and something else
+~
+
 2021.07.21
 -- Grid and hitbox outline rework (need to setting)
 -- Animation cooldown (Video) (Disable animation alternative)

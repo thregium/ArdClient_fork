@@ -157,7 +157,7 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
                 g.chcolor(255, 255, 255, a);
                 Double ameter = (this.ameter >= 0) ? (this.ameter / 100.0) : ameteri.get();
                 if (ameter != null) {
-                    g.image(scframe, Coord.z, scframe.sz().mul(scale));
+                    g.image(scframe, Coord.z, sz.mul(scale));
                     g.chcolor(0, 0, 0, a);
                     g.frect(sameteroff.mul(scale), sametersz.mul(scale));
                     g.chcolor(255, 255, 255, a);
@@ -169,14 +169,12 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
                 g.chcolor();
 
                 if (ameter != null) {
-                    final int width = FastText.textw(this.ameter + "");
-                    final Coord c = new Coord(sz.x / 2 - width / 2, sz.y / 2 - 5).mul(scale);
-                    final Coord tc = c.sub(0, 3);
-                    final Coord tsz = new Coord(width, 10);
+                    final Coord size = FastText.size(this.ameter + "");
+                    final Coord c = sz.mul(scale).div(2);
                     g.chcolor(new Color(64, 64, 64, 215));
-                    g.frect(c.mul(scale), c.add(tsz.x, 0).mul(scale), c.add(tsz).mul(scale), c.add(0, tsz.y).mul(scale));
+                    g.frect(c.sub(size.div(2)), size.sub(0, 1));
                     g.chcolor();
-                    FastText.printf(g, tc.mul(scale), "%d", this.ameter);
+                    FastText.aprintf(g, c, 0.5, 0.5, "%d", this.ameter);
                 }
             }
         } catch (Loading l) {
@@ -189,14 +187,23 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
     }
 
     public void stancedraw(final GOut g, float scale) {
+        final Coord sz = scframe.sz();
         try {
             final Resource res = this.res.get();
             Tex img = res.layer(Resource.imgc).tex();
             if (img != null) {
-                g.image(img, Coord.z, img.sz().mul(scale));
+                g.image(img, Coord.z, sz.mul(scale));
                 g.chcolor(new Color(64, 64, 64, 215));
-                g.rect(Coord.z, img.sz().mul(scale));
+                g.rect(Coord.z, sz.mul(scale));
                 g.chcolor();
+                if (this.ameter > 0) {
+                    final Coord size = FastText.size(this.ameter + "");
+                    final Coord c = sz.mul(scale).div(2);
+                    g.chcolor(new Color(64, 64, 64, 215));
+                    g.frect(c.sub(size.div(2)), size.sub(0, 1));
+                    g.chcolor();
+                    FastText.aprintf(g, c, 0.5, 0.5, "%d", this.ameter);
+                }
             }
         } catch (Loading l) {
             //do nothing

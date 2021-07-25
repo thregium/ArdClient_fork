@@ -52,6 +52,13 @@ public class HSlider extends Widget {
         adda(minus, Coord.of(0, sz.y / 2), 0, 0.5);
     }
 
+    @Override
+    protected void attach(UI ui) {
+        super.attach(ui);
+        plus.attach(ui);
+        minus.attach(ui);
+    }
+
     public void draw(GOut g) {
         g.chcolor(DefSettings.SLIDERCOL.get());
         //y offset incase sflarp.sz.y > schain.sz.y

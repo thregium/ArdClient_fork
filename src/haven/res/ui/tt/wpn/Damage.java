@@ -15,20 +15,20 @@ public class Damage extends WeaponInfo {
 
     public final int dmg;
 
-    public Damage(Owner paramOwner, int paramInt) {
-        super(paramOwner);
-        this.dmg = paramInt;
+    public Damage(Owner owner, int dmg) {
+        super(owner);
+        this.dmg = dmg;
     }
 
-    public static Damage mkinfo(Owner paramOwner, Object... paramVarArgs) {
-        return new Damage(paramOwner, ((Number) paramVarArgs[1]).intValue());
+    public static Damage mkinfo(Owner owner, Object... args) {
+        return (new Damage(owner, ((Number) args[1]).intValue()));
     }
 
     public String wpntips() {
-        return "Damage: " + this.dmg;
+        return ("Damage: " + dmg);
     }
 
     public int order() {
-        return 50;
+        return (50);
     }
 }

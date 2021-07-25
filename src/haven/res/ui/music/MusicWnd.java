@@ -22,6 +22,7 @@ import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /* >wdg: MusicWnd */
@@ -41,8 +42,8 @@ public class MusicWnd extends Window {
     public Thread thread;
     public Button refresh, parsing, play, stop, pause;
     public HSlider multi;
-    public ArrayList<String> midList = new ArrayList<>();
-    public ArrayList<midiTrack> trackList = new ArrayList<>();
+    public List<String> midList = new ArrayList<>();
+    public List<midiTrack> trackList = new ArrayList<>();
     //	public ArrayList<String> channelList = new ArrayList<>();
     public Listbox<String> midLst, trackLst, channelLst;
     public CheckListbox trackCheckList;
@@ -50,7 +51,7 @@ public class MusicWnd extends Window {
     public midiTrack allT, currentT;
     public static JSONArray jsonArray = new JSONArray();
     public static int currentTrack = 0, currentChannel = 0;
-    public ArrayList<Integer> tracksList = new ArrayList<>();
+    public List<Integer> tracksList = new ArrayList<>();
     public double multiplier = 1;
     public int[] diapasone = new int[2];
     public int[] octaves = new int[10];

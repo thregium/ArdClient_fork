@@ -206,7 +206,7 @@ public class VMeter extends Widget implements ItemInfo.Owner {
     private Tex shorttip, longtip;
 
     public Object tooltip(Coord c, Widget prev) {
-        if (rawinfo == null) {
+        if (rawinfo == null || ui.modctrl) {
             Widget p = this.parent;
             if (p instanceof Window) {
                 for (Kit kit : kits) {
@@ -216,23 +216,18 @@ public class VMeter extends Widget implements ItemInfo.Owner {
                                 String ca = (tl.limit * amount / 100 % 1 == 0 ? String.format("%.0f", tl.limit * amount / 100) : tl.limit * amount / 100) + "";
                                 String cl = (tl.limit % 1 == 0 ? String.format("%.0f", tl.limit) : tl.limit) + "";
                                 String stt = "$b{$col[255,223,5]{" + ca + " / " + cl + " " + tl.subText + " (" + amount + "%)}}";
-                                if (ui.modctrl) {
-                                    return RichText.render(stt + tl.tooltip + tl.addTooltip, -1).tex();
-                                } else {
-                                    return RichText.render(stt, -1).tex();
-                                }
+                                return RichText.render(stt + tl.tooltip + tl.addTooltip, -1).tex();
                             }
                         }
                     }
                 }
             }
-            return RichText.render("$b{$col[255,223,5]{" + amount + "%}}", -1).tex();
         }
         double now = Utils.rtime();
         if (prev != this)
             hoverstart = now;
         try {
-            if (now - hoverstart < 1.0) {
+            if (now - hoverstart < 1.0 && !Config.longtooltips) {
                 if (shorttip == null)
                     shorttip = new TexI(ItemInfo.shorttip(info()));
                 return (shorttip);
