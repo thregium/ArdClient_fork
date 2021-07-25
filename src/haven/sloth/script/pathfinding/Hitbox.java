@@ -236,11 +236,9 @@ public class Hitbox {
                     }
                 }
                 for (Resource.Neg o : negs) {
-                    for (int i = 0; i < o.ep.length; i++) {
-                        boolean hitable = checkHitable(gob);
-                        Hitbox hb = new Hitbox(o.bc, o.bs, hitable, false);
-                        hitlist.add(hb);
-                    }
+                    boolean hitable = checkHitable(gob);
+                    Hitbox hb = new Hitbox(o.bc, o.bs, hitable, false);
+                    hitlist.add(hb);
                 }
                 boolean isAdd = true;
                 for (String s : nocacheends)
