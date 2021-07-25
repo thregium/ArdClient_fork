@@ -233,10 +233,8 @@ public class VMeter extends Widget implements ItemInfo.Owner {
                     shorttip = new TexI(ItemInfo.shorttip(info()));
                 return (shorttip);
             } else {
-                if (longtip == null) {
-                    BufferedImage img = ItemInfo.longtip(info());
-                    longtip = img != null ? new TexI(img) : Text.render("...").tex();
-                }
+                if (longtip == null)
+                    longtip = new TexI(ItemInfo.longtip(info()));
                 return (longtip);
             }
         } catch (Loading e) {

@@ -400,7 +400,7 @@ public abstract class ItemInfo {
             }
         }
         if (l.tips.size() < 1)
-            return (null);
+            return (Text.render("...").img);
         return (l.render());
     }
 
@@ -416,7 +416,7 @@ public abstract class ItemInfo {
             }
         }
         if (l.tips.size() < 1)
-            return (null);
+            return (Text.render("...").img);
         return (l.render());
     }
 
