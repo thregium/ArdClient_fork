@@ -27,6 +27,7 @@
 package haven;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -232,8 +233,10 @@ public class VMeter extends Widget implements ItemInfo.Owner {
                     shorttip = new TexI(ItemInfo.shorttip(info()));
                 return (shorttip);
             } else {
-                if (longtip == null)
-                    longtip = new TexI(ItemInfo.longtip(info()));
+                if (longtip == null) {
+                    BufferedImage img = ItemInfo.longtip(info());
+                    longtip = img != null ? new TexI(img) : Text.render("...").tex();
+                }
                 return (longtip);
             }
         } catch (Loading e) {

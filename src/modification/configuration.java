@@ -53,6 +53,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -1261,4 +1263,6 @@ public class configuration {
             h = (h * 31) + name.charAt(i);
         return (h);
     }
+
+    public static Executor executor = Executors.newSingleThreadExecutor();
 }

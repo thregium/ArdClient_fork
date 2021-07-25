@@ -30,6 +30,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import haven.sloth.util.ObservableMap;
+import modification.configuration;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -530,16 +531,18 @@ public class Utils {
     }
 
     public static void setprefsliderlst(String prefname, List<HSliderListboxItem> data) {
-        try {
-            JSONObject jsonobj = new JSONObject();
-            for (HSliderListboxItem itm : data) {
-                jsonobj.put(itm.name, itm.val);
+        configuration.executor.execute(() -> {
+            try {
+                JSONObject jsonobj = new JSONObject();
+                for (HSliderListboxItem itm : data) {
+                    jsonobj.put(itm.name, itm.val);
+                }
+                Config.saveFile(prefname + ".json", jsonobj.toString());
+            } catch (SecurityException e) {
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
-            Config.saveFile(prefname + ".json", jsonobj.toString());
-        } catch (SecurityException e) {
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        });
     }
 
     public static ArrayList<String> loadcollection(String prefname) {
