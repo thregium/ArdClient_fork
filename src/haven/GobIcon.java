@@ -82,7 +82,6 @@ public class GobIcon extends GAttrib {
         public Image(Resource.Image rimg) {
             this.rimg = rimg;
             BufferedImage buf = PUtils.copy(rimg.img);
-            buf = PUtils.rasterimg(PUtils.blurmask2(buf.getRaster(), 1, 1, Color.BLACK));
             if ((buf.getWidth() > size) || (buf.getHeight() > size)) {
                 buf = PUtils.convolve(buf, new Coord(20, 20), filter);
             }
@@ -103,7 +102,6 @@ public class GobIcon extends GAttrib {
         public TexI texgrey() {
             if (texgrey == null) {
                 BufferedImage bimg = PUtils.monochromize(rimg.img, Color.WHITE);
-                bimg = PUtils.rasterimg(PUtils.blurmask2(bimg.getRaster(), 1, 1, Color.BLACK));
                 if ((bimg.getWidth() > size) && (bimg.getHeight() > size)) {
                     bimg = PUtils.convolvedown(bimg, new Coord(20, 20), filter);
                 }
