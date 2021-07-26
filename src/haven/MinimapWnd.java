@@ -169,7 +169,7 @@ public class MinimapWnd extends ResizableWnd {
                     vatsul = String.format("Current grid id: %d", g.id);
                 } else
                     vatsul = "Grid not found";
-                String addinfo = "Click to open the Odditownmap\nShfit+Click to open the Vatsul map";
+                String addinfo = "Click to open the Odditown map\nShfit+Click to open the Vatsul map";
 
                 tooltip = RichText.render(oddi + "\n" + vatsul + "\n" + addinfo, 300).tex();
                 return (super.tooltip(c, prev));

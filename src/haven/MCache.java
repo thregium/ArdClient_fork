@@ -58,6 +58,7 @@ public class MCache {
     public static final Coord2d tilesz = new Coord2d(11, 11);
     public static final Coord tilesz2 = tilesz.round(); /* XXX: Remove me in due time. */
     public static final Coord cmaps = new Coord(100, 100);
+    public static final Coord2d cmapsd = new Coord2d(cmaps);
     public static final Coord cutsz = new Coord(25, 25);
     public static final Coord cutn = cmaps.div(cutsz);
     public final Resource.Spec[] nsets = new Resource.Spec[256];

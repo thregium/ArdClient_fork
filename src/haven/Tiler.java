@@ -224,7 +224,7 @@ public abstract class Tiler {
     }
 
     public void lay(MapMesh m, Coord lc, Coord gc, MCons cons, boolean cover) {
-        MapMesh.MapSurface s = m.data(m.gnd);
+        MapMesh.MapSurface s = m.data(MapMesh.gnd);
         cons.faces(m, MPart.splitquad(lc, gc, s.fortilea(lc), s.split[s.ts.o(lc)]));
     }
 

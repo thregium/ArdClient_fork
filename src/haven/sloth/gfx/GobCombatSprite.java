@@ -152,27 +152,31 @@ public class GobCombatSprite extends Sprite {
     @Override
     public boolean tick(int dt) {
         if (rel != null && rel.lastact != null) {
-            Resource lastres = rel.lastact.get();
-            if (lastres != null) {
-                double max = 10;
-                double lastuse = rel.lastuse;
-                if (!lastres.name.equals(lastn) || lastuse != lastt) {
-                    double timem = Utils.rtime() - lastt;
-                    if (lastn != null && timem < max) {
-                        int delay = 0;
-                        if (lastres.name.contains("takeaim"))
-                            delay = 1;
-                        if (lastres.name.contains("think"))
-                            delay = 2;
-                        timem = delay == 0 ? timem : timem / (1 + 0.2 * (rel.oip - delay));
-                        final double finalTimem = timem;
-                        cooldowns.compute(lastn, (s, d) -> d == null ? finalTimem : Math.min(d, finalTimem));
+            try {
+                Resource lastres = rel.lastact.get();
+                if (lastres != null) {
+                    double max = 10;
+                    double lastuse = rel.lastuse;
+                    if (!lastres.name.equals(lastn) || lastuse != lastt) {
+                        double timem = Utils.rtime() - lastt;
+                        if (lastn != null && timem < max) {
+                            int delay = 0;
+                            if (lastres.name.contains("takeaim"))
+                                delay = 1;
+                            if (lastres.name.contains("think"))
+                                delay = 2;
+                            timem = delay == 0 ? timem : timem / (1 + 0.2 * (rel.oip - delay));
+                            final double finalTimem = timem;
+                            cooldowns.compute(lastn, (s, d) -> d == null ? finalTimem : Math.min(d, finalTimem));
+                        }
+                        if (!lastres.name.equals(lastn))
+                            lastn = lastres.name;
+                        if (lastuse != lastt)
+                            lastt = lastuse;
                     }
-                    if (!lastres.name.equals(lastn))
-                        lastn = lastres.name;
-                    if (lastuse != lastt)
-                        lastt = lastuse;
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         return rel == null;

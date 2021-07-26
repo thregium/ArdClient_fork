@@ -116,6 +116,10 @@ public class Coord2d implements Comparable<Coord2d>, java.io.Serializable {
         return (sub(b.x, b.y));
     }
 
+    public Coord2d sub(Coord b) {
+        return (sub(b.x, b.y));
+    }
+
     public Coord2d mul(double f) {
         return (new Coord2d(x * f, y * f));
     }
@@ -125,6 +129,10 @@ public class Coord2d implements Comparable<Coord2d>, java.io.Serializable {
     }
 
     public Coord2d mul(Coord2d b) {
+        return (mul(b.x, b.y));
+    }
+
+    public Coord2d mul(Coord b) {
         return (mul(b.x, b.y));
     }
 
@@ -157,7 +165,19 @@ public class Coord2d implements Comparable<Coord2d>, java.io.Serializable {
     }
 
     public Coord2d floord() {
-        return new Coord2d(Math.floor(x), Math.floor(y));
+        return (new Coord2d(Math.floor(x), Math.floor(y)));
+    }
+
+    public Coord2d floord(double X, double Y) {
+        return (new Coord2d(Math.floor(x / X), Math.floor(y / Y)));
+    }
+
+    public Coord2d floord(Coord2d f) {
+        return (floord(f.x, f.y));
+    }
+
+    public Coord2d floord(Coord f) {
+        return (floord(f.x, f.y));
     }
 
     public Coord floor(double X, double Y) {
@@ -165,6 +185,10 @@ public class Coord2d implements Comparable<Coord2d>, java.io.Serializable {
     }
 
     public Coord floor(Coord2d f) {
+        return (floor(f.x, f.y));
+    }
+
+    public Coord floor(Coord f) {
         return (floor(f.x, f.y));
     }
 
@@ -220,5 +244,19 @@ public class Coord2d implements Comparable<Coord2d>, java.io.Serializable {
         return new Coord2d(x - gridUnit.x, y - gridUnit.y);
     }
 
+    public boolean isect(Coord2d c, Coord2d s) {
+        return ((x >= c.x) && (y >= c.y) && (x < c.x + s.x) && (y < c.y + s.y));
+    }
 
+    public boolean eisect(Coord2d c, Coord2d s) {
+        return ((x >= c.x) && (y >= c.y) && (x <= c.x + s.x) && (y <= c.y + s.y));
+    }
+
+    public boolean isect(Coord c, Coord s) {
+        return ((x >= c.x) && (y >= c.y) && (x < c.x + s.x) && (y < c.y + s.y));
+    }
+
+    public boolean eisect(Coord c, Coord s) {
+        return ((x >= c.x) && (y >= c.y) && (x <= c.x + s.x) && (y <= c.y + s.y));
+    }
 }

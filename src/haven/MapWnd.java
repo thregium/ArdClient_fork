@@ -480,7 +480,7 @@ public class MapWnd extends ResizableWnd {
                         vatsul = String.format("Current grid id: %d", g.id);
                     } else
                         vatsul = "Grid not found";
-                    String addinfo = "Click to open the Odditownmap\nShfit+Click to open the Vatsul map";
+                    String addinfo = "Click to open the Odditown map\nShfit+Click to open the Vatsul map";
 
                     tooltip = RichText.render(oddi + "\n" + vatsul + "\n" + addinfo, 300).tex();
                     return (super.tooltip(c, prev));
@@ -1038,12 +1038,20 @@ public class MapWnd extends ResizableWnd {
             for (TempMark cm : marks) {
                 PBotGob g = PBotGobAPI.findGobById(ui, cm.id);
                 if (g == null) {
-                    Gob player = mv.player();
-                    if (player != null)
-                        if ((System.currentTimeMillis() - cm.start > configuration.tempmarkstime * 1000) || (cm.near && player.rc.dist(cm.rc) < 40 * 10)) {
-                            tempMarkList.remove(cm);
-                        } else if (cm.near)
-                            cm.near = false;
+                    if (System.currentTimeMillis() - cm.start > configuration.tempmarkstime * 1000L) {
+                        tempMarkList.remove(cm);
+                    } else if (cm.near) {
+                        Gob player = mv.player();
+                        if (player != null) {
+                            Coord2d cmap = new Coord2d(cmaps);
+                            Coord2d vs = player.rc.floord(cmap).mul(cmap).sub(cmap.mul(4));
+                            if (cm.rc.isect(vs.add(11, 11), cmap.mul(9).sub(22, 22))) {
+                                tempMarkList.remove(cm);
+                            } else {
+                                cm.near = false;
+                            }
+                        }
+                    }
                 } else {
                     Location loc = this.curloc;
                     if (loc != null) {
@@ -1080,9 +1088,12 @@ public class MapWnd extends ResizableWnd {
             }
 
             marks.clear();
-            marks.addAll(getTempMarkList());
+            marks.addAll(
 
-            for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+                    getTempMarkList());
+
+            for (
+                    Gob gob : ui.sess.glob.oc.getallgobs()) {
                 if (marks.stream().noneMatch(m -> m.id == gob.id)) {
                     TexI tex = (TexI) setTex.apply(gob);
                     GobIcon icon = gob.getattr(GobIcon.class);
@@ -1366,6 +1377,7 @@ public class MapWnd extends ResizableWnd {
                 MapWnd.this.resize(asz);
             }
         }
+
     }
 
     public void resize(Coord sz) {
