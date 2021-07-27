@@ -50,6 +50,7 @@ import java.util.stream.Collectors;
 public abstract class ItemInfo {
     public static final Resource armor_hard = Resource.local().loadwait("gfx/hud/chr/custom/ahard");
     public static final Resource armor_soft = Resource.local().loadwait("gfx/hud/chr/custom/asoft");
+    public static BufferedImage emptyTooltip = Text.render("...").img;
     static final Pattern count_pattern = Pattern.compile("(?:^|[\\s])([0-9]*\\.?[0-9]+\\s*%?)");
     public final Owner owner;
 
@@ -400,7 +401,7 @@ public abstract class ItemInfo {
             }
         }
         if (l.tips.size() < 1)
-            return (Text.render("...").img);
+            return (emptyTooltip);
         return (l.render());
     }
 
@@ -416,7 +417,7 @@ public abstract class ItemInfo {
             }
         }
         if (l.tips.size() < 1)
-            return (Text.render("...").img);
+            return (emptyTooltip);
         return (l.render());
     }
 

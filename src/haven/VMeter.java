@@ -27,7 +27,6 @@
 package haven;
 
 import java.awt.Color;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -87,8 +86,8 @@ public class VMeter extends Widget implements ItemInfo.Owner {
         public static Kit getKit(String windowName) {
             for (Kit kit : kits)
                 if (kit.windowName.equals(windowName))
-                    return kit;
-            return null;
+                    return (kit);
+            return (null);
         }
     }
 
@@ -118,8 +117,8 @@ public class VMeter extends Widget implements ItemInfo.Owner {
         public static TypeLimit getTypeLimit(Kit kit, Color color) {
             for (TypeLimit typeLimit : kit.typeLimit)
                 if (typeLimit.color.equals(color))
-                    return typeLimit;
-            return null;
+                    return (typeLimit);
+            return (null);
         }
 
         enum Tooltip {
@@ -179,7 +178,7 @@ public class VMeter extends Widget implements ItemInfo.Owner {
 
         Widget p = this.parent;
         if (p instanceof Window) {
-            Integer lvl = this.levels.get(((Window) p).origcap);
+            Integer lvl = levels.get(((Window) p).origcap);
             if (lvl != null) {
                 g.chcolor(Color.WHITE);
                 int y = sz.y - 3 - (hm * lvl) / 100;
@@ -207,7 +206,7 @@ public class VMeter extends Widget implements ItemInfo.Owner {
     private Tex shorttip, longtip;
 
     public Object tooltip(Coord c, Widget prev) {
-        if (rawinfo == null || ui.modctrl) {
+        if (ui.modctrl) {
             Widget p = this.parent;
             if (p instanceof Window) {
                 for (Kit kit : kits) {
@@ -217,12 +216,16 @@ public class VMeter extends Widget implements ItemInfo.Owner {
                                 String ca = (tl.limit * amount / 100 % 1 == 0 ? String.format("%.0f", tl.limit * amount / 100) : tl.limit * amount / 100) + "";
                                 String cl = (tl.limit % 1 == 0 ? String.format("%.0f", tl.limit) : tl.limit) + "";
                                 String stt = "$b{$col[255,223,5]{" + ca + " / " + cl + " " + tl.subText + " (" + amount + "%)}}";
-                                return RichText.render(stt + tl.tooltip + tl.addTooltip, -1).tex();
+                                return (RichText.render(stt + tl.tooltip + tl.addTooltip, -1).tex());
                             }
                         }
                     }
                 }
+                return (RichText.render("$b{$col[255,223,5]{" + amount + "%}}", -1).tex());
             }
+        }
+        if (rawinfo == null) {
+            return (super.tooltip(c, prev));
         }
         double now = Utils.rtime();
         if (prev != this)

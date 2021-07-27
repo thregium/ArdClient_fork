@@ -464,56 +464,51 @@ public class UI {
 
     public void wdgmsg(Widget sender, String msg, Object... args) {
         int id;
+
+        if (msg.endsWith("-identical"))
+            return;
+
         synchronized (this) {
-
-            if (msg.endsWith("-identical"))
-                return;
-
-            //  try { for(Object obj:args) if(!sender.toString().contains("Camera")) System.out.println("Sender : " + sender + " msg = " + msg + " arg 1 : " + obj); }catch(ArrayIndexOutOfBoundsException q){}
-
             if (!rwidgets.containsKey(sender)) {
                 if (msg.equals("close")) {
                     sender.reqdestroy();
                     return;
                 } else
                     System.err.printf("Wdgmsg sender (%s) is not in rwidgets, message is %s\n", sender.getClass().getName(), msg);
-                //   System.out.println("Args:"+args[0]);
-                // System.out.println("Sender is : "+sender);
                 return;
             }
             id = rwidgets.get(sender);
+            if (rcvr != null)
+                rcvr.rcvmsg(id, msg, args);
         }
-        if (rcvr != null)
-            rcvr.rcvmsg(id, msg, args);
         dev.sysLog(dev.clientSender, sender, id, msg, args);
     }
 
     public void uimsg(int id, String msg, Object... args) {
+        Widget wdg;
         synchronized (this) {
-            Widget wdg = widgets.get(id);
-            if (realmchat != null) {
-                try {
-                    if (realmchat.get() != null && id == realmchat.get().wdgid()) {
-                        if (msg.contains("msg") && wdg.toString().contains("Realm")) {
-                            ((ChatUI.EntryChannel) realmchat.get()).updurgency(1);
-                            if (Config.realmchatalerts)
-                                Audio.play(ChatUI.notifsfx);
-                        }
-                    }
-                } catch (NullPointerException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (wdg != null) {
-                // try { for(Object obj:args) if(!wdg.toString().contains("CharWnd")) System.out.println("UI Wdg : " + wdg + " msg : "+msg+" id = " + id + " arg 1 : " + obj); }catch(ArrayIndexOutOfBoundsException qq){}
-                wdg.uimsg(msg.intern(), args);
-            } else {
-                dev.resourceLog("Uimsg to non-existent widget ", id);
-//                    throw (new UIException("Uimsg to non-existent widget " + id, msg, args));
-                return;
-            }
-            dev.sysLog(dev.serverSender, wdg, id, msg, args);
+            wdg = widgets.get(id);
         }
+        if (realmchat != null) {
+            try {
+                if (realmchat.get() != null && id == realmchat.get().wdgid()) {
+                    if (msg.contains("msg") && wdg.toString().contains("Realm")) {
+                        ((ChatUI.EntryChannel) realmchat.get()).updurgency(1);
+                        if (Config.realmchatalerts)
+                            Audio.play(ChatUI.notifsfx);
+                    }
+                }
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
+        }
+        if (wdg != null) {
+            wdg.uimsg(msg.intern(), args);
+        } else {
+            dev.resourceLog("Uimsg to non-existent widget ", id);
+            return;
+        }
+        dev.sysLog(dev.serverSender, wdg, id, msg, args);
     }
 
     private void setmods(InputEvent ev) {

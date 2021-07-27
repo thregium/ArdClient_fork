@@ -31,7 +31,6 @@ import haven.Coord;
 import haven.Coord3f;
 import haven.DefSettings;
 import haven.GLConfig;
-import haven.GLSettings;
 import haven.GLState;
 import haven.GOut;
 import haven.Glob;
@@ -486,36 +485,40 @@ public class WaterTile extends Tiler {
                     bottom = (Tiler.MCons) b;
                 }
             }
-            return (new WaterTile(id, bottom, depth));
+            return (new WaterTile(id, set.getres(), bottom, depth));
         }
     }
 
-    private final GLState mat;
+    private GLState mat;
     private final GLState fog;
+
+    public WaterTile(int id, Resource res, Tiler.MCons bottom, int depth) {
+        this(id, bottom, depth);
+        switch (res.name) {
+            case "gfx/tiles/deep":
+                this.mat = GLState.compose(wfog, boff);
+                break;
+            case "gfx/tiles/odeep":
+                this.mat = GLState.compose(oceanfog, boff);
+                break;
+            case "gfx/tiles/odeeper":
+                this.mat = GLState.compose(deepfog, boff);
+                break;
+            case "gfx/tiles/owater":
+                this.mat = GLState.compose(shallowoceanfog, boff);
+                break;
+            case "gfx/tiles/water":
+                this.mat = GLState.compose(shallowfog, boff);
+                break;
+        }
+    }
 
     public WaterTile(int id, Tiler.MCons bottom, int depth) {
         super(id);
         this.bottom = bottom;
         this.depth = depth;
-        if (id == 204) {
-            this.mat = GLState.compose(wfog, boff);
-            this.fog = obfog;
-        } else if (id == 206) {
-            this.mat = GLState.compose(oceanfog, boff);
-            this.fog = obfog;
-        } else if (id == 207) {
-            this.mat = GLState.compose(deepfog, boff);
-            this.fog = obfog;
-        } else if (id == 208) {
-            this.mat = GLState.compose(shallowoceanfog, boff);
-            this.fog = obfog;
-        } else if (id == 210) {
-            this.mat = GLState.compose(shallowfog, boff);
-            this.fog = obfog;
-        } else {
-            this.mat = GLState.compose(waterfog, boff);
-            this.fog = obfog;
-        }
+        this.mat = GLState.compose(waterfog, boff);
+        this.fog = obfog;
     }
 
     @Deprecated
