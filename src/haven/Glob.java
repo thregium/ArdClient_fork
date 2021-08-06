@@ -28,6 +28,7 @@ package haven;
 
 //import haven.sloth.script.pathfinding.GobHitmap;
 
+import haven.res.gfx.fx.floatimg.DamageText;
 import haven.sloth.script.pathfinding.GobHitmap;
 
 import java.awt.Color;
@@ -39,6 +40,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Observable;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Glob {
     //TODO: Glob should honestly make the ui, not have the UI attach onto it.
@@ -78,6 +80,7 @@ public class Glob {
     public Tex rservertimetex;
     public boolean night = false; //true is night
     public Tex bservertimetex;
+    public final Map<Long, DamageText.Numbers> gobmap = new ConcurrentHashMap<>();
 
     private static Map<String, Glob> reference = new HashMap<>();
 

@@ -594,8 +594,10 @@ public class Fightsess extends Widget {
     protected void removed() {
         super.removed();
         ui.gui.fs = null;
-        if (configuration.autocleardamage && ui.gui.map != null)
+        if (configuration.autocleardamage && ui.gui.map != null) {
+            ui.sess.glob.gobmap.clear();
             ui.gui.map.removeCustomSprites(DamageText.id);
+        }
     }
 
     public void presize() {

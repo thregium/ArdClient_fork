@@ -85,6 +85,7 @@ public class GobIcon extends GAttrib {
             if ((buf.getWidth() > size) || (buf.getHeight() > size)) {
                 buf = PUtils.convolve(buf, new Coord(20, 20), filter);
             }
+            buf = Utils.outline2(buf, Color.GRAY);
             TexI tex = new TexI(buf);
             this.tex = tex;
             this.cc = tex.sz().div(2);

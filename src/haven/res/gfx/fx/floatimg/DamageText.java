@@ -10,6 +10,9 @@ import haven.Utils;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DamageText extends FloatSprite {
     public static final int id = -14115;
@@ -18,26 +21,55 @@ public class DamageText extends FloatSprite {
     private static final Color hhpcol = new Color(255, 204, 0);
     private static final Color shpcol = new Color(255, 0, 0);
 
-    private int shp;
-    private int hhp;
-    private int armor;
+    public static class Numbers {
+        private int shp;
+        private int hhp;
+        private int armor;
+
+        public Numbers(int shp, int hhp, int armor) {
+            this.shp = shp;
+            this.hhp = hhp;
+            this.armor = armor;
+        }
+
+        public void update(int shp, int hhp, int armor) {
+            this.shp = shp;
+            this.hhp = hhp;
+            this.armor = armor;
+        }
+
+        public void update(Numbers numbers) {
+            this.shp = numbers.shp;
+            this.hhp = numbers.hhp;
+            this.armor = numbers.armor;
+        }
+    }
+
+    private Numbers numbers;
 
     DamageText(Owner owner, Resource res) {
         super(owner, res);
-        shp = 0;
-        hhp = 0;
-        armor = 0;
+        numbers = new Numbers(0, 0, 0);
     }
 
-    private void remake() {
-        int[] ind = new int[]{shp, hhp, armor};
+    public DamageText(Owner owner, Resource res, Numbers numbers) {
+        super(owner, res);
+        this.numbers = numbers;
+    }
+
+    public void remake() {
+        if (owner instanceof Gob) {
+            final Gob gob = (Gob) owner;
+            owner.glob().gobmap.computeIfAbsent(gob.id, id -> numbers).update(numbers);
+        }
+        int[] ind = new int[]{numbers.shp, numbers.hhp, numbers.armor};
         Color[] cind = new Color[]{shpcol, hhpcol, armorcol};
 
         BufferedImage img = null;
         for (int i = 0; i < ind.length; i++) {
             if (ind[i] != 0) {
                 if (img != null) {
-                    img = Utils.hconcat(img, fnd.render( " " + ind[i], cind[i]).img);
+                    img = Utils.hconcat(img, fnd.render(" " + ind[i], cind[i]).img);
                 } else {
                     img = Utils.hconcat(fnd.render(ind[i] + "", cind[i]).img);
                 }
@@ -50,17 +82,17 @@ public class DamageText extends FloatSprite {
     }
 
     void incshp(final int shp) {
-        this.shp += shp;
+        numbers.shp += shp;
         remake();
     }
 
     void inchhp(final int hhp) {
-        this.hhp += hhp;
+        numbers.hhp += hhp;
         remake();
     }
 
     void incarmor(final int armor) {
-        this.armor += armor;
+        numbers.armor += armor;
         remake();
     }
 

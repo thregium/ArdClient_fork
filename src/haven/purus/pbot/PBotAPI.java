@@ -7,6 +7,7 @@ import haven.UI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 public class PBotAPI {
 
@@ -47,12 +48,20 @@ public class PBotAPI {
      * @return List<UI>
      */
     public static List<UI> uis() {
-        List<UI> uiList = new ArrayList<UI>();
+        final List<UI> uiList = new ArrayList<>();
         synchronized (MainFrame.instance.p.sessions) {
             Iterator<UI> itr = MainFrame.instance.p.sessions.iterator();
             while (itr.hasNext()) uiList.add(itr.next());
         }
         return uiList;
+    }
+
+    public static Optional<UI> getOUIByName(String name) {
+        return (uis().stream().filter(ui -> ui.sess != null).filter(ui -> ui.sess.username.equals(name)).findFirst());
+    }
+
+    public static UI getUIByName(String name) {
+        return (getOUIByName(name).orElse(null));
     }
 
 

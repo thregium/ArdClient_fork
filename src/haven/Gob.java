@@ -29,6 +29,7 @@ package haven;
 import haven.overlays.OverlayData;
 import haven.overlays.TextOverlay;
 import haven.overlays.newPlantStageSprite;
+import haven.res.gfx.fx.floatimg.DamageText;
 import haven.res.lib.tree.Tree;
 import haven.res.lib.vmat.Materials;
 import haven.res.lib.vmat.VarSprite;
@@ -510,6 +511,19 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 glob.oc.remove(id);
             }
             discovered = true;
+        }
+
+        try {
+            Overlay ol = findol(DamageText.id);
+            if (ol == null) {
+                DamageText.Numbers numbers = glob().gobmap.get(id);
+                if (numbers != null) {
+                    DamageText text = new DamageText(this, Resource.remote().loadwait("gfx/fx/floatimg"), numbers);
+                    daddol(DamageText.id, text);
+                    text.remake();
+                }
+            }
+        } catch (Exception ignore) {
         }
     }
 

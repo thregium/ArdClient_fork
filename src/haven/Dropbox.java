@@ -144,6 +144,7 @@ public abstract class Dropbox<T> extends ListWidget<T> {
     }
 
     public void resizedl(List<String> values) {
-        dl.resize(new Coord(calcWidth(values) + Scrollbar.sflarp.sz().x + 2, Math.min(listh, listitems()) * itemh));
+        if (dl != null)
+            dl.resize(new Coord(calcWidth(values) + Scrollbar.sflarp.sz().x + 2, Math.min(listh, listitems()) * itemh));
     }
 }

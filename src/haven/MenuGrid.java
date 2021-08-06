@@ -37,7 +37,6 @@ import haven.automation.CoalToSmelters;
 import haven.automation.Coracleslol;
 import haven.automation.CountGobs;
 import haven.automation.DestroyArea;
-import haven.automation.Discord;
 import haven.automation.Dismount;
 import haven.automation.DreamHarvester;
 import haven.automation.EquipRusalka;
@@ -70,7 +69,6 @@ import haven.purus.Farmer2;
 import haven.purus.FlowerPicker;
 import haven.purus.StockpileFiller2;
 import haven.purus.TroughFiller;
-import haven.purus.pbot.PBotUtils;
 import haven.res.gfx.fx.floatimg.DamageText;
 import haven.sloth.util.ObservableCollection;
 import modification.configuration;
@@ -1148,7 +1146,10 @@ public class MenuGrid extends Widget {
                 (pag) -> ui.gui.toggleGobSpawner()));
         addSpecial(new SpecialPagina(this, "paginae::windows::nulldamage",
                 Resource.local().load("paginae/windows/nulldamage"),
-                (pag) -> ui.gui.map.removeCustomSprites(DamageText.id)));
+                (pag) -> {
+                    ui.sess.glob.gobmap.clear();
+                    ui.gui.map.removeCustomSprites(DamageText.id);
+                }));
 
         addSpecial(new SpecialPagina(this, "paginae::windows::lmap",
                 Resource.local().load("paginae/windows/lmap"),
