@@ -22,13 +22,7 @@ public class TakeTrays implements Runnable {
 
     @Override
     public void run() {
-        Thread t = new Thread(new OpenRacks(gui), "OpenRacks");
-        t.start();
-        try {
-            t.join(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        new OpenRacks(gui).run();
         List<WItem> trays;
 
         for (PBotInventory q : PBotUtils.getAllInventories(gui.ui)) {
