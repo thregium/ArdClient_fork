@@ -3,15 +3,10 @@ package haven.res.ui.croster;
 import haven.Audio;
 import haven.Button;
 import haven.IButton;
-import modification.dev;
 
 import java.awt.image.BufferedImage;
 
 public class TypeButton extends IButton {
-    static {
-        dev.checkFileVersion("ui/croster", 70);
-    }
-
     public final int order;
 
     public TypeButton(BufferedImage up, BufferedImage down, int order) {

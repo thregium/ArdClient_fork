@@ -3,13 +3,8 @@ package haven.res.ui.croster;
 import haven.GAttrib;
 import haven.Gob;
 import haven.Message;
-import modification.dev;
 
 public class CattleId extends GAttrib {
-    static {
-        dev.checkFileVersion("ui/croster", 70);
-    }
-
     public final long id;
     public CattleIdSprite sprite;
 

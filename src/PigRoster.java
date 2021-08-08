@@ -4,16 +4,11 @@ import haven.res.ui.croster.CattleRoster;
 import haven.res.ui.croster.Column;
 import haven.res.ui.croster.Entry;
 import haven.res.ui.croster.TypeButton;
-import modification.dev;
 
 import java.util.Comparator;
 import java.util.List;
 
 public class PigRoster extends CattleRoster<Pig> {
-    static {
-        dev.checkFileVersion("gfx/hud/rosters/pig", 58);
-    }
-
     public static List<Column> cols = initcols(
             new Column<>("Name", Comparator.comparing((Entry e) -> e.name), 200),
 
@@ -21,6 +16,7 @@ public class PigRoster extends CattleRoster<Pig> {
             new Column<>(Resource.local().load("gfx/hud/rosters/growth"), Comparator.comparing((Pig e) -> e.piglet).reversed(), 20).runon(),
             new Column<>(Resource.local().load("gfx/hud/rosters/deadp"), Comparator.comparing((Pig e) -> e.dead).reversed(), 20).runon(),
             new Column<>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Pig e) -> e.pregnant).reversed(), 20),
+            new Column<>(Resource.local().load("gfx/hud/rosters/lactate"), Comparator.comparing((Pig e) -> e.lactate).reversed(), 20),
 
             new Column<>(Resource.local().load("gfx/hud/rosters/quality"), Comparator.comparing((Pig e) -> e.q).reversed()),
 
@@ -60,6 +56,7 @@ public class PigRoster extends CattleRoster<Pig> {
         ret.piglet = (fl & 2) != 0;
         ret.dead = (fl & 4) != 0;
         ret.pregnant = (fl & 8) != 0;
+        ret.lactate = (fl & 16) != 0;
         ret.q = ((Number) args[n++]).doubleValue();
         ret.meat = (Integer) args[n++];
         ret.milk = (Integer) args[n++];

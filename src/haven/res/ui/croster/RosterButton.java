@@ -4,13 +4,8 @@ import haven.Coord2d;
 import haven.GameUI;
 import haven.MenuGrid;
 import haven.MenuGrid.Pagina;
-import modification.dev;
 
 public class RosterButton extends MenuGrid.PagButton {
-    static {
-        dev.checkFileVersion("ui/croster", 70);
-    }
-
     public final GameUI gui;
     public RosterWindow wnd;
 

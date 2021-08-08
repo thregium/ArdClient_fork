@@ -1,19 +1,14 @@
 import haven.Coord;
 import haven.GOut;
 import haven.res.ui.croster.Entry;
-import modification.dev;
 
 public class Horse extends Entry {
-    static {
-        dev.checkFileVersion("gfx/hud/rosters/horse", 58);
-    }
-
     public int meat, milk;
     public int meatq, milkq, hideq;
     public double tmeatq, tmilkq, thideq;
     public int seedq;
     public int end, stam, mb;
-    public boolean stallion, foal, dead, pregnant;
+    public boolean stallion, foal, dead, pregnant, lactate;
 
     public Horse(long id, String name) {
         super(SIZE, id, name);
@@ -27,6 +22,7 @@ public class Horse extends Entry {
         drawcol(g, HorseRoster.cols.get(i), 0.5, foal, growth, i++);
         drawcol(g, HorseRoster.cols.get(i), 0.5, dead, deadrend, i++);
         drawcol(g, HorseRoster.cols.get(i), 0.5, pregnant, pregrend, i++);
+        drawcol(g, HorseRoster.cols.get(i), 0.5, lactate, lactrend, i++);
         drawcol(g, HorseRoster.cols.get(i), 1, q, quality, i++);
         drawcol(g, HorseRoster.cols.get(i), 1, end, null, i++);
         drawcol(g, HorseRoster.cols.get(i), 1, stam, null, i++);
@@ -58,6 +54,10 @@ public class Horse extends Entry {
         }
         if (HorseRoster.cols.get(4).hasx(c.x)) {
             markall(Horse.class, o -> (o.pregnant == this.pregnant));
+            return (true);
+        }
+        if (HorseRoster.cols.get(5).hasx(c.x)) {
+            markall(Horse.class, o -> (o.lactate == this.lactate));
             return (true);
         }
         return (super.mousedown(c, button));

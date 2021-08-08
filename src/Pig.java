@@ -1,19 +1,14 @@
 import haven.Coord;
 import haven.GOut;
 import haven.res.ui.croster.Entry;
-import modification.dev;
 
 public class Pig extends Entry {
-    static {
-        dev.checkFileVersion("gfx/hud/rosters/pig", 58);
-    }
-
     public int meat, milk;
     public int meatq, milkq, hideq;
     public double tmeatq, tmilkq, thideq;
     public int seedq;
     public int prc;
-    public boolean hog, piglet, dead, pregnant;
+    public boolean hog, piglet, dead, pregnant, lactate;
 
     public Pig(long id, String name) {
         super(SIZE, id, name);
@@ -27,6 +22,7 @@ public class Pig extends Entry {
         drawcol(g, PigRoster.cols.get(i), 0.5, piglet, growth, i++);
         drawcol(g, PigRoster.cols.get(i), 0.5, dead, deadrend, i++);
         drawcol(g, PigRoster.cols.get(i), 0.5, pregnant, pregrend, i++);
+        drawcol(g, PigRoster.cols.get(i), 0.5, lactate, lactrend, i++);
         drawcol(g, PigRoster.cols.get(i), 1, q, quality, i++);
         drawcol(g, PigRoster.cols.get(i), 1, prc, null, i++);
         drawcol(g, PigRoster.cols.get(i), 1, meat, null, i++);
@@ -56,6 +52,10 @@ public class Pig extends Entry {
         }
         if (PigRoster.cols.get(4).hasx(c.x)) {
             markall(Pig.class, o -> (o.pregnant == this.pregnant));
+            return (true);
+        }
+        if (PigRoster.cols.get(5).hasx(c.x)) {
+            markall(Pig.class, o -> (o.lactate == this.lactate));
             return (true);
         }
         return (super.mousedown(c, button));

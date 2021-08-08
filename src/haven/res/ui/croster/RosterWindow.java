@@ -5,7 +5,6 @@ import haven.Glob;
 import haven.UI;
 import haven.Widget;
 import haven.Window;
-import modification.dev;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -14,10 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 public class RosterWindow extends Window {
-    static {
-        dev.checkFileVersion("ui/croster", 70);
-    }
-
     public static final Map<Glob, RosterWindow> rosters = new HashMap<>();
     public static int rmseq = 0;
     public int btny = 0;

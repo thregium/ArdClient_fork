@@ -1,18 +1,13 @@
 import haven.Coord;
 import haven.GOut;
 import haven.res.ui.croster.Entry;
-import modification.dev;
 
 public class Sheep extends Entry {
-    static {
-        dev.checkFileVersion("gfx/hud/rosters/sheep", 59);
-    }
-
     public int meat, milk, wool;
     public int meatq, milkq, woolq, hideq;
     public double tmeatq, tmilkq, twoolq, thideq;
     public int seedq;
-    public boolean ram, lamb, dead, pregnant;
+    public boolean ram, lamb, dead, pregnant, lactate;
 
     public Sheep(long id, String name) {
         super(SIZE, id, name);
@@ -26,6 +21,7 @@ public class Sheep extends Entry {
         drawcol(g, SheepRoster.cols.get(i), 0.5, lamb, growth, i++);
         drawcol(g, SheepRoster.cols.get(i), 0.5, dead, deadrend, i++);
         drawcol(g, SheepRoster.cols.get(i), 0.5, pregnant, pregrend, i++);
+        drawcol(g, SheepRoster.cols.get(i), 0.5, lactate, lactrend, i++);
         drawcol(g, SheepRoster.cols.get(i), 1, q, quality, i++);
         drawcol(g, SheepRoster.cols.get(i), 1, meat, null, i++);
         drawcol(g, SheepRoster.cols.get(i), 1, milk, null, i++);
@@ -57,6 +53,10 @@ public class Sheep extends Entry {
         }
         if (SheepRoster.cols.get(4).hasx(c.x)) {
             markall(Sheep.class, o -> (o.pregnant == this.pregnant));
+            return (true);
+        }
+        if (SheepRoster.cols.get(5).hasx(c.x)) {
+            markall(Sheep.class, o -> (o.lactate == this.lactate));
             return (true);
         }
         return (super.mousedown(c, button));

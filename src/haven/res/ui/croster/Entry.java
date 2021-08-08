@@ -11,7 +11,6 @@ import haven.Tex;
 import haven.UI;
 import haven.Utils;
 import haven.Widget;
-import modification.dev;
 
 import java.awt.Color;
 import java.util.Arrays;
@@ -19,10 +18,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class Entry extends Widget {
-    static {
-        dev.checkFileVersion("ui/croster", 70);
-    }
-
     public static final int WIDTH = CattleRoster.WIDTH;
     public static final int HEIGHT = UI.scale(20);
     public static final Coord SIZE = new Coord(WIDTH, HEIGHT);
@@ -42,6 +37,9 @@ public class Entry extends Widget {
     public static final Tex pregy = Loading.waitfor(Resource.local().load("gfx/hud/rosters/pregnant-y")).layer(Resource.imgc).tex();
     public static final Tex pregn = Loading.waitfor(Resource.local().load("gfx/hud/rosters/pregnant-n")).layer(Resource.imgc).tex();
     public static final Function<Boolean, Tex> pregrend = v -> (v ? pregy : pregn);
+    public static final Tex lacty = Loading.waitfor(Resource.local().load("gfx/hud/rosters/lactate-y")).layer(Resource.imgc).tex();
+    public static final Tex lactn = Loading.waitfor(Resource.local().load("gfx/hud/rosters/lactate-n")).layer(Resource.imgc).tex();
+    public static final Function<Boolean, Tex> lactrend = v -> (v ? lacty : lactn);
     public final long id;
     public String name;
     public int grp;

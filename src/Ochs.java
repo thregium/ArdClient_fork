@@ -4,18 +4,13 @@
 import haven.Coord;
 import haven.GOut;
 import haven.res.ui.croster.Entry;
-import modification.dev;
 
 public class Ochs extends Entry {
-    static {
-        dev.checkFileVersion("gfx/hud/rosters/cow", 70);
-    }
-
     public int meat, milk;
     public int meatq, milkq, hideq;
     public double tmeatq, tmilkq, thideq;
     public int seedq;
-    public boolean bull, calf, dead, pregnant;
+    public boolean bull, calf, dead, pregnant, lactate;
 
     public Ochs(long id, String name) {
         super(SIZE, id, name);
@@ -29,6 +24,7 @@ public class Ochs extends Entry {
         drawcol(g, CowRoster.cols.get(i), 0.5, calf, growth, i++);
         drawcol(g, CowRoster.cols.get(i), 0.5, dead, deadrend, i++);
         drawcol(g, CowRoster.cols.get(i), 0.5, pregnant, pregrend, i++);
+        drawcol(g, CowRoster.cols.get(i), 0.5, lactate, lactrend, i++);
         drawcol(g, CowRoster.cols.get(i), 1, q, quality, i++);
         drawcol(g, CowRoster.cols.get(i), 1, meat, null, i++);
         drawcol(g, CowRoster.cols.get(i), 1, milk, null, i++);
@@ -57,6 +53,10 @@ public class Ochs extends Entry {
         }
         if (CowRoster.cols.get(4).hasx(c.x)) {
             markall(Ochs.class, o -> (o.pregnant == this.pregnant));
+            return (true);
+        }
+        if (CowRoster.cols.get(5).hasx(c.x)) {
+            markall(Ochs.class, o -> (o.lactate == this.lactate));
             return (true);
         }
         return (super.mousedown(c, button));

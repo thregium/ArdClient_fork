@@ -26,6 +26,7 @@
 
 package haven;
 
+import haven.purus.pbot.PBotUtils;
 import modification.configuration;
 import modification.dev;
 
@@ -213,8 +214,14 @@ public class UI {
             type = "inv-study";
         }
 
-        if (type.startsWith("ui/province")) //пошли нахуй эти уведомления о провинциях
+        if (type.startsWith("ui/province")) {
+            try {
+                if (gui != null)
+                    gui.notifyProvince((int) cargs[2], (String) cargs[0], (String) cargs[3]);
+            } catch (Exception ignore) {
+            }
             return;
+        }
 
         Widget.Factory f;
         if (type.startsWith("gfx/hud/rosters/"))

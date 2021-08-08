@@ -16,7 +16,6 @@ import haven.Tex;
 import haven.UI;
 import haven.Widget;
 import haven.Window;
-import modification.dev;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,10 +29,6 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class CattleRoster<T extends Entry> extends Widget {
-    static {
-        dev.checkFileVersion("ui/croster", 70);
-    }
-
     public static final int WIDTH = UI.scale(1050);
     public static final Comparator<Entry> namecmp = Comparator.comparing(a -> a.name);
     public static final int HEADH = UI.scale(40);
@@ -228,6 +223,7 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
 
     public abstract T parse(Object... args);
 
+    public static RosterButton rbtn;
     public void uimsg(String msg, Object... args) {
         if (msg == "add") {
             addentry(parse(args));
@@ -243,7 +239,9 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
             Indir<Resource> res = ui.sess.getres((Integer) args[1]);
             Pagina pag = gui.menu.paginafor(res);
             MenuGrid.PagButton pagButton = Loading.waitfor(pag::button);
-            RosterButton btn = pagButton instanceof RosterButton ? (RosterButton) pagButton : new RosterButton(pag);
+            if (rbtn == null)
+                rbtn = pagButton instanceof RosterButton ? (RosterButton) pagButton : new RosterButton(pag);
+            RosterButton btn = rbtn;
             btn.add(this);
         } else {
             super.uimsg(msg, args);
