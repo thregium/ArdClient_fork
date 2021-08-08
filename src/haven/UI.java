@@ -59,7 +59,7 @@ public class UI {
     public Widget mouseon;
     public Console cons = new WidgetConsole();
     private Collection<AfterDraw> afterdraws = new LinkedList<AfterDraw>();
-    public int beltWndId = -1;
+    public int beltWndId = -2;
     public GameUI gui;
     public WeakReference<Widget> realmchat;
     public WeakReference<FightWnd> fightwnd;
@@ -213,6 +213,9 @@ public class UI {
             type = "inv-study";
         }
 
+        if (type.startsWith("ui/province")) //пошли нахуй эти уведомления о провинциях
+            return;
+
         Widget.Factory f;
         if (type.startsWith("gfx/hud/rosters/"))
             f = Widget.gettype3(type);
@@ -224,7 +227,7 @@ public class UI {
 
             Widget wdg = f.create(this, cargs);
             wdg.attach(this);
-            if (parent != 65535) {
+            if (parent != -1) {
                 Widget pwdg = widgets.get(parent);
                 if (pwdg == null) {
                     dev.resourceLog("Null parent widget newwidget", parent, id, type, pargs, cargs);

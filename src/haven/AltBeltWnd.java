@@ -98,6 +98,6 @@ public class AltBeltWnd extends MovableWidget implements DTarget {
     @Override
     public void destroy() {
         super.destroy();
-        ui.beltWndId = -1;
+        ui.beltWndId = -2;
     }
 }
