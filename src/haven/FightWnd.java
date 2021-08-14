@@ -1087,7 +1087,7 @@ public class FightWnd extends Widget {
 
             @Override
             public void change(Pair<Text, Integer> item) {
-                super.change(item);
+                super.change2(item);
                 load(item.b);
                 use(item.b);
             }
