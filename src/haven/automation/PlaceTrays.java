@@ -1,20 +1,22 @@
 package haven.automation;
 
-
-import haven.Coord;
 import haven.GameUI;
-import haven.Inventory;
-import haven.WItem;
-import haven.Widget;
+import haven.UI;
 import haven.Window;
+import haven.purus.pbot.PBotInventory;
+import haven.purus.pbot.PBotItem;
 import haven.purus.pbot.PBotUtils;
+import haven.purus.pbot.PBotWindowAPI;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import static haven.automation.CheeseAPI.beltWndName;
+import static haven.automation.CheeseAPI.fullTrayResName;
+import static haven.automation.CheeseAPI.rackWndName;
 
 public class PlaceTrays implements Runnable {
-    private GameUI gui;
-    private static final int TIMEOUT = 2000;
+    private final GameUI gui;
 
     public PlaceTrays(GameUI gui) {
         this.gui = gui;
@@ -22,37 +24,55 @@ public class PlaceTrays implements Runnable {
 
     @Override
     public void run() {
-        Thread t = new Thread(new OpenRacks(gui), "OpenRacks");
-        t.start();
-        while (t.isAlive()) {
-            PBotUtils.sleep(10);
-        }
-
-        WItem trays = null;
+        UI ui = gui.ui;
         try {
-            if ((trays = Utils.findItemByPrefixInInv(gui.maininv, "gfx/invobjs/cheesetray")) != null) {
-                for (Widget w = gui.lchild; w != null; w = w.prev) {
-                    if (!(w instanceof Window))
-                        continue;
-                    for (Widget wdg = w.lchild; wdg != null; wdg = wdg.prev) {
-                        if (!(wdg instanceof Inventory))
-                            continue;
-                        if (trays == null)
-                            break;
-                    }
-                }
-                List<WItem> items = gui.maininv.getIdenticalItems(trays.item);
-                for (WItem item : items)
-                    item.item.wdgmsg("transfer", Coord.z);
-                // trays.item.wdgmsg("transfer", Coord.z);
+            new OpenRacks(gui).run();
+            PBotUtils.sleep(500);
+
+            final List<PBotInventory> otherinvs = PBotUtils.getAllInventories(ui);
+            final PBotInventory pinv = PBotUtils.playerInventory(ui);
+
+            final List<PBotInventory> invs = new ArrayList<>();
+            final List<Window> wnds = PBotWindowAPI.getWindows(ui, rackWndName);
+            wnds.forEach(w -> invs.addAll(PBotWindowAPI.getInventories(w)));
+
+            otherinvs.removeIf(invs::contains);
+            otherinvs.removeIf(pinv::equals);
+            Window beltWnd = PBotWindowAPI.getWindow(ui, beltWndName);
+            if (beltWnd != null) {
+                PBotInventory beltInv = PBotWindowAPI.getInventory(beltWnd);
+                if (beltInv != null)
+                    otherinvs.removeIf(beltInv::equals);
             }
 
+            final List<PBotItem> trays = new ArrayList<>(pinv.getInventoryItemsByResnames(fullTrayResName));
+            otherinvs.forEach(i -> trays.addAll(i.getInventoryItemsByResnames(fullTrayResName)));
 
-        } catch (NullPointerException fa) {
+            while (checkFreeSpace(invs) && !trays.isEmpty()) {
+                try {
+                    trays.forEach(PBotItem::transferItem);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                trays.clear();
+
+                trays.addAll(pinv.getInventoryItemsByResnames(fullTrayResName));
+                otherinvs.forEach(i -> trays.addAll(i.getInventoryItemsByResnames(fullTrayResName)));
+
+                PBotUtils.sleep(10);
+            }
+
+            PBotUtils.sysMsg(ui, "Trays is placed!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            PBotUtils.sysMsg(ui, "Failed " + e);
         }
-
     }
 
-
+    public boolean checkFreeSpace(List<PBotInventory> invs) {
+        for (PBotInventory inv : invs)
+            if (inv.freeSlotsInv() > 0)
+                return (true);
+        return (false);
+    }
 }
-

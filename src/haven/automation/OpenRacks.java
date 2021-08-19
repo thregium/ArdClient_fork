@@ -1,25 +1,23 @@
 package haven.automation;
 
-
-import haven.Coord;
+import haven.Coord2d;
 import haven.GameUI;
-import haven.Gob;
-import haven.Inventory;
+import haven.UI;
+import haven.purus.pbot.PBotGob;
+import haven.purus.pbot.PBotGobAPI;
+import haven.purus.pbot.PBotUtils;
+import haven.purus.pbot.PBotWindowAPI;
 
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
-import static haven.OCache.posres;
+import static haven.automation.CheeseAPI.rackResName;
+import static haven.automation.CheeseAPI.rackWndName;
+import static haven.automation.CheeseAPI.radius;
+import static haven.automation.CheeseAPI.timeout;
 
 public class OpenRacks implements Runnable {
-    private GameUI gui;
-    private Gob rack;
-    private int count;
-    private static final int TIMEOUT = 2000;
-    private static final int HAND_DELAY = 8;
-    private Inventory inv;
-    //private Gob Racks[] = new Gob[7];
-
+    private final GameUI gui;
 
     public OpenRacks(GameUI gui) {
         this.gui = gui;
@@ -27,34 +25,22 @@ public class OpenRacks implements Runnable {
 
     @Override
     public void run() {
-
-        List<Gob> Racks = new ArrayList<>();
-        List<Gob> allGobs = new ArrayList<Gob>();
-        synchronized (gui.ui.sess.glob.oc) {
-            for (Gob gob : gui.ui.sess.glob.oc)
-                allGobs.add(gob);
-
-            try {
-                for (int i = 0; i < allGobs.size(); i++) {
-                    double distFromPlayer = allGobs.get(i).rc.dist(gui.map.player().rc);
-                    if (distFromPlayer < 14 && allGobs.get(i).getres().name.contains("cheeserack")) {
-                        Racks.add(allGobs.get(i));
-                    }
-                }
-
-            } catch (NullPointerException e) {
+        UI ui = gui.ui;
+        PBotGob closestRack = PBotGobAPI.findGobByNames(ui, radius, rackResName);
+        if (closestRack != null) {
+            closestRack.doClick(3, 0);
+            if (PBotWindowAPI.waitForWindow(ui, rackWndName, timeout) != null) {
+                final List<PBotGob> racks = PBotGobAPI.findObjectsByNames(ui, radius, rackResName);
+                racks.removeIf(closestRack::equals);
+                Coord2d playerRc = PBotGobAPI.player(ui).getRcCoords();
+                racks.sort(Comparator.comparingDouble(o -> playerRc.dist(o.getRcCoords())));
+                racks.forEach(r -> {
+                    r.doClick(3, 0);
+                    if (PBotWindowAPI.getWindow(ui, rackWndName) == null)
+                        PBotWindowAPI.waitForWindow(ui, rackWndName, timeout);
+                });
+                PBotUtils.sysMsg(ui, racks.size() + " racks opened!");
             }
-
-        }
-
-        if (Racks.size() == 0)
-            return;
-
-        try {
-            for (Gob rack : Racks) {
-                gui.map.wdgmsg("click", Coord.z, rack.rc.floor(posres), 3, 0, 0, (int) rack.id, rack.rc.floor(posres), 0, -1);
-            }
-        } catch (IndexOutOfBoundsException f) {
         }
     }
 }

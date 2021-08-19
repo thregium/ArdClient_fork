@@ -36,6 +36,7 @@ import haven.purus.ItemClickCallback;
 import haven.purus.pbot.PBotScriptlist;
 import haven.purus.pbot.PBotScriptlistOld;
 import haven.purus.pbot.PBotUtils;
+import haven.purus.pbot.PBotWindowAPI;
 import haven.resutil.FoodInfo;
 import haven.sloth.gob.AggroMark;
 import haven.sloth.gob.Mark;
@@ -1002,6 +1003,15 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public Coord optplacement(Widget child, Coord org) {
         Set<Window> closed = new HashSet<>();
         Set<Coord> open = new HashSet<>();
+
+        //Hook for window placement
+        if (child instanceof Window) {
+            String name = ((Window) child).origcap;
+            Window wnd = PBotWindowAPI.getWindow(ui, name);
+            if (wnd != null)
+                org = wnd.c;
+        }
+
         open.add(org);
         Coord opt = null;
         double optscore = Double.NEGATIVE_INFINITY;

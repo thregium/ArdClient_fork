@@ -1,4 +1,11 @@
 Details in https://github.com/Cediner/ArdClient/commits/
+2021.08.20
+-- Saving for windows position like cupboard (UI - Stack windows on top of eachother)
+-- Cheese scripts reworked (faster and smarter) (need test)
+-- Avaview fix (Charlist)
+-- Some pbot api
+~
+
 2021.08.06
 -- Music bot reworked
 -- Damage text saves info

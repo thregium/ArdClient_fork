@@ -9,6 +9,7 @@ import haven.Widget;
 import haven.Window;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PBotWindowAPI {
 
@@ -95,6 +96,17 @@ public class PBotWindowAPI {
 //    public static Window getWindow(String name) {
 //        return getWindow(PBotAPI.modeui(), name);
 //    }
+
+    public static List<Window> getWindows(UI ui, String name) {
+        final List<Window> wnds = new ArrayList<>();
+        for (Widget w = ui.gui.lchild; w != null; w = w.prev)
+            if (w instanceof Window) {
+                Window wnd = (Window) w;
+                if (wnd.cap != null && name.equals(wnd.origcap))
+                    wnds.add(wnd);
+            }
+        return (wnds);
+    }
 
     /**
      * Close the window

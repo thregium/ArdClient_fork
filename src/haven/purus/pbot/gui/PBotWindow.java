@@ -12,7 +12,7 @@ public class PBotWindow extends Window {
     private boolean closed = false;
 
     public PBotWindow(Coord sz, String cap, String id) {
-        super(sz, cap);
+        super(sz, cap, cap);
         this.id = id;
     }
 
@@ -64,6 +64,7 @@ public class PBotWindow extends Window {
             {
                 a = initialState;
             }
+
             @Override
             public void set(boolean val) {
                 a = val;

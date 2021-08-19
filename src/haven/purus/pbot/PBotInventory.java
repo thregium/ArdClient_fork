@@ -9,6 +9,7 @@ import haven.Widget;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -237,5 +238,18 @@ public class PBotInventory {
 
     public void wdgmsg(String msg, Object... args) {
         inv.wdgmsg(msg, args);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PBotInventory that = (PBotInventory) o;
+        return Objects.equals(inv, that.inv) && Objects.equals(ui, that.ui);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(inv, ui);
     }
 }

@@ -289,7 +289,8 @@ public class Avaview extends PView {
                 updcomp();
                 super.draw(g);
             } catch (Loading e) {
-                g.image(missing, Coord.z, sz);
+                if (avagob != -1)
+                    g.image(missing, Coord.z, sz);
             }
         }
         if (color != null) {

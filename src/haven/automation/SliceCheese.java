@@ -1,23 +1,23 @@
 package haven.automation;
 
-
-import haven.Coord;
-import haven.FlowerMenu;
 import haven.GameUI;
-import haven.Inventory;
-import haven.WItem;
-import haven.Widget;
+import haven.UI;
 import haven.Window;
 import haven.purus.pbot.PBotInventory;
+import haven.purus.pbot.PBotItem;
 import haven.purus.pbot.PBotUtils;
+import haven.purus.pbot.PBotWindowAPI;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import static haven.automation.CheeseAPI.flowerPetal;
+import static haven.automation.CheeseAPI.fullTrayResName;
+import static haven.automation.CheeseAPI.rackWndName;
+import static haven.automation.CheeseAPI.timeout;
+
 public class SliceCheese implements Runnable {
-    private GameUI gui;
-    private static final int TIMEOUT = 2000;
+    private final GameUI gui;
 
     public SliceCheese(GameUI gui) {
         this.gui = gui;
@@ -25,63 +25,36 @@ public class SliceCheese implements Runnable {
 
     @Override
     public void run() {
-        WItem tray = null;
-        List<WItem> trays = new ArrayList<>();
-        List<WItem> trays2 = new ArrayList<>();
-        Window cupboard = null;
+        UI ui = gui.ui;
+        try {
+            final List<PBotItem> trays = new ArrayList<>();
+            final List<PBotInventory> invs = new ArrayList<>();
+            final List<Window> wnds = PBotWindowAPI.getWindows(ui, rackWndName);
 
-        for (PBotInventory q : PBotUtils.getAllInventories(gui.ui)) {
-            try {
-                tray = getTrays2(q.inv);
-                if (tray != null) {
-                    trays = getTrays(q.inv);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+            wnds.forEach(w -> invs.addAll(PBotWindowAPI.getInventories(w)));
+            invs.forEach(i -> trays.addAll(i.getInventoryItemsByResnames(fullTrayResName)));
 
-        //BotUtils.sysMsg("inv found is : "+children.size(),Color.white);
-        // BotUtils.sysMsg("trays found is : "+trays.size(),Color.white);
-
-        for (int l = 0; l < trays.size(); l++) {
-            if (trays.get(l).item.getcontents() != null) {
-                trays2.add(trays.get(l));
-            }
-        }
-        //BotUtils.sysMsg("Number of Cheese trays found is : "+trays2.size(),Color.white);
-        gui.error("Number of Cheese trays found is : " + trays2.size());
-        for (int i = 0; i < trays2.size(); i++) {
-            if (trays2.get(i).item.getcontents() != null) {
-                FlowerMenu.setNextSelection("Slice up");
-                trays2.get(i).item.wdgmsg("iact", Coord.z, -1);
-                int timeout = 0;
-                while (trays2.get(i).item.getcontents() != null) {
-                    timeout++;
-                    if (timeout > 500) {
-                        PBotUtils.sysMsg(gui.ui, "Cheese Slicer interrupted, exited.", Color.white);
-                        return;
+            trays.forEach(t -> {
+                t.activateItem();
+                if (PBotUtils.waitForFlowerMenu(ui, timeout)) {
+                    if (PBotUtils.choosePetal(ui, flowerPetal)) {
+                        if (PBotUtils.waitFlowermenuClose(ui, timeout)) {
+                            PBotUtils.sysMsg(ui, "FlowerMenu close failed!");
+                            return;
+                        }
+                    } else {
+                        if (PBotUtils.closeFlowermenu(ui, timeout)) {
+                            PBotUtils.sysMsg(ui, "FlowerMenu close failed!");
+                            return;
+                        }
                     }
-                    PBotUtils.sleep(10);
                 }
-            }
+            });
+
+            PBotUtils.sysMsg(ui, trays.size() + " cheeses is sliced!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            PBotUtils.sysMsg(ui, "Failed " + e);
         }
-        PBotUtils.sysMsg(gui.ui, "Done", Color.white);
-    }
-
-    private List<WItem> getTrays(Inventory inv) {
-        List<WItem> trays = inv.getItemsPartial("Cheese Tray");
-        // BotUtils.sysMsg("trying to find trays", Color.WHITE);
-        if (trays == null)
-            return null;
-        return trays;
-    }
-
-    private WItem getTrays2(Inventory inv) {
-        WItem trays = inv.getItemPartialTrays("Tray");
-        // BotUtils.sysMsg("trying to find trays", Color.WHITE);
-        if (trays == null)
-            return null;
-        return trays;
     }
 }

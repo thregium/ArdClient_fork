@@ -27,6 +27,7 @@
 package haven;
 
 import haven.purus.pbot.PBotUtils;
+import haven.purus.pbot.PBotWindowAPI;
 import haven.res.ui.tt.Wear;
 import haven.resutil.Curiosity;
 import haven.sloth.gui.MovableWidget;
@@ -155,7 +156,7 @@ public class Window extends MovableWidget implements DTarget {
     private boolean minimized;
     private Coord fullsz;
     private Runnable destroyHook = null;
-    private final Collection<Widget> twdgs = new LinkedList<Widget>();
+    private final Collection<Widget> twdgs = new LinkedList<>();
 
     @RName("wnd")
     public static class $_ implements Factory {
@@ -163,11 +164,10 @@ public class Window extends MovableWidget implements DTarget {
             Coord sz = (Coord) args[0];
             String cap = (args.length > 1) ? (String) args[1] : null;
             boolean lg = (args.length > 2) && ((Integer) args[2] != 0);
-            if (!Config.stackwindows && cap != null && cap.equals("Cupboard")) {
-                return (new Window(sz, cap, lg, Coord.z, Coord.z));
-            } else {
-                return (new Window(sz, cap, cap, lg, Coord.z, Coord.z));
+            if (!Config.stackwindows && cap != null && PBotWindowAPI.getWindow(ui, cap) != null) {
+                return (new Window(sz, cap, cap, false, lg, Coord.z, Coord.z));
             }
+            return (new Window(sz, cap, cap, lg, Coord.z, Coord.z));
         }
     }
 
@@ -200,6 +200,11 @@ public class Window extends MovableWidget implements DTarget {
         resize2(sz);
 
         setfocustab(true);
+    }
+
+    public Window(Coord sz, String cap, final String moveKey, boolean loadPosition, boolean lg, Coord tlo, Coord rbo) {
+        this(sz, cap, moveKey, lg, tlo, rbo);
+        this.loadPosition = loadPosition;
     }
 
     public Window(Coord sz, String cap, boolean lg) {

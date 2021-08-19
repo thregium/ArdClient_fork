@@ -18,6 +18,7 @@ import haven.purus.gobText;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static haven.OCache.posres;
 
@@ -320,5 +321,18 @@ public class PBotGob {
         Object[] args = {Coord.z, gob.rc.floor(posres), 1, 0, (int) gob.id, gob.rc.floor(posres), 0, -1};
         ui.gui.map.lastItemactClickArgs = args;
         ui.gui.map.wdgmsg("itemact", Coord.z, gob.rc.floor(posres), 1, 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PBotGob pBotGob = (PBotGob) o;
+        return Objects.equals(gob, pBotGob.gob) && Objects.equals(ui, pBotGob.ui);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(gob, ui);
     }
 }

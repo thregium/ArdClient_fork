@@ -69,6 +69,7 @@ public abstract class MovableWidget extends Widget {
     private Coord doff;
 
     private boolean movableBg;
+    protected boolean loadPosition = true;
 
     public MovableWidget(final Coord sz, final String name) {
         super(sz);
@@ -130,7 +131,8 @@ public abstract class MovableWidget extends Widget {
 
     @Override
     protected void added() {
-        loadPosition();
+        if (loadPosition)
+            loadPosition();
         lock = knownLocks.getOrDefault(key, false);
         super.added();
     }

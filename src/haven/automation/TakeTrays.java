@@ -1,18 +1,21 @@
 package haven.automation;
 
-
-import haven.Coord;
 import haven.GameUI;
-import haven.Inventory;
-import haven.WItem;
-import haven.Widget;
+import haven.UI;
+import haven.Window;
+import haven.purus.pbot.PBotInventory;
+import haven.purus.pbot.PBotItem;
 import haven.purus.pbot.PBotUtils;
+import haven.purus.pbot.PBotWindowAPI;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import static haven.automation.CheeseAPI.fullTrayResName;
+import static haven.automation.CheeseAPI.rackWndName;
 
 public class TakeTrays implements Runnable {
-    private GameUI gui;
+    private final GameUI gui;
 
     public TakeTrays(GameUI gui) {
         this.gui = gui;
@@ -20,28 +23,23 @@ public class TakeTrays implements Runnable {
 
     @Override
     public void run() {
-        Thread t = new Thread(new OpenRacks(gui), "OpenRacks");
-        t.start();
-        // while (t.isAlive()) {
-        PBotUtils.sleep(500);
-        // }
-        List<WItem> trays;
-        synchronized (gui.ui.root.lchild) {
-            try {
-                for (Widget q = gui.ui.root.lchild; q != null; q = q.rnext()) {
-                    if (q instanceof Inventory && q != gui.maininv) {
-                        trays = (((Inventory) q).getItemsPartial("Tray"));
-                        System.out.println("trays2 size : " + trays.size());
-                        if (trays.size() > 0) {
-                            for (WItem item : trays)
-                                item.item.wdgmsg("transfer", new Coord(item.item.sz.x / 2, item.item.sz.y / 2), -1);
-                            trays.clear();
-                        }
-                    }
-                }
-            } catch (NullPointerException q) {
-                q.printStackTrace();
-            }
+        UI ui = gui.ui;
+        try {
+            new OpenRacks(gui).run();
+            PBotUtils.sleep(500);
+
+            final List<PBotItem> trays = new ArrayList<>();
+            final List<PBotInventory> invs = new ArrayList<>();
+            final List<Window> wnds = PBotWindowAPI.getWindows(ui, rackWndName);
+
+            wnds.forEach(w -> invs.addAll(PBotWindowAPI.getInventories(w)));
+            invs.forEach(i -> trays.addAll(i.getInventoryItemsByResnames(fullTrayResName)));
+            trays.forEach(PBotItem::transferItem);
+
+            PBotUtils.sysMsg(ui, trays.size() + " trays transferred!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            PBotUtils.sysMsg(ui, "Failed " + e);
         }
     }
 }

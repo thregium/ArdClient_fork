@@ -2186,7 +2186,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Stack cupboard windows on top of eachother") {
+        appender.add(new CheckBox("Stack windows on top of eachother") {
             {
                 a = Config.stackwindows;
             }
