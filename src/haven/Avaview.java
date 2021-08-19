@@ -37,6 +37,7 @@ public class Avaview extends PView {
     public static final Tex missing = Resource.loadtex("gfx/hud/equip/missing");
     public static final Coord dasz = missing.sz();
     public Color color = Color.WHITE;
+    public Color clearcolor = Color.BLACK;
     public long avagob;
     public Desc avadesc;
     public Resource.Resolver resmap = null;
@@ -112,6 +113,8 @@ public class Avaview extends PView {
             this.color = (Color) args[0];
         } else if (msg == "pop") {
             pop(Desc.decode(ui.sess, args));
+        } else if (msg == "bg") {
+            clearcolor = (Color) args[0];
         } else {
             super.uimsg(msg, args);
         }
@@ -144,7 +147,7 @@ public class Avaview extends PView {
         public <T> T context(Class<T> cl) {
             return (ctxr.context(cl, Avaview.this));
         }
-        }
+    }
 
     private void initcomp(Composite gc) {
         if ((comp == null) || (comp.skel != gc.comp.skel)) {
@@ -253,6 +256,10 @@ public class Avaview extends PView {
             return RichText.render(base.toString(), 300);
         }
         return null;
+    }
+
+    protected Color clearcolor() {
+        return (clearcolor);
     }
 
     public void draw(GOut g) {
