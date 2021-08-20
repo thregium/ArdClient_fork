@@ -1237,10 +1237,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             }
             add(child, c);
         } else if (place == "abt") {
-            Defer.later(() -> {
-                add(child, Coord.z);
-                return (null);
-            });
+            add(child, Coord.z);
         } else {
             throw (new UI.UIException("Illegal gameui child", place, args));
         }

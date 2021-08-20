@@ -79,6 +79,20 @@ public class UI {
 
     public interface Runner {
         public Session run(UI ui) throws InterruptedException;
+        public default void init(UI ui) {}
+        public default String title() {return(null);}
+
+        public static class Proxy implements Runner {
+            public final Runner back;
+
+            public Proxy(Runner back) {
+                this.back = back;
+            }
+
+            public Session run(UI ui) throws InterruptedException {return(back.run(ui));}
+            public void init(UI ui) {back.init(ui);}
+            public String title() {return(back.title());}
+        }
     }
 
     public interface Context {

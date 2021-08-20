@@ -164,7 +164,7 @@ public class Window extends MovableWidget implements DTarget {
             Coord sz = (Coord) args[0];
             String cap = (args.length > 1) ? (String) args[1] : null;
             boolean lg = (args.length > 2) && ((Integer) args[2] != 0);
-            if (!Config.stackwindows && cap != null && PBotWindowAPI.getWindow(ui, cap) != null) {
+            if (!Config.stackwindows && cap != null && ui.gui != null && PBotWindowAPI.getWindow(ui, cap) != null) {
                 return (new Window(sz, cap, cap, false, lg, Coord.z, Coord.z));
             }
             return (new Window(sz, cap, cap, lg, Coord.z, Coord.z));
