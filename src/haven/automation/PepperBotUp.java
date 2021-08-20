@@ -154,7 +154,7 @@ public class PepperBotUp extends Window implements GobSelectCallback {
             @Override
             public void click() {
                 PBotUtils.sysMsg(ui, "Drag area over crops", Color.WHITE);
-                selectingarea = new Thread(new PepperBotUp.selectingarea(), "Pepper Bot");
+                selectingarea = new Thread(new selectingarea(), "Pepper Bot");
                 selectingarea.start();
             }
         };

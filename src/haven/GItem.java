@@ -245,8 +245,8 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         }
     }
 
-    public synchronized List<ItemInfo> info() {
-        if (info == null && rawinfo != null) {
+    public List<ItemInfo> info() {
+        if (info == null) {
             info = ItemInfo.buildinfo(this, rawinfo);
             try {
                 // getres() can throw Loading, ignore it

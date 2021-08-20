@@ -12,14 +12,15 @@ import haven.purus.pbot.PBotWindowAPI;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import static haven.automation.CheeseAPI.beltWndName;
 import static haven.automation.CheeseAPI.curdInfo;
 import static haven.automation.CheeseAPI.curdResName;
+import static haven.automation.CheeseAPI.debug;
 import static haven.automation.CheeseAPI.emptyTrayResName;
 import static haven.automation.CheeseAPI.itemClick;
 import static haven.automation.CheeseAPI.timeout;
+import static haven.automation.CheeseAPI.waitFor;
 
 public class FillCheeseTray implements Runnable {
     private final GameUI gui;
@@ -43,8 +44,9 @@ public class FillCheeseTray implements Runnable {
                     otherinvs.removeIf(beltInv::equals);
             }
 
-            while (true) {
-                debug(otherinvs, pinv);
+            long time = System.currentTimeMillis();
+            while (System.currentTimeMillis() - time < 5000) {
+                debug(pinv, otherinvs);
                 final List<PBotItem> trays = new ArrayList<>(pinv.getInventoryItemsByResnames(emptyTrayResName));
                 otherinvs.forEach(i -> trays.addAll(i.getInventoryItemsByResnames(emptyTrayResName)));
 
@@ -60,13 +62,13 @@ public class FillCheeseTray implements Runnable {
                     othercurds.get(i).transferItem();
 
                 if (!waitFor(() -> {
-                    debug(otherinvs, pinv);
+                    debug(pinv, otherinvs);
                     return (pinv.getInventoryItemsByResnames(curdResName).size() != count + initCount);
                 }, 1000)) {
                     break;
                 }
 
-                debug(otherinvs, pinv);
+                debug(pinv, otherinvs);
                 final List<PBotItem> curds = new ArrayList<>(pinv.getInventoryItemsByResnames(curdResName));
                 if (!curds.isEmpty()) {
                     curds.get(curds.size() - 1).takeItem(timeout);
@@ -81,7 +83,7 @@ public class FillCheeseTray implements Runnable {
                     }
                     int finalIc = ic;
                     if (!waitFor(() -> {
-                        debug(otherinvs, pinv);
+                        debug(pinv, otherinvs);
                         return (pinv.getInventoryItemsByResnames(curdResName).size() != finalIc);
                     }, 1000)) {
                         break;
@@ -104,18 +106,6 @@ public class FillCheeseTray implements Runnable {
         }
     }
 
-    public void debug(List<PBotInventory> otherinvs, PBotInventory pinv) {
-        otherinvs.forEach(this::debug);
-        debug(pinv);
-    }
-
-    public void debug(PBotInventory inv) {
-        inv.getInventoryContents().forEach(item -> {
-            while (item.getResname() == null)
-                PBotUtils.sleep(10);
-        });
-    }
-
     public int checkInfo(PBotItem item) {
         if (item.getResname().contains(emptyTrayResName)) {
             for (ItemInfo info : item.gitem.info())
@@ -136,20 +126,5 @@ public class FillCheeseTray implements Runnable {
             return (itemClick);
         }
         return (0);
-    }
-
-    public boolean waitFor(Callable<Boolean> task, int limit) {
-        try {
-            for (int i = 0, sleep = 10; task.call(); i += sleep) {
-                if (i >= limit) {
-                    return (false);
-                } else {
-                    PBotUtils.sleep(sleep);
-                }
-            }
-            return (true);
-        } catch (Exception e) {
-            return (false);
-        }
     }
 }

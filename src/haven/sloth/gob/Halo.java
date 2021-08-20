@@ -43,8 +43,8 @@ public class Halo extends GAttrib implements Rendered {
     }
 
     @Override
-    public void tick() {
-        super.tick();
+    public void ctick(int dt) {
+        super.ctick(dt);
         if (DefSettings.SHOWHALO.get()) {
             show = true;
         } else if (DefSettings.SHOWHALOONHEARTH.get()) {

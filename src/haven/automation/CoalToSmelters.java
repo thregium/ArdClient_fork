@@ -175,7 +175,7 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
                 areaSelBtn.hide();
                 fuelbtn.hide();
                 cbtn.show();
-                light = new Thread(new CoalToSmelters.light(), "Add Coal To Smelters");
+                light = new Thread(new light(), "Add Coal To Smelters");
                 light.start();
             }
         };
@@ -189,7 +189,7 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
                     autodropper.interrupt();
                 } else {
                     autodropperon = true;
-                    autodropper = new Thread(new CoalToSmelters.autodropper(), "Add Coal To Smelters");
+                    autodropper = new Thread(new autodropper(), "Add Coal To Smelters");
                     autodropper.start();
                     PBotUtils.sysMsg(ui, "Autodropper started.", Color.white);
                 }
@@ -199,7 +199,7 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
         areaSelBtn = new Button(100, "Select") {
             @Override
             public void click() {
-                selectingarea = new Thread(new CoalToSmelters.selectingarea(), "Add Coal To Smelters");
+                selectingarea = new Thread(new selectingarea(), "Add Coal To Smelters");
                 selectingarea.start();
             }
         };
@@ -208,7 +208,7 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
         oreareaSelBtn = new Button(80, "Ore Select") {
             @Override
             public void click() {
-                oreselectingarea = new Thread(new CoalToSmelters.oreselectingarea(), "Add Coal To Smelters");
+                oreselectingarea = new Thread(new oreselectingarea(), "Add Coal To Smelters");
                 oreselectingarea.start();
             }
         };
@@ -229,7 +229,7 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
                 terminateore = false;
                 runbtn3.hide();
                 clearbtn.hide();
-                orefiller = new Thread(new CoalToSmelters.orefiller(), "Add Coal To Smelters");
+                orefiller = new Thread(new orefiller(), "Add Coal To Smelters");
                 orefiller.start();
             }
         };

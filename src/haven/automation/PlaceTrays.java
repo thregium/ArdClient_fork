@@ -12,8 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static haven.automation.CheeseAPI.beltWndName;
+import static haven.automation.CheeseAPI.debug;
+import static haven.automation.CheeseAPI.freeSpaceForTrays;
 import static haven.automation.CheeseAPI.fullTrayResName;
+import static haven.automation.CheeseAPI.getInventoryItemsByResnames;
 import static haven.automation.CheeseAPI.rackWndName;
+import static haven.automation.CheeseAPI.waitFor;
 
 public class PlaceTrays implements Runnable {
     private final GameUI gui;
@@ -45,21 +49,43 @@ public class PlaceTrays implements Runnable {
                     otherinvs.removeIf(beltInv::equals);
             }
 
-            final List<PBotItem> trays = new ArrayList<>(pinv.getInventoryItemsByResnames(fullTrayResName));
-            otherinvs.forEach(i -> trays.addAll(i.getInventoryItemsByResnames(fullTrayResName)));
+            long time = System.currentTimeMillis();
+            while (System.currentTimeMillis() - time < 5000) {
+                {
+                    debug(pinv, otherinvs, invs);
+                    final List<PBotItem> trays = new ArrayList<>(pinv.getInventoryItemsByResnames(fullTrayResName));
+                    int count = Math.min(trays.size(), freeSpaceForTrays(invs));
+                    int initCount = getInventoryItemsByResnames(invs, fullTrayResName).size();
+                    for (int i = 0; i < count; i++)
+                        trays.get(i).transferItem();
 
-            while (checkFreeSpace(invs) && !trays.isEmpty()) {
-                try {
-                    trays.forEach(PBotItem::transferItem);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    if (!waitFor(() -> {
+                        debug(pinv, otherinvs, invs);
+                        return (getInventoryItemsByResnames(invs, fullTrayResName).size() != count + initCount);
+                    }, 1000)) {
+                        break;
+                    }
                 }
-                trays.clear();
 
-                trays.addAll(pinv.getInventoryItemsByResnames(fullTrayResName));
-                otherinvs.forEach(i -> trays.addAll(i.getInventoryItemsByResnames(fullTrayResName)));
+                {
+                    debug(pinv, otherinvs, invs);
+                    final List<PBotItem> othertrays = new ArrayList<>();
+                    otherinvs.forEach(i -> othertrays.addAll(i.getInventoryItemsByResnames(fullTrayResName)));
+                    int count = Math.min(othertrays.size(), freeSpaceForTrays(pinv));
+                    int initCount = pinv.getInventoryItemsByResnames(fullTrayResName).size();
+                    for (int i = 0; i < count; i++)
+                        othertrays.get(i).transferItem();
 
-                PBotUtils.sleep(10);
+                    if (!waitFor(() -> {
+                        debug(pinv, otherinvs, invs);
+                        return (pinv.getInventoryItemsByResnames(fullTrayResName).size() != count + initCount);
+                    }, 1000)) {
+                        break;
+                    }
+                }
+
+                if (pinv.getInventoryItemsByResnames(fullTrayResName).isEmpty() || freeSpaceForTrays(invs) == 0)
+                    break;
             }
 
             PBotUtils.sysMsg(ui, "Trays is placed!");
@@ -67,12 +93,5 @@ public class PlaceTrays implements Runnable {
             e.printStackTrace();
             PBotUtils.sysMsg(ui, "Failed " + e);
         }
-    }
-
-    public boolean checkFreeSpace(List<PBotInventory> invs) {
-        for (PBotInventory inv : invs)
-            if (inv.freeSlotsInv() > 0)
-                return (true);
-        return (false);
     }
 }

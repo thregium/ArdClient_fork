@@ -192,7 +192,7 @@ public class PepperBot extends Window implements AreaSelectCallback, GobSelectCa
         Button RunBtn = new Button(140, "Run Test") {
             @Override
             public void click() {
-                testthread = new Thread(new PepperBot.testthread(), "Pepper Bot");
+                testthread = new Thread(new testthread(), "Pepper Bot");
                 testthread.start();
             }
         };

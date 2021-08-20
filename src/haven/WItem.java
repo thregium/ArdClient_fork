@@ -152,7 +152,7 @@ public class WItem extends Widget implements DTarget2 {
         }
         try {
             List<ItemInfo> info = item.info();
-            if (info.size() < 1)
+            if (info == null || info.size() < 1)
                 return (null);
             if (info != ttinfo) {
                 shorttip = longtip = fulltip = null;

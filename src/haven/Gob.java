@@ -583,6 +583,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             for (GAttrib a : attr.values())
                 a.ctick(dt);
         }
+
         final Iterator<Pair<GAttrib, Consumer<Gob>>> ditr = dattrs.iterator();
         while (ditr.hasNext()) {
             final Pair<GAttrib, Consumer<Gob>> pair = ditr.next();
@@ -812,7 +813,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         }
         return (null);
     }
-
 
     public void tick() {
         synchronized (attr) {
@@ -1074,6 +1074,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     }
 
     public Overlay gobHitbox;
+
     public boolean setup(RenderList rl) {
         loc.tick();
         final Hidden hid = getattr(Hidden.class);

@@ -42,6 +42,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 import static haven.MapView.markedGobs;
 
@@ -70,11 +72,11 @@ public class OCache implements Iterable<Gob> {
     public static final int OD_END = 255;
     public static final Coord2d posres = new Coord2d(0x1.0p-10, 0x1.0p-10).mul(11, 11);
     /* XXX: Use weak refs */
-    private Collection<Collection<Gob>> local = new LinkedList<>();
-    private Map<Long, Gob> objs = new TreeMap<>();
-    private Map<Long, Integer> deleted = new TreeMap<>();
+    private final Collection<Collection<Gob>> local = new LinkedList<>();
+    private final Map<Long, Gob> objs = new TreeMap<>();
+    private final Map<Long, Integer> deleted = new TreeMap<>();
     private Glob glob;
-    private Map<Long, DamageSprite> gobdmgs = new HashMap<>();
+    private final Map<Long, DamageSprite> gobdmgs = new HashMap<>();
     public boolean isfight = false;
     private final Collection<ChangeCallback> cbs = new WeakList<>();
 
@@ -129,13 +131,13 @@ public class OCache implements Iterable<Gob> {
     }
 
     public synchronized void remove(long id, int frame) {
-        if (objs.containsKey(id) && !DefSettings.KEEPGOBS.get()) {
-            if (!deleted.containsKey(id) || deleted.get(id) < frame) {
+            if (objs.containsKey(id) && !DefSettings.KEEPGOBS.get()) {
+                if (!deleted.containsKey(id) || deleted.get(id) < frame) {
                 Gob old = objs.remove(id);
-                deleted.put(id, frame);
-                old.dispose();
-                for (ChangeCallback cb : cbs)
-                    cb.removed(old);
+            deleted.put(id, frame);
+            old.dispose();
+            for (ChangeCallback cb : cbs)
+                cb.removed(old);
             }
         }
     }
@@ -161,31 +163,16 @@ public class OCache implements Iterable<Gob> {
                 copy.add(g);
             for (Gob g : copy) {
                 g.ctick(dt);
-//                if (Config.showdmgop) {
-//                    Gob.Overlay dmgol = g.findol(DamageSprite.ID);
-//                    if (dmgol != null)
-//                        g.ols.remove(dmgol);
-//                    if (isfight) {
-//                        DamageSprite dmgspr = gobdmgs.get(g.id);
-//                        if (dmgspr != null) {
-//                            if (dmgspr.owner == g) {
-//                                g.ols.add(new Gob.Overlay(DamageSprite.ID, dmgspr));
-//                            } else {
-//                                g.ols.add(new Gob.Overlay(DamageSprite.ID, new DamageSprite(dmgspr.dmg, dmgspr.arm, g)));
-//                            }
-//                        }
-//                    }
-//                }
             }
         }
     }
 
     @SuppressWarnings("unchecked")
     public Iterator<Gob> iterator() {
-        Collection<Iterator<Gob>> is = new LinkedList<Iterator<Gob>>();
+        Collection<Iterator<Gob>> is = new LinkedList<>();
         for (Collection<Gob> gc : local)
             is.add(gc.iterator());
-        return (new I2<Gob>(objs.values().iterator(), new I2<Gob>(is)));
+        return (new I2<>(objs.values().iterator(), new I2<>(is)));
     }
 
     public synchronized void ladd(Collection<Gob> gob) {
@@ -389,16 +376,14 @@ public class OCache implements Iterable<Gob> {
             System.out.println(String.format("cmppose on non-composed object: %s %s %s %s", poses, tposes, interp, ttime));
             return;
         }
-        if (cmp != null) {
-            if (cmp.pseq != pseq) {
-                cmp.pseq = pseq;
+        if (cmp.pseq != pseq) {
+            cmp.pseq = pseq;
 //                if (poses != null)
-                    cmp.chposes(poses, interp);
+            cmp.chposes(poses, interp);
 //                if (tposes != null)
-                    cmp.tposes(tposes, WrapMode.ONCE, ttime);
-            }
-            changed(g);
+            cmp.tposes(tposes, WrapMode.ONCE, ttime);
         }
+        changed(g);
     }
 
     public void cmppose(Gob gob, Message msg) {
@@ -407,7 +392,7 @@ public class OCache implements Iterable<Gob> {
         int seq = msg.uint8();
         boolean interp = (pfl & 1) != 0;
         if ((pfl & 2) != 0) {
-            poses = new LinkedList<ResData>();
+            poses = new LinkedList<>();
             while (true) {
                 int resid = msg.uint16();
                 if (resid == 65535)
@@ -422,7 +407,7 @@ public class OCache implements Iterable<Gob> {
         }
         float ttime = 0;
         if ((pfl & 4) != 0) {
-            tposes = new LinkedList<ResData>();
+            tposes = new LinkedList<>();
             while (true) {
                 int resid = msg.uint16();
                 if (resid == 65535)
@@ -450,14 +435,14 @@ public class OCache implements Iterable<Gob> {
     }
 
     public void cmpmod(Gob gob, Message msg) {
-        List<Composited.MD> mod = new LinkedList<Composited.MD>();
+        List<Composited.MD> mod = new LinkedList<>();
         int mseq = 0;
         while (true) {
             int modid = msg.uint16();
             if (modid == 65535)
                 break;
             Indir<Resource> modr = getres(modid);
-            List<ResData> tex = new LinkedList<ResData>();
+            List<ResData> tex = new LinkedList<>();
             while (true) {
                 int resid = msg.uint16();
                 if (resid == 65535)
@@ -507,7 +492,7 @@ public class OCache implements Iterable<Gob> {
             Coord3f off;
             if ((ef & 128) != 0) {
                 int x = msg.int16(), y = msg.int16(), z = msg.int16();
-                off = new Coord3f(x / 1000.0f, y / 1000.0f, z / 1000.0f);
+                off = Coord3f.of(x / 1000.0f, y / 1000.0f, z / 1000.0f);
             } else {
                 off = Coord3f.o;
             }
@@ -538,7 +523,7 @@ public class OCache implements Iterable<Gob> {
     }
 
     public void avatar(Gob gob, Message msg) {
-        List<Indir<Resource>> layers = new LinkedList<Indir<Resource>>();
+        List<Indir<Resource>> layers = new LinkedList<>();
         while (true) {
             int layer = msg.uint16();
             if (layer == 65535)
@@ -555,10 +540,10 @@ public class OCache implements Iterable<Gob> {
         } else {
             DrawOffset dro = g.getattr(DrawOffset.class);
             if (dro == null) {
-                dro = new DrawOffset(g, new Coord3f(0, 0, off));
+                dro = new DrawOffset(g, Coord3f.of(0, 0, off));
                 g.setattr(dro);
             } else {
-                dro.off = new Coord3f(0, 0, off);
+                dro.off = Coord3f.of(0, 0, off);
             }
         }
         changed(g);
@@ -584,7 +569,7 @@ public class OCache implements Iterable<Gob> {
     }
 
     public synchronized void follow(Gob g, long oid, Indir<Resource> xfres, String xfname) {
-        if (oid == 0xffffffffl) {
+        if (oid == 0xffffffffL) {
             g.delattr(Following.class);
             final HeldBy heldby = g.getattr(HeldBy.class);
             if (heldby != null) {
@@ -640,7 +625,7 @@ public class OCache implements Iterable<Gob> {
 
     public void homing(Gob gob, Message msg) {
         long oid = msg.uint32();
-        if (oid == 0xffffffffl) {
+        if (oid == 0xffffffffL) {
             if (gob != null)
                 homostop(gob);
         } else {
@@ -981,21 +966,23 @@ public class OCache implements Iterable<Gob> {
                         Utils.setprefi("crosterresid", id);
                     }
                 }
-            } catch (Loading le) {}
-            Defer.later(new Defer.Callable<Void>() {
-                public Void call() {
-                    try {
-                        Resource res = resid.get();
-                        GAttrib.Parser parser = res.getcode(GAttrib.Parser.class, false);
-                        parser.apply(g, dat);
-                    } catch (Loading le) {
-                        Defer.later(this);
-                    }
-                    return (null);
-                }
-            });
+            } catch (Loading le) {
+            }
         }
-
+        Defer.later(new Defer.Callable<Void>() {
+            public Void call() {
+                try {
+                    Resource res = resid.get();
+                    GAttrib.Parser parser = res.getcode(GAttrib.Parser.class, false);
+                    if (parser != null) {
+                        parser.apply(g, dat);
+                    }
+                } catch (Loading le) {
+                    Defer.later(this);
+                }
+                return (null);
+            }
+        });
         if (dat != null)
             g.setrattr(resid, dat);
         else

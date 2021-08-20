@@ -1198,7 +1198,15 @@ public class PBotUtils {
      * Use item in hand to ground below player, for example, to plant carrot
      */
     public static void mapInteractClick(UI ui) {
-        ui.gui.map.wdgmsg("itemact", getCenterScreenCoord(ui), player(ui).rc.floor(posres), 3, ui.modflags());
+        ui.gui.map.wdgmsg("itemact", getCenterScreenCoord(ui), player(ui).rc.floor(posres), ui.modflags());
+    }
+
+    public static void mapInteractClick(UI ui, Coord2d c2d) {
+        ui.gui.map.wdgmsg("itemact", getCenterScreenCoord(ui), c2d.floor(posres), ui.modflags());
+    }
+
+    public static void mapInteractClick(UI ui, Coord2d c2d, int mod) {
+        ui.gui.map.wdgmsg("itemact", getCenterScreenCoord(ui), c2d.floor(posres), mod);
     }
 
 //    public static void mapInteractClick() {

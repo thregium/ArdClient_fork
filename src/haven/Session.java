@@ -40,8 +40,8 @@ import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.ListIterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 public class Session implements Resource.Resolver {
@@ -61,6 +61,7 @@ public class Session implements Resource.Resolver {
     public static final int SESSERR_CONN = 3;
     public static final int SESSERR_PVER = 4;
     public static final int SESSERR_EXPR = 5;
+    public static final int SESSERR_MESG = 6;
     public final CharacterInfo character;
     static final int ackthresh = 30;
 
@@ -74,18 +75,19 @@ public class Session implements Resource.Resolver {
     Thread rworker, sworker, ticker;
     Object[] args;
     public int connfailed = 0;
+    public String connerror = null;
     public String state = "conn";
     int tseq = 0, rseq = 0;
     int ackseq;
     long acktime = -1;
-    LinkedList<PMessage> uimsgs = new LinkedList<PMessage>();
-    Map<Integer, PMessage> waiting = new TreeMap<Integer, PMessage>();
-    LinkedList<RMessage> pending = new LinkedList<RMessage>();
-    Map<Long, ObjAck> objacks = new TreeMap<Long, ObjAck>();
+    LinkedList<PMessage> uimsgs = new LinkedList<>();
+    Map<Integer, PMessage> waiting = new TreeMap<>();
+    LinkedList<RMessage> pending = new LinkedList<>();
+    Map<Long, ObjAck> objacks = new TreeMap<>();
     public final SessionDetails details;
     public String username;
     byte[] cookie;
-    final Map<Integer, CachedRes> rescache = new TreeMap<Integer, CachedRes>();
+    final Map<Integer, CachedRes> rescache = new TreeMap<>();
     public final Glob glob;
     public byte[] sesskey;
     private int localCacheId = -1;
@@ -146,9 +148,9 @@ public class Session implements Resource.Resolver {
 
             public String toString() {
                 if (res == null) {
-                    return ("<res:" + resid + ">");
+                    return ("<" + resid + (resnm != null ? ":" + resnm + "(" + resver + ")" : "") + ">");
                 } else {
-                    return ("<" + res + ">");
+                    return ("<" + resid + ":" + res + ">");
                 }
             }
 
@@ -166,7 +168,7 @@ public class Session implements Resource.Resolver {
         private Ref get() {
             Ref ind = (this.ind == null) ? null : (this.ind.get());
             if (ind == null)
-                this.ind = new WeakReference<Ref>(ind = new Ref());
+                this.ind = new WeakReference<>(ind = new Ref());
             return (ind);
         }
 
@@ -184,7 +186,7 @@ public class Session implements Resource.Resolver {
             synchronized (this) {
                 this.resnm = res.name;
                 this.resver = res.ver;
-                ind = new WeakReference<Ref>(new SRef(res));
+                ind = new WeakReference<>(new SRef(res));
                 notifyAll();
             }
         }
@@ -289,11 +291,7 @@ public class Session implements Resource.Resolver {
 
         private void gotack(int seq) {
             synchronized (pending) {
-                for (ListIterator<RMessage> i = pending.listIterator(); i.hasNext(); ) {
-                    RMessage msg = i.next();
-                    if (msg.seq <= seq)
-                        i.remove();
-                }
+                pending.removeIf(msg -> msg.seq <= seq);
             }
         }
 
@@ -363,7 +361,7 @@ public class Session implements Resource.Resolver {
                     }
                 }
             } else if ((msg.type == RMessage.RMSG_NEWWDG) || (msg.type == RMessage.RMSG_WDGMSG) ||
-                    (msg.type == RMessage.RMSG_DSTWDG) || (msg.type == RMessage.RMSG_ADDWDG)) {
+                    (msg.type == RMessage.RMSG_DSTWDG) || (msg.type == RMessage.RMSG_ADDWDG) || (msg.type == RMessage.RMSG_WDGBAR)) {
                 synchronized (uimsgs) {
                     uimsgs.add(msg);
                 }
@@ -375,19 +373,23 @@ public class Session implements Resource.Resolver {
                 int resid = msg.uint16();
                 String resname = msg.string();
                 int resver = msg.uint16();
-                try {
-                    cachedres(resid).set(resname, resver);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                //   cachedres(resid).set(resname, resver);
+                cachedres(resid).set(resname, resver);
             } else if (msg.type == RMessage.RMSG_PARTY) {
                 glob.party.msg(msg);
             } else if (msg.type == RMessage.RMSG_SFX) {
                 Indir<Resource> res = getres(msg.uint16());
                 double vol = ((double) msg.uint16()) / 256.0;
                 double spd = ((double) msg.uint16()) / 256.0;
-                Audio.play(res);
+//                Audio.play(res);
+                Defer.later(() -> {
+                    Audio.CS clip = Audio.fromres(res.get());
+                    if (spd != 1.0)
+                        clip = new Audio.Resampler(clip).sp(spd);
+                    if (vol != 1.0)
+                        clip = new Audio.VolAdjust(clip, vol);
+                    Audio.play(clip);
+                    return (null);
+                });
             } else if (msg.type == RMessage.RMSG_CATTR) {
                 glob.cattr(msg);
             } else if (msg.type == RMessage.RMSG_MUSIC) {
@@ -461,6 +463,28 @@ public class Session implements Resource.Resolver {
                                     state = "";
                                 } else {
                                     connfailed = error;
+                                    switch (connfailed) {
+                                        case SESSERR_AUTH:
+                                            connerror = "Invalid authentication token";
+                                            break;
+                                        case SESSERR_BUSY:
+                                            connerror = "Already logged in";
+                                            break;
+                                        case SESSERR_CONN:
+                                            connerror = "Could not connect to server";
+                                            break;
+                                        case SESSERR_PVER:
+                                            connerror = "This client is too old";
+                                            break;
+                                        case SESSERR_EXPR:
+                                            connerror = "Authentication token expired";
+                                            break;
+                                        case SESSERR_MESG:
+                                            connerror = msg.string();
+                                            break;
+                                        default:
+                                            connerror = "Connection failed";
+                                    }
                                     Session.this.close();
                                 }
                                 Session.this.notifyAll();
@@ -514,7 +538,7 @@ public class Session implements Resource.Resolver {
     }
 
     private class SWorker extends HackThread {
-
+        boolean alive;
         public SWorker() {
             super("Session writer");
             setDaemon(true);
@@ -522,9 +546,9 @@ public class Session implements Resource.Resolver {
 
         public void run() {
             try {
+                alive = true;
                 long to, last = 0, retries = 0;
-                while (true) {
-
+                while (alive) {
                     long now = System.currentTimeMillis();
                     if (state == "conn") {
                         if (now - last > 2000) {
@@ -535,9 +559,12 @@ public class Session implements Resource.Resolver {
                                     return;
                                 }
                             }
+                            String protocol = "Hafen";
+                            if (!Config.confid.equals(""))
+                                protocol += "/" + Config.confid;
                             PMessage msg = new PMessage(MSG_SESS);
                             msg.adduint16(2);
-                            msg.addstring("Hafen/ArdClient");
+                            msg.addstring(protocol);
                             msg.adduint16(PVER);
                             msg.addstring(username);
                             msg.adduint16(cookie.length);
@@ -670,9 +697,16 @@ public class Session implements Resource.Resolver {
                     }
                 }
             } finally {
-                ticker.interrupt();
-                rworker.interrupt();
+                synchronized (Session.this) {
+                    state = "dead";
+                    Session.this.notifyAll();
+                }
             }
+        }
+
+        public void interrupt() {
+            alive = false;
+            super.interrupt();
         }
     }
 
@@ -709,16 +743,15 @@ public class Session implements Resource.Resolver {
     }
 
     public void close() {
+        sworker.interrupt();
+        rworker.interrupt();
+        ticker.interrupt();
         if (this.alive() && this.username != null) {
             MappingClient.getInstance(username).SetEndpoint("");
             MappingClient.getInstance(username).EnableGridUploads(false);
             MappingClient.getInstance(username).EnableTracking(false);
             MappingClient.removeInstance(username);
         }
-        if (glob != null && glob.ui != null && glob.ui.get() != null && glob.ui.get().gui != null) {
-            glob.ui.get().gui.reqdestroy();
-        }
-        sworker.interrupt();
     }
 
     public synchronized boolean alive() {
@@ -749,7 +782,6 @@ public class Session implements Resource.Resolver {
         byte[] buf = new byte[msg.size() + 1];
         buf[0] = (byte) msg.type;
         msg.fin(buf, 1);
-        //  System.out.println(msg.type + " "+msg.size());
         sendmsg(buf);
     }
 

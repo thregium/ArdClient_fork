@@ -73,6 +73,7 @@ public class Config {
     public static URL resurl = geturl("haven.resurl", "https://game.havenandhearth.com/hres/");
     public static boolean dbtext = false;
     public static boolean profile = false;
+    public static boolean par = true;
     public static boolean simplemap = Utils.getprefb("simplemap", false);
     public static boolean rawrzmap = Utils.getprefb("rawrzmap", false);
     public static boolean trollexmap = Utils.getprefb("trollexmap", false);

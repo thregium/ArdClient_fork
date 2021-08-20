@@ -26,7 +26,6 @@
 
 package haven;
 
-import haven.purus.pbot.PBotUtils;
 import modification.configuration;
 import modification.dev;
 
@@ -37,7 +36,6 @@ import java.awt.event.MouseEvent;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
@@ -46,9 +44,9 @@ import java.util.TreeMap;
 public class UI {
     public RootWidget root;
     public static int MOD_SHIFT = 1, MOD_CTRL = 2, MOD_META = 4, MOD_SUPER = 8;
-    final protected LinkedList<Grab> keygrab = new LinkedList<Grab>(), mousegrab = new LinkedList<Grab>();
-    public Map<Integer, Widget> widgets = new TreeMap<Integer, Widget>();
-    public Map<Widget, Integer> rwidgets = new HashMap<Widget, Integer>();
+    protected final LinkedList<Grab> keygrab = new LinkedList<>(), mousegrab = new LinkedList<>();
+    public final Map<Integer, Widget> widgets = new TreeMap<>();
+    public final Map<Widget, Integer> rwidgets = new HashMap<>();
     Receiver rcvr;
     public Coord mc = Coord.z, lcc = Coord.z;
     public Session sess;
@@ -59,7 +57,7 @@ public class UI {
     double lastevent, lasttick;
     public Widget mouseon;
     public Console cons = new WidgetConsole();
-    private Collection<AfterDraw> afterdraws = new LinkedList<AfterDraw>();
+    private final Collection<AfterDraw> afterdraws = new LinkedList<>();
     public int beltWndId = -2;
     public GameUI gui;
     public WeakReference<Widget> realmchat;
@@ -79,8 +77,13 @@ public class UI {
 
     public interface Runner {
         public Session run(UI ui) throws InterruptedException;
-        public default void init(UI ui) {}
-        public default String title() {return(null);}
+
+        public default void init(UI ui) {
+        }
+
+        public default String title() {
+            return (null);
+        }
 
         public static class Proxy implements Runner {
             public final Runner back;
@@ -89,9 +92,17 @@ public class UI {
                 this.back = back;
             }
 
-            public Session run(UI ui) throws InterruptedException {return(back.run(ui));}
-            public void init(UI ui) {back.init(ui);}
-            public String title() {return(back.title());}
+            public Session run(UI ui) throws InterruptedException {
+                return (back.run(ui));
+            }
+
+            public void init(UI ui) {
+                back.init(ui);
+            }
+
+            public String title() {
+                return (back.title());
+            }
         }
     }
 
@@ -191,6 +202,15 @@ public class UI {
         }
     }
 
+    public int widgetid(Widget wdg) {
+        synchronized (widgets) {
+            Integer id = rwidgets.get(wdg);
+            if (id == null)
+                return (-1);
+            return (id);
+        }
+    }
+
     public void drawafter(AfterDraw ad) {
         synchronized (afterdraws) {
             afterdraws.add(ad);
@@ -238,14 +258,17 @@ public class UI {
         }
 
         Widget.Factory f;
-        if (type.startsWith("gfx/hud/rosters/"))
+        if (parent == beltWndId)
+            f = Widget.gettype2("inv-belt");
+        else if (type.startsWith("gfx/hud/rosters/"))
             f = Widget.gettype3(type);
         else
             f = Widget.gettype2(type);
+        if (f == null) {
+            dev.resourceLog("Bad widget name", type, cargs);
+            return;
+        }
         synchronized (this) {
-            if (parent == beltWndId)
-                f = Widget.gettype2("inv-belt");
-
             Widget wdg = f.create(this, cargs);
             wdg.attach(this);
             if (parent != -1) {
@@ -310,7 +333,7 @@ public class UI {
         synchronized (this) {
             Widget wdg = widgets.get(id);
             if (wdg == null) {
-                dev.resourceLog("Null parent widget addwidget", id, parent, pargs);
+                dev.resourceLog("Null child widget addwidget", id, parent, pargs);
 //                    throw (new UIException("Null child widget " + id + " added to " + parent, null, pargs));
                 return;
             }
@@ -434,7 +457,6 @@ public class UI {
     }
 
     private void removeid(Widget wdg) {
-        //System.out.println("Removing widget "+wdg.toString());
         wdg.removed();
         synchronized (rwidgets) {
             if (rwidgets.containsKey(wdg)) {
@@ -448,16 +470,8 @@ public class UI {
     }
 
     public void destroy(Widget wdg) {
-        for (Iterator<Grab> i = mousegrab.iterator(); i.hasNext(); ) {
-            Grab g = i.next();
-            if (g.wdg.hasparent(wdg))
-                i.remove();
-        }
-        for (Iterator<Grab> i = keygrab.iterator(); i.hasNext(); ) {
-            Grab g = i.next();
-            if (g.wdg.hasparent(wdg))
-                i.remove();
-        }
+        mousegrab.removeIf(g -> g.wdg.hasparent(wdg));
+        keygrab.removeIf(g -> g.wdg.hasparent(wdg));
         if (wdg != null) {
             removeid(wdg);
             wdg.reqdestroy();
@@ -488,7 +502,6 @@ public class UI {
 
     public void wdgmsg(Widget sender, String msg, Object... args) {
         int id;
-
         if (msg.endsWith("-identical"))
             return;
 
@@ -707,12 +720,20 @@ public class UI {
         return (Math.round(scale((float) v)));
     }
 
+    public static int rscale(double v) {
+        return ((int) Math.round(v * scalef));
+    }
+
     public static Coord scale(Coord v) {
         return (v.mul(scalef));
     }
 
     public static Coord scale(int x, int y) {
         return (scale(new Coord(x, y)));
+    }
+
+    public static Coord rscale(double x, double y) {
+        return (new Coord(rscale(x), rscale(y)));
     }
 
     public static Coord2d scale(Coord2d v) {

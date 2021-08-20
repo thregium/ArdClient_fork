@@ -80,8 +80,8 @@ public class Following extends Moving {
     }
 
     @Override
-    public void tick() {
-        super.tick();
+    public void ctick(int dt) {
+        super.ctick(dt);
         final Gob tgt = tgt();
         if (tgt != null) {
             final Holding holding = tgt.getattr(Holding.class);

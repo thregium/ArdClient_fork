@@ -468,60 +468,62 @@ public abstract class ItemInfo {
 
     public static List<ItemInfo> buildinfo(Owner owner, Raw raw) {
         List<ItemInfo> ret = new ArrayList<>();
-        for (Object o : raw.data) {
-            if (o instanceof Object[]) {
-                Object[] a = (Object[]) o;
-                Resource ttres = null;
-                InfoFactory f = null;
-                if (a[0] instanceof Integer) {
-                    ttres = owner.glob().sess.getres((Integer) a[0]).get();
-                } else if (a[0] instanceof Resource) {
-                    ttres = (Resource) a[0];
-                } else if (a[0] instanceof Indir) {
-                    ttres = (Resource) ((Indir) a[0]).get();
-                } else if (a[0] instanceof InfoFactory) {
-                    f = (InfoFactory) a[0];
-                } else {
-                    throw (new ClassCastException("Unexpected info specification " + a[0].getClass()));
-                }
-
-                if (ttres != null) {
-                    if (f == null)
-                        f = customFactories.get(ttres.name);
-                    if (f == null)
-                        f = ttres.getcode(InfoFactory.class, true);
-
-                    if (f != null) {
-                        ItemInfo inf = f.build(owner, raw, a);
-                        if (inf != null)
-                            ret.add(inf);
+        if (raw != null) {
+            for (Object o : raw.data) {
+                if (o instanceof Object[]) {
+                    Object[] a = (Object[]) o;
+                    Resource ttres = null;
+                    InfoFactory f = null;
+                    if (a[0] instanceof Integer) {
+                        ttres = owner.glob().sess.getres((Integer) a[0]).get();
+                    } else if (a[0] instanceof Resource) {
+                        ttres = (Resource) a[0];
+                    } else if (a[0] instanceof Indir) {
+                        ttres = (Resource) ((Indir) a[0]).get();
+                    } else if (a[0] instanceof InfoFactory) {
+                        f = (InfoFactory) a[0];
+                    } else {
+                        throw (new ClassCastException("Unexpected info specification " + a[0].getClass()));
                     }
+
+                    if (ttres != null) {
+                        if (f == null)
+                            f = customFactories.get(ttres.name);
+                        if (f == null)
+                            f = ttres.getcode(InfoFactory.class, true);
+
+                        if (f != null) {
+                            ItemInfo inf = f.build(owner, raw, a);
+                            if (inf != null)
+                                ret.add(inf);
+                        }
+                    }
+                    if (ttres == null || f == null)
+                        System.err.printf("ItemInfo for %s %s %s %s %s failed!%n", ttres, f, owner, raw, Arrays.toString(a));
+                } else if (o instanceof String) {
+                    ret.add(new AdHoc(owner, (String) o));
+                } else {
+                    throw (new ClassCastException("Unexpected object type " + o.getClass() + " in item info array."));
                 }
-                if (ttres == null || f == null)
-                    System.err.printf("ItemInfo for %s %s %s %s %s failed!%n", ttres, f, owner, raw, Arrays.toString(a));
-            } else if (o instanceof String) {
-                ret.add(new AdHoc(owner, (String) o));
-            } else {
-                throw (new ClassCastException("Unexpected object type " + o.getClass() + " in item info array."));
             }
-        }
-        final List<String> skipList = new ArrayList<>(Arrays.asList("TipLabel", "haven.VMeter"));
-        String s = null;
-        try {
-            if (owner instanceof ResOwner)
-                s = ((ResOwner) owner).resource().name;
-            else if (owner instanceof MenuGrid.PagButton)
-                s = ((MenuGrid.PagButton) owner).res.name;
-            else if (owner instanceof MenuGrid.Pagina)
-                s = ((MenuGrid.Pagina) owner).res().name;
-            else if (skipList.contains(owner.getClass().getCanonicalName())) {
-            } else
+            final List<String> skipList = new ArrayList<>(Arrays.asList("TipLabel", "haven.VMeter"));
+            String s = null;
+            try {
+                if (owner instanceof ResOwner)
+                    s = ((ResOwner) owner).resource().name;
+                else if (owner instanceof MenuGrid.PagButton)
+                    s = ((MenuGrid.PagButton) owner).res.name;
+                else if (owner instanceof MenuGrid.Pagina)
+                    s = ((MenuGrid.Pagina) owner).res().name;
+                else if (skipList.contains(owner.getClass().getCanonicalName())) {
+                } else
+                    s = owner.toString();
+            } catch (Exception e) {
                 s = owner.toString();
-        } catch (Exception e) {
-            s = owner.toString();
+            }
+            if (s != null)
+                ret.add(new AdHoc(owner, "\n" + s));
         }
-        if (s != null)
-            ret.add(new AdHoc(owner, "\n" + s));
         return (ret);
     }
 
