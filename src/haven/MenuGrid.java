@@ -168,9 +168,7 @@ public class MenuGrid extends Widget {
         public void use(Interaction iact) {
             Resource.AButton btn = res.layer(Resource.action);
             if (btn != null) {
-                Object[] args = Utils.extend(new Object[0], btn.ad);
-                args = Utils.extend(args, Integer.valueOf(pag.scm.ui.modflags()));
-                pag.scm.wdgmsg("act", args);
+                use();
             }
         }
 
