@@ -224,11 +224,15 @@ public class UI {
     }
 
     public void draw(GOut g) {
-        root.draw(g);
-        synchronized (afterdraws) {
-            for (AfterDraw ad : afterdraws)
-                ad.draw(g);
-            afterdraws.clear();
+        try {
+            root.draw(g);
+            synchronized (afterdraws) {
+                for (AfterDraw ad : afterdraws)
+                    ad.draw(g);
+                afterdraws.clear();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

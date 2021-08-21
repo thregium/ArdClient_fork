@@ -28,10 +28,8 @@ public class SliceCheese implements Runnable {
         UI ui = gui.ui;
         try {
             final List<PBotItem> trays = new ArrayList<>();
-            final List<PBotInventory> invs = new ArrayList<>();
-            final List<Window> wnds = PBotWindowAPI.getWindows(ui, rackWndName);
+            final List<PBotInventory> invs = new ArrayList<>(PBotUtils.getAllInventories(ui));
 
-            wnds.forEach(w -> invs.addAll(PBotWindowAPI.getInventories(w)));
             invs.forEach(i -> trays.addAll(i.getInventoryItemsByResnames(fullTrayResName)));
 
             trays.forEach(t -> {
