@@ -51,7 +51,6 @@ public class TakeTrays implements Runnable {
 
             long time = System.currentTimeMillis();
             while (System.currentTimeMillis() - time < 5000) {
-                {
                     debug(pinv, otherinvs, invs);
                     final List<PBotItem> racktrays = new ArrayList<>();
                     invs.forEach(i -> racktrays.addAll(i.getInventoryItemsByResnames(fullTrayResName)));
@@ -66,27 +65,26 @@ public class TakeTrays implements Runnable {
                     }, 1000)) {
                         break;
                     }
-                }
 
-                {
                     debug(pinv, otherinvs, invs);
+                    int leaveCount = count;
                     for (PBotInventory inv : otherinvs) {
                         final List<PBotItem> trays = new ArrayList<>(pinv.getInventoryItemsByResnames(fullTrayResName));
                         if (trays.isEmpty())
                             break;
-                        int count = Math.min(trays.size(), freeSpaceForTrays(inv));
-                        int initCount = inv.getInventoryItemsByResnames(fullTrayResName).size();
-                        for (int i = 0; i < count; i++)
+                        int lastCount = Math.min(trays.size(), leaveCount);
+                        leaveCount -= lastCount;
+                        int inInvCount = inv.getInventoryItemsByResnames(fullTrayResName).size();
+                        for (int i = 0; i < lastCount; i++)
                             inv.transferLastItemToInventoryFromPlayerInventory();
 
                         if (!waitFor(() -> {
                             debug(pinv, otherinvs, invs);
-                            return (inv.getInventoryItemsByResnames(fullTrayResName).size() != count + initCount);
+                            return (inv.getInventoryItemsByResnames(fullTrayResName).size() != lastCount + inInvCount);
                         }, 1000)) {
                             break;
                         }
                     }
-                }
 
                 if (getInventoryItemsByResnames(invs, fullTrayResName).isEmpty() || freeSpaceForTrays(pinv) == 0)
                     break;

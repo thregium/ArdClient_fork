@@ -237,14 +237,10 @@ public class UI {
     public int next_predicted_id = 2;
 
     public void newwidget(int id, String type, int parent, Object[] pargs, Object... cargs) throws InterruptedException {
-
-        // System.out.println("Widget ID : "+id+" Type : "+type+" Parent : "+parent);
         if (Config.quickbelt && type.equals("wnd") && cargs[1].equals("Belt")) {
-            // use custom belt window
             type = "alt-wnd-belt";
             beltWndId = id;
         } else if (type.equals("inv") && pargs[0].toString().equals("study")) {
-            // use custom study inventory
             type = "inv-study";
         }
 
@@ -563,43 +559,55 @@ public class UI {
     }
 
     public void type(KeyEvent ev) {
-        setmods(ev);
-        for (Grab g : c(keygrab)) {
-            //Make sure this wdg is visible the entire way up
-            if (g.wdg.tvisible()) {
-                if (g.wdg.type(ev.getKeyChar(), ev))
-                    return;
+        try {
+            setmods(ev);
+            for (Grab g : c(keygrab)) {
+                //Make sure this wdg is visible the entire way up
+                if (g.wdg.tvisible()) {
+                    if (g.wdg.type(ev.getKeyChar(), ev))
+                        return;
+                }
             }
+            if (!root.type(ev.getKeyChar(), ev))
+                root.globtype(ev.getKeyChar(), ev);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        if (!root.type(ev.getKeyChar(), ev))
-            root.globtype(ev.getKeyChar(), ev);
     }
 
     public void keydown(KeyEvent ev) {
-        setmods(ev);
-        keycode = ev.getKeyCode();
-        for (Grab g : c(keygrab)) {
-            //Make sure this wdg is visible the entire way up
-            if (g.wdg.tvisible()) {
-                if (g.wdg.keydown(ev))
-                    return;
+        try {
+            setmods(ev);
+            keycode = ev.getKeyCode();
+            for (Grab g : c(keygrab)) {
+                //Make sure this wdg is visible the entire way up
+                if (g.wdg.tvisible()) {
+                    if (g.wdg.keydown(ev))
+                        return;
+                }
             }
+            if (!root.keydown(ev))
+                root.globtype((char) 0, ev);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        if (!root.keydown(ev))
-            root.globtype((char) 0, ev);
     }
 
     public void keyup(KeyEvent ev) {
-        setmods(ev);
-        keycode = -1;
-        for (Grab g : c(keygrab)) {
-            //Make sure this wdg is visible the entire way up
-            if (g.wdg.tvisible()) {
-                if (g.wdg.keyup(ev))
-                    return;
+        try {
+            setmods(ev);
+            keycode = -1;
+            for (Grab g : c(keygrab)) {
+                //Make sure this wdg is visible the entire way up
+                if (g.wdg.tvisible()) {
+                    if (g.wdg.keyup(ev))
+                        return;
+                }
             }
+            root.keyup(ev);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        root.keyup(ev);
     }
 
     private Coord wdgxlate(Coord c, Widget wdg) {

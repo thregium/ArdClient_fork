@@ -912,8 +912,9 @@ public class MapWnd extends ResizableWnd {
                 Coord ploc = xlate(loc);
                 if (ploc != null) {
                     double angle = 0;
-                    if (mv.player() != null)
-                        angle = mv.player().geta();
+                    Gob player = mv.player();
+                    if (player != null)
+                        angle = player.geta();
 
                     g.chcolor(255, 0, 0, 255);
 //                    g.image(plx, ploc.sub(plx.sz().div(2)));
@@ -938,7 +939,7 @@ public class MapWnd extends ResizableWnd {
                 if (Config.mapdrawparty)
                     ignore = drawparty(g);
                 g.chcolor();
-            } catch (Loading l) {
+            } catch (Exception l) {
             }
         }
 
