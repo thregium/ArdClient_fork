@@ -1,7 +1,6 @@
 package haven;
 
 import haven.purus.pbot.PBotScriptlistItem;
-import haven.purus.pbot.PBotUtils;
 import haven.sloth.gui.MovableWidget;
 
 import java.awt.Color;
@@ -171,51 +170,66 @@ public class BeltWnd extends MovableWidget {
         }
 
         private void use() {
-            if (res != null && res.get() != null) {
-                if (Config.confirmmagic && res.get().name.startsWith("paginae/seid/") && !res.get().name.equals("paginae/seid/rawhide")) {
-                    Window confirmwnd = new Window(new Coord(225, 100), "Confirm") {
-                        @Override
-                        public void wdgmsg(Widget sender, String msg, Object... args) {
-                            if (sender == cbtn)
-                                reqdestroy();
-                            else
-                                super.wdgmsg(sender, msg, args);
-                        }
+            Resource resource = res == null ? null : res.get();
+            if (resource != null) {
+                GameUI gui = getparent(GameUI.class);
+                MenuGrid.Pagina pag = gui.menu.paginafor(res);
+                try {
+                    MenuGrid.PagButton btn = pag.button();
+                    MenuGrid.Interaction iact = new MenuGrid.Interaction(1, ui.modflags());
+                    if (btn != null && resource.layer(Resource.action) != null) {
+                        if (Config.confirmmagic && resource.name.startsWith("paginae/seid/") && !resource.name.equals("paginae/seid/rawhide")) {
+                            Window confirmwnd = new Window(new Coord(225, 100), "Confirm") {
+                                @Override
+                                public void wdgmsg(Widget sender, String msg, Object... args) {
+                                    if (sender == cbtn)
+                                        reqdestroy();
+                                    else
+                                        super.wdgmsg(sender, msg, args);
+                                }
 
-                        @Override
-                        public boolean type(char key, KeyEvent ev) {
-                            if (key == 27) {
-                                reqdestroy();
-                                return true;
-                            }
-                            return super.type(key, ev);
-                        }
-                    };
+                                @Override
+                                public boolean type(char key, KeyEvent ev) {
+                                    if (key == 27) {
+                                        reqdestroy();
+                                        return true;
+                                    }
+                                    return super.type(key, ev);
+                                }
+                            };
 
-                    confirmwnd.add(new Label(Resource.getLocString(Resource.BUNDLE_LABEL, "Using magic costs experience points. Are you sure you want to proceed?")),
-                            new Coord(10, 20));
-                    confirmwnd.pack();
-                    Button yesbtn = new Button(70, "Yes") {
-                        @Override
-                        public void click() {
-                            ui.gui.wdgmsg("belt", slot, 1, ui.modflags());
-                            parent.reqdestroy();
-                        }
-                    };
-                    confirmwnd.add(yesbtn, new Coord(confirmwnd.sz.x / 2 - 60 - yesbtn.sz.x, 60));
-                    Button nobtn = new Button(70, "No") {
-                        @Override
-                        public void click() {
-                            parent.reqdestroy();
-                        }
-                    };
-                    confirmwnd.add(nobtn, new Coord(confirmwnd.sz.x / 2 + 20, 60));
-                    confirmwnd.pack();
+                            confirmwnd.add(new Label(Resource.getLocString(Resource.BUNDLE_LABEL, "Using magic costs experience points. Are you sure you want to proceed?")),
+                                    new Coord(10, 20));
+                            confirmwnd.pack();
+                            Button yesbtn = new Button(70, "Yes") {
+                                @Override
+                                public void click() {
+                                    gui.menu.use(btn, iact, false);
+                                    parent.reqdestroy();
+                                }
+                            };
+                            confirmwnd.add(yesbtn, new Coord(confirmwnd.sz.x / 2 - 60 - yesbtn.sz.x, 60));
+                            Button nobtn = new Button(70, "No") {
+                                @Override
+                                public void click() {
+                                    parent.reqdestroy();
+                                }
+                            };
+                            confirmwnd.add(nobtn, new Coord(confirmwnd.sz.x / 2 + 20, 60));
+                            confirmwnd.pack();
 
-                    ui.gui.add(confirmwnd, new Coord(ui.gui.sz.x / 2 - confirmwnd.sz.x / 2, ui.gui.sz.y / 2 - 200));
-                    confirmwnd.show();
-                } else
-                    ui.gui.wdgmsg("belt", slot, 1, ui.modflags());
+                            ui.gui.add(confirmwnd, new Coord(ui.gui.sz.x / 2 - confirmwnd.sz.x / 2, ui.gui.sz.y / 2 - 200));
+                            confirmwnd.show();
+                        } else {
+                            gui.menu.use(btn, iact, false);
+                        }
+                    } else {
+                        Object[] args = {slot, iact.btn, iact.modflags};
+                        gui.wdgmsg("belt", args);
+                    }
+                } catch (Exception l) {
+                    l.printStackTrace();
+                }
             } else if (pag != null) {
                 pag.use();
             } else if (script != null) {
@@ -313,13 +327,13 @@ public class BeltWnd extends MovableWidget {
                         //reset for now and wait for server to send us uimsg if this was valid drop
                         reset();
                         return true;
-                    } else if (thing instanceof MenuGrid.SpecialPagina){
+                    } else if (thing instanceof MenuGrid.SpecialPagina) {
                         //Not normal stuff.
                         setPag((MenuGrid.SpecialPagina) thing);
                         //delete anything that might already belong to this slot
                         ui.gui.wdgmsg("setbelt", slot, 1);
                         return true;
-                    } else if (thing instanceof PBotScriptlistItem){
+                    } else if (thing instanceof PBotScriptlistItem) {
                         //Not normal stuff.
                         setScript((PBotScriptlistItem) thing);
                         //delete anything that might already belong to this slot
