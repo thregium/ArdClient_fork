@@ -15,7 +15,7 @@ public class HorseRoster extends CattleRoster<Horse> {
             new Column<>(Resource.local().load("gfx/hud/rosters/sex"), Comparator.comparing((Horse e) -> e.stallion).reversed(), 20).runon(),
             new Column<>(Resource.local().load("gfx/hud/rosters/growth"), Comparator.comparing((Horse e) -> e.foal).reversed(), 20).runon(),
             new Column<>(Resource.local().load("gfx/hud/rosters/deadp"), Comparator.comparing((Horse e) -> e.dead).reversed(), 20).runon(),
-            new Column<>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Horse e) -> e.pregnant).reversed(), 20),
+            new Column<>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Horse e) -> e.pregnant).reversed(), 20).runon(),
             new Column<>(Resource.local().load("gfx/hud/rosters/lactate"), Comparator.comparing((Horse e) -> e.lactate).reversed(), 20),
 
             new Column<>(Resource.local().load("gfx/hud/rosters/quality"), Comparator.comparing((Horse e) -> e.q).reversed()),

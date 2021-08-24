@@ -15,7 +15,7 @@ public class SheepRoster extends CattleRoster<Sheep> {
             new Column<>(Resource.local().load("gfx/hud/rosters/sex"), Comparator.comparing((Sheep e) -> e.ram).reversed(), 20).runon(),
             new Column<>(Resource.local().load("gfx/hud/rosters/growth"), Comparator.comparing((Sheep e) -> e.lamb).reversed(), 20).runon(),
             new Column<>(Resource.local().load("gfx/hud/rosters/deadp"), Comparator.comparing((Sheep e) -> e.dead).reversed(), 20).runon(),
-            new Column<>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Sheep e) -> e.pregnant).reversed(), 20),
+            new Column<>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Sheep e) -> e.pregnant).reversed(), 20).runon(),
             new Column<>(Resource.local().load("gfx/hud/rosters/lactate"), Comparator.comparing((Sheep e) -> e.lactate).reversed(), 20),
 
             new Column<>(Resource.local().load("gfx/hud/rosters/quality"), Comparator.comparing((Sheep e) -> e.q).reversed()),

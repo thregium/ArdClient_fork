@@ -15,7 +15,7 @@ public class PigRoster extends CattleRoster<Pig> {
             new Column<>(Resource.local().load("gfx/hud/rosters/sex"), Comparator.comparing((Pig e) -> e.hog).reversed(), 20).runon(),
             new Column<>(Resource.local().load("gfx/hud/rosters/growth"), Comparator.comparing((Pig e) -> e.piglet).reversed(), 20).runon(),
             new Column<>(Resource.local().load("gfx/hud/rosters/deadp"), Comparator.comparing((Pig e) -> e.dead).reversed(), 20).runon(),
-            new Column<>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Pig e) -> e.pregnant).reversed(), 20),
+            new Column<>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Pig e) -> e.pregnant).reversed(), 20).runon(),
             new Column<>(Resource.local().load("gfx/hud/rosters/lactate"), Comparator.comparing((Pig e) -> e.lactate).reversed(), 20),
 
             new Column<>(Resource.local().load("gfx/hud/rosters/quality"), Comparator.comparing((Pig e) -> e.q).reversed()),

@@ -583,8 +583,8 @@ public class AreaPicker extends Window implements Runnable {
                     objects.remove(pgob);
                     continue;
                 }
-                for (int i = 0; i < retry; i++) {
-                    botLog("Gob is " + p + " of " + currentgoblist.size() + ". Try is " + (i + 1) + " of " + retry, Color.YELLOW);
+                for (int i = 0; ; i++) {
+                    botLog("Gob is " + p + " of " + currentgoblist.size() + ". Try is " + (i + 1), Color.YELLOW);
                     if (cr == -1 || cr == 0) {
                         if (!freeSlots() || PBotUtils.getItemAtHand(ui) != null) {
                             botLog("Not enough space for item. Stopping...", Color.WHITE);
@@ -673,8 +673,6 @@ public class AreaPicker extends Window implements Runnable {
                         break;
                     }
                     sleep(1);
-                    if (i + 1 == retry)
-                        objects.remove(pgob);
                 }
             }
 
@@ -714,9 +712,9 @@ public class AreaPicker extends Window implements Runnable {
     public List<PBotGob> storaging(List<PBotGob> storages) throws InterruptedException {
         List<PBotGob> output = new ArrayList<>(storages);
         for (int p = 0; p < storages.size(); p++) {
-            for (int i = 0; i < retry; i++) {
+            for (int i = 0; ; i++) {
                 pauseCheck();
-                botLog("Storage is " + (p + 1) + " of " + storages.size() + ". Try is " + (i + 1) + " of " + retry, Color.YELLOW);
+                botLog("Storage is " + (p + 1) + " of " + storages.size() + ". Try is " + (i + 1), Color.YELLOW);
                 if (PBotGobAPI.findGobById(ui, storages.get(p).getGobId()) == null) {
                     botLog("Object not found. Skipping...", Color.WHITE);
                     break;

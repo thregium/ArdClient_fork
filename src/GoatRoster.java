@@ -15,7 +15,7 @@ public class GoatRoster extends CattleRoster<Goat> {
             new Column<>(Resource.local().load("gfx/hud/rosters/sex"), Comparator.comparing((Goat e) -> e.billy).reversed(), 20).runon(),
             new Column<>(Resource.local().load("gfx/hud/rosters/growth"), Comparator.comparing((Goat e) -> e.kid).reversed(), 20).runon(),
             new Column<>(Resource.local().load("gfx/hud/rosters/deadp"), Comparator.comparing((Goat e) -> e.dead).reversed(), 20).runon(),
-            new Column<>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Goat e) -> e.pregnant).reversed(), 20),
+            new Column<>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Goat e) -> e.pregnant).reversed(), 20).runon(),
             new Column<>(Resource.local().load("gfx/hud/rosters/lactate"), Comparator.comparing((Goat e) -> e.lactate).reversed(), 20),
 
 

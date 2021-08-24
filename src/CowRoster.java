@@ -15,7 +15,7 @@ public class CowRoster extends CattleRoster<Ochs> {
             new Column<>(Resource.local().load("gfx/hud/rosters/sex"), Comparator.comparing((Ochs e) -> e.bull).reversed(), 20).runon(),
             new Column<>(Resource.local().load("gfx/hud/rosters/growth"), Comparator.comparing((Ochs e) -> e.calf).reversed(), 20).runon(),
             new Column<>(Resource.local().load("gfx/hud/rosters/deadp"), Comparator.comparing((Ochs e) -> e.dead).reversed(), 20).runon(),
-            new Column<>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Ochs e) -> e.pregnant).reversed(), 20),
+            new Column<>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Ochs e) -> e.pregnant).reversed(), 20).runon(),
             new Column<>(Resource.local().load("gfx/hud/rosters/lactate"), Comparator.comparing((Ochs e) -> e.lactate).reversed(), 20),
 
             new Column<>(Resource.local().load("gfx/hud/rosters/quality"), Comparator.comparing((Ochs e) -> e.q).reversed()),

@@ -223,7 +223,6 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
 
     public abstract T parse(Object... args);
 
-    public static RosterButton rbtn;
     public void uimsg(String msg, Object... args) {
         if (msg == "add") {
             addentry(parse(args));
@@ -234,14 +233,9 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
         } else if (msg == "rm") {
             delentry((Long) args[0]);
         } else if (msg == "addto") {
-            Widget wdg = ui.getwidget((Integer) args[0]);
-            GameUI gui = (GameUI) wdg;
-            Indir<Resource> res = ui.sess.getres((Integer) args[1]);
-            Pagina pag = gui.menu.paginafor(res);
-            MenuGrid.PagButton pagButton = Loading.waitfor(pag::button);
-            if (rbtn == null)
-                rbtn = pagButton instanceof RosterButton ? (RosterButton) pagButton : new RosterButton(pag);
-            RosterButton btn = rbtn;
+            GameUI gui = (GameUI)ui.getwidget((Integer)args[0]);
+            Pagina pag = gui.menu.paginafor(ui.sess.getres((Integer)args[1]));
+            RosterButton btn = (RosterButton)Loading.waitfor(pag::button);
             btn.add(this);
         } else {
             super.uimsg(msg, args);
