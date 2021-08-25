@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import static haven.OCache.posres;
 
@@ -71,11 +73,11 @@ public class Pathfinder extends Thread {
     HashSet<String> inaccessibleTiles = new HashSet<String>() {{
         add("gfx/tiles/nil");
         add("gfx/tiles/deep");
+        add("gfx/tiles/cave");
+        add("gfx/tiles/rocks/.*");
     }};
 
-    HashSet<String> whitelistedGobs = new HashSet<String>() {{
-        add("gfx/terobjs/arch/hwall");
-    }};
+    HashSet<String> whitelistedGobs = new HashSet<String>();
 
     private Coord coordToTile(Coord2d c) {
         return c.div(11, 11).floor();
@@ -132,11 +134,20 @@ public class Pathfinder extends Thread {
                 // Get rid of negative coordinates
                 origin = origin.sub(11 * 45, 11 * 45);
 
+                Predicate<String> inaccess = s -> {
+                    for (String act : inaccessibleTiles) {
+                        Pattern pattern = Pattern.compile(act);
+                        if (pattern.matcher(s).matches())
+                            return (true);
+                    }
+                    return (false);
+                };
+
                 for (int i = 1; i < 90; i++) {
                     for (int j = 1; j < 90; j++) {
                         int t = gui.map.glob.map.gettile(origin.div(11).floor().add(i, j));
                         Resource res = gui.map.glob.map.tilesetr(t);
-                        if (res != null && inaccessibleTiles.contains(res.name)) {
+                        if (res != null && inaccess.test(res.name)) {
                             accessMatrix[i][j] = 2;
                         }
                     }
@@ -210,7 +221,6 @@ public class Pathfinder extends Thread {
 
                     g.setColor(Color.WHITE);
                     g.fillRect(destTile.x * 11, destTile.y * 11, 11, 11);
-
                 }
                 // Only pathfind within 37 tiles to every distance around player TODO: Find the precise distance where objects are loaded
                 Coord playerTile = coordToTile(gui.map.player().rc.sub(origin));
@@ -236,28 +246,41 @@ public class Pathfinder extends Thread {
                         }
                     }
                 }
-                // Move player to tile that is accessible
-                playerTile = coordToTile(gui.map.player().rc.sub(origin));
+
                 // While player is in tile that is inaccessible, try to move player to accessible tile
                 Random rng = new Random(1337);
                 int timeout = 10000;
                 long startTime = System.currentTimeMillis();
-                while (accessMatrix[playerTile.x][playerTile.y] > 0) {
-                    if (System.currentTimeMillis() - startTime > timeout) {
-                        // Timeout after 10 seconds
-                        return;
-                    }
-                    // Randomly click around and hope that player moves to correct position, timeout after few retries
-                    gui.map.wdgmsg("click", PBotUtils.getCenterScreenCoord(gui.ui), gui.map.player().rc.add(rng.nextInt() % 11, rng.nextInt() % 11).floor(posres), 1, 0);
-                    gui.map.pllastcc = gui.map.player().rc.add(rng.nextInt() % 11, rng.nextInt() % 11);
-                    do {
-                        sleep(250);
-                        if (stop)
-                            return;
-                    } while (gui.map.player().getv() != 0);
+
+                /** Unstack cycle
+                 * while player is standing on inaccessible tile do a random click within 11 pixels
+                 */
+                while (true) {
+                    // Move player to tile that is accessible
                     playerTile = coordToTile(gui.map.player().rc.sub(origin));
+                    int t = gui.map.glob.map.gettile(origin.div(11).floor().add(playerTile.x, playerTile.y));
+                    Resource res = gui.map.glob.map.tilesetr(t);
+                    if (res != null && inaccess.test(res.name)) {
+                        accessMatrix[playerTile.x][playerTile.y] = 2;
+                    }
+
+                    if (accessMatrix[playerTile.x][playerTile.y] > 0) {
+                        if (System.currentTimeMillis() - startTime > timeout) {
+                            // Timeout after 10 seconds
+                            return;
+                        }
+                        // Randomly click around and hope that player moves to correct position, timeout after few retries
+                        gui.map.wdgmsg("click", PBotUtils.getCenterScreenCoord(gui.ui), gui.map.player().rc.add(rng.nextInt() % 11, rng.nextInt() % 11).floor(posres), 1, 0);
+                        gui.map.pllastcc = gui.map.player().rc.add(rng.nextInt() % 11, rng.nextInt() % 11);
+                        do {
+                            sleep(250);
+                            if (stop)
+                                return;
+                        } while (gui.map.player().getv() != 0);
+                    } else {
+                        break;
+                    }
                 }
-                playerTile = coordToTile(gui.map.player().rc.sub(origin));
                 clickTile(playerTile, origin);
                 // Find route
                 if (!playerTile.equals(destTile)) { // If player is already in the destination tile, skip this

@@ -497,7 +497,7 @@ public class FlowerMenu extends Widget {
 
                 try {
                     if (option.name.contains("Giddy") && Config.horseautorun) {
-                        horsemounter = new Thread(new FlowerMenu.horsemounter());
+                        horsemounter = new Thread(new horsemounter());
                         horsemounter.start();
                     }
                 } catch (Exception e) {
