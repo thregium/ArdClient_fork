@@ -41,7 +41,7 @@ public class Decal implements Sprite.Factory {
         } else {
             pc = new Coord3f((float) (sdt.float16() * MCache.tilesz.x), -(float) (sdt.float16() * MCache.tilesz.y), 0);
         }
-        if (owner.getres().toString().contains("gfx/terobjs/cupboard") && Config.flatcupboards)
+        if (owner.getres() != null && owner.getres().toString().contains("gfx/terobjs/cupboard") && Config.flatcupboards)
             pc = Coord3f.of(0, 0, 1);
         Location offset = null;
         if (eq == null)
@@ -62,6 +62,7 @@ public class Decal implements Sprite.Factory {
         return (new StaticSprite(owner, res, parts) {
             GLState normal = cpeq != null ? cpeq : cpoffset;
             GLState xray = GLState.compose(normal, States.xray);
+
             @Override
             public boolean setup(RenderList rl) {
                 for (int i = 0; i < parts.length; i++) {
