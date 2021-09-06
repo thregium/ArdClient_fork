@@ -348,7 +348,7 @@ public class Resource implements Serializable {
 
         public InputStream get(String name) throws FileNotFoundException {
             String full = "/" + base + "/" + name + ".res";
-            if (name.contains("cupboard") && !Config.flatcupboards)
+            if (name.equals("gfx/terobjs/cupboard") && !Config.flatcupboards)
                 return null;
             InputStream s = Resource.class.getResourceAsStream(full);
             if (s == null)
@@ -548,16 +548,13 @@ public class Resource implements Serializable {
         private void handle(Queued res) {
             for (ResSource src : sources) {
                 try {
-                    InputStream in = src.get(res.name);
-                    try {
+                    try (InputStream in = src.get(res.name)) {
                         Resource ret = new Resource(this, res.name, res.ver);
                         ret.source = src;
                         ret.load(in);
                         res.res = ret;
                         res.error = null;
                         break;
-                    } finally {
-                        in.close();
                     }
                 } catch (Throwable t) {
                     LoadException error;
@@ -1964,15 +1961,18 @@ public class Resource implements Serializable {
     private void load(InputStream st) throws IOException {
         Message in = new StreamMessage(st);
         byte[] sig = "Haven Resource 1".getBytes(Utils.ascii);
-        if (!Arrays.equals(sig, in.bytes(sig.length)))
+        if (!Arrays.equals(sig, in.bytes(sig.length))) {
+            System.out.printf("Invalid res signature %s%n", this);
             throw (new LoadException("Invalid res signature", this));
+        }
         int ver = in.uint16();
-        List<Layer> layers = new LinkedList<Layer>();
+        List<Layer> layers = new LinkedList<>();
         if (this.ver == -1)
             this.ver = ver;
-        else if (ver != this.ver)
+        else if (ver != this.ver) {
+            System.out.printf("Wrong res version (%d != %d) %s%n", ver, this.ver, this);
             throw (new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
-//            System.out.println("Wrong res version (" + ver + " != " + this.ver + ") " +  this);
+        }
         while (!in.eom()) {
             String title = in.string();
 //            dev.resourceLog("DECODING", this, title);

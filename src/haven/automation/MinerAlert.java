@@ -179,7 +179,7 @@ public class MinerAlert extends Window {
             @Override
             public void click() {
                 terminate = false;
-                runner = new Thread(new MinerAlert.runner(), "Miner Alert");
+                runner = new Thread(new runner(), "Miner Alert");
                 runner.start();
             }
         };

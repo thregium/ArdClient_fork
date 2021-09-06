@@ -26,6 +26,8 @@
 
 package haven;
 
+import modification.Decal;
+
 import java.lang.reflect.Constructor;
 import java.util.LinkedList;
 import java.util.List;
@@ -161,6 +163,10 @@ public abstract class Sprite implements Rendered {
         }
         if (res.name.equals("gfx/terobjs/thingwall")) {
             Factory f = new modification.Thingwall();
+            return (f.create(owner, res, sdt));
+        }
+        if (res.name.startsWith("gfx/terobjs/items/decal-") || res.name.startsWith("gfx/terobjs/items/parchment-decal")) {
+            Factory f = new Decal();
             return (f.create(owner, res, sdt));
         }
         {

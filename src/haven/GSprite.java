@@ -95,6 +95,9 @@ public abstract class GSprite implements Drawn {
     }
 
     public static GSprite create(Owner owner, Resource res, Message sdt) {
+        if (res.name.equals("gfx/invobjs/parchment-decal")) {
+            return (new modification.DecalItem(owner, res, sdt));
+        }
         {
             Factory f = res.getcode(Factory.class, false);
             if (f != null)

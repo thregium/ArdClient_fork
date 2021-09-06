@@ -99,12 +99,12 @@ public class Pointer extends Widget {
         g.vertex(localCoord2.add(localCoord3).add(localCoord3.y / 3, -localCoord3.x / 3)); //The other
         localBGL.glEnd();
         localBGL.glDisable(2881);
-        if (this.icon != null) {
+        if (icon != null) {
             try {
-                if (this.licon == null) {
-                    this.licon = ((this.icon.get()).layer(Resource.imgc)).tex();
+                if (licon == null) {
+                    licon = ((icon.get()).layer(Resource.imgc)).tex();
                 }
-                g.aimage(this.licon, localCoord2.add(localCoord3), 0.5D, 0.5D);
+                g.aimage(licon, localCoord2.add(localCoord3), 0.5D, 0.5D);
                 if (configuration.showpointdist)
                     g.aimage(Text.renderstroked(dist + "", Color.WHITE, Color.BLACK, Text.num12boldFnd).tex(), localCoord2.add(localCoord3), 0.5, 0.5);
             } catch (Loading localLoading) {
@@ -139,12 +139,12 @@ public class Pointer extends Widget {
         g.gl.glEnd();
         g.gl.glDisable(GL2.GL_POLYGON_SMOOTH);
 
-        if (this.icon != null) {
+        if (icon != null) {
             try {
-                if (this.licon == null) {
-                    this.licon = ((this.icon.get()).layer(Resource.imgc)).tex();
+                if (licon == null) {
+                    licon = ((icon.get()).layer(Resource.imgc)).tex();
                 }
-                g.aimage(this.licon, bc.add(Coord.sc(a, -30)), 0.5, 0.5);
+                g.aimage(licon, bc.add(Coord.sc(a, -30)), 0.5, 0.5);
                 if (configuration.showpointdist)
                     g.aimage(Text.renderstroked(dist + "", Color.WHITE, Color.BLACK, Text.num12boldFnd).tex(), bc.add(Coord.sc(a, -30)), 0.5, 0.5);
             } catch (Loading localLoading) {

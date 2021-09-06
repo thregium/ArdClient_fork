@@ -156,7 +156,7 @@ public abstract class TexGL extends Tex {
         }
     }
 
-    private final TexDraw draw = new TexDraw(this);
+    public final TexDraw draw = new TexDraw(this);
 
     public GLState draw() {
         return (draw);
@@ -236,7 +236,7 @@ public abstract class TexGL extends Tex {
         }
     }
 
-    private final TexClip clip = new TexClip(this);
+    public final TexClip clip = new TexClip(this);
 
     public GLState clip() {
         return (clip);
