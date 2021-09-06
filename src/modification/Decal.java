@@ -41,7 +41,7 @@ public class Decal implements Sprite.Factory {
         } else {
             pc = new Coord3f((float) (sdt.float16() * MCache.tilesz.x), -(float) (sdt.float16() * MCache.tilesz.y), 0);
         }
-        if (owner.getres().name.equals("gfx/terobjs/cupboard") && Config.flatcupboards)
+        if (owner.getres().toString().contains("gfx/terobjs/cupboard") && Config.flatcupboards)
             pc = Coord3f.of(0, 0, 1);
         Location offset = null;
         if (eq == null)
