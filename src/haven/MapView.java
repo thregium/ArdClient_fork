@@ -109,9 +109,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     public String curcamera;
     public final Glob glob;
     public int view = DRAWGRIDRADIUS.get();//(Config.lowerterraindistance ? 1 : 2);
-    private Collection<Delayed> delayed = new LinkedList<Delayed>();
-    private Collection<Delayed> delayed2 = new LinkedList<Delayed>();
-    private Collection<Rendered> extradraw = new LinkedList<Rendered>();
+    private Collection<Delayed> delayed = new LinkedList<>();
+    private Collection<Delayed> delayed2 = new LinkedList<>();
+    private Collection<Rendered> extradraw = new LinkedList<>();
     public Camera camera = restorecam();
     public Plob placing = null;
     private Grabber grab;
@@ -2619,7 +2619,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
                 if (inf == null) {
                     if (Config.pf && clickb == 1 && curs != null && !curs.name.equals("gfx/hud/curs/study")) {
-                        Defer.later(() -> pathto(mc));
+                        glob.loader.defer(() -> pathto(mc));
                         //      purusPfLeftClick(mc.floor(), null);
                     } else if (clickb == 1 && ui.modmeta && ui.gui.vhand == null && curs != null && curs.name.equals("gfx/hud/curs/arw")) {
                         //Queued movement
@@ -2682,9 +2682,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     } else if (Config.pf && curs != null && !curs.name.equals("gfx/hud/curs/study") && gob != null) {
                         if (clickb == 3) {
                             //  purusPfRightClick(gob, (int) args[8], clickb, 0, null);
-                            Defer.later(() -> pathtoRightClick(gob, 0));
+                            glob.loader.defer(() -> pathtoRightClick(gob, 0));
                         } else if (clickb == 1) {
-                            Defer.later(() -> pathto(gob));
+                            glob.loader.defer(() -> pathto(gob));
                         }
                     } else {
                         args = Utils.extend(args, gobargs);
@@ -3051,7 +3051,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         // we really don't want dropping, so click is moving
                         if (Config.pf) {
                             // purusPfLeftClick(mc.floor(), null);
-                            Defer.later(() -> pathto(mc));
+                            glob.loader.defer(() -> pathto(mc));
                         } else {
                             wdgmsg("click", pc, mc.floor(posres), 1, 0);
                             pllastcc = mc;

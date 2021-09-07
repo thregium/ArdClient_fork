@@ -34,15 +34,17 @@ import java.security.PrivilegedExceptionAction;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Defer extends ThreadGroup {
-    private static final Map<ThreadGroup, Defer> groups = new WeakHashMap<ThreadGroup, Defer>();
-    private final Queue<Future<?>> queue = new PrioQueue<Future<?>>();
-    private final Collection<Thread> pool = new LinkedList<Thread>();
-    private static final int maxthreads = 2;
+    private static final Map<ThreadGroup, Defer> groups = new WeakHashMap<>();
+    private final Queue<Future<?>> queue = new PrioQueue<>();
+    private final Collection<Thread> pool = new LinkedList<>();
+    private static final int maxthreads = Math.max(2, Runtime.getRuntime().availableProcessors() - 1);
+    private final AtomicInteger busy = new AtomicInteger(0);
 
     public interface Callable<T> {
         public T call() throws InterruptedException;
@@ -141,7 +143,7 @@ public class Defer extends ThreadGroup {
 
         public void run() {
             synchronized (this) {
-                if (state == "done")
+                if (Objects.equals(state, "done"))
                     return;
                 running = Thread.currentThread();
             }
@@ -280,9 +282,9 @@ public class Defer extends ThreadGroup {
             if ((pool.isEmpty() || !e) && (pool.size() < maxthreads)) {
                 Thread n = AccessController.doPrivileged(new PrivilegedAction<Thread>() {
                     public Thread run() {
-                        Thread ret = new Worker();
-                        ret.start();
-                        return (ret);
+                    Thread ret = new Worker();
+                    ret.start();
+                    return (ret);
                     }
                 });
                 pool.add(n);
@@ -299,15 +301,15 @@ public class Defer extends ThreadGroup {
     private static Defer getgroup() {
         return (AccessController.doPrivileged(new PrivilegedAction<Defer>() {
             public Defer run() {
-                ThreadGroup tg = Thread.currentThread().getThreadGroup();
-                if (tg instanceof Defer)
-                    return ((Defer) tg);
-                Defer d;
-                synchronized (groups) {
-                    if ((d = groups.get(tg)) == null)
-                        groups.put(tg, d = new Defer(tg));
-                }
-                return (d);
+            ThreadGroup tg = Thread.currentThread().getThreadGroup();
+            if (tg instanceof Defer)
+                return ((Defer) tg);
+            Defer d;
+            synchronized (groups) {
+                if ((d = groups.get(tg)) == null)
+                    groups.put(tg, d = new Defer(tg));
+            }
+            return (d);
             }
         }));
     }
@@ -315,5 +317,15 @@ public class Defer extends ThreadGroup {
     public static <T> Future<T> later(Callable<T> task) {
         Defer d = getgroup();
         return (d.defer(task));
+    }
+
+    public String stats() {
+        synchronized (queue) {
+            return (String.format("%d %d/%d", queue.size(), busy.get(), pool.size()));
+        }
+    }
+
+    public static String gstats() {
+        return (getgroup().stats());
     }
 }

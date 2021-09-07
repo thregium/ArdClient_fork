@@ -66,13 +66,13 @@ public class Widget {
     public Object tooltip = null;
     public int gkey;
     private Widget prevtt;
-    static Map<String, Factory> types = new TreeMap<String, Factory>();
+    static Map<String, Factory> types = new TreeMap<>();
 
     @dolda.jglob.Discoverable
     @Target(ElementType.TYPE)
     @Retention(RetentionPolicy.RUNTIME)
     public @interface RName {
-        public String value();
+        String value();
     }
 
     @RName("cnt")

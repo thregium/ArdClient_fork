@@ -48,6 +48,7 @@ public class Glob {
     public final GobHitmap gobhitmap;
     public static final double SERVER_TIME_RATIO = 3.29d;
     public double serverEpoch, localEpoch = Utils.rtime();
+    public final Loader loader = new Loader();
     public Astronomy ast;
     public OCache oc = new OCache(this);
     public MCache map;
@@ -65,8 +66,8 @@ public class Glob {
     public long lchange = -1;
     public Indir<Resource> sky1 = null, sky2 = null;
     public double skyblend = 0.0;
-    public final Map<String, CAttr> cattr = new HashMap<String, CAttr>();
-    private Map<Indir<Resource>, Object> wmap = new HashMap<Indir<Resource>, Object>();
+    public final Map<String, CAttr> cattr = new HashMap<>();
+    private Map<Indir<Resource>, Object> wmap = new HashMap<>();
 //    public static haven.timers.TimersThread timersThread;
     public String servertime;
     public Tex servertimetex;
@@ -97,12 +98,12 @@ public class Glob {
     }
 
     @Resource.PublishedCode(name = "wtr")
-    public static interface Weather {
-        public void gsetup(RenderList rl);
+    public interface Weather {
+        void gsetup(RenderList rl);
 
-        public void update(Object... args);
+        void update(Object... args);
 
-        public boolean tick(int dt);
+        boolean tick(int dt);
     }
 
     public static class CAttr extends Observable {

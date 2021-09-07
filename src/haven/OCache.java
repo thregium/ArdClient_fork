@@ -675,8 +675,8 @@ public class OCache implements Iterable<Gob> {
         if (clr != 61455 /* damage */ && clr != 36751 /* armor damage */)
             return;
 
-        Defer.later(new Defer.Callable<Void>() {
-            public Void call() {
+        glob.loader.defer(new Runnable() {
+            public void run() {
                 try {
                     Resource res = resid.get();
                     if (res != null && res.name.equals("gfx/fx/floatimg")) {
@@ -700,11 +700,10 @@ public class OCache implements Iterable<Gob> {
                         }
                     }
                 } catch (Loading le) {
-                    Defer.later(this);
+                    glob.loader.defer(this, null);
                 }
-                return null;
             }
-        });
+        }, null);
     }
 
     public GameUI getGUI() {
@@ -969,20 +968,20 @@ public class OCache implements Iterable<Gob> {
             } catch (Loading le) {
             }
         }
-        Defer.later(new Defer.Callable<Void>() {
-            public Void call() {
+        glob.loader.defer(new Runnable() {
+            @Override
+            public void run() {
                 try {
                     Resource res = resid.get();
                     GAttrib.Parser parser = res.getcode(GAttrib.Parser.class, false);
                     if (parser != null) {
                         parser.apply(g, dat);
                     }
-                } catch (Loading le) {
-                    Defer.later(this);
+                } catch(Loading le) {
+                    glob.loader.defer(this, null);
                 }
-                return (null);
             }
-        });
+        }, null);
         if (dat != null)
             g.setrattr(resid, dat);
         else

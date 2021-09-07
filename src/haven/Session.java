@@ -37,12 +37,14 @@ import java.net.DatagramSocket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.nio.channels.ClosedByInterruptException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 public class Session implements Resource.Resolver {
     public static final int PVER = 25;
@@ -80,10 +82,10 @@ public class Session implements Resource.Resolver {
     int tseq = 0, rseq = 0;
     int ackseq;
     long acktime = -1;
-    LinkedList<PMessage> uimsgs = new LinkedList<>();
-    Map<Integer, PMessage> waiting = new TreeMap<>();
-    LinkedList<RMessage> pending = new LinkedList<>();
-    Map<Long, ObjAck> objacks = new TreeMap<>();
+    final LinkedList<PMessage> uimsgs = new LinkedList<>();
+    final Map<Integer, PMessage> waiting = new TreeMap<>();
+    final LinkedList<RMessage> pending = new LinkedList<>();
+    final Map<Long, ObjAck> objacks = new TreeMap<>();
     public final SessionDetails details;
     public String username;
     byte[] cookie;
@@ -312,7 +314,7 @@ public class Session implements Resource.Resolver {
                     while (true) {
                         int type = msg.uint8();
                         if (type == OCache.OD_REM) {
-                            oc.remove(id, frame);
+                            oc.remove(id, frame - 1);
                         } else if (type == OCache.OD_END) {
                             break;
                         } else {
@@ -323,7 +325,8 @@ public class Session implements Resource.Resolver {
                 synchronized (objacks) {
                     if (objacks.containsKey(id)) {
                         ObjAck a = objacks.get(id);
-                        a.frame = frame;
+                        if (frame > a.frame)
+                            a.frame = frame;
                         a.recv = System.currentTimeMillis();
                     } else {
                         objacks.put(id, new ObjAck(id, frame, System.currentTimeMillis()));
@@ -443,7 +446,7 @@ public class Session implements Resource.Resolver {
                     DatagramPacket p = new DatagramPacket(new byte[65536], 65536);
                     try {
                         sk.receive(p);
-                    } catch (java.nio.channels.ClosedByInterruptException e) {
+                    } catch (ClosedByInterruptException e) {
                         /* Except apparently Sun's J2SE doesn't throw this when interrupted :P*/
                         break;
                     } catch (SocketTimeoutException e) {
@@ -456,7 +459,7 @@ public class Session implements Resource.Resolver {
                     PMessage msg = new PMessage(p.getData()[0], p.getData(), 1, p.getLength() - 1);
                     recv += p.getLength();
                     if (msg.type == MSG_SESS) {
-                        if (state == "conn") {
+                        if (Objects.equals(state, "conn")) {
                             int error = msg.uint8();
                             synchronized (Session.this) {
                                 if (error == 0) {
@@ -491,7 +494,7 @@ public class Session implements Resource.Resolver {
                             }
                         }
                     }
-                    if (state != "conn") {
+                    if (!Objects.equals(state, "conn")) {
                         if (msg.type == MSG_SESS) {
                         } else if (msg.type == MSG_REL) {
                             int seq = msg.uint16();
@@ -539,6 +542,7 @@ public class Session implements Resource.Resolver {
 
     private class SWorker extends HackThread {
         boolean alive;
+
         public SWorker() {
             super("Session writer");
             setDaemon(true);
@@ -550,7 +554,7 @@ public class Session implements Resource.Resolver {
                 long to, last = 0, retries = 0;
                 while (alive) {
                     long now = System.currentTimeMillis();
-                    if (state == "conn") {
+                    if (Objects.equals(state, "conn")) {
                         if (now - last > 2000) {
                             if (++retries > 5) {
                                 synchronized (Session.this) {
@@ -603,7 +607,7 @@ public class Session implements Resource.Resolver {
 			*/
                         pend = pending.size();
                         synchronized (pending) {
-                            if (pending.size() > 0) {
+                            if (!pending.isEmpty()) {
                                 for (RMessage msg : pending) {
                                     int txtime;
                                     if (msg.retx == 0)
@@ -681,9 +685,9 @@ public class Session implements Resource.Resolver {
                 for (int i = 0; i < 5; i++) {
                     sendmsg(new PMessage(MSG_CLOSE));
                     long f = System.currentTimeMillis();
-                    while (true) {
+                    while (alive) {
                         synchronized (Session.this) {
-                            if ((state == "conn") || (state == "fin") || (state == "dead"))
+                            if ((Objects.equals(state, "conn")) || (Objects.equals(state, "fin")) || (Objects.equals(state, "dead")))
                                 break;
                             state = "close";
                             long now = System.currentTimeMillis();
@@ -755,7 +759,7 @@ public class Session implements Resource.Resolver {
     }
 
     public synchronized boolean alive() {
-        return (state != "dead");
+        return (!Objects.equals(state, "dead"));
     }
 
     public void queuemsg(PMessage pmsg) {
@@ -772,7 +776,7 @@ public class Session implements Resource.Resolver {
 
     public PMessage getuimsg() {
         synchronized (uimsgs) {
-            if (uimsgs.size() == 0)
+            if (uimsgs.isEmpty())
                 return (null);
             return (uimsgs.remove());
         }
