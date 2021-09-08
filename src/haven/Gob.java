@@ -482,7 +482,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     }
                 });
 
-                if (type == Type.UNKNOWN && name.contains("/bumlings/"))
+                if (type == Type.UNKNOWN && name.startsWith("gfx/terobjs/bumlings/"))
                     type = Type.BOULDER;
 
                 //Check for any special attributes we should attach
