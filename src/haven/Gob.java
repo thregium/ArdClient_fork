@@ -482,6 +482,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     }
                 });
 
+                if (type == Type.UNKNOWN && name.contains("/bumlings/"))
+                    type = Type.BOULDER;
+
                 //Check for any special attributes we should attach
                 Alerted.checkAlert(name, this);
 

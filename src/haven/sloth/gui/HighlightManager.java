@@ -14,12 +14,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class HighlightManager extends Window implements ObservableListener<String> {
     private List<String> highlighted = new ArrayList<>();
     private final TextEntry manualin;
     private final Listbox<String> defaults;
-    private HashMap<String, String> defaultlist = new HashMap<>();
+    private Map<String, String> defaultlist = new HashMap<>();
     private List<String> shortvers = new ArrayList<>();
 
     public HighlightManager() {

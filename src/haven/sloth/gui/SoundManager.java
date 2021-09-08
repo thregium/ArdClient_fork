@@ -38,7 +38,7 @@ public class SoundManager extends Window implements ObservableListener<Alerted.C
     private Label vollabel;
     private final Listbox<String> defaults;
     public static Button select;
-    private HashMap<String, String> defaultlist = new HashMap<>();
+    private Map<String, String> defaultlist = new HashMap<>();
     private List<String> shortvers = new ArrayList<>();
 
     public SoundManager() {

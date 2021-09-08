@@ -26,6 +26,7 @@
 
 package haven;
 
+import com.google.common.collect.Maps;
 import haven.error.ErrorHandler;
 import haven.purus.Iconfinder;
 import haven.sloth.util.ObservableMap;
@@ -361,227 +362,21 @@ public class Config {
     public static double cleavesoundvol = Utils.getprefd("cleavesoundvol", 0.8);
     public static String attackedsfx = Utils.getpref("attackedsfx", "None");
     public static double attackedvol = Utils.getprefd("attackedvol", 0.8);
-    public static HashMap<String, Boolean> curioslist = null;
+    public static Map<String, Boolean> curioslist = null;
     public static ObservableMap<String, Boolean> autodroplist = null;
 
-    public final static String chatfile = "chatlog.txt";
+    public static final String chatfile = "chatlog.txt";
     public static PrintWriter chatlog = null;
 
-    public final static HashMap<String, CheckListboxItem> boulders = new HashMap<String, CheckListboxItem>() {{
-        put("alabaster", new CheckListboxItem("Alabaster"));
-        put("basalt", new CheckListboxItem("Basalt"));
-        put("schist", new CheckListboxItem("Schist"));
-        put("dolomite", new CheckListboxItem("Dolomite"));
-        put("gneiss", new CheckListboxItem("Gneiss"));
-        put("granite", new CheckListboxItem("Granite"));
-        put("porphyry", new CheckListboxItem("Porphyry"));
-        put("quartz", new CheckListboxItem("Quartz"));
-        put("limestone", new CheckListboxItem("Limestone"));
-        put("sandstone", new CheckListboxItem("Sandstone"));
-        put("cinnabar", new CheckListboxItem("Cinnabar"));
-        put("feldspar", new CheckListboxItem("Feldspar"));
-        put("marble", new CheckListboxItem("Marble"));
-        put("flint", new CheckListboxItem("Flint"));
-        put("hornblende", new CheckListboxItem("Hornblende"));
-        put("olivine", new CheckListboxItem("Olivine"));
-        put("apatite", new CheckListboxItem("Apatite"));
-        put("corund", new CheckListboxItem("Korund"));
-        put("gabbro", new CheckListboxItem("Gabbro"));
-        put("arkose", new CheckListboxItem("Arkose"));
-        put("breccia", new CheckListboxItem("Breccia"));
-    }};
-
-    public final static HashMap<String, CheckListboxItem> bushes = new HashMap<String, CheckListboxItem>() {{
-        put("arrowwood", new CheckListboxItem("Arrowwood"));
-        put("crampbark", new CheckListboxItem("Crampbark"));
-        put("sandthorn", new CheckListboxItem("Sandthorn"));
-        put("blackberrybush", new CheckListboxItem("Blackberry"));
-        put("dogrose", new CheckListboxItem("Dogrose"));
-        put("spindlebush", new CheckListboxItem("Spindlebush"));
-        put("blackcurrant", new CheckListboxItem("Blackcurrant"));
-        put("elderberrybush", new CheckListboxItem("Elderberry"));
-        put("teabush", new CheckListboxItem("Tea"));
-        put("blackthorn", new CheckListboxItem("Blackthorn"));
-        put("gooseberrybush", new CheckListboxItem("Gooseberry"));
-        put("tibast", new CheckListboxItem("Tibast"));
-        put("bogmyrtle", new CheckListboxItem("Bogmyrtle"));
-        put("hawthorn", new CheckListboxItem("Hawthorn"));
-        put("tundrarose", new CheckListboxItem("Tundrarose"));
-        put("boxwood", new CheckListboxItem("Boxwood"));
-        put("holly", new CheckListboxItem("Hollyberry"));
-        put("woodbine", new CheckListboxItem("Fly Woodbine"));
-        put("bsnightshade", new CheckListboxItem("Bittersweet Nightshade"));
-        put("raspberrybush", new CheckListboxItem("Raspberry"));
-        put("caprifole", new CheckListboxItem("Caprifole"));
-        put("redcurrant", new CheckListboxItem("Redcurrant"));
-        put("gorse", new CheckListboxItem("Gorse"));
-        put("witherstand", new CheckListboxItem("Witherstand"));
-        put("cavefern", new CheckListboxItem("Cave Fern"));
-        put("mastic", new CheckListboxItem("Mastic"));
-        put("poppycaps", new CheckListboxItem("Poppycaps"));
-        put("ghostpipe", new CheckListboxItem("Ghostpipe"));
-        put("hoarwithy", new CheckListboxItem("Hoarwithy"));
-    }};
-
-    public final static HashMap<String, CheckListboxItem> trees = new HashMap<String, CheckListboxItem>() {{
-        put("chastetree", new CheckListboxItem("Chaste Tree"));
-        put("dogwood", new CheckListboxItem("Dogwood"));
-        put("strawberrytree", new CheckListboxItem("Strawberry Tree"));
-        put("stonepine", new CheckListboxItem("Stone Pine"));
-        put("blackpine", new CheckListboxItem("Black Pine"));
-        put("silverfir", new CheckListboxItem("Silver Fir"));
-        put("treeheath", new CheckListboxItem("Heath Tree"));
-        put("sycamore", new CheckListboxItem("Sycamore"));
-        put("terebinth", new CheckListboxItem("Terebinth"));
-        put("lotetree", new CheckListboxItem("Lote Tree"));
-        put("sorbtree", new CheckListboxItem("Sorb Tree"));
-        put("alder", new CheckListboxItem("Alder"));
-        put("corkoak", new CheckListboxItem("Corkoak"));
-        put("plumtree", new CheckListboxItem("Plum Tree"));
-        put("juniper", new CheckListboxItem("Juniper"));
-        put("crabappletree", new CheckListboxItem("Crabapple"));
-        put("kingsoak", new CheckListboxItem("King's Oak"));
-        put("oak", new CheckListboxItem("Oak"));
-        put("walnuttree", new CheckListboxItem("Walnut Tree"));
-        put("birdcherrytree", new CheckListboxItem("Birdcherry Tree"));
-        put("larch", new CheckListboxItem("Larch"));
-        put("poplar", new CheckListboxItem("Poplar"));
-        put("whitebeam", new CheckListboxItem("Whitebeam"));
-        put("appletree", new CheckListboxItem("Apple Tree"));
-        put("cypress", new CheckListboxItem("Cypress"));
-        put("buckthorn", new CheckListboxItem("Buckthorn"));
-        put("laurel", new CheckListboxItem("Laurel"));
-        put("ash", new CheckListboxItem("Ash"));
-        put("elm", new CheckListboxItem("Elm"));
-        put("rowan", new CheckListboxItem("Rowan"));
-        put("willow", new CheckListboxItem("Willow"));
-        put("cedar", new CheckListboxItem("Cedar"));
-        put("linden", new CheckListboxItem("Linden"));
-        put("olivetree", new CheckListboxItem("Olive Tree"));
-        put("aspen", new CheckListboxItem("Aspen"));
-        put("fir", new CheckListboxItem("Fir"));
-        put("baywillow", new CheckListboxItem("Baywillow"));
-        put("goldenchain", new CheckListboxItem("Goldenchain"));
-        put("peartree", new CheckListboxItem("Pear Tree"));
-        put("sallow", new CheckListboxItem("Sallow"));
-        put("yew", new CheckListboxItem("Yew"));
-        put("cherry", new CheckListboxItem("Cherry"));
-        put("maple", new CheckListboxItem("Maple"));
-        put("beech", new CheckListboxItem("Beech"));
-        put("chestnuttree", new CheckListboxItem("Chestnut Tree"));
-        put("hazel", new CheckListboxItem("Hazel"));
-        put("spruce", new CheckListboxItem("Spruce"));
-        put("hornbeam", new CheckListboxItem("Hornbeam"));
-        put("oldtrunk", new CheckListboxItem("Mirkwood Log"));
-        put("conkertree", new CheckListboxItem("Conker Tree"));
-        put("mulberry", new CheckListboxItem("Mulberry"));
-        put("sweetgum", new CheckListboxItem("Sweetgum"));
-        put("pine", new CheckListboxItem("Pine"));
-        put("birch", new CheckListboxItem("Birch"));
-        put("planetree", new CheckListboxItem("Plane Tree"));
-        put("quincetree", new CheckListboxItem("Quince"));
-        put("almondtree", new CheckListboxItem("Almond"));
-        put("persimmontree", new CheckListboxItem("Persimmon"));
-        put("medlartree", new CheckListboxItem("Medlar"));
-        put("gnomeshat", new CheckListboxItem("Gnome's Hat"));
-        put("carobtree", new CheckListboxItem("Carob Tree"));
-        put("gloomcap", new CheckListboxItem("Gloomcap"));
-        put("trombonechantrelle", new CheckListboxItem("Trombone Chantrelle"));
-        put("osier", new CheckListboxItem("Osier"));
-        put("tamarisk", new CheckListboxItem("Tamarisk"));
-        put("checkertree", new CheckListboxItem("Checker Tree"));
-        put("wartybirch", new CheckListboxItem("Warty Birch"));
-        put("figtree", new CheckListboxItem("Fig Tree"));
-        put("dwarfpine", new CheckListboxItem("Dwarf Pine"));
-        put("mayflower", new CheckListboxItem("Mayflower"));
-    }};
-
-    public final static HashMap<String, CheckListboxItem> icons = new HashMap<String, CheckListboxItem>() {{
-        put("arrow", new CheckListboxItem("Arrow"));
-        put("rowboat", new CheckListboxItem("Rowboat"));
-        put("dugout", new CheckListboxItem("Dugout"));
-        put("knarr", new CheckListboxItem("Knarr"));
-        put("snekkja", new CheckListboxItem("Snekkja"));
-        put("wagon", new CheckListboxItem("Wagon"));
-        put("wheelbarrow", new CheckListboxItem("Wheelbarrow"));
-        put("cart", new CheckListboxItem("Cart"));
-        put("wball", new CheckListboxItem("Wrecking Ball"));
-        put("bram", new CheckListboxItem("Battering Ram"));
-//        put("irrbloss", new CheckListboxItem("Irrlight"));
-        put("opiumdragon", new CheckListboxItem("Opium Dragon"));
-        put("moonmoth", new CheckListboxItem("Moonmoths"));
-        put("lobsterpot", new CheckListboxItem("Lobster Pot"));
-        put("mandrakespirited", new CheckListboxItem("Spirited Mandrake"));
-        put("fishingnet", new CheckListboxItem("Fishing Net"));
-        put("mare", new CheckListboxItem("Tamed Mares"));
-        put("stallion", new CheckListboxItem("Tamed Stallions"));
-        put("boarspear", new CheckListboxItem("Boar Spear"));
-        put("boostspeed", new CheckListboxItem("Speed Boost"));
-        put("frog", new CheckListboxItem("Frog"));
-        put("toad", new CheckListboxItem("Toad"));
-        put("stalagoomba", new CheckListboxItem("Stalagoomba"));
-        put("dryad", new CheckListboxItem("Dryad"));
-        put("ent", new CheckListboxItem("Ent"));
-//old icons
-//        put("dandelion", new CheckListboxItem("Dandelion"));
-//        put("chantrelle", new CheckListboxItem("Chantrelle"));
-//        put("blueberry", new CheckListboxItem("Blueberry"));
-//        put("rat", new CheckListboxItem("Rat"));
-//        put("chicken", new CheckListboxItem("Chicken"));
-//        put("chick", new CheckListboxItem("Chick"));
-//        put("duskfern", new CheckListboxItem("Dusk Fern"));
-//        put("spindlytaproot", new CheckListboxItem("Spindly Taproot"));
-//        put("stingingnettle", new CheckListboxItem("Stinging Nettle"));
-//        put("dragonfly", new CheckListboxItem("Dragonfly"));
-//        put("magpie", new CheckListboxItem("Magpie"));
-//        put("mistletoe", new CheckListboxItem("Mistletoe"));
-//        put("firefly", new CheckListboxItem("Firefly"));
-//        put("cavemoth", new CheckListboxItem("Cave Moth"));
-//        put("windweed", new CheckListboxItem("Wild Windsown Weed"));
-//        put("mussels", new CheckListboxItem("Mussels"));
-//        put("mallard", new CheckListboxItem("Duck"));
-//        put("ladybug", new CheckListboxItem("Ladybug"));
-//        put("silkmoth", new CheckListboxItem("Silkmoth"));
-//        put("hedgehog", new CheckListboxItem("Hedgehog"));
-//        put("squirrel", new CheckListboxItem("Squirrel"));
-//        put("rabbit", new CheckListboxItem("Rabbit"));
-//        put("lingon", new CheckListboxItem("Lingonberries"));
-//        put("grub", new CheckListboxItem("Grub"));
-//        put("yellowfoot", new CheckListboxItem("Yellowfoot"));
-//        put("coltsfoot", new CheckListboxItem("Coltsfoot"));
-//        put("chives", new CheckListboxItem("Chives"));
-//        put("rustroot", new CheckListboxItem("Rustroot"));
-//        put("adder", new CheckListboxItem("Adder"));
-//        put("crab", new CheckListboxItem("Crab"));
-//        put("clover", new CheckListboxItem("Clover"));
-//        put("ladysmantle", new CheckListboxItem("Lady's Mantle"));
-//        put("grasshopper", new CheckListboxItem("Grasshopper"));
-//        put("snapdragon", new CheckListboxItem("Uncommon Snapdragon"));
-//        put("cattail", new CheckListboxItem("Cattail"));
-//        put("forestsnail", new CheckListboxItem("Forest Snail"));
-//        put("forestlizard", new CheckListboxItem("Forest Lizard"));
-//        put("greenkelp", new CheckListboxItem("Green Kelp"));
-//        put("waterstrider", new CheckListboxItem("Water Strider"));
-//        put("frogspawn", new CheckListboxItem("Frog Spawn"));
-//        put("oyster", new CheckListboxItem("Oysters"));
-//        put("jellyfish", new CheckListboxItem("Jellyfish"));
-//        put("clay-gray", new CheckListboxItem("Gray Clay"));
-//        put("bat", new CheckListboxItem("Bats"));
-//        put("stagbeetle", new CheckListboxItem("Stagbeetles"));
-//        put("monarchbutterfly", new CheckListboxItem("Monarch Butterfly"));
-//        put("cavecentipede", new CheckListboxItem("Cave Centipede"));
-//        put("mole", new CheckListboxItem("Moles"));
-//        put("lorchel", new CheckListboxItem("Morels"));
-//        put("frogscrown", new CheckListboxItem("Frog's Crown"));
-//        put("lampstalk", new CheckListboxItem("Lamp Stalks"));
-    }};
-    public final static HashMap<String, CheckListboxItem> oldicons = new HashMap<String, CheckListboxItem>();
+    public static final Map<String, CheckListboxItem> boulders = new HashMap<>();
+    public static final Map<String, CheckListboxItem> bushes = new HashMap<>();
+    public static final Map<String, CheckListboxItem> trees = new HashMap<>();
+    public static final Map<String, CheckListboxItem> icons = new HashMap<>();
+    public static final Map<String, CheckListboxItem> oldicons = new HashMap<>();
 
     public static CheckListbox flowerlist = null;
     public static TextEntry petalsearch = null;
-    public final static Map<String, CheckListboxItem> flowermenus = new TreeMap<String, CheckListboxItem>() {{
-        Utils.loadcollection("petalcol").forEach(petal -> put(petal, new CheckListboxItem(petal)));
-    }};
+    public static final Map<String, CheckListboxItem> flowermenus = new TreeMap<>();
 
 //    public final static HashMap<String, CheckListboxItem> flowermenus = new HashMap<String, CheckListboxItem>(37) {{
 //        put("Pick", new CheckListboxItem("Pick", Resource.BUNDLE_FLOWER));
@@ -623,262 +418,14 @@ public class Config {
 //        put("Pick mushrooms", new CheckListboxItem("Pick mushrooms", Resource.BUNDLE_FLOWER));
 //    }};
 
-    public final static HashMap<String, CheckListboxItem> autowindows = new HashMap<String, CheckListboxItem>() {{
-        put("Inventory", new CheckListboxItem("Inventory"));
-        put("Belt", new CheckListboxItem("Belt"));
-        put("Quest Log", new CheckListboxItem("Quest Log"));
-        put("Study", new CheckListboxItem("Study"));
-        put("Equipment", new CheckListboxItem("Equipment"));
-        put("Timers", new CheckListboxItem("Timers"));
-        put("Kith & Kin", new CheckListboxItem("Kith & Kin"));
-        put("Character Sheet", new CheckListboxItem("Character Sheet"));
-        put("Search...", new CheckListboxItem("Search..."));
-        put("Craft window", new CheckListboxItem("Craft window"));
-        put("Chat", new CheckListboxItem("Chat Window - Reverse Logic, select to disable."));
-    }};
+    public static final Map<String, CheckListboxItem> autowindows = new HashMap<>();
+    public static final Map<String, CheckListboxItem> autoclusters = new HashMap<>();
 
-    public final static HashMap<String, CheckListboxItem> autoclusters = new HashMap<String, CheckListboxItem>() {{
-        put("gfx/terobjs/herbs/mussels", new CheckListboxItem("Mussels", Resource.BUNDLE_FLOWER));
-        put("gfx/terobjs/herbs/clay-gray", new CheckListboxItem("Gray Clay", Resource.BUNDLE_FLOWER));
-        put("gfx/terobjs/herbs/oyster", new CheckListboxItem("Oysters", Resource.BUNDLE_FLOWER));
-        put("gfx/terobjs/herbs/goosebarnacle", new CheckListboxItem("Gooseneck Barnacles", Resource.BUNDLE_FLOWER));
-        put("gfx/terobjs/herbs/cattail", new CheckListboxItem("Cattails", Resource.BUNDLE_FLOWER));
-        put("gfx/kritter/jellyfish/jellyfish", new CheckListboxItem("Jellyfish", Resource.BUNDLE_FLOWER));
-        put("gfx/terobjs/herbs/lampstalk", new CheckListboxItem("Lamp Stalks", Resource.BUNDLE_FLOWER));
-    }};
-
-    public final static HashMap<String, CheckListboxItem> curiolist = new HashMap<String, CheckListboxItem>() {{
-        put("Bar of Soap", new CheckListboxItem("Bar of Soap"));
-        put("Barkboat", new CheckListboxItem("Barkboat"));
-        put("Batwing Necklace", new CheckListboxItem("Batwing Necklace"));
-        put("Beast Unborn", new CheckListboxItem("Beast Unborn"));
-        put("Blacksmith's Bauble", new CheckListboxItem("Blacksmith's Bauble"));
-        put("Chiming Bluebell", new CheckListboxItem("Chiming Bluebell"));
-        put("Bronze Steed", new CheckListboxItem("Bronze Steed"));
-        put("Cigar", new CheckListboxItem("Cigar"));
-        put("Deep Sea Atavism", new CheckListboxItem("Deep Sea Atavism"));
-        put("Feather Duster", new CheckListboxItem("Feather Duster"));
-        put("Feather Trinket", new CheckListboxItem("Feather Trinket"));
-        put("Bouquet of Flowers", new CheckListboxItem("Bouquet of Flowers"));
-        put("Fossil Collection", new CheckListboxItem("Fossil Collection"));
-        put("Glue Troll", new CheckListboxItem("Glue Troll"));
-        put("Golden Cat", new CheckListboxItem("Golden Cat"));
-        put("Golden Tooth", new CheckListboxItem("Golden Tooth"));
-        put("Grand Haruspex", new CheckListboxItem("Grand Haruspex"));
-        put("Great Wax Seal", new CheckListboxItem("Great Wax Seal"));
-        put("Ivory Figurine", new CheckListboxItem("Ivory Figurine"));
-        put("Mirkwood Offering", new CheckListboxItem("Mirkwood Offering"));
-        put("Onion Braid", new CheckListboxItem("Onion Braid"));
-        put("Porcelain Doll", new CheckListboxItem("Porcelain Doll"));
-        put("Seer's Bowl", new CheckListboxItem("Seer's Bowl"));
-        put("Seer's Bones", new CheckListboxItem("Seer's Bones"));
-        put("Seer's Spindle", new CheckListboxItem("Seer's Spindle"));
-        put("Seer's Stones", new CheckListboxItem("Seer's Stones"));
-        put("Seer's Tealeaves", new CheckListboxItem("Seer's Tealeaves"));
-        put("Shiny Marbles", new CheckListboxItem("Shiny Marbles"));
-        put("Silken Ribbon", new CheckListboxItem("Silken Ribbon"));
-        put("Silver Rose", new CheckListboxItem("Silver Rose"));
-        put("Snow Globe", new CheckListboxItem("Snow Globe"));
-        put("Stained Glass Heart", new CheckListboxItem("Stained Glass Heart"));
-        put("Straw Doll", new CheckListboxItem("Straw Doll"));
-        put("Stuffed Bear", new CheckListboxItem("Stuffed Bear"));
-        put("Tafl Board", new CheckListboxItem("Tafl Board"));
-        put("Tiny Abacus", new CheckListboxItem("Tiny Abacus"));
-        put("Uncrushed Husk", new CheckListboxItem("Uncrushed Husk"));
-        put("Easter Egg", new CheckListboxItem("Easter Egg"));
-    }};
-
-    public final static Map<String, Tex> additonalicons = new HashMap<String, Tex>(26) {{
-        put("gfx/terobjs/items/mandrakespirited", Resource.loadtex("gfx/icons/mandrakespirited"));
-        put("gfx/terobjs/vehicle/bram", Resource.loadtex("gfx/icons/bram"));
-        put("gfx/kritter/toad/toad", Resource.loadtex("gfx/icons/toad"));
-        put("gfx/terobjs/vehicle/rowboat", Resource.loadtex("gfx/icons/rowboat"));
-        put("gfx/terobjs/vehicle/dugout", Resource.loadtex("gfx/icons/dugout"));
-        put("gfx/terobjs/vehicle/knarr", Resource.loadtex("gfx/icons/knarr"));
-        put("gfx/terobjs/vehicle/snekkja", Resource.loadtex("gfx/icons/snekkja"));
-        put("gfx/kritter/chicken/chicken", Resource.loadtex("gfx/icons/deadhen"));
-        put("gfx/kritter/chicken/rooster", Resource.loadtex("gfx/icons/deadrooster"));
-        put("gfx/kritter/rabbit/rabbit", Resource.loadtex("gfx/icons/deadrabbit"));
-        put("gfx/kritter/hedgehog/hedgehog", Resource.loadtex("gfx/icons/deadhedgehog"));
-        put("gfx/kritter/squirrel/squirrel", Resource.loadtex("gfx/icons/deadsquirrel"));
-        put("gfx/terobjs/items/arrow", Resource.loadtex("gfx/icons/arrow"));
-        put("gfx/terobjs/items/boarspear", Resource.loadtex("gfx/icons/arrow"));
-        put("gfx/kritter/frog/frog", Resource.loadtex("gfx/icons/frog"));
-        put("gfx/terobjs/vehicle/wagon", Resource.loadtex("gfx/icons/wagon"));
-        put("gfx/terobjs/vehicle/wheelbarrow", Resource.loadtex("gfx/icons/wheelbarrow"));
-        put("gfx/terobjs/vehicle/cart", Resource.loadtex("gfx/icons/cart"));
-        put("gfx/terobjs/vehicle/wreckingball", Resource.loadtex("gfx/icons/wball"));
-        put("gfx/kritter/nidbane/nidbane", Resource.loadtex("gfx/icons/spooky"));
-        put("gfx/kritter/irrbloss/irrbloss", Resource.loadtex("gfx/icons/irrbloss"));
-        put("gfx/kritter/opiumdragon/opiumdragon", Resource.loadtex("gfx/icons/opiumdragon"));
-        put("gfx/terobjs/lobsterpot", Resource.loadtex("gfx/icons/lobsterpot"));
-        put("gfx/terobjs/fishingnet", Resource.loadtex("gfx/icons/fishingnet"));
-        put("gfx/kritter/horse/stallion", Resource.loadtex("gfx/icons/stallionicon"));
-        put("gfx/kritter/horse/mare", Resource.loadtex("gfx/icons/mareicon"));
-        put("gfx/kritter/stalagoomba/stalagoomba", configuration.imageToTex(configuration.modificationPath + "/gfx/icons/stalagoomba.png", Coord.of(20, 20)));
-        put("gfx/kritter/dryad/dryad", configuration.imageToTex(configuration.modificationPath + "/gfx/icons/dryad.png"));
-        put("gfx/kritter/ent/ent", configuration.imageToTex(configuration.modificationPath + "/gfx/icons/ent.png"));
-    }};
-
-    public final static HashMap<String, CheckListboxItem> alarmitems = new HashMap<String, CheckListboxItem>() {{
-        put("gfx/terobjs/herbs/flotsam", new CheckListboxItem("Peculiar Flotsam"));
-        put("gfx/terobjs/herbs/chimingbluebell", new CheckListboxItem("Chiming Bluebell"));
-        put("gfx/terobjs/herbs/edelweiss", new CheckListboxItem("Edelweiß"));
-        put("gfx/terobjs/herbs/bloatedbolete", new CheckListboxItem("Bloated Bolete"));
-        put("gfx/terobjs/herbs/glimmermoss", new CheckListboxItem("Glimmermoss"));
-        put("gfx/terobjs/herbs/camomile", new CheckListboxItem("Camomile"));
-        put("gfx/terobjs/herbs/clay-cave", new CheckListboxItem("Cave Clay"));
-        put("gfx/terobjs/herbs/mandrake", new CheckListboxItem("Mandrake Root"));
-        put("gfx/terobjs/herbs/clay-gray", new CheckListboxItem("Gray Clay"));
-        put("gfx/terobjs/herbs/dandelion", new CheckListboxItem("Dandelion"));
-        put("gfx/terobjs/herbs/chantrelle", new CheckListboxItem("Chantrelle"));
-        put("gfx/terobjs/herbs/blueberry", new CheckListboxItem("Blueberry"));
-        put("gfx/terobjs/herbs/strawberry", new CheckListboxItem("Strawberry"));
-        put("gfx/kritter/rat/rat", new CheckListboxItem("Rat"));
-        put("gfx/kritter/spermwhale/spermwhale", new CheckListboxItem("Whale"));
-        put("gfx/kritter/orca/orca", new CheckListboxItem("Orca"));
-        put("gfx/kritter/chicken/chicken", new CheckListboxItem("Chicken"));
-        put("gfx/kritter/chicken/chick", new CheckListboxItem("Chick"));
-        put("gfx/terobjs/herbs/spindlytaproot", new CheckListboxItem("Spindly Taproot"));
-        put("gfx/terobjs/herbs/stingingnettle", new CheckListboxItem("Stinging Nettle"));
-        put("gfx/kritter/dragonfly/dragonfly", new CheckListboxItem("Dragonfly"));
-        put("gfx/kritter/toad/toad", new CheckListboxItem("Toad"));
-        put("gfx/kritter/frog/frog", new CheckListboxItem("Frog"));
-        put("gfx/terobjs/herbs/windweed", new CheckListboxItem("Wild Windsown Weed"));
-        put("gfx/terobjs/herbs/mussels", new CheckListboxItem("Mussels"));
-        put("gfx/kritter/mallard/mallard", new CheckListboxItem("Duck"));
-        put("gfx/kritter/ladybug/ladybug", new CheckListboxItem("Ladybug"));
-        put("gfx/kritter/silkmoth/silkmoth", new CheckListboxItem("Silkmoth"));
-        put("gfx/kritter/hedgehog/hedgehog", new CheckListboxItem("Hedgehog"));
-        put("gfx/kritter/squirrel/squirrel", new CheckListboxItem("Squirrel"));
-        put("gfx/kritter/rabbit/rabbit", new CheckListboxItem("Rabbit"));
-        put("gfx/terobjs/herbs/lingon", new CheckListboxItem("Lingonberries"));
-        put("gfx/kritter/grub/grub", new CheckListboxItem("Grub"));
-        put("gfx/terobjs/herbs/yellowfoot", new CheckListboxItem("Yellowfoot"));
-        put("gfx/terobjs/herbs/chives", new CheckListboxItem("Chives"));
-        put("gfx/terobjs/herbs/rustroot", new CheckListboxItem("Rustroot"));
-        put("gfx/kritter/crab/crab", new CheckListboxItem("Crab"));
-        put("gfx/terobjs/herbs/clover", new CheckListboxItem("Clover"));
-        put("gfx/terobjs/herbs/ladysmantle", new CheckListboxItem("Lady's Mantle"));
-        put("gfx/kritter/grasshopper/grasshopper", new CheckListboxItem("Grasshopper"));
-        put("gfx/kritter/irrbloss/irrbloss", new CheckListboxItem("Irrlight"));
-        put("gfx/kritter/opiumdragon/opiumdragon", new CheckListboxItem("Opium Dragon"));
-        put("gfx/terobjs/herbs/snapdragon", new CheckListboxItem("Uncommon Snapdragon"));
-        put("gfx/terobjs/herbs/cattail", new CheckListboxItem("Cattail"));
-        put("gfx/kritter/forestsnail/forestsnail", new CheckListboxItem("Forest Snail"));
-        put("gfx/kritter/forestlizard/forestlizard", new CheckListboxItem("Forest Lizard"));
-        put("gfx/terobjs/herbs/greenkelp", new CheckListboxItem("Green Kelp"));
-        put("gfx/terobjs/herbs/yarrow", new CheckListboxItem("Yarrow"));
-        put("gfx/terobjs/herbs/candleberry", new CheckListboxItem("Candleberry"));
-        put("gfx/terobjs/herbs/oyster", new CheckListboxItem("Oysters"));
-        put("gfx/kritter/jellyfish/jellyfish", new CheckListboxItem("Jellyfish"));
-        put("gfx/terobjs/herbs/seashell", new CheckListboxItem("Rainbowshell"));
-        put("gfx/terobjs/herbs/giantpuffball", new CheckListboxItem("Giant Puff Ball"));
-        put("gfx/terobjs/herbs/ladysmantledew", new CheckListboxItem("Dewy Lady's Mantle"));
-    }};
-
-    public final static HashMap<String, String> defaultitems = new HashMap<String, String>() {{
-        put("gfx/terobjs/herbs/flotsam", "Peculiar Flotsam");
-        put("gfx/terobjs/herbs/chimingbluebell", "Chiming Bluebell");
-        put("gfx/terobjs/herbs/edelweiss", "Edelweiß");
-        put("gfx/terobjs/herbs/bloatedbolete", "Bloated Bolete");
-        put("gfx/terobjs/herbs/glimmermoss", "Glimmermoss");
-        put("gfx/terobjs/herbs/camomile", "Camomile");
-        put("gfx/terobjs/herbs/clay-cave", "Cave Clay");
-        put("gfx/terobjs/herbs/mandrake", "Mandrake Root");
-        put("gfx/terobjs/herbs/clay-gray", "Gray Clay");
-        put("gfx/terobjs/herbs/dandelion", "Dandelion");
-        put("gfx/terobjs/herbs/chantrelle", "Chantrelle");
-        put("gfx/terobjs/herbs/blueberry", "Blueberry");
-        put("gfx/terobjs/herbs/strawberry", "Strawberry");
-        put("gfx/kritter/rat/rat", "Rat");
-        put("gfx/terobs/villageidol", "Village Idol");
-        put("gfx/kritter/chicken/chicken", "Chicken");
-        put("gfx/kritter/chicken/chick", "Chick");
-        put("gfx/terobjs/herbs/spindlytaproot", "Spindly Taproot");
-        put("gfx/terobjs/herbs/stingingnettle", "Stinging Nettle");
-        put("gfx/kritter/dragonfly/dragonfly", "Dragonfly");
-        put("gfx/kritter/toad/toad", "Toad");
-        put("gfx/kritter/frog/frog", "Frog");
-        put("gfx/terobjs/herbs/windweed", "Wild Windsown Weed");
-        put("gfx/terobjs/herbs/mussels", "Mussels");
-        put("gfx/kritter/mallard/mallard", "Duck");
-        put("gfx/kritter/ladybug/ladybug", "Ladybug");
-        put("gfx/kritter/silkmoth/silkmoth", "Silkmoth");
-        put("gfx/kritter/caveangler/caveangler", "Cave Angler");
-        put("gfx/kritter/hedgehog/hedgehog", "Hedgehog");
-        put("gfx/kritter/squirrel/squirrel", "Squirrel");
-        put("gfx/kritter/rabbit/rabbit", "Rabbit");
-        put("gfx/terobjs/herbs/lingon", "Lingonberries");
-        put("gfx/kritter/grub/grub", "Grub");
-        put("gfx/terobjs/herbs/yellowfoot", "Yellowfoot");
-        put("gfx/terobjs/herbs/coltsfoot", "Coltsfoot");
-        put("gfx/terobjs/herbs/chives", "Chives");
-        put("gfx/terobjs/herbs/rustroot", "Rustroot");
-        put("gfx/kritter/crab/crab", "Crab");
-        put("gfx/terobjs/herbs/clover", "Clover");
-        put("gfx/terobjs/herbs/ladysmantle", "Lady's Mantle");
-        put("gfx/kritter/grasshopper/grasshopper", "Grasshopper");
-        put("gfx/kritter/irrbloss/irrbloss", "Irrlight");
-        put("gfx/kritter/opiumdragon/opiumdragon", "Opium Dragon");
-        put("gfx/terobjs/herbs/snapdragon", "Uncommon Snapdragon");
-        put("gfx/terobjs/herbs/cattail", "Cattail");
-        put("gfx/kritter/forestsnail/forestsnail", "Forest Snail");
-        put("gfx/kritter/forestlizard/forestlizard", "Forest Lizard");
-        put("gfx/terobjs/herbs/greenkelp", "Green Kelp");
-        put("gfx/terobjs/herbs/yarrow", "Yarrow");
-        put("gfx/terobjs/herbs/candleberry", "Candleberry");
-        put("gfx/terobjs/herbs/oyster", "Oysters");
-        put("gfx/kritter/jellyfish/jellyfish", "Jellyfish");
-        put("gfx/terobjs/herbs/seashell", "Rainbowshell");
-        put("gfx/terobjs/herbs/giantpuffball", "Giant Puff Ball");
-        put("gfx/terobjs/herbs/ladysmantledew", "Dewy Lady's Mantle");
-        put("gfx/terobjs/saltbasin", "Salt Basin");
-        put("gfx/terobjs/abyssalchasm", "Abyssal Chasm");
-        put("gfx/terobjs/windthrow", "Wild Windthrow");
-        put("gfx/terobjs/icespire", "Ice Spire");
-        put("gfx/terobjs/woodheart", "Heartwood Tree");
-        put("gfx/terobjs/lilypadlotus", "Lilypad Lotus");
-        put("gfx/terobjs/fairystone", "Fairy Stone");
-        put("gfx/terobjs/jotunmussel", "Jotun Mussel");
-        put("gfx/terobjs/guanopile", "Guano Pile");
-        put("gfx/terobjs/geyser", "Brimstone Geyser");
-        put("gfx/terobjs/claypit", "Clay Pit");
-        put("gfx/terobjs/caveorgan", "Cave Organ");
-        put("gfx/terobjs/crystalpatch", "Rock Crystal");
-        put("gfx/kritter/bear/bear", "Bear");
-        put("gfx/kritter/orca/orca", "Orca");
-        put("gfx/kritter/spermwhale/spermwhale", "Whale");
-        put("gfx/kritter/adder/adder", "Snake");
-        put("gfx/terobjs/vehicle/bram", "Battering Ram");
-        put("gfx/terobjs/vehicle/catapult", "Catapult");
-        put("gfx/terobjs/vehicle/wreckingball", "Wrecking Ball");
-        put("gfx/kritter/lynx/lynx", "Lynx");
-        put("gfx/kritter/walrus/walrus", "Walrus");
-        put("gfx/kritter/seal/seal", "Seal");
-        put("gfx/kritter/troll/troll", "Troll");
-        put("gfx/kritter/mammoth/mammoth", "Mammoth");
-        put("gfx/kritter/goldeneagle/golldeneagle", "Eagle");
-        put("gfx/kritter/nidbane/nidbane", "Nidbane");
-        put("gfx/kritter/horse/horse", "Wild Horse");
-        put("gfx/kritter/moose/moose", "Moose");
-        put("gfx/terobjs/beaverdam", "Beaver Dam");
-        put("gfx/terobjs/dng/antdungeon", "Ant Dungeon");
-        put("gfx/terobjs/dng/batcave", "Bat Dungeon");
-        put("gfx/kritter/wolverine/wolverine", "Wolverine");
-        put("gfx/kritter/badger/badger", "Badger");
-        put("gfx/kritter/fox/fox", "Fox");
-        put("gfx/kritter/wolf/wolf", "Wolves");
-        put("gfx/kritter/mole/mole", "Moles");
-        put("gfx/terobjs/herbs/lorchel", "Morels");
-        put("gfx/terobjs/herbs/frogscrown", "Frog's Crown");
-        put("gfx/terobjs/items/gems/gemstone", "Gemstones");
-        put("gfx/kritter/boar/boar", "Boars");
-        put("gfx/kritter/reddeer/reddeer", "Red Deer");
-        put("gfx/kritter/reindeer/reindeer", "Reindeer");
-    }};
-
-    public final static Set<String> locres = new HashSet<String>(Arrays.asList(
+    public static final Map<String, CheckListboxItem> curiolist = new HashMap<>();
+    public static final Map<String, Tex> additonalicons = new HashMap<>();
+    public static final Map<String, CheckListboxItem> alarmitems = new HashMap<>();
+    public static final Map<String, String> defaultitems = new HashMap<>();
+    public static final Set<String> locres = new HashSet<>(Arrays.asList(
             "gfx/terobjs/saltbasin",
             "gfx/terobjs/abyssalchasm",
             "gfx/terobjs/windthrow",
@@ -893,7 +440,7 @@ public class Config {
             "gfx/terobjs/caveorgan",
             "gfx/terobjs/crystalpatch"));
 
-    public final static Set<String> mineablesStone = new HashSet<String>(Arrays.asList(
+    public static final Set<String> mineablesStone = new HashSet<>(Arrays.asList(
             "gneiss",
             "basalt",
             "cinnabar",
@@ -948,7 +495,7 @@ public class Config {
             "peacockore"
     ));
 
-    public final static Set<String> mineablesOrePrecious = new HashSet<String>(Arrays.asList(
+    public final static Set<String> mineablesOrePrecious = new HashSet<>(Arrays.asList(
             "galena",
             "argentite",
             "hornsilver",
@@ -958,195 +505,18 @@ public class Config {
 
     ));
 
-    public final static Set<String> mineablesCurios = new HashSet<String>(Arrays.asList(
+    public final static Set<String> mineablesCurios = new HashSet<>(Arrays.asList(
             "catgold",
             "petrifiedshell",
             "strangecrystal",
             "quarryquartz"
     ));
 
-    public final static HashMap<String, CheckListboxItem> disableanim = new HashMap<String, CheckListboxItem>() {{
-        put("gfx/terobjs/beehive", new CheckListboxItem("Beehives"));
-        put("gfx/terobjs/pow", new CheckListboxItem("Fires"));
-        put("gfx/terobjs/stockpile-trash", new CheckListboxItem("Full trash stockpiles"));
-        put("/idle", new CheckListboxItem("Idle animals"));
-        put("gfx/terobjs/steelcrucible", new CheckListboxItem("Steel Crucible"));
-        put("gfx/terobjs/cauldron", new CheckListboxItem("Cauldrons"));
-        put("gfx/terobjs/villageidol", new CheckListboxItem("Village Idol"));
-        put("gfx/terobjs/tarkiln", new CheckListboxItem("Tar Kilns"));
-        put("gfx/terobjs/oven", new CheckListboxItem("Ovens"));
-        put("gfx/terobjs/smelter", new CheckListboxItem("Smelters"));
-        put("gfx/terobjs/arch/visflag", new CheckListboxItem("Visitor Flags"));
-        put("gfx/terobjs/flagpole", new CheckListboxItem("Flag Poles"));
-        put("gfx/terobjs/herbs/chimingbluebell", new CheckListboxItem("Bluebells"));
-    }};
-
-    public final static HashMap<String, CheckListboxItem> disableshiftclick = new HashMap<String, CheckListboxItem>() {{
-        put("steelcrucible", new CheckListboxItem("Steel Crucibles"));
-        put("ttub", new CheckListboxItem("Tanning Tub"));
-        put("smelter", new CheckListboxItem("Smelters"));
-        put("oven", new CheckListboxItem("Ovens"));
-        put("kiln", new CheckListboxItem("Kilns"));
-        put("htable", new CheckListboxItem("Herb Tables"));
-        put("cupboard", new CheckListboxItem("Cupboards"));
-        put("cauldron", new CheckListboxItem("Cauldrons"));
-        put("primsmelter", new CheckListboxItem("Primitiry Smeltery"));
-    }};
-
-    public final static HashMap<String, String> alarms = new HashMap<String, String>() {{
-        put("None", "None");
-        put("Pony Alarm", "sfx/alarmpony");
-        put("Awwwwww Yeah", "sfx/awwyeah");
-        put("Bear Roar", "sfx/BearRoar");
-        put("Jcoles Beaver Dungeon", "sfx/BeaverDungeon");
-        put("JColes Danger Noodle", "sfx/DangerNoodle");
-        put("DaveyJones", "sfx/DaveyJones");
-        put("Ding", "sfx/Ding");
-        put("Doomed", "sfx/Doomed");
-        put("EagleScreech", "sfx/EagleScreech");
-        put("GhostBusters", "sfx/GhostBusters");
-        put("Gold", "sfx/gold");
-        put("Oof!", "sfx/oof");
-        put("lynx", "sfx/lynx");
-        put("mammoth", "sfx/mammoth");
-        put("Oh Shit!", "sfx/OhShit");
-        put("JColes OhFuckItsAGuy", "sfx/OhShitItsAGuy");
-        put("Enemy Siren", "sfx/redenemy");
-        put("Arf Arf", "sfx/seal");
-        put("Siege Warning", "sfx/siege");
-        put("Silver", "sfx/silver");
-        put("Unknown Player Siren", "sfx/Siren");
-        put("Female Scream", "sfx/Scream");
-        put("Study Ding", "sfx/Study");
-        put("Swag!", "sfx/Swag");
-        put("Thank youuuuuuu", "sfx/thankyourick");
-        put("Timer alarm", "sfx/timer");
-        put("Troll in the dungeon!", "sfx/troll");
-        put("JColes Wallllllrus", "sfx/Walrus");
-        put("Wrecking Ball!", "sfx/WreckingBall");
-        put("Zelda Secret", "sfx/Zelda");
-        put("Trumpets", "sfx/trumpets");
-        put("No Dick!", "sfx/nodick");
-        put("Snek!", "sfx/snek");
-        put("Noperope", "sfx/noperope");
-        put("Bruh", "sfx/bruh");
-    }};
-
-    public final static HashMap<String, String[]> cures = new HashMap<String, String[]>() {{
-        put("paginae/wound/antburn", new String[]{
-                "gfx/invobjs/herbs/yarrow"
-        });
-        put("paginae/wound/sandfleabites", new String[]{
-                "gfx/invobjs/herbs/yarrow"
-        });
-        put("paginae/wound/blunttrauma", new String[]{
-                "gfx/invobjs/toadbutter",
-                "gfx/invobjs/leech",
-                "gfx/invobjs/gauze",
-                "gfx/invobjs/hartshornsalve",
-                "gfx/invobjs/camomilecompress",
-                "gfx/invobjs/opium"
-        });
-        put("paginae/wound/bruise", new String[]{
-                "gfx/invobjs/leech"
-        });
-        put("paginae/wound/midgebite", new String[]{
-                "gfx/invobjs/herbs/yarrow"
-        });
-        put("paginae/wound/concussion", new String[]{
-                "gfx/invobjs/coldcompress",
-                "gfx/invobjs/opium"
-        });
-        put("paginae/wound/cruelincision", new String[]{
-                "gfx/invobjs/gauze",
-                "gfx/invobjs/stitchpatch",
-                "gfx/invobjs/rootfill"
-        });
-        put("paginae/wound/deepcut", new String[]{
-                "gfx/invobjs/gauze",
-                "gfx/invobjs/stingingpoultice",
-                "gfx/invobjs/rootfill",
-                "gfx/invobjs/herbs/waybroad",
-                "gfx/invobjs/honeybroadaid"
-        });
-        put("paginae/wound/fellslash", new String[]{
-                "gfx/invobjs/gauze"
-        });
-        put("paginae/wound/nicksnknacks", new String[]{
-                "gfx/invobjs/herbs/yarrow",
-                "gfx/invobjs/honeybroadaid"
-        });
-        put("paginae/wound/punchsore", new String[]{
-                "gfx/invobjs/mudointment",
-                "gfx/invobjs/opium"
-        });
-        put("paginae/wound/scrapesncuts", new String[]{
-                "gfx/invobjs/herbs/yarrow",
-                "gfx/invobjs/mudointment",
-                "gfx/invobjs/honeybroadaid"
-        });
-        put("paginae/wound/severemauling", new String[]{
-                "gfx/invobjs/hartshornsalve",
-                "gfx/invobjs/opium"
-        });
-        put("paginae/wound/swollenbump", new String[]{
-                "gfx/invobjs/coldcompress",
-                "gfx/invobjs/leech",
-                "gfx/invobjs/stingingpoultice"
-        });
-        put("paginae/wound/unfaced", new String[]{
-                "gfx/invobjs/toadbutter",
-                "gfx/invobjs/leech",
-                "gfx/invobjs/mudointment",
-                "gfx/invobjs/kelpcream"
-        });
-        put("paginae/wound/wretchedgore", new String[]{
-                "gfx/invobjs/stitchpatch"
-        });
-        put("paginae/wound/blackeye", new String[]{
-                "gfx/invobjs/hartshornsalve",
-                "gfx/invobjs/honeybroadaid",
-                "gfx/invobjs/toadbutter",
-                "gfx/invobjs/rootfill"
-        });
-        put("paginae/wound/bladekiss", new String[]{
-                "gfx/invobjs/gauze",
-                "gfx/invobjs/toadbutter"
-        });
-        put("paginae/wound/somethingbroken", new String[]{
-                "gfx/invobjs/splint"
-        });
-        put("paginae/wound/infectedsore", new String[]{
-                "gfx/invobjs/camomilecompress",
-                "gfx/invobjs/soapbar",
-                "gfx/invobjs/opium",
-                "gfx/invobjs/antpaste"
-        });
-        put("paginae/wound/nastylaceration", new String[]{
-                "gfx/invobjs/stitchpatch",
-                "gfx/invobjs/toadbutter"
-        });
-        put("paginae/wound/sealfinger", new String[]{
-                "gfx/invobjs/hartshornsalve",
-                "gfx/invobjs/kelpcream",
-                "gfx/invobjs/antpaste"
-        });
-        put("paginae/wound/coalcough", new String[]{
-                "gfx/invobjs/opium"
-        });
-        put("paginae/wound/beesting", new String[]{
-                "gfx/invobjs/kelpcream",
-                "gfx/invobjs/antpaste"
-        });
-        put("paginae/wound/crabcaressed", new String[]{
-                "gfx/invobjs/antpaste"
-        });
-        put("paginae/wound/leechburns", new String[]{
-                "gfx/invobjs/toadbutter"
-        });
-    }};
-
-    public final static Set<String> bigAnimals = new HashSet<String>(Arrays.asList(
+    public static final Map<String, CheckListboxItem> disableanim = new HashMap<>();
+    public static final Map<String, CheckListboxItem> disableshiftclick = new HashMap<>();
+    public static final Map<String, String> alarms = new HashMap<>();
+    public static final Map<String, String[]> cures = new HashMap<>();
+    public static final Set<String> bigAnimals = new HashSet<>(Arrays.asList(
             "Spine01_R.001",
             "main.004_R",
             "tail0_R.001",
@@ -1168,6 +538,627 @@ public class Config {
             "Bone.001_L.002",
             "Spine00"
     ));
+
+    static {
+        boulders.put("alabaster", new CheckListboxItem("Alabaster"));
+        boulders.put("basalt", new CheckListboxItem("Basalt"));
+        boulders.put("schist", new CheckListboxItem("Schist"));
+        boulders.put("dolomite", new CheckListboxItem("Dolomite"));
+        boulders.put("gneiss", new CheckListboxItem("Gneiss"));
+        boulders.put("granite", new CheckListboxItem("Granite"));
+        boulders.put("porphyry", new CheckListboxItem("Porphyry"));
+        boulders.put("quartz", new CheckListboxItem("Quartz"));
+        boulders.put("limestone", new CheckListboxItem("Limestone"));
+        boulders.put("sandstone", new CheckListboxItem("Sandstone"));
+        boulders.put("cinnabar", new CheckListboxItem("Cinnabar"));
+        boulders.put("feldspar", new CheckListboxItem("Feldspar"));
+        boulders.put("marble", new CheckListboxItem("Marble"));
+        boulders.put("flint", new CheckListboxItem("Flint"));
+        boulders.put("hornblende", new CheckListboxItem("Hornblende"));
+        boulders.put("olivine", new CheckListboxItem("Olivine"));
+        boulders.put("apatite", new CheckListboxItem("Apatite"));
+        boulders.put("corund", new CheckListboxItem("Korund"));
+        boulders.put("gabbro", new CheckListboxItem("Gabbro"));
+        boulders.put("arkose", new CheckListboxItem("Arkose"));
+        boulders.put("breccia", new CheckListboxItem("Breccia"));
+
+        bushes.put("arrowwood", new CheckListboxItem("Arrowwood"));
+        bushes.put("crampbark", new CheckListboxItem("Crampbark"));
+        bushes.put("sandthorn", new CheckListboxItem("Sandthorn"));
+        bushes.put("blackberrybush", new CheckListboxItem("Blackberry"));
+        bushes.put("dogrose", new CheckListboxItem("Dogrose"));
+        bushes.put("spindlebush", new CheckListboxItem("Spindlebush"));
+        bushes.put("blackcurrant", new CheckListboxItem("Blackcurrant"));
+        bushes.put("elderberrybush", new CheckListboxItem("Elderberry"));
+        bushes.put("teabush", new CheckListboxItem("Tea"));
+        bushes.put("blackthorn", new CheckListboxItem("Blackthorn"));
+        bushes.put("gooseberrybush", new CheckListboxItem("Gooseberry"));
+        bushes.put("tibast", new CheckListboxItem("Tibast"));
+        bushes.put("bogmyrtle", new CheckListboxItem("Bogmyrtle"));
+        bushes.put("hawthorn", new CheckListboxItem("Hawthorn"));
+        bushes.put("tundrarose", new CheckListboxItem("Tundrarose"));
+        bushes.put("boxwood", new CheckListboxItem("Boxwood"));
+        bushes.put("holly", new CheckListboxItem("Hollyberry"));
+        bushes.put("woodbine", new CheckListboxItem("Fly Woodbine"));
+        bushes.put("bsnightshade", new CheckListboxItem("Bittersweet Nightshade"));
+        bushes.put("raspberrybush", new CheckListboxItem("Raspberry"));
+        bushes.put("caprifole", new CheckListboxItem("Caprifole"));
+        bushes.put("redcurrant", new CheckListboxItem("Redcurrant"));
+        bushes.put("gorse", new CheckListboxItem("Gorse"));
+        bushes.put("witherstand", new CheckListboxItem("Witherstand"));
+        bushes.put("cavefern", new CheckListboxItem("Cave Fern"));
+        bushes.put("mastic", new CheckListboxItem("Mastic"));
+        bushes.put("poppycaps", new CheckListboxItem("Poppycaps"));
+        bushes.put("ghostpipe", new CheckListboxItem("Ghostpipe"));
+        bushes.put("hoarwithy", new CheckListboxItem("Hoarwithy"));
+
+        trees.put("chastetree", new CheckListboxItem("Chaste Tree"));
+        trees.put("dogwood", new CheckListboxItem("Dogwood"));
+        trees.put("strawberrytree", new CheckListboxItem("Strawberry Tree"));
+        trees.put("stonepine", new CheckListboxItem("Stone Pine"));
+        trees.put("blackpine", new CheckListboxItem("Black Pine"));
+        trees.put("silverfir", new CheckListboxItem("Silver Fir"));
+        trees.put("treeheath", new CheckListboxItem("Heath Tree"));
+        trees.put("sycamore", new CheckListboxItem("Sycamore"));
+        trees.put("terebinth", new CheckListboxItem("Terebinth"));
+        trees.put("lotetree", new CheckListboxItem("Lote Tree"));
+        trees.put("sorbtree", new CheckListboxItem("Sorb Tree"));
+        trees.put("alder", new CheckListboxItem("Alder"));
+        trees.put("corkoak", new CheckListboxItem("Corkoak"));
+        trees.put("plumtree", new CheckListboxItem("Plum Tree"));
+        trees.put("juniper", new CheckListboxItem("Juniper"));
+        trees.put("crabappletree", new CheckListboxItem("Crabapple"));
+        trees.put("kingsoak", new CheckListboxItem("King's Oak"));
+        trees.put("oak", new CheckListboxItem("Oak"));
+        trees.put("walnuttree", new CheckListboxItem("Walnut Tree"));
+        trees.put("birdcherrytree", new CheckListboxItem("Birdcherry Tree"));
+        trees.put("larch", new CheckListboxItem("Larch"));
+        trees.put("poplar", new CheckListboxItem("Poplar"));
+        trees.put("whitebeam", new CheckListboxItem("Whitebeam"));
+        trees.put("appletree", new CheckListboxItem("Apple Tree"));
+        trees.put("cypress", new CheckListboxItem("Cypress"));
+        trees.put("buckthorn", new CheckListboxItem("Buckthorn"));
+        trees.put("laurel", new CheckListboxItem("Laurel"));
+        trees.put("ash", new CheckListboxItem("Ash"));
+        trees.put("elm", new CheckListboxItem("Elm"));
+        trees.put("rowan", new CheckListboxItem("Rowan"));
+        trees.put("willow", new CheckListboxItem("Willow"));
+        trees.put("cedar", new CheckListboxItem("Cedar"));
+        trees.put("linden", new CheckListboxItem("Linden"));
+        trees.put("olivetree", new CheckListboxItem("Olive Tree"));
+        trees.put("aspen", new CheckListboxItem("Aspen"));
+        trees.put("fir", new CheckListboxItem("Fir"));
+        trees.put("baywillow", new CheckListboxItem("Baywillow"));
+        trees.put("goldenchain", new CheckListboxItem("Goldenchain"));
+        trees.put("peartree", new CheckListboxItem("Pear Tree"));
+        trees.put("sallow", new CheckListboxItem("Sallow"));
+        trees.put("yew", new CheckListboxItem("Yew"));
+        trees.put("cherry", new CheckListboxItem("Cherry"));
+        trees.put("maple", new CheckListboxItem("Maple"));
+        trees.put("beech", new CheckListboxItem("Beech"));
+        trees.put("chestnuttree", new CheckListboxItem("Chestnut Tree"));
+        trees.put("hazel", new CheckListboxItem("Hazel"));
+        trees.put("spruce", new CheckListboxItem("Spruce"));
+        trees.put("hornbeam", new CheckListboxItem("Hornbeam"));
+        trees.put("oldtrunk", new CheckListboxItem("Mirkwood Log"));
+        trees.put("conkertree", new CheckListboxItem("Conker Tree"));
+        trees.put("mulberry", new CheckListboxItem("Mulberry"));
+        trees.put("sweetgum", new CheckListboxItem("Sweetgum"));
+        trees.put("pine", new CheckListboxItem("Pine"));
+        trees.put("birch", new CheckListboxItem("Birch"));
+        trees.put("planetree", new CheckListboxItem("Plane Tree"));
+        trees.put("quincetree", new CheckListboxItem("Quince"));
+        trees.put("almondtree", new CheckListboxItem("Almond"));
+        trees.put("persimmontree", new CheckListboxItem("Persimmon"));
+        trees.put("medlartree", new CheckListboxItem("Medlar"));
+        trees.put("gnomeshat", new CheckListboxItem("Gnome's Hat"));
+        trees.put("carobtree", new CheckListboxItem("Carob Tree"));
+        trees.put("gloomcap", new CheckListboxItem("Gloomcap"));
+        trees.put("trombonechantrelle", new CheckListboxItem("Trombone Chantrelle"));
+        trees.put("osier", new CheckListboxItem("Osier"));
+        trees.put("tamarisk", new CheckListboxItem("Tamarisk"));
+        trees.put("checkertree", new CheckListboxItem("Checker Tree"));
+        trees.put("wartybirch", new CheckListboxItem("Warty Birch"));
+        trees.put("figtree", new CheckListboxItem("Fig Tree"));
+        trees.put("dwarfpine", new CheckListboxItem("Dwarf Pine"));
+        trees.put("mayflower", new CheckListboxItem("Mayflower"));
+
+        icons.put("arrow", new CheckListboxItem("Arrow"));
+        icons.put("rowboat", new CheckListboxItem("Rowboat"));
+        icons.put("dugout", new CheckListboxItem("Dugout"));
+        icons.put("knarr", new CheckListboxItem("Knarr"));
+        icons.put("snekkja", new CheckListboxItem("Snekkja"));
+        icons.put("wagon", new CheckListboxItem("Wagon"));
+        icons.put("wheelbarrow", new CheckListboxItem("Wheelbarrow"));
+        icons.put("cart", new CheckListboxItem("Cart"));
+        icons.put("wball", new CheckListboxItem("Wrecking Ball"));
+        icons.put("bram", new CheckListboxItem("Battering Ram"));
+//        icons.put("irrbloss", new CheckListboxItem("Irrlight"));
+        icons.put("opiumdragon", new CheckListboxItem("Opium Dragon"));
+        icons.put("moonmoth", new CheckListboxItem("Moonmoths"));
+        icons.put("lobsterpot", new CheckListboxItem("Lobster Pot"));
+        icons.put("mandrakespirited", new CheckListboxItem("Spirited Mandrake"));
+        icons.put("fishingnet", new CheckListboxItem("Fishing Net"));
+        icons.put("mare", new CheckListboxItem("Tamed Mares"));
+        icons.put("stallion", new CheckListboxItem("Tamed Stallions"));
+        icons.put("boarspear", new CheckListboxItem("Boar Spear"));
+        icons.put("boostspeed", new CheckListboxItem("Speed Boost"));
+        icons.put("frog", new CheckListboxItem("Frog"));
+        icons.put("toad", new CheckListboxItem("Toad"));
+        icons.put("stalagoomba", new CheckListboxItem("Stalagoomba"));
+        icons.put("dryad", new CheckListboxItem("Dryad"));
+        icons.put("ent", new CheckListboxItem("Ent"));
+//old icons
+//        icons.put("dandelion", new CheckListboxItem("Dandelion"));
+//        icons.put("chantrelle", new CheckListboxItem("Chantrelle"));
+//        icons.put("blueberry", new CheckListboxItem("Blueberry"));
+//        icons.put("rat", new CheckListboxItem("Rat"));
+//        icons.put("chicken", new CheckListboxItem("Chicken"));
+//        icons.put("chick", new CheckListboxItem("Chick"));
+//        icons.put("duskfern", new CheckListboxItem("Dusk Fern"));
+//        icons.put("spindlytaproot", new CheckListboxItem("Spindly Taproot"));
+//        icons.put("stingingnettle", new CheckListboxItem("Stinging Nettle"));
+//        icons.put("dragonfly", new CheckListboxItem("Dragonfly"));
+//        icons.put("magpie", new CheckListboxItem("Magpie"));
+//        icons.put("mistletoe", new CheckListboxItem("Mistletoe"));
+//        icons.put("firefly", new CheckListboxItem("Firefly"));
+//        icons.put("cavemoth", new CheckListboxItem("Cave Moth"));
+//        icons.put("windweed", new CheckListboxItem("Wild Windsown Weed"));
+//        icons.put("mussels", new CheckListboxItem("Mussels"));
+//        icons.put("mallard", new CheckListboxItem("Duck"));
+//        icons.put("ladybug", new CheckListboxItem("Ladybug"));
+//        icons.put("silkmoth", new CheckListboxItem("Silkmoth"));
+//        icons.put("hedgehog", new CheckListboxItem("Hedgehog"));
+//        icons.put("squirrel", new CheckListboxItem("Squirrel"));
+//        icons.put("rabbit", new CheckListboxItem("Rabbit"));
+//        icons.put("lingon", new CheckListboxItem("Lingonberries"));
+//        icons.put("grub", new CheckListboxItem("Grub"));
+//        icons.put("yellowfoot", new CheckListboxItem("Yellowfoot"));
+//        icons.put("coltsfoot", new CheckListboxItem("Coltsfoot"));
+//        icons.put("chives", new CheckListboxItem("Chives"));
+//        icons.put("rustroot", new CheckListboxItem("Rustroot"));
+//        icons.put("adder", new CheckListboxItem("Adder"));
+//        icons.put("crab", new CheckListboxItem("Crab"));
+//        icons.put("clover", new CheckListboxItem("Clover"));
+//        icons.put("ladysmantle", new CheckListboxItem("Lady's Mantle"));
+//        icons.put("grasshopper", new CheckListboxItem("Grasshopper"));
+//        icons.put("snapdragon", new CheckListboxItem("Uncommon Snapdragon"));
+//        icons.put("cattail", new CheckListboxItem("Cattail"));
+//        icons.put("forestsnail", new CheckListboxItem("Forest Snail"));
+//        icons.put("forestlizard", new CheckListboxItem("Forest Lizard"));
+//        icons.put("greenkelp", new CheckListboxItem("Green Kelp"));
+//        icons.put("waterstrider", new CheckListboxItem("Water Strider"));
+//        icons.put("frogspawn", new CheckListboxItem("Frog Spawn"));
+//        icons.put("oyster", new CheckListboxItem("Oysters"));
+//        icons.put("jellyfish", new CheckListboxItem("Jellyfish"));
+//        icons.put("clay-gray", new CheckListboxItem("Gray Clay"));
+//        icons.put("bat", new CheckListboxItem("Bats"));
+//        icons.put("stagbeetle", new CheckListboxItem("Stagbeetles"));
+//        icons.put("monarchbutterfly", new CheckListboxItem("Monarch Butterfly"));
+//        icons.put("cavecentipede", new CheckListboxItem("Cave Centipede"));
+//        icons.put("mole", new CheckListboxItem("Moles"));
+//        icons.put("lorchel", new CheckListboxItem("Morels"));
+//        icons.put("frogscrown", new CheckListboxItem("Frog's Crown"));
+//        icons.put("lampstalk", new CheckListboxItem("Lamp Stalks"));
+
+        Utils.loadcollection("petalcol").forEach(petal -> flowermenus.put(petal, new CheckListboxItem(petal)));
+
+        autowindows.put("Inventory", new CheckListboxItem("Inventory"));
+        autowindows.put("Belt", new CheckListboxItem("Belt"));
+        autowindows.put("Quest Log", new CheckListboxItem("Quest Log"));
+        autowindows.put("Study", new CheckListboxItem("Study"));
+        autowindows.put("Equipment", new CheckListboxItem("Equipment"));
+        autowindows.put("Timers", new CheckListboxItem("Timers"));
+        autowindows.put("Kith & Kin", new CheckListboxItem("Kith & Kin"));
+        autowindows.put("Character Sheet", new CheckListboxItem("Character Sheet"));
+        autowindows.put("Search...", new CheckListboxItem("Search..."));
+        autowindows.put("Craft window", new CheckListboxItem("Craft window"));
+        autowindows.put("Chat", new CheckListboxItem("Chat Window - Reverse Logic, select to disable."));
+
+        autoclusters.put("gfx/terobjs/herbs/mussels", new CheckListboxItem("Mussels", Resource.BUNDLE_FLOWER));
+        autoclusters.put("gfx/terobjs/herbs/clay-gray", new CheckListboxItem("Gray Clay", Resource.BUNDLE_FLOWER));
+        autoclusters.put("gfx/terobjs/herbs/oyster", new CheckListboxItem("Oysters", Resource.BUNDLE_FLOWER));
+        autoclusters.put("gfx/terobjs/herbs/goosebarnacle", new CheckListboxItem("Gooseneck Barnacles", Resource.BUNDLE_FLOWER));
+        autoclusters.put("gfx/terobjs/herbs/cattail", new CheckListboxItem("Cattails", Resource.BUNDLE_FLOWER));
+        autoclusters.put("gfx/kritter/jellyfish/jellyfish", new CheckListboxItem("Jellyfish", Resource.BUNDLE_FLOWER));
+        autoclusters.put("gfx/terobjs/herbs/lampstalk", new CheckListboxItem("Lamp Stalks", Resource.BUNDLE_FLOWER));
+
+        curiolist.put("Bar of Soap", new CheckListboxItem("Bar of Soap"));
+        curiolist.put("Barkboat", new CheckListboxItem("Barkboat"));
+        curiolist.put("Batwing Necklace", new CheckListboxItem("Batwing Necklace"));
+        curiolist.put("Beast Unborn", new CheckListboxItem("Beast Unborn"));
+        curiolist.put("Blacksmith's Bauble", new CheckListboxItem("Blacksmith's Bauble"));
+        curiolist.put("Chiming Bluebell", new CheckListboxItem("Chiming Bluebell"));
+        curiolist.put("Bronze Steed", new CheckListboxItem("Bronze Steed"));
+        curiolist.put("Cigar", new CheckListboxItem("Cigar"));
+        curiolist.put("Deep Sea Atavism", new CheckListboxItem("Deep Sea Atavism"));
+        curiolist.put("Feather Duster", new CheckListboxItem("Feather Duster"));
+        curiolist.put("Feather Trinket", new CheckListboxItem("Feather Trinket"));
+        curiolist.put("Bouquet of Flowers", new CheckListboxItem("Bouquet of Flowers"));
+        curiolist.put("Fossil Collection", new CheckListboxItem("Fossil Collection"));
+        curiolist.put("Glue Troll", new CheckListboxItem("Glue Troll"));
+        curiolist.put("Golden Cat", new CheckListboxItem("Golden Cat"));
+        curiolist.put("Golden Tooth", new CheckListboxItem("Golden Tooth"));
+        curiolist.put("Grand Haruspex", new CheckListboxItem("Grand Haruspex"));
+        curiolist.put("Great Wax Seal", new CheckListboxItem("Great Wax Seal"));
+        curiolist.put("Ivory Figurine", new CheckListboxItem("Ivory Figurine"));
+        curiolist.put("Mirkwood Offering", new CheckListboxItem("Mirkwood Offering"));
+        curiolist.put("Onion Braid", new CheckListboxItem("Onion Braid"));
+        curiolist.put("Porcelain Doll", new CheckListboxItem("Porcelain Doll"));
+        curiolist.put("Seer's Bowl", new CheckListboxItem("Seer's Bowl"));
+        curiolist.put("Seer's Bones", new CheckListboxItem("Seer's Bones"));
+        curiolist.put("Seer's Spindle", new CheckListboxItem("Seer's Spindle"));
+        curiolist.put("Seer's Stones", new CheckListboxItem("Seer's Stones"));
+        curiolist.put("Seer's Tealeaves", new CheckListboxItem("Seer's Tealeaves"));
+        curiolist.put("Shiny Marbles", new CheckListboxItem("Shiny Marbles"));
+        curiolist.put("Silken Ribbon", new CheckListboxItem("Silken Ribbon"));
+        curiolist.put("Silver Rose", new CheckListboxItem("Silver Rose"));
+        curiolist.put("Snow Globe", new CheckListboxItem("Snow Globe"));
+        curiolist.put("Stained Glass Heart", new CheckListboxItem("Stained Glass Heart"));
+        curiolist.put("Straw Doll", new CheckListboxItem("Straw Doll"));
+        curiolist.put("Stuffed Bear", new CheckListboxItem("Stuffed Bear"));
+        curiolist.put("Tafl Board", new CheckListboxItem("Tafl Board"));
+        curiolist.put("Tiny Abacus", new CheckListboxItem("Tiny Abacus"));
+        curiolist.put("Uncrushed Husk", new CheckListboxItem("Uncrushed Husk"));
+        curiolist.put("Easter Egg", new CheckListboxItem("Easter Egg"));
+
+        additonalicons.put("gfx/terobjs/items/mandrakespirited", Resource.loadtex("gfx/icons/mandrakespirited"));
+        additonalicons.put("gfx/terobjs/vehicle/bram", Resource.loadtex("gfx/icons/bram"));
+        additonalicons.put("gfx/kritter/toad/toad", Resource.loadtex("gfx/icons/toad"));
+        additonalicons.put("gfx/terobjs/vehicle/rowboat", Resource.loadtex("gfx/icons/rowboat"));
+        additonalicons.put("gfx/terobjs/vehicle/dugout", Resource.loadtex("gfx/icons/dugout"));
+        additonalicons.put("gfx/terobjs/vehicle/knarr", Resource.loadtex("gfx/icons/knarr"));
+        additonalicons.put("gfx/terobjs/vehicle/snekkja", Resource.loadtex("gfx/icons/snekkja"));
+        additonalicons.put("gfx/kritter/chicken/chicken", Resource.loadtex("gfx/icons/deadhen"));
+        additonalicons.put("gfx/kritter/chicken/rooster", Resource.loadtex("gfx/icons/deadrooster"));
+        additonalicons.put("gfx/kritter/rabbit/rabbit", Resource.loadtex("gfx/icons/deadrabbit"));
+        additonalicons.put("gfx/kritter/hedgehog/hedgehog", Resource.loadtex("gfx/icons/deadhedgehog"));
+        additonalicons.put("gfx/kritter/squirrel/squirrel", Resource.loadtex("gfx/icons/deadsquirrel"));
+        additonalicons.put("gfx/terobjs/items/arrow", Resource.loadtex("gfx/icons/arrow"));
+        additonalicons.put("gfx/terobjs/items/boarspear", Resource.loadtex("gfx/icons/arrow"));
+        additonalicons.put("gfx/kritter/frog/frog", Resource.loadtex("gfx/icons/frog"));
+        additonalicons.put("gfx/terobjs/vehicle/wagon", Resource.loadtex("gfx/icons/wagon"));
+        additonalicons.put("gfx/terobjs/vehicle/wheelbarrow", Resource.loadtex("gfx/icons/wheelbarrow"));
+        additonalicons.put("gfx/terobjs/vehicle/cart", Resource.loadtex("gfx/icons/cart"));
+        additonalicons.put("gfx/terobjs/vehicle/wreckingball", Resource.loadtex("gfx/icons/wball"));
+        additonalicons.put("gfx/kritter/nidbane/nidbane", Resource.loadtex("gfx/icons/spooky"));
+        additonalicons.put("gfx/kritter/irrbloss/irrbloss", Resource.loadtex("gfx/icons/irrbloss"));
+        additonalicons.put("gfx/kritter/opiumdragon/opiumdragon", Resource.loadtex("gfx/icons/opiumdragon"));
+        additonalicons.put("gfx/terobjs/lobsterpot", Resource.loadtex("gfx/icons/lobsterpot"));
+        additonalicons.put("gfx/terobjs/fishingnet", Resource.loadtex("gfx/icons/fishingnet"));
+        additonalicons.put("gfx/kritter/horse/stallion", Resource.loadtex("gfx/icons/stallionicon"));
+        additonalicons.put("gfx/kritter/horse/mare", Resource.loadtex("gfx/icons/mareicon"));
+        additonalicons.put("gfx/kritter/stalagoomba/stalagoomba", configuration.imageToTex(configuration.modificationPath + "/gfx/icons/stalagoomba.png", Coord.of(20, 20)));
+        additonalicons.put("gfx/kritter/dryad/dryad", configuration.imageToTex(configuration.modificationPath + "/gfx/icons/dryad.png"));
+        additonalicons.put("gfx/kritter/ent/ent", configuration.imageToTex(configuration.modificationPath + "/gfx/icons/ent.png"));
+
+        alarmitems.put("gfx/terobjs/herbs/flotsam", new CheckListboxItem("Peculiar Flotsam"));
+        alarmitems.put("gfx/terobjs/herbs/chimingbluebell", new CheckListboxItem("Chiming Bluebell"));
+        alarmitems.put("gfx/terobjs/herbs/edelweiss", new CheckListboxItem("Edelweiß"));
+        alarmitems.put("gfx/terobjs/herbs/bloatedbolete", new CheckListboxItem("Bloated Bolete"));
+        alarmitems.put("gfx/terobjs/herbs/glimmermoss", new CheckListboxItem("Glimmermoss"));
+        alarmitems.put("gfx/terobjs/herbs/camomile", new CheckListboxItem("Camomile"));
+        alarmitems.put("gfx/terobjs/herbs/clay-cave", new CheckListboxItem("Cave Clay"));
+        alarmitems.put("gfx/terobjs/herbs/mandrake", new CheckListboxItem("Mandrake Root"));
+        alarmitems.put("gfx/terobjs/herbs/clay-gray", new CheckListboxItem("Gray Clay"));
+        alarmitems.put("gfx/terobjs/herbs/dandelion", new CheckListboxItem("Dandelion"));
+        alarmitems.put("gfx/terobjs/herbs/chantrelle", new CheckListboxItem("Chantrelle"));
+        alarmitems.put("gfx/terobjs/herbs/blueberry", new CheckListboxItem("Blueberry"));
+        alarmitems.put("gfx/terobjs/herbs/strawberry", new CheckListboxItem("Strawberry"));
+        alarmitems.put("gfx/kritter/rat/rat", new CheckListboxItem("Rat"));
+        alarmitems.put("gfx/kritter/spermwhale/spermwhale", new CheckListboxItem("Whale"));
+        alarmitems.put("gfx/kritter/orca/orca", new CheckListboxItem("Orca"));
+        alarmitems.put("gfx/kritter/chicken/chicken", new CheckListboxItem("Chicken"));
+        alarmitems.put("gfx/kritter/chicken/chick", new CheckListboxItem("Chick"));
+        alarmitems.put("gfx/terobjs/herbs/spindlytaproot", new CheckListboxItem("Spindly Taproot"));
+        alarmitems.put("gfx/terobjs/herbs/stingingnettle", new CheckListboxItem("Stinging Nettle"));
+        alarmitems.put("gfx/kritter/dragonfly/dragonfly", new CheckListboxItem("Dragonfly"));
+        alarmitems.put("gfx/kritter/toad/toad", new CheckListboxItem("Toad"));
+        alarmitems.put("gfx/kritter/frog/frog", new CheckListboxItem("Frog"));
+        alarmitems.put("gfx/terobjs/herbs/windweed", new CheckListboxItem("Wild Windsown Weed"));
+        alarmitems.put("gfx/terobjs/herbs/mussels", new CheckListboxItem("Mussels"));
+        alarmitems.put("gfx/kritter/mallard/mallard", new CheckListboxItem("Duck"));
+        alarmitems.put("gfx/kritter/ladybug/ladybug", new CheckListboxItem("Ladybug"));
+        alarmitems.put("gfx/kritter/silkmoth/silkmoth", new CheckListboxItem("Silkmoth"));
+        alarmitems.put("gfx/kritter/hedgehog/hedgehog", new CheckListboxItem("Hedgehog"));
+        alarmitems.put("gfx/kritter/squirrel/squirrel", new CheckListboxItem("Squirrel"));
+        alarmitems.put("gfx/kritter/rabbit/rabbit", new CheckListboxItem("Rabbit"));
+        alarmitems.put("gfx/terobjs/herbs/lingon", new CheckListboxItem("Lingonberries"));
+        alarmitems.put("gfx/kritter/grub/grub", new CheckListboxItem("Grub"));
+        alarmitems.put("gfx/terobjs/herbs/yellowfoot", new CheckListboxItem("Yellowfoot"));
+        alarmitems.put("gfx/terobjs/herbs/chives", new CheckListboxItem("Chives"));
+        alarmitems.put("gfx/terobjs/herbs/rustroot", new CheckListboxItem("Rustroot"));
+        alarmitems.put("gfx/kritter/crab/crab", new CheckListboxItem("Crab"));
+        alarmitems.put("gfx/terobjs/herbs/clover", new CheckListboxItem("Clover"));
+        alarmitems.put("gfx/terobjs/herbs/ladysmantle", new CheckListboxItem("Lady's Mantle"));
+        alarmitems.put("gfx/kritter/grasshopper/grasshopper", new CheckListboxItem("Grasshopper"));
+        alarmitems.put("gfx/kritter/irrbloss/irrbloss", new CheckListboxItem("Irrlight"));
+        alarmitems.put("gfx/kritter/opiumdragon/opiumdragon", new CheckListboxItem("Opium Dragon"));
+        alarmitems.put("gfx/terobjs/herbs/snapdragon", new CheckListboxItem("Uncommon Snapdragon"));
+        alarmitems.put("gfx/terobjs/herbs/cattail", new CheckListboxItem("Cattail"));
+        alarmitems.put("gfx/kritter/forestsnail/forestsnail", new CheckListboxItem("Forest Snail"));
+        alarmitems.put("gfx/kritter/forestlizard/forestlizard", new CheckListboxItem("Forest Lizard"));
+        alarmitems.put("gfx/terobjs/herbs/greenkelp", new CheckListboxItem("Green Kelp"));
+        alarmitems.put("gfx/terobjs/herbs/yarrow", new CheckListboxItem("Yarrow"));
+        alarmitems.put("gfx/terobjs/herbs/candleberry", new CheckListboxItem("Candleberry"));
+        alarmitems.put("gfx/terobjs/herbs/oyster", new CheckListboxItem("Oysters"));
+        alarmitems.put("gfx/kritter/jellyfish/jellyfish", new CheckListboxItem("Jellyfish"));
+        alarmitems.put("gfx/terobjs/herbs/seashell", new CheckListboxItem("Rainbowshell"));
+        alarmitems.put("gfx/terobjs/herbs/giantpuffball", new CheckListboxItem("Giant Puff Ball"));
+        alarmitems.put("gfx/terobjs/herbs/ladysmantledew", new CheckListboxItem("Dewy Lady's Mantle"));
+
+        defaultitems.put("gfx/terobjs/herbs/flotsam", "Peculiar Flotsam");
+        defaultitems.put("gfx/terobjs/herbs/chimingbluebell", "Chiming Bluebell");
+        defaultitems.put("gfx/terobjs/herbs/edelweiss", "Edelweiß");
+        defaultitems.put("gfx/terobjs/herbs/bloatedbolete", "Bloated Bolete");
+        defaultitems.put("gfx/terobjs/herbs/glimmermoss", "Glimmermoss");
+        defaultitems.put("gfx/terobjs/herbs/camomile", "Camomile");
+        defaultitems.put("gfx/terobjs/herbs/clay-cave", "Cave Clay");
+        defaultitems.put("gfx/terobjs/herbs/mandrake", "Mandrake Root");
+        defaultitems.put("gfx/terobjs/herbs/clay-gray", "Gray Clay");
+        defaultitems.put("gfx/terobjs/herbs/dandelion", "Dandelion");
+        defaultitems.put("gfx/terobjs/herbs/chantrelle", "Chantrelle");
+        defaultitems.put("gfx/terobjs/herbs/blueberry", "Blueberry");
+        defaultitems.put("gfx/terobjs/herbs/strawberry", "Strawberry");
+        defaultitems.put("gfx/kritter/rat/rat", "Rat");
+        defaultitems.put("gfx/terobs/villageidol", "Village Idol");
+        defaultitems.put("gfx/kritter/chicken/chicken", "Chicken");
+        defaultitems.put("gfx/kritter/chicken/chick", "Chick");
+        defaultitems.put("gfx/terobjs/herbs/spindlytaproot", "Spindly Taproot");
+        defaultitems.put("gfx/terobjs/herbs/stingingnettle", "Stinging Nettle");
+        defaultitems.put("gfx/kritter/dragonfly/dragonfly", "Dragonfly");
+        defaultitems.put("gfx/kritter/toad/toad", "Toad");
+        defaultitems.put("gfx/kritter/frog/frog", "Frog");
+        defaultitems.put("gfx/terobjs/herbs/windweed", "Wild Windsown Weed");
+        defaultitems.put("gfx/terobjs/herbs/mussels", "Mussels");
+        defaultitems.put("gfx/kritter/mallard/mallard", "Duck");
+        defaultitems.put("gfx/kritter/ladybug/ladybug", "Ladybug");
+        defaultitems.put("gfx/kritter/silkmoth/silkmoth", "Silkmoth");
+        defaultitems.put("gfx/kritter/caveangler/caveangler", "Cave Angler");
+        defaultitems.put("gfx/kritter/hedgehog/hedgehog", "Hedgehog");
+        defaultitems.put("gfx/kritter/squirrel/squirrel", "Squirrel");
+        defaultitems.put("gfx/kritter/rabbit/rabbit", "Rabbit");
+        defaultitems.put("gfx/terobjs/herbs/lingon", "Lingonberries");
+        defaultitems.put("gfx/kritter/grub/grub", "Grub");
+        defaultitems.put("gfx/terobjs/herbs/yellowfoot", "Yellowfoot");
+        defaultitems.put("gfx/terobjs/herbs/coltsfoot", "Coltsfoot");
+        defaultitems.put("gfx/terobjs/herbs/chives", "Chives");
+        defaultitems.put("gfx/terobjs/herbs/rustroot", "Rustroot");
+        defaultitems.put("gfx/kritter/crab/crab", "Crab");
+        defaultitems.put("gfx/terobjs/herbs/clover", "Clover");
+        defaultitems.put("gfx/terobjs/herbs/ladysmantle", "Lady's Mantle");
+        defaultitems.put("gfx/kritter/grasshopper/grasshopper", "Grasshopper");
+        defaultitems.put("gfx/kritter/irrbloss/irrbloss", "Irrlight");
+        defaultitems.put("gfx/kritter/opiumdragon/opiumdragon", "Opium Dragon");
+        defaultitems.put("gfx/terobjs/herbs/snapdragon", "Uncommon Snapdragon");
+        defaultitems.put("gfx/terobjs/herbs/cattail", "Cattail");
+        defaultitems.put("gfx/kritter/forestsnail/forestsnail", "Forest Snail");
+        defaultitems.put("gfx/kritter/forestlizard/forestlizard", "Forest Lizard");
+        defaultitems.put("gfx/terobjs/herbs/greenkelp", "Green Kelp");
+        defaultitems.put("gfx/terobjs/herbs/yarrow", "Yarrow");
+        defaultitems.put("gfx/terobjs/herbs/candleberry", "Candleberry");
+        defaultitems.put("gfx/terobjs/herbs/oyster", "Oysters");
+        defaultitems.put("gfx/kritter/jellyfish/jellyfish", "Jellyfish");
+        defaultitems.put("gfx/terobjs/herbs/seashell", "Rainbowshell");
+        defaultitems.put("gfx/terobjs/herbs/giantpuffball", "Giant Puff Ball");
+        defaultitems.put("gfx/terobjs/herbs/ladysmantledew", "Dewy Lady's Mantle");
+        defaultitems.put("gfx/terobjs/saltbasin", "Salt Basin");
+        defaultitems.put("gfx/terobjs/abyssalchasm", "Abyssal Chasm");
+        defaultitems.put("gfx/terobjs/windthrow", "Wild Windthrow");
+        defaultitems.put("gfx/terobjs/icespire", "Ice Spire");
+        defaultitems.put("gfx/terobjs/woodheart", "Heartwood Tree");
+        defaultitems.put("gfx/terobjs/lilypadlotus", "Lilypad Lotus");
+        defaultitems.put("gfx/terobjs/fairystone", "Fairy Stone");
+        defaultitems.put("gfx/terobjs/jotunmussel", "Jotun Mussel");
+        defaultitems.put("gfx/terobjs/guanopile", "Guano Pile");
+        defaultitems.put("gfx/terobjs/geyser", "Brimstone Geyser");
+        defaultitems.put("gfx/terobjs/claypit", "Clay Pit");
+        defaultitems.put("gfx/terobjs/caveorgan", "Cave Organ");
+        defaultitems.put("gfx/terobjs/crystalpatch", "Rock Crystal");
+        defaultitems.put("gfx/kritter/bear/bear", "Bear");
+        defaultitems.put("gfx/kritter/orca/orca", "Orca");
+        defaultitems.put("gfx/kritter/spermwhale/spermwhale", "Whale");
+        defaultitems.put("gfx/kritter/adder/adder", "Snake");
+        defaultitems.put("gfx/terobjs/vehicle/bram", "Battering Ram");
+        defaultitems.put("gfx/terobjs/vehicle/catapult", "Catapult");
+        defaultitems.put("gfx/terobjs/vehicle/wreckingball", "Wrecking Ball");
+        defaultitems.put("gfx/kritter/lynx/lynx", "Lynx");
+        defaultitems.put("gfx/kritter/walrus/walrus", "Walrus");
+        defaultitems.put("gfx/kritter/seal/seal", "Seal");
+        defaultitems.put("gfx/kritter/troll/troll", "Troll");
+        defaultitems.put("gfx/kritter/mammoth/mammoth", "Mammoth");
+        defaultitems.put("gfx/kritter/goldeneagle/golldeneagle", "Eagle");
+        defaultitems.put("gfx/kritter/nidbane/nidbane", "Nidbane");
+        defaultitems.put("gfx/kritter/horse/horse", "Wild Horse");
+        defaultitems.put("gfx/kritter/moose/moose", "Moose");
+        defaultitems.put("gfx/terobjs/beaverdam", "Beaver Dam");
+        defaultitems.put("gfx/terobjs/dng/antdungeon", "Ant Dungeon");
+        defaultitems.put("gfx/terobjs/dng/batcave", "Bat Dungeon");
+        defaultitems.put("gfx/kritter/wolverine/wolverine", "Wolverine");
+        defaultitems.put("gfx/kritter/badger/badger", "Badger");
+        defaultitems.put("gfx/kritter/fox/fox", "Fox");
+        defaultitems.put("gfx/kritter/wolf/wolf", "Wolves");
+        defaultitems.put("gfx/kritter/mole/mole", "Moles");
+        defaultitems.put("gfx/terobjs/herbs/lorchel", "Morels");
+        defaultitems.put("gfx/terobjs/herbs/frogscrown", "Frog's Crown");
+        defaultitems.put("gfx/terobjs/items/gems/gemstone", "Gemstones");
+        defaultitems.put("gfx/kritter/boar/boar", "Boars");
+        defaultitems.put("gfx/kritter/reddeer/reddeer", "Red Deer");
+        defaultitems.put("gfx/kritter/reindeer/reindeer", "Reindeer");
+
+        disableanim.put("gfx/terobjs/beehive", new CheckListboxItem("Beehives"));
+        disableanim.put("gfx/terobjs/pow", new CheckListboxItem("Fires"));
+        disableanim.put("gfx/terobjs/stockpile-trash", new CheckListboxItem("Full trash stockpiles"));
+        disableanim.put("/idle", new CheckListboxItem("Idle animals"));
+        disableanim.put("gfx/terobjs/steelcrucible", new CheckListboxItem("Steel Crucible"));
+        disableanim.put("gfx/terobjs/cauldron", new CheckListboxItem("Cauldrons"));
+        disableanim.put("gfx/terobjs/villageidol", new CheckListboxItem("Village Idol"));
+        disableanim.put("gfx/terobjs/tarkiln", new CheckListboxItem("Tar Kilns"));
+        disableanim.put("gfx/terobjs/oven", new CheckListboxItem("Ovens"));
+        disableanim.put("gfx/terobjs/smelter", new CheckListboxItem("Smelters"));
+        disableanim.put("gfx/terobjs/arch/visflag", new CheckListboxItem("Visitor Flags"));
+        disableanim.put("gfx/terobjs/flagpole", new CheckListboxItem("Flag Poles"));
+        disableanim.put("gfx/terobjs/herbs/chimingbluebell", new CheckListboxItem("Bluebells"));
+
+        disableshiftclick.put("steelcrucible", new CheckListboxItem("Steel Crucibles"));
+        disableshiftclick.put("ttub", new CheckListboxItem("Tanning Tub"));
+        disableshiftclick.put("smelter", new CheckListboxItem("Smelters"));
+        disableshiftclick.put("oven", new CheckListboxItem("Ovens"));
+        disableshiftclick.put("kiln", new CheckListboxItem("Kilns"));
+        disableshiftclick.put("htable", new CheckListboxItem("Herb Tables"));
+        disableshiftclick.put("cupboard", new CheckListboxItem("Cupboards"));
+        disableshiftclick.put("cauldron", new CheckListboxItem("Cauldrons"));
+        disableshiftclick.put("primsmelter", new CheckListboxItem("Primitiry Smeltery"));
+
+        alarms.put("None", "None");
+        alarms.put("Pony Alarm", "sfx/alarmpony");
+        alarms.put("Awwwwww Yeah", "sfx/awwyeah");
+        alarms.put("Bear Roar", "sfx/BearRoar");
+        alarms.put("Jcoles Beaver Dungeon", "sfx/BeaverDungeon");
+        alarms.put("JColes Danger Noodle", "sfx/DangerNoodle");
+        alarms.put("DaveyJones", "sfx/DaveyJones");
+        alarms.put("Ding", "sfx/Ding");
+        alarms.put("Doomed", "sfx/Doomed");
+        alarms.put("EagleScreech", "sfx/EagleScreech");
+        alarms.put("GhostBusters", "sfx/GhostBusters");
+        alarms.put("Gold", "sfx/gold");
+        alarms.put("Oof!", "sfx/oof");
+        alarms.put("lynx", "sfx/lynx");
+        alarms.put("mammoth", "sfx/mammoth");
+        alarms.put("Oh Shit!", "sfx/OhShit");
+        alarms.put("JColes OhFuckItsAGuy", "sfx/OhShitItsAGuy");
+        alarms.put("Enemy Siren", "sfx/redenemy");
+        alarms.put("Arf Arf", "sfx/seal");
+        alarms.put("Siege Warning", "sfx/siege");
+        alarms.put("Silver", "sfx/silver");
+        alarms.put("Unknown Player Siren", "sfx/Siren");
+        alarms.put("Female Scream", "sfx/Scream");
+        alarms.put("Study Ding", "sfx/Study");
+        alarms.put("Swag!", "sfx/Swag");
+        alarms.put("Thank youuuuuuu", "sfx/thankyourick");
+        alarms.put("Timer alarm", "sfx/timer");
+        alarms.put("Troll in the dungeon!", "sfx/troll");
+        alarms.put("JColes Wallllllrus", "sfx/Walrus");
+        alarms.put("Wrecking Ball!", "sfx/WreckingBall");
+        alarms.put("Zelda Secret", "sfx/Zelda");
+        alarms.put("Trumpets", "sfx/trumpets");
+        alarms.put("No Dick!", "sfx/nodick");
+        alarms.put("Snek!", "sfx/snek");
+        alarms.put("Noperope", "sfx/noperope");
+        alarms.put("Bruh", "sfx/bruh");
+
+        cures.put("paginae/wound/antburn", new String[]{
+                "gfx/invobjs/herbs/yarrow"
+        });
+        cures.put("paginae/wound/sandfleabites", new String[]{
+                "gfx/invobjs/herbs/yarrow"
+        });
+        cures.put("paginae/wound/blunttrauma", new String[]{
+                "gfx/invobjs/toadbutter",
+                "gfx/invobjs/leech",
+                "gfx/invobjs/gauze",
+                "gfx/invobjs/hartshornsalve",
+                "gfx/invobjs/camomilecompress",
+                "gfx/invobjs/opium"
+        });
+        cures.put("paginae/wound/bruise", new String[]{
+                "gfx/invobjs/leech"
+        });
+        cures.put("paginae/wound/midgebite", new String[]{
+                "gfx/invobjs/herbs/yarrow"
+        });
+        cures.put("paginae/wound/concussion", new String[]{
+                "gfx/invobjs/coldcompress",
+                "gfx/invobjs/opium"
+        });
+        cures.put("paginae/wound/cruelincision", new String[]{
+                "gfx/invobjs/gauze",
+                "gfx/invobjs/stitchpatch",
+                "gfx/invobjs/rootfill"
+        });
+        cures.put("paginae/wound/deepcut", new String[]{
+                "gfx/invobjs/gauze",
+                "gfx/invobjs/stingingpoultice",
+                "gfx/invobjs/rootfill",
+                "gfx/invobjs/herbs/waybroad",
+                "gfx/invobjs/honeybroadaid"
+        });
+        cures.put("paginae/wound/fellslash", new String[]{
+                "gfx/invobjs/gauze"
+        });
+        cures.put("paginae/wound/nicksnknacks", new String[]{
+                "gfx/invobjs/herbs/yarrow",
+                "gfx/invobjs/honeybroadaid"
+        });
+        cures.put("paginae/wound/punchsore", new String[]{
+                "gfx/invobjs/mudointment",
+                "gfx/invobjs/opium"
+        });
+        cures.put("paginae/wound/scrapesncuts", new String[]{
+                "gfx/invobjs/herbs/yarrow",
+                "gfx/invobjs/mudointment",
+                "gfx/invobjs/honeybroadaid"
+        });
+        cures.put("paginae/wound/severemauling", new String[]{
+                "gfx/invobjs/hartshornsalve",
+                "gfx/invobjs/opium"
+        });
+        cures.put("paginae/wound/swollenbump", new String[]{
+                "gfx/invobjs/coldcompress",
+                "gfx/invobjs/leech",
+                "gfx/invobjs/stingingpoultice"
+        });
+        cures.put("paginae/wound/unfaced", new String[]{
+                "gfx/invobjs/toadbutter",
+                "gfx/invobjs/leech",
+                "gfx/invobjs/mudointment",
+                "gfx/invobjs/kelpcream"
+        });
+        cures.put("paginae/wound/wretchedgore", new String[]{
+                "gfx/invobjs/stitchpatch"
+        });
+        cures.put("paginae/wound/blackeye", new String[]{
+                "gfx/invobjs/hartshornsalve",
+                "gfx/invobjs/honeybroadaid",
+                "gfx/invobjs/toadbutter",
+                "gfx/invobjs/rootfill"
+        });
+        cures.put("paginae/wound/bladekiss", new String[]{
+                "gfx/invobjs/gauze",
+                "gfx/invobjs/toadbutter"
+        });
+        cures.put("paginae/wound/somethingbroken", new String[]{
+                "gfx/invobjs/splint"
+        });
+        cures.put("paginae/wound/infectedsore", new String[]{
+                "gfx/invobjs/camomilecompress",
+                "gfx/invobjs/soapbar",
+                "gfx/invobjs/opium",
+                "gfx/invobjs/antpaste"
+        });
+        cures.put("paginae/wound/nastylaceration", new String[]{
+                "gfx/invobjs/stitchpatch",
+                "gfx/invobjs/toadbutter"
+        });
+        cures.put("paginae/wound/sealfinger", new String[]{
+                "gfx/invobjs/hartshornsalve",
+                "gfx/invobjs/kelpcream",
+                "gfx/invobjs/antpaste"
+        });
+        cures.put("paginae/wound/coalcough", new String[]{
+                "gfx/invobjs/opium"
+        });
+        cures.put("paginae/wound/beesting", new String[]{
+                "gfx/invobjs/kelpcream",
+                "gfx/invobjs/antpaste"
+        });
+        cures.put("paginae/wound/crabcaressed", new String[]{
+                "gfx/invobjs/antpaste"
+        });
+        cures.put("paginae/wound/leechburns", new String[]{
+                "gfx/invobjs/toadbutter"
+        });
+    }
 
     public static final Map<Long, Coord> gridIdsMap = new HashMap<>();
 
