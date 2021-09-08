@@ -3217,6 +3217,9 @@ public class OptWnd extends Window {
 
         appender.addRow(new Label("Custom grid size: "), makeCustomMenuGrid(0), makeCustomMenuGrid(1));
 
+        CheckBox mineboulderchk = new CheckBox("Chip boulders while mine cursor", v -> Utils.setprefb("bouldersmine", configuration.bouldersmine = v), configuration.bouldersmine);
+        mineboulderchk.setcolor(Color.ORANGE);
+        appender.add(mineboulderchk);
         appender.add(new CheckBox("Special menu alt+RMC in proximity to the mouse cursor") {
             {
                 a = configuration.proximityspecial;

@@ -1,5 +1,6 @@
 package modification;
 
+import haven.Callback;
 import haven.CheckBox;
 import haven.CheckListboxItem;
 import haven.Config;
@@ -22,6 +23,7 @@ import haven.Utils;
 import haven.Widget;
 import haven.WidgetVerticalAppender;
 import haven.Window;
+import haven.purus.pbot.PBotUtils;
 import haven.sloth.gfx.SnowFall;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -53,10 +55,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
 
 public class configuration {
     public static String modificationPath = "modification";
@@ -227,6 +232,7 @@ public class configuration {
     public static boolean tempmarksall = Utils.getprefb("tempmarksall", false);
     public static int tempmarkstime = Utils.getprefi("tempmarkstime", 300);
     public static int tempmarksfrequency = Utils.getprefi("tempmarksfrequency", 500);
+    public static boolean bouldersmine = Utils.getprefb("bouldersmine", true);
 
     public static float badcamdistdefault = Utils.getpreff("badcamdistdefault", 50.0f);
     public static float badcamdistminimaldefault = Utils.getpreff("badcamdistminimaldefault", 5.0f);
@@ -1265,4 +1271,22 @@ public class configuration {
     }
 
     public static Executor executor = Executors.newSingleThreadExecutor();
+
+    public static void waitfor(Callable<Boolean> call, Callback<Boolean> back, int timeout) {
+        executor.execute(() -> {
+            for (int i = 0, sleep = 100; ; i += sleep) {
+                if (i >= timeout)
+                    break;
+                try {
+                    if (call.call()) {
+                        back.done(true);
+                        return;
+                    }
+                } catch (Exception ignore) {
+                }
+                PBotUtils.sleep(sleep);
+            }
+            back.done(false);
+        });
+    }
 }

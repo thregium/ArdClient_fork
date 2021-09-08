@@ -26,6 +26,7 @@
 
 package haven;
 
+import java.awt.Color;
 import java.util.function.Consumer;
 
 public class CheckBox extends Widget {
@@ -38,6 +39,8 @@ public class CheckBox extends Widget {
     public boolean a = false;
     private Consumer<Boolean> onChange;
     Text lbl;
+    String defstr;
+    Color clr = Color.WHITE;
 
     @RName("chk")
     public static class $_ implements Factory {
@@ -49,7 +52,7 @@ public class CheckBox extends Widget {
     }
 
     public CheckBox(String lbl, boolean lg, final Consumer<Boolean> onChange) {
-        this.lbl = Text.std.render(Resource.getLocString(Resource.BUNDLE_LABEL, lbl), java.awt.Color.WHITE);
+        this.lbl = Text.std.render(Resource.getLocString(Resource.BUNDLE_LABEL, defstr = lbl), clr);
         if (lg) {
             type = "chkbox/large";
         } else {
@@ -83,6 +86,11 @@ public class CheckBox extends Widget {
     public void set(boolean a) {
         this.a = a;
         changed(a);
+    }
+
+    public void setcolor(Color clr) {
+        this.clr = clr;
+        lbl = Text.std.render(Resource.getLocString(Resource.BUNDLE_LABEL, defstr), clr);
     }
 
     public void click() {

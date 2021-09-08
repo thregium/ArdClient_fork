@@ -45,6 +45,7 @@ import haven.overlays.OverlaySelector;
 import haven.pathfinder.PFListener;
 import haven.pathfinder.Pathfinder;
 import haven.purus.Farmer;
+import haven.purus.pbot.PBotCharacterAPI;
 import haven.purus.pbot.PBotUtils;
 import haven.resutil.BPRadSprite;
 import haven.sloth.gob.Alerted;
@@ -84,6 +85,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
+import java.util.function.Consumer;
 
 import static haven.DefSettings.DARKMODE;
 import static haven.DefSettings.DRAWGRIDRADIUS;
@@ -2880,6 +2882,15 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         });
     }
 
+    public void takeinf(Coord c, Callback<ClickInfo> infoCallback) {
+        delay(new Hittest(c, ui.modflags()) {
+            @Override
+            protected void hit(Coord pc, Coord2d mc, ClickInfo inf) {
+                infoCallback.done(inf);
+            }
+        });
+    }
+
     public void mousemove(Coord c) {
         if (configuration.autoclick)
             if (ismousedown && ui.modflags() == 0)
@@ -3237,17 +3248,49 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     Coord ec = mc.div(MCache.tilesz2);
                     xl.mv = false;
                     tt = null;
-                    Resource curs = ui.root.getcurs(c);
-                    if (button == 1 && curs != null && curs.name.equals("gfx/hud/curs/mine")) {
-                        synchronized (glob.map.grids) {
-                            miningOverlay = glob.map.new Overlay(ol.getA(), selol);
-                        }
-                    }
+
                     ol.destroy();
                     mgrab.remove();
                     if (areaselcb != null)
                         areaselcb.areaselect(ol.getc1(), ol.getc2());
-                    wdgmsg("sel", sc, ec, modflags);
+
+                    Resource curs = ui.root.getcurs(c);
+
+                    Consumer<Coord> send = coord -> {
+                        if (button == 1 && curs != null && curs.name.equals("gfx/hud/curs/mine")) {
+                            synchronized (glob.map.grids) {
+                                miningOverlay = glob.map.new Overlay(ol.getA(), selol);
+                            }
+                        }
+                        wdgmsg("sel", coord, ec, modflags);
+                    };
+
+                    if (configuration.bouldersmine && button == 1 && curs != null && curs.name.equals("gfx/hud/curs/mine")) {
+                        Coord coord = sc;
+                        takeinf(ui.mc, inf -> {
+                            Optional<Gob> ogob = gobFromClick(inf);
+                            if (ogob.isPresent()) {
+                                Gob gob = ogob.get();
+                                if (gob.type == Type.BOULDER) {
+                                    FlowerMenu.setNextSelection("Chip stone");
+                                    PBotCharacterAPI.cancelAct(ui);
+                                    configuration.waitfor(() -> {
+                                        Resource ccurs = ui.root.getcurs(c);
+                                        return (ccurs != null && ccurs.name.equals("gfx/hud/curs/arw"));
+                                    }, b -> {
+                                        if (b) {
+                                            PBotUtils.doClick(ui, gob, 3, 0);
+                                            PBotCharacterAPI.doAct(ui, "mine");
+                                        }
+                                    }, 1000);
+                                    return;
+                                }
+                            }
+                            send.accept(coord);
+                        });
+                    } else {
+                        send.accept(sc);
+                    }
                     sc = null;
                     if (PBotAPISelect) {
                         PBotUtils.areaSelect(ui, ol.getc1(), ol.getc2());
@@ -3572,5 +3615,4 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
         return Optional.empty();
     }
-
 }
