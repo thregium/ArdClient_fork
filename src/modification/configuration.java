@@ -1273,20 +1273,20 @@ public class configuration {
     public static Executor executor = Executors.newSingleThreadExecutor();
 
     public static void waitfor(Callable<Boolean> call, Callback<Boolean> back, int timeout) {
-        executor.execute(() -> {
+        executor.execute(() -> back.done(waitfor(call, timeout)));
+    }
+
+    public static boolean waitfor(Callable<Boolean> call, int timeout) {
             for (int i = 0, sleep = 100; ; i += sleep) {
                 if (i >= timeout)
                     break;
                 try {
-                    if (call.call()) {
-                        back.done(true);
-                        return;
-                    }
+                    if (call.call())
+                        return (true);
                 } catch (Exception ignore) {
                 }
                 PBotUtils.sleep(sleep);
             }
-            back.done(false);
-        });
+            return (false);
     }
 }
