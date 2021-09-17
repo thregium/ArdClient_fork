@@ -1,4 +1,8 @@
 Details in https://github.com/Cediner/ArdClient/commits/
+2021.09.18
+!!! I will be absent in this Sunday (september 19). If will a patch and something will not work, I can't fix it. I advise you to find an alternative in advance.
+~
+
 2021.09.07
 > *empty*
 > Chip boulders while mine cursor (auto) (Modification) (on by default)
