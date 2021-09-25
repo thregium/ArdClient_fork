@@ -133,7 +133,7 @@ public class SoundManager extends Window implements ObservableListener<Alerted.C
                 public boolean type(char c, KeyEvent ev) {
                     if (c == '\n') {
                         if (sounds.sel != null) {
-                            Alerted.add(text, sounds.sel, volslider.val / 1000.0);
+                            Alerted.add(text(), sounds.sel, volslider.val / 1000.0);
                             settext("");
                         } else {
                             PBotUtils.sysMsg(ui, "Choose a sound");
@@ -147,9 +147,9 @@ public class SoundManager extends Window implements ObservableListener<Alerted.C
             Button removebtn = add(new Button(50, "Remove Sound Alert", this::removeAlert));
             removebtn.move(c.copy().add(200, manualin.sz.y + 5), 1, 0);
             add(new Button(200 - removebtn.sz.x - 5, "Add", () -> {
-                if (!manualin.text.equals("")) {
+                if (!manualin.text().equals("")) {
                     if (sounds.sel != null) {
-                        Alerted.add(manualin.text, sounds.sel, volslider.val / 1000.0);
+                        Alerted.add(manualin.text(), sounds.sel, volslider.val / 1000.0);
                         manualin.settext("");
                     } else {
                         PBotUtils.sysMsg(ui, "Choose a sound");

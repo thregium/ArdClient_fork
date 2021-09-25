@@ -51,8 +51,8 @@ public class FilterWnd extends Window {
     }
 
     private void checkInput() {
-        if (input.text.length() >= 2) {
-            setFilter(input.text);
+        if (input.text().length() >= 2) {
+            setFilter(input.text());
         } else {
             setFilter(null);
         }

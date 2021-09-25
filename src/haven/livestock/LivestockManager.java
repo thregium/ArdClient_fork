@@ -517,7 +517,7 @@ public class LivestockManager extends ResizableWnd {
 
     public void applyName(Widget wdg) {
         if (pendingAnimal != null && !pendingAnimal.hasAllAttributes()) {
-            pendingAnimal.name = ((TextEntry) wdg).text;
+            pendingAnimal.name = ((TextEntry) wdg).text();
             pendingAnimal.attributeResolved();
         }
     }

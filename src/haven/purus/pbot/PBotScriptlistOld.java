@@ -29,7 +29,7 @@ public class PBotScriptlistOld extends Window {
                     return false;
 
                 boolean ret = buf.key(ev);
-                list.changeFilter(text);
+                list.changeFilter(text());
                 list.sb.val = 0;
                 return true;
             }

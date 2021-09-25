@@ -874,10 +874,10 @@ public class FightWnd extends Widget {
         }
     }
 
-    public class Savelist extends Listbox<Integer> {
+    public class Savelist extends Listbox<Integer> implements ReadLine.Owner {
         private int edit = -1;
         private Text.Line redit = null;
-        private LineEdit nmed;
+        private ReadLine nmed;
         private double focusstart;
 
         public Savelist(int w, int h) {
@@ -903,10 +903,10 @@ public class FightWnd extends Widget {
             g.chcolor();
             if (n == edit) {
                 if (redit == null)
-                    redit = attrf.render(nmed.line);
+                    redit = attrf.render(nmed.line());
                 g.aimage(redit.tex(), new Coord(UI.scale(20), itemh / 2), 0.0, 0.5);
                 if (hasfocus && (((Utils.rtime() - focusstart) % 1.0) < 0.5)) {
-                    int cx = redit.advance(nmed.point);
+                    int cx = redit.advance(nmed.point());
                     g.chcolor(255, 255, 255, 255);
                     Coord co = new Coord(UI.scale(20) + cx + UI.scale(1), (g.sz.y - redit.sz().y) / 2);
                     g.line(co, co.add(0, redit.sz().y), 1);
@@ -929,17 +929,7 @@ public class FightWnd extends Widget {
                 if (((now - lt) < 0.5) && (c.dist(lc) < 10) && (sel != null) && (saves[sel] != unused)) {
                     if (sel == usesave) {
                         edit = sel;
-                        nmed = new LineEdit(saves[sel].text) {
-                            protected void done(String line) {
-                                saves[edit] = attrf.render(line);
-                                edit = -1;
-                                nmed = null;
-                            }
-
-                            protected void changed() {
-                                redit = null;
-                            }
-                        };
+                        nmed = ReadLine.make(this, saves[sel].text);
                         redit = null;
                         parent.setfocus(this);
                         focusstart = now;
@@ -953,6 +943,16 @@ public class FightWnd extends Widget {
                 }
             }
             return (ret);
+        }
+
+        public void done(ReadLine buf) {
+            saves[edit] = attrf.render(buf.line());
+            edit = -1;
+            nmed = null;
+        }
+
+        public void changed(ReadLine buf) {
+            redit = null;
         }
 
         public void change(Integer sel) {
@@ -1128,7 +1128,7 @@ public class FightWnd extends Widget {
                         Button add = new Button(60, "Save") {
                             @Override
                             public void click() {
-                                saves[sel.b] = attrf.render(txtname.text);
+                                saves[sel.b] = attrf.render(txtname.text());
                                 schoolsDropdown.sel = new Pair<>(saves[sel.b], sel.b);
                                 save(sel.b);
                                 parent.reqdestroy();

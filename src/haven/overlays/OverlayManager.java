@@ -84,8 +84,8 @@ public class OverlayManager extends Window implements ObservableListener<Overlay
         }), new Coord(0, c.copy().y + 5));
         c.y += manualin.sz.y;
         add(new Button(200, "Add Overlay", () -> {
-            if (!manualin.text.equals("")) {
-                ui.gui.add(new OverlaySelector(manualin.text), ui.mc);
+            if (!manualin.text().equals("")) {
+                ui.gui.add(new OverlaySelector(manualin.text()), ui.mc);
             }
         }), new Coord(0, c.copy().y + 5));
         add(new Button(200, "Remove", () -> {

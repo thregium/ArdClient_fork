@@ -116,7 +116,7 @@ public class AreaPicker extends Window implements Runnable {
                     return (buf.key(ev));
                 } else if (c == '\n') {
                     try {
-                        waitingtime = text.equals("") ? 0 : Integer.parseInt(text);
+                        waitingtime = text().equals("") ? 0 : Integer.parseInt(text());
                         return (true);
                     } catch (NumberFormatException ignore) {
                     }
@@ -197,7 +197,7 @@ public class AreaPicker extends Window implements Runnable {
                 public void update() {
                     selectedgoblbox.items.clear();
                     for (CheckListboxItem i : selectedgoblist) {
-                        if (i.name.toLowerCase().contains(text.toLowerCase()))
+                        if (i.name.toLowerCase().contains(text().toLowerCase()))
                             selectedgoblbox.items.add(i);
                     }
                     selectedgoblbox.items.sort(listboxsort());
@@ -268,7 +268,7 @@ public class AreaPicker extends Window implements Runnable {
                     selectedflowerlbox.items.clear();
                     for (CheckListboxItem i : selectedflowerlist) {
                         String s = Resource.language.equals("en") ? i.name : i.name + " (" + Resource.getLocString(Resource.BUNDLE_FLOWER, i.name) + ")";
-                        if (s.toLowerCase().contains(text.toLowerCase()))
+                        if (s.toLowerCase().contains(text().toLowerCase()))
                             selectedflowerlbox.items.add(i);
                     }
                     selectedflowerlbox.items.sort(listboxsort());
@@ -381,7 +381,7 @@ public class AreaPicker extends Window implements Runnable {
                 public void update() {
                     selectedstoragelbox.items.clear();
                     for (CheckListboxItem i : selectedstoragelist) {
-                        if (i.name.toLowerCase().contains(text.toLowerCase()))
+                        if (i.name.toLowerCase().contains(text().toLowerCase()))
                             selectedstoragelbox.items.add(i);
                     }
                     selectedstoragelbox.items.sort(listboxsort());
@@ -445,7 +445,7 @@ public class AreaPicker extends Window implements Runnable {
                 public void update() {
                     selecteditemlbox.items.clear();
                     for (CheckListboxItem i : selecteditemlist) {
-                        if (i.name.toLowerCase().contains(text.toLowerCase()))
+                        if (i.name.toLowerCase().contains(text().toLowerCase()))
                             selecteditemlbox.items.add(i);
                     }
                     selecteditemlbox.items.sort(listboxsort());
@@ -476,8 +476,8 @@ public class AreaPicker extends Window implements Runnable {
 
                 public boolean type(char c, KeyEvent ev) {
                     if (!isblocked()) {
-                        if (c == '\n' && !text.equals("")) {
-                            addeditemlist.add(text);
+                        if (c == '\n' && !text().equals("")) {
+                            addeditemlist.add(text());
                         } else {
                             return buf.key(ev);
                         }
@@ -488,8 +488,8 @@ public class AreaPicker extends Window implements Runnable {
             selecteditemaddbtn = new Button(50, "Add") {
                 public void click() {
                     if (!isblocked()) {
-                        if (!selecteditemaddtext.text.equals("")) {
-                            addeditemlist.add(selecteditemaddtext.text);
+                        if (!selecteditemaddtext.text().equals("")) {
+                            addeditemlist.add(selecteditemaddtext.text());
                         }
                     }
                 }

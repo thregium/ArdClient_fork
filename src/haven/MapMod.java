@@ -172,7 +172,7 @@ public class MapMod extends Window implements MapView.Grabber {
         }
         if (sender == tilenm) {
             if (!fake)
-                wdgmsg("tilenm", tilenm.text);
+                wdgmsg("tilenm", tilenm.text());
             return;
         }
         super.wdgmsg(sender, msg, args);

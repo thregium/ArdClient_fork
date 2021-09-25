@@ -79,9 +79,9 @@ public class HighlightManager extends Window implements ObservableListener<Strin
         }), new Coord(0, c.copy().y + 5));
         c.y += manualin.sz.y;
         add(new Button(200, "Add Highlight", () -> {
-            if (!manualin.text.equals("")) {
-                HighlightData.add(manualin.text);
-                ui.sess.glob.oc.highlightGobs(manualin.text);
+            if (!manualin.text().equals("")) {
+                HighlightData.add(manualin.text());
+                ui.sess.glob.oc.highlightGobs(manualin.text());
             }
         }), new Coord(0, c.copy().y + 5));
         add(new Button(200, "Stop Highlighting", () -> {

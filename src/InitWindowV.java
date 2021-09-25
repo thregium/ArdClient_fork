@@ -72,7 +72,7 @@ public class InitWindowV extends Window {
 
     public void wdgmsg(Widget sender, String msg, Object... args) {
         if (sender == form) {
-            wdgmsg("found", name.text);
+            wdgmsg("found", name.text());
             return;
         }
         super.wdgmsg(sender, msg, args);

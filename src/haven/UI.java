@@ -367,7 +367,7 @@ public class UI {
 
                 @Override
                 public boolean type(char c, KeyEvent ev) {
-                    if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line.length() < 2 || c == '\b') {
+                    if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line().length() < 2 || c == '\b') {
                         return buf.key(ev);
                     } else if (c == '\n') {
                         try {

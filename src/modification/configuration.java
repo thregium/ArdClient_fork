@@ -657,7 +657,7 @@ public class configuration {
         if (Config.flowermenus.get(name) == null) {
             CheckListboxItem ci = new CheckListboxItem(name);
             Config.flowermenus.put(name, ci);
-            if (Config.petalsearch != null && Config.flowerlist != null && Config.petalsearch.text.equals(""))
+            if (Config.petalsearch != null && Config.flowerlist != null && Config.petalsearch.text().equals(""))
                 Config.flowerlist.items.add(ci);
             Utils.setcollection("petalcol", Config.flowermenus.keySet());
         }
@@ -669,7 +669,7 @@ public class configuration {
             if (h == null) {
                 h = new HSliderListboxItem(name, 100);
                 resources.sfxmenus.add(h);
-                if (resources.sfxsearch != null && resources.sfxlist != null && resources.sfxsearch.text.equals(""))
+                if (resources.sfxsearch != null && resources.sfxlist != null && resources.sfxsearch.text().equals(""))
                     resources.sfxlist.addItem(createSFXSlider(h));
                 Utils.setprefsliderlst("customsfxvol", resources.sfxmenus);
                 return (100);
@@ -1190,7 +1190,7 @@ public class configuration {
                             return buf.key(ev);
                         } else if (c == '\n') {
                             try {
-                                float val = Float.parseFloat(text.replace(',', '.'));
+                                float val = Float.parseFloat(text().replace(',', '.'));
                                 single.setScale(row, column, val);
                                 return (true);
                             } catch (NumberFormatException e) {
@@ -1235,7 +1235,7 @@ public class configuration {
                             return buf.key(ev);
                         } else if (c == '\n') {
                             try {
-                                float val = Float.parseFloat(text.replace(',', '.'));
+                                float val = Float.parseFloat(text().replace(',', '.'));
                                 multi.setScale(row, column, val);
                                 return (true);
                             } catch (NumberFormatException e) {

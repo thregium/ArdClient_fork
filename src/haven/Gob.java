@@ -350,9 +350,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     public int frame;
     public final Glob glob;
     public int quality = 0;
-    Map<Class<? extends GAttrib>, GAttrib> attr = new HashMap<Class<? extends GAttrib>, GAttrib>();
+    public final Map<Class<? extends GAttrib>, GAttrib> attr = new HashMap<>();
     private final Set<haven.sloth.gob.Rendered> renderedattrs = new HashSet<>();
-    public Collection<Overlay> ols = new LinkedList<Overlay>() {
+    public final Collection<Overlay> ols = new LinkedList<Overlay>() {
         public boolean add(Overlay item) {
             /* XXX: Remove me once local code is changed to use addol(). */
             if (glob.oc.getgob(id) != null) {
@@ -363,8 +363,8 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             return (super.add(item));
         }
     };
-    private List<Overlay> dols = new ArrayList<>();
-    private List<Pair<GAttrib, Consumer<Gob>>> dattrs = new ArrayList<>();
+    private final List<Overlay> dols = new ArrayList<>();
+    private final List<Pair<GAttrib, Consumer<Gob>>> dattrs = new ArrayList<>();
 
     private final Collection<ResAttr.Cell<?>> rdata = new LinkedList<ResAttr.Cell<?>>();
     private final Collection<ResAttr.Load> lrdata = new LinkedList<ResAttr.Load>();
@@ -587,12 +587,11 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 a.ctick(dt);
         }
 
-        final Iterator<Pair<GAttrib, Consumer<Gob>>> ditr = dattrs.iterator();
-        while (ditr.hasNext()) {
-            final Pair<GAttrib, Consumer<Gob>> pair = ditr.next();
-            setattr(pair.a);
-            pair.b.accept(this);
-            ditr.remove();
+        synchronized (dattrs) {
+            for (Pair<GAttrib, Consumer<Gob>> pair : dattrs) {
+                setattr(pair.a);
+                pair.b.accept(this);
+            }
         }
 
         synchronized (ols) {
@@ -956,7 +955,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     }
 
     public void delayedsetattr(GAttrib a, Consumer<Gob> cb) {
-        dattrs.add(new Pair<GAttrib, Consumer<Gob>>(a, cb));
+        dattrs.add(new Pair<>(a, cb));
     }
 
     public <C extends GAttrib> C getattr(Class<C> c) {

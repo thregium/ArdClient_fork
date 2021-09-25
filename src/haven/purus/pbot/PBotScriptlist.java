@@ -54,11 +54,11 @@ public class PBotScriptlist extends GameUI.Hidewnd {
 
                 if (list.visible) {
                     boolean ret = buf.key(ev);
-                    list.changeFilter(text);
+                    list.changeFilter(text());
                     list.sb.val = 0;
                 } else if (threadList.visible) {
                     boolean ret = buf.key(ev);
-                    threadList.changeFilter(text);
+                    threadList.changeFilter(text());
                     threadList.sb.val = 0;
                 }
                 return true;

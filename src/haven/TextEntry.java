@@ -31,11 +31,14 @@ import java.awt.Graphics;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
-public class TextEntry extends SIWidget { //TODO make highlighting copy paste
-    public static final Color defcol = new Color(255, 205, 109), dirtycol = new Color(255, 232, 209);
+public class TextEntry extends Widget implements ReadLine.Owner {
+    public static final Color defcol = new Color(255, 205, 109);
+    public static final Color dirtycol = new Color(255, 232, 209);
+    public static final Color selcol = new Color(24, 80, 192);
     public static final Text.Foundry fnd = new Text.Foundry(Text.serif, 12).aa(true);
     public static final BufferedImage lcap = Theme.img("textedit", 0);
     public static final BufferedImage mext = Theme.img("textedit", 1);
@@ -45,23 +48,25 @@ public class TextEntry extends SIWidget { //TODO make highlighting copy paste
     public static final Coord coff = new Coord(-3, -1);
     public static final int wmarg = lcap.getWidth() + rcap.getWidth() + 1;
     public boolean dshow = false;
-    public LineEdit buf;
+    public ReadLine buf;
     public int sx;
     public boolean pw = false;
-    private final static Pattern numpat = Pattern.compile("(-)|(-?[0-9]+)");
+    private static final Pattern numpat = Pattern.compile("(-)|(-?[0-9]+)");
     public boolean numeric = false;
+    @Deprecated
     public String text;
     private boolean dirty = false;
     private double focusstart;
     private Text.Line tcache = null;
+    private UI.Grab d = null;
 
     @RName("text")
     public static class $_ implements Factory {
         public Widget create(UI ui, Object[] args) {
             if (args[0] instanceof Coord)
-                return (new TextEntry((Coord) args[0], (String) args[1]));
+		return(new TextEntry(UI.scale((Coord)args[0]), (String)args[1]));
             else
-                return (new TextEntry((Integer) args[0], (String) args[1]));
+		return(new TextEntry(UI.scale((Integer)args[0]), (String)args[1]));
         }
     }
 
@@ -71,22 +76,7 @@ public class TextEntry extends SIWidget { //TODO make highlighting copy paste
     }
 
     public void rsettext(String text) {
-        buf = new LineEdit(this.text = text) {
-            protected void done(String line) {
-                activate(line);
-            }
-
-            protected void changed() {
-                if (!numeric || (line.length() == 0 || numpat.matcher(line).matches())) {
-                    redraw();
-                    TextEntry.this.text = line;
-                    TextEntry.this.changed();
-                } else {
-                    //deny
-                    line = TextEntry.this.text;
-                }
-            }
-        };
+        buf = ReadLine.make(this, text);
         redraw();
     }
 
@@ -103,8 +93,16 @@ public class TextEntry extends SIWidget { //TODO make highlighting copy paste
     public void uimsg(String name, Object... args) {
         if (name == "settext") {
             settext((String) args[0]);
+        } else if (name == "sel") {
+            if (args.length == 0) {
+                buf.select(0, buf.length());
+            } else {
+                int f = (args[0] == null) ? buf.length() : Utils.clip((Integer) args[0], 0, buf.length());
+                int t = (args[1] == null) ? buf.length() : Utils.clip((Integer) args[1], 0, buf.length());
+                buf.select(f, t);
+            }
         } else if (name == "get") {
-            wdgmsg("text", buf.line);
+            wdgmsg("text", buf.line());
         } else if (name == "pw") {
             pw = ((Integer) args[0]) != 0;
         } else if (name == "dshow") {
@@ -118,12 +116,12 @@ public class TextEntry extends SIWidget { //TODO make highlighting copy paste
 
     public int numvalue() {
         if (numeric) {
-            if (text.length() == 0)
+            if (text().length() == 0)
                 return 0;
-            else if (text.equals("-"))
+            else if (text().equals("-"))
                 return 0;
             else
-                return Integer.parseInt(text);
+                return Integer.parseInt(text());
         } else {
             return 0;
         }
@@ -131,12 +129,18 @@ public class TextEntry extends SIWidget { //TODO make highlighting copy paste
 
     protected String dtext() {
         if (pw) {
-            String ret = "";
-            for (int i = 0; i < buf.line.length(); i++)
-                ret += "\u2022";
-            return (ret);
+            char[] dp = new char[buf.length()];
+            Arrays.fill(dp, '•');
+            return (new String(dp));
         } else {
-            return (buf.line);
+            return (buf.line());
+        }
+    }
+
+    protected void redraw() {
+        if (tcache != null) {
+            tcache.tex().dispose();
+            tcache = null;
         }
     }
 
@@ -154,26 +158,39 @@ public class TextEntry extends SIWidget { //TODO make highlighting copy paste
     }
 
     public void draw(GOut g) {
+        Text.Line tcache = this.tcache;
+        if (tcache == null)
+            this.tcache = tcache = fnd.render(dtext(), (dshow && dirty) ? dirtycol : defcol);
+        int point = buf.point(), mark = buf.mark();
         g.chcolor(DefSettings.TXBCOL.get());
-        super.draw(g);
+        g.image(lcap, Coord.z);
+        g.image(mext, Coord.of(lcap.getWidth(), 0), Coord.of(sz.x - lcap.getWidth() - rcap.getWidth(), sz.y));
+        g.image(rcap, Coord.of(sz.x - rcap.getWidth(), 0));
         g.chcolor();
+        if (mark >= 0) {
+            int px = tcache.advance(point) - sx, mx = tcache.advance(mark) - sx;
+            g.chcolor(selcol);
+            g.frect2(Coord.of(Math.min(px, mx) + toff.x, (sz.y - tcache.sz().y) / 2), Coord.of(Math.max(px, mx) + toff.x, (sz.y + tcache.sz().y) / 2));
+            g.chcolor();
+        }
+
+        g.image(tcache.tex(), Coord.of(toff.x - sx, toff.y));
+
         if (hasfocus) {
             int cx;
             try {
-                cx = tcache.advance(buf.point);
+                cx = tcache.advance(point);
             } catch (Exception e) {
                 cx = 0;
             }
-            int lx = cx - sx + 1;
             if (cx < sx) {
                 sx = cx;
-                redraw();
             }
             if (cx > sx + (sz.x - wmarg)) {
                 sx = cx - (sz.x - wmarg);
-                redraw();
             }
-            if (((Utils.rtime() - focusstart) % 1.0) < 0.5)
+            int lx = cx - sx + 1;
+            if (((Utils.rtime() - Math.max(focusstart, buf.mtime())) % 1.0) < 0.5)
                 g.image(caret, toff.add(coff).add(lx, 0));
         }
     }
@@ -201,7 +218,7 @@ public class TextEntry extends SIWidget { //TODO make highlighting copy paste
     protected void changed() {
         dirty = true;
         if (onChange != null)
-            onChange.accept(text);
+            onChange.accept(text());
     }
 
     public void activate(String text) {
@@ -211,8 +228,19 @@ public class TextEntry extends SIWidget { //TODO make highlighting copy paste
             onActivate.accept(text);
     }
 
+    public void done(ReadLine buf) {
+        activate(buf.line());
+    }
+
+    public void changed(ReadLine buf) {
+        text = buf.line();
+        redraw();
+        TextEntry.this.changed();
+    }
+
     public boolean type(char c, KeyEvent ev) {
-        return (buf.key(ev));
+        activate(buf.line());
+        return(true);
     }
 
     public boolean keydown(KeyEvent e) {
@@ -221,16 +249,35 @@ public class TextEntry extends SIWidget { //TODO make highlighting copy paste
                 || e.getKeyCode() == KeyEvent.VK_F11 || e.getKeyCode() == KeyEvent.VK_F12 || e.getModifiers() == InputEvent.ALT_MASK || e.getModifiers() == InputEvent.CTRL_MASK) {
             return super.keydown(e);
         }
-        buf.key(e);
-        return (true);
+        return (buf.key(e));
     }
 
     public boolean mousedown(Coord c, int button) {
         parent.setfocus(this);
-        if (tcache != null) {
-            buf.point = tcache.charat(c.x + sx);
+        if((button == 1) && (tcache != null)) {
+            buf.point(tcache.charat(c.x + sx - toff.x));
+            buf.mark(-1);
+            d = ui.grabmouse(this);
         }
-        return (true);
+        return(true);
+    }
+
+    public void mousemove(Coord c) {
+        if((d != null) && (tcache != null)) {
+            int p = tcache.charat(c.x + sx - toff.x);
+            if(buf.mark() < 0)
+                buf.mark(buf.point());
+            buf.point(p);
+        }
+    }
+
+    public boolean mouseup(Coord c, int button) {
+        if((button == 1) && (d != null)) {
+            d.remove();
+            d = null;
+            return(true);
+        }
+        return(false);
     }
 
     public void gotfocus() {
@@ -239,5 +286,10 @@ public class TextEntry extends SIWidget { //TODO make highlighting copy paste
 
     public void resize(int w) {
         resize(w, sz.y);
+        redraw();
+    }
+
+    public String text() {
+        return(buf.line());
     }
 }

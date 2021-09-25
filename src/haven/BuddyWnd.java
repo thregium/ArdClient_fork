@@ -118,7 +118,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
                     return false;
 
                 boolean ret = buf.key(ev);
-                bl.filter = text.toLowerCase();
+                bl.filter = text().toLowerCase();
                 return ret;
             }
         }, new Coord(width - 110, y + 5));
@@ -210,7 +210,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         y += 25;
         add(new Button(75, "Set") {
             public void click() {
-                setpname(pname.text);
+                setpname(pname.text());
             }
         }, new Coord(0, y));
         y += 35;
@@ -229,7 +229,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         y += 25;
         add(new Button(sbw, "Set") {
             public void click() {
-                setpwd(charpass.text);
+                setpwd(charpass.text());
             }
         }, new Coord(0, y));
         add(new Button(sbw, "Clear") {
@@ -267,7 +267,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
                 if (random) {
                     setpname(configuration.randomNick());
                 }
-                BuddyWnd.this.wdgmsg("bypwd", opass.text);
+                BuddyWnd.this.wdgmsg("bypwd", opass.text());
                 opass.settext("");
                 if (random && name != null)
                     setpname(name);
@@ -427,11 +427,11 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
             bl.change(find(id));
         } else if (msg == "pwd") {
             charpass.settext((String) args[0]);
-            charpass.buf.point = charpass.buf.line.length();
+            charpass.buf.point(charpass.buf.length());
             charpass.commit();
         } else if (msg == "pname") {
             pname.settext((String) args[0]);
-            pname.buf.point = pname.buf.line.length();
+            pname.buf.point(pname.buf.length());
             pname.commit();
         } else if (msg == "i-set") {
             Buddy b = (args[0] == null) ? null : find((Integer) args[0]);
@@ -474,7 +474,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
     }
 
     public String getCharName() {
-        return pname != null ? pname.text : null;
+        return pname != null ? pname.text() : null;
     }
 
     public void clearSearch() {

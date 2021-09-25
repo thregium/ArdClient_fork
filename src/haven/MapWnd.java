@@ -1354,7 +1354,7 @@ public class MapWnd extends ResizableWnd {
                 }
                 setfocus(tool.namesel);
                 tool.namesel.settext(mark.nm);
-                tool.namesel.buf.point = mark.nm.length();
+                tool.namesel.buf.point(mark.nm.length());
                 tool.namesel.commit();
                 if (mark instanceof PMarker) {
                     PMarker pm = (PMarker) mark;

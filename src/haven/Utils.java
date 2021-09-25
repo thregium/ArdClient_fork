@@ -67,6 +67,9 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -279,6 +282,29 @@ public class Utils {
         }
     }
 
+    public static Path path(String path) {
+        return (FileSystems.getDefault().getPath(path));
+    }
+
+    public static Path pj(Path base, String... els) {
+        for (String el : els)
+            base = base.resolve(el);
+        return (base);
+    }
+
+    public static Path srcpath(Class<?> cl) {
+        java.security.ProtectionDomain d = cl.getProtectionDomain();
+        if (d == null) throw (new IllegalArgumentException(String.valueOf(cl) + " has no prortection domain"));
+        java.security.CodeSource s = d.getCodeSource();
+        if (s == null) throw (new IllegalArgumentException(String.valueOf(cl) + " has no code source"));
+        URL url = s.getLocation();
+        if (url == null) throw (new IllegalArgumentException(String.valueOf(cl) + " has no location"));
+        try {
+            return (Paths.get(url.toURI()));
+        } catch (java.net.URISyntaxException e) {
+            throw (new IllegalArgumentException(String.valueOf(cl) + " has a malformed location", e));
+        }
+    }
     public static int drawtext(Graphics g, String text, Coord c) {
         java.awt.FontMetrics m = g.getFontMetrics();
         g.drawString(text, c.x, c.y + m.getAscent());
@@ -410,7 +436,7 @@ public class Utils {
         return ((raw - 186) * (1.0 / 31.0));
     }
 
-    static synchronized Preferences prefs() {
+    public static synchronized Preferences prefs() {
         if (prefs == null) {
             Preferences node = Preferences.userNodeForPackage(Utils.class);
             if (Config.prefspec != null)
@@ -420,7 +446,7 @@ public class Utils {
         return (prefs);
     }
 
-    static void delpref(String prefname) {
+    public static void delpref(String prefname) {
         try {
             prefs().remove(prefname);
         } catch (SecurityException e) {
@@ -782,7 +808,7 @@ public class Utils {
         }
     }
 
-    static byte[] getprefb(String prefname, byte[] def) {
+    public static byte[] getprefb(String prefname, byte[] def) {
         try {
             return (prefs().getByteArray(prefname, def));
         } catch (SecurityException e) {
@@ -790,7 +816,7 @@ public class Utils {
         }
     }
 
-    static void setprefb(String prefname, byte[] val) {
+    public static void setprefb(String prefname, byte[] val) {
         try {
             prefs().putByteArray(prefname, val);
         } catch (SecurityException e) {
@@ -806,6 +832,10 @@ public class Utils {
         } catch (SecurityException e) {
             return (def);
         }
+    }
+
+    public static int sb(int n, int b) {
+        return ((n << (32 - b)) >> (32 - b));
     }
 
     public static int ub(byte b) {
@@ -1262,6 +1292,42 @@ public class Utils {
         }
     }
 
+    public static interface IOFunction<T> {
+        /* Check exceptions banzai :P */
+        public T run() throws IOException;
+    }
+
+    public static <T> T ioretry(IOFunction<? extends T> task) throws IOException {
+        double[] retimes = {0.01, 0.1, 0.5, 1.0, 5.0};
+        Throwable last = null;
+        boolean intr = false;
+        try {
+            for (int r = 0; true; r++) {
+                try {
+                    return (task.run());
+                } catch (RuntimeException | IOException exc) {
+                    if (last == null)
+                        new Warning(exc, "weird I/O error occurred on " + String.valueOf(task)).issue();
+                    if (last != null)
+                        exc.addSuppressed(last);
+                    last = exc;
+                    if (r < retimes.length) {
+                        try {
+                            Thread.sleep((long) (retimes[r] * 1000));
+                        } catch (InterruptedException irq) {
+                            Thread.currentThread().interrupted();
+                            intr = true;
+                        }
+                    } else {
+                        throw (exc);
+                    }
+                }
+            }
+        } finally {
+            if (intr)
+                Thread.currentThread().interrupt();
+        }
+    }
     private static void dumptg(ThreadGroup tg, PrintWriter out, int indent) {
         for (int o = 0; o < indent; o++)
             out.print("    ");
@@ -1393,6 +1459,15 @@ public class Utils {
             for (int o = 0; (o < width) && (i + o < arr.capacity()); o++) {
                 if (o > 0) out.print(' ');
                 out.printf("%02x", arr.get(i + o) & 0xff);
+            }
+            for (int o = (Math.min(width, arr.capacity() - i) * 3) - 1, w = (width * 3) - 1 + 8; o < w; o++)
+                out.print(' ');
+            for (int o = 0; (o < width) && (i + o < arr.capacity()); o++) {
+                int b = arr.get(i + o) & 0xff;
+                if ((b < 32) || (b >= 127))
+                    out.print('.');
+                else
+                    out.print((char) b);
             }
             out.print('\n');
         }

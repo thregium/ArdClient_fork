@@ -505,6 +505,18 @@ public class VertexBuf {
                     dst.put(i, Utils.mfdec((byte) buf.int8()));
                 break;
             }
+            case "sf9995": {
+                int i = 0;
+                float[] vb = new float[3];
+                while (i < dst.capacity()) {
+                    int w = buf.int32();
+                    Utils.float9995d(w, vb);
+                    dst.put(i++, vb[0]);
+                    dst.put(i++, vb[1]);
+                    dst.put(i++, vb[2]);
+                }
+                break;
+            }
             case "sn4": {
                 float F = buf.float32() / 2147483647.0f;
                 for (int i = 0; i < dst.capacity(); i++)
@@ -539,6 +551,37 @@ public class VertexBuf {
                 float F = buf.float32() / 255.0f;
                 for (int i = 0; i < dst.capacity(); i++)
                     dst.put(i, buf.uint8() * F);
+                break;
+            }
+            case "rn4": {
+                float m = buf.float32(), k = buf.float32() / 4294967295.0f;
+                for (int i = 0; i < dst.capacity(); i++)
+                    dst.put(i, (buf.uint32() * k) + m);
+                break;
+            }
+            case "rn2": {
+                float m = buf.float32(), k = buf.float32() / 65535.0f;
+                for (int i = 0; i < dst.capacity(); i++)
+                    dst.put(i, (buf.uint16() * k) + m);
+                break;
+            }
+            case "rn1": {
+                float m = buf.float32(), k = buf.float32() / 255.0f;
+                for (int i = 0; i < dst.capacity(); i++)
+                    dst.put(i, (buf.uint8() * k) + m);
+                break;
+            }
+            case "uvech": {
+                int i = 0;
+                float F = 1.0f / 7.0f;
+                float[] vb = new float[3];
+                while (i < dst.capacity()) {
+                    int v = buf.uint8();
+                    Utils.oct2uvec(vb, Utils.sb((v & 0xf0) >> 4, 4) * F, Utils.sb(v & 0x0f, 4) * F);
+                    dst.put(i++, vb[0]);
+                    dst.put(i++, vb[1]);
+                    dst.put(i++, vb[2]);
+                }
                 break;
             }
             case "uvec1": {
@@ -641,7 +684,7 @@ public class VertexBuf {
         }
 
         public String toString() {
-            StringBuilder sb  = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             sb.append("<VertexRes ");
             sb.append(id).append(" ");
             sb.append(b);

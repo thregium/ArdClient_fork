@@ -273,7 +273,7 @@ public class OptWnd extends Window {
                     public boolean keydown(KeyEvent ev) {
                         if (!parent.visible)
                             return false;
-                        Utils.setpref("vendan-mapv4-endpoint", text);
+                        Utils.setpref("vendan-mapv4-endpoint", text());
                         if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
                             MappingClient.getInstance(ui.sess.username).SetEndpoint(Utils.getpref("vendan-mapv4-endpoint", ""));
                         }
@@ -503,7 +503,7 @@ public class OptWnd extends Window {
                 synchronized (resources.sfxmenus) {
                     resources.sfxlist.clear();
                     resources.sfxmenus.forEach(s -> {
-                        if (s.contains(text))
+                        if (s.contains(text()))
                             resources.sfxlist.addItem(configuration.createSFXSlider(s));
                     });
                 }
@@ -2647,9 +2647,9 @@ public class OptWnd extends Window {
                     public boolean keydown(KeyEvent ev) {
                         if (!parent.visible)
                             return false;
-                        Utils.setpref("discordtoken", text);
-                        System.out.println(text);
-                        Config.discordtoken = text;
+                        Utils.setpref("discordtoken", text());
+                        System.out.println(text());
+                        Config.discordtoken = text();
                         System.out.println(Utils.getpref("discordtoken", ""));
 
                         return buf.key(ev);
@@ -2663,9 +2663,9 @@ public class OptWnd extends Window {
                     public boolean keydown(KeyEvent ev) {
                         if (!parent.visible)
                             return false;
-                        Utils.setpref("discordchannel", text);
-                        System.out.println(text);
-                        Config.discordchannel = text;
+                        Utils.setpref("discordchannel", text());
+                        System.out.println(text());
+                        Config.discordchannel = text();
                         System.out.println(Utils.getpref("discordchannel", ""));
 
                         return buf.key(ev);
@@ -2738,9 +2738,9 @@ public class OptWnd extends Window {
                   public boolean keydown(KeyEvent ev) {
                       if (!parent.visible)
                           return false;
-                      Utils.setpref("discordalertstring", text);
-                      Config.discordalertstring = text;
-                      System.out.println(text);
+                      Utils.setpref("discordalertstring", text());
+                      Config.discordalertstring = text();
+                      System.out.println(text());
                       System.out.println(Utils.getpref("discordalertstring", ""));
                       return buf.key(ev);
                   }
@@ -2779,8 +2779,8 @@ public class OptWnd extends Window {
                 new ResizableTextEntry(configuration.defaultUtilsCustomTitle) {
                     @Override
                     public void changed() {
-                        Utils.setpref("custom-title", text);
-                        configuration.defaultUtilsCustomTitle = text;
+                        Utils.setpref("custom-title", text());
+                        configuration.defaultUtilsCustomTitle = text();
                         MainFrame.instance.setTitle(configuration.tittleCheck(ui.sess));
                     }
                 });
@@ -2850,7 +2850,7 @@ public class OptWnd extends Window {
                 wva.addRow(value, new Button(45, "Add") {
                     @Override
                     public void click() {
-                        list.put(value.text, false);
+                        list.put(value.text(), false);
                         value.settext("");
                     }
                 }, new Button(45, "Load Default") {
@@ -3108,8 +3108,8 @@ public class OptWnd extends Window {
                     };
                     Button addbtn = new Button(45, "Add") {
                         public void click() {
-                            if (!addentry.text.equals("")) {
-                                cwl.put(addentry.text, false);
+                            if (!addentry.text().equals("")) {
+                                cwl.put(addentry.text(), false);
                                 addentry.settext("");
                             }
                         }
@@ -3833,7 +3833,7 @@ public class OptWnd extends Window {
 
             @Override
             public boolean type(char c, KeyEvent ev) {
-                if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line.length() < 3 || c == '\b') {
+                if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line().length() < 3 || c == '\b') {
                     return buf.key(ev);
                 } else if (c == '\n') {
                     try {
@@ -3856,7 +3856,7 @@ public class OptWnd extends Window {
 
             @Override
             public boolean type(char c, KeyEvent ev) {
-                if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line.length() < 3 || c == '\b') {
+                if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line().length() < 3 || c == '\b') {
                     return buf.key(ev);
                 } else if (c == '\n') {
                     try {
@@ -3879,7 +3879,7 @@ public class OptWnd extends Window {
 
             @Override
             public boolean type(char c, KeyEvent ev) {
-                if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line.length() < 3 || c == '\b') {
+                if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line().length() < 3 || c == '\b') {
                     return buf.key(ev);
                 } else if (c == '\n') {
                     try {
@@ -3902,7 +3902,7 @@ public class OptWnd extends Window {
 
             @Override
             public boolean type(char c, KeyEvent ev) {
-                if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line.length() < 3 || c == '\b') {
+                if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line().length() < 3 || c == '\b') {
                     return buf.key(ev);
                 } else if (c == '\n') {
                     try {
@@ -3981,8 +3981,8 @@ public class OptWnd extends Window {
             @Override
             public void click() {
                 try {
-                    if (!value.text.isEmpty())
-                        list.add(Double.parseDouble(value.text), Double.parseDouble(value.text), CustomQualityList.NewColor, true);
+                    if (!value.text().isEmpty())
+                        list.add(Double.parseDouble(value.text()), Double.parseDouble(value.text()), CustomQualityList.NewColor, true);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -4100,7 +4100,7 @@ public class OptWnd extends Window {
                 wva.addRow(value, new Button(45, "Add") {
                     @Override
                     public void click() {
-                        list.add(value.text);
+                        list.add(value.text());
                         value.settext("");
                     }
                 }, new Button(45, "Load Default") {
@@ -4390,7 +4390,7 @@ public class OptWnd extends Window {
         appender.add(new Label(""));
         TextEntry baseurl = new TextEntry(200, Config.resurl.toString()) {
             {
-                sz = new Coord(TextEntry.fnd.render(text).sz().x + 10, sz.y);
+                sz = new Coord(TextEntry.fnd.render(text()).sz().x + 10, sz.y);
             }
 
             public Object tooltip(Coord c0, Widget prev) {
@@ -4400,14 +4400,14 @@ public class OptWnd extends Window {
         TextEntry hashid = new TextEntry(200, "") {
             @Override
             public void changed() {
-                sz = new Coord(TextEntry.fnd.render(text).sz().x + 10, sz.y);
+                sz = new Coord(TextEntry.fnd.render(text()).sz().x + 10, sz.y);
             }
         };
         TextEntry textEntry = new TextEntry(200, "") {
             @Override
             public boolean type(char c, KeyEvent ev) {
                 if (c == '\n') {
-                    String hash = String.format("%016x.0", namehash(namehash(0, baseurl.text), "res/" + text)); //-8944751680107289605
+                    String hash = String.format("%016x.0", namehash(namehash(0, baseurl.text()), "res/" + text())); //-8944751680107289605
                     hashid.settext(hash);
 
                     PBotUtils.sysMsg(ui, hash);
@@ -4432,7 +4432,7 @@ public class OptWnd extends Window {
         appender.addRow(new Label("res/"), textEntry,
                 new Button(30, "ENTER") {
                     public void click() {
-                        String hash = String.format("%016x.0", namehash(namehash(0, baseurl.text), "res/" + textEntry.text)); //-8944751680107289605
+                        String hash = String.format("%016x.0", namehash(namehash(0, baseurl.text()), "res/" + textEntry.text())); //-8944751680107289605
                         hashid.settext(hash);
 
                         PBotUtils.sysMsg(ui, hash);
@@ -4447,7 +4447,7 @@ public class OptWnd extends Window {
                 }, new Button(50, "Download") {
                     public void click() {
                         try {
-                            Resource res = Resource.remote(baseurl.text).loadwait(textEntry.text);
+                            Resource res = Resource.remote(baseurl.text()).loadwait(textEntry.text());
                             dev.resourceLog("Resource", "DOWNLOAD", res);
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -4456,10 +4456,10 @@ public class OptWnd extends Window {
                 });
         appender.addRow(new Label("%appdata%\\Haven and Hearth\\data\\"), hashid, new Button(50, "Remove") {
             public void click() {
-                if (hashid.text != null && !hashid.text.equals("")) {
+                if (hashid.text() != null && !hashid.text().equals("")) {
                     try {
                         File basedir = HashDirCache.findbase();
-                        File file = new File(basedir, hashid.text);
+                        File file = new File(basedir, hashid.text());
                         if (!file.exists()) {
                             dev.resourceLog("Resource", "NOT FOUND", file.getAbsolutePath());
                         } else {
@@ -4582,7 +4582,7 @@ public class OptWnd extends Window {
             public void update() {
                 Config.flowerlist.items.clear();
                 for (Map.Entry<String, CheckListboxItem> entry : Config.flowermenus.entrySet()) {
-                    if (Resource.getLocString(Resource.BUNDLE_FLOWER, entry.getKey()).toLowerCase().contains(text.toLowerCase()))
+                    if (Resource.getLocString(Resource.BUNDLE_FLOWER, entry.getKey()).toLowerCase().contains(text().toLowerCase()))
                         Config.flowerlist.items.add(entry.getValue());
                 }
                 Config.flowerlist.items.sort(Comparator.comparing(o -> Resource.getLocString(Resource.BUNDLE_FLOWER, o.name)));
@@ -4636,7 +4636,7 @@ public class OptWnd extends Window {
         appender.addRow(new Button(45, "Add") {
             @Override
             public void click() {
-                list.add(value.text);
+                list.add(value.text());
                 value.settext("");
             }
         }, new Button(45, "Load Default") {
@@ -4738,7 +4738,7 @@ public class OptWnd extends Window {
         studydesksettings.add(new Button(45, "Add") {
             @Override
             public void click() {
-                list.add(value.text);
+                list.add(value.text());
                 value.settext("");
             }
         }, x + 155, y - 2);
@@ -4768,7 +4768,7 @@ public class OptWnd extends Window {
         autodropsettings.add(new Button(45, "Add") {
             @Override
             public void click() {
-                list.add(value.text);
+                list.add(value.text());
                 value.settext("");
             }
         }, x + 155, y - 2);

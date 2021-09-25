@@ -26,6 +26,6 @@ public class PBotTextEntry extends TextEntry {
      * @return Text of the text entry
      */
     public String getText() {
-        return super.text;
+        return super.text();
     }
 }

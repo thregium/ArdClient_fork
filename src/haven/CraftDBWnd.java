@@ -27,7 +27,7 @@ import static haven.CraftDBWnd.Mode.All;
 import static haven.CraftDBWnd.Mode.Favourites;
 import static haven.CraftDBWnd.Mode.History;
 
-public class CraftDBWnd extends Window implements DTarget2, ObservableListener<Pagina> {
+public class CraftDBWnd extends Window implements DTarget2, ObservableListener<Pagina>, ReadLine.Owner {
     private static final int PANEL_H = 52;
     private static final Coord WND_SZ = new Coord(635, 360 + PANEL_H);
     private static final Coord ICON_SZ = new Coord(20, 20);
@@ -57,7 +57,7 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<P
     private final Pattern category = Pattern.compile("paginae/craft/.+");
     private int pagseq = 0;
     private boolean needfilter = false;
-    private final LineEdit filter = new LineEdit();
+    private final ReadLine filter;
     private Mode mode = All;
 
     static {
@@ -132,6 +132,7 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<P
     public CraftDBWnd() {
         //  super(WND_SZ.add(0, 20), "Craft window", "Craft window");
         super(Coord.z, "Craft window", "Craft window");
+        filter = ReadLine.make(this, "");
         // CFG.REAL_TIME_CURIO.observe(cfg -> updateDescription(descriptionPagina));
         // CFG.SHOW_CURIO_LPH.observe(cfg -> updateDescription(descriptionPagina));
     }
@@ -196,7 +197,7 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<P
                             }
                             item = menu.getParent(item);
                         }
-                        if ((mode.reparent && filter.line.isEmpty()) || !item.isAction()) {
+                        if ((mode.reparent && filter.line().isEmpty()) || !item.isAction()) {
                             menu.use(item.button(), new MenuGrid.Interaction(),false);
                         } else {
                             select(item, true, true);
@@ -366,7 +367,7 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<P
         if (mode != All) {
             changeMode(All);
         }
-        if (!filter.line.isEmpty()) {
+        if (!filter.line().isEmpty()) {
             filter.setline("");
             changeMode(All);
             if (p == ui.gui.menu.bk.pag) {
@@ -457,7 +458,7 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<P
 
     private void updateBreadcrumbs(Pagina p) {
         List<Breadcrumbs.Crumb<Pagina>> crumbs = new LinkedList<>();
-        if (filter.line.isEmpty()) {
+        if (filter.line().isEmpty()) {
             if (mode == All) {
                 List<Pagina> parents = getParents(p);
                 Collections.reverse(parents);
@@ -476,7 +477,7 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<P
         } else {
             crumbs.add(Breadcrumbs.Crumb.fromPagina(paginafor(mode.res)));
             BufferedImage img = Resource.remote().loadwait("paginae/act/inspect").layer(Resource.imgc).img;
-            crumbs.add(new Breadcrumbs.Crumb<>(img, filter.line, CRAFT));
+            crumbs.add(new Breadcrumbs.Crumb<>(img, filter.line(), CRAFT));
         }
         breadcrumbs.setCrumbs(crumbs);
     }
@@ -557,7 +558,7 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<P
 
     private void filter() {
         needfilter = false;
-        String filter = this.filter.line.toLowerCase();
+        String filter = this.filter.line().toLowerCase();
         if (filter.isEmpty()) {
             return;
         }
@@ -618,7 +619,7 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<P
     @Override
     public boolean type(char key, KeyEvent ev) {
         if (key == 27) {
-            if (!filter.line.isEmpty()) {
+            if (!filter.line().isEmpty()) {
                 changeMode(mode);
             } else {
                 close();
@@ -629,10 +630,10 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<P
         if (ignoredKey(ev)) {
             return false;
         }
-        String before = filter.line;
-        if (filter.key(ev) && !before.equals(filter.line)) {
+        String before = filter.line();
+        if (filter.key(ev) && !before.equals(filter.line())) {
             needfilter();
-            if (filter.line.isEmpty()) {
+            if (filter.line().isEmpty()) {
                 changeMode(mode);
             }
             return true;
@@ -791,5 +792,11 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<P
             }
             return an.compareTo(bn);
         }
+    }
+
+    public void done(ReadLine buf) {
+    }
+
+    public void changed(ReadLine buf) {
     }
 }

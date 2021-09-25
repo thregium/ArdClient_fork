@@ -102,8 +102,10 @@ public class SessionDisplay extends MovableWidget implements ObservableListener<
 
     public void remove(UI item) {
         final UIDisplay display = uimap.remove(item);
-        display.destroy();
-        grp.pack();
-        pack();
+        if (display != null) {
+            display.destroy();
+            grp.pack();
+            pack();
+        }
     }
 }

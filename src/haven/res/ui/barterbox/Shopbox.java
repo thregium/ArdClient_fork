@@ -252,9 +252,9 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
 
     private static Integer parsenum(TextEntry e) {
         try {
-            if (e.buf.line.equals(""))
+            if (e.buf.line().equals(""))
                 return (0);
-            return (Integer.parseInt(e.buf.line));
+            return (Integer.parseInt(e.buf.line()));
         } catch (NumberFormatException exc) {
             return (null);
         }
@@ -315,7 +315,7 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
 
                 @Override
                 public boolean type(char c, KeyEvent ev) {
-                    if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line.length() < 2 || c == '\b') {
+                    if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line().length() < 2 || c == '\b') {
                         return buf.key(ev);
                     } else if (c == '\n') {
                         try {

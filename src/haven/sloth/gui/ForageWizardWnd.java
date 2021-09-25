@@ -82,8 +82,8 @@ public class ForageWizardWnd extends Window {
                 basic.add(new CheckBox("Logout on bad players", (val) -> logoutonplayers = val, true));
                 basic.add(new CheckBox("Logout on bad animals", (val) -> logoutonanimals = val, true));
                 basic.add(new Button(150, "Save", () -> {
-                    if (!filename.text.equals("") && foragables.size() > 0 && points.size() > 0) {
-                        ui.sess.details.context.dispatchmsg(this, "new-data", "data/scripts/forage/" + filename.text + ".dat", radius.value(),
+                    if (!filename.text().equals("") && foragables.size() > 0 && points.size() > 0) {
+                        ui.sess.details.context.dispatchmsg(this, "new-data", "data/scripts/forage/" + filename.text() + ".dat", radius.value(),
                                 useboat, crawl, logoutonplayers, logoutonanimals,
                                 foragables.toArray(new String[0]), points.toArray(new Coord2d[0]), rpoints.toArray(new Coord2d[0]));
                         ui.destroy(this);

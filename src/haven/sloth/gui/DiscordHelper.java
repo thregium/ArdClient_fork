@@ -94,13 +94,13 @@ public class DiscordHelper extends Window {
             addg.add(new Label("Token"));
             final TextEntry token = addg.add(new TextEntry(200, ""));
             addg.add(new Button(200, "Add Token",  () ->  {
-                addToken(token.text);
+                addToken(token.text());
                 token.settext("");
             }));
             addg.add(new Label("Role ID"));
             final TextEntry role = addg.add(new TextEntry(200, ""));
             addg.add(new Button(200, "Add Role", () ->  {
-                addRole(role.text);
+                addRole(role.text());
                 role.settext("");
             }));
             addg.pack();

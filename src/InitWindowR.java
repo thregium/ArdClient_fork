@@ -62,7 +62,7 @@ public class InitWindowR extends Window {
     }
 
     private void form() {
-        wdgmsg("found", (name != null) ? name.text : null);
+        wdgmsg("found", (name != null) ? name.text() : null);
     }
 
     public static Widget mkwidget(UI ui, Object[] args) {

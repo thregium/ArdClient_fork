@@ -127,7 +127,7 @@ public class LoginScreen extends Widget {
             }}, new Coord(0, 50));
             add(pass = new TextEntry(150, ""), new Coord(0, 70));
             pass.pw = true;
-            if (user.text.equals(""))
+            if (user.text().equals(""))
                 setfocus(user);
             else
                 setfocus(pass);
@@ -139,14 +139,14 @@ public class LoginScreen extends Widget {
         }
 
         Object[] data() {
-            return (new Object[]{new AuthClient.NativeCred(user.text, pass.text), false});
+            return (new Object[]{new AuthClient.NativeCred(user.text(), pass.text()), false});
         }
 
         boolean enter() {
-            if (user.text.equals("")) {
+            if (user.text().equals("")) {
                 setfocus(user);
                 return (false);
-            } else if (pass.text.equals("")) {
+            } else if (pass.text().equals("")) {
                 setfocus(pass);
                 return (false);
             } else {
@@ -340,7 +340,7 @@ public class LoginScreen extends Widget {
     public void wdgmsg(Widget sender, String msg, Object... args) {
         if (sender == btn) {
             if (cur.enter()) {
-                Context.accname = user.text;
+                Context.accname = user.text();
                 super.wdgmsg("login", cur.data());
             }
             return;
@@ -450,7 +450,7 @@ public class LoginScreen extends Widget {
     public boolean type(char k, KeyEvent ev) {
         if (k == 10) {
             if ((cur != null) && cur.enter()) {
-                Context.accname = user.text;
+                Context.accname = user.text();
                 wdgmsg("login", cur.data());
             }
             return (true);

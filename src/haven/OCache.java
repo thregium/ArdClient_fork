@@ -42,7 +42,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 import static haven.MapView.markedGobs;
@@ -131,13 +130,13 @@ public class OCache implements Iterable<Gob> {
     }
 
     public synchronized void remove(long id, int frame) {
-            if (objs.containsKey(id) && !DefSettings.KEEPGOBS.get()) {
-                if (!deleted.containsKey(id) || deleted.get(id) < frame) {
+        if (objs.containsKey(id) && !DefSettings.KEEPGOBS.get()) {
+            if (!deleted.containsKey(id) || deleted.get(id) < frame) {
                 Gob old = objs.remove(id);
-            deleted.put(id, frame);
-            old.dispose();
-            for (ChangeCallback cb : cbs)
-                cb.removed(old);
+                deleted.put(id, frame);
+                old.dispose();
+                for (ChangeCallback cb : cbs)
+                    cb.removed(old);
             }
         }
     }
@@ -977,7 +976,7 @@ public class OCache implements Iterable<Gob> {
                     if (parser != null) {
                         parser.apply(g, dat);
                     }
-                } catch(Loading le) {
+                } catch (Loading le) {
                     glob.loader.defer(this, null);
                 }
             }

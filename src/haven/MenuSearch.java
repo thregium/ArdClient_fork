@@ -108,7 +108,7 @@ public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pa
     private void refilter() {
         list.clear();
         for (MenuGrid.Pagina p : all) {
-            if (p.res.get().layer(Resource.action).name.toLowerCase().contains(entry.text.toLowerCase()))
+            if (p.res.get().layer(Resource.action).name.toLowerCase().contains(entry.text().toLowerCase()))
                 list.add(p);
         }
         list.sort(new ItemComparator());
@@ -170,6 +170,6 @@ public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pa
                 //Ignore
             }
         }
-        return pagina.res.get().layer(Resource.action).name.toLowerCase().contains(entry.text.toLowerCase());
+        return pagina.res.get().layer(Resource.action).name.toLowerCase().contains(entry.text().toLowerCase());
     }
 }

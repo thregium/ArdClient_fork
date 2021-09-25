@@ -64,6 +64,7 @@ public class Widget {
     public Widget focused;
     public Indir<Resource> cursor = null;
     public Object tooltip = null;
+    public KeyBinding kb_gkey;
     public int gkey;
     private Widget prevtt;
     static Map<String, Factory> types = new TreeMap<>();
@@ -985,6 +986,10 @@ public class Widget {
             return (false);
         }
     }
+
+    public static final KeyMatch key_act = KeyMatch.forcode(KeyEvent.VK_ENTER, 0);
+    public static final KeyMatch key_esc = KeyMatch.forcode(KeyEvent.VK_ESCAPE, 0);
+    public static final KeyMatch key_tab = KeyMatch.forcode(KeyEvent.VK_TAB, 0);
 
     public boolean keydown(KeyEvent ev) {
         if (focusctl) {

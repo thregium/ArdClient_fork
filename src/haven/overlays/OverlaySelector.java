@@ -179,7 +179,7 @@ public class OverlaySelector extends Window {
 
     private void select() { //FIXME переработать, чтобы были выключенные и выключенные и менюшку тоже
         if (textchbox.a) {
-            OverlayData.addText(gobname, textEntry.text, textColor, strokeColor, selectedFontSize, selectedFont, true);
+            OverlayData.addText(gobname, textEntry.text(), textColor, strokeColor, selectedFontSize, selectedFont, true);
             ui.sess.glob.oc.unovTextGobs(gobname);
             ui.sess.glob.oc.ovTextGobs(gobname);
         } else {

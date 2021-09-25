@@ -25,7 +25,7 @@ public class TimerEditWnd extends Window {
             @Override
             public boolean keydown(KeyEvent ev) {
                 final char c = ev.getKeyChar();
-                if (c == 0x8 || c == 0x7f || c == 0x09 || (c >= 0x30 && c <= 0x39 && text.length() <= 2))
+                if (c == 0x8 || c == 0x7f || c == 0x09 || (c >= 0x30 && c <= 0x39 && text().length() <= 2))
                     return super.keydown(ev);
                 return true;
             }
@@ -37,7 +37,7 @@ public class TimerEditWnd extends Window {
             @Override
             public boolean keydown(KeyEvent ev) {
                 final char c = ev.getKeyChar();
-                if (c == 0x8 || c == 0x7f || c == 0x09 || (c >= 0x30 && c <= 0x39 && text.length() <= 1))
+                if (c == 0x8 || c == 0x7f || c == 0x09 || (c >= 0x30 && c <= 0x39 && text().length() <= 1))
                     return super.keydown(ev);
                 return true;
             }
@@ -49,7 +49,7 @@ public class TimerEditWnd extends Window {
             @Override
             public boolean keydown(KeyEvent ev) {
                 final char c = ev.getKeyChar();
-                if (c == 0x8 || c == 0x7f || c == 0x09 || (c >= 0x30 && c <= 0x39 && text.length() <= 1))
+                if (c == 0x8 || c == 0x7f || c == 0x09 || (c >= 0x30 && c <= 0x39 && text().length() <= 1))
                     return super.keydown(ev);
                 return true;
             }
@@ -58,9 +58,9 @@ public class TimerEditWnd extends Window {
 
         CheckBox gametime = new CheckBox("Ingame time") {
             public void set(boolean val) {
-                long hours = Long.parseLong(txthours.text.equals("") ? "0" : txthours.text);
-                long minutes = Long.parseLong(txtminutes.text.equals("") ? "0" : txtminutes.text);
-                long seconds = Long.parseLong(txtseconds.text.equals("") ? "0" : txtseconds.text);
+                long hours = Long.parseLong(txthours.text().equals("") ? "0" : txthours.text());
+                long minutes = Long.parseLong(txtminutes.text().equals("") ? "0" : txtminutes.text());
+                long seconds = Long.parseLong(txtseconds.text().equals("") ? "0" : txtseconds.text());
                 long duration = ((60 * hours + minutes) * 60 + seconds);
                 if (val) {
                     duration = Math.round(duration * Glob.SERVER_TIME_RATIO);
@@ -81,12 +81,12 @@ public class TimerEditWnd extends Window {
 
         Button add = new Button(60, "Add", () -> {
             try {
-                long hours = Long.parseLong(txthours.text.equals("") ? "0" : txthours.text);
-                long minutes = Long.parseLong(txtminutes.text.equals("") ? "0" : txtminutes.text);
-                long seconds = Long.parseLong(txtseconds.text.equals("") ? "0" : txtseconds.text);
+                long hours = Long.parseLong(txthours.text().equals("") ? "0" : txthours.text());
+                long minutes = Long.parseLong(txtminutes.text().equals("") ? "0" : txtminutes.text());
+                long seconds = Long.parseLong(txtseconds.text().equals("") ? "0" : txtseconds.text());
                 long duration = ((60 * hours + minutes) * 60 + seconds) * 3;
                 if (gametime.a) duration = Math.round(duration / Glob.SERVER_TIME_RATIO);
-                TimerData.addTimer(txtname.text, duration);
+                TimerData.addTimer(txtname.text(), duration);
                 ui.destroy(this);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -117,7 +117,7 @@ public class TimerEditWnd extends Window {
             @Override
             public boolean keydown(KeyEvent ev) {
                 final char c = ev.getKeyChar();
-                if (c == 0x8 || c == 0x7f || c == 0x09 || (c >= 0x30 && c <= 0x39 && text.length() <= 2))
+                if (c == 0x8 || c == 0x7f || c == 0x09 || (c >= 0x30 && c <= 0x39 && text().length() <= 2))
                     return super.keydown(ev);
                 return true;
             }
@@ -129,7 +129,7 @@ public class TimerEditWnd extends Window {
             @Override
             public boolean keydown(KeyEvent ev) {
                 final char c = ev.getKeyChar();
-                if (c == 0x8 || c == 0x7f || c == 0x09 || (c >= 0x30 && c <= 0x39 && text.length() <= 1))
+                if (c == 0x8 || c == 0x7f || c == 0x09 || (c >= 0x30 && c <= 0x39 && text().length() <= 1))
                     return super.keydown(ev);
                 return true;
             }
@@ -141,7 +141,7 @@ public class TimerEditWnd extends Window {
             @Override
             public boolean keydown(KeyEvent ev) {
                 final char c = ev.getKeyChar();
-                if (c == 0x8 || c == 0x7f || c == 0x09 || (c >= 0x30 && c <= 0x39 && text.length() <= 1))
+                if (c == 0x8 || c == 0x7f || c == 0x09 || (c >= 0x30 && c <= 0x39 && text().length() <= 1))
                     return super.keydown(ev);
                 return true;
             }
@@ -150,9 +150,9 @@ public class TimerEditWnd extends Window {
 
         CheckBox gametime = new CheckBox("Ingame time") {
             public void set(boolean val) {
-                long hours = Long.parseLong(txthours.text.equals("") ? "0" : txthours.text);
-                long minutes = Long.parseLong(txtminutes.text.equals("") ? "0" : txtminutes.text);
-                long seconds = Long.parseLong(txtseconds.text.equals("") ? "0" : txtseconds.text);
+                long hours = Long.parseLong(txthours.text().equals("") ? "0" : txthours.text());
+                long minutes = Long.parseLong(txtminutes.text().equals("") ? "0" : txtminutes.text());
+                long seconds = Long.parseLong(txtseconds.text().equals("") ? "0" : txtseconds.text());
                 long duration = ((60 * hours + minutes) * 60 + seconds);
                 if (val) {
                     duration = Math.round(duration * Glob.SERVER_TIME_RATIO);
@@ -173,12 +173,12 @@ public class TimerEditWnd extends Window {
 
         Button edit = new Button(60, "Edit", () -> {
             try {
-                long hours = Long.parseLong(txthours.text.equals("") ? "0" : txthours.text);
-                long minutes = Long.parseLong(txtminutes.text.equals("") ? "0" : txtminutes.text);
-                long seconds = Long.parseLong(txtseconds.text.equals("") ? "0" : txtseconds.text);
+                long hours = Long.parseLong(txthours.text().equals("") ? "0" : txthours.text());
+                long minutes = Long.parseLong(txtminutes.text().equals("") ? "0" : txtminutes.text());
+                long seconds = Long.parseLong(txtseconds.text().equals("") ? "0" : txtseconds.text());
                 long duration = ((60 * hours + minutes) * 60 + seconds) * 3;
                 if (gametime.a) duration = Math.round(duration / Glob.SERVER_TIME_RATIO);
-                TimerData.editTimer(timer, txtname.text, duration);
+                TimerData.editTimer(timer, txtname.text(), duration);
                 ui.destroy(this);
             } catch (Exception e) {
                 e.printStackTrace();
