@@ -361,8 +361,7 @@ public class UI {
             TextEntry entry = new TextEntry(40, "") {
                 @Override
                 public boolean keydown(KeyEvent e) {
-                    if (e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12) return true;
-                    else return super.keydown(e);
+                    return !(e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12);
                 }
 
                 @Override
