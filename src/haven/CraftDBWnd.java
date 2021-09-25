@@ -610,9 +610,9 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<P
                 return true;
         }
 
-        if (filter.key(ev)) {
-            needfilter();
-        }
+//        if (filter.key(ev)) {
+//            needfilter();
+//        }
         return true;
     }
 

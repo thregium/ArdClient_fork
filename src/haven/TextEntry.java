@@ -238,9 +238,9 @@ public class TextEntry extends Widget implements ReadLine.Owner {
         TextEntry.this.changed();
     }
 
-    public boolean type(char c, KeyEvent ev) {
+    public boolean gkeytype(KeyEvent ev) {
         activate(buf.line());
-        return(true);
+        return (true);
     }
 
     public boolean keydown(KeyEvent e) {
