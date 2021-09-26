@@ -141,7 +141,7 @@ public class ChatUI extends Widget {
                 Matcher m = hspat.matcher(text);
                 if (m.find(p)) {
                     String hs = m.group(1);
-                    na = new HashMap<Attribute, Object>(attrs);
+                    na = new HashMap<>(attrs);
                     na.putAll(urlstyle);
                     na.put(ChatAttribute.HEARTH_SECRET, hs);
                     p = m.end();
@@ -158,7 +158,7 @@ public class ChatUI extends Widget {
                             p = m.end();
                             continue;
                         }
-                        na = new HashMap<Attribute, Object>(attrs);
+                        na = new HashMap<>(attrs);
                         na.putAll(urlstyle);
                         na.put(ChatAttribute.HYPERLINK, new FuckMeGentlyWithAChainsaw(url));
                         p = m.end();
@@ -678,14 +678,14 @@ public class ChatUI extends Widget {
                 }
 
                 public boolean keydown(KeyEvent ev) {
-                    if (ev.getKeyCode() == KeyEvent.VK_UP) {
+			if(ConsoleHost.kb_histprev.key().match(ev)) {
                         if (hpos > 0) {
                             if (hpos == history.size())
                                 hcurrent = text();
                             rsettext(history.get(--hpos));
                         }
                         return (true);
-                    } else if (ev.getKeyCode() == KeyEvent.VK_DOWN) {
+			} else if(ConsoleHost.kb_histnext.key().match(ev)) {
                         if (hpos < history.size()) {
                             if (++hpos == history.size())
                                 rsettext(hcurrent);
@@ -797,7 +797,6 @@ public class ChatUI extends Widget {
         public SimpleChat(boolean closable, String name) {
             super(closable);
             this.name = Resource.getLocString(Resource.BUNDLE_LABEL, name);
-            ;
         }
 
         public void uimsg(String msg, Object... args) {
@@ -1063,7 +1062,7 @@ public class ChatUI extends Widget {
         public void uimsg(String msg, Object... args) {
             if (msg == "msg") {
                 Integer from = (Integer) args[0];
-                int gobid = (Integer) args[1];
+		long gobid = Utils.uint32((Integer)args[1]);
                 String line = (String) args[2];
                 Color col = Color.WHITE;
 
@@ -1681,7 +1680,8 @@ public class ChatUI extends Widget {
 
     private UI.Grab dm = null;
     private Coord doff;
-    public int savedh = Math.max(111, Utils.getprefi("chatsize", 111));
+    private static final int minh = 111;
+    public int savedh = UI.scale(Math.max(minh, Utils.getprefi("chatsize", minh)));
 
     public boolean mousedown(Coord c, int button) {
         int bmfx = (sz.x - bmf.sz().x) / 2;
@@ -1696,7 +1696,7 @@ public class ChatUI extends Widget {
 
     public void mousemove(Coord c) {
         if (dm != null) {
-            resize(sz.x, savedh = Math.max(111, sz.y + doff.y - c.y));
+            resize(sz.x, savedh = Math.max(UI.scale(minh), sz.y + doff.y - c.y));
         } else {
             super.mousemove(c);
         }
@@ -1706,7 +1706,7 @@ public class ChatUI extends Widget {
         if (dm != null) {
             dm.remove();
             dm = null;
-            Utils.setprefi("chatsize", savedh);
+            Utils.setprefi("chatsize", UI.unscale(savedh));
             return (true);
         } else {
             return (super.mouseup(c, button));
@@ -1764,8 +1764,10 @@ public class ChatUI extends Widget {
         }
     }
 
+    public static final KeyBinding kb_quick = KeyBinding.get("chat-quick", KeyMatch.forcode(KeyEvent.VK_ENTER, 0));
+
     public boolean globtype(char key, KeyEvent ev) {
-        if (key == 10) {
+        if (kb_quick.key().match(ev)) {
             if (!visible && (sel instanceof EntryChannel)) {
                 qgrab = ui.grabkeys(this);
                 qline = new QuickLine((EntryChannel) sel);

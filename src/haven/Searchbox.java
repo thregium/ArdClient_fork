@@ -91,11 +91,12 @@ public abstract class Searchbox<T> extends Listbox<T> {
     }
 
     public boolean type(char c, KeyEvent ev) {
-        return (key(c, ev));
+//        key(c, ev);
+        return (true);
     }
 
     public boolean keydown(KeyEvent ev) {
-        return (key((char) 0, ev));
+        return (key(ev.getKeyChar(), ev));
     }
 
     private void updinfo() {

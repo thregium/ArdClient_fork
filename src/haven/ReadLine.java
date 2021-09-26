@@ -362,6 +362,9 @@ public interface ReadLine {
             } else if ((code == KeyEvent.VK_END) && (mod == 0)) {
                 mark = s ? (mark < 0) ? point : mark : -1;
                 point = length;
+            } else if ((c == 'a') && (mod == C)) {
+                mark = 0;
+                point = length;
             } else if ((c == 'v') && (mod == C)) {
                 rmsel();
                 String cl = cliptext();
