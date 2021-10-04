@@ -333,6 +333,7 @@ public abstract class Message {
                     break;
                 case T_FLOAT16:
                     ret.add(float16());
+                    break;
                 case T_FLOAT32:
                     ret.add(float32());
                     break;
