@@ -254,11 +254,19 @@ public class TextEntry extends Widget implements ReadLine.Owner {
 //                || e.getKeyCode() == KeyEvent.VK_F11 || e.getKeyCode() == KeyEvent.VK_F12 || e.getModifiers() == InputEvent.ALT_MASK || e.getModifiers() == InputEvent.CTRL_MASK) {
 //            return super.keydown(e);
 //        }
-        if (key_esc.match(e) && ui.root.sessionDisplay != null) {
+        if (key_esc.match(e)) {
+            if (close())
+                return (true);
+        }
+        return (buf.key(e));
+    }
+
+    public boolean close() {
+        if (ui.root.sessionDisplay != null) {
             ui.root.setfocus(ui.root.sessionDisplay);
             return (true);
         }
-        return (buf.key(e));
+        return (false);
     }
 
     public boolean mousedown(Coord c, int button) {

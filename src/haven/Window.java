@@ -34,8 +34,10 @@ import haven.sloth.gui.MovableWidget;
 import haven.sloth.io.HiddenWndData;
 
 import java.awt.Color;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -833,13 +835,14 @@ public class Window extends MovableWidget implements DTarget {
         }
     }
 
+    public static final List<String> excludesCloseWnd = new ArrayList<>(Arrays.asList("Chat", "Minimap", "Map"));
 
-    public boolean type(char key, java.awt.event.KeyEvent ev) {
+    public boolean type(char key, KeyEvent ev) {
         if (super.type(key, ev))
             return (true);
         if (key == 27 && Config.escclosewindows) {
-            if (!this.origcap.equals("Chat") && !this.origcap.equals("Minimap")) {
-                wdgmsg("close");
+            if (!excludesCloseWnd.contains(this.origcap)) {
+                close();
                 return (true);
             }
         }

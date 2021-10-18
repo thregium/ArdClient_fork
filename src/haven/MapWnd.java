@@ -1343,6 +1343,14 @@ public class MapWnd extends ResizableWnd {
                             dshow = true;
                         }
 
+                        @Override
+                        public boolean close() {
+                            change2(null);
+                            setfocus(MarkerList.this);
+                            return (true);
+                        }
+
+                        @Override
                         public void activate(String text) {
                             mark.nm = text;
                             view.file.update(mark);
@@ -1434,6 +1442,10 @@ public class MapWnd extends ResizableWnd {
     public boolean keydown(KeyEvent ev) {
         if (super.keydown(ev))
             return (true);
+        if (key_esc.match(ev)) {
+            show(false);
+            return (true);
+        }
         if (ev.getKeyCode() == KeyEvent.VK_HOME) {
             questlinemap.clear();
             recenter();
@@ -1589,12 +1601,6 @@ public class MapWnd extends ResizableWnd {
 
     @Override
     public boolean type(char key, KeyEvent ev) {
-//        if (key == 27) {
-//            if (cbtn.visible) {
-//                show(false);
-//            }
-//            return true;
-//        }
-        return super.type(key, ev);
+        return (true);
     }
 }
