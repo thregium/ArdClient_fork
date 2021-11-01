@@ -231,7 +231,8 @@ public class BeltWnd extends MovableWidget {
                     l.printStackTrace();
                 }
             } else if (pag != null) {
-                pag.use();
+                MenuGrid.Interaction iact = new MenuGrid.Interaction(1, ui.modflags());
+                pag.use(iact);
             } else if (script != null) {
                 script.runScript();
             }
@@ -251,7 +252,7 @@ public class BeltWnd extends MovableWidget {
 
         @Override
         public boolean mousedown(Coord c, int button) {
-            if (((res != null && res.get() != null) || pag != null || script != null) && ui.modflags() == 0) {
+            if ((res != null && res.get() != null) || pag != null || script != null) {
                 dm = ui.grabmouse(this);
                 return true;
             }

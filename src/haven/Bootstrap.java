@@ -28,12 +28,13 @@ package haven;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class Bootstrap implements UI.Receiver, UI.Runner {
-    Session sess;
     String hostname;
     int port;
     Queue<Message> msgs = new LinkedList<Message>();
@@ -70,6 +71,32 @@ public class Bootstrap implements UI.Receiver, UI.Runner {
         Utils.setpref(name + "@" + hostname, val);
     }
 
+    private Message getmsg() throws InterruptedException {
+        Message msg;
+        synchronized(msgs) {
+            while((msg = msgs.poll()) == null)
+                msgs.wait();
+            return(msg);
+        }
+    }
+
+    private static void preferhost(InetAddress[] hosts, SocketAddress prev) {
+        if((prev == null) || !(prev instanceof InetSocketAddress))
+            return;
+        InetAddress host = ((InetSocketAddress)prev).getAddress();
+        Arrays.sort(hosts, (a, b) -> {
+            boolean pa = Utils.eq(a, host), pb = Utils.eq(b, host);
+            if(pa && pb)
+                return(0);
+            else if(pa)
+                return(-1);
+            else if(pb)
+                return(1);
+            else
+                return(0);
+        });
+    }
+
     public Session run(UI ui) throws InterruptedException {
         ui.setreceiver(this);
         ui.bind(ui.root.add(new LoginScreen()), 1);
@@ -82,10 +109,12 @@ public class Bootstrap implements UI.Receiver, UI.Runner {
         String authserver = (Config.authserv == null) ? hostname : Config.authserv;
         int authport = Config.authport;
         AuthClient.Credentials creds = null;
+        Session sess;
         retry:
         do {
             byte[] cookie;
             String acctname, tokenname;
+            SocketAddress authaddr = null;
             if (initcookie != null) {
                 acctname = inituser;
                 cookie = initcookie;
@@ -148,8 +177,8 @@ public class Bootstrap implements UI.Receiver, UI.Runner {
                     }
                 }
                 ui.uimsg(1, "prg", "Authenticating...");
-                try {
-                    AuthClient auth = new AuthClient(authserver, authport);
+                try (AuthClient auth = new AuthClient(authserver, authport)) {
+                    authaddr = auth.address();
                     try {
                         try {
                             acctname = creds.tryauth(auth);
@@ -175,47 +204,41 @@ public class Bootstrap implements UI.Receiver, UI.Runner {
             }
             ui.uimsg(1, "prg", "Connecting...");
             try {
-                sess = new Session(new InetSocketAddress(InetAddress.getByName(hostname), port), acctname, cookie);
+                InetAddress[] addrs = InetAddress.getAllByName(hostname);
+                if(addrs.length == 0)
+                    throw(new UnknownHostException(hostname));
+                preferhost(addrs, authaddr);
+                connect:
+                {
+                    for (int i = 0; i < addrs.length; i++) {
+                        if (i > 0)
+                            ui.uimsg(1, "prg", String.format("Connecting (address %d/%d)...", i + 1, addrs.length));
+                        sess = new Session(new InetSocketAddress(addrs[i], port), acctname, cookie);
+                        while (true) {
+                            synchronized (sess) {
+                                if (sess.state == "") {
+                                    break connect;
+                                } else if (sess.connfailed != 0) {
+                                    String error = sess.connerror;
+                                    if (error == null)
+                                        error = "Connection failed";
+                                    ui.uimsg(1, "error", error);
+                                    break;
+                                }
+                                sess.wait();
+                            }
+                        }
+                    }
+                    ui.uimsg(1, "error", "Could not connect to server");
+                    continue retry;
+                }
             } catch (UnknownHostException e) {
                 ui.uimsg(1, "error", "Could not locate server");
                 continue retry;
             }
-            Thread.sleep(100);
-            while (true) {
-                if (sess.state == "") {
-                    setpref("loginname", loginname);
-                    ui.destroy(1);
-                    break retry;
-                } else if (sess.connfailed != 0) {
-                    String error;
-                    switch (sess.connfailed) {
-                        case 1:
-                            error = "Invalid authentication token";
-                            break;
-                        case 2:
-                            error = "Already logged in";
-                            break;
-                        case 3:
-                            error = "Could not connect to server";
-                            break;
-                        case 4:
-                            error = "This client is too old";
-                            break;
-                        case 5:
-                            error = "Authentication token expired";
-                            break;
-                        default:
-                            error = "Connection failed";
-                            break;
-                    }
-                    ui.uimsg(1, "error", error);
-                    sess = null;
-                    continue retry;
-                }
-                synchronized (sess) {
-                    sess.wait();
-                }
-            }
+            setpref("loginname", loginname);
+            ui.destroy(1);
+            break retry;
         } while (true);
 
         if (creds != null) {

@@ -37,10 +37,12 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -178,8 +180,24 @@ public class SslHelper {
     }
 
     public SSLSocket connect(String host, int port) throws IOException {
-        Socket sk = new HackSocket();
-        sk.connect(new InetSocketAddress(host, port));
+        Socket sk = null;
+        IOException lerr = null;
+        for (InetAddress haddr : InetAddress.getAllByName(host)) {
+            try {
+                sk = new HackSocket();
+                sk.connect(new InetSocketAddress(haddr, port));
+                break;
+            } catch (IOException e) {
+                if (lerr != null)
+                    e.addSuppressed(e);
+                lerr = e;
+            }
+        }
+        if (sk == null) {
+            if (lerr != null)
+                throw (lerr);
+            throw (new UnknownHostException(host));
+        }
         return (connect(sk, host, port, true));
     }
 

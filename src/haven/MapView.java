@@ -58,6 +58,7 @@ import haven.sloth.io.HighlightData;
 import haven.sloth.script.pathfinding.Hitbox;
 import haven.sloth.script.pathfinding.Move;
 import haven.sloth.script.pathfinding.NBAPathfinder;
+import modification.CustomFakeGrid;
 import modification.configuration;
 import modification.dev;
 import modification.resources;
@@ -70,6 +71,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.FloatBuffer;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,6 +88,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
+import java.util.function.DoubleUnaryOperator;
 
 import static haven.DefSettings.DARKMODE;
 import static haven.DefSettings.DRAWGRIDRADIUS;
@@ -122,7 +125,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     private Coord3f camoff = new Coord3f(Coord3f.o);
     public double shake = 0.0;
     public static int plobgran = Utils.getprefi("placegridval", 8);
-    private static final Map<String, Class<? extends Camera>> camtypes = new HashMap<String, Class<? extends Camera>>();
+    private static final Map<String, Class<? extends Camera>> camtypes = new HashMap<>();
     public String tooltip;
     private boolean showgrid = Config.showgridlines;
     private TileOutline gridol;
@@ -1391,8 +1394,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 final Color ldif = darkmode ? Color.BLACK : nightvision ? NVDIFFUSECOL.get() : glob.lightdif;
                 final Color lspc = darkmode ? Color.BLACK : nightvision ? NVSPECCOC.get() : glob.lightspc;
 
-                DirLight light = new DirLight(lamb, ldif, lspc,
-                        Coord3f.o.sadd((float) glob.lightelev, (float) glob.lightang, 1f));
+                DirLight light = new DirLight(lamb, ldif, lspc, Coord3f.o.sadd((float) glob.lightelev, (float) glob.lightang, 1f));
 
                 rl.add(light, null);
                 updsmap(rl, light);
@@ -1429,6 +1431,8 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             rl.add(gobs, null);
         if (placing != null)
             addgob(rl, placing);
+        if (fakeGob != null)
+            addfakegrid(rl, fakeGob);
         synchronized (extradraw) {
             for (Rendered extra : extradraw)
                 rl.add(extra, null);
@@ -2192,6 +2196,8 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         updateSpeed(dt);
         if (placing != null)
             placing.ctick((int) (dt * 1000));
+        if (fakeGob != null)
+            fakeGob.ctick((int) (dt * 1000));
         if (movequeue.size() > 0 && (System.currentTimeMillis() - lastMove > 500) && triggermove()) {
             movingto = movequeue.poll();
             ui.gui.pointer.update(movingto);
@@ -2257,6 +2263,16 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         private Plob(Indir<Resource> res, Message sdt) {
             super(MapView.this.glob, Coord2d.z);
             setattr(new ResDrawable(this, res, sdt));
+            if (ui.mc.isect(rootpos(), sz)) {
+                delay(new Adjust(ui.mc.sub(rootpos()), 0));
+            }
+        }
+
+        /*
+         * FakePlob
+         */
+        public Plob() {
+            super(MapView.this.glob, Coord2d.z);
             if (ui.mc.isect(rootpos(), sz)) {
                 delay(new Adjust(ui.mc.sub(rootpos()), 0));
             }
@@ -2862,6 +2878,8 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         } else if (placing != null) {
             if (placing.lastmc != null)
                 wdgmsg("place", placing.rc.floor(posres), (int) Math.round(placing.a * 32768 / Math.PI), button, ui.modflags());
+        } else if (fakeGob != null) {
+            fakeGob = null;
         } else if ((grab != null) && grab.mmousedown(c, button)) {
         } else {
             if (configuration.autoclick)
@@ -2902,11 +2920,19 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 ((Camera) camera).drag(c);
             } catch (Exception e) {
             }//ignore exceptions here, possible to cause a crash if you change camera WHILE dragging the camera. Why you'd do this, I have no idea, but pls dont crash from it.
-        } else if (placing != null) {
-            if ((placing.lastmc == null) || !placing.lastmc.equals(c)) {
-                delay(placing.new Adjust(c, ui.modflags()));
+        } else if (placing != null || fakeGob != null) {
+            if (placing != null) {
+                if ((placing.lastmc == null) || !placing.lastmc.equals(c)) {
+                    delay(placing.new Adjust(c, ui.modflags()));
+                }
             }
-        } else if (ui.modshift && !ui.modctrl && Config.detailedresinfo) {
+            if (fakeGob != null) {
+                if ((fakeGob.lastmc == null) || !fakeGob.lastmc.equals(c)) {
+                    delay(fakeGob.new Adjust(c, ui.modflags()));
+                }
+            }
+        }
+        if (ui.modshift && !ui.modctrl && Config.detailedresinfo) {
             delay(new Hover(c));
         } else if (ui.modshift && !ui.modctrl && Config.resinfo) {
             long now = System.currentTimeMillis();
@@ -2980,33 +3006,38 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
 
         protected void hit(Coord pc, Coord2d mc, ClickInfo inf) {
-            if (inf != null) {
-                final Optional<Gob> gob = gobFromClick(inf);
-                if (gob.isPresent()) {
-                    updatett(gob.get().details());
-                } else {
-                    try {
-                        final int tile_id = ui.sess.glob.map.gettile_safe(mc.div(MCache.tilesz).floor());
-                        final MCache.Grid grid = ui.sess.glob.map.getgrid(mc.floor(tilesz).div(MCache.cmaps));
-                        final Resource res = ui.sess.glob.map.tilesetr(tile_id);
-                        final String name = ui.sess.glob.map.tiler(tile_id).getClass().getSimpleName();
-                        updatett("Tile: " + res.name + "[" + tile_id + "] of type " + name + "\n[" + grid.id + "]" + "\n" + String.format("(%.3f, %.3f, %d)", mc.x, mc.y, glob.map.getz(mc.div(MCache.tilesz).floor())));
-                    } catch (Exception e) {
-                        lasttt = "";
-                        tt = null;
-                    }
-                }
-            } else {
+            DoubleUnaryOperator offset = (s) -> {
+                int n = 100 * 11;
+                return (s % n < 0 ? s % n + n : s % n);
+            };
+            Runnable tilett = () -> {
                 try {
                     final int tile_id = ui.sess.glob.map.gettile_safe(mc.div(MCache.tilesz).floor());
                     final MCache.Grid grid = ui.sess.glob.map.getgrid(mc.floor(tilesz).div(MCache.cmaps));
                     final Resource res = ui.sess.glob.map.tilesetr(tile_id);
                     final String name = ui.sess.glob.map.tiler(tile_id).getClass().getSimpleName();
-                    updatett("Tile: " + res.name + "[" + tile_id + "] of type " + name + "\n[" + grid.id + "]" + "\n" + String.format("(%.3f, %.3f, %d)", mc.x, mc.y, glob.map.getz(mc.div(MCache.tilesz).floor())));
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Tile: ").append(res.name).append("[").append(tile_id).append("] of type ").append(name).append("\n");
+                    sb.append("GridID: ").append(grid.id).append("\n");
+                    sb.append("Position: ").append(String.format("(%.3f, %.3f, %.3f)", mc.x, mc.y, glob.map.getcz(mc))).append("\n");
+                    double ox = offset.applyAsDouble(mc.x);
+                    double oy = offset.applyAsDouble(mc.y);
+                    sb.append("Offset: ").append(String.format("(%.3f x %.3f) (%.0f x %.0f)", ox, oy, Math.floor(ox / 11.0), Math.floor(oy / 11.0))).append("\n");
+                    updatett(sb.toString());
                 } catch (Exception e) {
                     lasttt = "";
                     tt = null;
                 }
+            };
+            if (inf != null) {
+                final Optional<Gob> gob = gobFromClick(inf);
+                if (gob.isPresent()) {
+                    updatett(gob.get().details());
+                } else {
+                    tilett.run();
+                }
+            } else {
+                tilett.run();
             }
         }
     }
@@ -3031,9 +3062,13 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     public boolean mousewheel(Coord c, int amount) {
         if ((grab != null) && grab.mmousewheel(c, amount))
             return (true);
-        if ((placing != null) && placing.adjust.rotate(placing, amount, ui.modflags()))
-            return (true);
-        return (((Camera) camera).wheel(c, amount));
+        if (placing != null || fakeGob != null) {
+            boolean pr = placing != null && placing.adjust.rotate(placing, amount, ui.modflags());
+            boolean fr = fakeGob != null && fakeGob.adjust.rotate(fakeGob, amount, ui.modflags());
+            if (pr || fr)
+                return (true);
+        }
+        return (camera.wheel(c, amount));
     }
 
     public boolean drop(final Coord cc, final Coord ul) {
@@ -3367,7 +3402,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
     }
 
-    private Map<String, Console.Command> cmdmap = new TreeMap<String, Console.Command>();
+    private Map<String, Console.Command> cmdmap = new TreeMap<>();
 
     {
         cmdmap.put("cam", (cons, args) -> {
@@ -3383,12 +3418,10 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 }
             }
         });
-        Console.setscmd("placegrid", new Console.Command() {
-            public void run(Console cons, String[] args) {
-                if ((plobgran = Integer.parseInt(args[1])) < 0)
-                    plobgran = 0;
-                Utils.setprefi("placegridval", plobgran);
-            }
+        Console.setscmd("placegrid", (cons, args) -> {
+            if ((plobgran = Integer.parseInt(args[1])) < 0)
+                plobgran = 0;
+            Utils.setprefi("placegridval", plobgran);
         });
         cmdmap.put("whyload", (cons, args) -> {
             Loading l = lastload;
@@ -3614,5 +3647,24 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             }
         }
         return Optional.empty();
+    }
+
+
+    public Plob fakeGob = null;
+    
+    public void addfakegrid(RenderList rl, Gob gob) {
+        addgob(rl, gob);
+
+        if (CustomFakeGrid.needUpdate) {
+            gob.ols.clear();
+            CustomFakeGrid.update(gob);
+            for (int i = 0; i < CustomFakeGrid.boxList.size(); i++) {
+                CustomFakeGrid box = CustomFakeGrid.boxList.get(i);
+                int fakeid = ("fakegrid" + i).hashCode();
+                if (gob.findol(fakeid) == null) {
+                    gob.ols.add(new Gob.Overlay(fakeid, box));
+                }
+            }
+        }
     }
 }

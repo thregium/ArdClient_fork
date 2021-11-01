@@ -27,6 +27,7 @@
 package haven;
 
 import modification.Decal;
+import modification.Fixedplob;
 
 import java.lang.reflect.Constructor;
 import java.util.LinkedList;
@@ -168,6 +169,9 @@ public abstract class Sprite implements Rendered {
         if (res.name.startsWith("gfx/terobjs/items/decal-") || res.name.startsWith("gfx/terobjs/items/parchment-decal")) {
             Factory f = new Decal();
             return (f.create(owner, res, sdt));
+        }
+        if (res.name.equals("ui/plob-fdir")) {
+            return (new Fixedplob(owner, res, sdt));
         }
         {
             Factory f = res.getcode(Factory.class, false);

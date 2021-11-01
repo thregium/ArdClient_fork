@@ -1,4 +1,9 @@
 Details in https://github.com/Cediner/ArdClient/commits/
+2021.11.02
+> Fake bound and offset tooltip info
+> Fix
+~
+
 2021.09.25
 > Vanilla changes
 ~

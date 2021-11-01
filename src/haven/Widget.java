@@ -59,7 +59,7 @@ public class Widget {
     public Widget next, prev, child, lchild, parent;
     public boolean focustab = false, focusctl = false, hasfocus = false, visible = true;
     private boolean attached = false;
-    private boolean canfocus = false, autofocus = false;
+    public boolean canfocus = false, autofocus = false;
     public boolean canactivate = false, cancancel = false;
     public Widget focused;
     public Indir<Resource> cursor = null;

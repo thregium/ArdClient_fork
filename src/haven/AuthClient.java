@@ -31,17 +31,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
 
 public class AuthClient implements Closeable {
     private static final SslHelper ssl;
-    private Socket sk;
-    private InputStream skin;
-    private OutputStream skout;
+    private final Socket sk;
+    private final InputStream skin;
+    private final OutputStream skout;
 
     static {
         ssl = new SslHelper();
@@ -56,6 +56,10 @@ public class AuthClient implements Closeable {
         sk = ssl.connect(host, port);
         skin = sk.getInputStream();
         skout = sk.getOutputStream();
+    }
+
+    public SocketAddress address() {
+        return (sk.getRemoteSocketAddress());
     }
 
     private static byte[] digest(byte[] pw) {

@@ -1,7 +1,6 @@
 package haven;
 
 import haven.sloth.gob.Type;
-import haven.sloth.script.pathfinding.Hitbox;
 import haven.sloth.util.ResHashMap;
 import modification.configuration;
 
@@ -99,9 +98,13 @@ public class GobHitbox extends Sprite {
         }
 
         public BBox(Coord ac, Coord bc) {
-            this.points = new Coord2d[]{
-                    new Coord2d(ac.x, -ac.y), new Coord2d(bc.x, -ac.y), new Coord2d(bc.x, -bc.y), new Coord2d(ac.x, -bc.y)
-            };
+            this.points = new Coord2d[]{new Coord2d(ac.x, -ac.y), new Coord2d(bc.x, -ac.y), new Coord2d(bc.x, -bc.y), new Coord2d(ac.x, -bc.y)};
+        }
+
+        public BBox(Coord2d ac) {
+            double x = ac.x / 2.0;
+            double y = ac.y / 2.0;
+            this.points = new Coord2d[]{new Coord2d(x, -y), new Coord2d(-x, -y), new Coord2d(-x, y), new Coord2d(x, y)};
         }
     }
 

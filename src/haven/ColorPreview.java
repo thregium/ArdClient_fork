@@ -53,14 +53,14 @@ public class ColorPreview extends Widget {
     }
 
     public boolean mouseup(Coord c, int btn) {
-        if (btn == 1 && cp == null && callback != null) {
+        if (btn == 1 && cp == null) {
             cp = new ColorPicker(col, (color -> {
                 cp = null;
                 col = color;
-                tooltip = RichText.Parser.quote(String.format((this.name.equals("") ? "" : this.name +"\n") + "Red: %d\nGreen: %d\nBlue: %d\nAlpha: %d",
-                        col.getRed(), col.getGreen(), col.getBlue(), col.getAlpha()));
+                tooltip = RichText.Parser.quote(String.format((this.name.equals("") ? "" : this.name +"\n") + "Red: %d\nGreen: %d\nBlue: %d\nAlpha: %d", col.getRed(), col.getGreen(), col.getBlue(), col.getAlpha()));
                 tooltip = RichText.render((String) tooltip, 200);
-                callback.accept(col);
+                if (callback != null)
+                    callback.accept(col);
             }));
 
             if (ui.gui != null) {

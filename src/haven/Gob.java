@@ -71,6 +71,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.DoubleUnaryOperator;
 
 public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.HasPose {
     public int cropstgmaxval = 0;
@@ -700,6 +701,13 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 
         sb.append("Angle: ").append(Math.toDegrees(a)).append("\n");
         sb.append("Position: ").append(String.format("(%.3f, %.3f, %.3f)", getc().x, getc().y, getc().z)).append("\n");
+        DoubleUnaryOperator offset = (s) -> {
+            int n = 100 * 11;
+            return (s % n < 0 ? s % n + n : s % n);
+        };
+        double ox = offset.applyAsDouble(getc().x);
+        double oy = offset.applyAsDouble(getc().y);
+        sb.append("Offset: ").append(String.format("(%.3f x %.3f) (%.0f x %.0f)", ox, oy, Math.floor(ox / 11.0), Math.floor(oy / 11.0))).append("\n");
         if (configuration.moredetails) {
             sb.append("Layers: ").append("\n");
             for (Resource.Layer l : getres().layers()) {
@@ -1193,7 +1201,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             }
             if (configuration.showtreeberry && (type == Type.TREE || type == Type.BUSH)) {
                 int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
-                if (stage == 32 || stage == 48) {
+                if (stage == 16 || stage == 32 || stage == 48) {
                     rl.prepc(Rendered.eyesort);
 //                    rl.prepc(Rendered.deflt);
 //                    rl.prepc(Rendered.first);

@@ -71,6 +71,7 @@ import haven.purus.StockpileFiller2;
 import haven.purus.TroughFiller;
 import haven.res.gfx.fx.floatimg.DamageText;
 import haven.sloth.util.ObservableCollection;
+import modification.CustomFakeGrid;
 import modification.configuration;
 
 import java.awt.Color;
@@ -80,6 +81,7 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -168,7 +170,7 @@ public class MenuGrid extends Widget {
         public void use(Interaction iact) {
             Resource.AButton btn = res.layer(Resource.action);
             if (btn != null) {
-                use();
+                pag.use(iact);
             }
         }
 
@@ -265,7 +267,8 @@ public class MenuGrid extends Widget {
         public Indir<Tex> img;
         public int newp;
         public Object[] rawinfo = {};
-        private final Consumer<Pagina> onUse;
+//        private final Consumer<Pagina> onUse;
+        private final Map<Integer, Consumer<Pagina>> onUseMap = new HashMap<>();
 
         public static enum State {
             ENABLED, DISABLED {
@@ -283,14 +286,23 @@ public class MenuGrid extends Widget {
             this.scm = scm;
             this.res = res;
             state(State.ENABLED);
-            this.onUse = (me) -> scm.wdgmsg("act", (Object[]) res().layer(Resource.action).ad);
+//            this.onUse = (me) -> scm.wdgmsg("act", (Object[]) res().layer(Resource.action).ad);
+            onUseMap.put(0, (me) -> scm.wdgmsg("act", (Object[]) res().layer(Resource.action).ad));
         }
 
         public Pagina(MenuGrid scm, Indir<Resource> res, final Consumer<Pagina> onUse) {
             this.scm = scm;
             this.res = res;
             state(State.ENABLED);
-            this.onUse = onUse;
+//            this.onUse = onUse;
+            onUseMap.put(0, onUse);
+        }
+
+        public Pagina(MenuGrid scm, Indir<Resource> res, final Map<Integer, Consumer<Pagina>> onUseMap) {
+            this.scm = scm;
+            this.res = res;
+            state(State.ENABLED);
+            this.onUseMap.putAll(onUseMap);
         }
 
 
@@ -303,7 +315,18 @@ public class MenuGrid extends Widget {
         }
 
         public void use() {
-            onUse.accept(this);
+//            onUse.accept(this);
+            use(0);
+        }
+
+        public void use(Interaction iact) {
+            use(iact.modflags);
+        }
+
+        public void use(int i) {
+            Consumer<Pagina> onUse = onUseMap.get(i);
+            if (onUse != null)
+                onUse.accept(this);
         }
 
         private PagButton button = null;
@@ -400,15 +423,13 @@ public class MenuGrid extends Widget {
         return paginafor(Resource.remote().load(name));
     }
 
-    public static Comparator<Pagina> sorter = new Comparator<Pagina>() {
-        public int compare(Pagina a, Pagina b) {
-            AButton aa = a.act(), ab = b.act();
-            if ((aa.ad.length == 0) && (ab.ad.length > 0))
-                return (-1);
-            if ((aa.ad.length > 0) && (ab.ad.length == 0))
-                return (1);
-            return (aa.name.compareTo(ab.name));
-        }
+    public static Comparator<Pagina> sorter = (a, b) -> {
+        AButton aa = a.act(), ab = b.act();
+        if ((aa.ad.length == 0) && (ab.ad.length > 0))
+            return (-1);
+        if ((aa.ad.length > 0) && (ab.ad.length == 0))
+            return (1);
+        return (aa.name.compareTo(ab.name));
     };
 
 
@@ -508,12 +529,16 @@ public class MenuGrid extends Widget {
             super(scm, res, onUse);
             this.key = key;
         }
+
+        public SpecialPagina(MenuGrid scm, String key, Indir<Resource> res, final Map<Integer, Consumer<Pagina>> onUseMap) {
+            super(scm, res, onUseMap);
+            this.key = key;
+        }
     }
 
     private void addSpecial(final SpecialPagina pag) {
         paginae.add(pag);
         specialpag.put(pag.key, pag);
-
     }
 
     public MenuGrid() {
@@ -1206,6 +1231,12 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "modification::builderwindow",
                 Resource.local().load("custom/paginae/default/wnd/builderwindow"),
                 (pag) -> ui.gui.toggleOverlaySettings()));
+        addSpecial(new SpecialPagina(this, "modification::fakegrid",
+                Resource.local().load("custom/paginae/default/wnd/fakegrid"),
+                new HashMap<Integer, Consumer<Pagina>>() {{
+                    put(0, (pag) -> CustomFakeGrid.toggle(ui.gui));
+                    put(1, (pag) -> CustomFakeGrid.options(ui.gui));
+                }}));
     }
 
     protected void updlayout() {
