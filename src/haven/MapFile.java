@@ -62,7 +62,7 @@ public class MapFile {
             new Coord(0, -1), new Coord(1, 0), new Coord(0, 1), new Coord(-1, 0),
             new Coord(1, -1), new Coord(1, 1), new Coord(-1, 1), new Coord(-1, -1),
     };
-    public static boolean debug = false;
+    public static boolean debug = Utils.getprefb("mapdebug", false);
     private static MapFile instance = null;
     public final ResCache store;
     public final String filename;
@@ -2327,7 +2327,8 @@ public class MapFile {
     }
 
     public static void warn(Throwable cause, String msg) {
-        Debug.log.printf("mapfile warning: %s\n", msg);
+        if (debug)
+            Debug.log.printf("mapfile warning: %s\n", msg);
         new Warning(cause, msg).issue();
     }
 
