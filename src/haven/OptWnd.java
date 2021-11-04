@@ -1909,6 +1909,20 @@ public class OptWnd extends Window {
                         return Text.render("Bad camera scrolling sensitivity : " + val).tex();
                     }
                 });
+        appender.addRow(new Label("Minimal distance for bad/top camera: "),
+                new HSlider(200, -200, 200, (int) configuration.badcamdistminimaldefault) {
+                    @Override
+                    public void changed() {
+                        configuration.badcamdistminimaldefault = val;
+                        Utils.setpreff("badcamdistminimaldefault", configuration.badcamdistminimaldefault);
+                    }
+
+                    @Override
+                    public Object tooltip(Coord c0, Widget prev) {
+                        return Text.render("Minimal distance for free camera : " + configuration.badcamdistminimaldefault).tex();
+                    }
+                }
+        );
         appender.addRow(new CheckBox("Lock bad camera elevator") {
             {
                 a = configuration.badcamelevlock;
@@ -3628,22 +3642,6 @@ public class OptWnd extends Window {
                 });
         appender.add(new IndirCheckBox("Don't close flowermenu on clicks", BUGGEDMENU));
         appender.add(new IndirCheckBox("Close button to each flowermenu", CLOSEFORMENU));
-
-        appender.add(new Label("Camera"));
-        appender.addRow(new Label("Minimal distance for free camera: "),
-                new HSlider(200, -200, 200, (int) configuration.badcamdistminimaldefault) {
-                    @Override
-                    public void changed() {
-                        configuration.badcamdistminimaldefault = val;
-                        Utils.setpreff("badcamdistminimaldefault", configuration.badcamdistminimaldefault);
-                    }
-
-                    @Override
-                    public Object tooltip(Coord c0, Widget prev) {
-                        return Text.render("Minimal distance for free camera : " + configuration.badcamdistminimaldefault).tex();
-                    }
-                }
-        );
 
         modification.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
         modification.pack();

@@ -548,7 +548,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
         private void chfield(float nf) {
             tfield = nf;
-            tfield = Math.max(tfield, 50);
+            tfield = Math.max(tfield, configuration.badcamdistminimaldefault);
         }
 
         public boolean wheel(Coord c, int amount) {
