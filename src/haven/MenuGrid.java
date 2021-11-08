@@ -163,14 +163,21 @@ public class MenuGrid extends Widget {
             return (res.layer(Resource.action).hk);
         }
 
+        Interaction fix = null;
         public void use() {
-            pag.use();
+            if (fix != null)
+                pag.use(fix);
+            else
+                pag.use();
         }
 
         public void use(Interaction iact) {
             Resource.AButton btn = res.layer(Resource.action);
             if (btn != null) {
-                pag.use(iact);
+//                pag.use(iact);
+                fix = iact;
+                use();
+                fix = null;
             }
         }
 
@@ -314,13 +321,17 @@ public class MenuGrid extends Widget {
             return (res().layer(Resource.action));
         }
 
+        int fix = 0;
         public void use() {
 //            onUse.accept(this);
-            use(0);
+            use(fix);
         }
 
         public void use(Interaction iact) {
-            use(iact.modflags);
+//            use(iact.modflags);
+            fix = iact.modflags;
+            use();
+            fix = 0;
         }
 
         public void use(int i) {

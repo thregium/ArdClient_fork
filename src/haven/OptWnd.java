@@ -1919,7 +1919,7 @@ public class OptWnd extends Window {
 
                     @Override
                     public Object tooltip(Coord c0, Widget prev) {
-                        return Text.render("Minimal distance for free camera : " + configuration.badcamdistminimaldefault).tex();
+                        return Text.render("Minimal distance for bad/top camera : " + configuration.badcamdistminimaldefault).tex();
                     }
                 }
         );
