@@ -30,17 +30,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class RadioGroup {
-    private Widget parent;
-    private ArrayList<RadioButton> btns;
-    private HashMap<String, RadioButton> map;
-    private HashMap<RadioButton, String> rmap;
+    private final Widget parent;
+    private final ArrayList<RadioButton> btns;
+    private final HashMap<String, RadioButton> map;
+    private final HashMap<RadioButton, String> rmap;
     private RadioButton checked;
 
     public RadioGroup(Widget parent) {
         this.parent = parent;
-        btns = new ArrayList<RadioButton>();
-        map = new HashMap<String, RadioButton>();
-        rmap = new HashMap<RadioButton, String>();
+        btns = new ArrayList<>();
+        map = new HashMap<>();
+        rmap = new HashMap<>();
     }
 
     public class RadioButton extends CheckBox {
@@ -49,7 +49,7 @@ public class RadioGroup {
         }
 
         public boolean mousedown(Coord c, int button) {
-            if (a || button != 1 || c.y < 16 || c.y > sz.y - 10)
+            if (a || button != 1)
                 return (false);
             check(this);
             return (true);
