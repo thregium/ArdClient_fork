@@ -1511,7 +1511,7 @@ public class MenuGrid extends Widget {
 
         if (togglestuff) {
             if (Config.enabletracking && !GameUI.trackon) {
-                wdgmsg("act", new Object[]{"tracking"});
+                wdgmsg("act", "tracking");
                 ui.gui.trackautotgld = true;
             }
 //            if (Config.autoconnectarddiscord && !discordconnected) {
@@ -1528,11 +1528,14 @@ public class MenuGrid extends Widget {
 
             if (Config.enablecrime && !GameUI.crimeon) {
                 ui.gui.crimeautotgld = true;
-                wdgmsg("act", new Object[]{"crime"});
+                wdgmsg("act", "crime");
             }
             if (Config.enableswimming && !GameUI.swimon) {
                 ui.gui.swimautotgld = true;
-                wdgmsg("act", new Object[]{"swim"});
+                wdgmsg("act", "swim");
+            }
+            if (Config.enablesiege) {
+                wdgmsg("act", "siegeptr");
             }
             if (Config.autowindows.get("Belt").selected) {
                 WItem l = ui.gui.getequipory().quickslots[5];

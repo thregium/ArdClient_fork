@@ -209,6 +209,7 @@ public class Config {
     public static boolean autoconnectdiscord = Utils.getprefb("autoconnectdiscord", false);
     public static boolean autoconnectarddiscord = Utils.getprefb("autoconnectarddiscord", false);
     public static boolean enablecrime = Utils.getprefb("enablecrime", false);
+    public static boolean enablesiege = Utils.getprefb("enablesiege", true);
     public static boolean resinfo = Utils.getprefb("resinfo", true);
     public static boolean detailedresinfo = Utils.getprefb("detailedresinfo", false);
     public static boolean showanimalrad = Utils.getprefb("showanimalrad", true);

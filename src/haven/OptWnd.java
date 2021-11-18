@@ -1635,6 +1635,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("Enable siege pointers on login", val -> Utils.setprefb("enablesiege", Config.enablesiege = val), Config.enablesiege));
         appender.add(new CheckBox("Shoo animals with Ctrl+Left Click") {
             {
                 a = Config.shooanimals;
