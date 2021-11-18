@@ -126,7 +126,7 @@ public class BeltWnd extends MovableWidget {
 
         private void setScript(PBotScriptlistItem script) {
             try {
-                data.add(slot, "script:" + script.scriptFile.getCanonicalPath().substring(System.getProperty("user.dir").length() + 1));
+                data.add(slot, "script:" + script.scriptFile.toFile().getCanonicalPath().substring(System.getProperty("user.dir").length() + 1));
                 res = null;
                 tt = null;
                 this.script = script;

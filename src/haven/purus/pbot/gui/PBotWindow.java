@@ -7,7 +7,6 @@ import haven.purus.pbot.PBotError;
 import haven.purus.pbot.PBotScriptmanager;
 
 public class PBotWindow extends Window {
-
     private String id;
     private boolean closed = false;
 
@@ -31,14 +30,11 @@ public class PBotWindow extends Window {
         PBotButton button = new PBotButton(width, label) {
             @Override
             public void click() {
-                Thread t = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            PBotScriptmanager.getScript(id).context.eval("js", name + "();");
-                        } catch (Exception e) {
-                            PBotError.handleException(ui, e);
-                        }
+                Thread t = new Thread(() -> {
+                    try {
+                        PBotScriptmanager.getScript(id).execute(name, "();");
+                    } catch (Exception e) {
+                        PBotError.handleException(ui, e);
                     }
                 });
                 t.start();
@@ -61,19 +57,10 @@ public class PBotWindow extends Window {
      */
     public PBotCheckbox addCheckbox(String name, String label, boolean initialState, int x, int y) {
         PBotCheckbox checkbox = new PBotCheckbox(label, initialState) {
-            {
-                a = initialState;
-            }
-
             @Override
             public void set(boolean val) {
                 a = val;
-                Thread t = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        PBotScriptmanager.getScript(id).context.eval("js", name + "(" + (val ? "true" : "false") + ");");
-                    }
-                });
+                Thread t = new Thread(() -> PBotScriptmanager.getScript(id).execute(name, "(" + (val ? "true" : "false") + ");"));
                 t.start();
             }
         };
@@ -129,18 +116,15 @@ public class PBotWindow extends Window {
 
     @Override
     public void close() {
-        reqdestroy();
-        closed = true;
+        closeWindow();
     }
 
     @Override
     public void wdgmsg(Widget sender, String msg, Object... args) {
         if (sender == cbtn) {
-            reqdestroy();
-            closed = true;
+            closeWindow();
         } else {
             super.wdgmsg(sender, msg, args);
         }
     }
-
 }

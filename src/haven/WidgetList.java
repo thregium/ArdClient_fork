@@ -8,7 +8,7 @@ public class WidgetList<T extends Widget> extends ListWidget<T> {
     public static final IBox BOX = new IBox("gfx/hud/box", "tl", "tr", "bl", "br", "extvl", "extvr", "extht", "exthb");
     public static final Coord BTLOFF = BOX.btloff();
     protected final List<T> list = new LinkedList<>();
-    protected final Scrollbar sb;
+    public final Scrollbar sb;
     protected final Coord itemsz, widesz;
     protected final int h;
     private Color bgcolor = new Color(0, 0, 0, 96);

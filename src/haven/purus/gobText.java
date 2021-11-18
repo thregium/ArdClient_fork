@@ -4,6 +4,7 @@ import haven.Camera;
 import haven.Coord;
 import haven.GLState;
 import haven.GOut;
+import haven.Gob;
 import haven.Location;
 import haven.Matrix4f;
 import haven.PView;
@@ -25,9 +26,17 @@ public class gobText extends Sprite {
     private Location.Chain loc;
     private Camera camp;
     private int height;
+    private Color color = Color.WHITE;
 
     public gobText(String text, int height) {
         super(null, null);
+        update(text);
+        this.height = height;
+    }
+
+    public gobText(Gob gob, String text, Color color, int height) {
+        super(gob, null);
+        this.color = color;
         update(text);
         this.height = height;
     }
@@ -52,11 +61,10 @@ public class gobText extends Sprite {
 
     public void update(String text) {
         String str = text;
-        tex = Text.render(text, Color.white).tex();
+        tex = Text.render(text, color).tex();
     }
 
     public Object staticp() {
         return CONSTANS;
     }
-
 }

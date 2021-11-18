@@ -4,16 +4,17 @@ import haven.UI;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class PBotScriptmanager {
-
-    public static HashMap<String, PBotScript> scripts = new HashMap<String, PBotScript>();
+    public static Map<String, PBotScript> scripts = new HashMap<>();
     public UI ui;
 
     public static void startScript(UI ui, File scriptFile) {
         String id = UUID.randomUUID().toString();
-        PBotScript script = new PBotScript(ui, scriptFile, id);
+        String ext = scriptFile.getName().substring(scriptFile.getName().lastIndexOf("."));
+        PBotScript script = (ext.equalsIgnoreCase(".py")) ? new PBotScriptPy(ui, scriptFile, id) : new PBotScriptJS(ui, scriptFile, id);
         scripts.put(id, script);
         script.start();
     }

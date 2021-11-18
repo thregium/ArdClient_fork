@@ -96,7 +96,7 @@ public class Equipory extends Widget implements DTarget {
     private final Avaview ava;
     AttrBonusesWdg bonuses;
     public WItem[] quickslots = new WItem[ecoords.length];
-    WItem[] slots = new WItem[ecoords.length];
+    public WItem[] slots = new WItem[ecoords.length];
 
     @RName("epry")
     public static class $_ implements Factory {

@@ -9,8 +9,8 @@ import static haven.TabStrip.frame;
 
 public class CraftWindow extends GameUI.Hidewnd {
     private final TabStrip<Pagina> tabStrip;
-    private final Map<String, TabStrip.Button<Pagina>> tabs = new HashMap<String, TabStrip.Button<Pagina>>();
-    private Widget makeWidget;
+    private final Map<String, TabStrip.Button<Pagina>> tabs = new HashMap<>();
+    public Widget makeWidget;
 
     public CraftWindow() {
         super(Coord.z, "Crafting");

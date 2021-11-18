@@ -2,7 +2,7 @@
 
 <project name="hafen" default="deftgt">
     <property name="name" value="ArdClient"/>
-    <property name="version" value="2021.11.02"/>
+    <property name="version" value="2021.11.18"/>
 
     <target name="build-env">
         <mkdir dir="build"/>
@@ -53,6 +53,7 @@
                 <pathelement path="lib/graaljs.jar"/>
                 <pathelement path="lib/tregex.jar"/>
                 <pathelement path="lib/truffle-api.jar"/>
+                <pathelement path="lib/py4j-0.10.9.2.jar"/>
 
                 <pathelement path="lib/abcl.jar"/>
                 <pathelement path="lib/luaj-jse-3.0.2.jar"/>
@@ -93,7 +94,7 @@
             <manifest>
                 <attribute name="Main-Class" value="haven.MainFrame"/>
                 <attribute name="Class-Path" value="jogl.jar gluegen-rt.jar amber-res.jar custom-res.jar builtin-res.jar hafen-res.jar l10n.jar HavenDiscord.jar rxjava-1.1.5.jar rxjava-1.1.5-javadoc.jar sqlite-jdbc-3.30.1.jar flogger-0.3.1.jar flogger-system-backend-0.3.1.jar
-jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar luaj-jse-3.0.2.jar abcl.jar abcl-contrib.jar javacord-api-3.0.4.jar javacord-core-3.0.4.jar"/>
+jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar luaj-jse-3.0.2.jar abcl.jar abcl-contrib.jar javacord-api-3.0.4.jar javacord-core-3.0.4.jar py4j-0.10.9.2.jar"/>
             </manifest>
         </jar>
         <chmod file="build/hafen.jar" perm="a+x"/>
@@ -141,7 +142,14 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar luaj-jse-3
         </copy>
     </target>
 
-    <target name="jars" depends="build-env, jar, res-jar, l10n-jar, custom-jar, scripts, modification">
+    <target name="bin" depends="build-env">
+        <mkdir dir="bin"/>
+        <copy todir="build/bin">
+            <fileset dir="bin"/>
+        </copy>
+    </target>
+
+    <target name="jars" depends="build-env, jar, res-jar, l10n-jar, custom-jar, scripts, modification, bin">
         <copy todir="build">
             <fileset dir="lib">
                 <include name="jogl.jar"/>
@@ -160,6 +168,7 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar luaj-jse-3
                 <include name="jackson-core.jar"/>
                 <include name="tregex.jar"/>
                 <include name="truffle-api.jar"/>
+                <include name="py4j-0.10.9.2.jar"/>
 
                 <include name="abcl.jar"/>
                 <include name="luaj-jse-3.0.2.jar"/>
@@ -178,6 +187,7 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar luaj-jse-3
         <delete dir="build/custom-res"/>
         <delete dir="build/modification"/>
         <delete dir="build/scripts"/>
+        <delete dir="build/bin"/>
     </target>
 
     <target name="jars_clean" depends="clean-classes, jars"/>
@@ -261,6 +271,7 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar luaj-jse-3
                 <include name="flogger-system-backend-0.3.1.jar"/>
                 <include name="sqlite-jdbc-3.30.1.jar"/>
                 <include name="bcprov-jdk15on-160.jar"/>
+                <include name="py4j-0.10.9.2.jar"/>
 
                 <include name="abcl.jar"/>
                 <include name="luaj-jse-3.0.2.jar"/>
@@ -290,6 +301,9 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar luaj-jse-3
         </copy>
         <copy todir="update/modification">
             <fileset dir="modification/"/>
+        </copy>
+        <copy todir="update/bin">
+            <fileset dir="bin/"/>
         </copy>
     </target>
 

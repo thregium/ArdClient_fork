@@ -9,6 +9,7 @@ public class PBotCheckbox extends CheckBox {
      */
     public PBotCheckbox(String lbl, boolean val) {
         super(lbl, false);
+        setValue(val);
     }
 
     /**

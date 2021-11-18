@@ -71,7 +71,6 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.FloatBuffer;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -3651,7 +3650,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
 
     public Plob fakeGob = null;
-    
+
     public void addfakegrid(RenderList rl, Gob gob) {
         addgob(rl, gob);
 

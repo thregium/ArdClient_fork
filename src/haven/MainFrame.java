@@ -28,6 +28,7 @@ package haven;
 
 import com.google.common.flogger.FluentLogger;
 import haven.purus.pbot.PBotDiscord;
+import haven.purus.pbot.Py4j;
 import modification.configuration;
 
 import javax.swing.JOptionPane;
@@ -486,12 +487,8 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
             }
         });
         ThreadGroup g = hg;
-
-        Thread main = new HackThread(g, new Runnable() {
-            public void run() {
-                main2(args);
-            }
-        }, "Haven main thread");
+        Py4j.start();
+        Thread main = new HackThread(g, () -> main2(args), "Haven main thread");
         main.start();
     }
 
