@@ -70,7 +70,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import static haven.Action.TOGGLE_CHARACTER;
 import static haven.Action.TOGGLE_EQUIPMENT;
@@ -96,8 +95,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public GobIcon.Settings iconconf;
     public Fightview fv;
     public Fightsess fs;
-    private List<Widget> meters = new LinkedList<Widget>();
-    private List<Widget> cmeters = new LinkedList<Widget>();
+    private List<Widget> meters = new LinkedList<>();
+    private List<Widget> cmeters = new LinkedList<>();
     private Text lastmsg;
     private double msgtime;
     public Window invwnd, equwnd;
@@ -115,11 +114,11 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public BuddyWnd buddies;
     public Equipory equipory;
     private Zergwnd zerg;
-    public final Collection<Polity> polities = new ArrayList<Polity>();
+    public final Collection<Polity> polities = new ArrayList<>();
     public HelpWnd help;
     public OptWnd opts;
-    public Collection<DraggedItem> hand = new LinkedList<DraggedItem>();
-    private Collection<DraggedItem> handSave = new LinkedList<DraggedItem>();
+    public Collection<DraggedItem> hand = new LinkedList<>();
+    private Collection<DraggedItem> handSave = new LinkedList<>();
     private long DrinkTimer = 0, StarvationAlertDelay = 0, SwimTimer;
     public WItem vhand;
     public ChatUI chat;
@@ -127,7 +126,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     private int saferadius = 1;
     private int dangerradius = 1;
     public ChatUI.Channel syslog;
-    public ChatUI.Channel botlog;
+    public ChatUI.Channel debuglog;
     public Window hidden, deleted, alerted, highlighted, overlayed, gobspawner;
     public double prog = -1;
     private boolean afk = false;
@@ -288,7 +287,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
                     }
                 }
                 for (String ln : lines)
-                    syslog.append(ln, Color.WHITE);
+                    debuglog.append(ln, Color.WHITE);
             }
 
             public void close() {
@@ -339,7 +338,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         if (Config.autowindows.get("Chat") != null && Config.autowindows.get("Chat").selected)
             chatwnd.hide();
         syslog = chat.add(new ChatUI.Log("System"));
-        botlog = chat.add(new ChatUI.BotChat());
+        debuglog = chat.add(new ChatUI.DebugChat());
         opts.c = sz.sub(opts.sz).div(2);
         pointer = add(new MapPointer());
         livestockwnd = add(new haven.livestock.LivestockManager(), new Coord(0, sz.y - 200));
@@ -2191,15 +2190,15 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         msg(msg, color, color);
     }
 
-    public void botmsg(String msg, Color color, Color logcol) {
+    public void debugmsg(String msg, Color color, Color logcol) {
         msgtime = Utils.rtime();
         lastmsg = msgfoundry.render(msg, color);
-        botlog.append(msg, logcol);
+        debuglog.append(msg, logcol);
         Audio.play(msgsfx);
     }
 
-    public void botmsg(String msg, Color color) {
-        botmsg(msg, color, color);
+    public void debugmsg(String msg, Color color) {
+        debugmsg(msg, color, color);
     }
 
     private static final Resource errsfx = Resource.local().loadwait("sfx/error");

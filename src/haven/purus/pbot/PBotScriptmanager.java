@@ -1,6 +1,7 @@
 package haven.purus.pbot;
 
 import haven.UI;
+import modification.configuration;
 
 import java.io.File;
 import java.util.HashMap;
@@ -8,8 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class PBotScriptmanager {
-    public static Map<String, PBotScript> scripts = new HashMap<>();
-    public UI ui;
+    public static final Map<String, PBotScript> scripts = new HashMap<>();
 
     public static void startScript(UI ui, File scriptFile) {
         String id = UUID.randomUUID().toString();
@@ -17,9 +17,21 @@ public class PBotScriptmanager {
         PBotScript script = (ext.equalsIgnoreCase(".py")) ? new PBotScriptPy(ui, scriptFile, id) : new PBotScriptJS(ui, scriptFile, id);
         scripts.put(id, script);
         script.start();
+        configuration.classMaker(() -> ui.gui.PBotScriptlist.threadsUpdate());
     }
 
     public static PBotScript getScript(String id) {
         return scripts.get(id);
+    }
+
+    public static void closeScript(PBotScript script) {
+        if (script != null) {
+            for (Map.Entry<String, PBotScript> item : scripts.entrySet())
+                if (item.getValue().equals(script)) {
+                    scripts.remove(item.getKey());
+                    break;
+                }
+            configuration.classMaker(() -> script.ui.gui.PBotScriptlist.removeFromList(script));
+        }
     }
 }

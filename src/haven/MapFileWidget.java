@@ -833,7 +833,7 @@ public class MapFileWidget extends Widget {
                     file.export(errors, out, MapFile.ExportFilter.all, prog);
                 }
             } catch (IOException e) {
-                e.printStackTrace(Debug.log);
+                e.printStackTrace(ui.cons.out);
                 gui.error("Unexpected error occurred when exporting map.");
             } catch (InterruptedException e) {
             }
@@ -868,7 +868,7 @@ public class MapFileWidget extends Widget {
                 }
             } catch (InterruptedException e) {
             } catch (Exception e) {
-                e.printStackTrace(Debug.log);
+                e.printStackTrace(ui.cons.out);
                 e.printStackTrace();
                 gui.error("Could not import map: " + e.getMessage());
             }

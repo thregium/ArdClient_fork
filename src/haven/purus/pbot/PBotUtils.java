@@ -494,7 +494,7 @@ public class PBotUtils {
                 try {
                     t.join();
                     if (!ui.gui.lastDrinkingSucessful) {
-                        sysMsg(ui, "PBotUtils Warning: Couldn't drink, didn't find anything to drink!", Color.ORANGE);
+                        debugMsg(ui, "PBotUtils Warning: Couldn't drink, didn't find anything to drink!", Color.ORANGE);
                         return false;
                     }
                 } catch (InterruptedException e) {
@@ -517,7 +517,7 @@ public class PBotUtils {
                 try {
                     t.join();
                     if (!ui.gui.lastDrinkingSucessful) {
-                        sysMsg(ui, "PBotUtils Warning: Couldn't drink, didn't find anything to drink!", Color.ORANGE);
+                        debugMsg(ui, "PBotUtils Warning: Couldn't drink, didn't find anything to drink!", Color.ORANGE);
                         return false;
                     }
                 } catch (InterruptedException e) {
@@ -592,6 +592,17 @@ public class PBotUtils {
         sysMsg(ui, str, new Color(r, g, b));
     }
 
+    public static void debugMsg(UI ui, String str) {
+        debugMsg(ui, str, Color.WHITE);
+    }
+    public static void debugMsg(UI ui, String str, Color col) {
+        if (ui.gui != null)
+            ui.gui.debugmsg(str, col);
+    }
+    public static void debugMsg(UI ui, String str, int r, int g, int b) {
+        debugMsg(ui, str, new Color(r, g, b));
+    }
+
 //    public static void sysMsg(String str, int r, int g, int b) {
 //        sysMsg(PBotAPI.modeui(), str, r, g, b);
 //    }
@@ -643,6 +654,12 @@ public class PBotUtils {
      */
     public static PBotWindow PBotWindow(UI ui, String title, int height, int width, String id) {
         PBotWindow window = new PBotWindow(new Coord(width, height), title, id);
+        ui.gui.add(window, 300, 300);
+        return window;
+    }
+
+    public static PBotWindow PBotWindow(UI ui, String title, int height, int width, String id, boolean killable) {
+        PBotWindow window = new PBotWindow(new Coord(width, height), title, id, killable);
         ui.gui.add(window, 300, 300);
         return window;
     }
@@ -717,7 +734,7 @@ public class PBotUtils {
      * User can select an area by dragging
      */
     public static void selectArea(UI ui) {
-        sysMsg(ui, "Please select an area by dragging!", Color.ORANGE);
+        debugMsg(ui, "Please select an area by dragging!", Color.ORANGE);
         ui.gui.map.PBotAPISelect = true;
         while (ui.gui.map.PBotAPISelect) {
             sleep(25);
@@ -785,7 +802,7 @@ public class PBotUtils {
     public static void areaSelect(UI ui, Coord a, Coord b) {
         selectedAreaA = a.mul(MCache.tilesz2);
         selectedAreaB = b.mul(MCache.tilesz2).add(11, 11);
-        sysMsg(ui, "Area selected!", Color.ORANGE);
+        debugMsg(ui, "Area selected!", Color.ORANGE);
     }
 
 //    public static void areaSelect(Coord a, Coord b) {
@@ -799,9 +816,9 @@ public class PBotUtils {
      * @param b B-point of the rectangle
      * @return List of gobs in the area, sorted to zig-zag pattern
      */
-    public static ArrayList<PBotGob> gobsInArea(UI ui, Coord a, Coord b) {
+    public static List<PBotGob> gobsInArea(UI ui, Coord a, Coord b) {
         // Initializes list of crops to harvest between the selected coordinates
-        ArrayList<PBotGob> gobs = new ArrayList<PBotGob>();
+        List<PBotGob> gobs = new ArrayList<>();
         double bigX = Math.max(a.x, b.x);
         double smallX = Math.min(a.x, b.x);
         double bigY = Math.max(a.y, b.y);

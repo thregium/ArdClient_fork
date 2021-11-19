@@ -33,27 +33,29 @@ public class Py4j {
 
         @Override
         public void serverPostShutdown() {
-            System.out.println("Pyj4 serverPostShutdown");
+            System.out.println("Py4j serverPostShutdown");
         }
 
         @Override
         public void serverPreShutdown() {
-            System.out.println("Pyj4 serverPreShutdown");
+            System.out.println("Py4j serverPreShutdown");
         }
 
         @Override
         public void serverStarted() {
-            System.out.println("Pyj4 serverStarted");
+            System.out.println("Py4j serverStarted");
         }
 
         @Override
         public void serverStopped() {
-            System.out.println("Pyj4 serverStopped");
+            System.out.println("Py4j serverStopped");
         }
     }
 
     public interface PBotScriptLoader {
-        public void start(String name, String methodname, String id);
+        void start(String name, String methodname, String id);
+
+        void stop(String id);
     }
 
     public static void start() {

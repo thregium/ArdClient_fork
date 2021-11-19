@@ -23,6 +23,7 @@ public class PBotError {
             PBotUtils.sysMsg(ui, "PBot error occurred!! Writing it into a file called: " + output.getPath(), Color.RED);
             PrintWriter pw = new PrintWriter(Files.newBufferedWriter(output.toPath(), StandardOpenOption.WRITE));
             e.printStackTrace(pw);
+            e.printStackTrace(ui.cons.out);
             pw.flush();
             e.printStackTrace();
         } catch (IOException e1) {

@@ -4,15 +4,22 @@ import haven.Coord;
 import haven.Widget;
 import haven.Window;
 import haven.purus.pbot.PBotError;
+import haven.purus.pbot.PBotScript;
 import haven.purus.pbot.PBotScriptmanager;
 
 public class PBotWindow extends Window {
     private String id;
     private boolean closed = false;
+    private boolean killable = false;
 
     public PBotWindow(Coord sz, String cap, String id) {
         super(sz, cap, cap);
         this.id = id;
+    }
+
+    public PBotWindow(Coord sz, String cap, String id, boolean killable) {
+        this(sz, cap, id);
+        setKillableIfClosed(killable);
     }
 
     /**
@@ -60,7 +67,7 @@ public class PBotWindow extends Window {
             @Override
             public void set(boolean val) {
                 a = val;
-                Thread t = new Thread(() -> PBotScriptmanager.getScript(id).execute(name, "(" + (val ? "true" : "false") + ");"));
+                Thread t = new Thread(() -> PBotScriptmanager.getScript(id).execute(name, "(" + val + ");"));
                 t.start();
             }
         };
@@ -98,6 +105,23 @@ public class PBotWindow extends Window {
     }
 
     /**
+     * Kill script if killable
+     */
+    public void setKillableIfClosed(boolean val) {
+        killable = val;
+    }
+
+    public void kill() {
+        try {
+            PBotScript script = PBotScriptmanager.getScript(id);
+            if (script != null)
+                script.kill();
+        } catch (Exception e) {
+            PBotError.handleException(ui, e);
+        }
+    }
+
+    /**
      * Has the window been closen by the user or program?
      *
      * @return True if the window has been closen
@@ -112,6 +136,8 @@ public class PBotWindow extends Window {
     public void closeWindow() {
         reqdestroy();
         closed = true;
+        if (killable)
+            kill();
     }
 
     @Override

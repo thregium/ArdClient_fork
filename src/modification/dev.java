@@ -25,15 +25,15 @@ public class dev {
     public static boolean reslog = Utils.getprefb("reslog", false);
 
     public static boolean msg_log_skip_boolean = Utils.getprefb("skiplogmsg", false);
-    public static ArrayList<String> msg_log_skip = new ArrayList<String>() {{       //chosen msg
-        addAll(Arrays.asList("glut", "click"));
-    }};
-
+    public static List<String> msg_log_skip = new ArrayList<>();
 
     public static CheckListbox msglist = null;
-    public final static Map<String, CheckListboxItem> msgmenus = new TreeMap<String, CheckListboxItem>() {{
-        Utils.loadcollection("msgcollection").forEach(msg -> put(msg, new CheckListboxItem(msg)));
-    }};
+    public static final Map<String, CheckListboxItem> msgmenus = new TreeMap<>();
+
+    static {
+        msg_log_skip.addAll(Arrays.asList("glut", "click"));
+        Utils.loadcollection("msgcollection").forEach(msg -> msgmenus.put(msg, new CheckListboxItem(msg)));
+    }
 
     public static void addMsg(String name) {
         List<String> list = new ArrayList<>(msgmenus.keySet());

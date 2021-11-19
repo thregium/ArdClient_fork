@@ -3,11 +3,11 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 import importlib
-import threading
-from py4j.java_gateway import JavaGateway, CallbackServerParameters, GatewayParameters
-from __pbot.variables import Vars
 
-ScriptVars = {}
+from py4j.java_gateway import JavaGateway, CallbackServerParameters, GatewayParameters
+from __pbot.thread import Thread
+
+Scripts = {}
 
 
 class PBotRunner(object):
@@ -16,11 +16,21 @@ class PBotRunner(object):
         script = importlib.import_module(scriptname)
         importlib.reload(script)
 
-        if scriptid not in ScriptVars:
-            ScriptVars[scriptid] = script.Script()
-            ScriptVars[scriptid].v = Vars(scriptid, gateway)
+        if scriptid not in Scripts:
+            Scripts[scriptid] = script.Script(scriptid, gateway)
 
-        threading.Thread(target=getattr(ScriptVars[scriptid], methodname)).start()
+        tscript = Scripts[scriptid]
+        tscript.threads = {}
+
+        if methodname in tscript.threads:
+            tscript.threads[methodname].terminate()
+        tscript.threads[methodname] = Thread(target=getattr(Scripts[scriptid], methodname), daemon=True)
+        tscript.threads[methodname].start()
+
+    def stop(scriptid):
+        if scriptid in Scripts:
+            for method in Scripts[scriptid].threads:
+                Scripts[scriptid].threads[method].terminate()
 
     class Java:
         implements = ["haven.purus.pbot.Py4j.PBotScriptLoader"]

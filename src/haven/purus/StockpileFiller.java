@@ -16,6 +16,7 @@ import haven.purus.pbot.PBotUtils;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.List;
 
 import static haven.OCache.posres;
 
@@ -242,7 +243,7 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
                 PBotUtils.sysMsg(ui, "Please select an area at least 2 tiles wide - try again.");
                 return;
             }
-            ArrayList<PBotGob> gobs = PBotUtils.gobsInArea(ui, aPnt, bPnt);
+            List<PBotGob> gobs = PBotUtils.gobsInArea(ui, aPnt, bPnt);
             int i = 0;
             while (i < gobs.size()) {
                 if (gobs.get((int) i).gob.getres().basename().equals(((Gob) StockpileFiller.this.stockpiles.get(0)).getres().basename())) {

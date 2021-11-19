@@ -821,9 +821,9 @@ public class ChatUI extends Widget {
         }
     }
 
-    public static class BotChat extends SimpleChat {
-        public BotChat() {
-            super(false, "Bot");
+    public static class DebugChat extends SimpleChat {
+        public DebugChat() {
+            super(false, "Debug");
         }
 
         @Override

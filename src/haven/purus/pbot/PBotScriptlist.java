@@ -280,7 +280,12 @@ public class PBotScriptlist extends GameUI.Hidewnd {
 
         @Override
         protected void drawitem(GOut g, Map.Entry<String, PBotScript> item, int i) {
-            g.image(Text.render(item.getValue().name()).tex(), nameoff);
+            g.image(Text.render(item.getValue().name() + "_" + item.getValue().id).tex(), nameoff);
+        }
+
+        @Override
+        protected Object itemtooltip(Coord c, Map.Entry<String, PBotScript> item) {
+            return Text.render(item.getValue().name() + "_" + item.getValue().id).tex();
         }
 
         @Override
@@ -318,13 +323,36 @@ public class PBotScriptlist extends GameUI.Hidewnd {
 
         public void deleteItem(Map.Entry<String, PBotScript> item) {
             item.getValue().kill();
-            filteredItemList.remove(item);
-            itemList.remove(item);
-            PBotScriptmanager.scripts.remove(item.getKey());
+        }
+
+        public void removeFromList(Map.Entry<String, PBotScript> item) {
+            if (item != null) {
+                filteredItemList.remove(item);
+                itemList.remove(item);
+            }
+        }
+
+        public void removeFromList(PBotScript script) {
+            removeFromList(getEntry(script));
+        }
+
+        public Map.Entry<String, PBotScript> getEntry(PBotScript script) {
+            for (Map.Entry<String, PBotScript> item : itemList)
+                if (item.getValue().equals(script))
+                    return (item);
+            return (null);
         }
     }
 
     public PBotScriptlistItem getScript(String name) {
         return (list.getScript(name));
+    }
+
+    public void threadsUpdate() {
+        threadList.refreshItemList();
+    }
+
+    public void removeFromList(PBotScript script) {
+        threadList.removeFromList(script);
     }
 }

@@ -4,10 +4,7 @@ import haven.UI;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Source;
 
-import java.awt.Color;
 import java.io.File;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 public class PBotScriptJS extends PBotScript {
     private Context context;
@@ -18,7 +15,7 @@ public class PBotScriptJS extends PBotScript {
 
     @Override
     public void run() {
-        PBotUtils.sysMsg(ui, "Starting script: " + name, Color.ORANGE);
+        super.run();
         context = Context.newBuilder("js").allowAllAccess(true).build();
         try {
             context.eval("js", "const ScriptID = '" + id + "';");
@@ -31,15 +28,19 @@ public class PBotScriptJS extends PBotScript {
     @Override
     public void kill() {
         try {
-            interrupt();
+            super.kill();
             context.close(true);
         } catch (Exception e) {
-            e.printStackTrace();
+            PBotError.handleException(ui, e);
         }
     }
 
     @Override
     public void execute(String... text) {
-        context.eval("js", String.join("", text));
+        try {
+            context.eval("js", String.join("", text));
+        } catch (Exception e) {
+            PBotError.handleException(ui, e);
+        }
     }
 }

@@ -5,7 +5,6 @@ import haven.Coord;
 import haven.GameUI;
 import haven.Gob;
 import haven.Label;
-import haven.Loading;
 import haven.MCache;
 import haven.WItem;
 import haven.Widget;
@@ -204,7 +203,7 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
                     PBotUtils.sysMsg(ui, "Please select an area at least 2 tiles wide - try again.");
                     return;
                 }
-                ArrayList<PBotGob> gobs = PBotUtils.gobsInArea(ui, aPnt, bPnt);
+                List<PBotGob> gobs = PBotUtils.gobsInArea(ui, aPnt, bPnt);
                 int i = 0;
                 while (i < gobs.size()) {
                     if (gobs.get(i).gob.getres().basename().equals((StockpileFiller2.this.stockpiles.get(0)).getres().basename())) {

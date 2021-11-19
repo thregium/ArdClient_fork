@@ -2,7 +2,6 @@ package haven.purus.pbot;
 
 import haven.UI;
 
-import java.awt.Color;
 import java.io.File;
 import java.util.regex.Matcher;
 
@@ -13,12 +12,11 @@ public class PBotScriptPy extends PBotScript {
 
     @Override
     public void run() {
-        PBotUtils.sysMsg(ui, "Starting script: " + name, Color.ORANGE);
+        super.run();
         try {
             String scriptname = scriptFile.getPath().substring("scripts/py/".length()).replaceAll(Matcher.quoteReplacement("\\"), ".").replace("/", ".").replace(".py", "");
             ((Py4j.PBotScriptLoader) Py4j.server.getPythonServerEntryPoint(new Class[]{Py4j.PBotScriptLoader.class})).start(scriptname, "run", id);
         } catch (Exception e) {
-            e.printStackTrace();
             PBotError.handleException(ui, e);
         }
     }
@@ -26,9 +24,10 @@ public class PBotScriptPy extends PBotScript {
     @Override
     public void kill() {
         try {
-            interrupt();
+            super.kill();
+            ((Py4j.PBotScriptLoader) Py4j.server.getPythonServerEntryPoint(new Class[]{Py4j.PBotScriptLoader.class})).stop(id);
         } catch (Exception e) {
-            e.printStackTrace();
+            PBotError.handleException(ui, e);
         }
     }
 
@@ -38,7 +37,6 @@ public class PBotScriptPy extends PBotScript {
             String scriptname = scriptFile.getPath().substring("scripts/py/".length()).replaceAll(Matcher.quoteReplacement("\\"), ".").replace("/", ".").replace(".py", "");
             ((Py4j.PBotScriptLoader) Py4j.server.getPythonServerEntryPoint(new Class[]{Py4j.PBotScriptLoader.class})).start(scriptname, args[0], id);
         } catch (Exception e) {
-            e.printStackTrace();
             PBotError.handleException(ui, e);
         }
     }

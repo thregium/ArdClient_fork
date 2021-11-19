@@ -2,6 +2,7 @@ package haven.purus.pbot;
 
 import haven.UI;
 
+import java.awt.Color;
 import java.io.File;
 
 public class PBotScript extends Thread {
@@ -19,11 +20,12 @@ public class PBotScript extends Thread {
 
     @Override
     public void run() {
-        //for heirs
+        PBotUtils.debugMsg(ui, "Starting script: " + name, Color.ORANGE);
     }
 
     public void kill() {
         interrupt();
+        PBotScriptmanager.closeScript(this);
     }
 
     public void execute(String... text) {
