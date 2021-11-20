@@ -1581,7 +1581,7 @@ public class MenuGrid extends Widget {
                 dragging = null;
             } else if (pressed != null) {
                 if (pressed == h)
-                    use(h, new Interaction(), false);
+                    use(h, new Interaction(button, ui.modflags()), false);
                 pressed = null;
             }
             grab.remove();

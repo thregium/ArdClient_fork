@@ -60,8 +60,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
 
 public class configuration {
     public static String modificationPath = "modification";
@@ -680,7 +678,7 @@ public class configuration {
     }
 
     public static HSliderNamed createSFXSlider(HSliderListboxItem item) {
-        return (new HSliderNamed(item, 180, 0, 100,  () -> {
+        return (new HSliderNamed(item, 180, 0, 100, () -> {
             synchronized (resources.sfxmenus) {
                 Utils.setprefsliderlst("customsfxvol", resources.sfxmenus);
             }
@@ -1185,18 +1183,27 @@ public class configuration {
                 int row = i;
                 int column = j;
                 singlescale[i][j] = new TextEntry(50, Float.toString(sscale[row][column])) {
-                    public boolean type(char c, KeyEvent ev) {
-                        if ((c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9) || c == ',' || c == '.' || c == '\b' || c == '-' || c == KeyEvent.VK_DELETE) {
-                            return buf.key(ev);
-                        } else if (c == '\n') {
+                    String backup = text();
+
+                    @Override
+                    public boolean keydown(KeyEvent e) {
+                        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                             try {
-                                float val = Float.parseFloat(text().replace(',', '.'));
+                                float val = text().isEmpty() ? 0 : Float.parseFloat(text().replace(',', '.'));
                                 single.setScale(row, column, val);
                                 return (true);
-                            } catch (NumberFormatException e) {
+                            } catch (NumberFormatException ex) {
                             }
                         }
-                        return (false);
+                        backup = text();
+                        boolean b = super.keydown(e);
+                        try {
+                            if (!text().isEmpty())
+                                Float.parseFloat(text().replace(',', '.'));
+                        } catch (Exception ex) {
+                            settext(backup);
+                        }
+                        return (b);
                     }
                 };
                 list.add(singlescale[i][j]);
@@ -1230,18 +1237,27 @@ public class configuration {
                 int row = i;
                 int column = j;
                 multiscale[i][j] = new TextEntry(50, Float.toString(mscale[row][column])) {
-                    public boolean type(char c, KeyEvent ev) {
-                        if ((c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9) || c == ',' || c == '.' || c == '\b' || c == '-' || c == KeyEvent.VK_DELETE) {
-                            return buf.key(ev);
-                        } else if (c == '\n') {
+                    String backup = text();
+
+                    @Override
+                    public boolean keydown(KeyEvent e) {
+                        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                             try {
-                                float val = Float.parseFloat(text().replace(',', '.'));
+                                float val = text().isEmpty() ? 0 : Float.parseFloat(text().replace(',', '.'));
                                 multi.setScale(row, column, val);
                                 return (true);
-                            } catch (NumberFormatException e) {
+                            } catch (NumberFormatException ex) {
                             }
                         }
-                        return (false);
+                        backup = text();
+                        boolean b = super.keydown(e);
+                        try {
+                            if (!text().isEmpty())
+                                Float.parseFloat(text().replace(',', '.'));
+                        } catch (Exception ex) {
+                            settext(backup);
+                        }
+                        return (b);
                     }
                 };
                 list.add(multiscale[i][j]);
@@ -1277,16 +1293,16 @@ public class configuration {
     }
 
     public static boolean waitfor(Callable<Boolean> call, int timeout) {
-            for (int i = 0, sleep = 100; ; i += sleep) {
-                if (i >= timeout)
-                    break;
-                try {
-                    if (call.call())
-                        return (true);
-                } catch (Exception ignore) {
-                }
-                PBotUtils.sleep(sleep);
+        for (int i = 0, sleep = 100; ; i += sleep) {
+            if (i >= timeout)
+                break;
+            try {
+                if (call.call())
+                    return (true);
+            } catch (Exception ignore) {
             }
-            return (false);
+            PBotUtils.sleep(sleep);
+        }
+        return (false);
     }
 }

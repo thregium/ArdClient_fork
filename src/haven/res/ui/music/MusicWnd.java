@@ -190,7 +190,7 @@ public class MusicWnd extends Window {
                 return (true);
             }
         }
-        return (super.keydown(ev));
+        return (super.keyup(ev));
     }
 }
 

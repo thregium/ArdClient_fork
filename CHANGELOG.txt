@@ -1,4 +1,9 @@
 Details in https://github.com/Cediner/ArdClient/commits/
+2021.11.18
+> Added python script engine
+> Fixed aggroAll
+~
+
 2021.11.02
 > Fake bound and offset tooltip info
 > Fix
