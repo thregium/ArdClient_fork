@@ -1972,7 +1972,7 @@ public class Resource implements Serializable {
         else if (ver != this.ver) {
             if (dev.reslog)
                 System.out.printf("Wrong res version (%d != %d) %s%n", ver, this.ver, this);
-            throw (new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
+            //throw (new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
         }
         while (!in.eom()) {
             String title = in.string();
