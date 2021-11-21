@@ -924,38 +924,12 @@ public class PBotUtils {
         return inventory.getFreeSlot();
     }
 
-    public static java.util.List<Coord> getFreeInvSlots(Inventory inventory) {
+    public static List<Coord> getFreeInvSlots(Inventory inventory) {
         return inventory.getFreeSlots();
     }
 
-    public static java.util.List<Coord> getFreeInvSlotsAlt(InventoryBelt inventory) {
+    public static List<Coord> getFreeInvSlotsAlt(InventoryBelt inventory) {
         return inventory.getFreeSlots();
-    }
-
-    // Finds nearest objects and returns closest one
-    public static Gob findObjectByNames(UI ui, int radius, String... names) {
-        Coord2d plc = player(ui).rc;
-        double min = radius;
-        Gob nearest = null;
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
-                double dist = gob.rc.dist(plc);
-                if (dist < min) {
-                    boolean matches = false;
-                    for (String name : names) {
-                        if (gob.getres() != null && gob.getres().name.equals(name)) {
-                            matches = true;
-                            break;
-                        }
-                    }
-                    if (matches) {
-                        min = dist;
-                        nearest = gob;
-                    }
-                }
-            }
-        }
-        return nearest;
     }
 
 //    public static Gob findObjectByNames(int radius, String... names) {
@@ -963,7 +937,7 @@ public class PBotUtils {
 //    }
 
     // Finds nearest objects and returns closest one
-    public static Gob findObjectContains(UI ui, int radius, String... names) {
+    public static Gob findObjectContains(UI ui, double radius, String... names) {
         Coord2d plc = player(ui).rc;
         double min = radius;
         Gob nearest = null;
@@ -988,11 +962,14 @@ public class PBotUtils {
         return nearest;
     }
 
+    public static Gob findObjectContains(UI ui, double radius, List<String> names) {
+        return (findObjectContains(ui, radius, names.toArray(new String[0])));
+    }
 //    public static Gob findObjectContains(int radius, String... names) {
 //        return findObjectContains(PBotAPI.modeui(), radius, names);
 //    }
 
-    public static Gob findNearestBarrel(UI ui, int radius, java.util.List<Gob> blacklist) {
+    public static Gob findNearestBarrel(UI ui, double radius, List<Gob> blacklist) {
         Coord2d plc = player(ui).rc;
         double min = radius;
         Gob nearest = null;
@@ -1021,7 +998,7 @@ public class PBotUtils {
         return nearest;
     }
 
-//    public static Gob findNearestBarrel(int radius, java.util.List<Gob> blacklist) {
+//    public static Gob findNearestBarrel(int radius, List<Gob> blacklist) {
 //        return findNearestBarrel(PBotAPI.modeui(), radius, blacklist);
 //    }
 
@@ -1131,7 +1108,7 @@ public class PBotUtils {
 //    }
 
     // Finds the nearest crop with a name and stage
-    public static Gob findNearestStageCrop(UI ui, int radius, int stage, String... names) {
+    public static Gob findNearestStageCrop(UI ui, double radius, int stage, String... names) {
         Coord2d plc = player(ui).rc;
         double min = radius;
         Gob nearest = null;
@@ -1162,11 +1139,15 @@ public class PBotUtils {
         return nearest;
     }
 
+    public static Gob findNearestStageCrop(UI ui, double radius, int stage, List<String> names) {
+        return (findNearestStageCrop(ui, radius, stage, names.toArray(new String[0])));
+    }
+
 //    public static Gob findNearestStageCrop(int radius, int stage, String... names) {
 //        return findNearestStageCrop(PBotAPI.modeui(), radius, stage, names);
 //    }
 
-    public static Gob findNearestGob(UI ui, int radius, java.util.List<Gob> blacklist, String... names) {
+    public static Gob findNearestGob(UI ui, double radius, List<Gob> blacklist, String... names) {
         Coord2d plc = player(ui).rc;
         double min = radius;
         Gob nearest = null;
@@ -1197,7 +1178,11 @@ public class PBotUtils {
         return nearest;
     }
 
-//    public static Gob findNearestGob(int radius, java.util.List<Gob> blacklist, String... names) {
+    public static Gob findNearestGob(UI ui, double radius, List<Gob> blacklist, List<String> names) {
+        return (findNearestGob(ui, radius, blacklist, names.toArray(new String[0])));
+    }
+
+//    public static Gob findNearestGob(int radius, List<Gob> blacklist, String... names) {
 //        return findNearestGob(PBotAPI.modeui(), radius, blacklist, names);
 //    }
 
@@ -1250,8 +1235,8 @@ public class PBotUtils {
 //    }
 
     // Returns witems with specific names from inventory
-    public static java.util.List<PBotItem> getInventoryItemsByNames(Inventory invwdg, java.util.List<String> items) {
-        java.util.List<PBotItem> witems = new ArrayList<PBotItem>();
+    public static List<PBotItem> getInventoryItemsByNames(Inventory invwdg, List<String> items) {
+        List<PBotItem> witems = new ArrayList<PBotItem>();
         for (WItem wi : getInventoryContents(invwdg)) {
             String resname = wi.item.resource().name;
             for (String s : items) {
@@ -1263,8 +1248,8 @@ public class PBotUtils {
     }
 
     // Returns witems with specific name from inventory
-    public static java.util.List<PBotItem> getInventoryItemsByName(Inventory invwdg, String item) {
-        java.util.List<PBotItem> witems = new ArrayList<PBotItem>();
+    public static List<PBotItem> getInventoryItemsByName(Inventory invwdg, String item) {
+        List<PBotItem> witems = new ArrayList<PBotItem>();
         for (WItem wi : getInventoryContents(invwdg)) {
             String resname = wi.item.resource().name;
             if (resname.equals(item))
@@ -1415,6 +1400,10 @@ public class PBotUtils {
             }
         }
         return nearest;
+    }
+
+    public static Gob findObjectByNames(UI ui, double radius, List<String> names) {
+        return (findObjectByNames(ui, radius, names.toArray(new String[0])));
     }
 
 //    public static Gob findObjectByNames(double radius, String... names) {
@@ -1754,7 +1743,7 @@ public class PBotUtils {
      * @param items  Name(s) of the items to look for
      * @return Item, or null if not found
      */
-    public static WItem getInventoryItemByNames(Inventory invwdg, java.util.List<String> items) {
+    public static WItem getInventoryItemByNames(Inventory invwdg, List<String> items) {
         for (WItem wi : getInventoryContents(invwdg)) {
             String resname = wi.item.resource().name;
             for (String s : items) {
@@ -1771,8 +1760,8 @@ public class PBotUtils {
      * @param invwdg Inventory of which items to return
      * @return List of items in the inventory
      */
-    public static java.util.List<WItem> getInventoryContents(Inventory invwdg) {
-        java.util.List<WItem> witems = new ArrayList<WItem>();
+    public static List<WItem> getInventoryContents(Inventory invwdg) {
+        List<WItem> witems = new ArrayList<WItem>();
         for (Widget witm = invwdg.lchild; witm != null; witm = witm.prev) {
             if (witm instanceof WItem) {
                 witems.add((WItem) witm);
@@ -1783,7 +1772,7 @@ public class PBotUtils {
 
     //same as above for returns a list of all WItems from all inventories seen on screen
     public static List<WItem> getallInventoryContents(UI ui) {
-        java.util.List<WItem> witems = new ArrayList<WItem>();
+        List<WItem> witems = new ArrayList<WItem>();
         synchronized (ui.root.lchild) {
             try {
                 for (Widget q = ui.root.lchild; q != null; q = q.rnext()) {
@@ -1803,7 +1792,7 @@ public class PBotUtils {
 
     //same as above for returns a list of all WItems from all inventories seen on screen
     public static List<WItem> getallInventoryContentsbyString(UI ui, String witem) {
-        java.util.List<WItem> witems = new ArrayList<WItem>();
+        List<WItem> witems = new ArrayList<WItem>();
         List<WItem> finallist = new ArrayList<>();
         synchronized (ui.root.lchild) {
             try {
@@ -1952,7 +1941,7 @@ public class PBotUtils {
      *
      * @return List of all gobs
      */
-    public static java.util.List<Gob> getGobs(UI ui) {
+    public static List<Gob> getGobs(UI ui) {
         List<Gob> list = new ArrayList<Gob>();
         synchronized (ui.sess.glob.oc) {
             for (Gob gob : ui.sess.glob.oc)
@@ -1961,7 +1950,7 @@ public class PBotUtils {
         return list;
     }
 
-//    public static java.util.List<Gob> getGobs() {
+//    public static List<Gob> getGobs() {
 //        return getGobs(PBotAPI.modeui());
 //    }
 

@@ -66,6 +66,10 @@ public class PBotInventory {
         return items;
     }
 
+    public List<PBotItem> getInventoryItemsByNames(List<String> pattern) {
+        return (getInventoryItemsByNames(pattern.toArray(new String[0])));
+    }
+
     public PBotItem getInventoryItemByNames(String... pattern) {
         List<Pattern> patterns = Arrays.stream(pattern).map(Pattern::compile).collect(Collectors.toList());
         for (PBotItem item : getInventoryContents()) {
@@ -78,6 +82,10 @@ public class PBotInventory {
             }
         }
         return (null);
+    }
+
+    public PBotItem getInventoryItemByNames(List<String> pattern) {
+        return (getInventoryItemByNames(pattern.toArray(new String[0])));
     }
 
     /**
@@ -97,6 +105,10 @@ public class PBotInventory {
         return items;
     }
 
+    public List<PBotItem> getInventoryItemsByResnames(List<String> pattern) {
+        return (getInventoryItemsByResnames(pattern.toArray(new String[0])));
+    }
+
     public PBotItem getInventoryItemByResnames(String... pattern) {
         List<Pattern> patterns = Arrays.stream(pattern).map(Pattern::compile).collect(Collectors.toList());
         for (PBotItem item : getInventoryContents()) {
@@ -107,6 +119,10 @@ public class PBotInventory {
             }
         }
         return (null);
+    }
+
+    public PBotItem getInventoryItemByResnames(List<String> pattern) {
+        return (getInventoryItemByResnames(pattern.toArray(new String[0])));
     }
 
     public List<PBotItem> getInventoryContainsResnames(List<String> resnames) {

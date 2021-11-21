@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -28,30 +29,32 @@ public class PBotGobAPI {
     private static boolean gobSelectWait = false;
     private static Gob selectedGob;
 
-    public static HashMap<String, String> gobWindowMap = new HashMap<String, String>() {{
-        put("gfx/terobjs/crate", "Crate");
-        put("gfx/terobjs/dframe", "Frame");
-        put("gfx/terobjs/kiln", "Kiln");
-        put("gfx/terobjs/fineryforge", "Finery Forge");
-        put("gfx/terobjs/steelcrucible", "Steelbox");
-        put("gfx/terobjs/smelter", "Ore Smelter");
-        put("gfx/terobjs/pow", "Fireplace");
-        put("gfx/terobjs/oven", "Oven");
-        put("gfx/terobjs/cauldron", "Cauldron");
-        put("gfx/terobjs/woodbox", "Woodbox");
-        put("gfx/terobjs/create", "Crate");
-        put("gfx/terobjs/furn/table-stone", "Table");
-        put("gfx/terobjs/furn/cottagetable", "Table");
-        put("gfx/terobjs/wbasket", "Basket");
-        put("gfx/terobjs/chickencoop", "Chicken Coop");
-        put("gfx/terobjs/htable", "Herbalist Table");
-        put("gfx/terobjs/studydesk", "Study Desk");
-        put("gfx/terobjs/cupboard", "Cupboard");
-        put("gfx/terobjs/ttub", "Tub");
-        put("gfx/terobjs/chest", "Chest");
-        put("gfx/terobjs/largechest", "Large Chest");
-        put("gfx/terobjs/matalcabinet", "Metal Cabinet");
-    }};
+    public static final Map<String, String> gobWindowMap = new HashMap<>();
+
+    static {
+        gobWindowMap.put("gfx/terobjs/crate", "Crate");
+        gobWindowMap.put("gfx/terobjs/dframe", "Frame");
+        gobWindowMap.put("gfx/terobjs/kiln", "Kiln");
+        gobWindowMap.put("gfx/terobjs/fineryforge", "Finery Forge");
+        gobWindowMap.put("gfx/terobjs/steelcrucible", "Steelbox");
+        gobWindowMap.put("gfx/terobjs/smelter", "Ore Smelter");
+        gobWindowMap.put("gfx/terobjs/pow", "Fireplace");
+        gobWindowMap.put("gfx/terobjs/oven", "Oven");
+        gobWindowMap.put("gfx/terobjs/cauldron", "Cauldron");
+        gobWindowMap.put("gfx/terobjs/woodbox", "Woodbox");
+        gobWindowMap.put("gfx/terobjs/create", "Crate");
+        gobWindowMap.put("gfx/terobjs/furn/table-stone", "Table");
+        gobWindowMap.put("gfx/terobjs/furn/cottagetable", "Table");
+        gobWindowMap.put("gfx/terobjs/wbasket", "Basket");
+        gobWindowMap.put("gfx/terobjs/chickencoop", "Chicken Coop");
+        gobWindowMap.put("gfx/terobjs/htable", "Herbalist Table");
+        gobWindowMap.put("gfx/terobjs/studydesk", "Study Desk");
+        gobWindowMap.put("gfx/terobjs/cupboard", "Cupboard");
+        gobWindowMap.put("gfx/terobjs/ttub", "Tub");
+        gobWindowMap.put("gfx/terobjs/chest", "Chest");
+        gobWindowMap.put("gfx/terobjs/largechest", "Large Chest");
+        gobWindowMap.put("gfx/terobjs/matalcabinet", "Metal Cabinet");
+    }
 
     /**
      * List of all gobs visible to the client
@@ -59,7 +62,7 @@ public class PBotGobAPI {
      * @return List of all gobs
      */
     public static List<PBotGob> getAllGobs(UI ui) {
-        List<PBotGob> list = new ArrayList<PBotGob>();
+        List<PBotGob> list = new ArrayList<>();
         synchronized (ui.sess.glob.oc) {
             for (Gob gob : ui.sess.glob.oc) {
                 list.add(new PBotGob(gob));
@@ -73,11 +76,11 @@ public class PBotGobAPI {
      *
      * @return List of all gobs in radius
      */
-    public static List<PBotGob> getGobsInRadius(UI ui, int radius) {
-        Coord2d plc = PBotGobAPI.player(ui).gob.rc;
+    public static List<PBotGob> getGobsInRadius(UI ui, double radius) {
+        Coord2d plc = player(ui).getRcCoords();
         double min = radius;
 
-        List<PBotGob> list = new ArrayList<PBotGob>();
+        List<PBotGob> list = new ArrayList<>();
         synchronized (ui.sess.glob.oc) {
             for (Gob gob : ui.sess.glob.oc) {
                 if (gob.isplayer()) continue;
@@ -97,13 +100,14 @@ public class PBotGobAPI {
      * @param center search center
      * @return List of all gobs in radius
      */
-    public static List<PBotGob> getGobsInRadius(UI ui, Coord2d center, int radius) {
+    public static List<PBotGob> getGobsInRadius(UI ui, Coord2d center, double radius) {
         double min = radius;
 
-        List<PBotGob> list = new ArrayList<PBotGob>();
+        List<PBotGob> list = new ArrayList<>();
         synchronized (ui.sess.glob.oc) {
             for (Gob gob : ui.sess.glob.oc) {
-                if (gob.isplayer()) continue;
+                if (gob.isplayer())
+                    continue;
                 double dist = gob.rc.dist(center);
                 if (dist < min) {
                     list.add(new PBotGob(gob));
@@ -121,14 +125,15 @@ public class PBotGobAPI {
      * @param cy     search center y
      * @return List of all gobs in radius
      */
-    public static List<PBotGob> getGobsInRadius(UI ui, double cx, double cy, int radius) {
+    public static List<PBotGob> getGobsInRadius(UI ui, double cx, double cy, double radius) {
         Coord2d center = new Coord2d(cx, cy);
         double min = radius;
 
-        List<PBotGob> list = new ArrayList<PBotGob>();
+        List<PBotGob> list = new ArrayList<>();
         synchronized (ui.sess.glob.oc) {
             for (Gob gob : ui.sess.glob.oc) {
-                if (gob.isplayer()) continue;
+                if (gob.isplayer())
+                    continue;
                 double dist = gob.rc.dist(center);
                 if (dist < min) {
                     list.add(new PBotGob(gob));
@@ -146,10 +151,10 @@ public class PBotGobAPI {
      * @param names  gobs names
      * @return List of all gobs in radius
      */
-    public static List<PBotGob> findObjectsByNames(UI ui, Coord2d center, int radius, String... names) {
+    public static List<PBotGob> findObjectsByNames(UI ui, Coord2d center, double radius, String... names) {
         double min = radius;
 
-        List<PBotGob> list = new ArrayList<PBotGob>();
+        List<PBotGob> list = new ArrayList<>();
         synchronized (ui.sess.glob.oc) {
             for (Gob gob : ui.sess.glob.oc) {
                 double dist = gob.rc.dist(center);
@@ -168,6 +173,10 @@ public class PBotGobAPI {
             }
         }
         return list;
+    }
+
+    public static List<PBotGob> findObjectsByNames(UI ui, Coord2d center, double radius, List<String> names) {
+        return (findObjectsByNames(ui, center, radius, names.toArray(new String[0])));
     }
 
     /**
@@ -179,11 +188,11 @@ public class PBotGobAPI {
      * @param names  gobs names
      * @return List of all gobs in radius
      */
-    public static List<PBotGob> findObjectsByNames(UI ui, double cx, double cy, int radius, String... names) {
+    public static List<PBotGob> findObjectsByNames(UI ui, double cx, double cy, double radius, String... names) {
         Coord2d center = new Coord2d(cx, cy);
         double min = radius;
 
-        List<PBotGob> list = new ArrayList<PBotGob>();
+        List<PBotGob> list = new ArrayList<>();
         synchronized (ui.sess.glob.oc) {
             for (Gob gob : ui.sess.glob.oc) {
                 double dist = gob.rc.dist(center);
@@ -204,6 +213,10 @@ public class PBotGobAPI {
         return list;
     }
 
+    public static List<PBotGob> findObjectsByNames(UI ui, double cx, double cy, double radius, List<String> names) {
+        return (findObjectsByNames(ui, cx, cy, radius, names.toArray(new String[0])));
+    }
+
     /**
      * List of all gobs in radius
      *
@@ -211,11 +224,11 @@ public class PBotGobAPI {
      * @param names  gobs names
      * @return List of all gobs in radius
      */
-    public static List<PBotGob> findObjectsByNames(UI ui, int radius, String... names) {
-        Coord2d plc = PBotGobAPI.player(ui).gob.rc;
+    public static List<PBotGob> findObjectsByNames(UI ui, double radius, String... names) {
+        Coord2d plc = player(ui).getRcCoords();
         double min = radius;
 
-        List<PBotGob> list = new ArrayList<PBotGob>();
+        List<PBotGob> list = new ArrayList<>();
         synchronized (ui.sess.glob.oc) {
             for (Gob gob : ui.sess.glob.oc) {
                 double dist = gob.rc.dist(plc);
@@ -234,6 +247,33 @@ public class PBotGobAPI {
             }
         }
         return list;
+    }
+
+    public static List<PBotGob> findObjectsByNames(UI ui, double radius, List<String> names) {
+        return (findObjectsByNames(ui, radius, names.toArray(new String[0])));
+    }
+
+    public static List<PBotGob> findObjectsByNames(UI ui, String... names) {
+        List<PBotGob> list = new ArrayList<>();
+        synchronized (ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc) {
+                boolean matches = false;
+                for (String name : names) {
+                    if (gob.getres() != null && gob.getres().name.equals(name)) {
+                        matches = true;
+                        break;
+                    }
+                }
+                if (matches) {
+                    list.add(new PBotGob(gob));
+                }
+            }
+        }
+        return list;
+    }
+
+    public static List<PBotGob> findObjectsByNames(UI ui, List<String> names) {
+        return (findObjectsByNames(ui, names.toArray(new String[0])));
     }
 
 //    public static List<PBotGob> getAllGobs() {
@@ -298,6 +338,46 @@ public class PBotGobAPI {
             return null;
         else
             return new PBotGob(nearest);
+    }
+
+    public static PBotGob findGobByNames(UI ui, double radius, List<String> pattern) {
+        return (findGobByNames(ui, radius, pattern.toArray(new String[0])));
+    }
+
+    public static PBotGob findGobByNames(UI ui, String... pattern) {
+        Coord2d plc = player(ui).getRcCoords();
+        double min = Double.MAX_VALUE;
+        Gob nearest = null;
+        List<Pattern> patterns = Arrays.stream(pattern).map(Pattern::compile).collect(Collectors.toList());
+        synchronized (ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc) {
+                double dist = gob.rc.dist(plc);
+                if (dist < min) {
+                    boolean matches = false;
+                    try {
+                        for (Pattern p : patterns) {
+                            if (gob.getres() != null && p.matcher(gob.getres().name).matches()) {
+                                matches = true;
+                                break;
+                            }
+                        }
+                    } catch (Loading l) {
+                    }
+                    if (matches) {
+                        min = dist;
+                        nearest = gob;
+                    }
+                }
+            }
+        }
+        if (nearest == null)
+            return null;
+        else
+            return new PBotGob(nearest);
+    }
+
+    public static PBotGob findGobByNames(UI ui, List<String> pattern) {
+        return (findGobByNames(ui, pattern.toArray(new String[0])));
     }
 
 //    public static PBotGob findGobByNames(double radius, String... pattern) {
@@ -432,7 +512,7 @@ public class PBotGobAPI {
             }
             PBotUtils.sleep(sleep);
         }
-        return(true);
+        return (true);
     }
 
     public static void unplaceThing(UI ui) {
@@ -447,7 +527,7 @@ public class PBotGobAPI {
             }
             PBotUtils.sleep(sleep);
         }
-        return(true);
+        return (true);
     }
 
 //    public static void placeThing(double x, double y) {

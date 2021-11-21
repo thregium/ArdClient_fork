@@ -4,6 +4,12 @@ class Vars:
         self.gw = gw
         self.ui = self.ui()
 
+    def toJStringArray(self, arr):
+        jarr = self.gw.new_array(self.gw.jvm.java.lang.String, len(arr))
+        for i in range(len(arr)):
+            jarr[i] = arr[i]
+        return jarr
+
     def pbotapi(self):
         return self.gw.jvm.haven.purus.pbot.PBotAPI
 

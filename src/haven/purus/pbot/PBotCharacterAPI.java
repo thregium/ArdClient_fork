@@ -6,6 +6,8 @@ import haven.UI;
 import haven.Widget;
 import haven.automation.Discord;
 
+import java.util.List;
+
 import static haven.OCache.posres;
 
 public class PBotCharacterAPI {
@@ -77,6 +79,10 @@ public class PBotCharacterAPI {
      */
     public static void doAct(UI ui, String... act) {
         ui.gui.menu.wdgmsg("act", act);
+    }
+
+    public static void doAct(UI ui, List<String> act) {
+        doAct(ui, act.toArray(new String[0]));
     }
 
 //    public static void doAct(String... act) {
