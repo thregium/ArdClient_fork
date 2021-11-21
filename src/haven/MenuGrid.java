@@ -1422,7 +1422,7 @@ public class MenuGrid extends Widget {
         Collection<PagButton> sub = new ArrayList<>();
         cons(r.pag, sub);
         selectCraft(r.pag);
-        if (sub.size() > 0) {
+        if (!sub.isEmpty()) {
             this.cur = r.pag;
             curoff = 0;
         } else if (r.pag == bk.pag) {
@@ -1581,7 +1581,11 @@ public class MenuGrid extends Widget {
                 dragging = null;
             } else if (pressed != null) {
                 if (pressed == h)
-                    use(h, new Interaction(button, ui.modflags()), false);
+                    try {
+                        use(h, new Interaction(button, ui.modflags()), false);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 pressed = null;
             }
             grab.remove();
