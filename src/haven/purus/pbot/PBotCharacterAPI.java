@@ -2,10 +2,14 @@ package haven.purus.pbot;
 
 import haven.ChatUI;
 import haven.Coord2d;
+import haven.Equipory;
 import haven.UI;
+import haven.WItem;
 import haven.Widget;
+import haven.Window;
 import haven.automation.Discord;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static haven.OCache.posres;
@@ -192,4 +196,21 @@ public class PBotCharacterAPI {
 //    public static void msgToChat(String chatName, String msg) {
 //        msgToChat(PBotAPI.modeui(), chatName, msg);
 //    }
+
+    public static List<PBotItem> getEquipment(UI ui) {
+        Window equwnd = ui.gui.equwnd;
+        if (equwnd == null)
+            return (null);
+        Equipory eq = equwnd.getchild(Equipory.class);
+        if (eq == null)
+            return (null);
+        List<PBotItem> ret = new ArrayList<>();
+        for (WItem itm : eq.slots) {
+            if (itm == null)
+                ret.add(null);
+            else
+                ret.add(new PBotItem(itm));
+        }
+        return ret;
+    }
 }
