@@ -707,7 +707,11 @@ public class Resource implements Serializable {
                                     return;
                             }
                         }
-                        handle(cur);
+                        try {
+                            handle(cur);
+                        } catch (Exception e) { //FIXME
+                            e.printStackTrace();
+                        }
                         cur = null;
                     }
                 } catch (InterruptedException e) {

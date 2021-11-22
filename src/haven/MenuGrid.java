@@ -483,6 +483,8 @@ public class MenuGrid extends Widget {
                 close.add(pag);
             } catch (Loading e) {
                 ret = false;
+            } catch (Exception e) { //FIXME
+                e.printStackTrace();
             }
         }
         return (ret);
