@@ -707,11 +707,7 @@ public class Resource implements Serializable {
                                     return;
                             }
                         }
-                        try {
-                            handle(cur);
-                        } catch (Exception e) { //FIXME
-                            e.printStackTrace();
-                        }
+                        handle(cur);
                         cur = null;
                     }
                 } catch (InterruptedException e) {
@@ -1973,7 +1969,7 @@ public class Resource implements Serializable {
         List<Layer> layers = new LinkedList<>();
         if (this.ver == -1)
             this.ver = ver;
-        if (ver == 0 || ver == -1)
+        else if (ver == 0 || ver == -1)
             ver = this.ver;
         else if (ver != this.ver) {
             if (dev.reslog)
