@@ -275,7 +275,7 @@ public class Makewindow extends Widget {
                 } catch (Exception e) { // fail silently
                 }
 
-                List<Integer> qmodValues = new ArrayList<Integer>(3);
+                List<Integer> qmodValues = new ArrayList<>(3);
 
                 for (Indir<Resource> qm : qmod) {
                     try {
@@ -302,7 +302,7 @@ public class Makewindow extends Widget {
                                 }
                             }
                         }
-                    } catch (Loading l) {
+                    } catch (Exception l) {
                     }
                 }
                 x += 25;
@@ -335,7 +335,7 @@ public class Makewindow extends Widget {
                         Tex t = qmicon(tool);
                         g.image(t, new Coord(x, qmy));
                         x += t.sz().x + 1;
-                    } catch (Loading l) {
+                    } catch (Exception l) {
                     }
                 }
                 x += 25;
