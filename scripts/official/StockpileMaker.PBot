@@ -30,7 +30,7 @@ main = () => {
 			stockpileLocs.push({x: i, y: j});
 		}
 	}
-	const items = javaListToArray(PBotUtils.playerInventory(ui).getInventoryItemsByResnames([selectedItem.getResname()]));
+	const items = javaListToArray(PBotUtils.playerInventory(ui).getInventoryItemsByResnames(selectedItem.getResname()));
 	while(stockpileLocs.length > 0 && items.length > 0) {
 		const location = stockpileLocs.shift();
 		const item = items.shift();

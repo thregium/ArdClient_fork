@@ -87,10 +87,10 @@ const pressBtn = () => {
         	return;
         }
 		
-	let grapeInPlayer = PBotUtils.playerInventory(ui).getInventoryItemsByNames(['Grapes']);
-	let grapeInPress = pressInventory.getInventoryItemsByNames(['Grapes']);
-	let seedInPlayer = PBotUtils.playerInventory(ui).getInventoryItemsByResnames(['gfx/invobjs/seed-grape']);
-	let seedInPress = pressInventory.getInventoryItemsByResnames(['gfx/invobjs/seed-grape']);
+	let grapeInPlayer = PBotUtils.playerInventory(ui).getInventoryItemsByNames('Grapes');
+	let grapeInPress = pressInventory.getInventoryItemsByNames('Grapes');
+	let seedInPlayer = PBotUtils.playerInventory(ui).getInventoryItemsByResnames('gfx/invobjs/seed-grape');
+	let seedInPress = pressInventory.getInventoryItemsByResnames('gfx/invobjs/seed-grape');
 	
 	const Button = Java.type('haven.Button');
 	const pressb = pressWindow.getchild(Button);  //Find Press Button
@@ -116,10 +116,10 @@ const pressBtn = () => {
 		}
 		
 		juiceAmount = juiceMeter.amount / 100;
-		grapeInPlayer = PBotUtils.playerInventory(ui).getInventoryItemsByNames(['Grapes']);
-		grapeInPress = pressInventory.getInventoryItemsByNames(['Grapes']);
-		seedInPlayer = PBotUtils.playerInventory(ui).getInventoryItemsByResnames(['gfx/invobjs/seed-grape']);
-		seedInPress = pressInventory.getInventoryItemsByResnames(['gfx/invobjs/seed-grape']);
+		grapeInPlayer = PBotUtils.playerInventory(ui).getInventoryItemsByNames('Grapes');
+		grapeInPress = pressInventory.getInventoryItemsByNames('Grapes');
+		seedInPlayer = PBotUtils.playerInventory(ui).getInventoryItemsByResnames('gfx/invobjs/seed-grape');
+		seedInPress = pressInventory.getInventoryItemsByResnames('gfx/invobjs/seed-grape');
 		
 		while (seedInPress.size() > 0 && !shouldStop()) {
 			freePressSlots = pressInventory.freeSlotsInv();
@@ -130,8 +130,8 @@ const pressBtn = () => {
 			}
 			PBotUtils.sleep(1000);
 			
-			seedInPress = pressInventory.getInventoryItemsByResnames(['gfx/invobjs/seed-grape']);
-			grapeInPress = pressInventory.getInventoryItemsByNames(['Grapes']);
+			seedInPress = pressInventory.getInventoryItemsByResnames('gfx/invobjs/seed-grape');
+			grapeInPress = pressInventory.getInventoryItemsByNames('Grapes');
 		}
 	}
 };
@@ -216,7 +216,7 @@ function checkContain(str) {
 }
 
 function fseedinplayer() {
-	return PBotUtils.playerInventory(ui).getInventoryItemsByResnames(['gfx/invobjs/seed-grape']);
+	return PBotUtils.playerInventory(ui).getInventoryItemsByResnames('gfx/invobjs/seed-grape');
 }
 
 const startBtn = () => {
@@ -241,7 +241,7 @@ const startBtn = () => {
 			PBotUtils.sysMsg(ui, "Ran out of grape stockpiles!");
 			break;
 		}
-		let grapeInInv = PBotUtils.playerInventory(ui).getInventoryItemsByNames(['Grapes']).size();
+		let grapeInInv = PBotUtils.playerInventory(ui).getInventoryItemsByNames('Grapes').size();
 		while(PBotUtils.playerInventory(ui).freeSlotsInv() > 0 && !shouldStop()) {
 			if(grapeStockpiles.length === 0) {
 				// Out of grape stockpiles

@@ -58,7 +58,7 @@ const startFarmingBtn = () => {
 		if (shouldStop()) {
 		    return;
 		}
-		let inventoryItems = PBotUtils.playerInventory(ui).getInventoryItemsByResnames([seedName]);
+		let inventoryItems = PBotUtils.playerInventory(ui).getInventoryItemsByResnames(seedName);
 		if (inventoryItems.size() == 0 && !seedInHand(seedName)) {
 			PBotUtils.sysMsg(ui, "Seeds null");
 			stop = true;
@@ -70,7 +70,7 @@ const startFarmingBtn = () => {
 		}
 		
 		if (!seedInHand(seedName)) {
-			inventoryItems = PBotUtils.playerInventory(ui).getInventoryItemsByResnames([seedName]);
+			inventoryItems = PBotUtils.playerInventory(ui).getInventoryItemsByResnames(seedName);
 			for (let j = 0; j < inventoryItems.size() || !shouldStop(); j++) {
 				if (isAmount(inventoryItems[j])) {
 					takeItem(inventoryItems[j], 50);

@@ -78,8 +78,8 @@ const startBtn = () => {
 			PBotUtils.sysMsg(ui, "Ran out of string stockpiles!");
 			break;
 		}
-		let flaxInInv = PBotUtils.playerInventory(ui).getInventoryItemsByNames(['Flax Fibres']).size();
-		let hempInInv = PBotUtils.playerInventory(ui).getInventoryItemsByNames(['Hemp Fibres']).size();
+		let flaxInInv = PBotUtils.playerInventory(ui).getInventoryItemsByNames('Flax Fibres').size();
+		let hempInInv = PBotUtils.playerInventory(ui).getInventoryItemsByNames('Hemp Fibres').size();
 		let stringInInv = flaxInInv + hempInInv;
 		while(PBotUtils.playerInventory(ui).freeSlotsInv() > 0) {
 			if(stringStockpiles.length === 0) {
@@ -126,13 +126,13 @@ const startBtn = () => {
 	    PBotWindowAPI.waitForWindow(ui, "Stockpile", 2000);
 	    const slots = PBotWindowAPI.getStockpileTotalCapacity(ui);
 	    const used = PBotWindowAPI.getStockpileUsedCapacity(ui);
-		let ropeInInv = PBotUtils.playerInventory(ui).getInventoryItemsByNames(['Rope']).size();
+		let ropeInInv = PBotUtils.playerInventory(ui).getInventoryItemsByNames('Rope').size();
 	    const count = Math.min(ropeInInv, slots-used);
 		PBotWindowAPI.putItemFromInventoryToStockpile(ui, count);
 		if(count + used === slots)
 			ropeStockpiles.shift();
 		ropeInInv -= count;
-		while(PBotUtils.playerInventory(ui).getInventoryItemsByNames(['Rope']).size() != ropeInInv) {
+		while(PBotUtils.playerInventory(ui).getInventoryItemsByNames('Rope').size() != ropeInInv) {
 			PBotUtils.sleep(25);
 		}
 	}

@@ -2,11 +2,12 @@
 // Made by Purus Cor to demonstrate usage of PBot API
 // For more information about API, join Purus Pasta discord
 // To suggest features into API, suggest them in discord
+load('api.js');
 const ui = Java.type('haven.purus.pbot.PBotAPI').ui();
 const PBotUtils = Java.type('haven.purus.pbot.PBotUtils');
 const PBotGobAPI = Java.type('haven.purus.pbot.PBotGobAPI');
 
-const potstuff = ["gfx/invobjs/soil", "gfx/invobjs/soil", "gfx/invobjs/mulch", "gfx/invobjs/earthworm"];
+const potstuff = arrayToList(["gfx/invobjs/soil", "gfx/invobjs/soil", "gfx/invobjs/mulch", "gfx/invobjs/earthworm"]);
 
 const potstuffs = PBotUtils.playerInventory(ui).getInventoryItemsByResnames(potstuff);
 const inventories = PBotUtils.getAllInventories(ui);
@@ -17,7 +18,7 @@ for(let i=0; i<inventories.length; i++) {
 let soil = 0;
 if(potstuffs.length > 0) {
 	for(let i=0; i<inventories.length; i++) {
-		const pots = inventories[i].getInventoryItemsByResnames(["gfx/invobjs/treepot", "gfx/invobjs/treepot-s"]);
+		const pots = inventories[i].getInventoryItemsByResnames(arrayToList(["gfx/invobjs/treepot", "gfx/invobjs/treepot-s"]));
 		for(let j=0; j<pots.length; j++) {
 			for(let k=0; k<4; k++) {
 			    potstuffs[soil++].takeItem(true);

@@ -71,7 +71,7 @@ const startBtnCb = () => {
 			}
 		}
 		PBotUtils.sleep(100); // Wait a moment for all the clay to appear into the inventory
-		let clayInInv = PBotUtils.playerInventory(ui).getInventoryItemsByNames(["Ball Clay"]).size();
+		let clayInInv = PBotUtils.playerInventory(ui).getInventoryItemsByNames("Ball Clay").size();
 		console.log(clayInInv);
 		// Put clay in stockpiles or out of stockpiles
 		while(clayInInv > 0) {
@@ -91,7 +91,7 @@ const startBtnCb = () => {
 			if(count + used === slots)
 				stockpiles.shift();
 			clayInInv -= count;
-			while(PBotUtils.playerInventory(ui).getInventoryItemsByNames(["Ball Clay"]).size() != clayInInv) {
+			while(PBotUtils.playerInventory(ui).getInventoryItemsByNames("Ball Clay").size() != clayInInv) {
 				PBotUtils.sleep(25);
 			}
 		}

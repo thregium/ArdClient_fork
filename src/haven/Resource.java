@@ -446,11 +446,11 @@ public class Resource implements Serializable {
 
     public static class Pool {
         public int nloaders = 2;
-        private final Collection<Loader> loaders = new LinkedList<Loader>();
-        private final List<ResSource> sources = new LinkedList<ResSource>();
-        private final Map<String, Resource> cache = new CacheMap<String, Resource>();
-        private final PrioQueue<Queued> queue = new PrioQueue<Queued>();
-        private final Map<String, Queued> queued = new HashMap<String, Queued>();
+        private final Collection<Loader> loaders = new LinkedList<>();
+        private final List<ResSource> sources = new LinkedList<>();
+        private final Map<String, Resource> cache = new CacheMap<>();
+        private final PrioQueue<Queued> queue = new PrioQueue<>();
+        private final Map<String, Queued> queued = new HashMap<>();
         private final Pool parent;
 
         public Pool(Pool parent, ResSource... sources) {
@@ -468,7 +468,7 @@ public class Resource implements Serializable {
         }
 
         private class Queued extends Named implements Prioritized, Serializable {
-            transient final Collection<Queued> rdep = new LinkedList<Queued>();
+            transient final Collection<Queued> rdep = new LinkedList<>();
             final Waitable.Queue wq = new Waitable.Queue();
             volatile int prio;
             Queued awaiting;
@@ -1969,10 +1969,12 @@ public class Resource implements Serializable {
         List<Layer> layers = new LinkedList<>();
         if (this.ver == -1)
             this.ver = ver;
+        if (ver == 0 || ver == -1)
+            ver = this.ver;
         else if (ver != this.ver) {
             if (dev.reslog)
                 System.out.printf("Wrong res version (%d != %d) %s%n", ver, this.ver, this);
-            //throw (new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
+            throw (new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
         }
         while (!in.eom()) {
             String title = in.string();

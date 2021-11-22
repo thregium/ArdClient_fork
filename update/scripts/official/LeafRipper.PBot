@@ -55,7 +55,7 @@ main = () => {
 		}
 		// PBotUtils.waitForHourglass(ui); // We may or may not have leave in our hand after this, maybe it doesn't matter
 		waitForIdle();
-		let leaves = PBotUtils.playerInventory(ui).getInventoryItemsByResnames(["gfx/invobjs/leaf-mulberrytree"]).size();
+		let leaves = PBotUtils.playerInventory(ui).getInventoryItemsByResnames("gfx/invobjs/leaf-mulberrytree").size();
 		while(leaves > 0) {
 			if(piles.length === 0) {
 				stop = true;
@@ -83,7 +83,7 @@ main = () => {
 				piles.shift();
 			leaves -= count;
 			PBotWindowAPI.putItemFromInventoryToStockpile(ui, count);
-			while(PBotUtils.playerInventory(ui).getInventoryItemsByResnames(["gfx/invobjs/leaf-mulberrytree"]).size() != leaves) {
+			while(PBotUtils.playerInventory(ui).getInventoryItemsByResnames("gfx/invobjs/leaf-mulberrytree").size() != leaves) {
 				PBotUtils.sleep(25);
 			}
 		}

@@ -20,7 +20,7 @@ function shouldStop() {
 };
 
 const btnClick = () => {
-	const cellar = PBotGobAPI.findGobByNames(ui, 1000, ["gfx/terobjs/arch/cellardoor"]);
+	const cellar = PBotGobAPI.findGobByNames(ui, 1000, "gfx/terobjs/arch/cellardoor");
 	if(cellar == null) {
 		PBotUtils.sysMsg(ui, "Couldn't find a cellar door!");
 		return;
@@ -33,7 +33,7 @@ const btnClick = () => {
 			PBotUtils.drink(ui, true);
 		cellar.doClick(3, 0);
 		while(PBotUtils.getHourglass(ui) == -1) {
-			if(PBotGobAPI.findGobByNames(ui, 1000, ["gfx/terobjs/arch/cellardoor"]) == null) {
+			if(PBotGobAPI.findGobByNames(ui, 1000, "gfx/terobjs/arch/cellardoor") == null) {
 				stop = true;
 				break;
 			}
@@ -52,7 +52,7 @@ const btnClick = () => {
 		
 		
 		PBotUtils.sleep(1000);
-		let boulder = PBotGobAPI.findGobByNames(ui, 1000, [".*bumling.*"]);
+		let boulder = PBotGobAPI.findGobByNames(ui, 1000, ".*bumling.*");
 		if (boulder == null) break;
 		while (boulder != null && !shouldStop()) {
 		    boulder.doClick(3, 0);
@@ -60,7 +60,7 @@ const btnClick = () => {
             PBotUtils.choosePetal(ui, "Chip stone");
             PBotUtils.waitForHourglass(ui);
             PBotUtils.dropItemFromHand(ui, 0);
-            boulder = PBotGobAPI.findGobByNames(ui, 1000, [".*bumling.*"]);
+            boulder = PBotGobAPI.findGobByNames(ui, 1000, ".*bumling.*");
 		}
 	}
 	PBotUtils.sysMsg(ui, "Finished digging the cellar!");
