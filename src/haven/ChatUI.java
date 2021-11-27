@@ -678,14 +678,14 @@ public class ChatUI extends Widget {
                 }
 
                 public boolean keydown(KeyEvent ev) {
-			if(ConsoleHost.kb_histprev.key().match(ev)) {
+                    if (ConsoleHost.kb_histprev.key().match(ev)) {
                         if (hpos > 0) {
                             if (hpos == history.size())
                                 hcurrent = text();
                             rsettext(history.get(--hpos));
                         }
                         return (true);
-			} else if(ConsoleHost.kb_histnext.key().match(ev)) {
+                    } else if (ConsoleHost.kb_histnext.key().match(ev)) {
                         if (hpos < history.size()) {
                             if (++hpos == history.size())
                                 rsettext(hcurrent);
@@ -908,7 +908,6 @@ public class ChatUI extends Widget {
                 Integer from = (Integer) args[0];
                 String line = (String) args[1];
 
-
                 if (name.equals(Resource.getLocString(Resource.BUNDLE_LABEL, "Area Chat")) && line.startsWith(CMD_PREFIX_HLIGHT)) {
                     try {
                         long gobid = Long.parseLong(line.substring(1));
@@ -1062,7 +1061,7 @@ public class ChatUI extends Widget {
         public void uimsg(String msg, Object... args) {
             if (msg == "msg") {
                 Integer from = (Integer) args[0];
-		long gobid = Utils.uint32((Integer)args[1]);
+                long gobid = Utils.uint32((Integer) args[1]);
                 String line = (String) args[2];
                 Color col = Color.WHITE;
 
@@ -1781,14 +1780,14 @@ public class ChatUI extends Widget {
         return "[" + new SimpleDateFormat("HH:mm").format(new Date()) + "] " + text;
     }
 
-    private static void save(String chatName, String text, String name) {
+    public static void save(String chatName, String text, String name) {
         if (Config.chatsave)
             save(chatName, Config.chattimestamp ?
                     text.substring(0, 7) + " " + name + ":" + text.substring(7) :
                     name + ": " + text);
     }
 
-    private synchronized static void save(String chatName, String text) {
+    public synchronized static void save(String chatName, String text) {
         if (Config.chatsave) {
             try {
                 if (Config.chatlog == null) {
