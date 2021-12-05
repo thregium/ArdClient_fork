@@ -146,24 +146,34 @@ public class MapFile {
                     }
                 }
             } while (fp == null);
-            try (StreamMessage data = new StreamMessage(fp)) {
-                int ver = data.uint8();
-                if (ver == 1) {
-                    Segment seg = new Segment(id);
-                    ZMessage z = new ZMessage(data);
-                    long storedid = z.int64();
-                    if (storedid != id)
-                        throw (new Message.FormatError(String.format("Segment ID mismatch: expected %x, got %x", id, storedid)));
-                    for (int i = 0, no = z.int32(); i < no; i++)
-                        seg.map.put(z.coord(), z.int64());
-                    return (seg);
-                } else {
-                    throw (new Message.FormatError("Unknown segment data version: " + ver));
+            do {
+                try (StreamMessage data = new StreamMessage(fp)) {
+                    int ver = data.uint8();
+                    if (ver == 1) {
+                        Segment seg = new Segment(id);
+                        ZMessage z = new ZMessage(data);
+                        long storedid = z.int64();
+                        if (storedid != id)
+                            throw (new Message.FormatError(String.format("Segment ID mismatch: expected %x, got %x", id, storedid)));
+                        for (int i = 0, no = z.int32(); i < no; i++)
+                            seg.map.put(z.coord(), z.int64());
+                        return (seg);
+                    } else {
+                        throw (new Message.FormatError("Unknown segment data version: " + ver));
+                    }
+                } catch (Message.BinError e) {
+                    if (e.getMessage().contains("another process")) {
+                        try {
+                            Thread.sleep(100);
+                        } catch (Exception ex) {
+                            return (null);
+                        }
+                    } else {
+                        warn(e, "error when loading segment %x: %s", id, e);
+                        return (null);
+                    }
                 }
-            } catch (Message.BinError e) {
-                warn(e, "error when loading segment %x: %s", id, e);
-                return (null);
-            }
+            } while (true);
         }, (id, seg) -> {
             checklock();
             OutputStream fp = null;
@@ -269,6 +279,8 @@ public class MapFile {
             }
         });
     }
+
+    public static final Map<String, Resource> localCache = new HashMap<>();
 
     public static Resource loadsaved(Resource.Pool pool, Resource.Spec spec) {
         try {
@@ -1062,7 +1074,9 @@ public class MapFile {
             else {
                 Resource r = null;
                 try {
-                    r = loadsaved(Resource.remote(), tilesets[t].res);
+                    synchronized (localCache) {
+                        r = localCache.compute(tilesets[t].res.name(), (k, v) -> v == null ? loadsaved(Resource.remote(), tilesets[t].res) : v);
+                    }
                 } catch (Loading l) {
                     throw (l);
                 } catch (Exception e) {
@@ -1085,7 +1099,9 @@ public class MapFile {
             else {
                 Resource r = null;
                 try {
-                    r = Resource.remote().loadwait(res);
+                    synchronized (localCache) {
+                        r = localCache.compute(res, (k, v) -> v == null ? Resource.remote().loadwait(res) : v);
+                    }
                 } catch (Loading l) {
                     throw (l);
                 } catch (Exception e) {
@@ -1109,7 +1125,10 @@ public class MapFile {
             if (cached[t])
                 return tilers[t];
             else {
-                final Resource r = loadsaved(Resource.remote(), tilesets[t].res);
+                Resource r;
+                synchronized (localCache) {
+                    r = localCache.compute(tilesets[t].res.name(), (k, v) -> v == null ? loadsaved(Resource.remote(), tilesets[t].res) : v);
+                }
                 final Tileset ts = r.layer(Tileset.class);
                 if (ts != null) {
                     //This can be null because some tiles are `notile`...
