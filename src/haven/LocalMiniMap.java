@@ -234,8 +234,8 @@ public class LocalMiniMap extends Widget {
                     if (!Config.disableBlackOutLinesOnMap) {
                         for (Coord ec : tecs) {
                             Coord coord = ul.add(c).add(ec);
-                            if (coord.x < 0 || coord.x > sz.x - 1 || coord.y < 0 || coord.y > sz.y - 1)
-                                continue;
+//                            if (coord.x < 0 || coord.x > sz.x - 1 || coord.y < 0 || coord.y > sz.y - 1)
+//                                continue;
                             if (m.gettile(coord) > t) {
                                 buf.setRGB(c.x, c.y, Color.BLACK.getRGB());
                                 break;
