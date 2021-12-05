@@ -28,7 +28,9 @@ package haven;
 
 import haven.sloth.gfx.GridMesh;
 import haven.sloth.script.pathfinding.Tile;
+import modification.dev;
 
+import java.io.IOException;
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
@@ -525,84 +527,87 @@ public class MCache {
                     break;
                 pfl[pidx] = msg.uint8();
             }
-            Message blob = new ZMessage(msg);
-            id = blob.int64();
-            while (true) {
-                int tileid = blob.uint8();
-                if (tileid == 255)
-                    break;
-                String resnm = blob.string();
-                int resver = blob.uint16();
-                nsets[tileid] = new Resource.Spec(Resource.remote(), resnm, resver);
+            try (ZMessage blob = new ZMessage(msg)) {
+                id = blob.int64();
+                while (true) {
+                    int tileid = blob.uint8();
+                    if (tileid == 255)
+                        break;
+                    String resnm = blob.string();
+                    int resver = blob.uint16();
+                    nsets[tileid] = new Resource.Spec(Resource.remote(), resnm, resver);
 
-                if (shallowater.matcher(resnm).matches()) {
-                    id2tile[tileid] = Tile.SHALLOWWATER;
-                } else if (deepwater.matcher(resnm).matches()) {
-                    id2tile[tileid] = Tile.DEEPWATER;
-                } else if (cave.matcher(resnm).matches()) {
-                    id2tile[tileid] = Tile.CAVE;
-                }
-            }
-            for (int i = 0; i < tiles.length; i++) {
-                tiles[i] = blob.uint8();
-
-                //we can figure out shallow vs deep hitmap from this info, ridges will come later
-                hitmap[i] = id2tile[tiles[i]];
-            }
-            for (int i = 0; i < z.length; i++)
-                z[i] = blob.int16();
-            @SuppressWarnings("unchecked")
-            Indir<Resource>[] olids = new Indir[0];
-            boolean[][] ols = {};
-            while (true) {
-                int pidx = blob.uint8();
-                if (pidx == 255)
-                    break;
-                int fl = pfl[pidx];
-                int type = blob.uint8();
-                Coord c1 = new Coord(blob.uint8(), blob.uint8());
-                Coord c2 = new Coord(blob.uint8(), blob.uint8());
-                Indir<Resource> olid;
-                if (type == 0) {
-                    if ((fl & 1) == 1)
-                        olid = olres.get(1).indir();
-                    else
-                        olid = olres.get(0).indir();
-                } else if (type == 1) {
-                    if ((fl & 1) == 1)
-                        olid = olres.get(3).indir();
-                    else
-                        olid = olres.get(2).indir();
-                } else if (type == 2) {
-                    if ((fl & 1) == 1)
-                        olid = olres.get(5).indir();
-                    else
-                        olid = olres.get(4).indir();
-                } else {
-                    throw (new RuntimeException("Unknown plot type " + type));
-                }
-                int oi;
-                find:
-                {
-                    for (oi = 0; oi < olids.length; oi++) {
-                        if (olids[oi] == olid)
-                            break find;
-                    }
-                    olids = Arrays.copyOf(olids, oi + 1);
-                    ols = Arrays.copyOf(ols, oi + 1);
-                    olids[oi] = olid;
-                }
-                boolean[] ol = ols[oi];
-                if (ol == null)
-                    ols[oi] = ol = new boolean[cmaps.x * cmaps.y];
-                for (int y = c1.y; y <= c2.y; y++) {
-                    for (int x = c1.x; x <= c2.x; x++) {
-                        ol[x + (y * cmaps.x)] = true;
+                    if (shallowater.matcher(resnm).matches()) {
+                        id2tile[tileid] = Tile.SHALLOWWATER;
+                    } else if (deepwater.matcher(resnm).matches()) {
+                        id2tile[tileid] = Tile.DEEPWATER;
+                    } else if (cave.matcher(resnm).matches()) {
+                        id2tile[tileid] = Tile.CAVE;
                     }
                 }
+                for (int i = 0; i < tiles.length; i++) {
+                    tiles[i] = blob.uint8();
+
+                    //we can figure out shallow vs deep hitmap from this info, ridges will come later
+                    hitmap[i] = id2tile[tiles[i]];
+                }
+                for (int i = 0; i < z.length; i++)
+                    z[i] = blob.int16();
+                @SuppressWarnings("unchecked")
+                Indir<Resource>[] olids = new Indir[0];
+                boolean[][] ols = {};
+                while (true) {
+                    int pidx = blob.uint8();
+                    if (pidx == 255)
+                        break;
+                    int fl = pfl[pidx];
+                    int type = blob.uint8();
+                    Coord c1 = new Coord(blob.uint8(), blob.uint8());
+                    Coord c2 = new Coord(blob.uint8(), blob.uint8());
+                    Indir<Resource> olid;
+                    if (type == 0) {
+                        if ((fl & 1) == 1)
+                            olid = olres.get(1).indir();
+                        else
+                            olid = olres.get(0).indir();
+                    } else if (type == 1) {
+                        if ((fl & 1) == 1)
+                            olid = olres.get(3).indir();
+                        else
+                            olid = olres.get(2).indir();
+                    } else if (type == 2) {
+                        if ((fl & 1) == 1)
+                            olid = olres.get(5).indir();
+                        else
+                            olid = olres.get(4).indir();
+                    } else {
+                        throw (new RuntimeException("Unknown plot type " + type));
+                    }
+                    int oi;
+                    find:
+                    {
+                        for (oi = 0; oi < olids.length; oi++) {
+                            if (olids[oi] == olid)
+                                break find;
+                        }
+                        olids = Arrays.copyOf(olids, oi + 1);
+                        ols = Arrays.copyOf(ols, oi + 1);
+                        olids[oi] = olid;
+                    }
+                    boolean[] ol = ols[oi];
+                    if (ol == null)
+                        ols[oi] = ol = new boolean[cmaps.x * cmaps.y];
+                    for (int y = c1.y; y <= c2.y; y++) {
+                        for (int x = c1.x; x <= c2.x; x++) {
+                            ol[x + (y * cmaps.x)] = true;
+                        }
+                    }
+                }
+                this.ols = olids;
+                this.ol = ols;
+            } catch (IOException e) {
+                dev.simpleLog(e);
             }
-            this.ols = olids;
-            this.ol = ols;
         }
 
         private void filltiles(Message buf) {

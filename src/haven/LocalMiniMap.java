@@ -229,20 +229,27 @@ public class LocalMiniMap extends Widget {
                     }
                 }
                 buf.setRGB(c.x, c.y, rgb);
+            }
+        }
 
-                try {
-                    if (!Config.disableBlackOutLinesOnMap) {
-                        for (Coord ec : tecs) {
-                            Coord coord = ul.add(c).add(ec);
+        if (!Config.disableBlackOutLinesOnMap) {
+            for (c.y = 0; c.y < sz.y; c.y++) {
+                for (c.x = 0; c.x < sz.x; c.x++) {
+                    int t = m.gettile(ul.add(c));
+                    try {
+                        if (!(configuration.disablepavingoutlineonmap && isContains(t, "gfx/tiles/paving/"))) {
+                            for (Coord ec : tecs) {
+                                Coord coord = ul.add(c).add(ec);
 //                            if (coord.x < 0 || coord.x > sz.x - 1 || coord.y < 0 || coord.y > sz.y - 1)
 //                                continue;
-                            if (m.gettile(coord) > t) {
-                                buf.setRGB(c.x, c.y, Color.BLACK.getRGB());
-                                break;
+                                if (m.gettile(coord) > t) {
+                                    buf.setRGB(c.x, c.y, Color.BLACK.getRGB());
+                                    break;
+                                }
                             }
                         }
+                    } catch (Exception e) {
                     }
-                } catch (Exception e) {
                 }
             }
         }

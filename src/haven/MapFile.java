@@ -1213,18 +1213,24 @@ public class MapFile {
                 if (configuration.allowoutlinemap) {
                     for (c.y = 0; c.y < cmaps.y; c.y++) {
                         for (c.x = 0; c.x < cmaps.x; c.x++) {
-                            int p = tilesets[gettile(c)].prio;
-                            for (Coord ec : tecs) {
-                                Coord coord = c.add(ec);
-                                if (coord.x < 0 || coord.x > cmaps.x - 1 || coord.y < 0 || coord.y > cmaps.y - 1)
-                                    continue;
-                                if (tilesets[gettile(coord)].prio > p) {
-                                    buf.setSample(c.x, c.y, 0, 0);
-                                    buf.setSample(c.x, c.y, 1, 0);
-                                    buf.setSample(c.x, c.y, 2, 0);
-                                    buf.setSample(c.x, c.y, 3, configuration.mapoutlinetransparency);
-                                    break;
+                            try {
+                                int p = tilesets[gettile(c)].prio;
+                                int t = gettile(c);
+                                if (!(configuration.disablepavingoutlineonmap && isContains(t, "gfx/tiles/paving/"))) {
+                                    for (Coord ec : tecs) {
+                                        Coord coord = c.add(ec);
+                                        if (coord.x < 0 || coord.x > cmaps.x - 1 || coord.y < 0 || coord.y > cmaps.y - 1)
+                                            continue;
+                                        if (tilesets[gettile(coord)].prio > p) {
+                                            buf.setSample(c.x, c.y, 0, 0);
+                                            buf.setSample(c.x, c.y, 1, 0);
+                                            buf.setSample(c.x, c.y, 2, 0);
+                                            buf.setSample(c.x, c.y, 3, configuration.mapoutlinetransparency);
+                                            break;
+                                        }
+                                    }
                                 }
+                            } catch (Exception e) {
                             }
                         }
                     }
@@ -1237,28 +1243,31 @@ public class MapFile {
                 if (configuration.allowridgesmap) {
                     for (c.y = 0; c.y < cmaps.y; c.y++) {
                         for (c.x = 0; c.x < cmaps.x; c.x++) {
-                            final Tiler t = tiler(gettile(c), tilers, tlcached);
-                            if (t instanceof Ridges.RidgeTile && brokenp(t, c, tilers, tlcached)) {
-                                final Color black = Color.BLACK;
-                                buf.setSample(c.x, c.y, 0, black.getRed());
-                                buf.setSample(c.x, c.y, 1, black.getGreen());
-                                buf.setSample(c.x, c.y, 2, black.getBlue());
-                                buf.setSample(c.x, c.y, 3, black.getAlpha());
-
-                                if (configuration.allowoutlinemap) {
-                                    for (int y = Math.max(c.y - 1, 0); y <= Math.min(c.y + 1, cmaps.y - 1); y++) {
-                                        for (int x = Math.max(c.x - 1, 0); x <= Math.min(c.x + 1, cmaps.x - 1); x++) {
-                                            if (x == c.x && y == c.y)
-                                                continue;
-                                            Color cc = new Color(buf.getSample(x, y, 0), buf.getSample(x, y, 1), buf.getSample(x, y, 2), buf.getSample(x, y, 3));
-                                            final Color blended = Utils.blendcol(cc, Color.BLACK, 0.1 * (configuration.mapoutlinetransparency / 255.0));
-                                            buf.setSample(x, y, 0, blended.getRed());
-                                            buf.setSample(x, y, 1, blended.getGreen());
-                                            buf.setSample(x, y, 2, blended.getBlue());
-                                            buf.setSample(x, y, 3, blended.getAlpha());
+                            try {
+                                final Tiler t = tiler(gettile(c), tilers, tlcached);
+                                if (t instanceof Ridges.RidgeTile && brokenp(t, c, tilers, tlcached)) {
+                                    final Color black = Color.BLACK;
+                                    buf.setSample(c.x, c.y, 0, black.getRed());
+                                    buf.setSample(c.x, c.y, 1, black.getGreen());
+                                    buf.setSample(c.x, c.y, 2, black.getBlue());
+                                    buf.setSample(c.x, c.y, 3, black.getAlpha());
+    
+                                    if (configuration.allowoutlinemap) {
+                                        for (int y = Math.max(c.y - 1, 0); y <= Math.min(c.y + 1, cmaps.y - 1); y++) {
+                                            for (int x = Math.max(c.x - 1, 0); x <= Math.min(c.x + 1, cmaps.x - 1); x++) {
+                                                if (x == c.x && y == c.y)
+                                                    continue;
+                                                Color cc = new Color(buf.getSample(x, y, 0), buf.getSample(x, y, 1), buf.getSample(x, y, 2), buf.getSample(x, y, 3));
+                                                final Color blended = Utils.blendcol(cc, Color.BLACK, 0.1 * (configuration.mapoutlinetransparency / 255.0));
+                                                buf.setSample(x, y, 0, blended.getRed());
+                                                buf.setSample(x, y, 1, blended.getGreen());
+                                                buf.setSample(x, y, 2, blended.getBlue());
+                                                buf.setSample(x, y, 3, blended.getAlpha());
+                                            }
                                         }
                                     }
                                 }
+                            } catch (Exception e) {
                             }
                         }
                     }

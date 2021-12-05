@@ -249,6 +249,8 @@ public class configuration {
     public static int outlinecolor = Utils.getprefi("outlinecolor", Color.BLACK.hashCode());
     public static int outlineh = Utils.getprefi("outlineh", 1);
 
+    public static boolean disablepavingoutlineonmap = Utils.getprefb("disablepavingoutlineonmap", false);
+
     public static boolean nocursor = Utils.getprefb("nocursor", false);
     public static int crosterresid = Utils.getprefi("crosterresid", -1);
 

@@ -4044,6 +4044,7 @@ public class OptWnd extends Window {
                 return Text.render("Draw cave tiles on large map. Outline nust be disable.").tex();
             }
         });
+        appender.add(new CheckBox("Disable paving outline", val -> Utils.setprefb("disablepavingoutlineonmap", configuration.disablepavingoutlineonmap = val), configuration.disablepavingoutlineonmap));
 
         appender.add(new Label(""));
         appender.add(new Label("Minimap"));
