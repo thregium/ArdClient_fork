@@ -107,8 +107,13 @@ public class LocalMiniMap extends Widget {
     private boolean showView = DefSettings.MMSHOWVIEW.get();
     private float zoom = 1f; //zoom multiplier
     private float iconZoom = 1f; //zoom multiplier for minimap icons
-    private Map<Color, Tex> xmap = new HashMap<Color, Tex>(6);
-
+    private Map<Color, Tex> xmap = new HashMap<>(6);
+    private static final Coord[] tecs = {
+            new Coord(0, -1),
+            new Coord(1, 0),
+            new Coord(0, 1),
+            new Coord(-1, 0)
+    };
 
     public LocalMiniMap(Coord sz, MapView mv) {
         super(sz);
@@ -227,28 +232,36 @@ public class LocalMiniMap extends Widget {
 
                 try {
                     if (!Config.disableBlackOutLinesOnMap) {
-                        if ((m.gettile(ul.add(c).add(-1, 0)) > t) ||
-                                (m.gettile(ul.add(c).add(1, 0)) > t) ||
-                                (m.gettile(ul.add(c).add(0, -1)) > t) ||
-                                (m.gettile(ul.add(c).add(0, 1)) > t))
-                            buf.setRGB(c.x, c.y, Color.BLACK.getRGB());
+                        for (Coord ec : tecs) {
+                            Coord coord = ul.add(c).add(ec);
+                            if (coord.x < 0 || coord.x > sz.x - 1 || coord.y < 0 || coord.y > sz.y - 1)
+                                continue;
+                            if (m.gettile(coord) > t) {
+                                buf.setRGB(c.x, c.y, Color.BLACK.getRGB());
+                                break;
+                            }
+                        }
                     }
                 } catch (Exception e) {
                 }
             }
         }
 
-        for (c.y = 1; c.y < sz.y - 1; c.y++) {
-            for (c.x = 1; c.x < sz.x - 1; c.x++) {
+        for (c.y = 0; c.y < sz.y; c.y++) {
+            for (c.x = 0; c.x < sz.x; c.x++) {
                 try {
                     int t = m.gettile(ul.add(c));
                     Tiler tl = m.tiler(t);
-                    if (tl instanceof Ridges.RidgeTile) {
-                        if (Ridges.brokenp(m, ul.add(c))) {
-                            for (int y = c.y - 1; y <= c.y + 1; y++) {
-                                for (int x = c.x - 1; x <= c.x + 1; x++) {
+                    if (tl instanceof Ridges.RidgeTile && Ridges.brokenp(m, ul.add(c))) {
+                        buf.setRGB(c.x, c.y, Color.BLACK.getRGB());
+
+                        if (!Config.disableBlackOutLinesOnMap) {
+                            for (int y = Math.max(c.y - 1, 0); y <= Math.min(c.y + 1, sz.y - 1); y++) {
+                                for (int x = Math.max(c.x - 1, 0); x <= Math.min(c.x + 1, sz.x - 1); x++) {
+                                    if (x == c.x && y == c.y)
+                                        continue;
                                     Color cc = new Color(buf.getRGB(x, y));
-                                    buf.setRGB(x, y, Utils.blendcol(cc, Color.BLACK, ((x == c.x) && (y == c.y)) ? 1 : 0.1).getRGB());
+                                    buf.setRGB(x, y, Utils.blendcol(cc, Color.BLACK, 0.1).getRGB());
                                 }
                             }
                         }
@@ -258,7 +271,7 @@ public class LocalMiniMap extends Widget {
             }
         }
 
-        return new TexI(buf);
+        return (new TexI(buf));
     }
 
     @SuppressWarnings("Duplicates")
@@ -912,12 +925,13 @@ public class LocalMiniMap extends Widget {
             Coord csd = c.sub(delta);
             Coord2d mc = c2p(csd);
             Gob gob = findicongob(csd.add(delta));
+            int mod = ui.modflags();
             if (gob == null) { //click tile
                 if (ui.modmeta && button == clickBind) {
                     mv.queuemove(c2p(c.sub(delta)));
                 } else if (button == clickBind) {
-                    mv.wdgmsg("click", rootpos().add(csd), mc.floor(posres), 1, ui.modflags());
-                    mv.pllastcc = mc;
+                    mv.wdgmsg("click", rootpos().add(csd), mc.floor(posres), 1, mod);
+                    mv.pllastcc = mod == 0 ? mc : null;
                     mv.clearmovequeue();
                 }
                 return true;
@@ -926,8 +940,12 @@ public class LocalMiniMap extends Widget {
                     if (ui.gui != null && ui.gui.map != null)
                         ui.gui.map.showSpecialMenu(gob);
                 } else {
-                    mv.wdgmsg("click", rootpos().add(csd), mc.floor(posres), button, ui.modflags(), 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
-                    mv.pllastcc = mc;
+                    mv.wdgmsg("click", rootpos().add(csd), mc.floor(posres), button, mod, 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
+                    if (button == 1) {
+                        mv.pllastcc = mod == 0 ? mc : null;
+                    } else {
+                        mv.pllastcc = gob.rc;
+                    }
                     if (gob.getres() != null) {
                         CheckListboxItem itm = Config.autoclusters.get(gob.getres().name);
                         if (itm != null && itm.selected)

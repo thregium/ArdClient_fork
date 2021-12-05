@@ -55,4 +55,7 @@ public abstract class SIWidget extends Widget {
             surf.dispose();
         surf = null;
     }
+
+    public void click() {
+    }
 }

@@ -1,4 +1,11 @@
-Details in https://github.com/Cediner/ArdClient/commits/
+>>> Details in https://github.com/Cediner/ArdClient/commits/ <<<
+
+[2021.12.05]
+> Added proximity to the right click (Control)
+> Updated some graphics
+> Fixed little
+~
+
 2021.11.18
 > Added python script engine
 > Fixed aggroAll

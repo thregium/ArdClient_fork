@@ -378,7 +378,7 @@ public class Resource implements Serializable {
         }
 
         public HttpSource(URL baseurl) {
-            System.out.println("Base URL: " + baseurl);
+            dev.simpleLog("Base URL: " + baseurl);
             this.baseurl = baseurl;
         }
 
@@ -500,7 +500,7 @@ public class Resource implements Serializable {
                 }
                 if (error != null)
                     if (dev.skipexceptions) {
-                        System.out.println("Delayed error in resource " + name + " (v" + ver + "), from " + error.src + " => " + error);
+                        dev.simpleLog("Delayed error in resource " + name + " (v" + ver + "), from " + error.src + " => " + error);
                     } else {
                         throw (new RuntimeException("Delayed error in resource " + name + " (v" + ver + "), from " + error.src, error));
                     }
@@ -588,7 +588,7 @@ public class Resource implements Serializable {
                          * way of going about it, however; I'm not
                          * sure. */
 //                        throw (new LoadException(String.format("Weird version number on %s (%d > %d), loaded from %s", cur.name, cur.ver, ver, cur.source), cur));
-                        System.out.println(String.format("Weird version number on %s (%d > %d), loaded from %s %s", cur.name, cur.ver, ver, cur.source, cur));
+                        dev.simpleLog(String.format("Weird version number on %s (%d > %d), loaded from %s %s", cur.name, cur.ver, ver, cur.source, cur));
                         return (cur.indir());
                     }
                 }
@@ -598,7 +598,7 @@ public class Resource implements Serializable {
                         if (ver != -1) {
                             if (ver < cq.ver) { //who cares, don't kill the client over this...
                                 //throw(new LoadException(String.format("Weird version number on %s (%d > %d)", cq.name, cq.ver, ver), null));
-                                System.out.println(String.format("Weird version number on %s (%d > %d)", cq.name, cq.ver, ver));
+                                dev.simpleLog(String.format("Weird version number on %s (%d > %d)", cq.name, cq.ver, ver));
                                 cq.boostprio(prio);
                                 return (cq);
                             } else if (ver == cq.ver) {
@@ -1409,7 +1409,7 @@ public class Resource implements Serializable {
                     n = pool.load(pr, pver);
                 } catch (RuntimeException e) {
 //                    throw (new LoadException("Illegal resource dependency", e, Resource.this));
-                    System.out.println("Illegal resource dependency " + e + Resource.this);
+                    dev.simpleLog("Illegal resource dependency " + e + Resource.this);
                     try {
                         n = pool.load(pr);
                     } catch (Exception ex) {
@@ -1962,7 +1962,7 @@ public class Resource implements Serializable {
         Message in = new StreamMessage(st);
         byte[] sig = "Haven Resource 1".getBytes(Utils.ascii);
         if (!Arrays.equals(sig, in.bytes(sig.length))) {
-            System.out.printf("Invalid res signature %s%n", this);
+            dev.simpleLog(String.format("Invalid res signature %s", this));
             throw (new LoadException("Invalid res signature", this));
         }
         int ver = in.uint16();
@@ -1973,7 +1973,7 @@ public class Resource implements Serializable {
             ver = this.ver;
         else if (ver != this.ver) {
             if (dev.reslog)
-                System.out.printf("Wrong res version (%d != %d) %s%n", ver, this.ver, this);
+                dev.simpleLog(String.format("Wrong res version (%d != %d) %s", ver, this.ver, this));
             throw (new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
         }
         while (!in.eom()) {

@@ -112,13 +112,17 @@ public class configuration {
     public static boolean instflmchosen = Utils.getprefb("instflmchosen", false);
     public static boolean instflmcancel = Utils.getprefb("instflmcancel", true);
 
-    public static boolean proximityspecial = Utils.getprefb("proximityspecial", false);
+//    public static boolean proximityspecial = Utils.getprefb("proximityspecial", false);
     public static boolean customquality = Utils.getprefb("customquality", false);
     public static String qualitypos = Utils.getpref("qualitypos", "Left-Bottom");
     public static boolean shownumeric = Utils.getprefb("shownumeric", true);
     public static String numericpos = Utils.getpref("numericpos", "Right-Top");
     public static boolean showstudytime = Utils.getprefb("showstudytime", true);
     public static String studytimepos = Utils.getpref("studytimepos", "Left-Top");
+
+    public static boolean rightclickproximity = Utils.getprefb("rightclickproximity", false);
+    public static int rightclickproximityradius = Utils.getprefi("rightclickproximityradius", 5);
+    public static int attackproximityradius = Utils.getprefi("attackproximityradius", 5);
 
     public static Coord infopos(String pos, Coord parsz, Coord tsz) {
         switch (pos) {

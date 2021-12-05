@@ -9,6 +9,7 @@ import haven.Utils;
 import haven.Widget;
 
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -50,6 +51,30 @@ public class dev {
     public static String serverSender = "_SERVER_MSG";
     public static String clientSender = "_CLIENT_MSG";
 
+    public static String localTime() {
+        return (LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS")));
+    }
+
+    public static void simpleLog(Throwable e) {
+        if (logging) {
+            StackTraceElement[] stackTraceElements = new Throwable().getStackTrace();
+            StringBuilder sb = new StringBuilder();
+            sb.append("[").append(LocalTime.now()).append("]").append(" || ").append("ERROR").append(" || ").append(stackTraceElements[1]).append(" || ").append(e.getMessage());
+
+            System.err.println(sb.toString());
+        }
+    }
+
+    public static void simpleLog(String e) {
+        if (logging) {
+            StackTraceElement[] stackTraceElements = new Throwable().getStackTrace();
+            StringBuilder sb = new StringBuilder();
+            sb.append("[").append(localTime()).append("]").append(" || ").append("ERROR").append(" || ").append(stackTraceElements[1]).append(" || ").append(e);
+
+            System.err.println(sb.toString());
+        }
+    }
+
     public static void sysPrintStackTrace(String text) {
         if (logging) {
             StackTraceElement[] stackTraceElements = new Throwable().getStackTrace();
@@ -86,7 +111,7 @@ public class dev {
         }
 
         if (!skip_log && logging) {
-            System.out.print("[" + LocalTime.now() + "]");
+            System.out.print("[" + localTime() + "]");
 
             System.out.print(" || " + who);
             if (widget.ui != null && widget.ui.sess != null) System.out.print("[" + widget.ui.sess.username + "]");
@@ -123,7 +148,7 @@ public class dev {
         boolean skip_log = false;
 
         if (!skip_log && logging) {
-            System.out.print("[" + LocalTime.now() + "]");
+            System.out.print("[" + localTime() + "]");
 //            System.out.print(" || ");
 //            for (int i = 1; i < stackTraceElementsLength; i++) {
 //                System.out.print("{" + stackTraceElements[i].getClassName() + "(" + stackTraceElements[i].getMethodName() + ")(" + stackTraceElements[i].getLineNumber() + ")");

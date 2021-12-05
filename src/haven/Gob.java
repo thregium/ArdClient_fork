@@ -799,6 +799,12 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         addol(new Overlay(ol));
     }
 
+    public void remol(Overlay ol) {
+        synchronized (ols) {
+            ols.remove(ol);
+        }
+    }
+
     public Overlay daddol(final Overlay ol) {
         dols.add(ol);
         return ol;
@@ -1083,8 +1089,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     public void draw(GOut g) {
     }
 
-    public Overlay gobHitbox;
-
     public boolean setup(RenderList rl) {
         loc.tick();
         final Hidden hid = getattr(Hidden.class);
@@ -1357,15 +1361,20 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             try {
                 if (d != null) {
                     if (!(hid != null && Config.hideuniquegobs)) {
+                        int olid = "overlay_hitbox_solid_id".hashCode();
+                        Overlay ol = findol(olid);
                         if (Config.hidegobs && ((type == Type.TREE && Config.hideTrees) || (type == Type.BUSH && Config.hideBushes) || (type == Type.BOULDER && Config.hideboulders))) {
-                            GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
-                            if (bbox != null && Config.showoverlay) {
-                                if (gobHitbox == null)
-                                    gobHitbox = new Overlay(new GobHitbox(this, bbox, true));
-                                if (gobHitbox != null)
-                                    rl.add(gobHitbox, null);
-                            }
+                            if (Config.showoverlay) {
+                                if (ol == null) {
+                                    GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
+                                    if (bbox != null)
+                                        addol(new Overlay(olid, new GobHitbox(this, bbox, true)));
+                                }
+                            } else if (ol != null)
+                                remol(ol);
                         } else {
+                            if (ol != null)
+                                remol(ol);
                             d.setup(rl);
                         }
                     }
@@ -1373,7 +1382,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                         boolean targetting = false;
                         Gob followGob = null;
                         Moving moving = getattr(Moving.class);
-                        if (moving != null && moving instanceof Following)
+                        if (moving instanceof Following)
                             followGob = ((Following) moving).tgt();
                         for (Composited.ED ed : ((Composite) d).comp.cequ) {
                             try {
@@ -1382,7 +1391,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                                     targetting = true;
                                     if (bowvector == null) {
                                         bowvector = new Overlay(new GobArcheryVector(this, followGob));
-                                        ols.add(bowvector);
+                                        addol(bowvector);
                                     }
                                     break;
                                 }
@@ -1390,23 +1399,30 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                             }
                         }
                         if (!targetting && bowvector != null) {
-                            ols.remove(bowvector);
+                            remol(bowvector);
                             bowvector = null;
                         }
                     }
-
                 }
             } catch (Exception e) {
                 //TODO: This is a weird issue that can pop up on startup, need to look into it
                 return false;
             }
+            int hitboxOlId = "overlay_hitbox_id".hashCode();
+            Overlay hitboxOl = findol(hitboxOlId);
             if (Config.showboundingboxes) {
-                GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
-                if (bbox != null)
-                    rl.add(new Overlay(new GobHitbox(this, bbox, false)), null);
+                if (hitboxOl == null) {
+                    GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
+                    if (bbox != null) {
+                        addol(new Overlay(hitboxOlId, new GobHitbox(this, bbox, false)));
+                    }
+                }
+            } else if (hitboxOl != null) {
+                remol(hitboxOl);
             }
+            Overlay plantOl = findol(Sprite.GROWTH_STAGE_ID);
             if (Config.showplantgrowstage) {
-                if ((type != null && type == Type.PLANT) || (type != null && type == Type.MULTISTAGE_PLANT)) {
+                if (type == Type.PLANT || type == Type.MULTISTAGE_PLANT) {
                     int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
                     if (cropstgmaxval == 0) {
                         for (FastMesh.MeshRes layer : getres().layers(FastMesh.MeshRes.class)) {
@@ -1415,19 +1431,18 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                                 cropstgmaxval = stg;
                         }
                     }
-                    Overlay ol = findol(Sprite.GROWTH_STAGE_ID);
                     Resource res = getres();
-                    if (ol == null && (stage == cropstgmaxval || (Config.showfreshcropstage ? stage >= 0 : stage > 0) && stage < 6)) {
+                    if (plantOl == null && (stage == cropstgmaxval || (Config.showfreshcropstage ? stage >= 0 : stage > 0) && stage < 6)) {
                         if (configuration.newCropStageOverlay)
                             addol(new Gob.Overlay(Sprite.GROWTH_STAGE_ID, new newPlantStageSprite(stage, cropstgmaxval, type == Type.MULTISTAGE_PLANT, (res != null && res.basename().contains("turnip") || res != null && res.basename().contains("leek") || res != null && res.basename().contains("carrot")))));
                         else
                             addol(new Gob.Overlay(Sprite.GROWTH_STAGE_ID, new PlantStageSprite(stage, cropstgmaxval, type == Type.MULTISTAGE_PLANT, (res != null && res.basename().contains("turnip") || res != null && res.basename().contains("leek")))));
-                    } else if (!Config.showfreshcropstage && stage == 0 || (stage != cropstgmaxval && stage >= 6)) {
-                        ols.remove(ol);
-                    } else if (configuration.newCropStageOverlay && ol.spr instanceof newPlantStageSprite && ((newPlantStageSprite) ol.spr).stg != stage) {
-                        ((newPlantStageSprite) ol.spr).update(stage, cropstgmaxval);
-                    } else if (ol.spr instanceof PlantStageSprite && ((PlantStageSprite) ol.spr).stg != stage) {
-                        ((PlantStageSprite) ol.spr).update(stage, cropstgmaxval);
+                    } else if (plantOl != null && !Config.showfreshcropstage && stage == 0 || (stage != cropstgmaxval && stage >= 6)) {
+                        remol(plantOl);
+                    } else if (plantOl != null && configuration.newCropStageOverlay && plantOl.spr instanceof newPlantStageSprite && ((newPlantStageSprite) plantOl.spr).stg != stage) {
+                        ((newPlantStageSprite) plantOl.spr).update(stage, cropstgmaxval);
+                    } else if (plantOl != null && plantOl.spr instanceof PlantStageSprite && ((PlantStageSprite) plantOl.spr).stg != stage) {
+                        ((PlantStageSprite) plantOl.spr).update(stage, cropstgmaxval);
                     }
                 }
 
@@ -1436,8 +1451,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     if (rd != null) {
                         int fscale = rd.sdt.peekrbuf(1);
                         if (fscale != -1) {
-                            Overlay ol = findol(Sprite.GROWTH_STAGE_ID);
-
                             /*
                             if (ol == null) {
                                 addol(new Gob.Overlay(Sprite.GROWTH_STAGE_ID, new TreeStageSprite(fscale)));
@@ -1448,33 +1461,34 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 
                             int minStage = (type == Type.TREE ? 10 : 30);
                             int growPercents = (int) Math.ceil((float) (fscale - minStage) / (float) (100 - minStage) * 100f);
-                            if (ol == null) {
+                            if (plantOl == null) {
                                 addol(new Gob.Overlay(Sprite.GROWTH_STAGE_ID, new TreeStageSprite(growPercents)));
-                            } else if (((TreeStageSprite) ol.spr).val != growPercents) {
-                                ((TreeStageSprite) ol.spr).update(growPercents);
+                            } else if (((TreeStageSprite) plantOl.spr).val != growPercents) {
+                                ((TreeStageSprite) plantOl.spr).update(growPercents);
                             }
                         }
                     }
                 }
-            }
+            } else if (plantOl != null)
+                remol(plantOl);
             if (Config.stranglevinecircle && type == Type.STRANGLEVINE) {
-                if (ols.size() > 0)
+                if (!ols.isEmpty())
                     return (false);
                 else
-                    ols.add(new Gob.Overlay(new PartyMemberOutline(this, new Color(0, 255, 0, 255))));
+                    addol(new Gob.Overlay(new PartyMemberOutline(this, new Color(0, 255, 0, 255))));
             }
             if (Config.showanimalrad && !Config.doubleradius && type == Type.DANGANIMAL) {
                 Overlay ol = findol(BPRadSprite.getId("animalradius"));
                 if (!isDead() && ol == null)
-                    ols.add(createBPRadSprite(this, "animalradius"));
+                    addol(createBPRadSprite(this, "animalradius"));
                 else if (isDead() && ol != null)
-                    ols.remove(ol);
+                    remol(ol);
             } else if (Config.showanimalrad && Config.doubleradius && type == Type.DANGANIMAL) {
                 Overlay ol = findol(BPRadSprite.getId("doubleanimalradius"));
                 if (!isDead() && ol == null)
-                    ols.add(createBPRadSprite(this, "doubleanimalradius"));
+                    addol(createBPRadSprite(this, "doubleanimalradius"));
                 else if (isDead() && ol != null)
-                    ols.remove(ol);
+                    remol(ol);
             }
 
 
@@ -1510,13 +1524,13 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 Overlay border = findol(borderhash);
                 Overlay box = findol(boxhash);
                 if (border == null && configuration.playerbordersprite)
-                    ols.add(new Overlay(borderhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(9)), () -> new Color(configuration.playerbordercolor, true), new Coord2d(MCache.cmaps))));
+                    addol(new Overlay(borderhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(9)), () -> new Color(configuration.playerbordercolor, true), new Coord2d(MCache.cmaps))));
                 if (border != null && !configuration.playerbordersprite)
-                    ols.remove(border);
+                    remol(border);
                 if (box == null && configuration.playerboxsprite)
-                    ols.add(new Overlay(boxhash, new RectSprite(this, new Coord2d(MCache.cmaps), () -> new Color(configuration.playerboxcolor, true), new Coord2d(MCache.cmaps))));
+                    addol(new Overlay(boxhash, new RectSprite(this, new Coord2d(MCache.cmaps), () -> new Color(configuration.playerboxcolor, true), new Coord2d(MCache.cmaps))));
                 if (box != null && !configuration.playerboxsprite)
-                    ols.remove(box);
+                    remol(box);
             }
         }
 
@@ -1654,26 +1668,34 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     }
 
     public boolean isMoving() {
-        if (getattr(LinMove.class) != null)
-            return true;
+//        if (getattr(LinMove.class) != null)
+//            return (true);
+//
+//        Following follow = getattr(Following.class);
+//        if (follow != null && follow.tgt() != null && follow.tgt().getattr(LinMove.class) != null)
+//            return (true);
+//
+//        Homing homing = getattr(Homing.class);
+//        if (homing != null && homing.tgt() != null && homing.tgt().getattr(LinMove.class) != null)
+//            return (true);
 
-        Following follow = getattr(Following.class);
-        if (follow != null && follow.tgt() != null && follow.tgt().getattr(LinMove.class) != null)
-            return true;
-
-        return false;
+        return (getattr(Moving.class) != null);
     }
 
     public LinMove getLinMove() {
         LinMove lm = getattr(LinMove.class);
         if (lm != null)
-            return lm;
+            return (lm);
 
         Following follow = getattr(Following.class);
         if (follow != null)
-            return follow.tgt().getattr(LinMove.class);
+            return (follow.tgt().getattr(LinMove.class));
 
-        return null;
+        Homing homing = getattr(Homing.class);
+        if (homing != null)
+            return (homing.tgt().getattr(LinMove.class));
+
+        return (null);
     }
 
     public boolean isFriend() {

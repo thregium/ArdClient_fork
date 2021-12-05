@@ -28,7 +28,6 @@ package haven;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
@@ -64,9 +63,9 @@ public class TextEntry extends Widget implements ReadLine.Owner {
     public static class $_ implements Factory {
         public Widget create(UI ui, Object[] args) {
             if (args[0] instanceof Coord)
-		return(new TextEntry(UI.scale((Coord)args[0]), (String)args[1]));
+                return (new TextEntry(UI.scale((Coord) args[0]), (String) args[1]));
             else
-		return(new TextEntry(UI.scale((Integer)args[0]), (String)args[1]));
+                return (new TextEntry(UI.scale((Integer) args[0]), (String) args[1]));
         }
     }
 
@@ -274,30 +273,30 @@ public class TextEntry extends Widget implements ReadLine.Owner {
 
     public boolean mousedown(Coord c, int button) {
         parent.setfocus(this);
-        if((button == 1) && (tcache != null)) {
+        if ((button == 1) && (tcache != null)) {
             buf.point(tcache.charat(c.x + sx - toff.x));
             buf.mark(-1);
             d = ui.grabmouse(this);
         }
-        return(true);
+        return (true);
     }
 
     public void mousemove(Coord c) {
-        if((d != null) && (tcache != null)) {
+        if ((d != null) && (tcache != null)) {
             int p = tcache.charat(c.x + sx - toff.x);
-            if(buf.mark() < 0)
+            if (buf.mark() < 0)
                 buf.mark(buf.point());
             buf.point(p);
         }
     }
 
     public boolean mouseup(Coord c, int button) {
-        if((button == 1) && (d != null)) {
+        if ((button == 1) && (d != null)) {
             d.remove();
             d = null;
-            return(true);
+            return (true);
         }
-        return(false);
+        return (false);
     }
 
     public void gotfocus() {
@@ -310,6 +309,6 @@ public class TextEntry extends Widget implements ReadLine.Owner {
     }
 
     public String text() {
-        return(buf.line());
+        return (buf.line());
     }
 }

@@ -767,13 +767,24 @@ public class Ridges extends MapMesh.Hooks {
             return (false);
         int bz = ((RidgeTile) t).breakz();
         for (Coord ec : tecs) {
-            t = map.tiler(map.gettile(tc.add(ec)));
-            if (t instanceof RidgeTile)
-                bz = Math.min(bz, ((RidgeTile) t).breakz());
+            try {
+                Coord coord = tc.add(ec);
+                t = map.tiler(map.gettile(coord));
+                if (t instanceof RidgeTile)
+                    bz = Math.min(bz, ((RidgeTile) t).breakz());
+            } catch (Exception e) {
+            }
         }
         for (int i = 0; i < 4; i++) {
-            if (Math.abs(map.getz(tc.add(tccs[(i + 1) % 4])) - map.getz(tc.add(tccs[i]))) > bz)
-                return (true);
+            try {
+                Coord coord1 = tc.add(tccs[i]);
+                Coord coord2 = tc.add(tccs[(i + 1) % 4]);
+                int z1 = map.getz(coord1);
+                int z2 = map.getz(coord2);
+                if (Math.abs(z2 - z1) > bz)
+                    return (true);
+            } catch (Exception e) {
+            }
         }
         return (false);
     }
@@ -784,12 +795,20 @@ public class Ridges extends MapMesh.Hooks {
             return (false);
         int bz = ((RidgeTile) t).breakz();
         for (Coord ec : tecs) {
-            t = map.tiler(g.gettile(tc.add(ec)));
+            Coord coord = tc.add(ec);
+//            if (coord.x < 0 || coord.x > cmaps.x - 1 || coord.y < 0 || coord.y > cmaps.y - 1)
+//                continue;
+            t = map.tiler(g.gettile(coord));
             if (t instanceof RidgeTile)
                 bz = Math.min(bz, ((RidgeTile) t).breakz());
         }
         for (int i = 0; i < 4; i++) {
-            if (Math.abs(g.getz(tc.add(tccs[(i + 1) % 4])) - g.getz(tc.add(tccs[i]))) > bz)
+            Coord coord1 = tc.add(tccs[i]);
+            Coord coord2 = tc.add(tccs[(i + 1) % 4]);
+//            if (coord1.x < 0 || coord1.x > cmaps.x - 1 || coord1.y < 0 || coord1.y > cmaps.y - 1 ||
+//                    coord2.x < 0 || coord2.x > cmaps.x - 1 || coord2.y < 0 || coord2.y > cmaps.y - 1)
+//                continue;
+            if (Math.abs(g.getz(coord2) - g.getz(coord1)) > bz)
                 return (true);
         }
         return (false);

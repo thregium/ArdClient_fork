@@ -43,7 +43,7 @@ public class Homing extends Moving {
     public Coord3f getc() {
         Coord2d rc = gob.rc;
         Coord2d tc = this.tc;
-        Gob tgt = gob.glob.oc.getgob(this.tgt);
+        Gob tgt = tgt();
         if (tgt != null)
             tc = tgt.rc;
         Coord2d d = tc.sub(rc);
@@ -60,12 +60,16 @@ public class Homing extends Moving {
     }
 
     public Optional<Coord2d> getDest() {
-        Gob tgt = gob.glob.oc.getgob(this.tgt);
+        Gob tgt = tgt();
         if (tgt != null) {
             return Optional.of(new Coord2d(tgt.getc()));
         } else {
             return Optional.empty();
         }
+    }
+
+    public Gob tgt() {
+        return (gob.glob.oc.getgob(this.tgt));
     }
 
     public void move(Coord2d c) {

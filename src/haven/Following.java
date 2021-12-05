@@ -48,14 +48,14 @@ public class Following extends Moving {
     }
 
     public Coord3f getc() {
-        Gob tgt = gob.glob.oc.getgob(this.tgt);
+        Gob tgt = tgt();
         if (tgt == null)
             return (gob.getrc());
         return (tgt.getc());
     }
 
     public double getv() {
-        Gob tgt = gob.glob.oc.getgob(this.tgt);
+        Gob tgt = tgt();
         if (tgt != null) {
             Moving mv = tgt.getattr(Moving.class);
             if (mv == null)
@@ -67,7 +67,7 @@ public class Following extends Moving {
     }
 
     public Optional<Coord2d> getDest() {
-        Gob tgt = gob.glob.oc.getgob(this.tgt);
+        Gob tgt = tgt();
         if (tgt != null) {
             return Optional.of(new Coord2d(tgt.getc()));
         } else {

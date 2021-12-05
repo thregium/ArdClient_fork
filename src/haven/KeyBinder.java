@@ -200,13 +200,13 @@ public class KeyBinder {
     public static boolean handle(UI ui, KeyEvent e) {
         if (Config.iswindows && Utils.getScancode(e) == 41) { //should fix the french keyboard ` not working as a keybind.
             KeyEvent f = new KeyEvent(e.getComponent(), e.getID(), e.getWhen(), 0, KeyEvent.VK_BACK_QUOTE);
-            return get(f).execute(ui);
+            return (get(f).execute(ui));
         }
-        if (get(e).code == 0 && get(e).mods == 0) //if the "null" unbound keybind, do nothing, else execute keybind.
-        {
-            return false;
+        KeyBind kb = get(e);
+        if (kb.code == 0 && kb.mods == 0) { //if the "null" unbound keybind, do nothing, else execute keybind.
+            return (false);
         } else {
-            return get(e).execute(ui);
+            return (kb.execute(ui));
         }
     }
 

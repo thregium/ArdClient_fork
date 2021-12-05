@@ -29,13 +29,26 @@ package haven;
 import haven.sloth.gfx.TextMap;
 
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 
 public class FastText {
+    public static final Font font = UI.scale(Text.sans, 11);
+    public static final int h;
+    public static final FontMetrics meter;
     public static final Text.Foundry fnd = new Text.Foundry(Text.sans, 11);
     private static final Tex[] ct = new Tex[225];
     private static final TextMap textmap;
 
     static {
+        BufferedImage junk = TexI.mkbuf(new Coord(1, 1));
+        Graphics tmpl = junk.getGraphics();
+        tmpl.setFont(font);
+        meter = tmpl.getFontMetrics();
+        h = meter.getHeight();
+        tmpl.dispose();
         final StringBuilder str = new StringBuilder();
         for (int chr = 0; chr <= 256; chr++) {
             str.append((char) chr);

@@ -133,6 +133,12 @@ public abstract class ConsoleHost extends Widget implements ReadLine.Owner {
         kg.remove();
     }
 
+    @Override
+    public boolean type(char key, KeyEvent ev) {
+        return (super.type(key, ev));
+    }
+
+    @Override
     public boolean keydown(KeyEvent ev) {
         if (cmdkey(ev))
             return (true);

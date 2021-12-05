@@ -232,7 +232,7 @@ public class UI {
                 afterdraws.clear();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            dev.simpleLog(e);
         }
     }
 
@@ -567,8 +567,9 @@ public class UI {
                         return;
                 }
             }
-            if (!root.type(ev.getKeyChar(), ev))
-                root.globtype(ev.getKeyChar(), ev);
+//            if (!root.type(ev.getKeyChar(), ev))
+//                root.globtype(ev.getKeyChar(), ev);
+            root.type(ev.getKeyChar(), ev);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -586,7 +587,7 @@ public class UI {
                 }
             }
             if (!root.keydown(ev))
-                root.globtype((char) 0, ev);
+                root.globtype(ev.getKeyChar(), ev);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -382,6 +382,13 @@ public class OptWnd extends Window {
         main.add(new PButton(200, "PBotDiscord", 'z', discord), new Coord(0, 210));
         main.add(new PButton(200, "Mapping", 'z', mapping), new Coord(420, 210));
         main.add(new PButton(200, "Modification", 'z', modification), new Coord(0, 240));
+
+        main.add(new Button(200, "Changelog") {
+            public void click() {
+                showChangeLog();
+            }
+        }, new Coord(210, 270));
+
         if (gopts) {
 //            main.add(new Button(200, "Disconnect Discord") {
 //                public void click() {
@@ -435,12 +442,6 @@ public class OptWnd extends Window {
                 }
             }, new Coord(210, 240));
             */
-
-            main.add(new Button(200, "Changelog") {
-                public void click() {
-                    showChangeLog();
-                }
-            }, new Coord(210, 270));
 
             main.add(new Button(200, "Switch character") {
                 public void click() {
@@ -926,7 +927,7 @@ public class OptWnd extends Window {
             }
         });
         appender.add(new IndirCheckBox("Show Your Movement Path", SHOWPLAYERPATH));
-        appender.add(ColorPreWithLabel("Your path color: ", PLAYERPATHCOL, val -> GobPath.clrst = new States.ColState(val)));
+        appender.add(ColorPreWithLabel("Your path color: ", PLAYERPATHCOL, val -> Movable.playercol = new States.ColState(val)));
         appender.add(new IndirCheckBox("Show Other Player Paths - Kinned player's paths will be their kin color.", SHOWGOBPATH));
         appender.add(ColorPreWithLabel("Unknown player path color: ", GOBPATHCOL, val -> Movable.unknowngobcol = new States.ColState(val)));
         appender.add(new IndirCheckBox("Show Mob Paths", SHOWANIMALPATH));
@@ -1890,7 +1891,7 @@ public class OptWnd extends Window {
     private void initControl() {
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(control, new Coord(620, 350)));
 
-        appender.setVerticalMargin(VERTICAL_MARGIN);
+//        appender.setVerticalMargin(VERTICAL_MARGIN);
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
 
         appender.addRow(new Label("Bad/Top camera scrolling sensitivity"),
@@ -1921,6 +1922,34 @@ public class OptWnd extends Window {
                     @Override
                     public Object tooltip(Coord c0, Widget prev) {
                         return Text.render("Minimal distance for bad/top camera : " + configuration.badcamdistminimaldefault).tex();
+                    }
+                }
+        );
+        appender.addRow(new CheckBox("Proximity to the right mouse click", val -> Utils.setprefb("rightclickproximity", configuration.rightclickproximity = val), configuration.rightclickproximity),
+                new HSlider(200, 0, 200, configuration.rightclickproximityradius) {
+                    @Override
+                    public void changed() {
+                        configuration.rightclickproximityradius = val;
+                        Utils.setprefi("rightclickproximityradius", configuration.rightclickproximityradius);
+                    }
+
+                    @Override
+                    public Object tooltip(Coord c0, Widget prev) {
+                        return Text.render("Proximity radius : " + val + " pixels").tex();
+                    }
+                }
+        );
+        appender.addRow(new Label("Proximity to the attack cursor: "),
+                new HSlider(200, 0, 200, configuration.attackproximityradius) {
+                    @Override
+                    public void changed() {
+                        configuration.attackproximityradius = val;
+                        Utils.setprefi("attackproximityradius", configuration.attackproximityradius);
+                    }
+
+                    @Override
+                    public Object tooltip(Coord c0, Widget prev) {
+                        return Text.render("Proximity radius : " + val + " pixels").tex();
                     }
                 }
         );
@@ -3235,17 +3264,6 @@ public class OptWnd extends Window {
         CheckBox mineboulderchk = new CheckBox("Chip boulders while mine cursor", v -> Utils.setprefb("bouldersmine", configuration.bouldersmine = v), configuration.bouldersmine);
         mineboulderchk.setcolor(Color.ORANGE);
         appender.add(mineboulderchk);
-        appender.add(new CheckBox("Special menu alt+RMC in proximity to the mouse cursor") {
-            {
-                a = configuration.proximityspecial;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("proximityspecial", val);
-                configuration.proximityspecial = val;
-                a = val;
-            }
-        });
         appender.add(new CheckBox("Show trough status") {
             {
                 a = configuration.showtroughstatus;
@@ -4031,7 +4049,7 @@ public class OptWnd extends Window {
         appender.add(new Label("Minimap"));
         final String[] tiers = {"Default", "Blend", "Simple"};
         appender.addRow(new IndirLabel(() -> String.format("Minimap type: %s", tiers[MINIMAPTYPE.get()])), new IndirHSlider(100, 0, 2, MINIMAPTYPE));
-        appender.add(new CheckBox("Disable black lines on minimap") {
+        appender.add(new CheckBox("Disable outline") {
             {
                 a = Config.disableBlackOutLinesOnMap;
             }

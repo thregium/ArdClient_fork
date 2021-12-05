@@ -1510,10 +1510,12 @@ public class MenuGrid extends Widget {
             updlayout();
 
         if (togglestuff) {
-            if (Config.enabletracking && !GameUI.trackon) {
-                wdgmsg("act", "tracking");
-                ui.gui.trackautotgld = true;
-            }
+            GameUI gui = getparent(GameUI.class);
+            if (gui != null) {
+                if (Config.enabletracking && !gui.trackon) {
+                    wdgmsg("act", "tracking");
+                    gui.trackautotgld = true;
+                }
 //            if (Config.autoconnectarddiscord && !discordconnected) {
 //                new Thread(new Discord(ui.gui, "ard")).start();
 //                ui.gui.discordconnected = true;
@@ -1526,45 +1528,46 @@ public class MenuGrid extends Widget {
 //            } else if (ui.gui.discordconnected)
 //                PBotUtils.sysMsg(ui, "Discord is already connected, you can only connect to one server at a time.", Color.white);
 
-            if (Config.enablecrime && !GameUI.crimeon) {
-                ui.gui.crimeautotgld = true;
-                wdgmsg("act", "crime");
-            }
-            if (Config.enableswimming && !GameUI.swimon) {
-                ui.gui.swimautotgld = true;
-                wdgmsg("act", "swim");
-            }
-            if (Config.enablesiege) {
-                wdgmsg("act", "siegeptr");
-            }
-            if (Config.autowindows.get("Belt").selected) {
-                WItem l = ui.gui.getequipory().quickslots[5];
-                if (l != null)
-                    l.item.wdgmsg("iact", Coord.z, -1);
-            }
-            for (Widget w = ui.gui.chat.lchild; w != null; w = w.prev) {
-                if (w instanceof ChatUI.MultiChat) {
-                    ChatUI.MultiChat chat = (ChatUI.MultiChat) w;
-                    if (Config.chatalert != null) {
-                        if (chat.name().equals(Resource.getLocString(Resource.BUNDLE_LABEL, Config.chatalert))) {
+                if (Config.enablecrime && !gui.crimeon) {
+                    gui.crimeautotgld = true;
+                    wdgmsg("act", "crime");
+                }
+                if (Config.enableswimming && !gui.swimon) {
+                    gui.swimautotgld = true;
+                    wdgmsg("act", "swim");
+                }
+                if (Config.enablesiege) {
+                    wdgmsg("act", "siegeptr");
+                }
+                if (Config.autowindows.get("Belt").selected) {
+                    WItem l = gui.getequipory().quickslots[5];
+                    if (l != null)
+                        l.item.wdgmsg("iact", Coord.z, -1);
+                }
+                for (Widget w = gui.chat.lchild; w != null; w = w.prev) {
+                    if (w instanceof ChatUI.MultiChat) {
+                        ChatUI.MultiChat chat = (ChatUI.MultiChat) w;
+                        if (Config.chatalert != null) {
+                            if (chat.name().equals(Resource.getLocString(Resource.BUNDLE_LABEL, Config.chatalert))) {
+                                chat.select();
+                                chat.getparent(ChatUI.class).expand();
+                                break;
+                            }
+                        } else if (chat.name().equals(Resource.getLocString(Resource.BUNDLE_LABEL, "Area Chat"))) {
                             chat.select();
                             chat.getparent(ChatUI.class).expand();
                             break;
                         }
-                    } else if (chat.name().equals(Resource.getLocString(Resource.BUNDLE_LABEL, "Area Chat"))) {
-                        chat.select();
-                        chat.getparent(ChatUI.class).expand();
-                        break;
                     }
                 }
+
+                if (!Config.autowindows.get("Quest Log").selected)
+                    gui.questwnd.hide();
+                if (Config.autowindows.get("Craft window").selected)
+                    gui.toggleCraftDB();
+
+                togglestuff = false;
             }
-
-            if (!Config.autowindows.get("Quest Log").selected)
-                ui.gui.questwnd.hide();
-            if (Config.autowindows.get("Craft window").selected)
-                ui.gui.toggleCraftDB();
-
-            togglestuff = false;
         }
     }
 

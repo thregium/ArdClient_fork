@@ -153,6 +153,7 @@ public class ErrorHandler extends ThreadGroup {
     }
 
     public void uncaughtException(Thread t, Throwable e) {
+        e.printStackTrace();
         reporter.report(e);
     }
 }

@@ -59,7 +59,7 @@ public class LinMove extends Moving {
             // This is simply the current position + direction vector which is larger than above
             //return Optional.of(s.add(v.mul(t)).add(v));
             // This is an exaggerated line to better give you an idea of where they COULD be
-            return Optional.of(s.add(v.mul(t)).add(v.mul(5)));
+            return Optional.of(s.add(v.mul(t)).add(v.mul(MAXOVER)));
         } else {
             //The real destination
             return Optional.of(s.add(v.mul(e)));

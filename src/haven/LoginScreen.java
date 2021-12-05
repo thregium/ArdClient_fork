@@ -40,6 +40,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class LoginScreen extends Widget {
@@ -59,6 +60,8 @@ public class LoginScreen extends Widget {
     Text progress = null;
     private Window log;
 
+    public final StatusLabel status;
+
     static {
         textf = new Text.Foundry(Text.sans, 16).aa(true);
         textfs = new Text.Foundry(Text.sans, 14).aa(true);
@@ -70,14 +73,12 @@ public class LoginScreen extends Widget {
 //        super(new Coord(800, 600));
         setfocustab(true);
         background = add(new Img(bg), Coord.z);
-        optbtn = adda(new Button(100, "Options"), sz.x - 110, 40, 0, 1);
+        optbtn = adda(new Button(100, "Options"), sz.x - 10, 40, 1, 1);
 //        new UpdateChecker().start();
         loginList = adda(new LoginList(200, 29), new Coord(10, 10), 0, 0);
-        statusbtn = adda(new Button(200, "Initializing..."), sz.x - 210, 80, 0, 1);
-        StartUpdaterThread();
-        GameUI.swimon = false;
-        GameUI.trackon = false;
-        GameUI.crimeon = false;
+//        statusbtn = adda(new Button(200, "Initializing..."), sz.x - 210, 80, 0, 1);
+//        StartUpdaterThread();
+        status = adda(new StatusLabel("www.havenandhearth.com", 0.5), Coord.of(sz.x - 10, 80), 1, 1);
     }
 
     private void showChangeLog() {
@@ -360,7 +361,7 @@ public class LoginScreen extends Widget {
         } else if (sender == opts) {
             opts.reqdestroy();
             opts = null;
-        } else if (sender == statusbtn) {
+        } else if (sender == statusbtn || sender == status) {
             Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
             if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
                 try {
@@ -432,9 +433,10 @@ public class LoginScreen extends Widget {
         int zerox = MainFrame.instance.p.getSize().width > sz.x ? 0 : sz.x / 2 - MainFrame.instance.p.getSize().width / 2;
         int zeroy = MainFrame.instance.p.getSize().height > sz.y ? 0 : sz.y / 2 - MainFrame.instance.p.getSize().height / 2;
 
-        optbtn.move(new Coord(zerox + szx - 110, zeroy + 40), 0, 1);
+        optbtn.move(new Coord(zerox + szx - 10, zeroy + 40), 1, 1);
         loginList.move(new Coord(zerox + 10, zeroy + 10), 0, 0);
-        statusbtn.move(new Coord(zerox + szx - 210, zeroy + 80), 0, 1);
+//        statusbtn.move(new Coord(zerox + szx - 210, zeroy + 80), 0, 1);
+        status.move(new Coord(zerox + szx - 10, zeroy + 80), 1, 1);
         if (cur != null)
             cur.move(new Coord(zerox + szx / 2, zeroy + szy / 2), 0.5, 0);
         if (btn != null)
@@ -488,5 +490,55 @@ public class LoginScreen extends Widget {
             }
         });
         statusupdaterthread.start();
+    }
+
+    public static class StatusLabel extends Widget {
+        public final HttpStatus stat;
+        public final double ax;
+
+        public StatusLabel(String host, double ax) {
+            super(new Coord(UI.scale(150), FastText.h * 2));
+            this.stat = new HttpStatus(host);
+            this.ax = ax;
+        }
+
+        @Override
+        public boolean mousedown(Coord c, int button) {
+            wdgmsg("activate");
+            return (true);
+        }
+
+        public void draw(GOut g) {
+            drawbg(g);
+            int x = (int) Math.round(sz.x * ax);
+            synchronized (stat) {
+                if (!stat.syn || (Objects.equals(stat.status, "")))
+                    return;
+                if (Objects.equals(stat.status, "up")) {
+                    FastText.aprintf(g, new Coord(x, FastText.h * 0), ax, 0, "Server status: Up");
+                    FastText.aprintf(g, new Coord(x, FastText.h * 1), ax, 0, "Hearthlings playing: %,d", stat.users);
+                } else if (Objects.equals(stat.status, "down")) {
+                    FastText.aprintf(g, new Coord(x, FastText.h * 0), ax, 0, "Server status: Down");
+                } else if (Objects.equals(stat.status, "shutdown")) {
+                    FastText.aprintf(g, new Coord(x, FastText.h * 0), ax, 0, "Server status: Shutting down");
+                } else if (Objects.equals(stat.status, "crashed")) {
+                    FastText.aprintf(g, new Coord(x, FastText.h * 0), ax, 0, "Server status: Crashed");
+                }
+            }
+        }
+
+        protected void drawbg(GOut g) {
+            g.chcolor(0, 0, 0, 120);
+            g.frect(Coord.z, sz);
+            g.chcolor();
+        }
+
+        protected void added() {
+            stat.start();
+        }
+
+        public void dispose() {
+            stat.quit();
+        }
     }
 }

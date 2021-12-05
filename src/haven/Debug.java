@@ -123,7 +123,7 @@ public class Debug {
     }
 
     public static void dump(Object... stuff) {
-        synchronized(System.err) {
+        synchronized (System.err) {
             dump_r(stuff);
             System.err.println();
         }

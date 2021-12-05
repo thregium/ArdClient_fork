@@ -240,8 +240,6 @@ public class BeltWnd extends MovableWidget {
 
         @Override
         public boolean globtype(char k, KeyEvent ev) {
-            if (k != 0)
-                return false;
             if (ev.getKeyCode() == this.key) {
                 use();
                 return true;

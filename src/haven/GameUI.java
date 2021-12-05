@@ -140,10 +140,10 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public QuickSlotsWdg quickslots;
     public newQuickSlotsWdg newquickslots;
     public StatusWdg statuswindow;
-    public static boolean swimon = false;
-    public static boolean crimeon = false;
-    public static boolean trackon = false;
-    public static boolean partyperm = false;
+    public boolean swimon = false;
+    public boolean crimeon = false;
+    public boolean trackon = false;
+    public boolean partyperm = false;
     public boolean crimeautotgld = false;
     public boolean swimautotgld = false;
     public boolean trackautotgld = false;
@@ -2103,7 +2103,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         } else if (chatfocused()) {
             return true;
         } else {
-            return KeyBinder.handle(ui, ev) || (super.globtype(key, ev));
+            return (KeyBinder.handle(ui, ev)) || (super.globtype(key, ev));
         }
     }
 

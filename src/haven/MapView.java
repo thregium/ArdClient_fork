@@ -48,6 +48,7 @@ import haven.purus.Farmer;
 import haven.purus.pbot.PBotCharacterAPI;
 import haven.purus.pbot.PBotUtils;
 import haven.resutil.BPRadSprite;
+import haven.resutil.TerrainTile;
 import haven.sloth.gob.Alerted;
 import haven.sloth.gob.Deleted;
 import haven.sloth.gob.Hidden;
@@ -1310,8 +1311,8 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 for (GobSet set : all) {
                     try {
                         rl.add(set, null);
-                    } catch (Exception e) { //???
-                        e.printStackTrace();
+                    } catch (Exception e) {
+                        dev.simpleLog(e);
                     }
                 }
                 ticks++;
@@ -2197,7 +2198,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             placing.ctick((int) (dt * 1000));
         if (fakeGob != null)
             fakeGob.ctick((int) (dt * 1000));
-        if (movequeue.size() > 0 && (System.currentTimeMillis() - lastMove > 500) && triggermove()) {
+        if (!movequeue.isEmpty() && (System.currentTimeMillis() - lastMove > 500) && triggermove()) {
             movingto = movequeue.poll();
             ui.gui.pointer.update(movingto);
             wdgmsg("click", new Coord(1, 1), movingto.floor(posres), 1, 0);
@@ -2531,13 +2532,13 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 final Optional<Gob> clickgob = gobFromClick(inf);
                 if (clickgob.isPresent()) {
                     showSpecialMenu(clickgob.get());
-                } else if (configuration.proximityspecial) {
+                } else if (configuration.rightclickproximity) {
                     Gob target = null;
                     synchronized (glob.oc) {
                         for (Gob gob : glob.oc) {
                             if (!gob.isplayer()) {
                                 double dist = gob.rc.dist(mc);
-                                if ((target == null || dist < target.rc.dist(mc)) && dist <= 5 * tilesz.x)
+                                if ((target == null || dist < target.rc.dist(mc)) && dist <= configuration.rightclickproximityradius)
                                     target = gob;
                             }
                         }
@@ -2619,7 +2620,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         for (Gob gob : glob.oc) {
                             if (!gob.isplayer()) {
                                 double dist = gob.rc.dist(mc);
-                                if ((target == null || dist < target.rc.dist(mc)) && dist <= 2 * tilesz.x)
+                                if ((target == null || dist < target.rc.dist(mc)) && dist <= configuration.attackproximityradius * tilesz.x)
                                     target = gob;
                             }
                         }
@@ -2632,7 +2633,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 }
                 final Object[] gobargs = gobclickargs(inf);
                 Object[] args = {pc, mc.floor(posres), clickb, modflags};
-                args = Utils.extend(args, gobclickargs(inf));
+                args = Utils.extend(args, gobargs);
 
                 if (inf == null) {
                     if (Config.pf && clickb == 1 && curs != null && !curs.name.equals("gfx/hud/curs/study")) {
@@ -2641,6 +2642,21 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     } else if (clickb == 1 && ui.modmeta && ui.gui.vhand == null && curs != null && curs.name.equals("gfx/hud/curs/arw")) {
                         //Queued movement
                         movequeue.add(mc);
+                    } else if (configuration.rightclickproximity && clickb == 3) {
+                        Gob target = null;
+                        synchronized (glob.oc) {
+                            for (Gob gob : glob.oc) {
+                                if (!gob.isplayer()) {
+                                    double dist = gob.rc.dist(mc);
+                                    if ((target == null || dist < target.rc.dist(mc)) && dist <= configuration.rightclickproximityradius)
+                                        target = gob;
+                                }
+                            }
+                            if (target != null) {
+                                wdgmsg("click", target.sc, target.rc.floor(posres), 3, modflags, 0, (int) target.id, target.rc.floor(posres), 0, -1);
+                                pllastcc = target.rc;
+                            }
+                        }
                     } else {
                         args = Utils.extend(args, gobargs);
                         if (clickb == 1 || gobargs.length > 0) {
@@ -2651,7 +2667,11 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             }
                         }
                         wdgmsg("click", args);
-                        pllastcc = mc;
+                        if (clickb == 1) {
+                            pllastcc = modflags == 0 ? mc : null;
+                        } else if (gobargs.length > 2 && gobargs[2] instanceof Coord) {
+                            pllastcc = ((Coord) gobargs[2]).mul(posres);
+                        }
                     }
                 } else {
                     Gob gob = inf.gob;
@@ -2713,7 +2733,11 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             }
                         }
                         wdgmsg("click", args);
-                        pllastcc = mc;
+                        if (clickb == 1) {
+                            pllastcc = modflags == 0 ? mc : null;
+                        } else if (gobargs.length > 2 && gobargs[2] instanceof Coord) {
+                            pllastcc = ((Coord) gobargs[2]).mul(posres);
+                        }
                         if (gob.getres() != null) {
                             CheckListboxItem itm = Config.autoclusters.get(gob.getres().name);
                             if (itm != null && itm.selected)
@@ -3014,9 +3038,12 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     final int tile_id = ui.sess.glob.map.gettile_safe(mc.div(MCache.tilesz).floor());
                     final MCache.Grid grid = ui.sess.glob.map.getgrid(mc.floor(tilesz).div(MCache.cmaps));
                     final Resource res = ui.sess.glob.map.tilesetr(tile_id);
-                    final String name = ui.sess.glob.map.tiler(tile_id).getClass().getSimpleName();
+                    final Tiler tiler = ui.sess.glob.map.tiler(tile_id);
+                    final String name = tiler.getClass().getSimpleName();
                     StringBuilder sb = new StringBuilder();
                     sb.append("Tile: ").append(res.name).append("[").append(tile_id).append("] of type ").append(name).append("\n");
+                    if (tiler instanceof TerrainTile.RidgeTile)
+                        sb.append("BreakZ: ").append(((TerrainTile.RidgeTile) tiler).breakz()).append("\n");
                     sb.append("GridID: ").append(grid.id).append("\n");
                     sb.append("Position: ").append(String.format("(%.3f, %.3f, %.3f)", mc.x, mc.y, glob.map.getcz(mc))).append("\n");
                     double ox = offset.applyAsDouble(mc.x);
@@ -3098,8 +3125,12 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             // purusPfLeftClick(mc.floor(), null);
                             glob.loader.defer(() -> pathto(mc));
                         } else {
-                            wdgmsg("click", pc, mc.floor(posres), 1, 0);
-                            pllastcc = mc;
+                            final Object[] gobargs = gobclickargs(inf);
+                            Object[] args = {pc, mc.floor(posres), 1, ui.modflags()};
+                            args = Utils.extend(args, gobargs);
+
+                            wdgmsg("click", args);
+                            pllastcc = ui.modflags() == 0 ? mc : null;
                         }
                         return;
                     }

@@ -1101,21 +1101,35 @@ public class MapFile {
             int bz = ((Ridges.RidgeTile) t).breakz();  //The distance at which a ridge is formed
             //Look at the four tiles around us to get the minimum break distance
             for (Coord ec : tecs) {
-                t = tiler(gettile(tc.add(ec)), tilers, tlcache);
-                if (t instanceof Ridges.RidgeTile)
-                    bz = Math.min(bz, ((Ridges.RidgeTile) t).breakz());
+                try {
+                    Coord coord = tc.add(ec);
+                    if (coord.x < 0 || coord.x > cmaps.x - 1 || coord.y < 0 || coord.y > cmaps.y - 1)
+                        continue;
+                    t = tiler(gettile(coord), tilers, tlcache);
+                    if (t instanceof Ridges.RidgeTile)
+                        bz = Math.min(bz, ((Ridges.RidgeTile) t).breakz());
+                } catch (Exception e) {
+                }
             }
 
             //Now figure out based on other tiles around us if we hit that break limit and should be a ridge
             //Ignore NOZ heights as these are nonupdated maps
-            for (int i = 0; i < 4; i++) {
-                final int z1 = getz(tc.add(tccs[i]));
-                final int z2 = getz(tc.add(tccs[(i + 1) % 4]));
-                //dumb mistake - 99999999
-                if (z1 != NOZ && z2 != NOZ && z1 != -99999999 && z2 != -99999999) {
-                    if (Math.abs(z2 - z1) > bz) {
-                        return (true);
+            for (int i = 0; i < tccs.length; i++) {
+                try {
+                    Coord coord1 = tc.add(tccs[i]);
+                    Coord coord2 = tc.add(tccs[(i + 1) % tccs.length]);
+                    if ((coord1.x < 0 || coord1.x > cmaps.x - 1 || coord1.y < 0 || coord1.y > cmaps.y - 1) ||
+                            (coord2.x < 0 || coord2.x > cmaps.x - 1 || coord2.y < 0 || coord2.y > cmaps.y - 1))
+                        continue;
+                    final int z1 = getz(coord1);
+                    final int z2 = getz(coord2);
+                    //dumb mistake - 99999999
+                    if (z1 != NOZ && z2 != NOZ && z1 != -99999999 && z2 != -99999999) {
+                        if (Math.abs(z2 - z1) > bz) {
+                            return (true);
+                        }
                     }
+                } catch (Exception e) {
                 }
             }
             return (false);
@@ -1173,17 +1187,20 @@ public class MapFile {
                     }
                 }
                 if (configuration.allowoutlinemap) {
-                    for (c.y = 1; c.y < cmaps.y - 1; c.y++) {
-                        for (c.x = 1; c.x < cmaps.x - 1; c.x++) {
+                    for (c.y = 0; c.y < cmaps.y; c.y++) {
+                        for (c.x = 0; c.x < cmaps.x; c.x++) {
                             int p = tilesets[gettile(c)].prio;
-                            if ((tilesets[gettile(c.add(-1, 0))].prio > p) ||
-                                    (tilesets[gettile(c.add(1, 0))].prio > p) ||
-                                    (tilesets[gettile(c.add(0, -1))].prio > p) ||
-                                    (tilesets[gettile(c.add(0, 1))].prio > p)) {
-                                buf.setSample(c.x, c.y, 0, 0);
-                                buf.setSample(c.x, c.y, 1, 0);
-                                buf.setSample(c.x, c.y, 2, 0);
-                                buf.setSample(c.x, c.y, 3, configuration.mapoutlinetransparency);
+                            for (Coord ec : tecs) {
+                                Coord coord = c.add(ec);
+                                if (coord.x < 0 || coord.x > cmaps.x - 1 || coord.y < 0 || coord.y > cmaps.y - 1)
+                                    continue;
+                                if (tilesets[gettile(coord)].prio > p) {
+                                    buf.setSample(c.x, c.y, 0, 0);
+                                    buf.setSample(c.x, c.y, 1, 0);
+                                    buf.setSample(c.x, c.y, 2, 0);
+                                    buf.setSample(c.x, c.y, 3, configuration.mapoutlinetransparency);
+                                    break;
+                                }
                             }
                         }
                     }
@@ -1194,19 +1211,28 @@ public class MapFile {
                 Tiler[] tilers = new Tiler[256];
                 boolean[] tlcached = new boolean[256];
                 if (configuration.allowridgesmap) {
-                    for (c.y = 1; c.y < MCache.cmaps.y - 1; ++c.y) {
-                        for (c.x = 1; c.x < MCache.cmaps.x - 1; ++c.x) {
+                    for (c.y = 0; c.y < cmaps.y; c.y++) {
+                        for (c.x = 0; c.x < cmaps.x; c.x++) {
                             final Tiler t = tiler(gettile(c), tilers, tlcached);
                             if (t instanceof Ridges.RidgeTile && brokenp(t, c, tilers, tlcached)) {
-                                for (int y = c.y - 1; y <= c.y + 1; ++y) {
-                                    for (int x = c.x - 1; x <= c.x + 1; ++x) {
-                                        Color cc = new Color(buf.getSample(x, y, 0), buf.getSample(x, y, 1),
-                                                buf.getSample(x, y, 2), buf.getSample(x, y, 3));
-                                        final Color blended = Utils.blendcol(cc, Color.BLACK, x == c.x && y == c.y ? 1.0 : configuration.allowoutlinemap ? 0.1 : 0);
-                                        buf.setSample(x, y, 0, blended.getRed());
-                                        buf.setSample(x, y, 1, blended.getGreen());
-                                        buf.setSample(x, y, 2, blended.getBlue());
-                                        buf.setSample(x, y, 3, blended.getAlpha());
+                                final Color black = Color.BLACK;
+                                buf.setSample(c.x, c.y, 0, black.getRed());
+                                buf.setSample(c.x, c.y, 1, black.getGreen());
+                                buf.setSample(c.x, c.y, 2, black.getBlue());
+                                buf.setSample(c.x, c.y, 3, black.getAlpha());
+
+                                if (configuration.allowoutlinemap) {
+                                    for (int y = Math.max(c.y - 1, 0); y <= Math.min(c.y + 1, cmaps.y - 1); y++) {
+                                        for (int x = Math.max(c.x - 1, 0); x <= Math.min(c.x + 1, cmaps.x - 1); x++) {
+                                            if (x == c.x && y == c.y)
+                                                continue;
+                                            Color cc = new Color(buf.getSample(x, y, 0), buf.getSample(x, y, 1), buf.getSample(x, y, 2), buf.getSample(x, y, 3));
+                                            final Color blended = Utils.blendcol(cc, Color.BLACK, 0.1 * (configuration.mapoutlinetransparency / 255.0));
+                                            buf.setSample(x, y, 0, blended.getRed());
+                                            buf.setSample(x, y, 1, blended.getGreen());
+                                            buf.setSample(x, y, 2, blended.getBlue());
+                                            buf.setSample(x, y, 3, blended.getAlpha());
+                                        }
                                     }
                                 }
                             }

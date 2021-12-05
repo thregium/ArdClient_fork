@@ -157,12 +157,14 @@ public class MapWnd extends ResizableWnd {
                 tooltip = RichText.render("Follow ($col[255,255,0]{Home})\nUpdate grids with CTRL", 0);
             }
 
+            @Override
             public void click() {
-                questlinemap.clear();
-                recenter();
                 if (ui.modflags() == UI.MOD_CTRL) {
                     view.file.updategrids(ui.sess.glob.map, ui.sess.glob.map.grids.values());
                     view.refreshDisplayGrid();
+                } else {
+                    questlinemap.clear();
+                    recenter();
                 }
             }
         }, Coord.z);
@@ -185,13 +187,13 @@ public class MapWnd extends ResizableWnd {
             Utils.setprefb("compact-map", a);
         });
         toolbar.add(new ICheckBox("gfx/hud/mmap/prov", "", "-d", "-h", "-dh") {
-            public boolean mousewheel(Coord c, int amount) {
-                if (!checkhit(c) || !ui.modshift)
-                    return (super.mousewheel(c, amount));
-                olalpha = Utils.clip(olalpha + (amount * -32), 32, 256);
-                return (true);
-            }
-        })
+                    public boolean mousewheel(Coord c, int amount) {
+                        if (!checkhit(c) || !ui.modshift)
+                            return (super.mousewheel(c, amount));
+                        olalpha = Utils.clip(olalpha + (amount * -32), 32, 256);
+                        return (true);
+                    }
+                })
                 .changed(a -> toggleol("realm", a))
                 .settip("Display provinces");
         toolbar.pack();
@@ -307,6 +309,12 @@ public class MapWnd extends ResizableWnd {
             };
             modes.change(filters[0]);
             return modes;
+        }
+
+        @Override
+        public void gotfocus() {
+            super.gotfocus();
+            setfocus(list);
         }
     }
 
@@ -1386,7 +1394,6 @@ public class MapWnd extends ResizableWnd {
                 MapWnd.this.resize(asz);
             }
         }
-
     }
 
     public void resize(Coord sz) {
@@ -1432,6 +1439,12 @@ public class MapWnd extends ResizableWnd {
         tool.list.display(m);
     }
 
+    @Override
+    public void gotfocus() {
+        super.gotfocus();
+        setfocus(tool);
+    }
+
     private static final Tex sizer = Resource.loadtex("gfx/hud/wnd/sizer");
 
     protected void drawframe(GOut g) {
@@ -1447,8 +1460,13 @@ public class MapWnd extends ResizableWnd {
             return (true);
         }
         if (ev.getKeyCode() == KeyEvent.VK_HOME) {
-            questlinemap.clear();
-            recenter();
+            if (ui.modflags() == UI.MOD_CTRL) {
+                view.file.updategrids(ui.sess.glob.map, ui.sess.glob.map.grids.values());
+                view.refreshDisplayGrid();
+            } else {
+                questlinemap.clear();
+                recenter();
+            }
             return (true);
         }
         return (false);

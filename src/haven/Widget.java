@@ -947,8 +947,8 @@ public class Widget {
                 return (true);
             }
         }
-        if (focusctl) {
-            if (focused != null) {
+        if (focusctl && visible()) {
+            if (focused != null && focused.visible()) {
                 if (focused.type(key, ev))
                     return (true);
                 if (focustab) {
@@ -978,7 +978,7 @@ public class Widget {
             }
         } else {
             for (Widget wdg = child; wdg != null; wdg = wdg.next) {
-                if (wdg.visible) {
+                if (wdg.visible()) {
                     if (wdg.type(key, ev))
                         return (true);
                 }
@@ -992,8 +992,8 @@ public class Widget {
     public static final KeyMatch key_tab = KeyMatch.forcode(KeyEvent.VK_TAB, 0);
 
     public boolean keydown(KeyEvent ev) {
-        if (focusctl) {
-            if (focused != null) {
+        if (focusctl && visible()) {
+            if (focused != null && focused.visible()) {
                 if (focused.keydown(ev))
                     return (true);
                 return (false);
@@ -1002,7 +1002,7 @@ public class Widget {
             }
         } else {
             for (Widget wdg = child; wdg != null; wdg = wdg.next) {
-                if (wdg.visible) {
+                if (wdg.visible()) {
                     if (wdg.keydown(ev))
                         return (true);
                 }
@@ -1012,8 +1012,8 @@ public class Widget {
     }
 
     public boolean keyup(KeyEvent ev) {
-        if (focusctl) {
-            if (focused != null) {
+        if (focusctl && visible()) {
+            if (focused != null && focused.visible()) {
                 if (focused.keyup(ev))
                     return (true);
                 return (false);
@@ -1022,7 +1022,7 @@ public class Widget {
             }
         } else {
             for (Widget wdg = child; wdg != null; wdg = wdg.next) {
-                if (wdg.visible) {
+                if (wdg.visible()) {
                     if (wdg.keyup(ev))
                         return (true);
                 }
