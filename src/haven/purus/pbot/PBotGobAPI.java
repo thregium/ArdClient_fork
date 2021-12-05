@@ -301,6 +301,43 @@ public class PBotGobAPI {
 //        waitForGob(PBotAPI.modeui(), x, y);
 //    }
 
+    public static PBotGob getClosestGobInRadius(UI ui, double radius) {
+        Coord2d plc = player(ui).getRcCoords();
+        double min = radius;
+        Gob nearest = null;
+        synchronized (ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc) {
+                double dist = gob.rc.dist(plc);
+                if (dist < min) {
+                    min = dist;
+                    nearest = gob;
+                }
+            }
+        }
+        if (nearest == null)
+            return (null);
+        else
+            return (new PBotGob(nearest));
+    }
+
+    public static PBotGob getClosestGobInRadius(UI ui, Coord2d center, double radius) {
+        double min = radius;
+        Gob nearest = null;
+        synchronized (ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc) {
+                double dist = gob.rc.dist(center);
+                if (dist < min) {
+                    min = dist;
+                    nearest = gob;
+                }
+            }
+        }
+        if (nearest == null)
+            return (null);
+        else
+            return (new PBotGob(nearest));
+    }
+
     /**
      * Finds the closest object that matches one of the given names
      *

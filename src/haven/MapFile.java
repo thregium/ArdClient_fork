@@ -29,7 +29,6 @@ package haven;
 import haven.Defer.Future;
 import haven.resutil.Ridges;
 import modification.configuration;
-import modification.dev;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;

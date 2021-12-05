@@ -46,6 +46,7 @@ import haven.pathfinder.PFListener;
 import haven.pathfinder.Pathfinder;
 import haven.purus.Farmer;
 import haven.purus.pbot.PBotCharacterAPI;
+import haven.purus.pbot.PBotGobAPI;
 import haven.purus.pbot.PBotUtils;
 import haven.resutil.BPRadSprite;
 import haven.resutil.TerrainTile;
@@ -2620,7 +2621,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         for (Gob gob : glob.oc) {
                             if (!gob.isplayer()) {
                                 double dist = gob.rc.dist(mc);
-                                if ((target == null || dist < target.rc.dist(mc)) && dist <= configuration.attackproximityradius * tilesz.x)
+                                if ((target == null || dist < target.rc.dist(mc)) && dist <= configuration.attackproximityradius)
                                     target = gob;
                             }
                         }
