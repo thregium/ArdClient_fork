@@ -84,7 +84,7 @@ public class Fightsess extends Widget {
     private Coord simpleOpeningSz = new Coord(32, 32);
     private Coord smallerOpeningSz = new Coord(24, 24);
 
-//    private Coord actionAnchor;
+    //    private Coord actionAnchor;
     private Coord enemyBuffAnchor;
     private Coord enemyIPAnchor;
     private Coord enemyLastMoveAnchor;
@@ -611,6 +611,7 @@ public class Fightsess extends Widget {
     }
 
     Supplier<Coord> actionAnchor = () -> actionWdg.sz.div(2);
+
     public void anchors() {
         final Coord center = sz.div(2);
         final Coord acenter = actionWdg.sz.div(2);
@@ -883,7 +884,6 @@ public class Fightsess extends Widget {
         int n = -1;
         if (Config.combatkeys == 0) {
             if ((ev.getModifiersEx() & (InputEvent.CTRL_DOWN_MASK | KeyEvent.META_DOWN_MASK | KeyEvent.ALT_DOWN_MASK)) == 0) {
-
                 switch (ev.getKeyCode()) {
                     case KeyEvent.VK_1:
                         n = 0;
@@ -905,112 +905,103 @@ public class Fightsess extends Widget {
                     n += 5;
             }
         } else if (Config.combatkeys == 1) { // F1-F5
-            if (key == 0) {
-
-                switch (ev.getKeyCode()) {
-                    case KeyEvent.VK_1:
-                        n = 0;
-                        break;
-                    case KeyEvent.VK_2:
-                        n = 1;
-                        break;
-                    case KeyEvent.VK_3:
-                        n = 2;
-                        break;
-                    case KeyEvent.VK_4:
-                        n = 3;
-                        break;
-                    case KeyEvent.VK_5:
-                        n = 4;
-                        break;
-                    case KeyEvent.VK_F1:
-                        n = 5;
-                        break;
-                    case KeyEvent.VK_F2:
-                        n = 6;
-                        break;
-                    case KeyEvent.VK_F3:
-                        n = 7;
-                        break;
-                    case KeyEvent.VK_F4:
-                        n = 8;
-                        break;
-                    case KeyEvent.VK_F5:
-                        n = 9;
-                        break;
-                }
+            switch (ev.getKeyCode()) {
+                case KeyEvent.VK_1:
+                    n = 0;
+                    break;
+                case KeyEvent.VK_2:
+                    n = 1;
+                    break;
+                case KeyEvent.VK_3:
+                    n = 2;
+                    break;
+                case KeyEvent.VK_4:
+                    n = 3;
+                    break;
+                case KeyEvent.VK_5:
+                    n = 4;
+                    break;
+                case KeyEvent.VK_F1:
+                    n = 5;
+                    break;
+                case KeyEvent.VK_F2:
+                    n = 6;
+                    break;
+                case KeyEvent.VK_F3:
+                    n = 7;
+                    break;
+                case KeyEvent.VK_F4:
+                    n = 8;
+                    break;
+                case KeyEvent.VK_F5:
+                    n = 9;
+                    break;
             }
-        } else if (Config.combatkeys == 2)  { // F1-F10
-            if (key == 0) {
-
-                switch (ev.getKeyCode()) {
-                    case KeyEvent.VK_F1:
-                        n = 0;
-                        break;
-                    case KeyEvent.VK_F2:
-                        n = 1;
-                        break;
-                    case KeyEvent.VK_F3:
-                        n = 2;
-                        break;
-                    case KeyEvent.VK_F4:
-                        n = 3;
-                        break;
-                    case KeyEvent.VK_F5:
-                        n = 4;
-                        break;
-                    case KeyEvent.VK_F6:
-                        n = 5;
-                        break;
-                    case KeyEvent.VK_F7:
-                        n = 6;
-                        break;
-                    case KeyEvent.VK_F8:
-                        n = 7;
-                        break;
-                    case KeyEvent.VK_F9:
-                        n = 8;
-                        break;
-                    case KeyEvent.VK_F10:
-                        n = 9;
-                        break;
-                }
+        } else if (Config.combatkeys == 2) { // F1-F10
+            switch (ev.getKeyCode()) {
+                case KeyEvent.VK_F1:
+                    n = 0;
+                    break;
+                case KeyEvent.VK_F2:
+                    n = 1;
+                    break;
+                case KeyEvent.VK_F3:
+                    n = 2;
+                    break;
+                case KeyEvent.VK_F4:
+                    n = 3;
+                    break;
+                case KeyEvent.VK_F5:
+                    n = 4;
+                    break;
+                case KeyEvent.VK_F6:
+                    n = 5;
+                    break;
+                case KeyEvent.VK_F7:
+                    n = 6;
+                    break;
+                case KeyEvent.VK_F8:
+                    n = 7;
+                    break;
+                case KeyEvent.VK_F9:
+                    n = 8;
+                    break;
+                case KeyEvent.VK_F10:
+                    n = 9;
+                    break;
             }
         } else { // 1-10
-            if (key == 0) {
-
-                switch (ev.getKeyCode()) {
-                    case KeyEvent.VK_1:
-                        n = 0;
-                        break;
-                    case KeyEvent.VK_2:
-                        n = 1;
-                        break;
-                    case KeyEvent.VK_3:
-                        n = 2;
-                        break;
-                    case KeyEvent.VK_4:
-                        n = 3;
-                        break;
-                    case KeyEvent.VK_5:
-                        n = 4;
-                        break;
-                    case KeyEvent.VK_6:
-                        n = 5;
-                        break;
-                    case KeyEvent.VK_7:
-                        n = 6;
-                        break;
-                    case KeyEvent.VK_8:
-                        n = 7;
-                        break;
-                    case KeyEvent.VK_9:
-                        n = 8;
-                        break;
-                    case KeyEvent.VK_0:
-                        n = 9;
-                        break;
-                }
+            switch (ev.getKeyCode()) {
+                case KeyEvent.VK_1:
+                    n = 0;
+                    break;
+                case KeyEvent.VK_2:
+                    n = 1;
+                    break;
+                case KeyEvent.VK_3:
+                    n = 2;
+                    break;
+                case KeyEvent.VK_4:
+                    n = 3;
+                    break;
+                case KeyEvent.VK_5:
+                    n = 4;
+                    break;
+                case KeyEvent.VK_6:
+                    n = 5;
+                    break;
+                case KeyEvent.VK_7:
+                    n = 6;
+                    break;
+                case KeyEvent.VK_8:
+                    n = 7;
+                    break;
+                case KeyEvent.VK_9:
+                    n = 8;
+                    break;
+                case KeyEvent.VK_0:
+                    n = 9;
+                    break;
             }
         }
 

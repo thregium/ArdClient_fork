@@ -29,6 +29,7 @@ package haven;
 import haven.Defer.Future;
 import haven.resutil.Ridges;
 import modification.configuration;
+import modification.dev;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -70,50 +71,7 @@ public class MapFile {
     public final Collection<Marker> markers = new ArrayList<>();
     public final Map<Long, SMarker> smarkers = new HashMap<>(); //safety check for ensuring no duplicates based off oid
     public final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-    public final BackCache<Long, GridInfo> gridinfo = new BackCache<>(100, id -> {
-        checklock();
-        InputStream fp;
-        try {
-            fp = sfetch("gi-%x", id);
-        } catch (IOException e) {
-            return (null);
-        }
-        try (StreamMessage data = new StreamMessage(fp)) {
-            int ver = data.uint8();
-            if (ver == 1) {
-                return (new GridInfo(data.int64(), data.int64(), data.coord()));
-            } else {
-                throw (new Message.FormatError("Unknown gridinfo version: " + ver));
-            }
-        } catch (Message.BinError e) {
-            warn(e, "error when loading gridinfo for %x: %s", id, e);
-            return (null);
-        }
-    }, (id, info) -> {
-        checklock();
-        OutputStream fp = null;
-        do {
-            try {
-                fp = sstore("gi-%x", info.id);
-            } catch (IOException e) {
-                if (e.getMessage().contains("another process")) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (Exception ex) {
-                        return;
-                    }
-                } else {
-                    throw (new StreamMessage.IOError(e));
-                }
-            }
-        } while (fp == null);
-        try (StreamMessage out = new StreamMessage(fp)) {
-            out.adduint8(1);
-            out.addint64(info.id);
-            out.addint64(info.seg);
-            out.addcoord(info.sc);
-        }
-    });
+    public final BackCache<Long, GridInfo> gridinfo;
     private final Object procmon = new Object();
     private final Collection<Pair<MCache, Collection<MCache.Grid>>> updqueue = new HashSet<>();
     private final Collection<Segment> dirty = new HashSet<>();
@@ -121,81 +79,148 @@ public class MapFile {
     public int markerseq = 0;
     private Thread processor = null;
     private boolean gdirty = false;
-    public final BackCache<Long, Segment> segments = new BackCache<>(5, id -> {
-        checklock();
-        InputStream fp;
-        try {
-            fp = sfetch("seg-%x", id);
-        } catch (IOException e) {
-            return (null);
-        }
-        try (StreamMessage data = new StreamMessage(fp)) {
-            int ver = data.uint8();
-            if (ver == 1) {
-                Segment seg = new Segment(id);
-                ZMessage z = new ZMessage(data);
-                long storedid = z.int64();
-                if (storedid != id)
-                    throw (new Message.FormatError(String.format("Segment ID mismatch: expected %x, got %x", id, storedid)));
-                for (int i = 0, no = z.int32(); i < no; i++)
-                    seg.map.put(z.coord(), z.int64());
-                return (seg);
-            } else {
-                throw (new Message.FormatError("Unknown segment data version: " + ver));
-            }
-        } catch (Message.BinError e) {
-            warn(e, "error when loading segment %x: %s", id, e);
-            return (null);
-        }
-    }, (id, seg) -> {
-        checklock();
-        OutputStream fp = null;
-        do {
-            try {
-                fp = sstore("seg-%x", seg.id);
-            } catch (IOException e) {
-                if (e.getMessage().contains("another process")) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (Exception ex) {
-                        return;
-                    }
-                } else {
-                    throw (new StreamMessage.IOError(e));
-                }
-            }
-        } while (fp == null);
-        try (StreamMessage out = new StreamMessage(fp)) {
-            out.adduint8(1);
-            ZMessage z = new ZMessage(out);
-            z.addint64(seg.id);
-            z.addint32(seg.map.size());
-            for (Map.Entry<Coord, Long> e : seg.map.entrySet())
-                z.addcoord(e.getKey()).addint64(e.getValue());
-            z.finish();
-        }
-        if (knownsegs.add(id))
-            defersave();
-    });
+    public final BackCache<Long, Segment> segments;
 
     public MapFile(ResCache store, String filename) {
         this.store = store;
         this.filename = filename;
+
+        gridinfo = new BackCache<>(100, id -> {
+            checklock();
+            InputStream fp;
+            try {
+                fp = sfetch("gi-%x", id);
+            } catch (IOException e) {
+                return (null);
+            }
+            try (StreamMessage data = new StreamMessage(fp)) {
+                int ver = data.uint8();
+                if (ver == 1) {
+                    return (new GridInfo(data.int64(), data.int64(), data.coord()));
+                } else {
+                    throw (new Message.FormatError("Unknown gridinfo version: " + ver));
+                }
+            } catch (Message.BinError e) {
+                warn(e, "error when loading gridinfo for %x: %s", id, e);
+                return (null);
+            }
+        }, (id, info) -> {
+            checklock();
+            OutputStream fp = null;
+            do {
+                try {
+                    fp = sstore("gi-%x", info.id);
+                } catch (IOException e) {
+                    if (e.getMessage().contains("another process")) {
+                        try {
+                            Thread.sleep(100);
+                        } catch (Exception ex) {
+                            return;
+                        }
+                    } else {
+                        throw (new StreamMessage.IOError(e));
+                    }
+                }
+            } while (fp == null);
+            try (StreamMessage out = new StreamMessage(fp)) {
+                out.adduint8(1);
+                out.addint64(info.id);
+                out.addint64(info.seg);
+                out.addcoord(info.sc);
+            }
+        });
+        segments = new BackCache<>(5, id -> {
+            checklock();
+            InputStream fp = null;
+            do {
+                try {
+                    fp = sfetch("seg-%x", id);
+                } catch (IOException e) {
+                    if (e.getMessage().contains("another process")) {
+                        try {
+                            Thread.sleep(100);
+                        } catch (Exception ex) {
+                            return (null);
+                        }
+                    } else {
+                        return (null);
+                    }
+                }
+            } while (fp == null);
+            try (StreamMessage data = new StreamMessage(fp)) {
+                int ver = data.uint8();
+                if (ver == 1) {
+                    Segment seg = new Segment(id);
+                    ZMessage z = new ZMessage(data);
+                    long storedid = z.int64();
+                    if (storedid != id)
+                        throw (new Message.FormatError(String.format("Segment ID mismatch: expected %x, got %x", id, storedid)));
+                    for (int i = 0, no = z.int32(); i < no; i++)
+                        seg.map.put(z.coord(), z.int64());
+                    return (seg);
+                } else {
+                    throw (new Message.FormatError("Unknown segment data version: " + ver));
+                }
+            } catch (Message.BinError e) {
+                warn(e, "error when loading segment %x: %s", id, e);
+                return (null);
+            }
+        }, (id, seg) -> {
+            checklock();
+            OutputStream fp = null;
+            do {
+                try {
+                    fp = sstore("seg-%x", seg.id);
+                } catch (IOException e) {
+                    if (e.getMessage().contains("another process")) {
+                        try {
+                            Thread.sleep(100);
+                        } catch (Exception ex) {
+                            return;
+                        }
+                    } else {
+                        throw (new StreamMessage.IOError(e));
+                    }
+                }
+            } while (fp == null);
+            try (StreamMessage out = new StreamMessage(fp)) {
+                out.adduint8(1);
+                ZMessage z = new ZMessage(out);
+                z.addint64(seg.id);
+                z.addint32(seg.map.size());
+                for (Map.Entry<Coord, Long> e : seg.map.entrySet())
+                    z.addcoord(e.getKey()).addint64(e.getValue());
+                z.finish();
+            }
+            if (knownsegs.add(id))
+                defersave();
+        });
     }
 
-    public static MapFile load(ResCache store, String filename) {
+    public static synchronized MapFile load(ResCache store, String filename) {
         if (instance != null)
             return instance;
         else {
             final MapFile file = new MapFile(store, filename);
-            InputStream fp;
-            try {
-                fp = file.sfetch("index");
-            } catch (FileNotFoundException e) {
-                return (file);
-            } catch (IOException e) {
-                return (null);
-            }
+            InputStream fp = null;
+            do {
+                try {
+                    fp = file.sfetch("index");
+                } catch (FileNotFoundException e) {
+                    instance = file;
+                    return (file);
+                } catch (IOException e) {
+                    if (e.getMessage().contains("another process")) {
+                        try {
+                            Thread.sleep(100);
+                        } catch (Exception ex) {
+                            return (null);
+                        }
+                    } else {
+                        return (null);
+                    }
+                }
+            } while (fp == null);
             try (StreamMessage data = new StreamMessage(fp)) {
                 int ver = data.uint8();
                 if (ver == 1) {
@@ -1376,13 +1401,23 @@ public class MapFile {
         }
 
         public static Grid load(MapFile file, long id) {
-            InputStream fp;
-            try {
-                fp = file.sfetch("grid-%x", id);
-            } catch (IOException e) {
-                warn(e, "error when locating grid %x: %s", id, e);
-                return (null);
-            }
+            InputStream fp = null;
+            do {
+                try {
+                    fp = file.sfetch("grid-%x", id);
+                } catch (IOException e) {
+                    if (e.getMessage().contains("another process")) {
+                        try {
+                            Thread.sleep(100);
+                        } catch (Exception ex) {
+                            return (null);
+                        }
+                    } else {
+                        warn(e, "error when locating grid %x: %s", id, e);
+                        return (null);
+                    }
+                }
+            } while (fp == null);
             try (StreamMessage data = new StreamMessage(fp)) {
                 int ver = data.uint8();
                 if ((ver >= 1) && (ver <= 4)) {
@@ -1803,19 +1838,44 @@ public class MapFile {
         public static int inval(MapFile file, long seg, Coord sc) {
             for (int lvl = 1; true; lvl++) {
                 sc = new Coord(sc.x & ~((1 << lvl) - 1), sc.y & ~((1 << lvl) - 1));
-                try {
-                    file.sfetch("zgrid-%x-%d-%d-%d", seg, lvl, sc.x, sc.y).close();
-                } catch (FileNotFoundException e) {
-                    return (lvl - 1);
-                } catch (IOException e) {
-                    warn(e, "error when invalidating zoomgrid (%d, %d) in %x@%d: %s", sc.x, sc.y, seg, lvl, e);
-                    return (lvl - 1);
-                }
-                try {
-                    file.sstore("zgrid-%x-%d-%d-%d", seg, lvl, sc.x, sc.y).close();
-                } catch (IOException e) {
-                    //Just ignore this one
-                }
+                InputStream fp = null;
+                do {
+                    try {
+                        fp = file.sfetch("zgrid-%x-%d-%d-%d", seg, lvl, sc.x, sc.y);
+                        fp.close();
+                        break;
+                    } catch (FileNotFoundException e) {
+                        return (lvl - 1);
+                    } catch (IOException e) {
+                        if (e.getMessage().contains("another process")) {
+                            try {
+                                Thread.sleep(100);
+                            } catch (Exception ex) {
+                                warn(e, "error when invalidating zoomgrid (%d, %d) in %x@%d: %s", sc.x, sc.y, seg, lvl, e);
+                                return (lvl - 1);
+                            }
+                        } else {
+                            warn(e, "error when invalidating zoomgrid (%d, %d) in %x@%d: %s", sc.x, sc.y, seg, lvl, e);
+                            return (lvl - 1);
+                        }
+                    }
+                } while (fp == null);
+                OutputStream ofp = null;
+                do {
+                    try {
+                        ofp = file.sstore("zgrid-%x-%d-%d-%d", seg, lvl, sc.x, sc.y);
+                        ofp.close();
+                        break;
+                    } catch (IOException e) {
+                        if (e.getMessage().contains("another process")) {
+                            try {
+                                Thread.sleep(100);
+                            } catch (Exception ex) {
+                            }
+                        } else {
+                        }
+                    }
+                } while (ofp == null);
             }
         }
 

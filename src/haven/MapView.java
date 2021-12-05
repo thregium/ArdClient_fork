@@ -2642,35 +2642,38 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     } else if (clickb == 1 && ui.modmeta && ui.gui.vhand == null && curs != null && curs.name.equals("gfx/hud/curs/arw")) {
                         //Queued movement
                         movequeue.add(mc);
-                    } else if (configuration.rightclickproximity && clickb == 3) {
+                    } else {
                         Gob target = null;
-                        synchronized (glob.oc) {
-                            for (Gob gob : glob.oc) {
-                                if (!gob.isplayer()) {
-                                    double dist = gob.rc.dist(mc);
-                                    if ((target == null || dist < target.rc.dist(mc)) && dist <= configuration.rightclickproximityradius)
-                                        target = gob;
+                        if (configuration.rightclickproximity && clickb == 3) {
+                            synchronized (glob.oc) {
+                                for (Gob gob : glob.oc) {
+                                    if (!gob.isplayer()) {
+                                        double dist = gob.rc.dist(mc);
+                                        if ((target == null || dist < target.rc.dist(mc)) && dist <= configuration.rightclickproximityradius)
+                                            target = gob;
+                                    }
+                                }
+                                if (target != null) {
+                                    wdgmsg("click", target.sc, target.rc.floor(posres), 3, modflags, 0, (int) target.id, target.rc.floor(posres), 0, -1);
+                                    pllastcc = target.rc;
                                 }
                             }
-                            if (target != null) {
-                                wdgmsg("click", target.sc, target.rc.floor(posres), 3, modflags, 0, (int) target.id, target.rc.floor(posres), 0, -1);
-                                pllastcc = target.rc;
-                            }
                         }
-                    } else {
-                        args = Utils.extend(args, gobargs);
-                        if (clickb == 1 || gobargs.length > 0) {
-                            clearmovequeue();
-                            canceltasks();
-                            if (pastaPathfinder != null && pastaPathfinder.isAlive() && !pastaPathfinder.isInterrupted()) {
-                                pastaPathfinder.interrupt();
+                        if (target == null) {
+                            args = Utils.extend(args, gobargs);
+                            if (clickb == 1 || gobargs.length > 0) {
+                                clearmovequeue();
+                                canceltasks();
+                                if (pastaPathfinder != null && pastaPathfinder.isAlive() && !pastaPathfinder.isInterrupted()) {
+                                    pastaPathfinder.interrupt();
+                                }
                             }
-                        }
-                        wdgmsg("click", args);
-                        if (clickb == 1) {
-                            pllastcc = modflags == 0 ? mc : null;
-                        } else if (gobargs.length > 2 && gobargs[2] instanceof Coord) {
-                            pllastcc = ((Coord) gobargs[2]).mul(posres);
+                            wdgmsg("click", args);
+                            if (clickb == 1) {
+                                pllastcc = modflags == 0 ? mc : null;
+                            } else if (gobargs.length > 2 && gobargs[2] instanceof Coord) {
+                                pllastcc = ((Coord) gobargs[2]).mul(posres);
+                            }
                         }
                     }
                 } else {
