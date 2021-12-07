@@ -26,6 +26,8 @@
 
 package haven;
 
+import modification.dev;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -137,6 +139,10 @@ public class HttpStatus extends HackThread {
                             break;
                         }
                     }
+                } catch (IOException e) {
+                    throw (e);
+                } catch (Exception e) {
+                    dev.simpleLog(e);
                 } finally {
                     fp.close();
                     synchronized (this) {
