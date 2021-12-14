@@ -111,7 +111,9 @@ public class DefSettings {
     public static final IndirSetting<Color> BEEHIVECOLOR = new IndirSetting<>(global, "gameplay.beehive-color");             //[RGBA] Color beehive radii circles
     public static final IndirSetting<Color> ANIMALDANGERCOLOR = new IndirSetting<>(global, "gameplay.danger-color");         //[RGBA] Color of animal radii circles
     public static final IndirSetting<Color> SUPPORTDANGERCOLOR = new IndirSetting<>(global, "gameplay.support-color");       //[RGBA] Color of mine suport radii circles
-    public static final IndirSetting<Color> CHEESERACKMISSINGCOLOR = new IndirSetting<>(global, "gameplay.cheeserack-color");//[RGBA] Color of cheese racks missing trays
+    public static final IndirSetting<Color> CHEESERACKEMPTYCOLOR = new IndirSetting<>(global, "gameplay.cheeserack-empty-color");//[RGBA] Color of cheese racks missing trays
+    public static final IndirSetting<Color> CHEESERACKFULLCOLOR = new IndirSetting<>(global, "gameplay.cheeserack-full-color");//[RGBA] Color of cheese racks missing trays
+    public static final IndirSetting<Color> CHEESERACKMISSINGCOLOR = new IndirSetting<>(global, "gameplay.cheeserack-missing-color");//[RGBA] Color of cheese racks missing trays
     public static final IndirSetting<Color> GARDENPOTDONECOLOR = new IndirSetting<>(global, "gameplay.gardenpot-color");//[RGBA] Color of cheese racks missing trays
     public static final IndirSetting<Color> ERRORTEXTCOLOR = new IndirSetting<>(global, "gameplay.errortext-color");//[RGBA] Color of error messages displayed
     public static final IndirSetting<Boolean> SHOWQUALITY = new IndirSetting<>(global, "gameplay.show-item-quality");        //[Bool] Toggle item quality
@@ -285,7 +287,9 @@ public class DefSettings {
         BEEHIVECOLOR.ensure(new Color(255, 255, 0, 80));
         ANIMALDANGERCOLOR.ensure(new Color(255, 0, 0, 80));
         SUPPORTDANGERCOLOR.ensure(new Color(0, 255, 0, 80));
-        CHEESERACKMISSINGCOLOR.ensure(Color.GREEN);
+        CHEESERACKEMPTYCOLOR.ensure(new Color(0, 255, 0, 255));
+        CHEESERACKFULLCOLOR.ensure(new Color(255, 0, 0, 255));
+        CHEESERACKMISSINGCOLOR.ensure(new Color(255, 255, 0, 255));
         GARDENPOTDONECOLOR.ensure(Color.BLACK);
         ERRORTEXTCOLOR.ensure(Color.red);
         SHOWQUALITY.ensure(true);

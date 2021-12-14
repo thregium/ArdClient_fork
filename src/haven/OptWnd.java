@@ -81,6 +81,8 @@ import static haven.DefSettings.ANIMALPATHCOL;
 import static haven.DefSettings.BEEHIVECOLOR;
 import static haven.DefSettings.BTNCOL;
 import static haven.DefSettings.BUGGEDMENU;
+import static haven.DefSettings.CHEESERACKEMPTYCOLOR;
+import static haven.DefSettings.CHEESERACKFULLCOLOR;
 import static haven.DefSettings.CHEESERACKMISSINGCOLOR;
 import static haven.DefSettings.CLOSEFORMENU;
 import static haven.DefSettings.DARKMODE;
@@ -740,7 +742,7 @@ public class OptWnd extends Window {
 
     private void initDisplayFirstColumn() {
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(display, new Coord(620, 350)));
-        appender.setVerticalMargin(VERTICAL_MARGIN);
+        appender.setHorizontalMargin(HORIZONTAL_MARGIN);
 
         appender.add(new CheckBox("Show Session Display") {
             {
@@ -1077,41 +1079,21 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Highlight empty/full cheese racks.") {
-            {
-                a = Config.showrackstatus;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("showrackstatus", val);
-                Config.showrackstatus = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Highlight partially full cheese racks.") {
-            {
-                a = Config.cRackmissing;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("cRackmissing", val);
-                Config.cRackmissing = val;
-                a = val;
-            }
-        });
-        appender.add(ColorPreWithLabel("Cheese rack missing color: ", CHEESERACKMISSINGCOLOR, val -> BPRadSprite.cRackMissing = new Material.Colors(CHEESERACKMISSINGCOLOR.get())));
-        appender.add(new CheckBox("Highlight finished garden pots.") {
-            {
-                a = Config.highlightpots;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("highlightpots", val);
-                Config.highlightpots = val;
-                a = val;
-            }
-        });
-        appender.add(ColorPreWithLabel("Garden Pot Finished Color (Requires restart)", GARDENPOTDONECOLOR));
+        appender.addRow(new CheckBox("Highlight empty/full cheese racks.", val -> Utils.setprefb("showrackstatus", Config.showrackstatus = val), Config.showrackstatus), new ColorPreview(Coord.of(16, 16), CHEESERACKEMPTYCOLOR.get(), val -> {
+            CHEESERACKEMPTYCOLOR.set(val);
+            Gob.cRackEmpty = new Material.Colors(val);
+        }), new ColorPreview(Coord.of(16, 16), CHEESERACKFULLCOLOR.get(), val -> {
+            CHEESERACKFULLCOLOR.set(val);
+            Gob.cRackFull = new Material.Colors(val);
+        }));
+        appender.addRow(new CheckBox("Highlight partially full cheese racks.", val -> Utils.setprefb("cRackmissing", Config.cRackmissing = val), Config.cRackmissing), new ColorPreview(Coord.of(16, 16), CHEESERACKMISSINGCOLOR.get(), val -> {
+            CHEESERACKMISSINGCOLOR.set(val);
+            Gob.cRackMissing = new Material.Colors(val);
+        }));
+        appender.addRow(new CheckBox("Highlight finished garden pots.", val -> Utils.setprefb("highlightpots", Config.highlightpots = val), Config.highlightpots), new ColorPreview(Coord.of(16, 16), GARDENPOTDONECOLOR.get(), val -> {
+            GARDENPOTDONECOLOR.set(val);
+            Gob.potDOne = new Material.Colors(val);
+        }));
         appender.add(new CheckBox("Draw circles around party members.") {
             {
                 a = Config.partycircles;

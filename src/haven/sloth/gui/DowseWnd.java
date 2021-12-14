@@ -1,5 +1,6 @@
 package haven.sloth.gui;
 
+import haven.ColorPreview;
 import haven.Coord;
 import haven.Coord2d;
 import haven.Label;

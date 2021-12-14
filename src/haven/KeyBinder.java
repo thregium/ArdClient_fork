@@ -198,9 +198,12 @@ public class KeyBinder {
     }
 
     public static boolean handle(UI ui, KeyEvent e) {
-        if (Config.iswindows && Utils.getScancode(e) == 41) { //should fix the french keyboard ` not working as a keybind.
-            KeyEvent f = new KeyEvent(e.getComponent(), e.getID(), e.getWhen(), 0, KeyEvent.VK_BACK_QUOTE);
-            return (get(f).execute(ui));
+        if (Config.iswindows && Config.userazerty) { //should fix the french keyboard ` not working as a keybind.
+            Long key = Utils.getScancode(e);
+            if (key != null && key == 41) {
+                KeyEvent f = new KeyEvent(e.getComponent(), e.getID(), e.getWhen(), 0, KeyEvent.VK_BACK_QUOTE);
+                return (get(f).execute(ui));
+            }
         }
         KeyBind kb = get(e);
         if (kb.code == 0 && kb.mods == 0) { //if the "null" unbound keybind, do nothing, else execute keybind.

@@ -34,7 +34,6 @@ public class BPRadSprite extends Sprite {
 
     public static GLState smatDanger = new ColState(DefSettings.ANIMALDANGERCOLOR.get());
     public static GLState smatSupports = new ColState(DefSettings.SUPPORTDANGERCOLOR.get());
-    public static Material.Colors cRackMissing = new Material.Colors(DefSettings.CHEESERACKMISSINGCOLOR.get());
     public static GLState smatBeehive = new ColState((DefSettings.BEEHIVECOLOR.get()));
     public static GLState smatTrough = new ColState(DefSettings.TROUGHCOLOR.get());
     final GLState smat;

@@ -78,15 +78,16 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     private Overlay bowvector = null;
     public static final Text.Foundry gobhpf = new Text.Foundry(Text.serif, 14).aa(true);
     private static final Material.Colors dframeEmpty = new Material.Colors(new Color(0, 255, 0, 200));
-    private static final Material.Colors cRackEmpty = new Material.Colors(new Color(0, 255, 0, 255));
-    private static final Material.Colors cRackFull = new Material.Colors(new Color(255, 0, 0, 255));
+    public static Material.Colors cRackEmpty = new Material.Colors(DefSettings.CHEESERACKEMPTYCOLOR.get());
+    public static Material.Colors cRackFull = new Material.Colors(DefSettings.CHEESERACKFULLCOLOR.get());
+    public static Material.Colors cRackMissing = new Material.Colors(DefSettings.CHEESERACKMISSINGCOLOR.get());
     private static final Material.Colors coopMissing = new Material.Colors(new Color(255, 0, 255, 255));
     private static final Material.Colors dframeDone = new Material.Colors(new Color(255, 0, 0, 200));
     private static final Material.Colors cupboardfull = new Material.Colors(new Color(255, 0, 0, 175));
     private static final Material.Colors cupboardempty = new Material.Colors(new Color(0, 255, 0, 175));
     private static final Material.Colors dframeWater = new Material.Colors(new Color(0, 0, 255, 200));
     private static final Material.Colors dframeBark = new Material.Colors(new Color(165, 42, 42, 200));
-    private static final Material.Colors potDOne = new Material.Colors(DefSettings.GARDENPOTDONECOLOR.get());
+    public static Material.Colors potDOne = new Material.Colors(DefSettings.GARDENPOTDONECOLOR.get());
 //    public static Gob.Overlay animalradius = new Gob.Overlay(new BPRadSprite(100.0F, -10.0F, BPRadSprite.smatDanger));
 //    public static Gob.Overlay doubleanimalradius = new Gob.Overlay(new BPRadSprite(200.0F, -20.0F, BPRadSprite.smatDanger));
 
@@ -676,7 +677,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 sb.append(eq()).append("\n");
             }
         }
-        if (ols.size() > 0) {
+        if (!ols.isEmpty()) {
             sb.append("Overlays: ").append(ols.size()).append("\n");
             for (Overlay ol : ols) {
                 if (ol != null) {
@@ -1161,12 +1162,16 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 rl.prepc(qlty.getfx());
 
             if (Config.showrackstatus && type == Type.CHEESERACK) {
-                if (ols.size() == 3)
-                    rl.prepc(cRackFull);
-                if (ols.size() > 0 && ols.size() < 3 && Config.cRackmissing)
-                    rl.prepc(BPRadSprite.cRackMissing);
-                else
+                final List<Overlay> eqOls = new ArrayList<>();
+                for (Overlay ol : ols)
+                    if (ol.name().contains("gfx/fx/eq"))
+                        eqOls.add(ol);
+                if (eqOls.isEmpty())
                     rl.prepc(cRackEmpty);
+                else if (eqOls.size() == 3)
+                    rl.prepc(cRackFull);
+                else if (eqOls.size() < 3 && Config.cRackmissing)
+                    rl.prepc(cRackMissing);
             }
             if (Config.showcupboardstatus) {
                 if (type == Type.CUPBOARD) {
@@ -1340,8 +1345,14 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             }
 
 
-            if (Config.highlightpots && type == Type.GARDENPOT && ols.size() == 2)
-                rl.prepc(potDOne);
+            if (Config.highlightpots && type == Type.GARDENPOT) {
+                final List<Overlay> eqOls = new ArrayList<>();
+                for (Overlay ol : ols)
+                    if (ol.name().contains("gfx/fx/eq"))
+                        eqOls.add(ol);
+                if (eqOls.size() == 2)
+                    rl.prepc(potDOne);
+            }
 
 
             for (final haven.sloth.gob.Rendered attr : renderedattrs) {
