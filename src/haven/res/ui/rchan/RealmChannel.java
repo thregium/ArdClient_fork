@@ -2,6 +2,7 @@ package haven.res.ui.rchan;
 
 import haven.BuddyWnd;
 import haven.ChatUI;
+import haven.Config;
 import haven.Coord;
 import haven.GameUI;
 import haven.Indir;
@@ -60,7 +61,8 @@ public class RealmChannel extends ChatUI.MultiChat {
                 if (nm == null)
                     nm = "???";
                 if ((r == null) || !nm.equals(cn)) {
-                    r = ChatUI.fnd.render(RichText.Parser.quote(String.format("%s: %s", nm, text)), w, TextAttribute.FOREGROUND, col);
+                    String tf = String.format("%s: %s", nm, text);
+                    r = ChatUI.fnd.render(RichText.Parser.quote(Config.chattimestamp ? ChatUI.timestamp(tf) : tf), w, TextAttribute.FOREGROUND, col);
                     cn = nm;
                 }
             }

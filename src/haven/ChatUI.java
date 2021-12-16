@@ -1776,7 +1776,7 @@ public class ChatUI extends Widget {
         return (super.globtype(key, ev));
     }
 
-    private static String timestamp(String text) {
+    public static String timestamp(String text) {
         return "[" + new SimpleDateFormat("HH:mm").format(new Date()) + "] " + text;
     }
 
