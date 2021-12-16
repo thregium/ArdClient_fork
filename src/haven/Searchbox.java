@@ -50,18 +50,18 @@ public abstract class Searchbox<T> extends Listbox<T> {
         if ((ev.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) != 0) mod |= C;
         if ((ev.getModifiersEx() & (InputEvent.META_DOWN_MASK | InputEvent.ALT_DOWN_MASK)) != 0) mod |= M;
         int code = ev.getKeyCode();
-        if (mod == 0) {
+        if (mod == 0 && code != KeyEvent.CHAR_UNDEFINED) {
             if (c == 8) {
                 if (searching != null) {
                     search(searching.substring(0, searching.length() - 1));
                     return (true);
                 }
-            } else if (c == 10) {
+            } else if (code == KeyEvent.VK_ENTER) {
                 if (searching != null) {
                     stopsearch();
                     return (true);
                 }
-            } else if (c == 27) {
+            } else if (code == KeyEvent.VK_ESCAPE) {
                 if (searching != null) {
                     stopsearch();
                     return (true);
