@@ -105,7 +105,6 @@ public class MenuGrid extends Widget {
     private UI.Grab grab;
     private int curoff = 0;
     public static int cap = (gsz.x * gsz.y) - 2;
-    BufferedReader br;
     private boolean recons = true;
     private Map<Character, PagButton> hotmap = new HashMap<>();
     private boolean togglestuff = true;
@@ -1653,9 +1652,9 @@ public class MenuGrid extends Widget {
 
     public boolean globtype(char k, KeyEvent ev) {
         if (Config.disablemenugrid)
-            return false;
+            return (false);
         if (ev.isShiftDown() || ev.isAltDown()) {
-            return false;
+            return (false);
         } else if ((k == 27) && (this.cur != null)) {
             this.cur = null;
             curoff = 0;
@@ -1670,7 +1669,7 @@ public class MenuGrid extends Widget {
             use(next, new Interaction(), false);
             return (true);
         }
-        PagButton r = hotmap.get(Character.toUpperCase(k));
+        PagButton r = hotmap.get(Character.toUpperCase((char)ev.getKeyCode())); //k
         if (r != null) {
             if (Config.disablemagaicmenugrid && r.res.name.startsWith("paginae/seid/"))
                 return (false);

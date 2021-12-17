@@ -2069,7 +2069,6 @@ public class OptWnd extends Window {
     private void initUis() {
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(uis, new Coord(620, 310)));
 
-        appender.setVerticalMargin(VERTICAL_MARGIN);
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
 
         appender.addRow(new Label("Language (req. restart):"), langDropdown());
@@ -3601,6 +3600,10 @@ public class OptWnd extends Window {
                 return Text.render("Caching Gemstone for fast loading").tex();
             }
         });
+        appender.addRow(new CheckBox("Draw focused widget rectangle", val -> Utils.setprefb("focusrectangle", configuration.focusrectangle = val), configuration.focusrectangle), new CheckBox("Solid", val -> Utils.setprefb("focusrectanglesolid", configuration.focusrectanglesolid = val), configuration.focusrectanglesolid), new ColorPreview(new Coord(20, 20), new Color(configuration.focusrectanglecolor, true), val -> {
+            configuration.focusrectanglecolor = val.hashCode();
+            Utils.setprefi("focusrectanglecolor", val.hashCode());
+        }));
 
         appender.add(new Label("Pathfinder"));
         final String[] tiers = {"Perfect", "Medium", "Fastest"};
@@ -5706,8 +5709,8 @@ public class OptWnd extends Window {
     public void wdgmsg(Widget sender, String msg, Object... args) {
         if ((sender == this) && (msg == "close")) {
             hide();
-            if (ui.gui != null)
-                setfocus(ui.gui.invwnd);
+//            if (ui.gui != null)
+//                setfocus(ui.gui.invwnd);
         } else {
             super.wdgmsg(sender, msg, args);
         }

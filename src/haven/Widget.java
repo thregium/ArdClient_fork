@@ -27,7 +27,9 @@
 package haven;
 
 import haven.purus.pbot.PBotUtils;
+import modification.configuration;
 
+import java.awt.Color;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.lang.annotation.ElementType;
@@ -46,6 +48,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
@@ -234,6 +237,7 @@ public class Widget {
 
     /**
      * Local with ignore version
+     *
      * @param name
      * @return
      * @throws InterruptedException
@@ -308,13 +312,13 @@ public class Widget {
 
     private <T extends Widget> T add0(T child) {
         if ((child.ui == null) && (this.ui != null))
-            ((Widget) child).attach(this.ui);
+            child.attach(this.ui);
         child.parent = this;
         child.link();
         child.added();
         if (attached)
             child.attached();
-        if (((Widget) child).canfocus && child.visible)
+        if (child.canfocus && child.visible())
             newfocusable(child);
         return (child);
     }
@@ -659,7 +663,7 @@ public class Widget {
 
     public void setfocus(Widget w) {
         if (focusctl) {
-            if (w != focused) {
+            if (w != focused && w.tvisible()) {
                 Widget last = focused;
                 focused = w;
                 if (hasfocus) {
@@ -677,7 +681,7 @@ public class Widget {
                 if ((ui != null) && ui.rwidgets.containsKey(w) && ui.rwidgets.containsKey(this))
                     wdgmsg("focus", ui.rwidgets.get(w));
             }
-            if ((parent != null) && visible && canfocus)
+            if ((parent != null) && tvisible() && canfocus)
                 parent.setfocus(this);
         } else {
             parent.setfocus(w);
@@ -720,7 +724,7 @@ public class Widget {
         /* XXX: Might need to check subwidgets recursively */
         focused = null;
         for (Widget w = lchild; w != null; w = w.prev) {
-            if (w.visible && w.autofocus) {
+            if (w.tvisible() && w.autofocus) {
                 focused = w;
                 if (hasfocus) {
                     focused.hasfocus = true;
@@ -832,7 +836,7 @@ public class Widget {
 
         for (Widget wdg = child; wdg != null; wdg = next) {
             next = wdg.next;
-            if (!wdg.visible)
+            if (!wdg.tvisible())
                 continue;
             if (this instanceof Window && ((Window) this).minimized() && !(wdg instanceof IButton))
                 continue;
@@ -843,6 +847,17 @@ public class Widget {
             else
                 g2 = g.reclipl(cc, wdg.sz);
             wdg.draw(g2);
+            if (configuration.focusrectangle) {
+                RootWidget rw = getparent(RootWidget.class);
+                if (rw != null && Objects.equals(rw.lastfocused, wdg)) {
+                    g2.chcolor(new Color(configuration.focusrectanglecolor, true));
+                    if (configuration.focusrectanglesolid)
+                        g2.frect(Coord.z, wdg.sz);
+                    else
+                        g2.rect(Coord.z, wdg.sz);
+                    g2.chcolor();
+                }
+            }
         }
     }
 
@@ -856,7 +871,7 @@ public class Widget {
 
     public boolean mousedown(Coord c, int button) {
         for (Widget wdg = lchild; wdg != null; wdg = wdg.prev) {
-            if (!wdg.visible)
+            if (!wdg.tvisible())
                 continue;
             Coord cc = xlate(wdg.c, true);
             if (c.isect(cc, wdg.sz)) {
@@ -870,7 +885,7 @@ public class Widget {
 
     public boolean mouseup(Coord c, int button) {
         for (Widget wdg = lchild; wdg != null; wdg = wdg.prev) {
-            if (!wdg.visible)
+            if (!wdg.tvisible())
                 continue;
             Coord cc = xlate(wdg.c, true);
             if (c.isect(cc, wdg.sz)) {
@@ -884,7 +899,7 @@ public class Widget {
 
     public boolean mousewheel(Coord c, int amount) {
         for (Widget wdg = lchild; wdg != null; wdg = wdg.prev) {
-            if (!wdg.visible)
+            if (!wdg.tvisible())
                 continue;
             Coord cc = xlate(wdg.c, true);
             if (c.isect(cc, wdg.sz)) {
@@ -898,7 +913,7 @@ public class Widget {
 
     public void mousemove(Coord c) {
         for (Widget wdg = lchild; wdg != null; wdg = wdg.prev) {
-            if (!wdg.visible)
+            if (!wdg.tvisible())
                 continue;
             Coord cc = xlate(wdg.c, true);
             wdg.mousemove(c.add(cc.inv()));
@@ -947,8 +962,8 @@ public class Widget {
                 return (true);
             }
         }
-        if (focusctl && visible()) {
-            if (focused != null && focused.visible()) {
+        if (focusctl && tvisible()) {
+            if (focused != null && focused.tvisible()) {
                 if (focused.type(key, ev))
                     return (true);
                 if (focustab) {
@@ -978,7 +993,7 @@ public class Widget {
             }
         } else {
             for (Widget wdg = child; wdg != null; wdg = wdg.next) {
-                if (wdg.visible()) {
+                if (wdg.tvisible()) {
                     if (wdg.type(key, ev))
                         return (true);
                 }
@@ -992,8 +1007,8 @@ public class Widget {
     public static final KeyMatch key_tab = KeyMatch.forcode(KeyEvent.VK_TAB, 0);
 
     public boolean keydown(KeyEvent ev) {
-        if (focusctl && visible()) {
-            if (focused != null && focused.visible()) {
+        if (focusctl && tvisible()) {
+            if (focused != null && focused.tvisible()) {
                 if (focused.keydown(ev))
                     return (true);
                 return (false);
@@ -1002,7 +1017,7 @@ public class Widget {
             }
         } else {
             for (Widget wdg = child; wdg != null; wdg = wdg.next) {
-                if (wdg.visible()) {
+                if (wdg.tvisible()) {
                     if (wdg.keydown(ev))
                         return (true);
                 }
@@ -1012,8 +1027,8 @@ public class Widget {
     }
 
     public boolean keyup(KeyEvent ev) {
-        if (focusctl && visible()) {
-            if (focused != null && focused.visible()) {
+        if (focusctl && tvisible()) {
+            if (focused != null && focused.tvisible()) {
                 if (focused.keyup(ev))
                     return (true);
                 return (false);
@@ -1022,7 +1037,7 @@ public class Widget {
             }
         } else {
             for (Widget wdg = child; wdg != null; wdg = wdg.next) {
-                if (wdg.visible()) {
+                if (wdg.tvisible()) {
                     if (wdg.keyup(ev))
                         return (true);
                 }
@@ -1033,7 +1048,7 @@ public class Widget {
 
     public boolean mouseclick(Coord c, int button, int count) {
         for (Widget wdg = lchild; wdg != null; wdg = wdg.prev) {
-            if (!wdg.visible)
+            if (!wdg.tvisible())
                 continue;
             Coord cc = xlate(wdg.c, true);
             if (c.isect(cc, wdg.sz))
@@ -1058,7 +1073,7 @@ public class Widget {
     public Coord contentsz() {
         Coord max = new Coord(0, 0);
         for (Widget wdg = child; wdg != null; wdg = wdg.next) {
-            if (!wdg.visible)
+            if (!wdg.visible())
                 continue;
             Coord br = wdg.c.add(wdg.sz);
             if (br.x > max.x)
@@ -1393,7 +1408,7 @@ public class Widget {
         Resource ret;
 
         for (Widget wdg = lchild; wdg != null; wdg = wdg.prev) {
-            if (!wdg.visible)
+            if (!wdg.tvisible())
                 continue;
             Coord cc = xlate(wdg.c, true);
             if (c.isect(cc, wdg.sz)) {
@@ -1466,7 +1481,7 @@ public class Widget {
             return (tooltip);
         }
         for (Widget wdg = lchild; wdg != null; wdg = wdg.prev) {
-            if (!wdg.visible)
+            if (!wdg.tvisible())
                 continue;
             Coord cc = xlate(wdg.c, true);
             if (c.isect(cc, wdg.sz)) {
@@ -1531,7 +1546,7 @@ public class Widget {
 
     public boolean tvisible() {
         for (Widget w = this; w != null; w = w.parent) {
-            if (!w.visible)
+            if (!w.visible())
                 return (false);
         }
         return (true);

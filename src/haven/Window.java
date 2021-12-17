@@ -837,10 +837,16 @@ public class Window extends MovableWidget implements DTarget {
 
     public static final List<String> excludesCloseWnd = new ArrayList<>(Arrays.asList("Chat", "Minimap", "Map"));
 
+    @Override
     public boolean type(char key, KeyEvent ev) {
-        if (super.type(key, ev))
+        return (true);
+    }
+
+    @Override
+    public boolean keydown(KeyEvent ev) {
+        if (super.keydown(ev))
             return (true);
-        if (key == 27 && Config.escclosewindows) {
+        if (key_esc.match(ev) && Config.escclosewindows) {
             if (!excludesCloseWnd.contains(this.origcap)) {
                 close();
                 return (true);

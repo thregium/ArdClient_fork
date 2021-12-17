@@ -148,6 +148,10 @@ public class configuration {
         }
     }
 
+    public static boolean focusrectangle = Utils.getprefb("focusrectangle", false);
+    public static boolean focusrectanglesolid = Utils.getprefb("focusrectanglesolid", false);
+    public static int focusrectanglecolor = Utils.getprefi("focusrectanglecolor", new Color(255, 255, 255, 128).hashCode());
+
     public static boolean showpolownersinfo = Utils.getprefb("showpolownersinfo", false);
     public static boolean oldmountbar = Utils.getprefb("oldmountbar", false);
     public static boolean newmountbar = Utils.getprefb("newmountbar", true);

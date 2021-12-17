@@ -145,7 +145,7 @@ public abstract class MovableWidget extends Widget {
     public boolean mousedown(final Coord mc, final int button) {
         if (super.mousedown(mc, button)) {
             //Give preference to the Widget using this
-            return true;
+            return (true);
         } else if (moveHit(mc, button)) {
             if (!lock) {
                 movableBg = true;
@@ -154,9 +154,9 @@ public abstract class MovableWidget extends Widget {
                 parent.setfocus(this);
                 raise();
             }
-            return true;
+            return (true);
         } else {
-            return false;
+            return (false);
         }
     }
 

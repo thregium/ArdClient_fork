@@ -27,6 +27,7 @@
 package haven;
 
 import haven.sloth.gui.SessionDisplay;
+import modification.configuration;
 
 import java.awt.event.KeyEvent;
 
@@ -83,5 +84,19 @@ public class RootWidget extends ConsoleHost {
     }
 
     public void error(String msg) {
+    }
+
+    public Widget lastfocused;
+    @Override
+    public void tick(double dt) {
+        super.tick(dt);
+        if (configuration.focusrectangle) {
+            for (Widget f = focused; f != null; f = f.focused) {
+                if (f.focused == null) {
+                    lastfocused = f;
+                    break;
+                }
+            }
+        }
     }
 }

@@ -244,9 +244,7 @@ public class TextEntry extends Widget implements ReadLine.Owner {
 
     public boolean type(char c, KeyEvent ev) {
 //        buf.key(ev);
-        if (c == 27) {
-            close();
-        }
+
         return (true);
     }
 
@@ -256,6 +254,10 @@ public class TextEntry extends Widget implements ReadLine.Owner {
 //                || e.getKeyCode() == KeyEvent.VK_F11 || e.getKeyCode() == KeyEvent.VK_F12 || e.getModifiers() == InputEvent.ALT_MASK || e.getModifiers() == InputEvent.CTRL_MASK) {
 //            return super.keydown(e);
 //        }
+        if (key_esc.match(e)) {
+            if (close())
+                return (true);
+        }
         return (buf.key(e));
     }
 
