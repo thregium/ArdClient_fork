@@ -359,25 +359,44 @@ public class UI {
                 gui.livestockwnd.applyId(wdg);
         } else if (wdg instanceof ISBox && cap.equals("Stockpile")) {
             TextEntry entry = new TextEntry(40, "") {
-                @Override
-                public boolean keydown(KeyEvent e) {
-                    return !(e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12);
-                }
+                String backup = text();
 
                 @Override
-                public boolean type(char c, KeyEvent ev) {
-                    if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line().length() < 2 || c == '\b') {
-                        return buf.key(ev);
-                    } else if (c == '\n') {
+                public boolean keydown(KeyEvent ev) {
+//                    char c = ev.getKeyChar();
+//                    if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line().length() < 2 || c == '\b') {
+//                        return (buf.key(ev));
+//                    } else if (c == '\n') {
+//                        try {
+//                            int count = Integer.parseInt(dtext());
+//                            for (int i = 0; i < count; i++)
+//                                wdg.wdgmsg("xfer");
+//                            return (true);
+//                        } catch (NumberFormatException e) {
+//                        }
+//                    }
+//                    return (false);
+
+                    if (ev.getKeyCode() == KeyEvent.VK_ENTER) {
                         try {
-                            int count = Integer.parseInt(dtext());
+                            int count = Integer.parseInt(text());
                             for (int i = 0; i < count; i++)
                                 wdg.wdgmsg("xfer");
-                            return true;
-                        } catch (NumberFormatException e) {
+                            return (true);
+                        } catch (NumberFormatException ex) {
                         }
                     }
-                    return false;
+                    backup = text();
+                    boolean b = super.keydown(ev);
+                    try {
+                        if (!text().isEmpty())
+                            Integer.parseInt(text());
+                        if (text().length() > 2)
+                            settext(backup);
+                    } catch (Exception ex) {
+                        settext(backup);
+                    }
+                    return (b);
                 }
             };
             Button btn = new Button(65, "Take") {
