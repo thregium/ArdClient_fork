@@ -836,7 +836,7 @@ public class Widget {
 
         for (Widget wdg = child; wdg != null; wdg = next) {
             next = wdg.next;
-            if (!wdg.tvisible())
+            if (!wdg.visible())
                 continue;
             if (this instanceof Window && ((Window) this).minimized() && !(wdg instanceof IButton))
                 continue;
@@ -871,7 +871,7 @@ public class Widget {
 
     public boolean mousedown(Coord c, int button) {
         for (Widget wdg = lchild; wdg != null; wdg = wdg.prev) {
-            if (!wdg.tvisible())
+            if (!wdg.visible())
                 continue;
             Coord cc = xlate(wdg.c, true);
             if (c.isect(cc, wdg.sz)) {
@@ -885,7 +885,7 @@ public class Widget {
 
     public boolean mouseup(Coord c, int button) {
         for (Widget wdg = lchild; wdg != null; wdg = wdg.prev) {
-            if (!wdg.tvisible())
+            if (!wdg.visible())
                 continue;
             Coord cc = xlate(wdg.c, true);
             if (c.isect(cc, wdg.sz)) {
@@ -899,7 +899,7 @@ public class Widget {
 
     public boolean mousewheel(Coord c, int amount) {
         for (Widget wdg = lchild; wdg != null; wdg = wdg.prev) {
-            if (!wdg.tvisible())
+            if (!wdg.visible())
                 continue;
             Coord cc = xlate(wdg.c, true);
             if (c.isect(cc, wdg.sz)) {
@@ -913,7 +913,7 @@ public class Widget {
 
     public void mousemove(Coord c) {
         for (Widget wdg = lchild; wdg != null; wdg = wdg.prev) {
-            if (!wdg.tvisible())
+            if (!wdg.visible())
                 continue;
             Coord cc = xlate(wdg.c, true);
             wdg.mousemove(c.add(cc.inv()));
