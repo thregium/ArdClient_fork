@@ -530,9 +530,13 @@ public class Material extends GLState {
                     ret.mipmap = true;
                 } else {
                     ResCons2 cons = rnames.get(nm);
-                    if (cons == null)
-                        throw (new Resource.LoadException("Unknown material part name: " + nm, res));
-                    ret.left.add(cons.cons(res, args));
+//                    if (cons == null)
+//                        throw (new Resource.LoadException("Unknown material part name: " + nm, res));
+//                    ret.left.add(cons.cons(res, args));
+                    if (cons != null)
+                        ret.left.add(cons.cons(res, args));
+                    else
+                        new Resource.LoadWarning(res, "unknown material part name in %s: %s", res.name, nm).issue();
                 }
             }
             return (ret);

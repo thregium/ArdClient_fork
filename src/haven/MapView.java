@@ -3157,8 +3157,10 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 Object[] args = {pc, mc.floor(posres), ui.modflags()};
                 args = Utils.extend(args, gobclickargs(inf));
 
-                if (ui.modshift && ui.modmeta)
+                if (ui.modshift && ui.modmeta) {
                     lastItemactClickArgs = args;
+                    lastItemactClickArgs[2] = 1;
+                }
                 wdgmsg("itemact", args);
             }
         });
