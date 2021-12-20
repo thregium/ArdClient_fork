@@ -308,23 +308,28 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
             bbtn100.tooltip = "Type the number in box press enter and press this button.";
 
             tbuy = add(new TextEntry(40, "") {
-                @Override
-                public boolean keydown(KeyEvent e) {
-                    return !(e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12);
-                }
+                String backup = text();
 
                 @Override
-                public boolean type(char c, KeyEvent ev) {
-                    if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line().length() < 2 || c == '\b') {
-                        return buf.key(ev);
-                    } else if (c == '\n') {
+                public boolean keydown(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                         try {
                             count = Integer.parseInt(dtext());
                             return true;
-                        } catch (NumberFormatException e) {
+                        } catch (NumberFormatException ex) {
                         }
                     }
-                    return false;
+                    backup = text();
+                    boolean b = super.keydown(e);
+                    try {
+                        if (!text().isEmpty())
+                            Integer.parseInt(text());
+                        if (text().length() > 2)
+                            settext(backup);
+                    } catch (Exception ex) {
+                        settext(backup);
+                    }
+                    return (b);
                 }
             }, new Coord(82, 66));
         } else if (!canbuy && this.bbtn != null) {
