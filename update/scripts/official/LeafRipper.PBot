@@ -46,8 +46,10 @@ main = () => {
 	let tree = mulberries.shift();
 	while(tree != null && !shouldStop()) {
 		tree.pfClick(1, 0);
-		tree.doClick(3, 0);
-		PBotUtils.waitForFlowerMenu(ui);
+		do {
+			tree.doClick(3, 0);
+			PBotUtils.waitForFlowerMenu(ui, 200);
+		} while (!PBotUtils.petalExists(ui) && !shouldStop());
 		if(!PBotUtils.choosePetal(ui, "Pick leaf")) { // No leaves remaining
 			PBotUtils.closeFlowermenu(ui);
 			tree = mulberries.shift();

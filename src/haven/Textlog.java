@@ -135,16 +135,19 @@ public class Textlog extends Widget {
         maxy = cury = 0;
     }
 
-    public static class SimpleMessage extends ChatUI.Channel.Message {
+    public class SimpleMessage extends ChatUI.Channel.Message {
         private final Text t;
         public final String text;
 
         public SimpleMessage(String text, Color col, int w) {
+            if (quote) {
+                text = RichText.Parser.quote(text);
+            }
             this.text = text;
             if (col == null)
-                this.t = fnd.render(RichText.Parser.quote(text), w);
+                this.t = fnd.render(text, w);
             else
-                this.t = fnd.render(RichText.Parser.quote(text), w, TextAttribute.FOREGROUND, col);
+                this.t = fnd.render(text, w, TextAttribute.FOREGROUND, col);
         }
 
         public Text text() {
@@ -170,16 +173,10 @@ public class Textlog extends Widget {
     }
 
     public void append(String line, Color col) {
-        Text rl;
-        if (quote) {
-            line = RichText.Parser.quote(line);
-        }
-        if (col == null)
-            rl = fnd.render(line, sz.x - (margin * 2) - sflarp.sz().x);
-        else
-            rl = fnd.render(line, sz.x - (margin * 2) - sflarp.sz().x, TextAttribute.FOREGROUND, col);
+        SimpleMessage sm;
         synchronized (lines) {
-            lines.add(new SimpleMessage(line, col, iw())); //rl
+            sm = new SimpleMessage(line, col, iw());
+            lines.add(sm);
             if ((maxLines > 0) && (lines.size() > maxLines)) {
                 ChatUI.Channel.Message tl = lines.remove(0);
                 int dy = tl.sz().y;
@@ -188,8 +185,8 @@ public class Textlog extends Widget {
             }
         }
         if (cury == maxy)
-            cury += rl.sz().y;
-        maxy += rl.sz().y;
+            cury += sm.sz().y;
+        maxy += sm.sz().y;
     }
 
     public void append(String line) {
@@ -437,15 +434,19 @@ public class Textlog extends Widget {
     }
 
     protected void clicked(ChatUI.Channel.CharPos pos) {
-        AttributedCharacterIterator inf = pos.part.ti();
-        inf.setIndex(pos.ch.getCharIndex() + pos.part.start);
-        ChatUI.FuckMeGentlyWithAChainsaw url = (ChatUI.FuckMeGentlyWithAChainsaw) inf.getAttribute(ChatUI.ChatAttribute.HYPERLINK);
-        if ((url != null) && (WebBrowser.self != null)) {
-            try {
-                WebBrowser.self.show(url.url);
-            } catch (WebBrowser.BrowserException e) {
-                getparent(GameUI.class).error("Could not launch web browser.");
+        try {
+            AttributedCharacterIterator inf = pos.part.ti();
+            inf.setIndex(pos.ch.getCharIndex() + pos.part.start);
+            ChatUI.FuckMeGentlyWithAChainsaw url = (ChatUI.FuckMeGentlyWithAChainsaw) inf.getAttribute(ChatUI.ChatAttribute.HYPERLINK);
+            if ((url != null) && (WebBrowser.self != null)) {
+                try {
+                    WebBrowser.self.show(url.url);
+                } catch (WebBrowser.BrowserException e) {
+                    getparent(GameUI.class).error("Could not launch web browser.");
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
