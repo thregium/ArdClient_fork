@@ -380,14 +380,18 @@ public class FastMesh implements FRendered, Rendered.Instanced, Disposable {
     }
 
     public void draw(GOut g) {
-        BGL gl = g.gl;
-        Compiler compiler = compiler(g.gc);
-        if (compiler != null) {
-            compiler.get(g).draw(g);
-        } else {
-            cdraw(g);
+        try {
+            BGL gl = g.gl;
+            Compiler compiler = compiler(g.gc);
+            if (compiler != null) {
+                compiler.get(g).draw(g);
+            } else {
+                cdraw(g);
+            }
+            GOut.checkerr(gl);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        GOut.checkerr(gl);
     }
 
     protected boolean compile() {
