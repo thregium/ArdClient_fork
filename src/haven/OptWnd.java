@@ -6580,17 +6580,18 @@ public class OptWnd extends Window {
                 });
             File file = HashDirCache.findbase();
             File[] listFiles = file.listFiles(new configuration.MyFileNameFilter(".0"));
-            ArrayList<File> files = new ArrayList<>();
+            List<File> files = new ArrayList<>();
             boolean success = false;
             if (listFiles != null)
                 for (int i = 0; i < listFiles.length; i++) {
                     if (!success)
                         success = true;
                     try {
-                        final RandomAccessFile fp = HashDirCache.open2(listFiles[i], "r");
-                        HashDirCache.Header head = ((HashDirCache) ResCache.global).readhead(fp);
-                        fp.close();
-                        if (Config.resurl.toString().equals(head.cid) && head.name.startsWith(part)) {
+                        HashDirCache.Header head;
+                        try (RandomAccessFile fp = HashDirCache.open2(listFiles[i], "r")) {
+                            head = ((HashDirCache) ResCache.global).readhead(fp);
+                        }
+                        if (head != null && Config.resurl.toString().equals(head.cid) && head.name.startsWith(part)) {
                             files.add(listFiles[i]);
                             search.settext("Searching files for deleting: " + ((i + 1) + "/" + listFiles.length) + " - " + files.size() + " added");
                             search.move(ui.root.sz.div(2), 0.5, 0.5);

@@ -588,8 +588,8 @@ public class MapFile {
         ZMessage zout = new ZMessage(out);
         Collection<Long> segbuf = locked((Collection<Long> c) -> new ArrayList<>(c), lock.readLock()).apply(knownsegs);
         int nseg = 0;
-        List<Long> ids = new ArrayList<>();
-        List<Long> dids = new ArrayList<>();
+        Collection<Long> ids = new ArrayList<>();
+        Collection<Long> dids = new ArrayList<>();
         for (Long sid : segbuf) {
             if (!filter.includeseg(sid))
                 continue;
@@ -601,20 +601,28 @@ public class MapFile {
                 for (Map.Entry<Coord, Long> gd : seg.map.entrySet()) {
                     if (filter.includegrid(seg, gd.getKey(), gd.getValue()))
                         gridbuf.add(new Pair<>(gd.getKey(), gd.getValue()));
+                    prog.info("Calculating map cut " + gridbuf.size() + "/" + seg.map.size());
                 }
             } finally {
                 lock.readLock().unlock();
             }
             int ngrid = 0;
-            for (Pair<Coord, Long> gd : gridbuf) { //check for bugs
-                if (ids.contains(gd.b)) {
-                    if (!dids.contains(gd.b))
-                        dids.add(gd.b);
-                } else
-                    ids.add(gd.b);
+            if (!errors) {
+                int dgrid = 0;
+                for (Pair<Coord, Long> gd : gridbuf) { //check for bugs
+                    if (ids.contains(gd.b)) {
+                        if (!dids.contains(gd.b))
+                            dids.add(gd.b);
+                    } else {
+                        ids.add(gd.b);
+                    }
+                    prog.info("Checking map cut " + dgrid++ + "/" + gridbuf.size());
+                }
             }
             for (Pair<Coord, Long> gd : gridbuf) {
                 prog.grid(nseg, segbuf.size(), ngrid++, gridbuf.size());
+                if (!errors && dids.contains(gd.b))
+                    continue;
                 Grid grid = Grid.load(this, gd.b);
                 if (grid == null) {
                     /* This /should/ never happen, but for unknown
@@ -624,8 +632,6 @@ public class MapFile {
                      * just ignore them here. */
                     continue;
                 }
-                if (!errors && dids.contains(gd.b))
-                    continue;
                 MessageBuf buf = new MessageBuf();
                 buf.adduint8(3);
                 buf.addint64(gd.b);
@@ -755,6 +761,9 @@ public class MapFile {
 
     public interface ExportStatus {
         default void grid(int cs, int ns, int cg, int ng) {
+        }
+
+        default void info(String text) {
         }
 
         default void mark(int cm, int nm) {
@@ -1270,7 +1279,7 @@ public class MapFile {
                                     buf.setSample(c.x, c.y, 1, black.getGreen());
                                     buf.setSample(c.x, c.y, 2, black.getBlue());
                                     buf.setSample(c.x, c.y, 3, black.getAlpha());
-    
+
                                     if (configuration.allowoutlinemap) {
                                         for (int y = Math.max(c.y - 1, 0); y <= Math.min(c.y + 1, cmaps.y - 1); y++) {
                                             for (int x = Math.max(c.x - 1, 0); x <= Math.min(c.x + 1, cmaps.x - 1); x++) {
@@ -2322,9 +2331,11 @@ public class MapFile {
                 Coord off = seg.offs.get(info.seg);
                 if (off == null) {
                     seg.offs.put(info.seg, info.sc.sub(grid.sc));
-                } else if (!errors) {
-                    if (!off.equals(info.sc.sub(grid.sc)))
-                        throw (new RuntimeException("Inconsistent grid locations detected"));
+                } else {
+                    if (!off.equals(info.sc.sub(grid.sc)) && !errors) {
+                        return;
+//                        throw (new RuntimeException("Inconsistent grid locations detected"));
+                    }
                 }
             }
             Segment rseg;

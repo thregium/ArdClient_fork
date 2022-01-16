@@ -385,6 +385,8 @@ public class FlowerMenu extends Widget {
             opts[i].num = i;
             if (options[i].equals("Make kin")) {
                 opts[i].tooltip = Text.render("Random name with CTRL").tex();
+            } else if (options[i].equals("Delete")) {
+                opts[i].tooltip = Text.render("Warning! Dangerous!").tex();
             }
             if (options[i].equals("Study") || options[i].equals("Turn"))    // eatable curios & spitroasting
                 ignoreAutoSetting = true;

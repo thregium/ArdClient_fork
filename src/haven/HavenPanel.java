@@ -633,6 +633,7 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
             gl.setSwapInterval((aswap = iswap) ? 1 : 0);
     }
 
+    private KeyEvent lastkey = null;
     void dispatch() {
         synchronized (events) {
             if (mousemv != null) {
@@ -658,8 +659,12 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
                     } else if (ke.getID() == KeyEvent.KEY_RELEASED) {
                         ui.keyup(ke);
                     } else if (ke.getID() == KeyEvent.KEY_TYPED) {
-                        ui.type(ke);
+                        if (lastkey != null && (lastkey.getWhen() == ke.getWhen() || lastkey.getWhen() + 1 == ke.getWhen()) && ke.getKeyChar() == lastkey.getKeyChar())
+                            ui.type(ke);
+                        else
+                            ui.keydown(ke);
                     }
+                    lastkey = ke;
                 }
                 ui.lastevent = Utils.rtime();
             }

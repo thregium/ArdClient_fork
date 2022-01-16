@@ -673,8 +673,10 @@ public class MapFileWidget extends Widget {
                 MapFileWidget.zoom++;
                 Utils.setprefi("zoomlmap", MapFileWidget.zoom);
                 tc = tc.div(MapFileWidget.scalef());
-                curloc.tc.x = tc.x;
-                curloc.tc.y = tc.y;
+                if (curloc != null) {
+                    curloc.tc.x = tc.x;
+                    curloc.tc.y = tc.y;
+                }
             }
         } else {
             if (MapFileWidget.zoom > 0) {
@@ -683,8 +685,10 @@ public class MapFileWidget extends Widget {
                 MapFileWidget.zoom--;
                 Utils.setprefi("zoomlmap", MapFileWidget.zoom);
                 tc = tc.div(MapFileWidget.scalef());
-                curloc.tc.x = tc.x;
-                curloc.tc.y = tc.y;
+                if (curloc != null) {
+                    curloc.tc.x = tc.x;
+                    curloc.tc.y = tc.y;
+                }
             }
         }
         return (true);
@@ -774,7 +778,11 @@ public class MapFileWidget extends Widget {
         }
 
         public void grid(int cs, int ns, int cg, int ng) {
-            this.prog = String.format("Exporting map cut %,d/%,d in segment %,d/%,d", cg, ng, cs, ns);
+            info(String.format("Exporting map cut %,d/%,d in segment %,d/%,d", cg, ng, cs, ns));
+        }
+
+        public void info(String text) {
+            this.prog = text;
         }
 
         public void mark(int cm, int nm) {

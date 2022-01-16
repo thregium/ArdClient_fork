@@ -3640,12 +3640,53 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         }
                         break;
                     case 4: //Delete all gobs like this one
-                        if (g.type == Type.TAMEDANIMAL) {
-                            PBotUtils.sysMsg(ui, "I know you tried to delete this, but it's basically just a bad idea. Not adding to delete. Deleting livestock can/will lead to game crashes. If you really want them gone, hide them.", Color.white);
-                            break;
-                        }
-                        Deleted.add(name);
-                        ui.sess.glob.oc.removeAll(name);
+                        Window confirmwnd = new Window(new Coord(225, 100), "Confirm") {
+                            @Override
+                            public void wdgmsg(Widget sender, String msg, Object... args) {
+                                if (sender == cbtn)
+                                    reqdestroy();
+                                else
+                                    super.wdgmsg(sender, msg, args);
+                            }
+
+                            @Override
+                            public boolean type(char key, KeyEvent ev) {
+                                if (key == 27) {
+                                    reqdestroy();
+                                    return true;
+                                }
+                                return super.type(key, ev);
+                            }
+                        };
+
+                        confirmwnd.add(new Label("This option deletes objects of this type " + name + ". To return the back needed in the \"xGame Windows > Deleted\" tab, select the desired and press \"Stop Deleting\""),new Coord(10, 20));
+                        confirmwnd.pack();
+
+                        Button yesbtn = new Button(70, "Yes") {
+                            @Override
+                            public void click() {
+                                if (g.type == Type.TAMEDANIMAL) {
+                                    PBotUtils.sysMsg(ui, "I know you tried to delete this, but it's basically just a bad idea. Not adding to delete. Deleting livestock can/will lead to game crashes. If you really want them gone, hide them.", Color.white);
+                                    return;
+                                }
+                                Deleted.add(name);
+                                ui.sess.glob.oc.removeAll(name);
+                                PBotUtils.sysMsg(ui, "You deleted " + name + " objects from the game. To return the back needed in the \"xGame Windows > Deleted\" tab, select the desired and press \"Stop Deleting\"");
+                                parent.reqdestroy();
+                            }
+                        };
+                        confirmwnd.add(yesbtn, new Coord(confirmwnd.sz.x / 2 - 60 - yesbtn.sz.x, 60));
+                        Button nobtn = new Button(70, "No") {
+                            @Override
+                            public void click() {
+                                parent.reqdestroy();
+                            }
+                        };
+                        confirmwnd.add(nobtn, new Coord(confirmwnd.sz.x / 2 + 20, 60));
+                        confirmwnd.pack();
+
+                        ui.gui.add(confirmwnd, new Coord(ui.gui.sz.x / 2 - confirmwnd.sz.x / 2, ui.gui.sz.y / 2 - 200));
+                        confirmwnd.show();
                         break;
                     case 5: //Custom overlays
                         ui.gui.add(new OverlaySelector(name), ui.mc);
