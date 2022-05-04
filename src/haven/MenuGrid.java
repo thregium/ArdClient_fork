@@ -70,18 +70,14 @@ import haven.purus.FlowerPicker;
 import haven.purus.StockpileFiller2;
 import haven.purus.TroughFiller;
 import haven.res.gfx.fx.floatimg.DamageText;
+import haven.res.ui.croster.RosterButton;
 import haven.sloth.util.ObservableCollection;
-import modification.CustomFakeGrid;
-import modification.configuration;
-
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.font.TextAttribute;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -92,6 +88,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
+import modification.CustomFakeGrid;
+import modification.configuration;
 
 public class MenuGrid extends Widget {
     public final static Coord bgsz = Inventory.invsq.sz().add(-1, -1);
@@ -163,6 +161,7 @@ public class MenuGrid extends Widget {
         }
 
         Interaction fix = null;
+
         public void use() {
             if (fix != null)
                 pag.use(fix);
@@ -273,7 +272,7 @@ public class MenuGrid extends Widget {
         public Indir<Tex> img;
         public int newp;
         public Object[] rawinfo = {};
-//        private final Consumer<Pagina> onUse;
+        //        private final Consumer<Pagina> onUse;
         private final Map<Integer, Consumer<Pagina>> onUseMap = new HashMap<>();
 
         public static enum State {
@@ -321,6 +320,7 @@ public class MenuGrid extends Widget {
         }
 
         int fix = 0;
+
         public void use() {
 //            onUse.accept(this);
             use(fix);
@@ -344,7 +344,12 @@ public class MenuGrid extends Widget {
         public PagButton button() {
             if (button == null) {
                 Resource res = res();
-                PagButton.Factory f = res.getcode(PagButton.Factory.class, false);
+                PagButton.Factory f = null;
+                if (res.name.equals("paginae/act/croster")) {
+                    f = new RosterButton.Fac();
+                }
+                if (f == null)
+                    f = res.getcode(PagButton.Factory.class, false);
                 if (f == null)
                     button = new PagButton(this);
                 else
@@ -1669,7 +1674,7 @@ public class MenuGrid extends Widget {
             use(next, new Interaction(), false);
             return (true);
         }
-        PagButton r = hotmap.get(Character.toUpperCase((char)ev.getKeyCode())); //k
+        PagButton r = hotmap.get(Character.toUpperCase((char) ev.getKeyCode())); //k
         if (r != null) {
             if (Config.disablemagaicmenugrid && r.res.name.startsWith("paginae/seid/"))
                 return (false);

@@ -240,7 +240,7 @@ public class WItem extends Widget implements DTarget2 {
             } else {
                 itm.metertex = Text.renderstroked(String.format("%d%%", (int) (meter * 100)), Color.WHITE, Color.BLACK, num10Fnd).tex();
             }
-            return minf::meter;
+            return () -> minf.meter();
         }
         itm.metertex = null;
         return minf::meter;
@@ -416,9 +416,9 @@ public class WItem extends Widget implements DTarget2 {
                     ui.gui.itemClickCallback.itemClick(this);
                     return (true);
                 }
-                if (ui.modctrl && ui.modmeta)
+                if (ui.modctrl && ui.modmeta && !ui.modshift)
                     wdgmsg("drop-identical", this.item);
-                else if (ui.modshift && !ui.modmeta) {
+                else if (ui.modshift && !ui.modmeta && !ui.modctrl) {
                     // server side transfer all identical: pass third argument -1 (or 1 for single item)
 //                    int n = ui.modmeta ? -1 : 1;
 //                    item.wdgmsg("transfer", c, n);
@@ -426,8 +426,12 @@ public class WItem extends Widget implements DTarget2 {
                 } else if (ui.modmeta)
                     wdgmsg("transfer-identical", this.item);
                  else if (ui.modctrl) {
-                    int n = ui.modmeta ? -1 : 1;
-                    item.wdgmsg("drop", c, n);
+                    if (ui.modshift)
+                        item.wdgmsg("transfer", c, -1);
+                    else {
+                        int nm = ui.modmeta ? -1 : 1;
+                        item.wdgmsg("drop", c, nm);
+                    }
                 } else
                     item.wdgmsg("take", c);
                 return (true);

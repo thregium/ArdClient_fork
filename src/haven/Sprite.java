@@ -26,14 +26,14 @@
 
 package haven;
 
-import modification.Decal;
-import modification.Fixedplob;
-
 import java.lang.reflect.Constructor;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
+import modification.Bed;
+import modification.Decal;
+import modification.Fixedplob;
 
 public abstract class Sprite implements Rendered {
     public static final int GOB_HEALTH_ID = -1001;
@@ -172,6 +172,10 @@ public abstract class Sprite implements Rendered {
         }
         if (res.name.equals("ui/plob-fdir")) {
             return (new Fixedplob(owner, res, sdt));
+        }
+        if (res.name.equals("gfx/terobjs/furn/bed-sturdy")) {
+            Factory f = new Bed();
+            return (f.create(owner, res, sdt));
         }
         {
             Factory f = res.getcode(Factory.class, false);

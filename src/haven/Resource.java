@@ -27,13 +27,6 @@
 package haven;
 
 import dolda.xiphutil.VorbisStream;
-import modification.configuration;
-import modification.dev;
-
-import javax.imageio.ImageIO;
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiSystem;
-import javax.sound.midi.Sequence;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -90,6 +83,12 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
+import javax.imageio.ImageIO;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.Sequence;
+import modification.configuration;
+import modification.dev;
 
 public class Resource implements Serializable {
     public static Resource fake = new Resource(null, "fake", -1);
@@ -1978,7 +1977,6 @@ public class Resource implements Serializable {
         }
         while (!in.eom()) {
             String title = in.string();
-//            dev.resourceLog("DECODING", this, title);
             LayerFactory<?> lc = ltypes.get(title);
             int len = in.int32();
             if (lc == null) {
