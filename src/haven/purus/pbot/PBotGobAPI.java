@@ -519,12 +519,21 @@ public class PBotGobAPI {
         for (c.y = ul.y; c.y < size.y; c.y++)
             for (c.x = ul.x; c.x < size.x; c.x++) {
                 String tile = PBotUtils.tileResnameAt(ui, c.mul(11).x, c.mul(11).y);
-                if (tile != null && tile.equals("gfx/tiles/field")) {
+                if (tile != null && !tile.equals("gfx/tiles/field")) {
                     ui.gui.map.wdgmsg("itemact", PBotUtils.getCenterScreenCoord(ui), c, 0);
                     return (true);
                 }
             }
         return (false);
+    }
+
+    /**
+     * Itemact with item in hand, for example, to make a stockpile
+     * @param c2d - coord for click mouse
+     */
+    public static boolean makePile(UI ui, Coord2d c2d) {
+        ui.gui.map.wdgmsg("itemact", PBotUtils.getCenterScreenCoord(ui), c2d.floor(posres), 0);
+        return (true);
     }
 
 //    public static void makePile() {
