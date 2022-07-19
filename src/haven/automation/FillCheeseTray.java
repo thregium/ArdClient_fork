@@ -99,10 +99,10 @@ public class FillCheeseTray implements Runnable {
                     break;
                 }
             }
-            PBotUtils.sysMsg(ui, "Curd is filled!");
+            PBotUtils.debugMsg(ui, "Curd is filled!");
         } catch (Exception e) {
             e.printStackTrace();
-            PBotUtils.sysMsg(ui, "Failed " + e);
+            PBotUtils.debugMsg(ui, "Failed " + e);
         }
     }
 

@@ -75,7 +75,7 @@ public class FlaxBot extends Window {
         @Override
         public void run() {
             highestquality = 0;
-            PBotUtils.sysMsg(ui, "Flax Bot Started!", Color.white);
+            PBotUtils.debugMsg(ui, "Flax Bot Started!", Color.white);
             lblProg.settext(cropsHarvested + " Units Harvested");
             lblProg2.settext(cropsHarvested + "Starting");
             while (!stopThread || ui.gui.getwnd("Flax Farmer") != null) {
@@ -489,7 +489,7 @@ public class FlaxBot extends Window {
 
     public void stop() {
         // Stops thread
-        PBotUtils.sysMsg(ui, "Flax Farmer stopped!", Color.white);
+        PBotUtils.debugMsg(ui, "Flax Farmer stopped!", Color.white);
         runner.interrupt();
         stopThread = true;
         this.destroy();

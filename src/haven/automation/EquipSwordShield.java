@@ -43,7 +43,7 @@ public class EquipSwordShield implements Runnable {
 
             if (righthand != null && lefthand != null) {
                 if ((righthand.name.get().contains("Sword") && lefthand.name.get().contains("shield")) || (righthand.name.get().contains("shield") && lefthand.name.get().contains("Sword"))) {
-                    PBotUtils.sysMsg(gui.ui, "Already found sword/shield equip, canceling.", Color.white);
+                    PBotUtils.debugMsg(gui.ui, "Already found sword/shield equip, canceling.", Color.white);
                     return;
                 }
             }
@@ -101,7 +101,7 @@ public class EquipSwordShield implements Runnable {
 
 
                 if (wepmap.size() == 0) {
-                    PBotUtils.sysMsg(gui.ui, "No sword/shield found", Color.white);
+                    PBotUtils.debugMsg(gui.ui, "No sword/shield found", Color.white);
                     return;
                 }
 
@@ -192,7 +192,7 @@ public class EquipSwordShield implements Runnable {
                 wepmap.clear();
             }
         } catch (Exception e) {
-            PBotUtils.sysMsg(gui.ui, "Exception occurred in EquipSwordShield script, ignored.", Color.white);
+            PBotUtils.debugMsg(gui.ui, "Exception occurred in EquipSwordShield script, ignored.", Color.white);
             e.printStackTrace();
         }//ignore all exceptions, this script will likely be used in a combat situation and crashes are unacceptable
     }

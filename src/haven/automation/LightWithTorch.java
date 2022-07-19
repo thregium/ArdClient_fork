@@ -145,14 +145,14 @@ public class LightWithTorch extends Window implements GobSelectCallback {
                 } catch (InterruptedException ie) {
                 }
             }
-            PBotUtils.sysMsg(ui, "Done", Color.white);
+            PBotUtils.debugMsg(ui, "Done", Color.white);
         }
     }
 
 
     private void registerGobSelect() {
         synchronized (GobSelectCallback.class) {
-            PBotUtils.sysMsg(ui, "Registering Gob", Color.white);
+            PBotUtils.debugMsg(ui, "Registering Gob", Color.white);
             ui.gui.map.registerGobSelect(this);
         }
     }

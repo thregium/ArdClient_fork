@@ -92,7 +92,7 @@ public class BarrelFiller extends Window implements GobSelectCallback {
                 }
 
             }
-            PBotUtils.sysMsg(ui, "Barrel Filler finished", Color.WHITE);
+            PBotUtils.debugMsg(ui, "Barrel Filler finished", Color.WHITE);
             reqdestroy();
         }
     });

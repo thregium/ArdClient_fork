@@ -39,7 +39,7 @@ public class OpenRacks implements Runnable {
                     if (PBotWindowAPI.getWindow(ui, rackWndName) == null)
                         PBotWindowAPI.waitForWindow(ui, rackWndName, timeout);
                 });
-                PBotUtils.sysMsg(ui, racks.size() + " racks opened!");
+                PBotUtils.debugMsg(ui, racks.size() + " racks opened!");
             }
         }
     }

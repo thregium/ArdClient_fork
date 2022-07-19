@@ -24,7 +24,7 @@ public class FlowerPicker implements Runnable, ItemClickCallback, WItemDestroyCa
 
     @Override
     public void run() {
-        PBotUtils.sysMsg(gui.ui, "Click an item in inventory");
+        PBotUtils.debugMsg(gui.ui, "Click an item in inventory");
         synchronized (GobSelectCallback.class) {
             gui.registerItemCallback(this);
         }
@@ -69,7 +69,7 @@ public class FlowerPicker implements Runnable, ItemClickCallback, WItemDestroyCa
                 }
             }
         }
-        PBotUtils.sysMsg(gui.ui, "FlowerPicker done!", Color.GREEN);
+        PBotUtils.debugMsg(gui.ui, "FlowerPicker done!", Color.GREEN);
     }
 
     @Override

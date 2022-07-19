@@ -39,11 +39,11 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
 
     public void added() {
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(this);
-        PBotUtils.sysMsg(ui, "Alt + Click to select stockpiles", Color.GREEN);
+        PBotUtils.debugMsg(ui, "Alt + Click to select stockpiles", Color.GREEN);
         Button gobselectBtn = new Button(140, "Choose gob area") {
             @Override
             public void click() {
-                PBotUtils.sysMsg(ui, "Click and Drag over 2 wide area for stockpiles", Color.WHITE);
+                PBotUtils.debugMsg(ui, "Click and Drag over 2 wide area for stockpiles", Color.WHITE);
                 StockpileFiller2.this.selectingarea = new Thread((Runnable) new selectingarea(), "Farming Bots");
                 StockpileFiller2.this.selectingarea.start();
             }
@@ -52,7 +52,7 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
         Button invobjBtn = new Button(140, "Choose item from inventory") {
             @Override
             public void click() {
-                PBotUtils.sysMsg(ui, "Click the stockpile item in inventory", Color.GREEN);
+                PBotUtils.debugMsg(ui, "Click the stockpile item in inventory", Color.GREEN);
                 registerItemCallback();
             }
         };
@@ -60,7 +60,7 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
             @Override
             public void click() {
                 terobjCallback = true;
-                PBotUtils.sysMsg(ui, "Alt + Click to select ground item", Color.GREEN);
+                PBotUtils.debugMsg(ui, "Alt + Click to select ground item", Color.GREEN);
             }
         };
         clearBtn = new Button(140, "Clear/Stop") {
@@ -71,7 +71,7 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
                     stop = true;
                     stop();
                     stockpiles = new ArrayList<Gob>();
-                    PBotUtils.sysMsg(ui, "Cleared the list of selected stockpiles", Color.GREEN);
+                    PBotUtils.debugMsg(ui, "Cleared the list of selected stockpiles", Color.GREEN);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -81,11 +81,11 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
             @Override
             public void click() {
                 if (stockpiles.isEmpty()) {
-                    PBotUtils.sysMsg(ui, "No stockpiles chosen!", Color.GREEN);
+                    PBotUtils.debugMsg(ui, "No stockpiles chosen!", Color.GREEN);
                 } else if (terobj == null) {
-                    PBotUtils.sysMsg(ui, "No ground item chosen!", Color.GREEN);
+                    PBotUtils.debugMsg(ui, "No ground item chosen!", Color.GREEN);
                 } else if (invobj == null) {
-                    PBotUtils.sysMsg(ui, "No inventory item chosen!", Color.GREEN);
+                    PBotUtils.debugMsg(ui, "No inventory item chosen!", Color.GREEN);
                 } else {
                     try {
                         t.start();
@@ -117,7 +117,7 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
                     if (!stckpl()) break main;
                 }
                 if (!takeItem(teritem)) {
-                    PBotUtils.sysMsg(ui, "Can't take ground item", Color.GREEN);
+                    PBotUtils.debugMsg(ui, "Can't take ground item", Color.GREEN);
                     continue;
                 } else {
                     setInfo(teritem + "");
@@ -125,10 +125,10 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
             }
             if (!stckpl()) break main;
         } catch (Exception e) {
-            PBotUtils.sysMsg(ui, "Something went wrong. Restart! " + e.getMessage());
+            PBotUtils.debugMsg(ui, "Something went wrong. Restart! " + e.getMessage());
             e.printStackTrace();
         }
-        PBotUtils.sysMsg(ui, "Finish!", Color.GREEN);
+        PBotUtils.debugMsg(ui, "Finish!", Color.GREEN);
         stop();
     }, "StockpileFiller");
 
@@ -171,7 +171,7 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
                 if (waitSleep()) return false;
             }
         } else {
-            PBotUtils.sysMsg(ui, "Inventory is full! Please clear it!", Color.GREEN);
+            PBotUtils.debugMsg(ui, "Inventory is full! Please clear it!", Color.GREEN);
             return false;
         }
         return true;
@@ -180,7 +180,7 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
     public void areaselect(Coord a, Coord b) {
         this.a = a.mul(MCache.tilesz2);
         this.b = b.mul(MCache.tilesz2).add(11, 11);
-        PBotUtils.sysMsg(ui, "Area selected!", Color.WHITE);
+        PBotUtils.debugMsg(ui, "Area selected!", Color.WHITE);
         ui.gui.map.unregisterAreaSelect();
     }
 
@@ -193,14 +193,14 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
         public void run() {
             try {
                 if (StockpileFiller2.this.stockpiles.isEmpty()) {
-                    PBotUtils.sysMsg(ui, "Please select a first stockpile Alt + Click - try again.");
+                    PBotUtils.debugMsg(ui, "Please select a first stockpile Alt + Click - try again.");
                     return;
                 }
                 PBotUtils.selectArea(ui);
                 Coord aPnt = PBotUtils.getSelectedAreaA();
                 Coord bPnt = PBotUtils.getSelectedAreaB();
                 if (Math.abs(aPnt.x - bPnt.x) > 22 && Math.abs(aPnt.y - bPnt.y) > 22) {
-                    PBotUtils.sysMsg(ui, "Please select an area at least 2 tiles wide - try again.");
+                    PBotUtils.debugMsg(ui, "Please select an area at least 2 tiles wide - try again.");
                     return;
                 }
                 List<PBotGob> gobs = PBotUtils.gobsInArea(ui, aPnt, bPnt);
@@ -212,7 +212,7 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
                     ++i;
                 }
             } catch (Exception e) {
-                PBotUtils.sysMsg(ui, "Error: " + e.getMessage());
+                PBotUtils.debugMsg(ui, "Error: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -229,10 +229,10 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
         if (terobjCallback) {
             terobjCallback = false;
             terobj = gob.getres().name;
-            PBotUtils.sysMsg(ui, "Ground item chosen!", Color.GREEN);
+            PBotUtils.debugMsg(ui, "Ground item chosen!", Color.GREEN);
         } else if (gob.getres().basename().contains("stockpile")) {
             stockpiles.add(gob);
-            PBotUtils.sysMsg(ui, "Stockpile added to list! Total stockpiles chosen: " + stockpiles.size(), Color.GREEN);
+            PBotUtils.debugMsg(ui, "Stockpile added to list! Total stockpiles chosen: " + stockpiles.size(), Color.GREEN);
         }
         synchronized (GobSelectCallback.class) {
             ui.gui.map.registerGobSelect(this);
@@ -242,7 +242,7 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
     @Override
     public void itemClick(WItem item) {
         invobj = item.item.getres().name;
-        PBotUtils.sysMsg(ui, "Inventory item to put in the stockpiles chosen!", Color.GREEN);
+        PBotUtils.debugMsg(ui, "Inventory item to put in the stockpiles chosen!", Color.GREEN);
         synchronized (ItemClickCallback.class) {
             ui.gui.unregisterItemCallback();
         }
@@ -283,14 +283,14 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
 
     public boolean stckpl() {
         if (stockpiles.isEmpty()) {
-            PBotUtils.sysMsg(ui, "Stockpiles full!", Color.GREEN);
+            PBotUtils.debugMsg(ui, "Stockpiles full!", Color.GREEN);
             return (false);
         }
 
         List<PBotItem> invitems = PBotUtils.playerInventory(ui).getInventoryItemsByResnames(invobj);
 
         if (invitems == null) {
-            PBotUtils.sysMsg(ui, invobj + " not found!", Color.GREEN);
+            PBotUtils.debugMsg(ui, invobj + " not found!", Color.GREEN);
             return (false);
         }
 
@@ -301,18 +301,18 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
                 stock = stockpiles.get(0);
                 if (stock == null) {
                     stockpiles.remove(0);
-                    PBotUtils.sysMsg(ui, "gob not found", Color.GREEN);
+                    PBotUtils.debugMsg(ui, "gob not found", Color.GREEN);
                     continue;
                 }
                 fstock = PBotGobAPI.findGobById(ui, stock.id);
                 if (fstock == null) {
                     stockpiles.remove(0);
-                    PBotUtils.sysMsg(ui, "gob didn't find", Color.GREEN);
+                    PBotUtils.debugMsg(ui, "gob didn't find", Color.GREEN);
                     continue;
                 }
                 if (fstock.stockpileIsFull()) {
                     stockpiles.remove(0);
-                    PBotUtils.sysMsg(ui, "Stockpile is full!", Color.GREEN);
+                    PBotUtils.debugMsg(ui, "Stockpile is full!", Color.GREEN);
                     continue;
                 }
                 if (!itemactchain(fstock)) {
@@ -320,7 +320,7 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
                     continue;
                 }
                 if (!takeItem(invobj)) {
-                    PBotUtils.sysMsg(ui, "Can't take item!", Color.GREEN);
+                    PBotUtils.debugMsg(ui, "Can't take item!", Color.GREEN);
                     return (false);
                 }
                 itemact(fstock);
@@ -338,12 +338,12 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
             drophanditem();
 
             if (!pftostock(fstock)) {
-                PBotUtils.sysMsg(ui, "Path not found!", Color.GREEN);
+                PBotUtils.debugMsg(ui, "Path not found!", Color.GREEN);
                 success = false;
                 continue;
             }
             if (!waitwindow()) {
-                PBotUtils.sysMsg(ui, "Window not found!", Color.GREEN);
+                PBotUtils.debugMsg(ui, "Window not found!", Color.GREEN);
                 success = false;
                 continue;
             }

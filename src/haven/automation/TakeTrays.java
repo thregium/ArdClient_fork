@@ -90,10 +90,10 @@ public class TakeTrays implements Runnable {
                     break;
             }
 
-            PBotUtils.sysMsg(ui, "Trays transferred!");
+            PBotUtils.debugMsg(ui, "Trays transferred!");
         } catch (Exception e) {
             e.printStackTrace();
-            PBotUtils.sysMsg(ui, "Failed " + e);
+            PBotUtils.debugMsg(ui, "Failed " + e);
         }
     }
 }

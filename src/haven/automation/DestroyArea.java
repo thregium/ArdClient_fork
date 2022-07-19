@@ -68,7 +68,7 @@ public class DestroyArea extends Window implements GobSelectCallback {
         stopbtn = new Button(100, "Stop") {
             @Override
             public void click() {
-                PBotUtils.sysMsg(ui, "Stopping", Color.white);
+                PBotUtils.debugMsg(ui, "Stopping", Color.white);
                 hide();
                 runner.interrupt();
                 runbtn.show();
@@ -81,7 +81,7 @@ public class DestroyArea extends Window implements GobSelectCallback {
             @Override
             public void click() {
                 if (gobselected == null) {
-                    PBotUtils.sysMsg(ui, "Please choose a gob (Alt+Click)", Color.white);
+                    PBotUtils.debugMsg(ui, "Please choose a gob (Alt+Click)", Color.white);
                     return;
                 }
                 selectingarea = new Thread(new DestroyArea.selectingarea(), "Destroy Gobs in Area");
@@ -122,7 +122,7 @@ public class DestroyArea extends Window implements GobSelectCallback {
         @Override
         public void run() {
 
-            PBotUtils.sysMsg(ui, "Drag area over Gobs", Color.WHITE);
+            PBotUtils.debugMsg(ui, "Drag area over Gobs", Color.WHITE);
             PBotUtils.selectArea(ui);
             list.clear();
             //gui.map.PBotAPISelect = true;
@@ -134,7 +134,7 @@ public class DestroyArea extends Window implements GobSelectCallback {
                 selectedAreaB = PBotUtils.getSelectedAreaB();
                 list.addAll(GobList());
             } catch (IndexOutOfBoundsException | NullPointerException idklol) {
-                PBotUtils.sysMsg(ui, "Error detected, please try closing and reopening the script window.", Color.white);
+                PBotUtils.debugMsg(ui, "Error detected, please try closing and reopening the script window.", Color.white);
             }
             lblc2.settext(list.size() + "");
         }
@@ -142,14 +142,14 @@ public class DestroyArea extends Window implements GobSelectCallback {
 
     private void registerGobSelect() {
         synchronized (GobSelectCallback.class) {
-            PBotUtils.sysMsg(ui, "Registering Gob", Color.white);
+            PBotUtils.debugMsg(ui, "Registering Gob", Color.white);
             ui.gui.map.registerGobSelect(this);
         }
     }
 
     public void gobselect(Gob gob) {
         this.gobselected = gob;
-        PBotUtils.sysMsg(ui, "Gob selected!", Color.white);
+        PBotUtils.debugMsg(ui, "Gob selected!", Color.white);
         lblc.settext(gob.getres().basename());
     }
 

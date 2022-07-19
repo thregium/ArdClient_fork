@@ -32,9 +32,9 @@ public class MothKiller implements Runnable {
 
         //  trays2.addAll(trays);
         if (!cocoons.isEmpty() || !deadheads.isEmpty())
-            PBotUtils.sysMsg(gui.ui, "Found " + (cocoons.size() + deadheads.size()) + " to kill.", Color.white);
+            PBotUtils.debugMsg(gui.ui, "Found " + (cocoons.size() + deadheads.size()) + " to kill.", Color.white);
         else {
-            PBotUtils.sysMsg(gui.ui, "No cocoons found", Color.white);
+            PBotUtils.debugMsg(gui.ui, "No cocoons found", Color.white);
             return;
         }
         int startid = gui.ui.next_predicted_id;
@@ -53,7 +53,7 @@ public class MothKiller implements Runnable {
                 iteration++;
             }
         }
-        PBotUtils.sysMsg(gui.ui, "Done", Color.white);
+        PBotUtils.debugMsg(gui.ui, "Done", Color.white);
     }
 
     private List<WItem> getcocoons(Inventory inv) {

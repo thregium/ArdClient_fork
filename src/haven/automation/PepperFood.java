@@ -75,9 +75,9 @@ public class PepperFood implements Runnable {
 
         f.wdgmsg("drop", nolbucket ? 7 : 6);
         if (nolbucket && norbucket) {
-            PBotUtils.sysMsg(gui.ui, "No equipped Bucket Found", Color.white);
+            PBotUtils.debugMsg(gui.ui, "No equipped Bucket Found", Color.white);
         } else
-            PBotUtils.sysMsg(gui.ui, "Done", Color.white);
+            PBotUtils.debugMsg(gui.ui, "Done", Color.white);
     }
 
     private List<WItem> getFood(Inventory inv) {

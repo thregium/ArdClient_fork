@@ -29,7 +29,7 @@ public class SplitLogs implements Runnable {
             q.printStackTrace();
         }
         if (blocks.isEmpty()) {
-            PBotUtils.sysMsg(gui.ui, "No blocks found.", Color.white);
+            PBotUtils.debugMsg(gui.ui, "No blocks found.", Color.white);
             return;
         }
         int startID = gui.ui.next_predicted_id;
@@ -48,7 +48,7 @@ public class SplitLogs implements Runnable {
                 iteration = iteration + 3;
             freespace = freespace - 3;
         }
-        PBotUtils.sysMsg(gui.ui, "Exiting Log Splitter", Color.white);
+        PBotUtils.debugMsg(gui.ui, "Exiting Log Splitter", Color.white);
     }
 }
 

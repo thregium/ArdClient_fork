@@ -76,7 +76,7 @@ public class PepperGrinderRun extends Window implements Runnable {
 
         //section = 4;
         tables = Tables();
-        PBotUtils.sysMsg(ui, "Pepper Grinder Bot started! Tables selected : " + tables.size(), Color.white);
+        PBotUtils.debugMsg(ui, "Pepper Grinder Bot started! Tables selected : " + tables.size(), Color.white);
 
         ui.gui.wdgmsg("act", "craft", "blackpepper");
         PBotUtils.waitForWindow(ui, "Crafting");
@@ -229,7 +229,7 @@ public class PepperGrinderRun extends Window implements Runnable {
             if (stopThread)
                 return;
         }
-        PBotUtils.sysMsg(ui, "Done", Color.white);
+        PBotUtils.debugMsg(ui, "Done", Color.white);
         stopThread = true;
     }
 
@@ -332,7 +332,7 @@ public class PepperGrinderRun extends Window implements Runnable {
 
     public void stop() {
         // Stops thread
-        PBotUtils.sysMsg(ui, "Pepper Grinder Stopped!", Color.white);
+        PBotUtils.debugMsg(ui, "Pepper Grinder Stopped!", Color.white);
         //ui.gui.map.wdgmsg("click", Coord.z, ui.gui.map.player().rc.floor(posres), 1, 0);
         if (ui.gui.map.pfthread != null) {
             ui.gui.map.pfthread.interrupt();

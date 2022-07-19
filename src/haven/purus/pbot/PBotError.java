@@ -20,7 +20,7 @@ public class PBotError {
 
             File output = new File(folder + "/" + "PBotError_" + System.currentTimeMillis() + ".txt");
             output.createNewFile();
-            PBotUtils.sysMsg(ui, "PBot error occurred!! Writing it into a file called: " + output.getPath(), Color.RED);
+            PBotUtils.debugMsg(ui, "PBot error occurred!! Writing it into a file called: " + output.getPath(), Color.RED);
             PrintWriter pw = new PrintWriter(Files.newBufferedWriter(output.toPath(), StandardOpenOption.WRITE));
             e.printStackTrace(pw);
             e.printStackTrace(ui.cons.out);

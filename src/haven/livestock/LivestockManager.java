@@ -374,48 +374,48 @@ public class LivestockManager extends ResizableWnd {
             if (tgt == ResetHighlights)
                 MapView.markedGobs.clear();
             else if (tgt == Inspect)
-                PBotUtils.sysMsg(ui, "Not yet implemented.", Color.white);
+                PBotUtils.debugMsg(ui, "Not yet implemented.", Color.white);
             else if (tgt == Slaughter)
-                PBotUtils.sysMsg(ui, "Not yet implemented.", Color.white);
+                PBotUtils.debugMsg(ui, "Not yet implemented.", Color.white);
             else if (tgt == DropEntrails) {
                 if (Config.DropEntrails) {
                     Config.DropEntrails = false;
                     DropEntrailsBox.a = false;
-                    PBotUtils.sysMsg(ui, "No longer dropping entrails.", Color.white);
+                    PBotUtils.debugMsg(ui, "No longer dropping entrails.", Color.white);
                 } else {
                     Config.DropEntrails = true;
                     DropEntrailsBox.a = true;
-                    PBotUtils.sysMsg(ui, "Auto dropping Entrails.", Color.white);
+                    PBotUtils.debugMsg(ui, "Auto dropping Entrails.", Color.white);
                 }
             } else if (tgt == DropIntestines) {
                 if (Config.DropIntestines) {
                     Config.DropIntestines = false;
-                    PBotUtils.sysMsg(ui, "No longer dropping Intestines.", Color.white);
+                    PBotUtils.debugMsg(ui, "No longer dropping Intestines.", Color.white);
                     DropIntestinesBox.a = false;
                 } else {
                     Config.DropIntestines = true;
                     DropIntestinesBox.a = true;
-                    PBotUtils.sysMsg(ui, "Auto dropping Intestines.", Color.white);
+                    PBotUtils.debugMsg(ui, "Auto dropping Intestines.", Color.white);
                 }
             } else if (tgt == DropMeat) {
                 if (Config.DropMeat) {
                     Config.DropMeat = false;
                     DropMeatBox.a = false;
-                    PBotUtils.sysMsg(ui, "No longer dropping Meat.", Color.white);
+                    PBotUtils.debugMsg(ui, "No longer dropping Meat.", Color.white);
                 } else {
                     Config.DropMeat = true;
                     DropMeatBox.a = true;
-                    PBotUtils.sysMsg(ui, "Auto dropping Meat.", Color.white);
+                    PBotUtils.debugMsg(ui, "Auto dropping Meat.", Color.white);
                 }
             } else if (tgt == DropBones) {
                 if (Config.DropBones) {
                     Config.DropBones = false;
                     DropBonesBox.a = false;
-                    PBotUtils.sysMsg(ui, "No longer dropping Bones.", Color.white);
+                    PBotUtils.debugMsg(ui, "No longer dropping Bones.", Color.white);
                 } else {
                     Config.DropBones = true;
                     DropBonesBox.a = true;
-                    PBotUtils.sysMsg(ui, "Auto dropping Bones.", Color.white);
+                    PBotUtils.debugMsg(ui, "Auto dropping Bones.", Color.white);
                 }
             } else if (tgt == HighlightFemales) {
                 //  Panel p = getAnimalPanel(wdg.type);

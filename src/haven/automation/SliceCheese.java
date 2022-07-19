@@ -37,22 +37,22 @@ public class SliceCheese implements Runnable {
                 if (PBotUtils.waitForFlowerMenu(ui, timeout)) {
                     if (PBotUtils.choosePetal(ui, flowerPetal)) {
                         if (PBotUtils.waitFlowermenuClose(ui, timeout)) {
-                            PBotUtils.sysMsg(ui, "FlowerMenu close failed!");
+                            PBotUtils.debugMsg(ui, "FlowerMenu close failed!");
                             return;
                         }
                     } else {
                         if (PBotUtils.closeFlowermenu(ui, timeout)) {
-                            PBotUtils.sysMsg(ui, "FlowerMenu close failed!");
+                            PBotUtils.debugMsg(ui, "FlowerMenu close failed!");
                             return;
                         }
                     }
                 }
             });
 
-            PBotUtils.sysMsg(ui, trays.size() + " cheeses is sliced!");
+            PBotUtils.debugMsg(ui, trays.size() + " cheeses is sliced!");
         } catch (Exception e) {
             e.printStackTrace();
-            PBotUtils.sysMsg(ui, "Failed " + e);
+            PBotUtils.debugMsg(ui, "Failed " + e);
         }
     }
 }

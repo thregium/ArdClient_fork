@@ -39,11 +39,11 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
 
     public void added() {
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(this);
-        PBotUtils.sysMsg(ui, "Alt + Click to select stockpiles", Color.GREEN);
+        PBotUtils.debugMsg(ui, "Alt + Click to select stockpiles", Color.GREEN);
         Button gobselectBtn = new Button(140, "Choose gob area") {
             @Override
             public void click() {
-                PBotUtils.sysMsg(ui, "Click and Drag over 2 wide area for stockpiles", Color.WHITE);
+                PBotUtils.debugMsg(ui, "Click and Drag over 2 wide area for stockpiles", Color.WHITE);
                 StockpileFiller.this.selectingarea = new Thread((Runnable) new selectingarea(), "Farming Bots");
                 StockpileFiller.this.selectingarea.start();
             }
@@ -54,7 +54,7 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
         Button invobjBtn = new Button(140, "Choose item from inventory") {
             @Override
             public void click() {
-                PBotUtils.sysMsg(ui, "Click the stockpile item in inventory", Color.GREEN);
+                PBotUtils.debugMsg(ui, "Click the stockpile item in inventory", Color.GREEN);
                 registerItemCallback();
             }
         };
@@ -64,7 +64,7 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
             @Override
             public void click() {
                 terobjCallback = true;
-                PBotUtils.sysMsg(ui, "Alt + Click to select ground item", Color.GREEN);
+                PBotUtils.debugMsg(ui, "Alt + Click to select ground item", Color.GREEN);
             }
         };
 //        add(terobjBtn, new Coord(20, y));
@@ -78,7 +78,7 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
                     if (t != null)
                         t.interrupt();
                     stockpiles = new ArrayList<Gob>();
-                    PBotUtils.sysMsg(ui, "Cleared the list of selected stockpiles", Color.GREEN);
+                    PBotUtils.debugMsg(ui, "Cleared the list of selected stockpiles", Color.GREEN);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -92,11 +92,11 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
                 this.hide();
                 stop = false;
                 if (stockpiles.isEmpty()) {
-                    PBotUtils.sysMsg(ui, "No stockpiles chosen!", Color.GREEN);
+                    PBotUtils.debugMsg(ui, "No stockpiles chosen!", Color.GREEN);
                 } else if (terobj == null) {
-                    PBotUtils.sysMsg(ui, "No ground item chosen!", Color.GREEN);
+                    PBotUtils.debugMsg(ui, "No ground item chosen!", Color.GREEN);
                 } else if (invobj == null) {
-                    PBotUtils.sysMsg(ui, "No inventory item chosen!", Color.GREEN);
+                    PBotUtils.debugMsg(ui, "No inventory item chosen!", Color.GREEN);
                 } else {
                     t.start();
                 }
@@ -166,7 +166,7 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
                             PBotUtils.dropItem(ui, 0);
                         if (stockpiles.isEmpty()) {
                             setInfo("Stockpiles empty");
-                            PBotUtils.sysMsg(ui, "All chosen stockpiles full!", Color.GREEN);
+                            PBotUtils.debugMsg(ui, "All chosen stockpiles full!", Color.GREEN);
                             stop = true;
                             break;
                         }
@@ -179,7 +179,7 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
                         if (stop)
                             break;
                         if (stockpiles.size() == 0) {
-                            PBotUtils.sysMsg(ui, "Stockpile list now empty, stopping.", Color.white);
+                            PBotUtils.debugMsg(ui, "Stockpile list now empty, stopping.", Color.white);
                             stop = true;
                             stop();
                         }
@@ -207,12 +207,12 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
                     if (PBotUtils.findObjectByNames(ui, 5000, terobj) == null)
                         break;
                 }
-                PBotUtils.sysMsg(ui, "Stockpile Filler finished!", Color.GREEN);
+                PBotUtils.debugMsg(ui, "Stockpile Filler finished!", Color.GREEN);
                 startBtn.show();
                 reqdestroy();
             } catch (Loading | NullPointerException q) {
             } catch (Exception e) {
-                PBotUtils.sysMsg(ui, "Something went wrong. Restart", Color.RED);
+                PBotUtils.debugMsg(ui, "Something went wrong. Restart", Color.RED);
                 System.err.println("Something went wrong. Restart");
             }
         }
@@ -221,7 +221,7 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
     public void areaselect(Coord a, Coord b) {
         this.a = a.mul(MCache.tilesz2);
         this.b = b.mul(MCache.tilesz2).add(11, 11);
-        PBotUtils.sysMsg(ui, "Area selected!", Color.WHITE);
+        PBotUtils.debugMsg(ui, "Area selected!", Color.WHITE);
         ui.gui.map.unregisterAreaSelect();
     }
 
@@ -233,14 +233,14 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
         @Override
         public void run() {
             if (StockpileFiller.this.stockpiles.size() == 0) {
-                PBotUtils.sysMsg(ui, "Please select a first stockpile Alt + Click - try again.");
+                PBotUtils.debugMsg(ui, "Please select a first stockpile Alt + Click - try again.");
                 return;
             }
             PBotUtils.selectArea(ui);
             Coord aPnt = PBotUtils.getSelectedAreaA();
             Coord bPnt = PBotUtils.getSelectedAreaB();
             if (Math.abs(aPnt.x - bPnt.x) > 22 && Math.abs(aPnt.y - bPnt.y) > 22) {
-                PBotUtils.sysMsg(ui, "Please select an area at least 2 tiles wide - try again.");
+                PBotUtils.debugMsg(ui, "Please select an area at least 2 tiles wide - try again.");
                 return;
             }
             List<PBotGob> gobs = PBotUtils.gobsInArea(ui, aPnt, bPnt);
@@ -265,10 +265,10 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
         if (terobjCallback) {
             terobjCallback = false;
             terobj = gob.getres().name;
-            PBotUtils.sysMsg(ui, "Ground item chosen!", Color.GREEN);
+            PBotUtils.debugMsg(ui, "Ground item chosen!", Color.GREEN);
         } else if (gob.getres().basename().contains("stockpile")) {
             stockpiles.add(gob);
-            PBotUtils.sysMsg(ui, "Stockpile added to list! Total stockpiles chosen: " + stockpiles.size(), Color.GREEN);
+            PBotUtils.debugMsg(ui, "Stockpile added to list! Total stockpiles chosen: " + stockpiles.size(), Color.GREEN);
         }
         synchronized (GobSelectCallback.class) {
             ui.gui.map.registerGobSelect(this);
@@ -278,7 +278,7 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
     @Override
     public void itemClick(WItem item) {
         invobj = item.item.getres().name;
-        PBotUtils.sysMsg(ui, "Inventory item to put in the stockpiles chosen!", Color.GREEN);
+        PBotUtils.debugMsg(ui, "Inventory item to put in the stockpiles chosen!", Color.GREEN);
         synchronized (ItemClickCallback.class) {
             ui.gui.unregisterItemCallback();
         }
@@ -316,7 +316,7 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
         try {
             ui.gui.map.wdgmsg("itemact", Coord.z, gob.rc.floor(posres), 1, 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
         } catch (IndexOutOfBoundsException lolindexes) {
-            PBotUtils.sysMsg(ui, "Critical error in stockpile list, stopping thread to prevent crash.", Color.white);
+            PBotUtils.debugMsg(ui, "Critical error in stockpile list, stopping thread to prevent crash.", Color.white);
             stop = true;
             stop();
         }

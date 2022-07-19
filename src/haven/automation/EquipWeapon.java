@@ -42,14 +42,14 @@ public class EquipWeapon implements Runnable {
 
             if (righthand != null) {
                 if (righthand.name.get().contains("Sword") || righthand.name.get().contains("Battleaxe")) {
-                    PBotUtils.sysMsg(gui.ui, "Already found weapon in right hand, canceling.", Color.white);
+                    PBotUtils.debugMsg(gui.ui, "Already found weapon in right hand, canceling.", Color.white);
                     return;
                 }
             }
 
             if (lefthand != null) {
                 if (lefthand.name.get().contains("Sword") || lefthand.name.get().contains("Battleaxe")) {
-                    PBotUtils.sysMsg(gui.ui, "Already found weapon in left hand, canceling.", Color.white);
+                    PBotUtils.debugMsg(gui.ui, "Already found weapon in left hand, canceling.", Color.white);
                     return;
                 }
             }
@@ -88,7 +88,7 @@ public class EquipWeapon implements Runnable {
             }
 
             if (wepmap.size() == 0) {
-                PBotUtils.sysMsg(gui.ui, "No weapons found", Color.white);
+                PBotUtils.debugMsg(gui.ui, "No weapons found", Color.white);
                 return;
             }
 
@@ -104,7 +104,7 @@ public class EquipWeapon implements Runnable {
                 }
             });
             if (weapons.size() == 0) {
-                PBotUtils.sysMsg(gui.ui, "No weapons found.", Color.white);
+                PBotUtils.debugMsg(gui.ui, "No weapons found.", Color.white);
                 return;
             }
             weaponItem = weapons.get(weapons.size() - 1).item;
@@ -221,7 +221,7 @@ public class EquipWeapon implements Runnable {
             }
             PBotUtils.sysLogAppend(gui.ui, "Finished equipWeapon script, if a weapon did not equip check to ensure you had inventory space to remove a bindle/sack.", "white");
         } catch (Exception e) {
-            PBotUtils.sysMsg(gui.ui, "Exception occurred in EquipWeapon script, ignored.", Color.white);
+            PBotUtils.debugMsg(gui.ui, "Exception occurred in EquipWeapon script, ignored.", Color.white);
             e.printStackTrace();
         }//ignore all exceptions, this script will likely be used in a combat situation and crashes are unacceptable
     }

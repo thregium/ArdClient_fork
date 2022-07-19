@@ -80,7 +80,7 @@ public class TrellisFarmer extends Window implements Runnable {
 
     public void run() {
         try {
-            PBotUtils.sysMsg(ui, "Trellis Farmer started!", Color.white);
+            PBotUtils.debugMsg(ui, "Trellis Farmer started!", Color.white);
             if (harvest) {
                 // Initialise crop list
                 crops = Crops(true);
@@ -193,7 +193,7 @@ public class TrellisFarmer extends Window implements Runnable {
                                     item.wdgmsg("transfer", Coord.z);
 
                                 } catch (NullPointerException qip) {
-                                    PBotUtils.sysMsg(ui, "Null Pointer on line 142", Color.white);
+                                    PBotUtils.debugMsg(ui, "Null Pointer on line 142", Color.white);
                                 }
                             }
                         }
@@ -205,7 +205,7 @@ public class TrellisFarmer extends Window implements Runnable {
                                         item.wdgmsg("drop", Coord.z);
 
                                     } catch (NullPointerException qip) {
-                                        PBotUtils.sysMsg(ui, "Null Pointer on line 142", Color.white);
+                                        PBotUtils.debugMsg(ui, "Null Pointer on line 142", Color.white);
                                     }
                                 }
                             }
@@ -313,11 +313,11 @@ public class TrellisFarmer extends Window implements Runnable {
                 }
             }
 
-            PBotUtils.sysMsg(ui, "Trellis Farmer finished!", Color.white);
+            PBotUtils.debugMsg(ui, "Trellis Farmer finished!", Color.white);
             this.destroy();
         } catch (Exception e) {
             e.printStackTrace();
-            PBotUtils.sysMsg(ui, "Some error, check log!");
+            PBotUtils.debugMsg(ui, "Some error, check log!");
         }
     }
 
@@ -415,7 +415,7 @@ public class TrellisFarmer extends Window implements Runnable {
 
     public void stop() {
         // Stops thread
-        PBotUtils.sysMsg(ui, "Trellis Farmer stopped!", Color.white);
+        PBotUtils.debugMsg(ui, "Trellis Farmer stopped!", Color.white);
         ui.gui.map.wdgmsg("click", Coord.z, ui.gui.map.player().rc.floor(posres), 1, 0);
         ui.gui.map.pllastcc = ui.gui.map.player().rc;
         stopThread = true;

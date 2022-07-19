@@ -99,19 +99,19 @@ public class PepperBot extends Window implements AreaSelectCallback, GobSelectCa
             public void click() {
                 allowrun = true;
                 if (hfire == null) {
-                    PBotUtils.sysMsg(ui, "No Hearthfire Selected.", Color.white);
+                    PBotUtils.debugMsg(ui, "No Hearthfire Selected.", Color.white);
                     allowrun = false;
                 }
                 if (barrel == null) {
-                    PBotUtils.sysMsg(ui, "No barrel Selected.", Color.white);
+                    PBotUtils.debugMsg(ui, "No barrel Selected.", Color.white);
                     allowrun = false;
                 }
                 if (water == null) {
-                    PBotUtils.sysMsg(ui, "No water source Selected.", Color.white);
+                    PBotUtils.debugMsg(ui, "No water source Selected.", Color.white);
                     allowrun = false;
                 }
                 if (cauldron == null) {
-                    PBotUtils.sysMsg(ui, "No cauldron Selected.", Color.white);
+                    PBotUtils.debugMsg(ui, "No cauldron Selected.", Color.white);
                     allowrun = false;
                 }
 
@@ -123,7 +123,7 @@ public class PepperBot extends Window implements AreaSelectCallback, GobSelectCa
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else if (allowrun) {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -134,7 +134,7 @@ public class PepperBot extends Window implements AreaSelectCallback, GobSelectCa
             public void click() {
                 allowrun = true;
                 if (grinder == null) {
-                    PBotUtils.sysMsg(ui, "No grinder Selected.", Color.white);
+                    PBotUtils.debugMsg(ui, "No grinder Selected.", Color.white);
                     allowrun = false;
                 }
                 if (ca != null && cb != null && allowrun) {
@@ -143,7 +143,7 @@ public class PepperBot extends Window implements AreaSelectCallback, GobSelectCa
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else if (allowrun) {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -152,7 +152,7 @@ public class PepperBot extends Window implements AreaSelectCallback, GobSelectCa
         Button areaSelBtn = new Button(140, "Select Area") {
             @Override
             public void click() {
-                PBotUtils.sysMsg(ui, "Drag area over crops", Color.WHITE);
+                PBotUtils.debugMsg(ui, "Drag area over crops", Color.WHITE);
                 ui.gui.map.farmSelect = true;
             }
         };
@@ -164,7 +164,7 @@ public class PepperBot extends Window implements AreaSelectCallback, GobSelectCa
                 section++;
                 if (section > 4)
                     section = 1;
-                PBotUtils.sysMsg(ui, "Section is now : " + section, Color.white);
+                PBotUtils.debugMsg(ui, "Section is now : " + section, Color.white);
                 lblc3.settext(section + "");
             }
         };
@@ -202,23 +202,23 @@ public class PepperBot extends Window implements AreaSelectCallback, GobSelectCa
     public void gobselect(Gob gob) {
         if (gob.getres().basename().contains("barrel")) {
             barrel = gob;
-            PBotUtils.sysMsg(ui, "Barrel selected!x : " + gob.rc.x + " y : " + gob.rc.y, Color.WHITE);
+            PBotUtils.debugMsg(ui, "Barrel selected!x : " + gob.rc.x + " y : " + gob.rc.y, Color.WHITE);
         } else if (gob.getres().basename().contains("well") || (gob.getres().basename().contains("cistern"))) {
             water = gob;
-            PBotUtils.sysMsg(ui, "Well/Cistern selected! x : " + gob.rc.x + " y : " + gob.rc.y, Color.white);
+            PBotUtils.debugMsg(ui, "Well/Cistern selected! x : " + gob.rc.x + " y : " + gob.rc.y, Color.white);
         } else if (gob.getres().basename().contains("pow")) {
             hfire = gob;
-            PBotUtils.sysMsg(ui, "Hearthfire selected!x : " + gob.rc.x + " y : " + gob.rc.y, Color.white);
+            PBotUtils.debugMsg(ui, "Hearthfire selected!x : " + gob.rc.x + " y : " + gob.rc.y, Color.white);
         } else if (gob.getres().basename().contains("cauldron")) {
             cauldron = gob;
-            PBotUtils.sysMsg(ui, "Cauldron Selected!x : " + gob.rc.x + " y : " + gob.rc.y, Color.white);
+            PBotUtils.debugMsg(ui, "Cauldron Selected!x : " + gob.rc.x + " y : " + gob.rc.y, Color.white);
         } else if (gob.getres().basename().contains("htable")) {
             htable = gob;
             int stage = gob.getStage();
-            PBotUtils.sysMsg(ui, "table selected : " + gob.rc.x + " y : " + gob.rc.y + " stage : " + stage + " overlay : " + gob.ols.size(), Color.white);
+            PBotUtils.debugMsg(ui, "table selected : " + gob.rc.x + " y : " + gob.rc.y + " stage : " + stage + " overlay : " + gob.ols.size(), Color.white);
         } else if (gob.getres().basename().contains("quern")) {
             grinder = gob;
-            PBotUtils.sysMsg(ui, "grinder selected : " + gob.rc.x + " y : " + gob.rc.y, Color.white);
+            PBotUtils.debugMsg(ui, "grinder selected : " + gob.rc.x + " y : " + gob.rc.y, Color.white);
         }
     }
 
@@ -232,7 +232,7 @@ public class PepperBot extends Window implements AreaSelectCallback, GobSelectCa
     public void areaselect(Coord a, Coord b) {
         this.ca = a.mul(MCache.tilesz2);
         this.cb = b.mul(MCache.tilesz2).add(11, 11);
-        PBotUtils.sysMsg(ui, "Area selected!", Color.WHITE);
+        PBotUtils.debugMsg(ui, "Area selected!", Color.WHITE);
         ui.gui.map.unregisterAreaSelect();
     }
 
@@ -247,7 +247,7 @@ public class PepperBot extends Window implements AreaSelectCallback, GobSelectCa
     public class testthread implements Runnable {
         @Override
         public void run() {
-            PBotUtils.sysMsg(ui, "Started", Color.white);
+            PBotUtils.debugMsg(ui, "Started", Color.white);
             PBotUtils.pfRightClick(ui, barrel, 0);
             PBotUtils.waitForWindow(ui, "Barrel");
             GItem item = PBotUtils.getInventoryItemsByNames(ui.gui.maininv, Arrays.asList("gfx/invobjs/seed-flax")).get(0).gitem;

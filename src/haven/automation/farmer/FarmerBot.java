@@ -140,7 +140,7 @@ public class FarmerBot extends Window {
         @Override
         public void run() {
             highestquality = 0;
-            PBotUtils.sysMsg(ui, current.fullname + " Bot Started!", Color.white);
+            PBotUtils.debugMsg(ui, current.fullname + " Bot Started!", Color.white);
             lblProg.settext(cropsHarvested + " Units Harvested");
             lblProg2.settext(cropsHarvested + "Starting");
             while (!stopThread || PBotWindowAPI.getWindow(ui, windowName) != null) {
@@ -544,7 +544,7 @@ public class FarmerBot extends Window {
 
     public void stop() {
         // Stops thread
-        PBotUtils.sysMsg(ui, current.fullname + " FarmerBots stopped!", Color.white);
+        PBotUtils.debugMsg(ui, current.fullname + " FarmerBots stopped!", Color.white);
         runner.interrupt();
         stopThread = true;
         this.destroy();

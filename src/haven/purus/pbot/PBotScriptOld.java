@@ -24,7 +24,7 @@ public class PBotScriptOld extends Thread {
     }
 
     public void run() {
-        PBotUtils.sysMsg(ui, "Starting script: " + name, Color.white);
+        PBotUtils.debugMsg(ui, "Starting script: " + name, Color.white);
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
         this.engine = engine;
         try {

@@ -105,7 +105,7 @@ public class Discord extends ListenerAdapter implements Runnable {
     @Override
     public void onReady(ReadyEvent event) {
         System.out.println("Ready!");
-        PBotUtils.sysMsg(gui.ui, "Discord Loaded", Color.white);
+        PBotUtils.debugMsg(gui.ui, "Discord Loaded", Color.white);
         readytogo = true;
         jdalogin = event.getJDA();
         tempchannels = jdalogin.getTextChannels();

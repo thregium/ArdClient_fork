@@ -33,7 +33,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
     }
 
     public void added() {
-        PBotUtils.sysMsg(ui, "Hold alt and left click containers to select them.", Color.white);
+        PBotUtils.debugMsg(ui, "Hold alt and left click containers to select them.", Color.white);
         Button carrotBtn = new Button(140, "Carrot") {
             @Override
             public void click() {
@@ -46,7 +46,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(SCF).start();
                     this.parent.destroy();
                 } else {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -54,7 +54,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
             @Override
             public void click() {
                 if (replantcontainer && containers.size() == 0 || containeronly && containers.size() == 0) {
-                    PBotUtils.sysMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
+                    PBotUtils.debugMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
                 } else if (ca != null && cb != null) {
                     SeedCropFarmer bf =
                             new SeedCropFarmer(ca, cb, "gfx/terobjs/plants/carrot", "gfx/invobjs/seed-carrot", 3, replant, containeronly, replantcontainer, containers, false, null);
@@ -63,7 +63,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -78,7 +78,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -93,7 +93,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -101,7 +101,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
             @Override
             public void click() {
                 if (replantcontainer && containers.size() == 0 || containeronly && containers.size() == 0) {
-                    PBotUtils.sysMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
+                    PBotUtils.debugMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
                 } else if (ca != null && cb != null) {
                     SeedCropFarmer bf = new SeedCropFarmer(ca, cb, "gfx/terobjs/plants/turnip", "gfx/invobjs/seed-turnip", 1, replant, containeronly, replantcontainer, containers, false, null);
 
@@ -109,7 +109,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -124,7 +124,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -140,7 +140,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -156,7 +156,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -171,7 +171,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -184,7 +184,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -192,7 +192,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
             @Override
             public void click() {
                 if (replantcontainer && containers.size() == 0 || containeronly && containers.size() == 0) {
-                    PBotUtils.sysMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
+                    PBotUtils.debugMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
                 } else if (ca != null && cb != null) {
                     // Start barley farmer and close this window
                     SeedCropFarmer bf =
@@ -202,7 +202,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -210,7 +210,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
             @Override
             public void click() {
                 if (replantcontainer && containers.size() == 0 || containeronly && containers.size() == 0) {
-                    PBotUtils.sysMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
+                    PBotUtils.debugMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
                 } else if (ca != null && cb != null) {
                     // Start yellow onion farmer and close this window
                     SeedCropFarmer bf =
@@ -220,7 +220,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -228,7 +228,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
             @Override
             public void click() {
                 if (replantcontainer && containers.size() == 0 || containeronly && containers.size() == 0) {
-                    PBotUtils.sysMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
+                    PBotUtils.debugMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
                 } else if (ca != null && cb != null) {
                     // Start yellow onion farmer and close this window
                     SeedCropFarmer bf =
@@ -238,7 +238,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -246,7 +246,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
             @Override
             public void click() {
                 if (replantcontainer && containers.size() == 0 || containeronly && containers.size() == 0) {
-                    PBotUtils.sysMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
+                    PBotUtils.debugMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
                 } else if (ca != null && cb != null) {
                     // Start flax farmer and close this window
                     SeedCropFarmer bf = new SeedCropFarmer(ca, cb, "gfx/terobjs/plants/flax", "gfx/invobjs/seed-flax", 3, replant, containeronly, replantcontainer, containers, stockpile, stockpileLocs);
@@ -255,7 +255,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -263,7 +263,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
             @Override
             public void click() {
                 if (replantcontainer && containers.size() == 0 || containeronly && containers.size() == 0) {
-                    PBotUtils.sysMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
+                    PBotUtils.debugMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
                 } else if (ca != null && cb != null) {
                     // Start hemp farmer and close this window
                     SeedCropFarmer bf = new SeedCropFarmer(ca, cb, "gfx/terobjs/plants/hemp", "gfx/invobjs/seed-hemp", 4, replant, containeronly, replantcontainer, containers, stockpile, stockpileLocs);
@@ -272,14 +272,14 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
             }
         };
         Button poppyBtn = new Button(140, "Poppy") {
             @Override
             public void click() {
                 if (replantcontainer && containers.size() == 0 || containeronly && containers.size() == 0) {
-                    PBotUtils.sysMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
+                    PBotUtils.debugMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
                 } else if (ca != null && cb != null) {
                     // Start poppy farmer and close this window
                     SeedCropFarmer bf = new SeedCropFarmer(ca, cb, "gfx/terobjs/plants/poppy", "gfx/invobjs/seed-poppy", 4, replant, containeronly, replantcontainer, containers, stockpile, stockpileLocs);
@@ -288,7 +288,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -296,7 +296,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
             @Override
             public void click() {
                 if (replantcontainer && containers.size() == 0 || containeronly && containers.size() == 0) {
-                    PBotUtils.sysMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
+                    PBotUtils.debugMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
                 } else if (ca != null && cb != null) {
                     // Start hemp farmer and close this window
                     SeedCropFarmer bf = new SeedCropFarmer(ca, cb, "gfx/terobjs/plants/pipeweed", "gfx/invobjs/seed-pipeweed", 4, replant, containeronly, replantcontainer, containers, stockpile, stockpileLocs);
@@ -305,14 +305,14 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
             }
         };
         Button lettuceBtn = new Button(140, "Lettuce") {
             @Override
             public void click() {
                 if (replantcontainer && containers.size() == 0 || containeronly && containers.size() == 0) {
-                    PBotUtils.sysMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
+                    PBotUtils.debugMsg(ui, "Please select a container by holding alt and clicking it before starting if using barrel or replantbarrel.", Color.white);
                 } else if (ca != null && cb != null) {
                     // Start hemp farmer and close this window
                     SeedCropFarmer bf = new SeedCropFarmer(ca, cb, "gfx/terobjs/plants/lettuce", "gfx/invobjs/seed-lettuce", 4, replant, containeronly, replantcontainer, containers, stockpile, stockpileLocs);
@@ -321,7 +321,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
             }
         };
         Button trelHarBtn = new Button(140, "Trellis harvest") {
@@ -335,7 +335,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -350,7 +350,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -364,14 +364,14 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
         Button areaSelBtn = new Button(140, "Select Area") {
             @Override
             public void click() {
-                PBotUtils.sysMsg(ui, "Drag area over crops", Color.WHITE);
+                PBotUtils.debugMsg(ui, "Drag area over crops", Color.WHITE);
                 ui.gui.map.farmSelect = true;
             }
         };
@@ -379,9 +379,9 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
             @Override
             public void click() {
                 if (ca == null && cb == null) {
-                    PBotUtils.sysMsg(ui, "Please select your crop area first before your stockpiles", Color.white);
+                    PBotUtils.debugMsg(ui, "Please select your crop area first before your stockpiles", Color.white);
                 } else {
-                    PBotUtils.sysMsg(ui, "Click and Drag over 2 wide area for stockpiles", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Click and Drag over 2 wide area for stockpiles", Color.WHITE);
                     selectingarea = new Thread(new Farmer.selectingarea(), "Farming Bots");
                     selectingarea.start();
                 }
@@ -442,7 +442,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 a = val;
                 stockpile = val;
                 if (a)
-                    PBotUtils.sysMsg(ui, "Currently only objects with smaller hitboxes work with stockpile, such as flax/hemp/poppy/leeks/pipeweed.");
+                    PBotUtils.debugMsg(ui, "Currently only objects with smaller hitboxes work with stockpile, such as flax/hemp/poppy/leeks/pipeweed.");
             }
         };
 
@@ -477,7 +477,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
             Coord aPnt = PBotUtils.getSelectedAreaA();
             Coord bPnt = PBotUtils.getSelectedAreaB();
             if (Math.abs(aPnt.x - bPnt.x) > 22 && Math.abs(aPnt.y - bPnt.y) > 22) {
-                PBotUtils.sysMsg(ui, "Please select an area at least 2 tiles wide - try again.");
+                PBotUtils.debugMsg(ui, "Please select an area at least 2 tiles wide - try again.");
             } else {
                 for (int i = Math.min(aPnt.x, bPnt.x) + 11 / 2; i < Math.max(aPnt.x, bPnt.x); i += 11) {
                     for (int j = Math.min(aPnt.y, bPnt.y) + 11 / 2; j < Math.max(aPnt.y, bPnt.y); j += 11) {
@@ -497,7 +497,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
     public void areaselect(Coord a, Coord b) {
         this.ca = a.mul(MCache.tilesz2);
         this.cb = b.mul(MCache.tilesz2).add(11, 11);
-        PBotUtils.sysMsg(ui, "Area selected!", Color.WHITE);
+        PBotUtils.debugMsg(ui, "Area selected!", Color.WHITE);
         ui.gui.map.unregisterAreaSelect();
     }
 
@@ -515,13 +515,13 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
         if (gob.getres().basename().contains("barrel") || gob.getres().basename().contains("trough") || gob.getres().basename().contains("cistern")) {
             if (!containers.contains(gob)) {
                 containers.add(gob);
-                PBotUtils.sysMsg(ui, "Barrel/Trough/Cistern added! Total : " + containers.size(), Color.WHITE);
+                PBotUtils.debugMsg(ui, "Barrel/Trough/Cistern added! Total : " + containers.size(), Color.WHITE);
             }
         } else if (gob.getres().basename().contains("chest")) {
             chest = gob;
-            PBotUtils.sysMsg(ui, "Chest selected!", Color.WHITE);
+            PBotUtils.debugMsg(ui, "Chest selected!", Color.WHITE);
         } else
-            PBotUtils.sysMsg(ui, "Please select only a barrel, trough, or chest!", Color.WHITE);
+            PBotUtils.debugMsg(ui, "Please select only a barrel, trough, or chest!", Color.WHITE);
         //ui.gui.map.unregisterGobSelect();
     }
 }

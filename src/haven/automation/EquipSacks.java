@@ -43,11 +43,11 @@ public class EquipSacks implements Runnable {
 
             if (righthand != null && lefthand != null) {
                 if (righthand.name.get().contains("Sack") && lefthand.name.get().contains("Sack")) {
-                    PBotUtils.sysMsg(gui.ui, "Already found traveler sacks, canceling.", Color.white);
+                    PBotUtils.debugMsg(gui.ui, "Already found traveler sacks, canceling.", Color.white);
                     return;
                 }
                 if (righthand.name.get().contains("Bindle") && lefthand.name.get().contains("Bindle")) {
-                    PBotUtils.sysMsg(gui.ui, "Already found traveler sacks, canceling.", Color.white);
+                    PBotUtils.debugMsg(gui.ui, "Already found traveler sacks, canceling.", Color.white);
                     return;
                 }
             }
@@ -105,7 +105,7 @@ public class EquipSacks implements Runnable {
 
 
                 if (wepmap.size() == 0) {
-                    PBotUtils.sysMsg(gui.ui, "No sacks found", Color.white);
+                    PBotUtils.debugMsg(gui.ui, "No sacks found", Color.white);
                     return;
                 }
 
@@ -196,7 +196,7 @@ public class EquipSacks implements Runnable {
                 wepmap.clear();
             }
         } catch (Exception e) {
-            PBotUtils.sysMsg(gui.ui, "Exception occurred in EquipSack script, ignored.", Color.white);
+            PBotUtils.debugMsg(gui.ui, "Exception occurred in EquipSack script, ignored.", Color.white);
             e.printStackTrace();
         }//ignore all exceptions, this script will likely be used in a combat situation and crashes are unacceptable
     }

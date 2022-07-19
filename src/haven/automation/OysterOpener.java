@@ -27,7 +27,7 @@ public class OysterOpener implements Runnable {
         } catch (Exception q) {
         }
         if (oysters.size() == 0) {
-            PBotUtils.sysMsg(gui.ui, "No Oysters found.", Color.white);
+            PBotUtils.debugMsg(gui.ui, "No Oysters found.", Color.white);
             return;
         }
         int startid = gui.ui.next_predicted_id;
@@ -46,7 +46,7 @@ public class OysterOpener implements Runnable {
             }
             startsize--;*/
         }
-        PBotUtils.sysMsg(gui.ui, "Exited OysterOpener", Color.white);
+        PBotUtils.debugMsg(gui.ui, "Exited OysterOpener", Color.white);
     }
 }
 

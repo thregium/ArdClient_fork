@@ -79,15 +79,19 @@ public class Following extends Moving {
         return (gob.glob.oc.getgob(this.tgt));
     }
 
+    boolean helded = false;
     @Override
     public void ctick(int dt) {
         super.ctick(dt);
-        final Gob tgt = tgt();
-        if (tgt != null) {
-            final Holding holding = tgt.getattr(Holding.class);
-            if (holding == null || holding.held != gob) {
-                tgt.setattr(new Holding(tgt, gob));
-                gob.delayedsetattr(new HeldBy(gob, tgt), Gob::updateHitmap);
+        if (!helded) {
+            final Gob tgt = tgt();
+            if (tgt != null) {
+                final Holding holding = tgt.getattr(Holding.class);
+                if (holding == null || holding.held != gob) {
+                    tgt.setattr(new Holding(tgt, gob));
+                    gob.delayedsetattr(new HeldBy(gob, tgt), Gob::updateHitmap);
+                    helded = true;
+                }
             }
         }
     }

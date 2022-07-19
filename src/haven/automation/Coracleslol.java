@@ -53,7 +53,7 @@ public class Coracleslol implements Runnable {
                 coraclegob = PBotUtils.findObjectByNames(gui.ui, 10, "gfx/terobjs/vehicle/coracle");
 
                 if (coraclegob == null) {
-                    PBotUtils.sysMsg(gui.ui, "Coracle not found.", Color.white);
+                    PBotUtils.debugMsg(gui.ui, "Coracle not found.", Color.white);
                     return;
                 } else {
                     //FlowerMenu.setNextSelection("Pick up");
@@ -75,7 +75,7 @@ public class Coracleslol implements Runnable {
                     tl = gui.ui.sess.glob.map.tiler(id);
                     timeout++;
                     if (timeout > 250) {
-                        PBotUtils.sysMsg(gui.ui, "Timed out waiting for water tile to drop coracle on.", Color.white);
+                        PBotUtils.debugMsg(gui.ui, "Timed out waiting for water tile to drop coracle on.", Color.white);
                         return;
                     }
                     PBotUtils.sleep(10);
@@ -90,14 +90,14 @@ public class Coracleslol implements Runnable {
                     while (gui.getequipory().quickslots[11] != null)
                         PBotUtils.sleep(10);
                 } else {
-                    PBotUtils.sysMsg(gui.ui, "Somehow I don't know if the coracle came from inv or equipory, breaking.", Color.white);
+                    PBotUtils.debugMsg(gui.ui, "Somehow I don't know if the coracle came from inv or equipory, breaking.", Color.white);
                     return;
                 }
                 while (PBotUtils.findObjectByNames(gui.ui, 10, "gfx/terobjs/vehicle/coracle") == null)
                     PBotUtils.sleep(10);
                 Gob coraclegob = PBotUtils.findObjectByNames(gui.ui, 10, "gfx/terobjs/vehicle/coracle");
                 if (coraclegob == null) {
-                    PBotUtils.sysMsg(gui.ui, "Coracle not found, breaking.", Color.white);
+                    PBotUtils.debugMsg(gui.ui, "Coracle not found, breaking.", Color.white);
                     return;
                 } else {//Into the blue yonder!
                     //  FlowerMenu.setNextSelection("Into the blue yonder!");
@@ -107,7 +107,7 @@ public class Coracleslol implements Runnable {
                 }
             }
         } catch (Exception e) {
-            PBotUtils.sysMsg(gui.ui, "Prevented crash, something went wrong dropping and mounting coracle.", Color.white);
+            PBotUtils.debugMsg(gui.ui, "Prevented crash, something went wrong dropping and mounting coracle.", Color.white);
             e.printStackTrace();
         }
     }

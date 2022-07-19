@@ -196,7 +196,7 @@ public class MinerAlert extends Window {
             @Override
             public void click() {
                 audiomute = !audiomute;
-                PBotUtils.sysMsg(ui, "Mute status : " + audiomute, Color.white);
+                PBotUtils.debugMsg(ui, "Mute status : " + audiomute, Color.white);
             }
         };
         add(mutebtn, new Coord(35, yvalue += 20));
@@ -244,7 +244,7 @@ public class MinerAlert extends Window {
                             double distFromPlayer = support.rc.dist(PBotUtils.player(ui).rc);
                             if (distFromPlayer <= 13 * 11) {    //support is less than or equal to 13 tiles from current player position, check it's HP
                                 if (support.getattr(GobHealth.class) != null && support.getattr(GobHealth.class).hp <= 2 && SupportAlertHalf) {
-                                    PBotUtils.sysMsg(ui, "Detected mine support at 50% or less HP", Color.ORANGE);
+                                    PBotUtils.debugMsg(ui, "Detected mine support at 50% or less HP", Color.ORANGE);
                                     synchronized (ui.gui.map.glob.oc) {
                                         support.addol(new Mark(4000));
                                         support.delattr(GobHighlight.class);
@@ -255,7 +255,7 @@ public class MinerAlert extends Window {
                                         Audio.play(supportalertsfx);
                                     }
                                 } else if (support.getattr(GobHealth.class) != null && support.getattr(GobHealth.class).hp <= 1 && SupportAlertQuarter) {
-                                    PBotUtils.sysMsg(ui, "Detected mine support at 25% or less HP less than 13 tiles away", Color.RED);
+                                    PBotUtils.debugMsg(ui, "Detected mine support at 25% or less HP less than 13 tiles away", Color.RED);
                                     synchronized (ui.gui.map.glob.oc) {
                                         support.addol(new Mark(4000));
                                         support.delattr(GobHighlight.class);
@@ -371,7 +371,7 @@ public class MinerAlert extends Window {
                         double now = Utils.rtime();
                         if (now - lasterror > 45) {
                             lasterror = now;
-                            PBotUtils.sysMsg(ui, "Gold Visible on screen!!", Color.green);
+                            PBotUtils.debugMsg(ui, "Gold Visible on screen!!", Color.green);
                             if (!audiomute)
                                 Audio.play(goldsfx);
                         }
@@ -379,14 +379,14 @@ public class MinerAlert extends Window {
                     if (countcinnabar > 0) {
                         double now = Utils.rtime();
                         if (now - lasterror > 45) {
-                            PBotUtils.sysMsg(ui, "Cinnabar visible on screen!!", Color.green);
+                            PBotUtils.debugMsg(ui, "Cinnabar visible on screen!!", Color.green);
                             lasterror = now;
                         }
                     }
                     if (countsilver > 0) {
                         double now = Utils.rtime();
                         if (now - lasterror > 15) {
-                            PBotUtils.sysMsg(ui, "Silver visible on screen!!", Color.green);
+                            PBotUtils.debugMsg(ui, "Silver visible on screen!!", Color.green);
                             if (!audiomute) {
                                 Audio.play(silversfx);
                             }

@@ -92,7 +92,7 @@ public class PepperGrinderUpRun extends Window implements Runnable {
         try {
             tables = Tables();
             storages = Storages();
-            PBotUtils.sysMsg(ui, "Pepper Grinder Bot started! Tables selected : " + tables.size(), Color.white);
+            PBotUtils.debugMsg(ui, "Pepper Grinder Bot started! Tables selected : " + tables.size(), Color.white);
 
             ui.gui.wdgmsg("act", "craft", "blackpepper");
             PBotUtils.waitForWindow(ui, "Crafting");
@@ -284,14 +284,14 @@ public class PepperGrinderUpRun extends Window implements Runnable {
                             break;
                         lblProg.settext("Collecting");
                         if (!pfRight(g, 0)) {
-                            PBotUtils.sysMsg(ui, "Not found the path");
+                            PBotUtils.debugMsg(ui, "Not found the path");
                             // Update progression
                             lblProg.settext("Status - Collecting");
                             this.storages.remove(g);
                             continue;
                         }
                     } catch (NullPointerException qq) {
-                        PBotUtils.sysMsg(ui, "Null pointer when harvesting, ping related?", Color.white);
+                        PBotUtils.debugMsg(ui, "Null pointer when harvesting, ping related?", Color.white);
                     }
 
                     String windowName = PBotGobAPI.gobWindowMap.get(g.getres().name);
@@ -386,7 +386,7 @@ public class PepperGrinderUpRun extends Window implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        PBotUtils.sysMsg(ui, "Done", Color.white);
+        PBotUtils.debugMsg(ui, "Done", Color.white);
         stopThread = true;
         stop();
     }
@@ -602,7 +602,7 @@ public class PepperGrinderUpRun extends Window implements Runnable {
 
     public void stop() {
         // Stops thread
-        PBotUtils.sysMsg(ui, "Pepper Grinder Stopped!", Color.white);
+        PBotUtils.debugMsg(ui, "Pepper Grinder Stopped!", Color.white);
         //ui.gui.map.wdgmsg("click", Coord.z, ui.gui.map.player().rc.floor(posres), 1, 0);
         if (ui.gui.map.pfthread != null) {
             ui.gui.map.pfthread.interrupt();

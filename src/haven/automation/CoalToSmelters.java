@@ -117,7 +117,7 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
             @Override
             public void click() {
                 terminaterun = false;
-                PBotUtils.sysMsg(ui, "Bank 1 Cleared", Color.white);
+                PBotUtils.debugMsg(ui, "Bank 1 Cleared", Color.white);
                 list.clear();
                 stockpiles.clear();
                 activelist.clear();
@@ -150,7 +150,7 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
         stopbtn = new Button(100, "Stop") {
             @Override
             public void click() {
-                PBotUtils.sysMsg(ui, "Stopping", Color.white);
+                PBotUtils.debugMsg(ui, "Stopping", Color.white);
                 this.hide();
                 terminate();
                 runbtn3.show();
@@ -184,14 +184,14 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
             @Override
             public void click() {
                 if (autodropperon) {
-                    PBotUtils.sysMsg(ui, "Autodropper stopped", Color.white);
+                    PBotUtils.debugMsg(ui, "Autodropper stopped", Color.white);
                     autodropperon = false;
                     autodropper.interrupt();
                 } else {
                     autodropperon = true;
                     autodropper = new Thread(new autodropper(), "Add Coal To Smelters");
                     autodropper.start();
-                    PBotUtils.sysMsg(ui, "Autodropper started.", Color.white);
+                    PBotUtils.debugMsg(ui, "Autodropper started.", Color.white);
                 }
             }
         };
@@ -381,9 +381,9 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
         @Override
         public void run() {
             try {
-                PBotUtils.sysMsg(ui, "Ore filler started.", Color.white);
+                PBotUtils.debugMsg(ui, "Ore filler started.", Color.white);
                 if (list.size() == 0) {
-                    PBotUtils.sysMsg(ui, "No Smelters selected.", Color.white);
+                    PBotUtils.debugMsg(ui, "No Smelters selected.", Color.white);
                     stopbtn.click();
                     return;
                 }
@@ -502,7 +502,7 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
                     }*/
                 }
                 terminateore = true;
-                PBotUtils.sysMsg(ui, "Done.", Color.white);
+                PBotUtils.debugMsg(ui, "Done.", Color.white);
                 stopbtn.click();
             } catch (Loading loadingerrorslol) {
             }
@@ -732,7 +732,7 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
                 }
                 count = countretain;
                 terminaterun = true;
-                PBotUtils.sysMsg(ui, "Done", Color.white);
+                PBotUtils.debugMsg(ui, "Done", Color.white);
                 activelist.clear();
                 stopbtn.click();
             } catch (Loading ie) {
@@ -750,7 +750,7 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
                         return;
                     try {
                         if (list.size() == 0) {
-                            PBotUtils.sysMsg(ui, "No Smelters/Ovens found", Color.white);
+                            PBotUtils.debugMsg(ui, "No Smelters/Ovens found", Color.white);
                             stopbtn.click();
                             return;
                         }
@@ -847,7 +847,7 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
                     }
                 }
             }
-            PBotUtils.sysMsg(ui, "Done", Color.white);
+            PBotUtils.debugMsg(ui, "Done", Color.white);
             terminatelight = true;
             lblc.settext(list.size() + "");
             torchlist.clear();
@@ -858,7 +858,7 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
     private class selectingarea implements Runnable {
         @Override
         public void run() {
-            PBotUtils.sysMsg(ui, "Drag area over smelters/Ovens/LowQ Fuel", Color.WHITE);
+            PBotUtils.debugMsg(ui, "Drag area over smelters/Ovens/LowQ Fuel", Color.WHITE);
             PBotUtils.selectArea(ui);
             try {
                 selectedAreaA = PBotUtils.getSelectedAreaA();
@@ -878,7 +878,7 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
                 lblc.settext(list.size() + "");
                 biglist.clear();
             } catch (NullPointerException q) {
-                PBotUtils.sysMsg(ui, "Error detected, please reopen the bot and try again.", Color.white);
+                PBotUtils.debugMsg(ui, "Error detected, please reopen the bot and try again.", Color.white);
                 q.printStackTrace();
             }
         }
@@ -888,7 +888,7 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
         @Override
         public void run() {
             orestockpiles.clear();
-            PBotUtils.sysMsg(ui, "Drag area over Ore", Color.WHITE);
+            PBotUtils.debugMsg(ui, "Drag area over Ore", Color.WHITE);
             PBotUtils.selectArea(ui);
             //ui.gui.map.PBotAPISelect = true;
             // while(ui.gui.map.PBotAPISelect)
@@ -903,7 +903,7 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
                 oreLabelStockpiles.settext(orestockpiles.size() + "");
                 biglist.clear();
             } catch (NullPointerException q) {
-                PBotUtils.sysMsg(ui, "Error detected, please reopen the bot and try again.", Color.white);
+                PBotUtils.debugMsg(ui, "Error detected, please reopen the bot and try again.", Color.white);
                 q.printStackTrace();
             }
         }
@@ -911,7 +911,7 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
 
     private void registerGobSelect() {
         synchronized (GobSelectCallback.class) {
-            PBotUtils.sysMsg(ui, "Registering Gob", Color.white);
+            PBotUtils.debugMsg(ui, "Registering Gob", Color.white);
             ui.gui.map.registerGobSelect(this);
         }
     }
@@ -1010,7 +1010,7 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
             }
             if (res.name.contains("chest")) {
                 chest = gob;
-                PBotUtils.sysMsg(ui, "Chest Selected", Color.white);
+                PBotUtils.debugMsg(ui, "Chest Selected", Color.white);
             }
         }
     }

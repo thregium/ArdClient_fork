@@ -584,16 +584,17 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             resname().ifPresent(this::discovered);
         }
 
-        synchronized (attr) {
-            for (GAttrib a : attr.values())
-                a.ctick(dt);
-        }
-
         synchronized (dattrs) {
             for (Pair<GAttrib, Consumer<Gob>> pair : dattrs) {
                 setattr(pair.a);
                 pair.b.accept(this);
             }
+            dattrs.clear();
+        }
+
+        synchronized (attr) {
+            for (GAttrib a : attr.values())
+                a.ctick(dt);
         }
 
         synchronized (ols) {

@@ -88,10 +88,10 @@ public class PlaceTrays implements Runnable {
                     break;
             }
 
-            PBotUtils.sysMsg(ui, "Trays is placed!");
+            PBotUtils.debugMsg(ui, "Trays is placed!");
         } catch (Exception e) {
             e.printStackTrace();
-            PBotUtils.sysMsg(ui, "Failed " + e);
+            PBotUtils.debugMsg(ui, "Failed " + e);
         }
     }
 }

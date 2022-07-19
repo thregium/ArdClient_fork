@@ -89,7 +89,7 @@ public class SeedCropFarmer extends Window implements Runnable {
     public void run() {
         try {
             if (stockpile)
-                PBotUtils.sysMsg(ui, "Auto-Stockpile not yet fully tested.", Color.white);
+                PBotUtils.debugMsg(ui, "Auto-Stockpile not yet fully tested.", Color.white);
             // Initialise crop list
             ui.gui.map.unregisterGobSelect();
             crops = Crops();
@@ -214,7 +214,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                             itemlist.clear();
                             itemlist = PBotUtils.getInventoryItemsByName(ui.gui.maininv, "gfx/invobjs/seed-pumpkin");
                             if (itemlist.size() == 0) {//If seeds are present in inventory, try to use them.
-                                PBotUtils.sysMsg(ui, "Somehow don't have seeds after picking up and slicing a pumpkin, stopping", Color.white);
+                                PBotUtils.debugMsg(ui, "Somehow don't have seeds after picking up and slicing a pumpkin, stopping", Color.white);
                                 stop();
                                 stopThread = true;
                             }
@@ -374,7 +374,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                             lblProg2.settext("Barreling");
                             for (int n = 0; true; n++) {
                                 if (n >= 5) {
-                                    PBotUtils.sysMsg(ui, "Barreling error, stopping.", Color.white);
+                                    PBotUtils.debugMsg(ui, "Barreling error, stopping.", Color.white);
                                     stopThread = true;
                                     stop();
                                     break;
@@ -402,19 +402,19 @@ public class SeedCropFarmer extends Window implements Runnable {
                                     if (stopThread)
                                         break;
                                     if (containers.size() == 1 && i > 250) {
-                                        PBotUtils.sysMsg(ui, "Only container in list appears to be full, stopping.", Color.white);
+                                        PBotUtils.debugMsg(ui, "Only container in list appears to be full, stopping.", Color.white);
                                         stopThread = true;
                                         stop();
                                         break;
                                     } else if (i > 250) {
-                                        PBotUtils.sysMsg(ui, "Container appears to be full, removing.", Color.white);
+                                        PBotUtils.debugMsg(ui, "Container appears to be full, removing.", Color.white);
                                         Coord slot = PBotUtils.getFreeInvSlot(ui.gui.maininv);
                                         PBotUtils.dropItemToInventory(slot, ui.gui.maininv);
                                         PBotUtils.sleep(250);
                                         containers.remove(0);
                                         for (int n = 0; true; n++) {
                                             if (n >= 5) {
-                                                PBotUtils.sysMsg(ui, "Barreling error, stopping.", Color.white);
+                                                PBotUtils.debugMsg(ui, "Barreling error, stopping.", Color.white);
                                                 stopThread = true;
                                                 stop();
                                                 break;
@@ -463,7 +463,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                                 lblProg2.settext("Barreling");
                                 for (int n = 0; true; n++) {
                                     if (n >= 5) {
-                                        PBotUtils.sysMsg(ui, "Barreling error, stopping.", Color.white);
+                                        PBotUtils.debugMsg(ui, "Barreling error, stopping.", Color.white);
                                         stopThread = true;
                                         stop();
                                         break;
@@ -491,19 +491,19 @@ public class SeedCropFarmer extends Window implements Runnable {
                                         if (stopThread)
                                             return;
                                         if (containers.size() == 1 && i > 250) {
-                                            PBotUtils.sysMsg(ui, "Only container in list appears to be full, stopping.", Color.white);
+                                            PBotUtils.debugMsg(ui, "Only container in list appears to be full, stopping.", Color.white);
                                             stopThread = true;
                                             stop();
                                             break;
                                         } else if (i > 250) {
-                                            PBotUtils.sysMsg(ui, "Container appears to be full, removing.", Color.white);
+                                            PBotUtils.debugMsg(ui, "Container appears to be full, removing.", Color.white);
                                             Coord slot = PBotUtils.getFreeInvSlot(ui.gui.maininv);
                                             PBotUtils.dropItemToInventory(slot, ui.gui.maininv);
                                             PBotUtils.sleep(250);
                                             containers.remove(0);
                                             for (int n = 0; true; n++) {
                                                 if (n >= 5) {
-                                                    PBotUtils.sysMsg(ui, "Barreling error, stopping.", Color.white);
+                                                    PBotUtils.debugMsg(ui, "Barreling error, stopping.", Color.white);
                                                     stopThread = true;
                                                     stop();
                                                     break;
@@ -559,7 +559,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                     GItem item;
                     for (int n = 0; true; n++) {
                         if (n >= 5) {
-                            PBotUtils.sysMsg(ui, "Barreling error, stopping.", Color.white);
+                            PBotUtils.debugMsg(ui, "Barreling error, stopping.", Color.white);
                             stopThread = true;
                             stop();
                             break;
@@ -587,19 +587,19 @@ public class SeedCropFarmer extends Window implements Runnable {
                             if (stopThread)
                                 return;
                             if (containers.size() == 1 && i > 250) {
-                                PBotUtils.sysMsg(ui, "Only container in list appears to be full, stopping.", Color.white);
+                                PBotUtils.debugMsg(ui, "Only container in list appears to be full, stopping.", Color.white);
                                 stopThread = true;
                                 stop();
                                 break;
                             } else if (i > 250) {
-                                PBotUtils.sysMsg(ui, "Container appears to be full, removing.", Color.white);
+                                PBotUtils.debugMsg(ui, "Container appears to be full, removing.", Color.white);
                                 Coord slot = PBotUtils.getFreeInvSlot(ui.gui.maininv);
                                 PBotUtils.dropItemToInventory(slot, ui.gui.maininv);
                                 PBotUtils.sleep(250);
                                 containers.remove(0);
                                 for (int n = 0; true; n++) {
                                     if (n >= 5) {
-                                        PBotUtils.sysMsg(ui, "Barreling error, stopping.", Color.white);
+                                        PBotUtils.debugMsg(ui, "Barreling error, stopping.", Color.white);
                                         stopThread = true;
                                         stop();
                                         break;
@@ -738,7 +738,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                             PBotUtils.dropItem(ui, 0);
                         if (stockpiles.isEmpty()) {
                             System.out.println("Stockpiles empty");
-                            PBotUtils.sysMsg(ui, "All chosen stockpiles full!", Color.GREEN);
+                            PBotUtils.debugMsg(ui, "All chosen stockpiles full!", Color.GREEN);
                             stop = true;
                             break;
                         }
@@ -751,7 +751,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                         if (stop)
                             break;
                         if (stockpiles.size() == 0) {
-                            PBotUtils.sysMsg(ui, "Stockpile list now empty, stopping.", Color.white);
+                            PBotUtils.debugMsg(ui, "Stockpile list now empty, stopping.", Color.white);
                             stop = true;
                             stop();
                         }
@@ -785,7 +785,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                         try {
                             ui.gui.map.wdgmsg("itemact", Coord.z, stockpiles.get(0).rc.floor(posres), 3, 0, (int) stockpiles.get(0).id, stockpiles.get(0).rc.floor(posres), 0, -1);
                         } catch (IndexOutOfBoundsException lolindexes) {
-                            PBotUtils.sysMsg(ui, "Critical error in stockpile list, stopping thread to prevent crash.", Color.white);
+                            PBotUtils.debugMsg(ui, "Critical error in stockpile list, stopping thread to prevent crash.", Color.white);
                             stop = true;
                             stop();
                         }
@@ -932,7 +932,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                         PBotUtils.dropItem(ui, 0);
                     if (stockpiles.isEmpty()) {
                         System.out.println("Stockpiles empty");
-                        PBotUtils.sysMsg(ui, "All chosen stockpiles full!", Color.GREEN);
+                        PBotUtils.debugMsg(ui, "All chosen stockpiles full!", Color.GREEN);
                         return;
                     }
                     if (PBotUtils.stockpileIsFull(PBotUtils.findObjectById(ui, stockpiles.get(0).id))) {
@@ -940,7 +940,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                         stockpiles.remove(0);
                     }
                     if (stockpiles.size() == 0) {
-                        PBotUtils.sysMsg(ui, "Stockpile list now empty, stopping.", Color.white);
+                        PBotUtils.debugMsg(ui, "Stockpile list now empty, stopping.", Color.white);
                         stop = true;
                         stop();
                     }
@@ -976,7 +976,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                     try {
                         ui.gui.map.wdgmsg("itemact", Coord.z, stockpiles.get(0).rc.floor(posres), 3, 0, (int) stockpiles.get(0).id, stockpiles.get(0).rc.floor(posres), 0, -1);
                     } catch (IndexOutOfBoundsException lolindexes) {
-                        PBotUtils.sysMsg(ui, "Critical error in stockpile list, stopping thread to prevent crash.", Color.white);
+                        PBotUtils.debugMsg(ui, "Critical error in stockpile list, stopping thread to prevent crash.", Color.white);
                         stop();
                     }
                 }
@@ -984,7 +984,7 @@ public class SeedCropFarmer extends Window implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        PBotUtils.sysMsg(ui, cropName.substring(cropName.lastIndexOf("/") + 1).substring(0, 1).toUpperCase()
+        PBotUtils.debugMsg(ui, cropName.substring(cropName.lastIndexOf("/") + 1).substring(0, 1).toUpperCase()
                 + cropName.substring(cropName.lastIndexOf("/") + 1).substring(1)
                 + " Farmer finished!", Color.white);
         this.destroy();
@@ -1054,7 +1054,7 @@ public class SeedCropFarmer extends Window implements Runnable {
 
     public void stop() {
         // Stops thread
-        PBotUtils.sysMsg(ui, cropName.substring(cropName.lastIndexOf("/") + 1).substring(0, 1).toUpperCase()
+        PBotUtils.debugMsg(ui, cropName.substring(cropName.lastIndexOf("/") + 1).substring(0, 1).toUpperCase()
                 + cropName.substring(cropName.lastIndexOf("/") + 1).substring(1)
                 + " Farmer stopped!", Color.white);
         ui.gui.map.wdgmsg("click", Coord.z, ui.gui.map.player().rc.floor(posres), 1, 0);

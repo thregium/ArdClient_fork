@@ -88,7 +88,7 @@ public class PepperBotProRun extends Window implements Runnable {
     }
 
     public void run() {
-        PBotUtils.sysMsg(ui, "Pepper Bot started!", Color.white);
+        PBotUtils.debugMsg(ui, "Pepper Bot started!", Color.white);
 
         ui.gui.wdgmsg("act", "craft", "boiledpepper");
         PBotUtils.waitForWindow(ui, "Crafting");
@@ -112,7 +112,7 @@ public class PepperBotProRun extends Window implements Runnable {
                 }
 
                 if (tables.size() == 0) {
-                    PBotUtils.sysMsg(ui, "No tables selected, stopping.", Color.white);
+                    PBotUtils.debugMsg(ui, "No tables selected, stopping.", Color.white);
                     stopThread = true;
                     stop();
                     return;
@@ -133,7 +133,7 @@ public class PepperBotProRun extends Window implements Runnable {
                                 PBotUtils.sleep(2000);
                             } else {
                                 if (PBotUtils.getEnergy(ui) < 21) {
-                                    PBotUtils.sysMsg(ui, "Starving and no porridge detected, stopping bot and logging out.", Color.white);
+                                    PBotUtils.debugMsg(ui, "Starving and no porridge detected, stopping bot and logging out.", Color.white);
                                     stopThread = true;
                                     stop();
                                     ui.gui.logoutChar();
@@ -144,7 +144,7 @@ public class PepperBotProRun extends Window implements Runnable {
                         }
                     } catch (NullPointerException qqq) {
                         //probably null pointer for a reason, stop bot.
-                        PBotUtils.sysMsg(ui, "Null pointer exception trying to find food to eat, stopping bot for safety. Please tell Ardennes about this.", Color.white);
+                        PBotUtils.debugMsg(ui, "Null pointer exception trying to find food to eat, stopping bot for safety. Please tell Ardennes about this.", Color.white);
                         stopThread = true;
                         stop();
                         return;
@@ -174,7 +174,7 @@ public class PepperBotProRun extends Window implements Runnable {
                         lblProg2.settext("Harvesting");
                         PBotUtils.doClick(ui, g, 3, 0);
                     } catch (NullPointerException qq) {
-                        PBotUtils.sysMsg(ui, "Null pointer when harvesting, ping related?", Color.white);
+                        PBotUtils.debugMsg(ui, "Null pointer when harvesting, ping related?", Color.white);
                     }
 
                     int retryharvest = 0;
@@ -291,7 +291,7 @@ public class PepperBotProRun extends Window implements Runnable {
                                     lblProg2.settext("Tables");
                                     while (htable == null) {
                                         if (tables.size() == 0) {
-                                            PBotUtils.sysMsg(ui, "Tables is now empty for some reason, all tables full?", Color.white);
+                                            PBotUtils.debugMsg(ui, "Tables is now empty for some reason, all tables full?", Color.white);
                                             stopBtn.click();
                                             break;
                                         }
@@ -456,7 +456,7 @@ public class PepperBotProRun extends Window implements Runnable {
                     lblProg.settext(cropsHarvested + "/" + totalCrops);
                 }
             }
-            PBotUtils.sysMsg(ui, "Section finished!", Color.white);
+            PBotUtils.debugMsg(ui, "Section finished!", Color.white);
             ui.gui.act("travel", "hearth");
             PBotUtils.sleep(6000);
             lblProg2.settext("Moving to harvest");
@@ -628,7 +628,7 @@ public class PepperBotProRun extends Window implements Runnable {
 
     public void stop() {
         // Stops thread
-        PBotUtils.sysMsg(ui, "Trellis Farmer stopped!", Color.white);
+        PBotUtils.debugMsg(ui, "Trellis Farmer stopped!", Color.white);
         ui.gui.map.wdgmsg("click", Coord.z, ui.gui.map.player().rc.floor(posres), 1, 0);
         if (ui.gui.map.pfthread != null) {
             ui.gui.map.pfthread.interrupt();

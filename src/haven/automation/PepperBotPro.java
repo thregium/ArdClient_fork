@@ -113,19 +113,19 @@ public class PepperBotPro extends Window implements GobSelectCallback {
             public void click() {
                 allowrun = true;
                 if (hfire == null) {
-                    PBotUtils.sysMsg(ui, "No Hearthfire Selected.", Color.white);
+                    PBotUtils.debugMsg(ui, "No Hearthfire Selected.", Color.white);
                     allowrun = false;
                 }
                 if (barrel == null) {
-                    PBotUtils.sysMsg(ui, "No barrel Selected.", Color.white);
+                    PBotUtils.debugMsg(ui, "No barrel Selected.", Color.white);
                     allowrun = false;
                 }
                 if (water == null) {
-                    PBotUtils.sysMsg(ui, "No water source Selected.", Color.white);
+                    PBotUtils.debugMsg(ui, "No water source Selected.", Color.white);
                     allowrun = false;
                 }
                 if (cauldron == null) {
-                    PBotUtils.sysMsg(ui, "No cauldron Selected.", Color.white);
+                    PBotUtils.debugMsg(ui, "No cauldron Selected.", Color.white);
                     allowrun = false;
                 }
 
@@ -137,7 +137,7 @@ public class PepperBotPro extends Window implements GobSelectCallback {
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else if (allowrun) {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -148,7 +148,7 @@ public class PepperBotPro extends Window implements GobSelectCallback {
             public void click() {
                 allowrun = true;
                 if (grinder == null) {
-                    PBotUtils.sysMsg(ui, "No grinder Selected.", Color.white);
+                    PBotUtils.debugMsg(ui, "No grinder Selected.", Color.white);
                     allowrun = false;
                 }
                 if (ca != null && cb != null && allowrun) {
@@ -157,7 +157,7 @@ public class PepperBotPro extends Window implements GobSelectCallback {
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else if (allowrun) {
-                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                    PBotUtils.debugMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };
@@ -166,7 +166,7 @@ public class PepperBotPro extends Window implements GobSelectCallback {
         Button areaSelBtn = new Button(140, "Select Area") {
             @Override
             public void click() {
-                PBotUtils.sysMsg(ui, "Drag area over crops", Color.WHITE);
+                PBotUtils.debugMsg(ui, "Drag area over crops", Color.WHITE);
                 selectingarea = new Thread(new selectingarea(), "Pepper Bot");
                 selectingarea.start();
             }
@@ -179,7 +179,7 @@ public class PepperBotPro extends Window implements GobSelectCallback {
                 section++;
                 if (section > 4)
                     section = 1;
-                PBotUtils.sysMsg(ui, "Section is now : " + section, Color.white);
+                PBotUtils.debugMsg(ui, "Section is now : " + section, Color.white);
                 lblc3.settext(section + "");
             }
         };
@@ -208,23 +208,23 @@ public class PepperBotPro extends Window implements GobSelectCallback {
     public void gobselect(Gob gob) {
         if (gob.getres().basename().contains("barrel")) {
             barrel = gob;
-            PBotUtils.sysMsg(ui, "Barrel selected!x : " + gob.rc.x + " y : " + gob.rc.y, Color.WHITE);
+            PBotUtils.debugMsg(ui, "Barrel selected!x : " + gob.rc.x + " y : " + gob.rc.y, Color.WHITE);
         } else if (gob.getres().basename().contains("well") || (gob.getres().basename().contains("cistern"))) {
             water = gob;
-            PBotUtils.sysMsg(ui, "Well/Cistern selected! x : " + gob.rc.x + " y : " + gob.rc.y, Color.white);
+            PBotUtils.debugMsg(ui, "Well/Cistern selected! x : " + gob.rc.x + " y : " + gob.rc.y, Color.white);
         } else if (gob.getres().basename().contains("pow")) {
             hfire = gob;
-            PBotUtils.sysMsg(ui, "Hearthfire selected!x : " + gob.rc.x + " y : " + gob.rc.y, Color.white);
+            PBotUtils.debugMsg(ui, "Hearthfire selected!x : " + gob.rc.x + " y : " + gob.rc.y, Color.white);
         } else if (gob.getres().basename().contains("cauldron")) {
             cauldron = gob;
-            PBotUtils.sysMsg(ui, "Cauldron Selected!x : " + gob.rc.x + " y : " + gob.rc.y, Color.white);
+            PBotUtils.debugMsg(ui, "Cauldron Selected!x : " + gob.rc.x + " y : " + gob.rc.y, Color.white);
         } else if (gob.getres().basename().contains("htable")) {
             htable = gob;
             int stage = gob.getStage();
-            PBotUtils.sysMsg(ui, "table selected : " + gob.rc.x + " y : " + gob.rc.y + " stage : " + stage + " overlay : " + gob.ols.size(), Color.white);
+            PBotUtils.debugMsg(ui, "table selected : " + gob.rc.x + " y : " + gob.rc.y + " stage : " + stage + " overlay : " + gob.ols.size(), Color.white);
         } else if (gob.getres().basename().contains("quern")) {
             grinder = gob;
-            PBotUtils.sysMsg(ui, "grinder selected : " + gob.rc.x + " y : " + gob.rc.y, Color.white);
+            PBotUtils.debugMsg(ui, "grinder selected : " + gob.rc.x + " y : " + gob.rc.y, Color.white);
         }
     }
 
@@ -399,7 +399,7 @@ public class PepperBotPro extends Window implements GobSelectCallback {
         section++;
         if (section > 4)
             section = 1;
-        PBotUtils.sysMsg(ui, "Ready to input next section.", Color.white);
+        PBotUtils.debugMsg(ui, "Ready to input next section.", Color.white);
         lblc3.settext(section + "");
     }
 

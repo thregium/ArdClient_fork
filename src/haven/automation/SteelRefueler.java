@@ -350,7 +350,7 @@ public class SteelRefueler extends Window implements GobSelectCallback {
     private class selectingarea implements Runnable {
         @Override
         public void run() {
-            PBotUtils.sysMsg(ui, "Drag area over smelters/Ovens", Color.WHITE);
+            PBotUtils.debugMsg(ui, "Drag area over smelters/Ovens", Color.WHITE);
             PBotUtils.selectArea(ui);
             try {
                 selectedAreaA = PBotUtils.getSelectedAreaA();
@@ -360,7 +360,7 @@ public class SteelRefueler extends Window implements GobSelectCallback {
                 lbls.settext(stockpiles.size() + "");
                 lblc.settext(crucibles.size() + "");
             } catch (NullPointerException q) {
-                PBotUtils.sysMsg(ui, "Error detected, please reopen the bot and try again.", Color.white);
+                PBotUtils.debugMsg(ui, "Error detected, please reopen the bot and try again.", Color.white);
             }
         }
     }

@@ -84,7 +84,7 @@ public class DrinkWater implements Runnable {
                                 break;
                             }
                             if (configuration.drinkmessage)
-                                PBotUtils.sysMsg(gui.ui, "Wrong petal exist. Water timeout expired.", Color.RED);
+                                PBotUtils.debugMsg(gui.ui, "Wrong petal exist. Water timeout expired.", Color.RED);
                             gui.lastDrinkingSucessful = false;
                             gui.drinkingWater = false;
                             return;
@@ -138,7 +138,7 @@ public class DrinkWater implements Runnable {
 
         if (!PBotUtils.waitForFlowerMenu(gui.ui, 5000)) {
             if (configuration.drinkmessage)
-                PBotUtils.sysMsg(gui.ui, "Flower not found. Water timeout expired. Drink failed.", Color.RED);
+                PBotUtils.debugMsg(gui.ui, "Flower not found. Water timeout expired. Drink failed.", Color.RED);
             return false;
         }
         if (PBotUtils.choosePetal(gui.ui, "Drink")) {
@@ -149,13 +149,13 @@ public class DrinkWater implements Runnable {
                 }
             else {
                 if (configuration.drinkmessage)
-                    PBotUtils.sysMsg(gui.ui, "Drink pose not found. Water timeout expired. Sip failed.", Color.RED);
+                    PBotUtils.debugMsg(gui.ui, "Drink pose not found. Water timeout expired. Sip failed.", Color.RED);
                 return false;
             }
         } else {
             PBotUtils.closeFlowermenu(gui.ui);
             if (configuration.drinkmessage)
-                PBotUtils.sysMsg(gui.ui, "Petal not found. Water timeout expired. Drink failed.", Color.RED);
+                PBotUtils.debugMsg(gui.ui, "Petal not found. Water timeout expired. Drink failed.", Color.RED);
             return false;
         }
         return true;
@@ -167,7 +167,7 @@ public class DrinkWater implements Runnable {
 //                while (PBotUtils.getStamina(gui.ui) < configuration.autosipthreshold && canDrinkFrom(drinkFromThis)) {
         for (int i = 0; i < sips; i++) {
             if (!canDrinkFrom(drinkFromThis)) {
-                PBotUtils.sysMsg(gui.ui, "Can't drink from this.", Color.RED);
+                PBotUtils.debugMsg(gui.ui, "Can't drink from this.", Color.RED);
                 return false;
             }
             if (PBotUtils.petalExists(gui.ui)) {
@@ -177,7 +177,7 @@ public class DrinkWater implements Runnable {
                 while (PBotUtils.petalExists(gui.ui)) {
                     if (cycles >= limit) {
                         if (configuration.drinkmessage)
-                            PBotUtils.sysMsg(gui.ui, "Wrong petal exist. Water timeout expired. Sip failed.", Color.RED);
+                            PBotUtils.debugMsg(gui.ui, "Wrong petal exist. Water timeout expired. Sip failed.", Color.RED);
                         return false;
                     }
                     sleep(sleep);
@@ -212,7 +212,7 @@ public class DrinkWater implements Runnable {
             else {
                 PBotUtils.closeFlowermenu(gui.ui);
                 if (configuration.drinkmessage)
-                    PBotUtils.sysMsg(gui.ui, "Petal not found. Water timeout expired. Sip failed.", Color.RED);
+                    PBotUtils.debugMsg(gui.ui, "Petal not found. Water timeout expired. Sip failed.", Color.RED);
                 return false;
             }
 
@@ -222,7 +222,7 @@ public class DrinkWater implements Runnable {
                 }
             else {
                 if (configuration.drinkmessage)
-                    PBotUtils.sysMsg(gui.ui, "Drink pose not found. Water timeout expired. Sip failed.", Color.RED);
+                    PBotUtils.debugMsg(gui.ui, "Drink pose not found. Water timeout expired. Sip failed.", Color.RED);
                 return false;
             }
         }
