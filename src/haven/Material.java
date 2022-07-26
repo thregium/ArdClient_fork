@@ -34,13 +34,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static haven.Utils.c2fa;
 
@@ -169,8 +164,7 @@ public class Material extends GLState {
         }
 
         public String toString() {
-            return (String.format("(%.1f, %.1f, %.1f), (%.1f, %.1f, %.1f), (%.1f, %.1f, %.1f @ %.1f)",
-                    amb[0], amb[1], amb[2], dif[0], dif[1], dif[2], spc[0], spc[1], spc[2], shine));
+            return (String.format("%s, %s, %s, %s, %.1f)", Arrays.toString(amb), Arrays.toString(dif), Arrays.toString(spc), Arrays.toString(emi), shine));
         }
     }
 
@@ -307,6 +301,14 @@ public class Material extends GLState {
                         Resolver r = i.next();
                         r.resolve(states);
                         i.remove();
+                    }
+                    if (getres().name.contains("gfx/tiles/overlay/")) {
+                        new ArrayList<>(states).stream().filter(st -> st instanceof States.ColState).findFirst().ifPresent(st -> {
+                            states.add(Light.deflight);
+                            Color stColor = ((States.ColState) st).c;
+                            states.add(new Material.Colors(Color.BLACK, new Color(0, 0, 0, 255 / 8), Color.BLACK, stColor, 0f));
+                            states.remove(st);
+                        });
                     }
                     m = new Material(states.toArray(new GLState[0])) {
                         public String toString() {
@@ -518,6 +520,7 @@ public class Material extends GLState {
         public Res cons(Resource res, Message buf) {
             int id = buf.uint16();
             Res ret = new Res(res, id);
+            boolean l_ok = false;
             while (!buf.eom()) {
                 String nm = buf.string();
                 Object[] args = buf.list();
@@ -529,6 +532,8 @@ public class Material extends GLState {
                 } else if (nm.equals("mipmap")) {
                     ret.mipmap = true;
                 } else {
+                    if ("light".equals(nm))
+                        l_ok = true;
                     ResCons2 cons = rnames.get(nm);
 //                    if (cons == null)
 //                        throw (new Resource.LoadException("Unknown material part name: " + nm, res));
@@ -539,6 +544,7 @@ public class Material extends GLState {
                         new Resource.LoadWarning(res, "unknown material part name in %s: %s", res.name, nm).issue();
                 }
             }
+//            if (!l_ok && res.name.contains("overlay")) ret.states.add(Light.deflight);
             return (ret);
         }
     }
