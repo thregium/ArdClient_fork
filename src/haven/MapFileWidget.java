@@ -666,31 +666,33 @@ public class MapFileWidget extends Widget {
     }
 
     public boolean mousewheel(Coord c, int amount) {
-        if (amount > 0) {
-            if (MapFileWidget.zoom < zoomlvls - 1) {
-                ui.gui.mapfile.zoomtex = null;
-                Coord tc = curloc.tc.mul(MapFileWidget.scalef());
-                MapFileWidget.zoom++;
-                Utils.setprefi("zoomlmap", MapFileWidget.zoom);
-                tc = tc.div(MapFileWidget.scalef());
-                if (curloc != null) {
-                    curloc.tc.x = tc.x;
-                    curloc.tc.y = tc.y;
+        try {
+            if (amount > 0) {
+                if (MapFileWidget.zoom < zoomlvls - 1) {
+                    ui.gui.mapfile.zoomtex = null;
+                    Coord tc = curloc.tc.mul(MapFileWidget.scalef());
+                    MapFileWidget.zoom++;
+                    Utils.setprefi("zoomlmap", MapFileWidget.zoom);
+                    tc = tc.div(MapFileWidget.scalef());
+                    if (curloc != null) {
+                        curloc.tc.x = tc.x;
+                        curloc.tc.y = tc.y;
+                    }
+                }
+            } else {
+                if (MapFileWidget.zoom > 0) {
+                    ui.gui.mapfile.zoomtex = null;
+                    Coord tc = curloc.tc.mul(MapFileWidget.scalef());
+                    MapFileWidget.zoom--;
+                    Utils.setprefi("zoomlmap", MapFileWidget.zoom);
+                    tc = tc.div(MapFileWidget.scalef());
+                    if (curloc != null) {
+                        curloc.tc.x = tc.x;
+                        curloc.tc.y = tc.y;
+                    }
                 }
             }
-        } else {
-            if (MapFileWidget.zoom > 0) {
-                ui.gui.mapfile.zoomtex = null;
-                Coord tc = curloc.tc.mul(MapFileWidget.scalef());
-                MapFileWidget.zoom--;
-                Utils.setprefi("zoomlmap", MapFileWidget.zoom);
-                tc = tc.div(MapFileWidget.scalef());
-                if (curloc != null) {
-                    curloc.tc.x = tc.x;
-                    curloc.tc.y = tc.y;
-                }
-            }
-        }
+        } catch (Exception e) {}
         return (true);
     }
 

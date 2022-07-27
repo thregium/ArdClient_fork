@@ -114,7 +114,7 @@ public class WidgetList<T extends Widget> extends ListWidget<T> {
 
     public T itemat(Coord c) {
         int idx = (c.y / itemsz.y) + sb.val;
-        if (idx >= listitems())
+        if (idx >= listitems() || idx < 0)
             return (null);
         return (listitem(idx));
     }
