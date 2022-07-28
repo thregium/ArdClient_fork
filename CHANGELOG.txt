@@ -1,4 +1,7 @@
 >>> Details in https://github.com/Cediner/ArdClient/commits/ <<<
+[2022.07.28]
+> Vanilla mine support color changer -> Options - Display - Mine support radius color (for Vanilla)
+~
 
 [2021.12.05]
 > Added proximity to the right click (Control)

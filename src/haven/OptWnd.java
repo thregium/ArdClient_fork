@@ -30,6 +30,7 @@ package haven;
 import haven.purus.pathfinder.Pathfinder;
 import haven.purus.pbot.PBotDiscord;
 import haven.purus.pbot.PBotUtils;
+import haven.res.gfx.fx.msrad.MSRad;
 import haven.resutil.BPRadSprite;
 import haven.resutil.FoodInfo;
 import haven.resutil.WaterTile;
@@ -1023,6 +1024,7 @@ public class OptWnd extends Window {
                 }
             }
         }));
+        appender.addRow(new Label("Mine support radius color (for Vanilla): "), new ColorPreview(new Coord(20, 20), MSRad.getColor1(), MSRad::changeColor1), new ColorPreview(new Coord(20, 20), MSRad.getColor2(), MSRad::changeColor2));
         appender.add(ColorPreWithLabel("Error message text color: ", ERRORTEXTCOLOR));
         appender.add(new CheckBox("Highlight empty/finished drying frames and full/empty tanning tubs. Requires restart.") {
             {
