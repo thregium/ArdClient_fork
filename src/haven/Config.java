@@ -235,6 +235,7 @@ public class Config {
     public static boolean showhutchstatus = Utils.getprefb("showhutchstatus", true);
     public static boolean showrackstatus = Utils.getprefb("showrackstatus", true);
     public static boolean showcupboardstatus = Utils.getprefb("showcupboardstatus", true);
+    public static boolean showpartialstoragestatus = Utils.getprefb("showpartialstoragestatus", false);
     public static boolean showshedstatus = Utils.getprefb("showshedstatus", true);
     public static boolean enableorthofullzoom = Utils.getprefb("enableorthofullzoom", false);
     public static boolean partycircles = Utils.getprefb("partycircles", false);

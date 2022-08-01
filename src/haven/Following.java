@@ -51,6 +51,9 @@ public class Following extends Moving {
         Gob tgt = tgt();
         if (tgt == null)
             return (gob.getrc());
+        Following fol = tgt.getattr(Following.class);
+        if (fol != null && fol.tgt() == gob)
+            return (gob.getrc());
         return (tgt.getc());
     }
 

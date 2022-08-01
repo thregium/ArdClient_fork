@@ -22,6 +22,16 @@ import haven.Utils;
 import java.awt.image.BufferedImage;
 
 public class Decal implements Sprite.Factory {
+    private static boolean xrayVal = getXray();
+
+    public static boolean getXray() {
+        return (Utils.getprefb("dacalsxray", false));
+    }
+
+    public static void setXray(final boolean val) {
+        Utils.setprefb("dacalsxray", xrayVal = val);
+    }
+
     public Sprite create(Sprite.Owner owner, Resource res, Message sdt) {
         GLState eq = null;
         if (owner instanceof Gob) {
@@ -66,7 +76,7 @@ public class Decal implements Sprite.Factory {
             @Override
             public boolean setup(RenderList rl) {
                 for (int i = 0; i < parts.length; i++) {
-                    rl.add(parts[i], i == parts.length - 1 ? xray : normal);
+                    rl.add(parts[i], (i == parts.length - 1 && xrayVal) ? xray : normal);
                 }
                 return (false);
             }

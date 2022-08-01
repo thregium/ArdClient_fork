@@ -40,6 +40,7 @@ import haven.sloth.gfx.SnowFall;
 import haven.sloth.gob.Movable;
 import haven.sloth.gob.Type;
 import integrations.mapv4.MappingClient;
+import modification.Decal;
 import modification.configuration;
 import modification.dev;
 import modification.resources;
@@ -1059,28 +1060,9 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Highlight storages based on amount of contents.") {
-            {
-                a = Config.showcupboardstatus;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("showcupboardstatus", val);
-                Config.showdframestatus = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Highlight sheds based on amount of contents.") {
-            {
-                a = Config.showshedstatus;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("showshedstatus", val);
-                Config.showshedstatus = val;
-                a = val;
-            }
-        });
+        appender.addRow(new CheckBox("Highlight empty/full storages", val -> Utils.setprefb("showcupboardstatus", Config.showcupboardstatus = val), Config.showcupboardstatus), new ColorPreview(new Coord(20, 20), Gob.getEmptyStorageColor(), Gob::setEmptyStorageColor), new ColorPreview(new Coord(20, 20), Gob.getFullStorageColor(), Gob::setFullStorageColor));
+        appender.addRow(new CheckBox("Highlight partially full storages", val -> Utils.setprefb("showpartialstoragestatus", Config.showpartialstoragestatus = val), Config.showpartialstoragestatus), new ColorPreview(new Coord(20, 20), Gob.getHalfStorageColor(), Gob::setHalfStorageColor));
+        appender.add(new CheckBox("Highlight sheds based on amount of contents", val -> Utils.setprefb("showshedstatus", Config.showshedstatus = val), Config.showshedstatus));
         appender.addRow(new CheckBox("Highlight empty/full cheese racks.", val -> Utils.setprefb("showrackstatus", Config.showrackstatus = val), Config.showrackstatus), new ColorPreview(Coord.of(16, 16), CHEESERACKEMPTYCOLOR.get(), val -> {
             CHEESERACKEMPTYCOLOR.set(val);
             Gob.cRackEmpty = new Material.Colors(val);
@@ -3393,6 +3375,7 @@ public class OptWnd extends Window {
                 return Text.render("Shows base quality fep on food: fep (basefep) - %").tex();
             }
         });
+        appender.add(new CheckBox("Decals are visible on top of all", Decal::setXray, Decal.getXray()));
         appender.add(new CheckBox("Straight ridges") {
             {
                 a = configuration.straightridges;

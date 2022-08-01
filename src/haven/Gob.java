@@ -61,6 +61,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -70,6 +71,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.DoubleUnaryOperator;
 
@@ -83,8 +85,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     public static Material.Colors cRackMissing = new Material.Colors(DefSettings.CHEESERACKMISSINGCOLOR.get());
     private static final Material.Colors coopMissing = new Material.Colors(new Color(255, 0, 255, 255));
     private static final Material.Colors dframeDone = new Material.Colors(new Color(255, 0, 0, 200));
-    private static final Material.Colors cupboardfull = new Material.Colors(new Color(255, 0, 0, 175));
-    private static final Material.Colors cupboardempty = new Material.Colors(new Color(0, 255, 0, 175));
+    private static final AtomicReference<GLState> storagefullcolormaterial = new AtomicReference(new Material.Colors(getFullStorageColor()));
+    private static final AtomicReference<GLState> storageemptycolormaterial = new AtomicReference(new Material.Colors(getEmptyStorageColor()));
+    private static final AtomicReference<GLState> storagehalfcolormaterial = new AtomicReference(new Material.Colors(getHalfStorageColor()));
     private static final Material.Colors dframeWater = new Material.Colors(new Color(0, 0, 255, 200));
     private static final Material.Colors dframeBark = new Material.Colors(new Color(165, 42, 42, 200));
     public static Material.Colors potDOne = new Material.Colors(DefSettings.GARDENPOTDONECOLOR.get());
@@ -1175,39 +1178,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     rl.prepc(cRackMissing);
             }
             if (Config.showcupboardstatus) {
-                if (type == Type.CUPBOARD) {
+                resname().flatMap(Gob::findStorageMaterial).ifPresent(sm -> {
                     int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
-                    if (stage == 30 || stage == 29)
-                        rl.prepc(cupboardfull);
-                    if (stage == 1 || stage == 2)
-                        rl.prepc(cupboardempty);
-                } else if (this.resname().isPresent()) {
-                    if (this.resname().get().endsWith("/metalcabinet")) {
-                        int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
-                        if (stage == 65 || stage == 66)
-                            rl.prepc(cupboardfull);
-                        if (stage == 1 || stage == 2)
-                            rl.prepc(cupboardempty);
-                    } else if (this.resname().get().endsWith("/chest")) {
-                        int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
-                        if (stage == 29 || stage == 30)
-                            rl.prepc(cupboardfull);
-                        if (stage == 1 || stage == 2)
-                            rl.prepc(cupboardempty);
-                    } else if (this.resname().get().endsWith("/crate")) {
-                        int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
-                        if (stage == 16)
-                            rl.prepc(cupboardfull);
-                        if (stage == 0)
-                            rl.prepc(cupboardempty);
-                    } else if (this.resname().get().endsWith("/largechest")) {
-                        int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
-                        if (stage == 17 || stage == 18)
-                            rl.prepc(cupboardfull);
-                        if (stage == 1 || stage == 2)
-                            rl.prepc(cupboardempty);
-                    }
-                }
+                    sm.getColor(stage).ifPresent(rl::prepc);
+                });
             }
             if (configuration.showtreeberry && (type == Type.TREE || type == Type.BUSH)) {
                 int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
@@ -1234,9 +1208,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
 
                 if (stage == 30 || stage == 29)
-                    rl.prepc(cupboardfull);
+                    rl.prepc(storagefullcolormaterial.get());
                 if (stage == 1 || stage == 2)
-                    rl.prepc(cupboardempty);
+                    rl.prepc(storageemptycolormaterial.get());
                 //while open : empty == 1, 1 item to half items = 5, half full = 13, full 29
                 //while closed : empty = 2, 1 item to half items = 6, half full= 14, full 30
             }
@@ -1736,6 +1710,65 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 return -1;
         } catch (Loading l) {
             return -1;
+        }
+    }
+
+
+    public static void setFullStorageColor(final Color color) {
+        Utils.setprefi("storagefullcolor", color.getRGB());
+        storagefullcolormaterial.set(new Material.Colors(color));
+    }
+
+    public static void setEmptyStorageColor(final Color color) {
+        Utils.setprefi("storageemptycolor", color.getRGB());
+        storageemptycolormaterial.set(new Material.Colors(color));
+    }
+
+    public static void setHalfStorageColor(final Color color) {
+        Utils.setprefi("storagehalfcolor", color.getRGB());
+        storagehalfcolormaterial.set(new Material.Colors(color));
+    }
+
+    public static Color getFullStorageColor() {
+        return (new Color(Utils.getprefi("storagefullcolor", new Color(255, 0, 0, 230).getRGB()), true));
+    }
+
+    public static Color getEmptyStorageColor() {
+        return (new Color(Utils.getprefi("storageemptycolor", new Color(0, 255, 0, 230).getRGB()), true));
+    }
+
+    public static Color getHalfStorageColor() {
+        return (new Color(Utils.getprefi("storagehalfcolor", new Color(255, 255, 0, 230).getRGB()), true));
+    }
+
+    private static final List<StorageMaterial> storageMaterialList = new ArrayList<>();
+    static {
+        storageMaterialList.add(new StorageMaterial("/cupboard", new Pair<>(29, storagefullcolormaterial), new Pair<>(30, storagefullcolormaterial), new Pair<>(1, storageemptycolormaterial), new Pair<>(2, storageemptycolormaterial), new Pair<>(-1, storagehalfcolormaterial)));
+        storageMaterialList.add(new StorageMaterial("/metalcabinet", new Pair<>(65, storagefullcolormaterial), new Pair<>(66, storagefullcolormaterial), new Pair<>(1, storageemptycolormaterial), new Pair<>(2, storageemptycolormaterial), new Pair<>(-1, storagehalfcolormaterial)));
+        storageMaterialList.add(new StorageMaterial("/chest", new Pair<>(29, storagefullcolormaterial), new Pair<>(30, storagefullcolormaterial), new Pair<>(1, storageemptycolormaterial), new Pair<>(2, storageemptycolormaterial), new Pair<>(-1, storagehalfcolormaterial)));
+        storageMaterialList.add(new StorageMaterial("/exquisitechest", new Pair<>(29, storagefullcolormaterial), new Pair<>(30, storagefullcolormaterial), new Pair<>(1, storageemptycolormaterial), new Pair<>(2, storageemptycolormaterial), new Pair<>(-1, storagehalfcolormaterial)));
+        storageMaterialList.add(new StorageMaterial("/crate", new Pair<>(16, storagefullcolormaterial), new Pair<>(0, storageemptycolormaterial), new Pair<>(-1, storagehalfcolormaterial)));
+        storageMaterialList.add(new StorageMaterial("/largechest", new Pair<>(17, storagefullcolormaterial), new Pair<>(18, storagefullcolormaterial), new Pair<>(1, storageemptycolormaterial), new Pair<>(2, storageemptycolormaterial), new Pair<>(-1, storagehalfcolormaterial)));
+    }
+
+    private static Optional<StorageMaterial> findStorageMaterial(final String resname) {
+        return (storageMaterialList.stream().filter(sm -> resname.endsWith(sm.resname)).findFirst());
+    }
+
+    private static class StorageMaterial {
+        private final String resname;
+        private final Map<Integer, AtomicReference<GLState>> map = new HashMap<>();
+
+        private StorageMaterial(final String resname, Pair<Integer, AtomicReference<GLState>>... entries) {
+            this.resname = resname;
+            Arrays.stream(entries).forEach(e -> map.put(e.a, e.b));
+        }
+
+        private Optional<GLState> getColor(final int sdt) {
+            AtomicReference<GLState> mc = map.get(sdt);
+            if (mc == null && Config.showpartialstoragestatus)
+                mc = map.get(-1);
+            return (mc == null ? Optional.empty() : Optional.ofNullable(mc.get()));
         }
     }
 }

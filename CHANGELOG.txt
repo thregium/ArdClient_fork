@@ -1,4 +1,9 @@
 >>> Details in https://github.com/Cediner/ArdClient/commits/ <<<
+[2022.08.01]
+> Storages(chests) color changer -> Options - Display - Highlight *** storages
+> Decal on top of all -> Options - Modification - Decals are visible on top of all
+~
+
 [2022.07.28]
 > Vanilla mine support color changer -> Options - Display - Mine support radius color (for Vanilla)
 ~
