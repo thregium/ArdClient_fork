@@ -6,21 +6,20 @@ import haven.Coord2d;
 import haven.Drawable;
 import haven.GAttrib;
 import haven.Gob;
+import haven.GobHitbox;
 import haven.Indir;
 import haven.LinMove;
 import haven.Loading;
 import haven.MapView;
+import static haven.OCache.posres;
 import haven.ResData;
 import haven.ResDrawable;
 import haven.Resource;
 import haven.UI;
 import haven.purus.gobText;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import static haven.OCache.posres;
 
 public class PBotGob {
 
@@ -84,10 +83,22 @@ public class PBotGob {
      * @param button 1 = Left click, 3 = Right click
      * @param mod    0 = no modifier, 1 = shift, 2 = ctrl, 4 = alt
      * @param meshId can be a door, roasting spit etc.
+     * @param olid gob overlay to click, for example roasting spit.
+     */
+    public void doClick(int button, int mod, int meshId, int olid) {
+        ui.gui.map.wdgmsg("click", Coord.z, gob.rc.floor(posres), button, mod, 1, (int) gob.id, gob.rc.floor(posres), olid, meshId);
+        ui.gui.map.pllastcc = gob.rc;
+    }
+
+    /**
+     * Click the gob
+     *
+     * @param button 1 = Left click, 3 = Right click
+     * @param mod    0 = no modifier, 1 = shift, 2 = ctrl, 4 = alt
+     * @param meshId can be a door, roasting spit etc.
      */
     public void doClick(int button, int mod, int meshId) {
-        ui.gui.map.wdgmsg("click", Coord.z, gob.rc.floor(posres), button, 0, mod, (int) gob.id, gob.rc.floor(posres), 0, meshId);
-        ui.gui.map.pllastcc = gob.rc;
+        doClick(button, mod, meshId, 0);
     }
 
     /**
@@ -97,8 +108,7 @@ public class PBotGob {
      * @param mod    0 = no modifier, 1 = shift, 2 = ctrl, 4 = alt
      */
     public void doClick(int button, int mod) {
-        ui.gui.map.wdgmsg("click", Coord.z, gob.rc.floor(posres), button, 0, mod, (int) gob.id, gob.rc.floor(posres), 0, -1);
-        ui.gui.map.pllastcc = gob.rc;
+        doClick(button, mod, -1, 0);
     }
 
     /**
@@ -321,6 +331,34 @@ public class PBotGob {
         Object[] args = {Coord.z, gob.rc.floor(posres), 1, 0, (int) gob.id, gob.rc.floor(posres), 0, -1};
         ui.gui.map.lastItemactClickArgs = args;
         ui.gui.map.wdgmsg("itemact", Coord.z, gob.rc.floor(posres), 1, 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
+    }
+
+    /**
+     * Get distance between gobs
+     *
+     * @return double number
+     */
+    public double dist(final PBotGob pgob) {
+        return (getRcCoords().dist(pgob.getRcCoords()));
+    }
+
+    /**
+     * Get hitboxes
+     *
+     * @return array of hitboxes
+     */
+    public GobHitbox.BBox[] getHitboxes() {
+        return (GobHitbox.getBBox(gob));
+    }
+
+    /**
+     * Get first hitbox
+     *
+     * @return first hitbox of gob
+     */
+    public GobHitbox.BBox getHitbox() {
+        GobHitbox.BBox[] bboxes = getHitboxes();
+        return (bboxes.length > 0 ? bboxes[0] : null);
     }
 
     @Override
