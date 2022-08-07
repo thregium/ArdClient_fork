@@ -26,6 +26,7 @@ import org.json.JSONObject;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -314,4 +315,6 @@ public class resources {
     public static HSliderListbox sfxlist = null;
     public static TextEntry sfxsearch = null;
     public static final List<HSliderListboxItem> sfxmenus = new TreeList<>();
+
+    public static ObservableMap<String, Boolean> customSendMarks = Utils.loadCustomList(Collections.emptyList(), "CustomSendMarks");
 }

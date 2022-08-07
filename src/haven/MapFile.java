@@ -53,6 +53,7 @@ import java.util.function.Function;
 
 import static haven.DefSettings.MAPTYPE;
 import static haven.MCache.cmaps;
+import modification.resources;
 
 public class MapFile {
     private static final int NOZ = Integer.MIN_VALUE;
@@ -306,7 +307,11 @@ public class MapFile {
                 case 's':
                     long oid = fp.int64();
                     Resource.Spec res = new Resource.Spec(Resource.remote(), fp.string(), fp.uint16());
-                    return (new SMarker(seg, tc, nm, oid, res));
+                    SMarker sm = new SMarker(seg, tc, nm, oid, res);
+                    Boolean st = resources.customSendMarks.get(Long.toString(oid));
+                    if (st != null)
+                        sm.makeAutosend(st);
+                    return (sm);
                 default:
                     throw (new Message.FormatError("Unknown marker type: " + (int) type));
             }
@@ -384,6 +389,7 @@ public class MapFile {
             out.addint32(markers.size());
             for (Marker mark : markers)
                 savemarker(out, mark);
+            Utils.saveCustomList(resources.customSendMarks, "CustomSendMarks");
         }
     }
 
@@ -423,8 +429,10 @@ public class MapFile {
         lock.writeLock().lock();
         try {
             if (markers.remove(mark)) {
-                if (mark instanceof SMarker)
+                if (mark instanceof SMarker) {
+                    resources.customSendMarks.remove(Long.toString(((SMarker) mark).oid));
                     smarkers.remove(((SMarker) mark).oid, mark);
+                }
                 defersave();
                 markerseq++;
             }
@@ -852,6 +860,7 @@ public class MapFile {
 
         public void makeAutosend(boolean val) {
             this.autosend = val;
+            resources.customSendMarks.put(Long.toString(oid), val);
         }
     }
 

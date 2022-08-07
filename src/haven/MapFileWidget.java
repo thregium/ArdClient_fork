@@ -675,6 +675,7 @@ public class MapFileWidget extends Widget {
                                 sm.makeAutosend(!sm.autosend);
                                 if (sm.autosend)
                                     uploadMarks();
+                                file.defersave();
                             } else if (selection == 1) {
                                 deletemarker(mark);
                             }
