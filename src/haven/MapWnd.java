@@ -27,6 +27,8 @@
 package haven;
 
 import haven.BuddyWnd.GroupSelector;
+import static haven.MCache.cmaps;
+import static haven.MCache.tilesz;
 import haven.MapFile.Marker;
 import haven.MapFile.PMarker;
 import haven.MapFile.SMarker;
@@ -40,7 +42,6 @@ import haven.sloth.gui.DowseWnd;
 import haven.sloth.gui.ResizableWnd;
 import integrations.mapv4.MappingClient;
 import modification.configuration;
-
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
@@ -57,15 +58,13 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import static haven.MCache.cmaps;
-import static haven.MCache.tilesz;
 
 public class MapWnd extends ResizableWnd {
     public static final Resource markcurs = Resource.local().loadwait("gfx/hud/curs/flag");
@@ -649,7 +648,7 @@ public class MapWnd extends ResizableWnd {
 
         public boolean clickloc(Location loc, int button) {
             if (domark && (button == 1)) {
-                Marker nm = new PMarker(loc.seg.id, loc.tc, "", BuddyWnd.gc[new Random().nextInt(BuddyWnd.gc.length)]);
+                Marker nm = new PMarker(loc.seg.id, loc.tc, "", BuddyWnd.gc[0]);
                 file.add(nm);
                 focus(nm);
                 domark = false;
@@ -1365,6 +1364,7 @@ public class MapWnd extends ResizableWnd {
                             commit();
                             change2(null);
                             setfocus(MarkerList.this);
+                            uploadMarks();
                         }
                     });
                 }
@@ -1523,7 +1523,7 @@ public class MapWnd extends ResizableWnd {
         }
     }
 
-    public void markobj(long gobid, Gob gob, String nm) {
+    public void markobj(long gobid, Gob gob, String nm, boolean sendeable) {
         synchronized (deferred) {
             deferred.add(new Runnable() {
                 double f = 0;
@@ -1563,16 +1563,21 @@ public class MapWnd extends ResizableWnd {
                         if (info == null)
                             throw (new Loading());
                         Coord sc = tc.add(info.sc.sub(obg.gc).mul(cmaps));
-                        long oid;
-                        try {
-                            oid = Long.parseLong(Math.abs(sc.x) + "" + Math.abs(sc.y) + "" + Math.abs(sc.x * sc.y) + ""); //FIXME bring true obj id
-                        } catch (NumberFormatException e) {
-                            oid = Long.MAX_VALUE - Math.abs(sc.x * sc.y);
-                        }
+
+                        DoubleUnaryOperator offset = (s) -> {
+                            int n = 100 * 11;
+                            return (s % n < 0 ? s % n + n : s % n);
+                        };
+                        double x = offset.applyAsDouble(gob.getc().x);
+                        double y = offset.applyAsDouble(gob.getc().y);
+
+                        long oid = Objects.hash(res.name, obg.id, x, y, gob.getc().z);
+
                         SMarker prev = view.file.smarkers.get(oid);
-//                        rnm = rnm + " [" + sc.x + ", " + sc.y + "]";
                         if (prev == null) {
-                            view.file.add(new SMarker(info.seg, sc, rnm, oid, new Resource.Spec(Resource.remote(), iconRes.name, iconRes.ver)));
+                            SMarker mark = new SMarker(info.seg, sc, rnm, oid, new Resource.Spec(Resource.remote(), iconRes.name, iconRes.ver));
+                            mark.makeAutosend(sendeable);
+                            view.file.add(mark);
                         } else {
                             if ((prev.seg != info.seg) || !prev.tc.equals(sc)) {
                                 prev.seg = info.seg;
@@ -1589,17 +1594,12 @@ public class MapWnd extends ResizableWnd {
         }
     }
 
+    public void markobj(long gobid, Gob gob, String nm) {
+        markobj(gobid, gob, nm, true);
+    }
+
     public void uploadMarks() {
-        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
-            if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
-                MappingClient.getInstance(ui.sess.username).ProcessMap(view.file, (m) -> {
-                    if (m instanceof MapFile.PMarker && configuration.loadMapSetting(ui.sess.username, "green")) {
-                        return ((MapFile.PMarker) m).color.equals(Color.GREEN) && !m.name().equals("");
-                    }
-                    return true;
-                });
-            }
-        }
+        view.uploadMarks();
     }
 
     @Override

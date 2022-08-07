@@ -5120,24 +5120,41 @@ public class OptWnd extends Window {
                     }
                 })
         );
-        Label placegridtext = new Label("Place Grid (" + Utils.getprefi("placegridval", 8) + "): ");
-        appender.addRow(
-                placegridtext,
-                new HSlider(200, 0, 255, Utils.getprefi("placegridval", 8)) {
+        Label placegridtext = new Label("Place Grid (" + Utils.getprefd("plobpgran", 8) + "): ");
+        appender.addRow(placegridtext, new HSlider(200, 0, 255 * 100, (int) (Utils.getprefd("plobpgran", 8) * 100)) {
                     @Override
                     public void changed() {
-                        placegridtext.settext("Place Grid (" + val + "): ");
+                        placegridtext.settext("Place Grid (" + val / 100.0 + "): ");
                         try {
-                            ui.cons.run(new String[]{"placegrid", Integer.toString(val)});
+                            ui.cons.run(new String[]{"placegrid", Double.toString(val / 100.0)});
                         } catch (Exception e) {
                             e.printStackTrace();
-                            Utils.setprefi("placegridval", val);
+                            Utils.setprefd("plobpgran", val / 100.0);
                         }
                     }
 
                     @Override
                     public Object tooltip(Coord c0, Widget prev) {
-                        return Text.render("Object placement grid: " + val).tex();
+                        return Text.render("Object placement grid: " + val / 100.0).tex();
+                    }
+                }
+        );
+        Label placeangletext = new Label("Place Angle (" + Utils.getprefd("plobagran", 16) + "): ");
+        appender.addRow(placeangletext, new HSlider(200, 0, 255 * 100, (int) (Utils.getprefd("plobagran", 16) * 100)) {
+                    @Override
+                    public void changed() {
+                        placeangletext.settext("Place Angle (" + val / 100.0 + "): ");
+                        try {
+                            ui.cons.run(new String[]{"placeangle", Double.toString(val / 100.0)});
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Utils.setprefd("plobagran", val / 100.0);
+                        }
+                    }
+
+                    @Override
+                    public Object tooltip(Coord c0, Widget prev) {
+                        return Text.render("Object placement angle: " + val / 100.0).tex();
                     }
                 }
         );

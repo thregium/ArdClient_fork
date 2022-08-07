@@ -26,14 +26,16 @@
 
 package haven;
 
+import static haven.MCache.cmaps;
 import haven.MapFile.Grid;
 import haven.MapFile.GridInfo;
 import haven.MapFile.Marker;
 import haven.MapFile.PMarker;
 import haven.MapFile.SMarker;
 import haven.MapFile.Segment;
+import static haven.Text.latin;
+import integrations.mapv4.MappingClient;
 import modification.configuration;
-
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -59,9 +61,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
-
-import static haven.MCache.cmaps;
-import static haven.Text.latin;
 
 public class MapFileWidget extends Widget {
     public final MapFile file;
@@ -660,6 +659,26 @@ public class MapFileWidget extends Widget {
                             return (true);
                 }
             }
+        } else if (button == 3) {
+            Coord tc = null;
+            if (curloc != null)
+                tc = c.sub(sz.div(2)).add(curloc.tc);
+            if (tc != null && lastmousedown.equals(c)) {
+                DisplayMarker mark = markerat(tc);
+                if (mark != null && mark.m instanceof MapFile.SMarker) {
+                    MapFile.SMarker sm = (MapFile.SMarker) mark.m;
+                    if (ui.modflags() == 0) {
+                        final FlowerMenu menu = new FlowerMenu((selection) -> {
+                            if (selection == 0) {
+                                sm.makeAutosend(!sm.autosend);
+                                if (sm.autosend)
+                                    uploadMarks();
+                            }
+                        }, !sm.autosend ? "Enable sending to mapper" : "Disable sending to mapper");
+                        ui.root.add(menu, ui.mc);
+                    }
+                }
+            }
         }
 
         return (super.mouseup(c, button));
@@ -929,5 +948,22 @@ public class MapFileWidget extends Widget {
 
     public Map<String, Console.Command> findcmds() {
         return (cmdmap);
+    }
+
+
+    public void uploadMarks() {
+        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+            if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
+                MappingClient.getInstance(ui.sess.username).ProcessMap(file, (m) -> {
+                    if (m instanceof MapFile.SMarker) {
+                        return (((MapFile.SMarker) m).autosend);
+                    }
+                    if (m instanceof MapFile.PMarker && configuration.loadMapSetting(ui.sess.username, "green")) {
+                        return ((MapFile.PMarker) m).color.equals(Color.GREEN) && !m.name().equals("");
+                    }
+                    return true;
+                });
+            }
+        }
     }
 }

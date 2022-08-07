@@ -46,7 +46,6 @@ import haven.pathfinder.PFListener;
 import haven.pathfinder.Pathfinder;
 import haven.purus.Farmer;
 import haven.purus.pbot.PBotCharacterAPI;
-import haven.purus.pbot.PBotGobAPI;
 import haven.purus.pbot.PBotUtils;
 import haven.resutil.BPRadSprite;
 import haven.resutil.TerrainTile;
@@ -125,7 +124,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     private MCache.Overlay miningOverlay;
     private Coord3f camoff = new Coord3f(Coord3f.o);
     public double shake = 0.0;
-    public static int plobgran = Utils.getprefi("placegridval", 8);
+    public static double plobpgran = Utils.getprefd("plobpgran", 8);
+    public static int plobgran = (int) plobpgran;
+    public static double plobagran = Utils.getprefd("plobagran", 16);
     private static final Map<String, Class<? extends Camera>> camtypes = new HashMap<>();
     public String tooltip;
     private boolean showgrid = Config.showgridlines;
@@ -2230,7 +2231,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
     public static class StdPlace implements PlobAdjust {
         boolean freerot = false;
-        Coord2d gran = (plobgran == 0) ? null : new Coord2d(1.0 / plobgran, 1.0 / plobgran).mul(tilesz);
+        Coord2d gran = (plobpgran == 0) ? null : new Coord2d(1.0 / plobpgran, 1.0 / plobpgran).mul(tilesz);
 
         public void adjust(Plob plob, Coord pc, Coord2d mc, int modflags) {
             if ((modflags & 2) == 0)
@@ -2245,13 +2246,13 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
 
         public boolean rotate(Plob plob, int amount, int modflags) {
-            if ((modflags & 1) == 0)
+            if ((modflags & UI.MOD_SHIFT) == 0)
                 return (false);
             freerot = true;
-            if ((modflags & 2) == 0)
+            if ((modflags & UI.MOD_CTRL) == 0)
                 plob.a = (Math.PI / 4) * Math.round((plob.a + (amount * Math.PI / 4)) / (Math.PI / 4));
             else
-                plob.a += amount * Math.PI / 16;
+                plob.a += amount * Math.PI / plobagran;
             plob.a = Utils.cangle(plob.a);
             return (true);
         }
@@ -3455,9 +3456,14 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             }
         });
         Console.setscmd("placegrid", (cons, args) -> {
-            if ((plobgran = Integer.parseInt(args[1])) < 0)
-                plobgran = 0;
-            Utils.setprefi("placegridval", plobgran);
+            if ((plobpgran = Double.parseDouble(args[1])) < 0)
+                plobpgran = 0;
+            Utils.setprefd("plobpgran", plobpgran);
+        });
+        Console.setscmd("placeangle", (cons, args) -> {
+            if ((plobagran = Double.parseDouble(args[1])) < 2)
+                plobagran = 2;
+            Utils.setprefd("plobagran", plobagran);
         });
         cmdmap.put("whyload", (cons, args) -> {
             Loading l = lastload;
@@ -3692,7 +3698,31 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         ui.gui.add(new OverlaySelector(name), ui.mc);
                         break;
                     case 6: //Mark gob on map
-                        ui.gui.mapfile.markobj(g.id, g, configuration.getShortName(g.resname().get()));
+                        Optional.ofNullable(getparent(GameUI.class)).ifPresent(gui -> {
+                            Window w = new Window(Coord.z, "New mark");
+                            WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
+                            wva.add(new Label("Set mark name:"));
+                            final TextEntry value = new TextEntry(150, "") {
+                                @Override
+                                public void activate(String text) {
+                                    if (!text.isEmpty()) {
+                                        ui.gui.mapfile.markobj(g.id, g, text);
+                                        w.close();
+                                    }
+                                }
+                            };
+                            wva.addRow(value, new Button(45, "Add") {
+                                @Override
+                                public void click() {
+                                    if (!value.text().isEmpty()) {
+                                        ui.gui.mapfile.markobj(g.id, g, value.text());
+                                        w.close();
+                                    }
+                                }
+                            });
+                            w.pack();
+                            gui.adda(w, gui.sz.div(2), 0.5, 0.5);
+                        });
                         break;
                     case 7: //Mark gob to custom marks
                         resources.customMarks.put(g.getres().name, true);

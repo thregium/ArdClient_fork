@@ -17,7 +17,7 @@ public class Fixedplob extends Sprite implements PlobAdjust {
     public final double a;
 
     boolean freerot = false;
-    Coord2d gran = (MapView.plobgran == 0) ? null : new Coord2d(1.0 / MapView.plobgran, 1.0 / MapView.plobgran).mul(tilesz);
+    Coord2d gran = (MapView.plobpgran == 0) ? null : new Coord2d(1.0 / MapView.plobpgran, 1.0 / MapView.plobpgran).mul(tilesz);
 
     public Fixedplob(Owner owner, Resource res, Message sdt) {
         super(owner, res);
