@@ -646,6 +646,12 @@ public class MapWnd extends ResizableWnd {
             return (false);
         }
 
+        public void deletemarker(DisplayMarker mark) {
+            view.file.remove(mark.m);
+            tool.list.change2(null);
+            setfocus(tool.list);
+        }
+
         public boolean clickloc(Location loc, int button) {
             if (domark && (button == 1)) {
                 Marker nm = new PMarker(loc.seg.id, loc.tc, "", BuddyWnd.gc[0]);

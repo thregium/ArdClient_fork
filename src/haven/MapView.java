@@ -26,8 +26,21 @@
 
 package haven;
 
+import static haven.DefSettings.DARKMODE;
+import static haven.DefSettings.DRAWGRIDRADIUS;
+import static haven.DefSettings.NIGHTVISION;
+import static haven.DefSettings.NVAMBIENTCOL;
+import static haven.DefSettings.NVDIFFUSECOL;
+import static haven.DefSettings.NVSPECCOC;
+import static haven.DefSettings.SHOWKCLAIM;
+import static haven.DefSettings.SHOWPCLAIM;
+import static haven.DefSettings.SHOWVCLAIM;
+import static haven.DefSettings.SYMMETRICOUTLINES;
 import haven.GLProgram.VarID;
+import static haven.Gob.createBPRadSprite;
 import haven.MCache.OverlayInfo;
+import static haven.MCache.tilesz;
+import static haven.OCache.posres;
 import haven.automation.AreaSelectCallback;
 import haven.automation.CoalToSmelters;
 import haven.automation.FlaxBot;
@@ -63,7 +76,6 @@ import modification.CustomFakeGrid;
 import modification.configuration;
 import modification.dev;
 import modification.resources;
-
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import java.awt.Color;
@@ -89,20 +101,6 @@ import java.util.TreeMap;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
 import java.util.function.DoubleUnaryOperator;
-
-import static haven.DefSettings.DARKMODE;
-import static haven.DefSettings.DRAWGRIDRADIUS;
-import static haven.DefSettings.NIGHTVISION;
-import static haven.DefSettings.NVAMBIENTCOL;
-import static haven.DefSettings.NVDIFFUSECOL;
-import static haven.DefSettings.NVSPECCOC;
-import static haven.DefSettings.SHOWKCLAIM;
-import static haven.DefSettings.SHOWPCLAIM;
-import static haven.DefSettings.SHOWVCLAIM;
-import static haven.DefSettings.SYMMETRICOUTLINES;
-import static haven.Gob.createBPRadSprite;
-import static haven.MCache.tilesz;
-import static haven.OCache.posres;
 
 public class MapView extends PView implements DTarget, Console.Directory, PFListener {
     public long plgobid;
@@ -3665,7 +3663,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             }
                         };
 
-                        confirmwnd.add(new Label("This option deletes objects of this type " + name + ". To return the back needed in the \"xGame Windows > Deleted\" tab, select the desired and press \"Stop Deleting\""),new Coord(10, 20));
+                        confirmwnd.add(new Label("This option deletes objects of this type " + name + ". To return the back needed in the \"xGame Windows > Deleted\" tab, select the desired and press \"Stop Deleting\""), new Coord(10, 20));
                         confirmwnd.pack();
 
                         Button yesbtn = new Button(70, "Yes") {
@@ -3705,19 +3703,15 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             final TextEntry value = new TextEntry(150, "") {
                                 @Override
                                 public void activate(String text) {
-                                    if (!text.isEmpty()) {
-                                        ui.gui.mapfile.markobj(g.id, g, text);
-                                        w.close();
-                                    }
+                                    ui.gui.mapfile.markobj(g.id, g, text, false);
+                                    w.close();
                                 }
                             };
                             wva.addRow(value, new Button(45, "Add") {
                                 @Override
                                 public void click() {
-                                    if (!value.text().isEmpty()) {
-                                        ui.gui.mapfile.markobj(g.id, g, value.text());
-                                        w.close();
-                                    }
+                                    ui.gui.mapfile.markobj(g.id, g, value.text(), false);
+                                    w.close();
                                 }
                             });
                             w.pack();
@@ -3737,8 +3731,8 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     Alerted.shouldAlert(name) ? "Remove Sound" : "Add Sound",
                     "Delete",
                     "Custom overlays",
-                    "Mark on map",
-                    "Add to custom marks",
+                    "Mark on map once",
+                    "Add to custom automarks",
                     "Resize");
             ui.root.add(modmenu, ui.mc);
         });

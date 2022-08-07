@@ -842,7 +842,7 @@ public class MapFile {
     public static class SMarker extends Marker {
         public long oid;
         public Resource.Spec res;
-        public boolean autosend;
+        public boolean autosend = true;
 
         public SMarker(long seg, Coord tc, String nm, long oid, Resource.Spec res) {
             super(seg, tc, nm);

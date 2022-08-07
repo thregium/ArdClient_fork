@@ -535,6 +535,8 @@ public class MapFileWidget extends Widget {
         return (false);
     }
 
+    public void deletemarker(DisplayMarker mark) {}
+
     private DisplayMarker markerat(Coord tc) {
         if (markers != null) {
             for (DisplayMarker mark : markers) {
@@ -673,8 +675,10 @@ public class MapFileWidget extends Widget {
                                 sm.makeAutosend(!sm.autosend);
                                 if (sm.autosend)
                                     uploadMarks();
+                            } else if (selection == 1) {
+                                deletemarker(mark);
                             }
-                        }, !sm.autosend ? "Enable sending to mapper" : "Disable sending to mapper");
+                        }, !sm.autosend ? "Enable sending to mapper" : "Disable sending to mapper", "Remove mark");
                         ui.root.add(menu, ui.mc);
                     }
                 }
