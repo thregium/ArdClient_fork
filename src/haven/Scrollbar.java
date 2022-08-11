@@ -32,14 +32,24 @@ public class Scrollbar extends Widget {
     private static final Tex schainm = Theme.tex("scroll/vertical", 1);
     private static final Tex schaint = Theme.tex("scroll/vertical", 2);
     public static final Tex sflarp = Theme.tex("scroll/vertical", 3);
+    public Scrollable ctl;
     public int val, min, max;
     private UI.Grab drag = null;
+
+    public Scrollbar(int h, Scrollable ctl) {
+        this(h, 0, 0);
+        this.ctl = ctl;
+        this.min = ctl.scrollmin();
+        this.max = ctl.scrollmax();
+        this.val = ctl.scrollval();
+    }
 
     public Scrollbar(int h, int min, int max) {
         super(new Coord(sflarp.sz().x, h));
         this.min = min;
         this.max = max;
         val = min;
+        this.ctl = null;
     }
 
     public boolean vis() {
@@ -47,6 +57,11 @@ public class Scrollbar extends Widget {
     }
 
     public void draw(GOut g) {
+        if (ctl != null) {
+            min = ctl.scrollmin();
+            max = ctl.scrollmax();
+            val = ctl.scrollval();
+        }
         if (vis()) {
             g.chcolor(DefSettings.SLIDERCOL.get());
             //x offset incase sflarp.sz.x > schain.sz.x
