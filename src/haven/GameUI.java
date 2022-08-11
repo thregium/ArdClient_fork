@@ -51,7 +51,6 @@ import haven.sloth.gui.Timer.TimersWnd;
 import haven.sloth.gui.chr.SkillnCredoWnd;
 import haven.sloth.gui.livestock.LivestockManager;
 import haven.sloth.gui.script.ScriptManager;
-import integrations.mapv4.MappingClient;
 import modification.configuration;
 import modification.dev;
 import modification.newQuickSlotsWdg;
@@ -61,6 +60,7 @@ import java.awt.event.KeyEvent;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -272,6 +272,9 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
     protected void added() {
         resize(parent.sz);
+        synchronized (crutchList) {
+            crutchList.forEach(Runnable::run);
+        }
         ui.gui = this;
         ui.cons.out = new java.io.PrintWriter(new java.io.Writer() {
             StringBuilder buf = new StringBuilder();
@@ -1081,7 +1084,20 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 //        }
 //    }
 
+    private List<Runnable> crutchList = Collections.synchronizedList(new ArrayList<>());
+
     public void addchild(Widget child, Object... args) {
+        Runnable run = () -> addchild2(child, args);
+        if (parent == null) {
+            synchronized (crutchList) {
+                crutchList.add(run);
+            }
+        } else {
+            run.run();
+        }
+    }
+
+    public void addchild2(Widget child, Object... args) {
         String place = ((String) args[0]).intern();
         if (place == "mapview") {
             child.resize(sz);

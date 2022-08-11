@@ -70,11 +70,13 @@ public class TextEntry extends Widget implements ReadLine.Owner {
     }
 
     public void settext(String text) {
+        this.text = text;
         buf.setline(text);
         redraw();
     }
 
     public void rsettext(String text) {
+        this.text = text;
         buf = ReadLine.make(this, text);
         redraw();
     }

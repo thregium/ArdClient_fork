@@ -1,4 +1,8 @@
 >>> Details in https://github.com/Cediner/ArdClient/commits/ <<<
+[2022.08.11]
+> Fixed hats
+~
+
 [2022.08.01]
 > Storages(chests) color changer -> Options - Display - Highlight *** storages
 > Decal on top of all -> Options - Modification - Decals are visible on top of all
