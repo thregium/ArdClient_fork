@@ -315,7 +315,7 @@ public class Glob {
     }
 
     private void servertimecalc() {
-        long secs = (long) globtime();
+        long secs = (long) globtime() / 1000;
         long day = secs / secinday;
         long secintoday = secs % secinday;
         long hours = secintoday / 3600;
