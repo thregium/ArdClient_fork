@@ -1,4 +1,9 @@
 >>> Details in https://github.com/Cediner/ArdClient/commits/ <<<
+[2022.08.12]
+> An attempt to fix the map
+> Hunger and time
+~
+
 [2022.08.11]
 > Fixed hats
 ~

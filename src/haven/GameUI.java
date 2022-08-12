@@ -274,6 +274,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         resize(parent.sz);
         synchronized (crutchList) {
             crutchList.forEach(Runnable::run);
+            crutchList.clear();
         }
         ui.gui = this;
         ui.cons.out = new java.io.PrintWriter(new java.io.Writer() {
@@ -1084,7 +1085,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 //        }
 //    }
 
-    private List<Runnable> crutchList = Collections.synchronizedList(new ArrayList<>());
+    private final List<Runnable> crutchList = Collections.synchronizedList(new ArrayList<>());
 
     public void addchild(Widget child, Object... args) {
         Runnable run = () -> addchild2(child, args);
@@ -1112,7 +1113,15 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             mmap = new LocalMiniMap(new Coord(133, 133), map);
             mmapwnd = adda(new MinimapWnd(mmap), new Coord(sz.x, 0), 1, 0);
             if (ResCache.global != null) {
-                MapFile file = MapFile.load(ResCache.global, mapfilename());
+                MapFile file;
+                try {
+                    file = MapFile.load(ResCache.global, mapfilename());
+                } catch (java.io.IOException e) {
+                    /* XXX: Not quite sure what to do here. It's
+                     * certainly not obvious that overwriting the
+                     * existing mapfile with a new one is better. */
+                    throw (new RuntimeException("failed to load mapfile", e));
+                }
                 mmap.save(file);
                 mapfile = new MapWnd(mmap.save, map, Utils.getprefc("wndsz-map", new Coord(700, 500)), "Map");
                 mapfile.hide();

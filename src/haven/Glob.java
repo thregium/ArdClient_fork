@@ -47,7 +47,9 @@ public class Glob {
     public WeakReference<UI> ui;
     public final GobHitmap gobhitmap;
     public static final double SERVER_TIME_RATIO = 3.29d;
-    public double serverEpoch, localEpoch = Utils.rtime();
+    public double gtime;
+    public double sgtime;
+    public double epoch = Utils.rtime();
     public final Loader loader = new Loader();
     public Astronomy ast;
     public OCache oc = new OCache(this);
@@ -195,6 +197,7 @@ public class Glob {
             }
         }
 
+        tickgtime(now, dt);
         oc.ctick(dt);
         map.ctick(dt);
 
@@ -204,21 +207,41 @@ public class Glob {
         lastctick = now;
     }
 
-    private double lastrep = 0, rgtime = 0;
+    private static final double itimefac = 3.0;
+    private double stimefac = itimefac, ctimefac = itimefac;
+    private void tickgtime(double now, double dt) {
+        double sgtime = this.sgtime + ((now - epoch) * stimefac);
+        gtime += dt * ctimefac;
+        if((sgtime > gtime) && (ctimefac / stimefac < 1.1))
+            ctimefac += Math.min((sgtime - gtime) * 0.001, 0.02) * dt;
+        else if((sgtime < gtime) && (stimefac / ctimefac < 1.1))
+            ctimefac -= Math.min((gtime - sgtime) * 0.001, 0.02) * dt;
+        ctimefac += Math.signum(stimefac - ctimefac) *0.002 * dt;
+    }
+
+    private void updgtime(double sgtime, boolean inc) {
+        double now = Utils.rtime();
+        double delta = now - epoch;
+        epoch = now;
+        if((this.sgtime == 0) || !inc || (Math.abs(sgtime - this.sgtime) > 500)) {
+            this.gtime = this.sgtime = sgtime;
+            return;
+        }
+        if((sgtime - this.sgtime) > 1) {
+            double utimefac = (sgtime - this.sgtime) / delta;
+            double f = Math.min(delta * 0.01, 0.5);
+            stimefac = (stimefac * (1 - f)) + (utimefac * f);
+        }
+        this.sgtime = sgtime;
+    }
+
+    public String gtimestats() {
+        double sgtime = this.sgtime + ((Utils.rtime() - epoch) * stimefac);
+        return(String.format("%.2f %.2f %.2f %.2f %.2f %.2f %.2f", gtime, this.sgtime, epoch, sgtime, sgtime - gtime, ctimefac, stimefac));
+    }
 
     public double globtime() {
-        double now = Utils.rtime();
-        double raw = ((now - localEpoch) * SERVER_TIME_RATIO) + serverEpoch;
-        if (lastrep == 0) {
-            rgtime = raw;
-        } else {
-            double gd = (now - lastrep) * SERVER_TIME_RATIO;
-            rgtime += gd;
-            if (Math.abs(rgtime + gd - raw) > 1.0)
-                rgtime = rgtime + ((raw - rgtime) * (1.0 - Math.pow(10.0, -(now - lastrep))));
-        }
-        lastrep = now;
-        return rgtime;
+        return(gtime);
     }
 
     private static final long secinday = 60 * 60 * 24;
@@ -355,11 +378,7 @@ public class Glob {
             Object[] a = msg.list();
             int n = 0;
             if (t == "tm") {
-                serverEpoch = ((Number) a[n++]).doubleValue();
-                localEpoch = Utils.rtime();
-                if (!inc)
-                    lastrep = 0;
-//                servertimecalc();
+                updgtime(((Number)a[n++]).doubleValue(), inc);
             } else if (t == "astro") {
                 double dt = ((Number) a[n++]).doubleValue();
                 double mp = ((Number) a[n++]).doubleValue();

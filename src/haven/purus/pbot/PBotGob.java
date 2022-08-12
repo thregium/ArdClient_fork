@@ -278,6 +278,10 @@ public class PBotGob {
         return ret;
     }
 
+    public List<Gob.Overlay> getOverlays() {
+        return (new ArrayList<>(gob.ols));
+    }
+
     /**
      * Return meshId of the overlay with given resname
      *

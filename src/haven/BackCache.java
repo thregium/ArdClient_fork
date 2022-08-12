@@ -82,4 +82,9 @@ public class BackCache<K, V> {
         store.accept(key, val);
         cache.put(key, val);
     }
+
+    public void remove(K key) {
+        store.accept(key, null);
+        cache.remove(key);
+    }
 }
