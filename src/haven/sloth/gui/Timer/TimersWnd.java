@@ -4,6 +4,7 @@ package haven.sloth.gui.Timer;
 import haven.Button;
 import haven.Coord;
 import haven.GOut;
+import haven.Glob;
 import haven.Scrollport;
 import haven.Text;
 import haven.Widget;
@@ -16,9 +17,12 @@ import java.util.Collection;
 public class TimersWnd extends Window implements ObservableListener<TimerData.Timer> {
     public static final int width = 460;
     public final Scrollport port;
+    private Glob glob;
 
-    public TimersWnd() {
+    public TimersWnd(Glob glob) {
         super(Coord.z, "Timers", "Timers");
+
+        this.glob = glob;
 
         Button btna = new Button(100, "Add", () ->
                 ui.gui.add(new TimerEditWnd("Create New Timer"),
@@ -54,14 +58,14 @@ public class TimersWnd extends Window implements ObservableListener<TimerData.Ti
     @Override
     public void init(Collection<TimerData.Timer> base) {
         for (final TimerData.Timer timer : base) {
-            port.cont.add(new TimerWdg(timer));
+            port.cont.add(new TimerWdg(timer, this.glob));
         }
         pack();
     }
 
     @Override
     public void added(TimerData.Timer item) {
-        port.cont.add(new TimerWdg(item));
+        port.cont.add(new TimerWdg(item, this.glob));
         pack();
     }
 

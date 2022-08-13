@@ -26,7 +26,7 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
 
     private class TimerInstWdg extends Widget {
         final TimerData.TimerInstance inst;
-        private long elapsed = (long) (time.duration * ui.sess.glob.getTimeFac());
+        private long elapsed = (long) (time.duration * getGlob().getTimeFac());
 
         private TimerInstWdg(final TimerData.TimerInstance inst) {
             this.inst = inst;
@@ -57,13 +57,15 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
     }
 
     public TimerData.Timer time;
+    private Glob glob;
     private int base_height;
 
     public Button X, editbtn, startbtn;
     public Label namelbl, timelbl;
 
-    TimerWdg(TimerData.Timer t) {
+    TimerWdg(TimerData.Timer t, Glob glob) {
         time = t;
+        this.glob = glob;
         sz = new Coord(width, height);
         namelbl = new Label(time.name);
         adda(namelbl, new Coord(3, sz.y / 2), 0, 0.5);
@@ -73,11 +75,15 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
         adda(editbtn, new Coord(X.c.x - 5, sz.y / 2), 1, 0.5);
         startbtn = new Button(50, "Start", this::start);
         adda(startbtn, new Coord(editbtn.c.x - 5, sz.y / 2), 1, 0.5);
-        timelbl = new Label(timeFormat(time.duration / 3) + " (" + timeFormat((long) (time.duration / 3 * Glob.SERVER_TIME_RATIO)) + ")");
+        timelbl = new Label(timeFormat(time.duration / 3) + " (" + timeFormat((long) (time.duration / 3 * getGlob().getTimeFac())) + ")");
         adda(timelbl, new Coord(startbtn.c.x - 15, sz.y / 2), 1, 0.5);
 
         pack();
         base_height = sz.y;
+    }
+
+    private Glob getGlob() {
+        return (glob);
     }
 
     @Override

@@ -349,7 +349,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         livestockwnd.hide();
         foragehelper = add(new ForageHelperWnd());
         foragehelper.hide();
-        timers = add(new TimersWnd());
+        timers = add(new TimersWnd(ui.sess.glob));
         timers.hide();
         if (!Config.autowindows.get("Timers").selected)
             timers.hide();
