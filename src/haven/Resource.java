@@ -1973,7 +1973,8 @@ public class Resource implements Serializable {
         else if (ver != this.ver) {
             if (dev.reslog)
                 dev.simpleLog(String.format("Wrong res version (%d != %d) %s", ver, this.ver, this));
-            throw (new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
+            if (!name.contains("gfx/borka/reedweavebelt"))
+                throw (new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
         }
         while (!in.eom()) {
             String title = in.string();
