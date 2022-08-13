@@ -2029,6 +2029,9 @@ public class MapFile {
             prog.mark(nmark++, markbuf.size());
             if (!filter.includemark(mark))
                 continue;
+            if (mark instanceof SMarker) {
+                if (!((SMarker) mark).autosend) continue;
+            }
             MessageBuf buf = new MessageBuf();
             savemarker(buf, mark);
             byte[] od = buf.fin();
