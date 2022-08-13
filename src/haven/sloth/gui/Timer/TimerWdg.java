@@ -26,7 +26,7 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
 
     private class TimerInstWdg extends Widget {
         final TimerData.TimerInstance inst;
-        private long elapsed = (long) (time.duration * Glob.SERVER_TIME_RATIO);
+        private long elapsed = (long) (time.duration * ui.sess.glob.getTimeFac());
 
         private TimerInstWdg(final TimerData.TimerInstance inst) {
             this.inst = inst;
@@ -36,13 +36,13 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
 
         @Override
         public void draw(GOut g) {
-            FastText.aprint(g, timec, 0.5, 0, timeFormat((long) (elapsed / Glob.SERVER_TIME_RATIO)) + " (" + timeFormat(elapsed) + ")");
+            FastText.aprint(g, timec, 0.5, 0, timeFormat((long) (elapsed / ui.sess.glob.getTimeFac())) + " (" + timeFormat(elapsed) + ")");
             super.draw(g);
         }
 
         @Override
         public void tick(double dt) {
-            elapsed = (long) (time.duration / 3 * Glob.SERVER_TIME_RATIO) - (long) ((ui.sess.glob.globtime() - inst.start));
+            elapsed = (long) (time.duration / 3 * ui.sess.glob.getTimeFac()) - (long) ((ui.sess.glob.currenttime() - inst.start));
             if (elapsed <= 0) {
                 ui.gui.add(new TimerDoneWindow(time.name), new Coord(50, 50));
                 Audio.play(timersfx, DefSettings.TIMERVOLUME.get() / 1000f);
@@ -57,7 +57,7 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
     }
 
     public TimerData.Timer time;
-    private final int base_height;
+    private int base_height;
 
     public Button X, editbtn, startbtn;
     public Label namelbl, timelbl;
@@ -90,7 +90,7 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
     }
 
     public void start() {
-        time.makeInstance((long) ui.sess.glob.globtime());
+        time.makeInstance((long) ui.sess.glob.currenttime());
     }
 
     public void edit() {
@@ -99,7 +99,7 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
 
     public void update() {
         namelbl.settext(time.name);
-        timelbl.settext(timeFormat(time.duration / 3) + " (" + timeFormat((long) (time.duration / 3 * Glob.SERVER_TIME_RATIO)) + ")");
+        timelbl.settext(timeFormat(time.duration / 3) + " (" + timeFormat((long) (time.duration / 3 * ui.sess.glob.getTimeFac())) + ")");
         timelbl.move(new Coord(startbtn.c.x - 15, timelbl.c.y), 1, 0);
     }
 

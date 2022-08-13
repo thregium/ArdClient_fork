@@ -269,7 +269,12 @@ public class UI {
             return;
         }
         synchronized (this) {
-            Widget wdg = f.create(this, cargs);
+            Widget wdg;
+            if (type.startsWith("ui/maillist")) {
+                wdg = modification.Maillist.mkwidget(this, cargs);
+            } else {
+                wdg = f.create(this, cargs);
+            }
             wdg.attach(this);
             if (parent != -1) {
                 Widget pwdg = widgets.get(parent);

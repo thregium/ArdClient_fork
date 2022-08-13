@@ -63,9 +63,9 @@ public class TimerEditWnd extends Window {
                 long seconds = Long.parseLong(txtseconds.text().equals("") ? "0" : txtseconds.text());
                 long duration = ((60 * hours + minutes) * 60 + seconds);
                 if (val) {
-                    duration = Math.round(duration * Glob.SERVER_TIME_RATIO);
+                    duration = Math.round(duration * ui.sess.glob.getTimeFac());
                 } else {
-                    duration = Math.round(duration / Glob.SERVER_TIME_RATIO);
+                    duration = Math.round(duration / ui.sess.glob.getTimeFac());
                 }
                 int h = (int) (duration / 3600);
                 int m = (int) ((duration % 3600) / 60);
@@ -85,7 +85,7 @@ public class TimerEditWnd extends Window {
                 long minutes = Long.parseLong(txtminutes.text().equals("") ? "0" : txtminutes.text());
                 long seconds = Long.parseLong(txtseconds.text().equals("") ? "0" : txtseconds.text());
                 long duration = ((60 * hours + minutes) * 60 + seconds) * 3;
-                if (gametime.a) duration = Math.round(duration / Glob.SERVER_TIME_RATIO);
+                if (gametime.a) duration = Math.round(duration / ui.sess.glob.getTimeFac());
                 TimerData.addTimer(txtname.text(), duration);
                 ui.destroy(this);
             } catch (Exception e) {
@@ -155,9 +155,9 @@ public class TimerEditWnd extends Window {
                 long seconds = Long.parseLong(txtseconds.text().equals("") ? "0" : txtseconds.text());
                 long duration = ((60 * hours + minutes) * 60 + seconds);
                 if (val) {
-                    duration = Math.round(duration * Glob.SERVER_TIME_RATIO);
+                    duration = Math.round(duration * ui.sess.glob.getTimeFac());
                 } else {
-                    duration = Math.round(duration / Glob.SERVER_TIME_RATIO);
+                    duration = Math.round(duration / ui.sess.glob.getTimeFac());
                 }
                 int h = (int) (duration / 3600);
                 int m = (int) ((duration % 3600) / 60);
@@ -177,7 +177,7 @@ public class TimerEditWnd extends Window {
                 long minutes = Long.parseLong(txtminutes.text().equals("") ? "0" : txtminutes.text());
                 long seconds = Long.parseLong(txtseconds.text().equals("") ? "0" : txtseconds.text());
                 long duration = ((60 * hours + minutes) * 60 + seconds) * 3;
-                if (gametime.a) duration = Math.round(duration / Glob.SERVER_TIME_RATIO);
+                if (gametime.a) duration = Math.round(duration / ui.sess.glob.getTimeFac());
                 TimerData.editTimer(timer, txtname.text(), duration);
                 ui.destroy(this);
             } catch (Exception e) {

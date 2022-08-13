@@ -46,7 +46,7 @@ public class Glob {
     //TODO: Glob should honestly make the ui, not have the UI attach onto it.
     public WeakReference<UI> ui;
     public final GobHitmap gobhitmap;
-    public static final double SERVER_TIME_RATIO = 3.29d;
+    @Deprecated public static final double SERVER_TIME_RATIO = 3.29d;
     public double gtime;
     public double sgtime;
     public double epoch = Utils.rtime();
@@ -219,6 +219,10 @@ public class Glob {
         ctimefac += Math.signum(stimefac - ctimefac) *0.002 * dt;
     }
 
+    public double getTimeFac() {
+        return (stimefac);
+    }
+
     private void updgtime(double sgtime, boolean inc) {
         double now = Utils.rtime();
         double delta = now - epoch;
@@ -242,6 +246,10 @@ public class Glob {
 
     public double globtime() {
         return(gtime);
+    }
+
+    public double currenttime() {
+        return (this.sgtime + ((Utils.rtime() - epoch) * stimefac));
     }
 
     private static final long secinday = 60 * 60 * 24;
@@ -315,7 +323,7 @@ public class Glob {
     }
 
     private void servertimecalc() {
-        long secs = (long) (globtime() / 1000 + sgtime);
+        long secs = (long) (currenttime());
         long day = secs / secinday;
         long secintoday = secs % secinday;
         long hours = secintoday / 3600;

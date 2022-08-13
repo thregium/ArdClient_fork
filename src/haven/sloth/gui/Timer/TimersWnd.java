@@ -24,17 +24,17 @@ public class TimersWnd extends Window implements ObservableListener<TimerData.Ti
                 ui.gui.add(new TimerEditWnd("Create New Timer"),
                         new Coord(ui.gui.sz.x / 2 - 200, ui.gui.sz.y / 2 - 200)));
         add(btna, new Coord(0, 10));
-        Button btnl = new Button(100, "Load") {
-            public void click() {
-                TimerData.oldload();
-                ui.destroy(this);
-            }
-
-            public Object tooltip(Coord c, Widget prev) {
-                return Text.render("Load old amber timers and delete them").tex();
-            }
-        };
-        add(btnl, new Coord(btna.c.x + btna.sz.x + 10, 10));
+//        Button btnl = new Button(100, "Load") {
+//            public void click() {
+//                TimerData.oldload();
+//                ui.destroy(this);
+//            }
+//
+//            public Object tooltip(Coord c, Widget prev) {
+//                return Text.render("Load old amber timers and delete them").tex();
+//            }
+//        };
+//        add(btnl, new Coord(btna.c.x + btna.sz.x + 10, 10));
 
         port = new Scrollport(new Coord(width - 20 - 15, 0), 30) {
             @Override
