@@ -930,8 +930,9 @@ public class Window extends MovableWidget implements DTarget {
         Set<Inventory> invs = children(Inventory.class);
         if (!invs.isEmpty()) {
             Runnable run = () -> {
-                Inventory inv = invs.iterator().next();
-                ui.root.adda(inv.sortingWindow(), ui.mc, 0.5, 0.5);
+                for (Inventory inv : invs) {
+                    ui.root.add(inv.sortingWindow(), inv.parentpos(ui.root));
+                }
             };
             list.put("Sort", run);
         }

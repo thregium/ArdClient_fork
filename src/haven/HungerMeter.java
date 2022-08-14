@@ -27,7 +27,7 @@ public class HungerMeter extends MovableWidget {
         g.chcolor();
         g.image(bg, Coord.z);
         if (Config.showmetertext) {
-            g.atextstroked(String.format("%.2f%%:%d%%", glut.lglut * 100, Math.round(glut.gmod * 100)), sz.div(2).add(10, -1), 0.5, 0.5, Color.WHITE, Color.BLACK, Text.num10Fnd);
+            g.atextstroked(String.format("%.2f\u2030:%d%%", glut.lglut * 1000, Math.round(glut.gmod * 100)), sz.div(2).add(10, -1), 0.5, 0.5, Color.WHITE, Color.BLACK, Text.num10Fnd);
         }
         super.draw(g);
     }
