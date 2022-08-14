@@ -723,6 +723,9 @@ public class MapFile {
                 if (state instanceof States.ColState) {
                     States.ColState col = (States.ColState) state;
                     bc = new FColor(col.c);
+                } else if (state instanceof Material.Colors) {
+                    Material.Colors col = (Material.Colors) state;
+                    bc = new FColor(col.emi[0], col.emi[1], col.emi[2]);
                 }
             }
             return (bc != null ? new Color(Math.round(bc.r * 255), Math.round(bc.g * 255), Math.round(bc.b * 255), 255) : (null));

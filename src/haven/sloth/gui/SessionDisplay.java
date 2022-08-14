@@ -53,7 +53,7 @@ public class SessionDisplay extends MovableWidget implements ObservableListener<
     }
 
     private final Map<UI, UIDisplay> uimap = new HashMap<>();
-    private final Grouping grp = new GridGrouping("Sessions", 5, 100);
+    private final Grouping grp = new GridGrouping("Sessions", 5, 500);
     private final Button add = new Button(100, "New Session", this::newSession);
 
     public SessionDisplay() {
