@@ -35,6 +35,7 @@ import modification.resources;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,6 +66,16 @@ public class MapFile {
                 process();
             }
         }
+    }
+
+    public void removeSegment(MapFileWidget.Location loc) {
+        lock.writeLock().lock();
+        segments.remove(loc.seg.id);
+        File mf = new File(HashDirCache.findbase(), mangle(String.format("seg-%x", loc.seg.id)));
+        if (mf.exists()) {
+            mf.delete();
+        }
+        lock.writeLock().unlock();
     }
 
     @Deprecated

@@ -62,7 +62,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 
-public class MapFileWidget extends Widget {
+public class MapFileWidget extends Widget implements Console.Directory {
     public final MapFile file;
     public Location curloc;
     private Locator setloc;
@@ -934,7 +934,7 @@ public class MapFileWidget extends Widget {
         });
     }
 
-    private final Map<String, Console.Command> cmdmap = new TreeMap<String, Console.Command>();
+    private final Map<String, Console.Command> cmdmap = new TreeMap<>();
 
     {
         cmdmap.put("exportmap", (cons, args) -> {
@@ -949,12 +949,20 @@ public class MapFileWidget extends Widget {
             else
                 importmap(false);
         });
+        cmdmap.put("rmseg", new Console.Command() {
+            public void run(Console cons, String[] args) {
+                MapFileWidget.Location loc = curloc;
+                if (loc != null) {
+                    file.removeSegment(loc);
+                }
+            }
+        });
     }
 
+    @Override
     public Map<String, Console.Command> findcmds() {
         return (cmdmap);
     }
-
 
     public void uploadMarks() {
         if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {

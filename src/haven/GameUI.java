@@ -1110,8 +1110,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
                 ui.destroy(mapfile);
                 mapfile = null;
             }
-            mmap = new LocalMiniMap(new Coord(133, 133), map);
-            mmapwnd = adda(new MinimapWnd(mmap), new Coord(sz.x, 0), 1, 0);
             if (ResCache.global != null) {
                 MapFile file;
                 try {
@@ -1122,10 +1120,15 @@ public class GameUI extends ConsoleHost implements Console.Directory {
                      * existing mapfile with a new one is better. */
                     throw (new RuntimeException("failed to load mapfile", e));
                 }
-                mmap.save(file);
-                mapfile = new MapWnd(mmap.save, map, Utils.getprefc("wndsz-map", new Coord(700, 500)), "Map");
+
+                mapfile = new MapWnd(file, map, Utils.getprefc("wndsz-map", new Coord(700, 500)), "Map");
                 mapfile.hide();
                 add(mapfile, 50, 50);
+
+                mmap = new LocalMiniMap(new Coord(133, 133), map);
+                mmapwnd = adda(new MinimapWnd(mmap), new Coord(sz.x, 0), 1, 0);
+                mmap.save(file);
+
                 mmapwnd.mapfile = mapfile;
                 mapfile.uploadMarks();
             }
