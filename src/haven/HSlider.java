@@ -86,6 +86,12 @@ public class HSlider extends Widget {
             v = amount * 5;
         else if (ui.modflags() == (UI.MOD_CTRL | UI.MOD_SHIFT))
             v = amount * 100;
+        else if (ui.modflags() == UI.MOD_META)
+            v = amount * 1000;
+        else if (ui.modflags() == (UI.MOD_META | UI.MOD_CTRL))
+            v = amount * 5000;
+        else if (ui.modflags() == (UI.MOD_META | UI.MOD_CTRL | UI.MOD_SHIFT))
+            v = amount * 10000;
         else
             v = amount;
         return (v);
