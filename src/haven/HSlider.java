@@ -78,27 +78,26 @@ public class HSlider extends Widget {
         minus.draw(g.reclip(Coord.of(0, -((minus.sz.y - sz.y) / 2)), Coord.of(minus.sz.x, sz.y + ((minus.sz.y - sz.y) / 2))));
     }
 
-    public void plus() {
+    private int scval(int amount) {
         final int v;
-        if (ui.modshift)
-            v = 1 * 10;
-        else if (ui.modctrl)
-            v = 1 * 5;
+        if (ui.modflags() == UI.MOD_SHIFT)
+            v = amount * 10;
+        else if (ui.modflags() == UI.MOD_CTRL)
+            v = amount * 5;
+        else if (ui.modflags() == (UI.MOD_CTRL | UI.MOD_SHIFT))
+            v = amount * 100;
         else
-            v = 1;
-        val = Math.min(val + v, max);
+            v = amount;
+        return (v);
+    }
+
+    public void plus() {
+        val = Math.min(val + scval(1), max);
         changed();
     }
 
     public void minus() {
-        final int v;
-        if (ui.modshift)
-            v = 1 * 10;
-        else if (ui.modctrl)
-            v = 1 * 5;
-        else
-            v = 1;
-        val = Math.max(val - v, min);
+        val = Math.max(val - scval(1), min);
         changed();
     }
 
@@ -151,14 +150,7 @@ public class HSlider extends Widget {
     }
 
     public boolean mousewheel(Coord c, int amount) {
-        final int v;
-        if (ui.modshift)
-            v = amount * 10;
-        else if (ui.modctrl)
-            v = amount * 5;
-        else
-            v = amount;
-        val = Math.max(Math.min(val - v, max), min);
+        val = Math.max(Math.min(val - scval(amount), max), min);
         changed();
         return (true);
     }
