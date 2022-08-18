@@ -606,6 +606,7 @@ public class LocalMiniMap extends Widget {
             }
         }
         icons = findicons(icons);
+        icons.sort(Comparator.comparingInt(a -> a.priority));
 
         List<Gob> dangergobs = new ArrayList<Gob>();
         synchronized (oc) {
@@ -793,9 +794,8 @@ public class LocalMiniMap extends Widget {
             if (Config.mapshowviewdist)
                 drawview(g);
         }
-        drawicons(g);
-
         drawnewicons(g);
+        drawicons(g);
 
         try {
             drawmovement(g);
@@ -1114,8 +1114,10 @@ public class LocalMiniMap extends Widget {
                         GobIcon.Setting conf = iconconf.get(icon.res.get());
                         if ((conf != null) && conf.show) {
                             DisplayIcon disp = pmap.get(gob);
-                            if (disp == null)
-                                disp = new DisplayIcon(icon);
+                            if (disp == null) {
+                                if (gob.isplayer()) disp = new DisplayIcon(icon, -1);
+                                else disp = new DisplayIcon(icon);
+                            }
                             disp.update(gob.rc, gob.a);
                             KinInfo kin = gob.getattr(KinInfo.class);
                             if ((kin != null) && (kin.group < BuddyWnd.gc.length))
@@ -1161,6 +1163,7 @@ public class LocalMiniMap extends Widget {
         public Color col = Color.WHITE;
         public int z;
         public double stime;
+        public int priority = 0;
 
         public DisplayIcon(GobIcon icon) {
             this.icon = icon;
@@ -1169,6 +1172,11 @@ public class LocalMiniMap extends Widget {
             this.ang = ang;
             this.z = this.img.z;
             this.stime = Utils.rtime();
+        }
+
+        public DisplayIcon(GobIcon icon, int priority) {
+            this(icon);
+            this.priority = priority;
         }
 
         public void update(Coord2d rc, double ang) {
