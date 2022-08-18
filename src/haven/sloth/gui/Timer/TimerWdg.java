@@ -42,7 +42,7 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
 
         @Override
         public void tick(double dt) {
-            elapsed = (long) (time.duration / 3 * ui.sess.glob.getTimeFac()) - (long) ((ui.sess.glob.currenttime() - inst.start));
+            elapsed = (long) (time.duration / 3 * ui.sess.glob.getTimeFac()) - (long) ((ui.sess.glob.globtime() - inst.start));
             if (elapsed <= 0) {
                 ui.gui.add(new TimerDoneWindow(time.name), new Coord(50, 50));
                 Audio.play(timersfx, DefSettings.TIMERVOLUME.get() / 1000f);
@@ -96,7 +96,7 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
     }
 
     public void start() {
-        time.makeInstance((long) ui.sess.glob.currenttime());
+        time.makeInstance((long) ui.sess.glob.globtime());
     }
 
     public void edit() {

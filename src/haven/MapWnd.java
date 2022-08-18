@@ -1016,7 +1016,7 @@ public class MapWnd extends ResizableWnd {
                 try {
                     GobIcon icon = gob.getattr(GobIcon.class);
                     Optional<Resource> ores = gob.res();
-                    if (ores.isPresent()) {
+                    if (ores.isPresent() && ui.gui.mmap.iconconf != null) {
                         Resource res = ores.get();
                         boolean check = false;
                         if (icon != null && icon.res != null && icon.res.get() != null) {
@@ -1102,12 +1102,9 @@ public class MapWnd extends ResizableWnd {
             }
 
             marks.clear();
-            marks.addAll(
+            marks.addAll(getTempMarkList());
 
-                    getTempMarkList());
-
-            for (
-                    Gob gob : ui.sess.glob.oc.getallgobs()) {
+            for (Gob gob : ui.sess.glob.oc.getallgobs()) {
                 if (marks.stream().noneMatch(m -> m.id == gob.id)) {
                     TexI tex = (TexI) setTex.apply(gob);
                     GobIcon icon = gob.getattr(GobIcon.class);

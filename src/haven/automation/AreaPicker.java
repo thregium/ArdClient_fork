@@ -1040,7 +1040,7 @@ public class AreaPicker extends Window implements Runnable {
             repeat = false;
             debugLog("hourglass waiting...", Color.WHITE);
             double prog = ui.gui.prog;
-            for (int i = 0, sleep = 5; prog == ui.gui.prog; i += sleep) {
+            for (int i = 0, sleep = 5; prog == -1; i += sleep) {
                 if (i > waitingtime)
                     return (0);
                 prog = ui.gui.prog;

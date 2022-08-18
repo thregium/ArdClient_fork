@@ -271,11 +271,11 @@ public class PBotGob {
         for (Gob.Overlay ol : gob.ols) {
             try {
                 Indir<Resource> olires = ol.res;
-                String name;
-                if (olires == null && ol.spr != null && ol.spr.res != null) {
-                    name = ol.spr.res.name;
-                } else {
+                String name = null;
+                if (olires != null) {
                     name = olires.get().name;
+                } else if (ol.spr != null && ol.spr.res != null) {
+                    name = ol.spr.res.name;
                 }
                 if (name != null)
                     ret.add(name);

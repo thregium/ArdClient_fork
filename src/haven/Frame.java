@@ -26,8 +26,10 @@
 
 package haven;
 
+import java.util.Arrays;
+
 public class Frame extends Widget {
-    private final IBox box;
+    public final IBox box;
 
     public Frame(Coord sz, boolean inner, IBox box) {
         super(inner ? sz.add(box.bisz()) : sz);
@@ -60,10 +62,28 @@ public class Frame extends Widget {
         return (around(parent, new Area(tl, br)));
     }
 
+    public static Frame around(Widget parent, Widget... ch) {
+        return (around(parent, Arrays.asList(ch)));
+    }
+
+    public static Frame with(Widget child, boolean resize) {
+        if (resize) {
+            Frame ret = new Frame(child.sz, false);
+            child.resize(child.sz.sub(ret.box.bisz()));
+            ret.add(child, 0, 0);
+            return (ret);
+        } else {
+            Frame ret = new Frame(child.sz, true);
+            ret.add(child, 0, 0);
+            return (ret);
+        }
+    }
+
     public Coord inner() {
         return (sz.sub(box.bisz()));
     }
 
+    @Override
     public Coord xlate(Coord c, boolean in) {
         if (in)
             return (c.add(box.btloff()));
@@ -71,9 +91,42 @@ public class Frame extends Widget {
             return (c.sub(box.btloff()));
     }
 
+    @Override
+    public Position getpos(String nm) {
+        Position pos;
+        switch (nm) {
+            case "iul": pos = new Position(this.c.add(box.btloff())); break;
+            case "iur": pos = new Position(this.c.add(this.sz.x - box.bbroff().x, box.btloff().y)); break;
+            case "ibr": pos = new Position(this.c.add(this.sz).sub(box.bbroff())); break;
+            case "ibl": pos = new Position(this.c.add(box.btloff().x, this.sz.y - box.bbroff().y)); break;
+            case "icul": pos = new Position(box.btloff()); break;
+            case "icur": pos = new Position(this.sz.x - box.bbroff().x, box.btloff().y); break;
+            case "icbr": pos = new Position(this.sz.sub(box.bbroff())); break;
+            case "icbl": pos = new Position(box.btloff().x, this.sz.y - box.bbroff().y); break;
+            default: pos = super.getpos(nm); break;
+        }
+        return (pos);
+    }
+
+    public void drawframe(GOut g) {
+        box.draw(g, Coord.z, sz);
+    }
+
+    @Override
     public void draw(GOut g) {
         super.draw(g);
-        box.draw(g, Coord.z, sz);
+        drawframe(g);
+    }
+
+    @Override
+    public boolean checkhit(Coord c) {
+        Coord ul = box.btloff();
+        if ((c.x < ul.x) || (c.y < ul.y))
+            return (true);
+        Coord br = sz.sub(box.bisz()).add(ul);
+        if ((c.x >= br.x) || (c.y >= br.y))
+            return (true);
+        return (false);
     }
 
     public <T extends Widget> T addin(T child) {

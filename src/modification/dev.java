@@ -69,7 +69,7 @@ public class dev {
         if (logging) {
             StackTraceElement[] stackTraceElements = new Throwable().getStackTrace();
             StringBuilder sb = new StringBuilder();
-            sb.append("[").append(localTime()).append("]").append(" || ").append("ERROR").append(" || ").append(stackTraceElements[1]).append(" || ").append(e);
+            sb.append("[").append(localTime()).append("]").append(" || ").append("INFO").append(" || ").append(stackTraceElements[1]).append(" || ").append(e);
 
             System.err.println(sb.toString());
         }

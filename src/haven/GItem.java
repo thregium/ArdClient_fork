@@ -26,11 +26,13 @@
 
 package haven;
 
+import static haven.Text.num10Fnd;
+import static haven.Text.num12boldFnd;
 import haven.purus.pbot.PBotUtils;
 import haven.res.ui.tt.q.qbuff.QBuff;
 import integrations.food.FoodService;
 import modification.configuration;
-
+import modification.dev;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -39,9 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-
-import static haven.Text.num10Fnd;
-import static haven.Text.num12boldFnd;
 
 public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owner {
     public Indir<Resource> res;
@@ -201,12 +200,17 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         if (spr == null) {
             try {
                 spr = this.spr = GSprite.create(this, res.get(), sdt.clone());
-                if (!postProcessed) {
-                    dropItMaybe();
-                    postProcessed = true;
-                }
                 //IconService.checkIcon(info(), spr);
             } catch (Exception l) {
+                dev.simpleLog(l.getMessage());
+            }
+        }
+        if (!postProcessed) {
+            try {
+                dropItMaybe();
+                postProcessed = true;
+            } catch (Exception l) {
+                dev.simpleLog(l.getMessage());
             }
         }
         return (spr);
@@ -377,30 +381,28 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     }
 
     private void dropItMaybe() {
-        try {
-            Resource curs = ui.root.getcurs(Coord.z);
-            String name = this.resource().basename();
-            String invname = this.getname();
-            for (Map.Entry<String, Boolean> entry : Config.autodroplist.entrySet()) {
-                if (entry.getKey().equals(invname) && entry.getValue()) {
-                    this.wdgmsg("drop", Coord.z);
-                }
+        Resource curs = ui.root.getcurs(Coord.z);
+        Resource res = this.resource();
+        String name = res.basename();
+        String resname = res.name;
+        String invname = this.getname();
+        for (Map.Entry<String, Boolean> entry : Config.autodroplist.entrySet()) {
+            if (entry.getValue() && (invname.contains(entry.getKey()) || resname.equals(entry.getKey()))) {
+                this.wdgmsg("drop", Coord.z);
             }
-            if (curs != null && curs.name.equals("gfx/hud/curs/mine")) {
-                if (PBotUtils.getStamina(ui) < 40) {
-                    PBotUtils.drink(ui, false);
-                }
-                if (Config.dropMinedStones && Config.mineablesStone.contains(name) ||
-                        Config.dropMinedOre && Config.mineablesOre.contains(name) ||
-                        Config.dropMinedOrePrecious && Config.mineablesOrePrecious.contains(name) ||
-                        Config.dropMinedCatGold && this.getname().contains("Cat Gold") ||
-                        Config.dropMinedCrystals && this.getname().contains("Strange Crystal") ||
-                        Config.dropMinedSeaShells && this.getname().contains("Petrified Seashell") ||
-                        Config.dropMinedQuarryquartz && this.resname().contains("quarryquartz"))
-                    this.wdgmsg("drop", Coord.z);
+        }
+        if (curs != null && curs.name.equals("gfx/hud/curs/mine")) {
+            if (PBotUtils.getStamina(ui) < 40) {
+                PBotUtils.drink(ui, false);
             }
-        } catch (Resource.Loading e) {
-            e.printStackTrace();
+            if (Config.dropMinedStones && Config.mineablesStone.contains(name) ||
+                    Config.dropMinedOre && Config.mineablesOre.contains(name) ||
+                    Config.dropMinedOrePrecious && Config.mineablesOrePrecious.contains(name) ||
+                    Config.dropMinedCatGold && this.getname().contains("Cat Gold") ||
+                    Config.dropMinedCrystals && this.getname().contains("Strange Crystal") ||
+                    Config.dropMinedSeaShells && this.getname().contains("Petrified Seashell") ||
+                    Config.dropMinedQuarryquartz && this.resname().contains("quarryquartz"))
+                this.wdgmsg("drop", Coord.z);
         }
     }
 

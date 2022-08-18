@@ -245,11 +245,11 @@ public class Glob {
     }
 
     public double globtime() {
-        return(gtime);
+        return (this.sgtime + ((Utils.rtime() - epoch) * stimefac));
     }
 
-    public double currenttime() {
-        return (this.sgtime + ((Utils.rtime() - epoch) * stimefac));
+    public double newglobtime() {
+        return(gtime);
     }
 
     private static final long secinday = 60 * 60 * 24;
@@ -323,7 +323,7 @@ public class Glob {
     }
 
     private void servertimecalc() {
-        long secs = (long) (currenttime());
+        long secs = (long) (globtime());
         long day = secs / secinday;
         long secintoday = secs % secinday;
         long hours = secintoday / 3600;

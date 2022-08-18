@@ -1151,10 +1151,14 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             }
         } else if (place == "menu") {
             menu = (MenuGrid) brpanel.add(child, 20, 34);
-            final BeltData data = new BeltData(Context.accname + "::" + Context.charname);
-            fbelt = add(new BeltWnd("fk", data, KeyEvent.VK_F1, KeyEvent.VK_F10, 5, 50), new Coord(0, 50));
-            npbelt = add(new BeltWnd("np", data, KeyEvent.VK_NUMPAD0, KeyEvent.VK_NUMPAD9, 4, 100), new Coord(0, 100));
-            nbelt = add(new BeltWnd("n", data, KeyEvent.VK_0, KeyEvent.VK_9, 5, 0), new Coord(0, 150));
+            try {
+                final BeltData data = new BeltData(ui.sess.username + "::" + chrid);
+                fbelt = add(new BeltWnd("fk", data, KeyEvent.VK_F1, KeyEvent.VK_F10, 5, 50), new Coord(0, 50));
+                npbelt = add(new BeltWnd("np", data, KeyEvent.VK_NUMPAD0, KeyEvent.VK_NUMPAD9, 4, 100), new Coord(0, 100));
+                nbelt = add(new BeltWnd("n", data, KeyEvent.VK_0, KeyEvent.VK_9, 5, 0), new Coord(0, 150));
+            } catch (Exception e) {
+                dev.simpleLog(e);
+            }
             menuSearch = add(new MenuSearch("Search..."));
             if (!Config.autowindows.get("Search...").selected)
                 menuSearch.hide();

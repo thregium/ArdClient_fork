@@ -15,6 +15,7 @@ import haven.MapFile.PMarker;
 import haven.MapFile.SMarker;
 import haven.WebBrowser;
 import haven.sloth.gob.Type;
+import modification.dev;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -277,19 +278,19 @@ public class MappingClient {
                     }).filter(m -> m != null).collect(Collectors.toList());
                 } catch (Exception ex) {
                     if (retries-- > 0) {
-                        System.out.println("rescheduling upload");
+                        dev.simpleLog("rescheduling upload");
                         scheduler.schedule(this, 5, TimeUnit.SECONDS);
                     }
                     return;
                 } finally {
                     mapfile.lock.readLock().unlock();
                 }
-                System.out.println("collected " + markers.size() + " markers");
+                dev.simpleLog("collected " + markers.size() + " markers");
 
                 scheduler.execute(new ProcessMapper(mapfile, markers));
             } else {
                 if (retries-- > 0) {
-                    System.out.println("rescheduling upload");
+                    dev.simpleLog("rescheduling upload");
                     scheduler.schedule(this, 5, TimeUnit.SECONDS);
                 }
             }
@@ -319,7 +320,7 @@ public class MappingClient {
         public void run() {
             ArrayList<JSONObject> loadedMarkers = new ArrayList<>();
             while (!markers.isEmpty()) {
-                System.out.println("processing " + markers.size() + " markers");
+                dev.simpleLog("processing " + markers.size() + " markers");
                 Iterator<MarkerData> iterator = markers.iterator();
                 while (iterator.hasNext()) {
                     MarkerData md = iterator.next();
@@ -351,11 +352,11 @@ public class MappingClient {
                 } catch (InterruptedException ex) {
                 }
             }
-            System.out.println("scheduling marker upload");
+            dev.simpleLog("scheduling marker upload");
             try {
                 scheduler.execute(new MarkerUpdate(new JSONArray(loadedMarkers.toArray())));
             } catch (Exception ex) {
-                System.out.println(ex);
+                dev.simpleLog(ex);
             }
         }
     }
@@ -370,7 +371,7 @@ public class MappingClient {
         @Override
         public void run() {
             try {
-                System.out.println("Uploading markers");
+                dev.simpleLog("Uploading markers");
                 HttpURLConnection connection =
                         (HttpURLConnection) new URL(endpoint + "/markerUpdate").openConnection();
                 connection.setRequestMethod("POST");
@@ -380,7 +381,7 @@ public class MappingClient {
                     final String json = data.toString();
                     out.write(json.getBytes(StandardCharsets.UTF_8));
                 }
-                System.out.println("Marker upload " + connection.getResponseCode());
+                dev.simpleLog("Marker upload " + connection.getResponseCode());
             } catch (Exception ex) {
                 //System.out.println("MarkerUpdate " + ex);
             }
@@ -427,7 +428,7 @@ public class MappingClient {
                                 upload.put(String.valueOf(gob.id), j);
                             }
                         } catch (Exception ex) {
-                            System.out.println("MappintClient run : " + ex);
+                            dev.simpleLog("MappintClient run : " + ex);
                         }
                     }
                 } catch (Exception ex) {
@@ -593,12 +594,12 @@ public class MappingClient {
 
                         MultipartUtility.Response response = multipart.finish();
                         if (response.statusCode != 200) {
-                            System.out.println("Upload Error: Code" + response.statusCode + " - " + response.response);
+                            dev.simpleLog("Upload Error: Code" + response.statusCode + " - " + response.response);
                         } else {
-                            System.out.println("Uploaded " + gridID);
+                            dev.simpleLog("Uploaded " + gridID);
                         }
                     } catch (IOException e) {
-                        System.out.println("Cannot upload " + gridID + ": " + e.getMessage());
+                        dev.simpleLog("Cannot upload " + gridID + ": " + e.getMessage());
                     }
                 }
             } catch (Loading ex) {

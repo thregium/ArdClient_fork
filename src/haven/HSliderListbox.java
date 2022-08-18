@@ -16,20 +16,26 @@ public class HSliderListbox extends Listbox<HSliderNamed> {
     }
 
     public void addItem(HSliderNamed item) {
-        items.add(item);
-        items.sort(Comparator.comparing(o -> o.name));
+        synchronized (items) {
+            items.add(item);
+            items.sort(Comparator.comparing(o -> o.name));
+        }
     }
 
     public void addItems(List<HSliderNamed> list) {
-        items.addAll(list);
-        items.sort(Comparator.comparing(o -> o.name));
+        synchronized (items) {
+            items.addAll(list);
+            items.sort(Comparator.comparing(o -> o.name));
+        }
     }
 
     public void clear() {
-        new ArrayList<>(items).forEach(i -> {
-            items.remove(i);
-            i.reqdestroy();
-        });
+        synchronized (items) {
+            new ArrayList<>(items).forEach(i -> {
+                items.remove(i);
+                i.reqdestroy();
+            });
+        }
     }
 
     private HSliderNamed holded = null;
@@ -80,11 +86,15 @@ public class HSliderListbox extends Listbox<HSliderNamed> {
     }
 
     protected HSliderNamed listitem(int idx) {
-        return (items.get(idx));
+        synchronized (items) {
+            return (items.get(idx));
+        }
     }
 
     protected int listitems() {
-        return items.size();
+        synchronized (items) {
+            return items.size();
+        }
     }
 
     @Override
@@ -102,10 +112,12 @@ public class HSliderListbox extends Listbox<HSliderNamed> {
     @Override
     public void tick(double dt) {
         super.tick(dt);
-        items.forEach(h -> {
-            if (h.slider.ui == null)
-                h.slider.attach(ui);
-        });
+        synchronized (items) {
+            items.forEach(h -> {
+                if (h.slider.ui == null)
+                    h.slider.attach(ui);
+            });
+        }
     }
 
     protected Object itemtooltip(Coord c, HSliderNamed itm) {

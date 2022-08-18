@@ -92,7 +92,7 @@ public class GobSpawner extends Window {
         ui.destroy(this);
     }
 
-    public final static HashMap<String, String> posemap = new HashMap<String, String>(3) {{
+    public final static HashMap<String, String> posemap = new HashMap<String, String>(14) {{
         put("Whale Knocked", "gfx/kritter/spermwhale/knock");
         put("Whale Dead", "gfx/kritter/spermwhale/waterdead");
         put("Whale Swimming", "gfx/kritter/spermwhale/swimming");
@@ -113,7 +113,7 @@ public class GobSpawner extends Window {
         put("Mammoth Idle", "gfx/kritter/mammoth/idle");
     }};
 
-    public final static HashMap<String, String> defaultitems = new HashMap<String, String>(45) {{
+    public final static HashMap<String, String> defaultitems = new HashMap<String, String>(44) {{
         put("gfx/kritter/chicken/hen", "Chicken Hen");
         put("gfx/kritter/chicken/rooster", "Chicken Rooster");
         put("gfx/kritter/chicken/chick", "Chicken Chick");

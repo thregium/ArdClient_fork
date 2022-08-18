@@ -129,7 +129,7 @@ public class Bootstrap implements UI.Receiver, UI.Runner {
                             msgs.wait();
                     }
                     if (msg.id == 1) {
-                        if (msg.name == "login") {
+                        if ("login".equals(msg.name)) {
                             break;
                         } else if (msg.name == "forget") {
                             token = null;
@@ -167,7 +167,7 @@ public class Bootstrap implements UI.Receiver, UI.Runner {
                             msgs.wait();
                     }
                     if (msg.id == 1) {
-                        if (msg.name == "login") {
+                        if ("login".equals(msg.name)) {
                             creds = (AuthClient.Credentials) msg.args[0];
                             nativecreds = (AuthClient.NativeCred) msg.args[0];
                             savepw = (Boolean) msg.args[1];

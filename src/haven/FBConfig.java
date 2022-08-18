@@ -45,7 +45,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 public class FBConfig {
-    private static Map<ShaderMacro[], ShaderMacro> rescache = new WeakHashMap<ShaderMacro[], ShaderMacro>();
+    private Map<ShaderMacro[], ShaderMacro> rescache = new WeakHashMap<ShaderMacro[], ShaderMacro>();
     public final PView.ConfContext ctx;
     public Coord sz;
     public boolean hdr, tdepth;
@@ -135,7 +135,7 @@ public class FBConfig {
             ShaderMacro[] resp = new ShaderMacro[res.length];
             for (int i = 0; i < res.length; i++)
                 resp[i] = res[i].code(this);
-            resp = ArrayIdentity.intern(resp);
+//            resp = ArrayIdentity.intern(resp);
             ShaderMacro iresp;
             synchronized (rescache) {
                 if ((iresp = rescache.get(resp)) == null)
