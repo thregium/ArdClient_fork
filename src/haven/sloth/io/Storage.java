@@ -4,7 +4,6 @@ import com.google.common.flogger.FluentLogger;
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteDataSource;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -23,7 +22,7 @@ import java.util.concurrent.Executors;
  */
 public class Storage {
     private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-    private static final Executor writerHandler = Executors.newSingleThreadExecutor();
+    private final Executor writerHandler = Executors.newWorkStealingPool();
     public static final Storage dynamic, overlays;
 
     static {
@@ -76,7 +75,9 @@ public class Storage {
             return stmts.get(sql);
         else {
             final PreparedStatement stmt;
-            stmts.put(sql, (stmt = conn.prepareStatement(sql)));
+            synchronized (conn) {
+                stmts.put(sql, (stmt = conn.prepareStatement(sql)));
+            }
             return stmt;
         }
     }
@@ -117,13 +118,17 @@ public class Storage {
         void run(final Connection sql) throws SQLException;
     }
 
-    public synchronized void ensure(final SQLCallback callback) {
+    public void ensure(final SQLCallback callback) {
         try {
-            callback.run(conn);
-            conn.commit();
+            synchronized (conn) {
+                callback.run(conn);
+                conn.commit();
+            }
         } catch (SQLException se) {
             try {
-                conn.rollback();
+                synchronized (conn) {
+                    conn.rollback();
+                }
             } catch (SQLException se2) {
                 //Eat it.
             }
@@ -136,15 +141,19 @@ public class Storage {
     /**
      * These are done async
      */
-    public synchronized void write(final SQLCallback callback) {
+    public void write(final SQLCallback callback) {
         final StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         writerHandler.execute(() -> {
             try {
-                callback.run(conn);
-                conn.commit();
+                synchronized (conn) {
+                    callback.run(conn);
+                    conn.commit();
+                }
             } catch (SQLException se) {
                 try {
-                    conn.rollback();
+                    synchronized (conn) {
+                        conn.rollback();
+                    }
                 } catch (SQLException se2) {
                     //Eat it.
                 }
@@ -159,14 +168,18 @@ public class Storage {
     /**
      * These are not done async
      */
-    public synchronized void writeAndWait(final SQLCallback callback) {
+    public void writeAndWait(final SQLCallback callback) {
         final StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         try {
-            callback.run(conn);
-            conn.commit();
+            synchronized (conn) {
+                callback.run(conn);
+                conn.commit();
+            }
         } catch (SQLException se) {
             try {
-                conn.rollback();
+                synchronized (conn) {
+                    conn.rollback();
+                }
             } catch (SQLException se2) {
                 //Eat it.
             }

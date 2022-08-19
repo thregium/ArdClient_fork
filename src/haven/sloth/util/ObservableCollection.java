@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 public class ObservableCollection<T> implements Iterable<T> {
@@ -15,7 +16,11 @@ public class ObservableCollection<T> implements Iterable<T> {
     }
 
     public boolean add(T item) {
-        if (base.add(item)) {
+        boolean added;
+        synchronized (base) {
+            added = base.add(item);
+        }
+        if (added) {
             synchronized (listeners) {
                 if (item != null)
                     listeners.forEach((lst) -> lst.added(item));
@@ -37,8 +42,14 @@ public class ObservableCollection<T> implements Iterable<T> {
     }
 
     public boolean remove(T item) {
-        if (base.remove(item)) {
-            listeners.forEach((lst) -> lst.remove(item));
+        boolean removed;
+        synchronized (base) {
+            removed = base.remove(item);
+        }
+        if (removed) {
+            synchronized (listeners) {
+                listeners.forEach((lst) -> lst.remove(item));
+            }
             return true;
         } else {
             return false;
@@ -46,19 +57,25 @@ public class ObservableCollection<T> implements Iterable<T> {
     }
 
     public int size() {
-        return base.size();
+        synchronized (base) {
+            return base.size();
+        }
     }
 
 
     public boolean contains(T other) {
-        return base.contains(other);
+        synchronized (base) {
+            return base.contains(other);
+        }
     }
 
     public void addListener(final ObservableListener<T> listener) {
         synchronized (listeners) {
             if (listener != null) {
                 listeners.add(listener);
-                listener.init(base);
+                synchronized (base) {
+                    listener.init(base);
+                }
             }
         }
     }
@@ -71,27 +88,36 @@ public class ObservableCollection<T> implements Iterable<T> {
     }
 
     public Iterator<T> iterator() {
-        return base.iterator();
+        synchronized (base) {
+            return base.iterator();
+        }
     }
 
     public boolean replaceItem(T olditem, T newitem) {
         int n = 0;
         boolean s = false;
-        for (T item : base) {
-            if (item.equals(olditem)) {
-                base.remove(item);
-                s = true;
-                break;
+        synchronized (base) {
+            for (T item : base) {
+                if (item.equals(olditem)) {
+                    base.remove(item);
+                    s = true;
+                    break;
+                }
+                n++;
             }
-            n++;
         }
         if (!s) return false;
 
-        ArrayList<T> newbase = new ArrayList<>(base);
+        List<T> newbase;
+        synchronized (base) {
+            newbase = new ArrayList<>(base);
+        }
         newbase.add(n, newitem);
 
-        base.clear();
-        if (!base.addAll(newbase)) return false;
+        synchronized (base) {
+            base.clear();
+            if (!base.addAll(newbase)) return false;
+        }
         return true;
     }
 }

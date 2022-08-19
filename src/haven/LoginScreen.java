@@ -425,6 +425,12 @@ public class LoginScreen extends Widget {
             opts.move(new Coord(sz.x * (opts.c.x + opts.sz.x / 2) / oldsz.x, sz.y * (opts.c.y + opts.sz.y / 2) / oldsz.y), 0.5, 0.5);
     }
 
+    @Override
+    public void reqdestroy() {
+        status.dispose();
+        super.reqdestroy();
+    }
+
 
     public void draw(GOut g) {
         super.draw(g);

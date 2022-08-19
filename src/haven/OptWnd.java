@@ -1370,8 +1370,9 @@ public class OptWnd extends Window {
     private void initGeneral() {
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(general, new Coord(620, 350)));
 
-        appender.setVerticalMargin(VERTICAL_MARGIN);
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
+
+        appender.add(new CheckBox("Use SQLite resource cache instead of default %appdata% (req. restart)", v -> Utils.setprefb("sqlitecache", v), configuration.sqlitecache));
         appender.add(new CheckBox("Confirmation popup box on game exit.") {
             {
                 a = Config.confirmclose;

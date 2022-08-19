@@ -99,6 +99,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.DoubleUnaryOperator;
 
@@ -2416,7 +2418,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         private Coord2d mapcl;
         private ClickInfo gobcl;
         private int dfl = 0;
-        private final int flags;
+        protected final int flags;
 
         public Hittest(Coord c) {
             clickc = c;
@@ -2528,6 +2530,15 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
 
         protected void hit(Coord pc, Coord2d mc, ClickInfo inf) {
+            synchronized (clickListenerState) {
+                if (clickListenerState.get() == 2) {
+                    synchronized (lastMouseClick) {
+                        lastMouseClick.set(new MouseClickData(pc, mc, clickb, flags, inf));
+                    }
+                    clickListenerState.set(0);
+                    return;
+                }
+            }
             if (clickb == 3 && ui.modflags() == UI.MOD_META && ui.gui.vhand == null) {
                 final Optional<Gob> clickgob = gobFromClick(inf);
                 if (clickgob.isPresent()) {
@@ -2866,6 +2877,15 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     public boolean mousedown(Coord c, int button) {
+        synchronized (clickListenerState) {
+            if (clickListenerState.get() == 1 || clickListenerState.get() == 2) {
+                if (clickListenerState.get() == 1) {
+                    clickListenerState.set(2);
+                    delay(new Click(c, ui.modflags(), button));
+                }
+                return (true);
+            }
+        }
         if (camdrag != null) { //this fixes a loftar bug where alt tabbing out while dragging the camera locks it in permanent drag state.
             camera.release();
             camdrag.remove();
@@ -3767,5 +3787,44 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 }
             }
         }
+    }
+
+    private final AtomicInteger clickListenerState = new AtomicInteger();
+    private final AtomicReference<MouseClickData> lastMouseClick = new AtomicReference<>();
+
+    public static class MouseClickData {
+        public final Coord screenCoord;
+        public final Coord2d mapCoord;
+        public final int button;
+        public final int modflags;
+        public final ClickInfo inf;
+
+        public MouseClickData(final Coord screenCoord, final Coord2d mapCoord, final int button, final int modflags, final ClickInfo inf) {
+            this.screenCoord = screenCoord;
+            this.mapCoord = mapCoord;
+            this.button = button;
+            this.modflags = modflags;
+            this.inf = inf;
+        }
+    }
+
+    public MouseClickData getNextClick(int timeout) {
+        synchronized (clickListenerState) {
+            clickListenerState.set(1);
+        }
+        MouseClickData last = null;
+        for (int i = 0, sleep = 10; i < timeout && last == null; i += sleep) {
+            synchronized (lastMouseClick) {
+                last = lastMouseClick.get();
+            }
+            PBotUtils.sleep(sleep);
+        }
+        synchronized (clickListenerState) {
+            clickListenerState.set(0);
+        }
+        synchronized (lastMouseClick) {
+            lastMouseClick.set(null);
+        }
+        return (last);
     }
 }

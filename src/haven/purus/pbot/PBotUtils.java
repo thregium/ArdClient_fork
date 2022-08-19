@@ -14,6 +14,7 @@ import haven.ItemInfo;
 import haven.Loading;
 import haven.MCache;
 import haven.Makewindow;
+import haven.MapView;
 import haven.Resource;
 import haven.Speedget;
 import haven.UI;
@@ -21,6 +22,7 @@ import haven.WItem;
 import haven.Widget;
 import haven.Window;
 import haven.automation.Discord;
+import haven.automation.GobSelectCallback;
 import haven.purus.DrinkWater;
 import haven.purus.ItemClickCallback;
 import haven.purus.pbot.gui.PBotWindow;
@@ -2110,5 +2112,12 @@ public class PBotUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Get clicked data
+     * */
+    public static MapView.MouseClickData selectCoord(UI ui, int time) {
+        return (ui.gui.map.getNextClick(time));
     }
 }

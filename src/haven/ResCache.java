@@ -26,6 +26,8 @@
 
 package haven;
 
+import modification.SQLiteCache;
+import modification.configuration;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -33,19 +35,30 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public interface ResCache {
-    public OutputStream store(String name) throws IOException;
 
-    public InputStream fetch(String name) throws IOException;
+    OutputStream store(String name) throws IOException;
 
-    public static ResCache global = StupidJavaCodeContainer.makeglobal();
+    InputStream fetch(String name) throws IOException;
 
-    public static class StupidJavaCodeContainer {
+    default void remove(String name) throws IOException {}
+
+    ResCache global = StupidJavaCodeContainer.makeglobal();
+
+    static ResCache getCache(String name) {
+        if (!configuration.sqlitecache) {
+            return (global);
+        } else {
+            return (SQLiteCache.get(name));
+        }
+    }
+
+    class StupidJavaCodeContainer {
         private static ResCache makeglobal() {
             return (HashDirCache.create());
         }
     }
 
-    public static class TestCache implements ResCache {
+    class TestCache implements ResCache {
         public OutputStream store(final String name) {
             return (new ByteArrayOutputStream() {
                 public void close() {

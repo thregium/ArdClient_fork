@@ -2064,6 +2064,7 @@ public class Resource implements Serializable {
     }
 
     public static void loadlist(Pool pool, InputStream list, int prio) throws IOException {
+        if (list == null) return;
         BufferedReader in = new BufferedReader(new InputStreamReader(list, "us-ascii"));
         String ln;
         while ((ln = in.readLine()) != null) {

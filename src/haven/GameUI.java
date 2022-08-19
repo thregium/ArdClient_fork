@@ -271,12 +271,12 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     protected void added() {
+        ui.gui = this;
         resize(parent.sz);
         synchronized (crutchList) {
             crutchList.forEach(Runnable::run);
             crutchList.clear();
         }
-        ui.gui = this;
         ui.cons.out = new java.io.PrintWriter(new java.io.Writer() {
             StringBuilder buf = new StringBuilder();
 
@@ -1110,10 +1110,11 @@ public class GameUI extends ConsoleHost implements Console.Directory {
                 ui.destroy(mapfile);
                 mapfile = null;
             }
-            if (ResCache.global != null) {
+            ResCache cache = ResCache.getCache("map");
+            if (cache != null) {
                 MapFile file;
                 try {
-                    file = MapFile.load(ResCache.global, mapfilename());
+                    file = MapFile.load(cache, mapfilename());
                 } catch (java.io.IOException e) {
                     /* XXX: Not quite sure what to do here. It's
                      * certainly not obvious that overwriting the
@@ -1344,10 +1345,10 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     private GobIcon.Settings loadiconconf() {
-        if (ResCache.global == null)
+        if (ResCache.getCache("map") == null)
             return (new GobIcon.Settings());
         try {
-            try (StreamMessage fp = new StreamMessage(ResCache.global.fetch(iconconfname()))) {
+            try (StreamMessage fp = new StreamMessage(ResCache.getCache("map").fetch(iconconfname()))) {
                 return (GobIcon.Settings.load(fp));
             }
         } catch (java.io.FileNotFoundException e) {
@@ -1359,10 +1360,10 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void saveiconconf() {
-        if (ResCache.global == null)
+        if (ResCache.getCache("map") == null)
             return;
         try {
-            try (StreamMessage fp = new StreamMessage(ResCache.global.store(iconconfname()))) {
+            try (StreamMessage fp = new StreamMessage(ResCache.getCache("map").store(iconconfname()))) {
                 iconconf.save(fp);
             }
         } catch (Exception e) {

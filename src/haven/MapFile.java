@@ -158,7 +158,7 @@ public class MapFile {
 
     public static void warn(Throwable cause, String msg) {
         if (debug)
-            Debug.log.printf("mapfile warning: %s\n", msg);
+            Debug.log.printf("mapfile warning: %s%n", msg);
         new Warning(cause, msg).issue();
     }
 
@@ -175,25 +175,13 @@ public class MapFile {
             return instance;
         else {
             final MapFile file = new MapFile(store, filename);
-            InputStream fp = null;
-            do {
-                try {
-                    fp = file.sfetch("index");
-                } catch (FileNotFoundException e) {
-                    instance = file;
-                    return (file);
-                } catch (IOException e) {
-                    if (e.getMessage().contains("another process")) {
-                        try {
-                            Thread.sleep(100);
-                        } catch (Exception ex) {
-                            return (null);
-                        }
-                    } else {
-                        return (null);
-                    }
-                }
-            } while (fp == null);
+            InputStream fp;
+            try {
+                fp = file.sfetch("index");
+            } catch (FileNotFoundException e) {
+                instance = file;
+                return (file);
+            }
             try (StreamMessage data = new StreamMessage(fp)) {
                 int ver = data.uint8();
                 if (ver == 1) {
@@ -1716,11 +1704,11 @@ public class MapFile {
     public final BackCache<Long, Segment> segments = new BackCache<>(5, id -> {
         checklock();
         InputStream fp;
-            try {
-                fp = sfetch("seg-%x", id);
-            } catch (IOException e) {
-                return (null);
-            }
+        try {
+            fp = sfetch("seg-%x", id);
+        } catch (IOException e) {
+            return (null);
+        }
         try (StreamMessage data = new StreamMessage(fp)) {
             if (data.eom())
                 return (null);
@@ -1744,19 +1732,19 @@ public class MapFile {
     }, (id, seg) -> {
         checklock();
         if (seg == null) {
-                try (OutputStream fp = sstore("seg-%x", id)) {
-                } catch (IOException e) {
-                        throw (new StreamMessage.IOError(e));
-                }
+            try (OutputStream fp = sstore("seg-%x", id)) {
+            } catch (IOException e) {
+                throw (new StreamMessage.IOError(e));
+            }
             if (knownsegs.remove(id))
                 defersave();
         } else {
             OutputStream fp;
-                try {
-                    fp = sstore("seg-%x", seg.id);
-                } catch (IOException e) {
-                    throw (new StreamMessage.IOError(e));
-                }
+            try {
+                fp = sstore("seg-%x", seg.id);
+            } catch (IOException e) {
+                throw (new StreamMessage.IOError(e));
+            }
             try (StreamMessage out = new StreamMessage(fp)) {
                 out.adduint8(1);
                 ZMessage z = new ZMessage(out);
@@ -1853,7 +1841,7 @@ public class MapFile {
                 if (mseg == -1) {
                     seg = new Segment(rnd.nextLong());
                     moff = Coord.z;
-                    warn("mapfile: creating new segment %x%n", seg.id);
+                    warn("mapfile: creating new segment %x", seg.id);
                 } else {
                     seg = segments.get(mseg);
                 }
@@ -1885,14 +1873,14 @@ public class MapFile {
                         dst = b;
                         soff = ab.inv();
                     }
-                    warn("mapfile: merging segment %x (%d) into %x (%d) at %s%n", src.id, src.map.size(), dst.id, dst.map.size(), soff);
+                    warn("mapfile: merging segment %x (%d) into %x (%d) at %s", src.id, src.map.size(), dst.id, dst.map.size(), soff);
                     merge(dst, src, soff);
                 }
             }
         } finally {
             lock.writeLock().unlock();
         }
-        warn("mapfile: update completed%n");
+        warn("mapfile: update completed");
     }
 
     public interface ExportFilter {

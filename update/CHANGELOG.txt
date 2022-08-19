@@ -1,5 +1,4 @@
->>> Details in https://github.com/Cediner/ArdClient/commits/ <<<
-[2022.08.18] >> Last Update
+[2022.08.19] >>> Details in https://github.com/Cediner/ArdClient/commits/ <<<
 
 [2022.08.12]
 > An attempt to fix the map

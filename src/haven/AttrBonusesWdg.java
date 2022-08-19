@@ -94,9 +94,12 @@ public class AttrBonusesWdg extends Widget implements ItemInfo.Owner {
             doUpdate();
         }
         if (charWnd == null) {
-            charWnd = ui.gui.chrwdg;
-            if (charWnd != null) {
-                needBuild = true;
+            GameUI gui = ui.root.getchild(GameUI.class);
+            if (gui != null) {
+                charWnd = gui.chrwdg;
+                if (charWnd != null) {
+                    needBuild = true;
+                }
             }
         }
         if (needBuild) {

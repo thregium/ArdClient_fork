@@ -77,6 +77,7 @@ public class configuration {
     public static String defaultTitle = MainFrame.TITLE;
     public static String defaultCustomTitle = "https://youtu.be/dQw4w9WgXcQ";
     public static String defaultUtilsCustomTitle = Utils.getpref("custom-title", defaultCustomTitle);
+    public static boolean sqlitecache = Utils.getprefb("sqlitecache", false);
 
     public static String tittleCheck(Session sess) {
         String name, title;

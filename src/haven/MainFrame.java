@@ -388,13 +388,14 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
 
 
     public static void setupres() {
-        if (ResCache.global != null)
-            Resource.setcache(ResCache.global);
+        ResCache cache = ResCache.getCache("resources");
+        if (cache != null)
+            Resource.setcache(cache);
         if (Config.resurl != null)
             Resource.addurl(Config.resurl);
-        if (ResCache.global != null) {
+        if (cache != null) {
             try {
-                Resource.loadlist(Resource.remote(), ResCache.global.fetch("tmp/allused"), -10);
+                Resource.loadlist(Resource.remote(), cache.fetch("tmp/allused"), -10);
             } catch (IOException e) {
             }
         }
@@ -464,9 +465,9 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
         }
         dumplist(Resource.remote().loadwaited(), null);
         dumplist(Resource.remote().cached(), null);
-        if (ResCache.global != null) {
+        if (ResCache.getCache("resources") != null) {
             try {
-                Writer w = new OutputStreamWriter(ResCache.global.store("tmp/allused"), "UTF-8");
+                Writer w = new OutputStreamWriter(ResCache.getCache("resources").store("tmp/allused"), "UTF-8");
                 try {
                     Resource.dumplist(Resource.remote().used(), w);
                 } finally {
