@@ -15,15 +15,14 @@ import modification.configuration;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 
 public class QBuff extends ItemInfo.Tip {
-    public final BufferedImage icon;
-    public final String name;
-    public final String origName;
+    public BufferedImage icon;
+    public String name;
+    public String origName;
     public double q;
     public Tex qtex, qwtex;
     public Color color, outline = Color.BLACK;
@@ -103,7 +102,7 @@ public class QBuff extends ItemInfo.Tip {
         QList() {super(null);}
 
         void sort() {
-            Collections.sort(ql, Comparator.comparing(a -> a.name));
+            ql.sort(Comparator.comparing(a -> a.name));
             for (Modifier mod : mods)
                 mod.prepare(this);
         }
@@ -130,7 +129,7 @@ public class QBuff extends ItemInfo.Tip {
         }
     }
 
-    public static final Layout.ID<Table> lid = () -> (new Table());
+    public static final Layout.ID<Table> lid = Table::new;
 
     public static class Summary extends QList {
         public int order() {return (10);}
@@ -148,7 +147,7 @@ public class QBuff extends ItemInfo.Tip {
         }
     }
 
-    public static final Layout.ID<Summary> sid = () -> (new Summary());
+    public static final Layout.ID<Summary> sid = Summary::new;
 
     public void prepare(Layout l) {
         l.intern(lid).ql.add(this);
