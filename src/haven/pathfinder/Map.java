@@ -3,11 +3,10 @@ package haven.pathfinder;
 
 import haven.Coord;
 import haven.Gob;
-import haven.GobHitbox;
 import haven.MCache;
 import haven.Pair;
 import haven.Resource;
-
+import haven.sloth.script.pathfinding.Hitbox;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -144,7 +143,7 @@ public class Map {
     }
 
     public void addGob(Gob gob) {
-        GobHitbox.BBox[] bbox = GobHitbox.getBBox(gob);
+        Hitbox[] bbox = Hitbox.hbfor(gob);
         if (bbox == null || bbox.length != 1 || bbox[0].points.length != 4)
             return;
 
@@ -233,7 +232,7 @@ public class Map {
     }
 
     public void excludeGob(Gob gob) {
-        GobHitbox.BBox bbox[] = GobHitbox.getBBox(gob);
+        Hitbox[] bbox = Hitbox.hbfor(gob);
         if (bbox == null || bbox.length != 1 || bbox[0].points.length != 4)
             return;
 

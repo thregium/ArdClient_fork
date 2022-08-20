@@ -57,6 +57,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -66,7 +67,7 @@ import java.util.TreeMap;
 
 public class HavenPanel extends GLCanvas implements Runnable, Console.Directory, UI.Context {
     //All of our UIs
-    public final ObservableCollection<UI> sessions = new ObservableCollection<>(new ArrayList<>());
+    public final ObservableCollection<UI> sessions = new ObservableCollection<>(Collections.synchronizedList(new ArrayList<>()));
     //The UI for the next frame, or null of no change
     private UI nextUI;
     //The current active UI

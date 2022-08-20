@@ -2941,7 +2941,17 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         delay(new Hittest(c, ui.modflags()) {
             @Override
             protected void hit(Coord pc, Coord2d mc, ClickInfo inf) {
-                mouse.done(mc);
+                synchronized (clickListenerState) {
+                    if (clickListenerState.get() == 2) {
+                        synchronized (lastMouseClick) {
+                            lastMouseClick.set(new MouseClickData(pc, mc, 0, flags, inf));
+                        }
+                        clickListenerState.set(0);
+                        return;
+                    }
+                }
+                if (mouse != null)
+                    mouse.done(mc);
             }
         });
     }
@@ -2950,7 +2960,8 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         delay(new Hittest(c, ui.modflags()) {
             @Override
             protected void hit(Coord pc, Coord2d mc, ClickInfo inf) {
-                infoCallback.done(inf);
+                if (infoCallback != null)
+                    infoCallback.done(inf);
             }
         });
     }
@@ -3812,6 +3823,27 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         synchronized (clickListenerState) {
             clickListenerState.set(1);
         }
+        MouseClickData last = null;
+        for (int i = 0, sleep = 10; i < timeout && last == null; i += sleep) {
+            synchronized (lastMouseClick) {
+                last = lastMouseClick.get();
+            }
+            PBotUtils.sleep(sleep);
+        }
+        synchronized (clickListenerState) {
+            clickListenerState.set(0);
+        }
+        synchronized (lastMouseClick) {
+            lastMouseClick.set(null);
+        }
+        return (last);
+    }
+
+    public MouseClickData getMouseInfo(int timeout) {
+        synchronized (clickListenerState) {
+            clickListenerState.set(2);
+        }
+        takemc(ui.mc, null);
         MouseClickData last = null;
         for (int i = 0, sleep = 10; i < timeout && last == null; i += sleep) {
             synchronized (lastMouseClick) {

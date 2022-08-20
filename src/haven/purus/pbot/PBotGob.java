@@ -17,6 +17,7 @@ import haven.ResDrawable;
 import haven.Resource;
 import haven.UI;
 import haven.purus.gobText;
+import haven.sloth.script.pathfinding.Hitbox;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -372,6 +373,25 @@ public class PBotGob {
         return (bboxes.length > 0 ? bboxes[0] : null);
     }
 
+    /**
+     * Get first hitbox
+     *
+     * @return first hitbox of gob
+     */
+    public Hitbox getHitbox_() {
+        Hitbox[] bboxes = getHitboxes_();
+        return (bboxes.length > 0 ? bboxes[0] : null);
+    }
+
+    /**
+     * Get hitboxes
+     *
+     * @return array of hitboxes
+     */
+    public Hitbox[] getHitboxes_() {
+        return (Hitbox.hbfor(gob));
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -383,5 +403,9 @@ public class PBotGob {
     @Override
     public int hashCode() {
         return Objects.hash(gob, ui);
+    }
+
+    public static PBotGob of(Gob gob) {
+        return (new PBotGob(gob));
     }
 }

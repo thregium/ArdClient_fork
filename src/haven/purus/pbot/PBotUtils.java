@@ -15,6 +15,7 @@ import haven.Loading;
 import haven.MCache;
 import haven.Makewindow;
 import haven.MapView;
+import static haven.OCache.posres;
 import haven.Resource;
 import haven.Speedget;
 import haven.UI;
@@ -22,21 +23,25 @@ import haven.WItem;
 import haven.Widget;
 import haven.Window;
 import haven.automation.Discord;
-import haven.automation.GobSelectCallback;
 import haven.purus.DrinkWater;
 import haven.purus.ItemClickCallback;
 import haven.purus.pbot.gui.PBotWindow;
+import modification.dev;
 import net.dv8tion.jda.core.entities.TextChannel;
-
 import java.awt.Color;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
-
-import static haven.OCache.posres;
 
 public class PBotUtils {
 
@@ -597,10 +602,12 @@ public class PBotUtils {
     public static void debugMsg(UI ui, String str) {
         debugMsg(ui, str, Color.WHITE);
     }
+
     public static void debugMsg(UI ui, String str, Color col) {
         if (ui.gui != null)
             ui.gui.debugmsg(str, col);
     }
+
     public static void debugMsg(UI ui, String str, int r, int g, int b) {
         debugMsg(ui, str, new Color(r, g, b));
     }
@@ -2106,18 +2113,40 @@ public class PBotUtils {
         return a.gob.rc.y;
     }
 
-    public static void runScript(UI ui, File scriptFile) {
+    public static PBotScript runScript(UI ui, File scriptFile) {
         try {
-            PBotScriptmanager.startScript(ui, scriptFile);
+            return (PBotScriptmanager.startScript(ui, scriptFile));
         } catch (Exception e) {
             e.printStackTrace();
+            return (null);
         }
     }
 
     /**
-     * Get clicked data
-     * */
-    public static MapView.MouseClickData selectCoord(UI ui, int time) {
+     * Click on map and get info
+     * return (Coord screenCoord; Coord2d mapCoord; int button; int modflags; ClickInfo inf;)
+     */
+    public static MapView.MouseClickData selectClickCoord(UI ui, int time) {
         return (ui.gui.map.getNextClick(time));
+    }
+
+    public static MapView.MouseClickData selectMouseCoord(UI ui, int time) {
+        return (ui.gui.map.getMouseInfo(time));
+    }
+
+    private static final ExecutorService executor = Executors.newWorkStealingPool();
+
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(executor::shutdown));
+    }
+
+    public static Future<?> run(final Runnable run) {
+        return (executor.submit(() -> new Thread(() -> {
+            try {
+                run.run();
+            } catch (Exception e) {
+                dev.simpleLog(e);
+            }
+        }).start()));
     }
 }

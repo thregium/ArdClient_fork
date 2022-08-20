@@ -67,7 +67,13 @@ public class PBotWindow extends Window {
             @Override
             public void set(boolean val) {
                 a = val;
-                Thread t = new Thread(() -> PBotScriptmanager.getScript(id).execute(name, "(" + val + ");"));
+                Thread t = new Thread(() -> {
+                    try {
+                        PBotScriptmanager.getScript(id).execute(name, "(" + val + ");");
+                    } catch (Exception e) {
+                        PBotError.handleException(ui, e);
+                    }
+                });
                 t.start();
             }
         };

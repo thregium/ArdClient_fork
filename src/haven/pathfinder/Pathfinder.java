@@ -5,7 +5,6 @@ import haven.Coord;
 import haven.Coord2d;
 import haven.Coordf;
 import haven.Gob;
-import haven.GobHitbox;
 import haven.LinMove;
 import haven.MCache;
 import haven.MapView;
@@ -17,6 +16,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import static haven.OCache.posres;
+import haven.sloth.script.pathfinding.Hitbox;
 
 public class Pathfinder implements Runnable {
     private OCache oc;
@@ -93,7 +93,7 @@ public class Pathfinder implements Runnable {
                 // need to exclude destination gob so it won't get into TO candidates list
                 if (this.gob != null && this.gob.id == gob.id)
                     continue;
-                GobHitbox.BBox[] box = GobHitbox.getBBox(gob);
+                Hitbox[] box = Hitbox.hbfor(gob);
                 if (box != null && box.length == 1 && box[0].points.length == 4 && isInsideBoundBox(gob.rc.floor(), gob.a, box, player.rc.floor())) {
                     m.excludeGob(gob);
                     continue;
@@ -211,7 +211,7 @@ public class Pathfinder implements Runnable {
         terminate = true;
     }
 
-    static public boolean isInsideBoundBox(Coord gobRc, double gobA, GobHitbox.BBox[] gobBBox, Coord point) {
+    static public boolean isInsideBoundBox(Coord gobRc, double gobA, Hitbox[] gobBBox, Coord point) {
         final Coordf relative = new Coordf(point.sub(gobRc)).rotate(-gobA);
         return relative.x >= gobBBox[0].points[0].x && relative.x <= gobBBox[0].points[0].x &&
                 relative.y >= gobBBox[0].points[0].y && relative.y <= gobBBox[0].points[0].y;

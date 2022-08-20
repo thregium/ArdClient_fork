@@ -54,6 +54,7 @@ public abstract class ErrorGui extends JDialog implements ErrorStatus {
     private JScrollPane infoc, exboxc;
     private Thread reporter;
     private boolean done;
+    private boolean hide = false;
 
     public ErrorGui(java.awt.Frame parent) {
         super(parent, "Haven error!", true);
@@ -91,6 +92,7 @@ public abstract class ErrorGui extends JDialog implements ErrorStatus {
                 add(hidebtn = new JButton("Hide") {{
                     addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent ev) {
+                            hide = true;
                             ErrorGui.this.dispose();
                             synchronized (ErrorGui.this) {
                                 done = true;
@@ -158,7 +160,8 @@ public abstract class ErrorGui extends JDialog implements ErrorStatus {
                 throw (new Error(e));
             }
         }
-        errorsent();
+        if (!hide) errorsent();
+        hide = false;
     }
 
     public abstract void errorsent();

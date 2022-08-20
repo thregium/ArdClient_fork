@@ -24,6 +24,7 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import static haven.OCache.posres;
+import haven.sloth.script.pathfinding.Hitbox;
 
 public class Pathfinder extends Thread {
 
@@ -157,7 +158,7 @@ public class Pathfinder extends Thread {
                     for (Gob gob : gui.ui.sess.glob.oc) {
                         if (gob.isplayer())
                             continue;
-                        GobHitbox.BBox[] box = GobHitbox.getBBox(gob);
+                        Hitbox[] box = Hitbox.hbfor(gob);
                         if (box != null && box.length == 1 && box[0].points.length == 4 && !whitelistedGobs.contains(gob.getres().name)) {//FIXME
                             Coord2d rel = gob.rc.sub(origin);
 

@@ -88,9 +88,7 @@ public class ObservableCollection<T> implements Iterable<T> {
     }
 
     public Iterator<T> iterator() {
-        synchronized (base) {
-            return base.iterator();
-        }
+        return base.iterator();
     }
 
     public boolean replaceItem(T olditem, T newitem) {

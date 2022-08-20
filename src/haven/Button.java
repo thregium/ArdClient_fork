@@ -26,6 +26,7 @@
 
 package haven;
 
+import modification.dev;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -196,8 +197,13 @@ public class Button extends SIWidget {
     }
 
     public void click() {
-        if (action != null)
-            action.run();
+        if (action != null) {
+            try {
+                action.run();
+            } catch (Exception e) {
+                dev.simpleLog(e);
+            }
+        }
     }
 
     public void uimsg(String msg, Object... args) {

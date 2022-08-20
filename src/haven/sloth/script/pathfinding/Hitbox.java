@@ -138,6 +138,14 @@ public class Hitbox {
         this.hitable = hitable;
     }
 
+    public Hitbox(final List<Coord2d> points, boolean hitable) {
+        this.points = new Coord2d[points.size()];
+        for (int i = 0; i < points.size(); i++) {
+            this.points[i] = new Coord2d(points.get(i).x, -points.get(i).y);
+        }
+        this.hitable = hitable;
+    }
+
     public Coord2d offset() {
         double minx = Double.MAX_VALUE, miny = Double.MAX_VALUE;
         for (Coord2d c2 : points) {
