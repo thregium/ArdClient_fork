@@ -2514,6 +2514,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         return (new Object[0]);
     }
 
+    private Loader.Future<Boolean> pfdefer;
     private class Click extends Hittest {
         int clickb;
 
@@ -2648,7 +2649,15 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
                 if (inf == null) {
                     if (Config.pf && clickb == 1 && curs != null && !curs.name.equals("gfx/hud/curs/study")) {
-                        glob.loader.defer(() -> pathto(mc));
+                        if (pfdefer != null) {
+                            pfdefer.cancel();
+                            pfdefer = null;
+                        }
+                        pfdefer = glob.loader.defer(() -> {
+                             pathto(mc);
+                             pfdefer = null;
+                             return (null);
+                        });
                         //      purusPfLeftClick(mc.floor(), null);
                     } else if (clickb == 1 && ui.modmeta && ui.gui.vhand == null && curs != null && curs.name.equals("gfx/hud/curs/arw")) {
                         //Queued movement
@@ -2733,13 +2742,33 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     } else if (Config.pf && curs != null && !curs.name.equals("gfx/hud/curs/study") && gob != null) {
                         if (clickb == 3) {
                             //  purusPfRightClick(gob, (int) args[8], clickb, 0, null);
-                            glob.loader.defer(() -> pathtoRightClick(gob, 0));
+                            if (pfdefer != null) {
+                                pfdefer.cancel();
+                                pfdefer = null;
+                            }
+                            pfdefer = glob.loader.defer(() -> {
+                                pathtoRightClick(gob, 0);
+                                pfdefer = null;
+                                return (null);
+                            });
                         } else if (clickb == 1) {
-                            glob.loader.defer(() -> pathto(gob));
+                            if (pfdefer != null) {
+                                pfdefer.cancel();
+                                pfdefer = null;
+                            }
+                            pfdefer = glob.loader.defer(() -> {
+                                pathto(gob);
+                                pfdefer = null;
+                                return (null);
+                            });
                         }
                     } else {
                         args = Utils.extend(args, gobargs);
                         if (clickb == 1 || gobargs.length > 0) {
+                            if (pfdefer != null) {
+                                pfdefer.cancel();
+                                pfdefer = null;
+                            }
                             clearmovequeue();
                             canceltasks();
                             if (pastaPathfinder != null && pastaPathfinder.isAlive() && !pastaPathfinder.isInterrupted()) {
@@ -3157,7 +3186,15 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         // we really don't want dropping, so click is moving
                         if (Config.pf) {
                             // purusPfLeftClick(mc.floor(), null);
-                            glob.loader.defer(() -> pathto(mc));
+                            if (pfdefer != null) {
+                                pfdefer.cancel();
+                                pfdefer = null;
+                            }
+                            pfdefer = glob.loader.defer(() -> {
+                                pathto(mc);
+                                pfdefer = null;
+                                return (null);
+                            });
                         } else {
                             final Object[] gobargs = gobclickargs(inf);
                             Object[] args = {pc, mc.floor(posres), 1, ui.modflags()};

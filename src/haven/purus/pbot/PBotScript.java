@@ -18,6 +18,14 @@ public class PBotScript extends Thread {
         this.ui = ui;
     }
 
+    public String getScriptId() {
+        return (id);
+    }
+
+    public String getScriptName() {
+        return (name);
+    }
+
     @Override
     public void run() {
         PBotUtils.debugMsg(ui, "Starting script: " + name, Color.ORANGE);
