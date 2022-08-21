@@ -5,7 +5,6 @@ import modification.configuration;
 
 import java.awt.Color;
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -26,7 +25,7 @@ public class PBotError {
             e.printStackTrace(ui.cons.out);
             pw.flush();
             e.printStackTrace();
-        } catch (IOException e1) {
+        } catch (Exception e1) {
             e1.printStackTrace();
         }
     }

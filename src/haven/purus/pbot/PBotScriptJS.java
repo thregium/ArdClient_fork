@@ -11,18 +11,22 @@ public class PBotScriptJS extends PBotScript {
 
     public PBotScriptJS(UI ui, File scriptFile, String id) {
         super(ui, scriptFile, id);
+        context = Context.newBuilder("js").allowAllAccess(true).build();
+        context.eval("js", "const ScriptID = '" + id + "';");
     }
 
     @Override
     public void run() {
         super.run();
-        context = Context.newBuilder("js").allowAllAccess(true).build();
         try {
-            context.eval("js", "const ScriptID = '" + id + "';");
             context.eval(Source.newBuilder("js", scriptFile).build());
         } catch (Exception e) {
             PBotError.handleException(ui, e);
         }
+    }
+
+    public Context getContext() {
+        return (context);
     }
 
     @Override

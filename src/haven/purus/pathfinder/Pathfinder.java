@@ -4,7 +4,6 @@ import haven.Coord;
 import haven.Coord2d;
 import haven.GameUI;
 import haven.Gob;
-import haven.GobHitbox;
 import haven.Resource;
 import haven.purus.pbot.PBotUtils;
 
@@ -159,7 +158,7 @@ public class Pathfinder extends Thread {
                         if (gob.isplayer())
                             continue;
                         Hitbox[] box = Hitbox.hbfor(gob);
-                        if (box != null && box.length == 1 && box[0].points.length == 4 && !whitelistedGobs.contains(gob.getres().name)) {//FIXME
+                        if (box != null && box.length == 1 && box[0].points.length == 4 && !whitelistedGobs.contains(gob.getres().name) && box[0].ishitable()) {//FIXME
                             Coord2d rel = gob.rc.sub(origin);
 
                             Coord2d[] points = new Coord2d[4];

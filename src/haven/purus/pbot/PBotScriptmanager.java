@@ -21,6 +21,19 @@ public class PBotScriptmanager {
         return (script);
     }
 
+    public static PBotScript prepareScript(UI ui, File scriptFile) {
+        String id = UUID.randomUUID().toString();
+        String ext = scriptFile.getName().substring(scriptFile.getName().lastIndexOf("."));
+        PBotScript script = (ext.equalsIgnoreCase(".py")) ? new PBotScriptPy(ui, scriptFile, id) : new PBotScriptJS(ui, scriptFile, id);
+        return (script);
+    }
+
+    public static void runScript(PBotScript script) {
+        scripts.put(script.getScriptId(), script);
+        script.start();
+        configuration.classMaker(() -> script.ui.gui.PBotScriptlist.threadsUpdate());
+    }
+
     public static PBotScript getScript(String id) {
         return scripts.get(id);
     }

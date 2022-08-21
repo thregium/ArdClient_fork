@@ -34,9 +34,9 @@ public class Coracleslol implements Runnable {
                 coracle = gui.maininv.getItemPartial("Coracle");
                 invcoracle = true;
                 equipcoracle = false;
-            } else if (gui.getequipory().quickslots[11] != null) {
-                if (gui.getequipory().quickslots[11].item.getname().contains("Coracle")) {
-                    coracle = gui.getequipory().quickslots[11];
+            } else if (gui.getequipory().quickslots[14] != null) {
+                if (gui.getequipory().quickslots[14].item.getname().contains("Coracle")) {
+                    coracle = gui.getequipory().quickslots[14];
                     equipcoracle = true;
                     invcoracle = false;
                 } else
@@ -87,7 +87,7 @@ public class Coracleslol implements Runnable {
                     while (gui.maininv.getItemPartial("Coracle") != null)
                         PBotUtils.sleep(10);
                 } else if (equipcoracle) {
-                    while (gui.getequipory().quickslots[11] != null)
+                    while (gui.getequipory().quickslots[14] != null)
                         PBotUtils.sleep(10);
                 } else {
                     PBotUtils.debugMsg(gui.ui, "Somehow I don't know if the coracle came from inv or equipory, breaking.", Color.white);

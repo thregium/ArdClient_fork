@@ -1,6 +1,7 @@
 package haven.purus.pbot;
 
 import haven.UI;
+import org.graalvm.polyglot.Context;
 
 import java.awt.Color;
 import java.io.File;
@@ -24,6 +25,10 @@ public class PBotScript extends Thread {
 
     public String getScriptName() {
         return (name);
+    }
+
+    public Context getContext() {
+        return (null);
     }
 
     @Override
