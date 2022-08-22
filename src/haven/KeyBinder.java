@@ -3,6 +3,7 @@ package haven;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import static haven.Action.*;
 import rx.functions.Func0;
 
 import java.awt.Color;
@@ -15,70 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static haven.Action.ACT_HAND_0;
-import static haven.Action.ACT_HAND_1;
-import static haven.Action.ACT_TRAVERSE;
-import static haven.Action.AGGRO_CLOSEST;
-import static haven.Action.ATTACK;
-import static haven.Action.BELT_PAGEFIVE;
-import static haven.Action.BELT_PAGEFOUR;
-import static haven.Action.BELT_PAGEONE;
-import static haven.Action.BELT_PAGETHREE;
-import static haven.Action.BELT_PAGETWO;
-import static haven.Action.CLOSEST_TARGET;
-import static haven.Action.CRAWL_SPEED;
-import static haven.Action.CYCLE_SPEED;
-import static haven.Action.DRINK;
-import static haven.Action.FILTER;
-import static haven.Action.FIX_CLIENT;
-import static haven.Action.HARVEST_FORAGEABLE;
-import static haven.Action.HARVEST_MOUSEOVERFORAGEABLE;
-import static haven.Action.LOCAL_SCREENSHOT;
-import static haven.Action.LOGOUT;
-import static haven.Action.LOGOUTSELECT;
-import static haven.Action.MARK_CURRENT;
-import static haven.Action.NEXT_SESS;
-import static haven.Action.PAUSE_SESS;
-import static haven.Action.PEACE_CURRENT;
-import static haven.Action.PREV_SESS;
-import static haven.Action.RUN_SPEED;
-import static haven.Action.SPRINT_SPEED;
-import static haven.Action.SWITCH_MARKEDTARGET;
-import static haven.Action.SWITCH_TARGETS;
-import static haven.Action.TAKE_SCREENSHOT;
-import static haven.Action.TOGGLEDEBUG;
-import static haven.Action.TOGGLE_CAMERA;
-import static haven.Action.TOGGLE_CHARACTER;
-import static haven.Action.TOGGLE_CHAT;
-import static haven.Action.TOGGLE_CRAFTWND;
-import static haven.Action.TOGGLE_CURSOR;
-import static haven.Action.TOGGLE_DANGER_RADIUS;
-import static haven.Action.TOGGLE_DAYLIGHT;
-import static haven.Action.TOGGLE_DISTANCE_BORDER;
-import static haven.Action.TOGGLE_EQUIPMENT;
-import static haven.Action.TOGGLE_FLOWERMENUSETTINGS;
-import static haven.Action.TOGGLE_GOB_HITBOX;
-import static haven.Action.TOGGLE_GOB_INFO;
-import static haven.Action.TOGGLE_GRID;
-import static haven.Action.TOGGLE_GRIDBINDS;
-import static haven.Action.TOGGLE_HIDDENGOBS;
-import static haven.Action.TOGGLE_HIDEGOBS;
-import static haven.Action.TOGGLE_INVENTORY;
-import static haven.Action.TOGGLE_KIN_LIST;
-import static haven.Action.TOGGLE_MAP;
-import static haven.Action.TOGGLE_MAPSETTINGS;
-import static haven.Action.TOGGLE_MUTE;
-import static haven.Action.TOGGLE_OPTIONS;
-import static haven.Action.TOGGLE_PATHFINDING;
-import static haven.Action.TOGGLE_QUESTHELPER;
-import static haven.Action.TOGGLE_RES;
-import static haven.Action.TOGGLE_SAFE_RADIUS;
-import static haven.Action.TOGGLE_SEARCH;
-import static haven.Action.TOGGLE_STATUSOVERLAY;
-import static haven.Action.TOGGLE_STUDY;
-import static haven.Action.TOGGLE_TILE_CENTERING;
-import static haven.Action.TOGGLE_UI;
-import static haven.Action.WALK_SPEED;
 import static haven.WidgetList.BOX;
 
 //import static haven.Action.FILTER;
@@ -186,6 +123,8 @@ public class KeyBinder {
         add(KeyEvent.VK_F, CTRL, TOGGLE_FLOWERMENUSETTINGS);
         add(KeyEvent.VK_M, SHIFT, TOGGLE_MAPSETTINGS);
         add(KeyEvent.VK_V, CTRL, ATTACK);
+        add(SHOT);
+        add(PUSH);
         add(KeyEvent.VK_TAB, CTRL, CLOSEST_TARGET);
         add(KeyEvent.VK_ADD, 0, NEXT_SESS);
         add(KeyEvent.VK_SUBTRACT, 0, PREV_SESS);
@@ -224,6 +163,18 @@ public class KeyBinder {
     public static void add(int code, int mods, Action action) {
         if (!binds.containsKey(action)) {
             binds.put(action, new KeyBind(code, mods, action));
+        }
+    }
+
+    public static void add(KeyBind keybind, Action action) {
+        if (!binds.containsKey(action)) {
+            binds.put(action, new KeyBind(keybind.code, keybind.mods, action));
+        }
+    }
+
+    public static void add(Action action) {
+        if (!binds.containsKey(action)) {
+            binds.put(action, new KeyBind(EMPTY.code, EMPTY.mods, action));
         }
     }
 

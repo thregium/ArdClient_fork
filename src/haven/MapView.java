@@ -2202,10 +2202,12 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             fakeGob.ctick((int) (dt * 1000));
         if (!movequeue.isEmpty() && (System.currentTimeMillis() - lastMove > 500) && triggermove()) {
             movingto = movequeue.poll();
-            ui.gui.pointer.update(movingto);
-            wdgmsg("click", new Coord(1, 1), movingto.floor(posres), 1, 0);
-            pllastcc = movingto;
-            lastMove = System.currentTimeMillis();
+            if (movingto != null) {
+                ui.gui.pointer.update(movingto);
+                wdgmsg("click", new Coord(1, 1), movingto.floor(posres), 1, 0);
+                pllastcc = movingto;
+                lastMove = System.currentTimeMillis();
+            }
         }
         if (!isclearmovequeue() && isfinishmovequeue()) {
             if (pathfindGobMouse == 3 && movequeue.size() == 0 && pathfindGob != null && !isclickongob) {

@@ -63,6 +63,7 @@ public class dev {
 
             System.err.println(sb.toString());
         }
+        e.printStackTrace();
     }
 
     public static void simpleLog(String e) {

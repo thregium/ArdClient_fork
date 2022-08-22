@@ -2021,9 +2021,19 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public void attack() {
         try {
             this.act("aggro");
-        } catch (Exception e) {
+        } catch (Exception e) {}
+    }
 
-        }
+    public void shoot() {
+        try {
+            this.act("shoot");
+        } catch (Exception e) {}
+    }
+
+    public void push() {
+        try {
+            this.act("push");
+        } catch (Exception e) {}
     }
 
 

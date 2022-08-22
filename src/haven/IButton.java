@@ -26,6 +26,7 @@
 
 package haven;
 
+import modification.dev;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
@@ -107,11 +108,17 @@ public class IButton extends SIWidget {
     }
 
     private void activate() {
-        action.run();
+        if (action != null) {
+            try {
+                action.run();
+            } catch (Exception e) {
+                dev.simpleLog(e);
+            }
+        }
     }
 
     public void click() {
-        action.run();
+        activate();
     }
 
     protected void depress() {
