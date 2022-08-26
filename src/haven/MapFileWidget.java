@@ -53,10 +53,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
@@ -186,6 +189,8 @@ public class MapFileWidget extends Widget implements Console.Directory {
         }
     }
 
+    private static final List<DisplayGrid.Highlighted> highlightedList = Collections.synchronizedList(new ArrayList<>());
+
     public static class DisplayGrid {
         public final Segment seg;
         public final Coord sc;
@@ -194,6 +199,9 @@ public class MapFileWidget extends Widget implements Console.Directory {
         private Defer.Future<Tex> img = null;
         private Tex tex = null;
         private final Map<String, Defer.Future<Tex>> olimg_c = new HashMap<>();
+        private final Map<Highlighted, Defer.Future<Tex>> highlightedMap = Collections.synchronizedMap(new HashMap<>());
+
+        private Color highlightColor = MapFile.highlightColor;
 
         public DisplayGrid(Segment seg, Coord sc, Indir<Grid> gref) {
             this.seg = seg;
@@ -202,23 +210,63 @@ public class MapFileWidget extends Widget implements Console.Directory {
         }
 
         public Tex img() {
+            return (img(0));
+        }
+
+        public Tex img(double opacity, String... tileNames) {
             Grid grid = gref.get();
-            if (grid != cgrid) {
-                if (img != null)
-                    img.cancel();
-                synchronized (olimg_c) {
-                    if (!olimg_c.isEmpty()) {
-                        olimg_c.forEach((s, d) -> d.cancel());
-                        olimg_c.clear();
-                    }
+            if (!highlightColor.equals(MapFile.highlightColor)) {
+                highlightColor = MapFile.highlightColor;
+                synchronized (highlightedList) {
+                    highlightedMap.clear();
                 }
-                img = Defer.later(() -> new TexI(grid.render(sc.mul(cmaps.div(scalef())))));
+            }
+            Defer.Future<Tex> imgt;
+            Highlighted hgt = null;
+            if (opacity > 0) {
+                synchronized (highlightedList) {
+                    hgt = highlightedList.stream().filter(h -> h.opacity == opacity).filter(h -> Arrays.equals(h.timeNames, tileNames)).findFirst().orElseGet(() -> {
+                        Highlighted nhgt = new Highlighted(opacity, tileNames);
+                        synchronized (highlightedList) {
+                            highlightedList.add(nhgt);
+                        }
+                        return (nhgt);
+                    });
+                }
+                synchronized (highlightedMap) {
+                    imgt = highlightedMap.get(hgt);
+                }
+            } else {
+                imgt = img;
+            }
+            if (grid != cgrid || imgt == null) {
+                if (grid != cgrid) {
+                    if (img != null)
+                        img.cancel();
+                    synchronized (olimg_c) {
+                        if (!olimg_c.isEmpty()) {
+                            olimg_c.forEach((s, d) -> d.cancel());
+                            olimg_c.clear();
+                        }
+                    }
+                    img = Defer.later(() -> new TexI(grid.render(sc.mul(cmaps.div(scalef())))));
+                }
+                if (opacity > 0) {
+                    if (imgt != null)
+                        imgt.cancel();
+                    imgt = Defer.later(() -> new TexI(grid.render(sc.mul(cmaps.div(scalef())), opacity, tileNames)));
+                    synchronized (highlightedMap) {
+                        highlightedMap.put(hgt, imgt);
+                    }
+                } else {
+                    imgt = img;
+                }
                 cgrid = grid;
             }
 
-            if (img != null) {
+            if (imgt != null && imgt.done()) {
                 try {
-                    tex = img.get();
+                    tex = imgt.get();
                 } catch (Exception e) {
 //                    dev.resourceLog("DisplayGrid: " + e + " " + seg.id);
                 }
@@ -247,6 +295,31 @@ public class MapFileWidget extends Widget implements Console.Directory {
                 }
             }
             return tret;
+        }
+
+        private class Highlighted {
+            private final double opacity;
+            private final String[] timeNames;
+
+            private Highlighted(double opacity, String[] timeNames) {
+                this.opacity = opacity;
+                this.timeNames = timeNames;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return (true);
+                if (o == null || getClass() != o.getClass()) return (false);
+                Highlighted that = (Highlighted) o;
+                return Double.compare(that.opacity, opacity) == 0 && Arrays.equals(timeNames, that.timeNames);
+            }
+
+            @Override
+            public int hashCode() {
+                int result = Objects.hash(opacity);
+                result = 31 * result + Arrays.hashCode(timeNames);
+                return (result);
+            }
         }
     }
 
@@ -374,9 +447,19 @@ public class MapFileWidget extends Widget implements Console.Directory {
         return (loc.tc.add(sz.div(2)).sub(curloc.tc));
     }
 
+    private final long timer = System.currentTimeMillis();
     public void drawgrid(GOut g, Coord ul, DisplayGrid disp) {
         try {
-            Tex img = disp.img();
+            double period = configuration.highlightTilePeriod;
+            double opac = (System.currentTimeMillis() - timer) % period / (period / 2);
+            double ropca;
+            double freq = 1.0 / configuration.highlightTileFrequency;
+            if (opac > 1.0) {
+                ropca = ((int) ((1.0 - (opac % 1.0)) / freq)) * freq;
+            } else {
+                ropca = ((int) (opac / freq)) * freq;
+            }
+            Tex img = disp.img(ropca, highlighed.toArray(new String[0]));
             if (img != null)
                 g.image(img, ul, cmaps.div(scalef()));
         } catch (Loading l) {
@@ -976,6 +1059,17 @@ public class MapFileWidget extends Widget implements Console.Directory {
                     }
                     return true;
                 });
+            }
+        }
+    }
+
+    private final List<String> highlighed = Collections.synchronizedList(new ArrayList<>());
+    public void highlight(final String tilename, final boolean toggle) {
+        synchronized (highlighed) {
+            if (toggle) {
+                highlighed.add(tilename);
+            } else {
+                highlighed.remove(tilename);
             }
         }
     }

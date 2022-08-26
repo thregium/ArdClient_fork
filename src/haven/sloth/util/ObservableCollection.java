@@ -91,6 +91,12 @@ public class ObservableCollection<T> implements Iterable<T> {
         return base.iterator();
     }
 
+    public List<T> items() {
+        synchronized (base) {
+            return (new ArrayList<>(base));
+        }
+    }
+
     public boolean replaceItem(T olditem, T newitem) {
         int n = 0;
         boolean s = false;

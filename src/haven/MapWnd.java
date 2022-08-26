@@ -1624,4 +1624,8 @@ public class MapWnd extends ResizableWnd {
     public boolean type(char key, KeyEvent ev) {
         return (true);
     }
+
+    public void highlight(final String tilename, final boolean toggle) {
+        view.highlight(tilename, toggle);
+    }
 }

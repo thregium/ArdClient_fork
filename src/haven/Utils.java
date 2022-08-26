@@ -571,8 +571,8 @@ public class Utils {
         });
     }
 
-    public static ArrayList<String> loadcollection(String prefname) {
-        ArrayList<String> a = new ArrayList<>();
+    public static List<String> loadcollection(String prefname) {
+        List<String> a = new ArrayList<>();
         try {
             String jsonstr = Utils.getpref(prefname, null);
             if (jsonstr != null) {
@@ -589,14 +589,14 @@ public class Utils {
         return a;
     }
 
-    public static void setcollection(String prefname, Set<String> val) {
+    public static void setcollection(String prefname, Collection<String> val) {
         try {
-            String jsonarr = "";
+            StringBuilder jsonarr = new StringBuilder();
             for (String item : val) {
-                jsonarr += "\"" + item + "\",";
+                jsonarr.append("\"").append(item).append("\",");
             }
             if (jsonarr.length() > 0)
-                jsonarr = jsonarr.substring(0, jsonarr.length() - 1);
+                jsonarr = new StringBuilder(jsonarr.substring(0, jsonarr.length() - 1));
             Utils.setpref(prefname, "[" + jsonarr + "]");
         } catch (SecurityException e) {
         } catch (Exception ex) {

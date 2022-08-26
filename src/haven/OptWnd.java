@@ -27,6 +27,7 @@
 package haven;
 
 
+import static haven.DefSettings.*;
 import haven.purus.pathfinder.Pathfinder;
 import haven.purus.pbot.PBotDiscord;
 import haven.purus.pbot.PBotUtils;
@@ -39,6 +40,7 @@ import haven.sloth.gfx.HitboxMesh;
 import haven.sloth.gfx.SnowFall;
 import haven.sloth.gob.Movable;
 import haven.sloth.gob.Type;
+import haven.sloth.util.ObservableListener;
 import integrations.mapv4.MappingClient;
 import modification.Decal;
 import modification.configuration;
@@ -47,7 +49,6 @@ import modification.resources;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.awt.Color;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
@@ -63,6 +64,7 @@ import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -75,62 +77,6 @@ import java.util.function.Function;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
-
-import static haven.DefSettings.ALLWATERCOL;
-import static haven.DefSettings.AMBERMENU;
-import static haven.DefSettings.ANIMALDANGERCOLOR;
-import static haven.DefSettings.ANIMALPATHCOL;
-import static haven.DefSettings.BEEHIVECOLOR;
-import static haven.DefSettings.BTNCOL;
-import static haven.DefSettings.BUGGEDMENU;
-import static haven.DefSettings.CHEESERACKEMPTYCOLOR;
-import static haven.DefSettings.CHEESERACKFULLCOLOR;
-import static haven.DefSettings.CHEESERACKMISSINGCOLOR;
-import static haven.DefSettings.CLOSEFORMENU;
-import static haven.DefSettings.DARKMODE;
-import static haven.DefSettings.DEBUG;
-import static haven.DefSettings.DEEPWATERCOL;
-import static haven.DefSettings.DRAWGRIDRADIUS;
-import static haven.DefSettings.ERRORTEXTCOLOR;
-import static haven.DefSettings.GARDENPOTDONECOLOR;
-import static haven.DefSettings.GOBPATHCOL;
-import static haven.DefSettings.GUIDESCOLOR;
-import static haven.DefSettings.HIDDENCOLOR;
-import static haven.DefSettings.HITBOXCOLOR;
-import static haven.DefSettings.HUDTHEME;
-import static haven.DefSettings.KEEPGOBS;
-import static haven.DefSettings.KEEPGRIDS;
-import static haven.DefSettings.LIMITPATHFINDING;
-import static haven.DefSettings.MAPTYPE;
-import static haven.DefSettings.MINIMAPTYPE;
-import static haven.DefSettings.NVAMBIENTCOL;
-import static haven.DefSettings.NVDIFFUSECOL;
-import static haven.DefSettings.NVSPECCOC;
-import static haven.DefSettings.OCEANWATERCOL;
-import static haven.DefSettings.PATHFINDINGTIER;
-import static haven.DefSettings.PLAYERPATHCOL;
-import static haven.DefSettings.RESEARCHUNTILGOAL;
-import static haven.DefSettings.SHALLOWOCEANWATERCOL;
-import static haven.DefSettings.SHALLOWWATERCOL;
-import static haven.DefSettings.SHOWANIMALPATH;
-import static haven.DefSettings.SHOWFKBELT;
-import static haven.DefSettings.SHOWGOBPATH;
-import static haven.DefSettings.SHOWGOBS;
-import static haven.DefSettings.SHOWHALO;
-import static haven.DefSettings.SHOWHALOONHEARTH;
-import static haven.DefSettings.SHOWMAP;
-import static haven.DefSettings.SHOWNBELT;
-import static haven.DefSettings.SHOWNPBELT;
-import static haven.DefSettings.SHOWPLAYERPATH;
-import static haven.DefSettings.SLIDERCOL;
-import static haven.DefSettings.SUPPORTDANGERCOLOR;
-import static haven.DefSettings.SYMMETRICOUTLINES;
-import static haven.DefSettings.THEMES;
-import static haven.DefSettings.TROUGHCOLOR;
-import static haven.DefSettings.TXBCOL;
-import static haven.DefSettings.WATERCOL;
-import static haven.DefSettings.WIREFRAMEMODE;
-import static haven.DefSettings.WNDCOL;
 
 
 public class OptWnd extends Window {
@@ -1351,17 +1297,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         }, 10, 350);
-        map.add(new CheckBox("Disable map updating(dontwork)") {
-            {
-                a = Config.stopmapupdate;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("stopmapupdate", val);
-                Config.stopmapupdate = val;
-                a = val;
-            }
-        }, 425, 350);
+        map.add(new PButton(50, "New map options", 'm', mapPanel), 425, 350);
 
         map.add(new PButton(200, "Back", 27, main), new Coord(210, 380));
         map.pack();
@@ -3983,12 +3919,145 @@ public class OptWnd extends Window {
     }
 
     private void initMapPanel() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(mapPanel, new Coord(620, 350)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(mapPanel);
+        final WidgetVerticalAppender appender2 = new WidgetVerticalAppender(withScrollport(mapPanel, new Coord(620, 350)));
         appender.setVerticalMargin(5);
         appender.setHorizontalMargin(5);
+        appender2.setX(200);
 
-        appender.add(new Label("Both"));
-        appender.addRow(new Label("Simple map color"), new HSlider(100, 0, 100, (int) (configuration.simplelmapintens * 100)) {
+        CheckListbox tiles = new CheckListbox(190, 17) {
+            @Override
+            public void itemclick(CheckListboxItem itm, int button) {
+                super.itemclick(itm, button);
+                GameUI gui = getparent(GameUI.class);
+                if (gui != null) {
+                    MapWnd wnd = gui.mapfile;
+                    if (wnd != null) {
+                        wnd.highlight(itm.name, itm.selected);
+                        return;
+                    }
+                }
+                {itm.selected = !itm.selected;}
+            }
+
+            protected void drawitemname(GOut g, CheckListboxItem itm) {
+                Text t = Text.render(configuration.getShortName(itm.name));
+                Tex T = t.tex();
+                g.image(T, new Coord(2, 2), t.sz());
+                T.dispose();
+            }
+        };
+        Runnable tilesSort = () -> {
+            synchronized (tiles.items) {
+                tiles.items.sort(Comparator.comparing(t -> configuration.getShortName(t.name)));
+            }
+        };
+        Consumer<String> tilesUpdate = (filter) -> {
+            tiles.filter = !filter.isEmpty();
+            tilesSort.run();
+            tiles.sb.val = 0;
+            synchronized (tiles.filtered) {
+                tiles.filtered.clear();
+                if (tiles.filter) {
+                    synchronized (tiles.items) {
+                        tiles.items.stream().filter(t -> t.name.toLowerCase().contains(filter.toLowerCase())).forEach(tiles.filtered::add);
+                    }
+                }
+            }
+        };
+        TextEntry searchEntry = new TextEntry(190, "") {
+            @Override
+            public void changed() {
+                update();
+            }
+
+            @Override
+            public boolean mousedown(Coord mc, int btn) {
+                if (btn == 3) {
+                    settext("");
+                    update();
+                    return (true);
+                } else {
+                    return (super.mousedown(mc, btn));
+                }
+            }
+
+            public void update() {
+                tilesUpdate.accept(text());
+            }
+
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Right Click to clear entry").tex();
+            }
+        };
+        CheckBox chb = new CheckBox("Highlight tiles", val -> {
+            synchronized (tiles.items) {
+                tiles.items.stream().filter(t -> t.selected).forEach(t -> tiles.itemclick(t, 1));
+            }
+            searchEntry.settext("");
+            tilesUpdate.accept(searchEntry.text());
+        }, true);
+        appender.addRow(chb, new ColorPreview(Coord.of(20, 20), MapFile.highlightColor, val -> Utils.setprefi("highlightTileColor", (MapFile.highlightColor = val).getRGB())));
+        appender.add(tiles);
+        appender.add(searchEntry);
+        configuration.tilesCollection.addListener(new ObservableListener<String>() {
+            @Override
+            public void init(Collection<String> base) {
+                synchronized (tiles.items) {
+                    base.forEach(t -> tiles.items.add(new CheckListboxItem(t)));
+                }
+                tilesUpdate.accept(searchEntry.text());
+            }
+
+            @Override
+            public void added(String item) {
+                synchronized (tiles.items) {
+                    tiles.items.add(new CheckListboxItem(item));
+                }
+                tilesUpdate.accept(searchEntry.text());
+            }
+
+            @Override
+            public void edited(String olditem, String newitem) {
+                synchronized (tiles.items) {
+                    tiles.items.stream().filter(t -> t.name.equals(olditem)).forEach(t -> t.name = newitem);
+                }
+                tilesUpdate.accept(searchEntry.text());
+            }
+
+            @Override
+            public void remove(String item) {
+                synchronized (tiles.items) {
+                    tiles.items.stream().filter(t -> t.name.equals(item)).collect(Collectors.toList()).forEach(tiles.items::remove);
+                }
+                tilesUpdate.accept(searchEntry.text());
+            }
+        });
+        appender.add(new HSlider(190, 1, 100, configuration.highlightTileFrequency) {
+            @Override
+            public void changed() {
+                Utils.setprefi("highlightTileFrequency", configuration.highlightTileFrequency = val);
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Highlight frequency: " + val).tex();
+            }
+        });
+        appender.add(new HSlider(190, 1, 10000, configuration.highlightTilePeriod) {
+            @Override
+            public void changed() {
+                Utils.setprefi("highlightTilePeriod", configuration.highlightTilePeriod = val);
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Highlight frequency: " + val).tex();
+            }
+        });
+
+        appender2.add(new Label("Both"));
+        appender2.addRow(new Label("Simple map color"), new HSlider(100, 0, 100, (int) (configuration.simplelmapintens * 100)) {
             public void changed() {
                 configuration.simplelmapintens = val / 100f;
                 Utils.setpreff("simplelmapintens", val / 100f);
@@ -3999,7 +4068,7 @@ public class OptWnd extends Window {
                 return Text.render("Simple map blend: " + val / 100f).tex();
             }
         });
-        appender.add(new CheckBox("Draw cave tiles on map") {
+        appender2.add(new CheckBox("Draw cave tiles on map") {
             {
                 a = configuration.cavetileonmap;
             }
@@ -4015,13 +4084,13 @@ public class OptWnd extends Window {
                 return Text.render("Draw cave tiles on large map. Outline nust be disable.").tex();
             }
         });
-        appender.add(new CheckBox("Disable paving outline", val -> Utils.setprefb("disablepavingoutlineonmap", configuration.disablepavingoutlineonmap = val), configuration.disablepavingoutlineonmap));
+        appender2.add(new CheckBox("Disable paving outline", val -> Utils.setprefb("disablepavingoutlineonmap", configuration.disablepavingoutlineonmap = val), configuration.disablepavingoutlineonmap));
 
-        appender.add(new Label(""));
-        appender.add(new Label("Minimap"));
+        appender2.add(new Label(""));
+        appender2.add(new Label("Minimap"));
         final String[] tiers = {"Default", "Blend", "Simple"};
-        appender.addRow(new IndirLabel(() -> String.format("Minimap type: %s", tiers[MINIMAPTYPE.get()])), new IndirHSlider(100, 0, 2, MINIMAPTYPE));
-        appender.add(new CheckBox("Disable outline") {
+        appender2.addRow(new IndirLabel(() -> String.format("Minimap type: %s", tiers[MINIMAPTYPE.get()])), new IndirHSlider(100, 0, 2, MINIMAPTYPE));
+        appender2.add(new CheckBox("Disable outline") {
             {
                 a = Config.disableBlackOutLinesOnMap;
             }
@@ -4032,7 +4101,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Map Scale") {
+        appender2.add(new CheckBox("Map Scale") {
             {
                 a = Config.mapscale;
             }
@@ -4043,7 +4112,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Trollex Map Binds") {
+        appender2.add(new CheckBox("Trollex Map Binds") {
             {
                 a = Config.trollexmap;
             }
@@ -4055,10 +4124,10 @@ public class OptWnd extends Window {
             }
         });
 
-        appender.add(new Label(""));
-        appender.add(new Label("Map"));
-        appender.addRow(new IndirLabel(() -> String.format("Map type: %s", tiers[MAPTYPE.get()])), new IndirHSlider(100, 0, 2, MAPTYPE));
-        appender.addRow(new CheckBox("Additional marks on the map") {
+        appender2.add(new Label(""));
+        appender2.add(new Label("Map"));
+        appender2.addRow(new IndirLabel(() -> String.format("Map type: %s", tiers[MAPTYPE.get()])), new IndirHSlider(100, 0, 2, MAPTYPE));
+        appender2.addRow(new CheckBox("Additional marks on the map") {
             {
                 a = resources.customMarkObj;
             }
@@ -4113,7 +4182,7 @@ public class OptWnd extends Window {
                 ui.root.adda(w, ui.root.sz.div(2), 0.5, 0.5);
             }
         });
-        appender.add(new CheckBox("Scaling marks from zoom") {
+        appender2.add(new CheckBox("Scaling marks from zoom") {
             {
                 a = configuration.scalingmarks;
             }
@@ -4129,7 +4198,7 @@ public class OptWnd extends Window {
                 return Text.render("On a large map the marks will look small").tex();
             }
         });
-        appender.add(new CheckBox("Allow texture map") {
+        appender2.add(new CheckBox("Allow texture map") {
             {
                 a = configuration.allowtexturemap;
             }
@@ -4145,7 +4214,7 @@ public class OptWnd extends Window {
                 return Text.render("Draw textures on large map").tex();
             }
         });
-        appender.addRow(new CheckBox("Allow outline map") {
+        appender2.addRow(new CheckBox("Allow outline map") {
             {
                 a = configuration.allowoutlinemap;
             }
@@ -4171,7 +4240,7 @@ public class OptWnd extends Window {
                 return Text.render(val + "").tex();
             }
         });
-        appender.add(new CheckBox("Allow ridges map") {
+        appender2.add(new CheckBox("Allow ridges map") {
             {
                 a = configuration.allowridgesmap;
             }
@@ -4188,27 +4257,27 @@ public class OptWnd extends Window {
             }
         });
 
-        appender.add(new Label(""));
-        appender.add(new Label("Other"));
-        appender.addRow(new Label("Distance view color"), new ColorPreview(new Coord(20, 20), new Color(configuration.distanceviewcolor, true), val -> {
+        appender2.add(new Label(""));
+        appender2.add(new Label("Other"));
+        appender2.addRow(new Label("Distance view color"), new ColorPreview(new Coord(20, 20), new Color(configuration.distanceviewcolor, true), val -> {
             configuration.distanceviewcolor = val.hashCode();
             Utils.setprefi("distanceviewcolor", val.hashCode());
         }));
-        appender.addRow(new Label("Pathfinding color"), new ColorPreview(new Coord(20, 20), new Color(configuration.pfcolor, true), val -> {
+        appender2.addRow(new Label("Pathfinding color"), new ColorPreview(new Coord(20, 20), new Color(configuration.pfcolor, true), val -> {
             configuration.pfcolor = val.hashCode();
             Utils.setprefi("pfcolor", val.hashCode());
         }));
-        appender.addRow(new Label("Dowse color"), new ColorPreview(new Coord(20, 20), new Color(configuration.dowsecolor, true), val -> {
+        appender2.addRow(new Label("Dowse color"), new ColorPreview(new Coord(20, 20), new Color(configuration.dowsecolor, true), val -> {
             configuration.dowsecolor = val.hashCode();
             Utils.setprefi("dowsecolor", val.hashCode());
         }));
-        appender.addRow(new Label("Questline color"), new ColorPreview(new Coord(20, 20), new Color(configuration.questlinecolor, true), val -> {
+        appender2.addRow(new Label("Questline color"), new ColorPreview(new Coord(20, 20), new Color(configuration.questlinecolor, true), val -> {
             configuration.questlinecolor = val.hashCode();
             Utils.setprefi("questlinecolor", val.hashCode());
         }));
 
-        appender.add(new Label(""));
-        appender.addRow(new CheckBox("Temporary marks") {
+        appender2.add(new Label(""));
+        appender2.addRow(new CheckBox("Temporary marks") {
             {
                 a = configuration.tempmarks;
             }
@@ -4246,7 +4315,7 @@ public class OptWnd extends Window {
             }
         });
 
-        appender.addRow(new HSlider(200, 0, 5000, configuration.tempmarkstime) {
+        appender2.addRow(new HSlider(200, 0, 5000, configuration.tempmarkstime) {
             @Override
             protected void added() {
                 super.added();

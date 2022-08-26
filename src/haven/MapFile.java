@@ -534,6 +534,7 @@ public class MapFile {
             this.tiles = tiles;
             this.zmap = zmap;
             this.mtime = mtime;
+            configuration.addTiles(tilesets);
         }
 
         public int gettile(Coord c) {
@@ -600,6 +601,10 @@ public class MapFile {
         }
 
         public BufferedImage render(Coord off) {
+            return (render(off, 0));
+        }
+
+        public BufferedImage render(Coord off, double opacity, String... tilenames) {
             BufferedImage[] texes = new BufferedImage[256];
             boolean[] cached = new boolean[256];
             WritableRaster buf = PUtils.imgraster(cmaps);
@@ -609,9 +614,9 @@ public class MapFile {
                     for (c.x = 0; c.x < cmaps.x; c.x++) {
                         try {
                             int t = gettile(c);
+                            final String tname = tileName(t);
                             BufferedImage tex;
                             if (configuration.cavetileonmap && isContains(t, "gfx/tiles/rocks/")) {
-                                final String tname = tileName(t);
                                 final String newtype = "gfx/terobjs/bumlings/" + tname.substring(tname.lastIndexOf("/") + 1);
                                 tex = tiletex(t, texes, cached, newtype);
                             } else tex = tiletex(t, texes, cached);
@@ -637,6 +642,14 @@ public class MapFile {
                                     default:
                                         rgb = tex.getRGB(Utils.floormod(c.x + off.x, tex.getWidth()), Utils.floormod(c.y + off.y, tex.getHeight()));
                                         break;
+                                }
+                            }
+
+                            for (String tnm : tilenames) {
+                                if (tname.contains(tnm)) {
+                                    Color tempColor = Utils.blendcol(new Color(rgb, true), highlightColor, opacity);
+                                    rgb = tempColor.getRGB();
+                                    break;
                                 }
                             }
 
@@ -2323,4 +2336,6 @@ public class MapFile {
             }
         }
     }
+
+    public static Color highlightColor = new Color(Utils.getprefi("highlightTileColor", new Color(255, 0, 255).getRGB()), true);
 }

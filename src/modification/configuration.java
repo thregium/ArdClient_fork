@@ -10,6 +10,7 @@ import haven.Gob;
 import haven.HSliderListboxItem;
 import haven.HSliderNamed;
 import haven.MainFrame;
+import haven.MapFile;
 import haven.Matrix4f;
 import haven.OCache;
 import haven.PUtils;
@@ -25,6 +26,7 @@ import haven.WidgetVerticalAppender;
 import haven.Window;
 import haven.purus.pbot.PBotUtils;
 import haven.sloth.gfx.SnowFall;
+import haven.sloth.util.ObservableCollection;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -51,9 +53,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
@@ -1316,4 +1320,37 @@ public class configuration {
         }
         return (false);
     }
+
+    public static final ObservableCollection<String> tilesCollection = new ObservableCollection<>(Utils.loadcollection("tilescollection"));
+
+    public static void addTile(final String tileName) {
+        synchronized (tilesCollection) {
+            final AtomicBoolean dirty = new AtomicBoolean();
+            if (!tilesCollection.contains(tileName)) {
+                tilesCollection.add(tileName);
+            }
+            if (dirty.get()) {
+                Utils.setcollection("tilescollection", tilesCollection.items());
+            }
+        }
+    }
+
+    public static void addTiles(final MapFile.TileInfo[] tileSets) {
+        synchronized (tilesCollection) {
+            final AtomicBoolean dirty = new AtomicBoolean();
+            Arrays.stream(tileSets).filter(Objects::nonNull).forEach(t -> {
+                String tileName = t.res.name();
+                if (!tilesCollection.contains(tileName)) {
+                    tilesCollection.add(tileName);
+                    dirty.set(true);
+                }
+            });
+            if (dirty.get()) {
+                Utils.setcollection("tilescollection", tilesCollection.items());
+            }
+        }
+    }
+
+    public static int highlightTileFrequency = Utils.getprefi("highlightTileFrequency", 5);
+    public static int highlightTilePeriod = Utils.getprefi("highlightTilePeriod", 2000);
 }

@@ -6,7 +6,17 @@ import java.util.List;
 
 public class CheckListbox extends Listbox<CheckListboxItem> {
     public static final Tex chk = Resource.loadtex("gfx/hud/chkmarks");
-    public List<CheckListboxItem> items = new ArrayList<CheckListboxItem>() {
+    public final List<CheckListboxItem> items = new ArrayList<CheckListboxItem>() {
+        @Override
+        public boolean add(CheckListboxItem value) {
+            super.add(value);
+            for (int i = size() - 1; i > 0 && value.compareTo(get(i - 1)) < 0; i--)
+                Collections.swap(this, i, i - 1);
+            return true;
+        }
+    };
+    public boolean filter = false;
+    public final List<CheckListboxItem> filtered = new ArrayList<CheckListboxItem>() {
         @Override
         public boolean add(CheckListboxItem value) {
             super.add(value);
@@ -32,11 +42,11 @@ public class CheckListbox extends Listbox<CheckListboxItem> {
     }
 
     protected CheckListboxItem listitem(int idx) {
-        return (items.get(idx));
+        return (filter ? filtered.get(idx) : items.get(idx));
     }
 
     protected int listitems() {
-        return items.size();
+        return (filter ? filtered.size() : items.size());
     }
 
     public void drawbg(GOut g) {
