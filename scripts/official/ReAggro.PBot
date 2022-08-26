@@ -1,0 +1,123 @@
+const PBotAPI = Java.type('haven.purus.pbot.PBotAPI');
+const PBotUtils = Java.type('haven.purus.pbot.PBotUtils');
+const PBotGobAPI = Java.type('haven.purus.pbot.PBotGobAPI');
+const PBotScriptmanager = Java.type('haven.purus.pbot.PBotScriptmanager');
+const PBotCharacterAPI = Java.type('haven.purus.pbot.PBotCharacterAPI');
+const WVA = Java.type('haven.WidgetVerticalAppender');
+const Label = Java.type('haven.Label');
+const Button = Java.type('haven.Button');
+const CheckBox = Java.type('haven.CheckBox');
+
+const script = PBotScriptmanager.getScript(ScriptID);
+const ui = script.ui;
+const player = (u) => PBotGobAPI.player(u);
+
+const window = PBotUtils.PBotWindow(ui, "ReAggro", 50, 50, ScriptID);
+const appender = new WVA(window);
+const stopCheckBox = new CheckBox("Stop");
+const infoLabel = new Label("");
+appender.addRow([infoLabel]);
+appender.addRow([stopCheckBox]);
+window.pack();
+
+function info(msg) {
+    infoLabel.settext(msg);
+    window.pack();
+}
+
+let currentState = 0; //0 - no combat no target, 1 - combat red/blue, 2 - combat green target run, 3 - no combat target run
+let lastTarget = -1;
+
+function startFunc() {
+    if (ui.gui == null) {
+        stopTrigger();
+        return;
+    }
+
+    let crn = ui.gui.fv.current;
+    if (crn == null) {
+        if (lastTarget === -1) {
+            currentState = 0;
+            info("Waiting for combat");
+        } else {
+            let ntarget = PBotGobAPI.findGobById(ui, lastTarget);
+            if (ntarget != null && ntarget.isKnocked()) {
+                lastTarget = -1;
+                return;
+            }
+            currentState = 3;
+            info("Trying reaggro");
+            aggro(lastTarget);
+        }
+    } else {
+        if (lastTarget !== crn.gobid) {
+            lastTarget = crn.gobid;
+        }
+        if (isPeace(crn)) {
+            currentState = 2;
+            info("Peace");
+            peace(crn);
+        } else {
+            currentState = 1;
+            info("Combat");
+        }
+    }
+}
+
+function aggro(gobid) {
+    PBotCharacterAPI.doAct(ui, "aggro");
+
+    let ntarget = PBotGobAPI.findGobById(ui, gobid);
+    if (ntarget != null) {
+        ntarget.doClick(1, 0);
+        PBotUtils.sleep(50);
+    }
+
+    PBotCharacterAPI.cancelAct(ui);
+}
+
+
+function peace(current) { //0 - red, 1 - blue, 2 - green
+    let give = current.give;
+    if (give.state !== 1) {
+        give.wdgmsg("click", 1);
+    }
+}
+
+function isPeace(current) {
+    let give = current.give;
+    return give.state === 2;
+}
+
+let stop = false;
+
+function stopTrigger() {
+    stopCheckBox.set(true);
+}
+
+function isStop() {
+    if (!stop) {
+        if (window.closed()) {
+            stop = true;
+            PBotUtils.debugMsg(ui, "Windows closed!");
+        }
+        if (stopCheckBox.a) {
+            stop = true;
+            PBotUtils.debugMsg(ui, "Stopped!");
+        }
+    }
+    return stop;
+}
+
+while (true) {
+    try {
+        if (isStop()) break;
+        startFunc();
+        PBotUtils.sleep(200);
+    } catch (e) {
+        PBotUtils.debugMsg(ui, e + "");
+        break;
+    }
+}
+window.close();
+script.kill();

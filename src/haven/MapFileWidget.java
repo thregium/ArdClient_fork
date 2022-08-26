@@ -447,19 +447,33 @@ public class MapFileWidget extends Widget implements Console.Directory {
         return (loc.tc.add(sz.div(2)).sub(curloc.tc));
     }
 
-    private final long timer = System.currentTimeMillis();
+    private long timer = System.currentTimeMillis();
     public void drawgrid(GOut g, Coord ul, DisplayGrid disp) {
         try {
-            double period = configuration.highlightTilePeriod;
-            double opac = (System.currentTimeMillis() - timer) % period / (period / 2);
-            double ropca;
-            double freq = 1.0 / configuration.highlightTileFrequency;
-            if (opac > 1.0) {
-                ropca = ((int) ((1.0 - (opac % 1.0)) / freq)) * freq;
-            } else {
-                ropca = ((int) (opac / freq)) * freq;
+            int size;
+            synchronized (highlighed) {
+                size = highlighed.size();
             }
-            Tex img = disp.img(ropca, highlighed.toArray(new String[0]));
+            Tex img;
+            if (size > 0) {
+                double period = configuration.highlightTilePeriod;
+                long now = System.currentTimeMillis();
+                long div = now - timer;
+                double opac = div % period / (period / 2);
+                if (div > period) timer = now;
+                double ropca;
+                double freq = 1.0 / configuration.highlightTileFrequency;
+                if (opac > 1.0) {
+                    ropca = ((int) ((1.0 - (opac % 1.0)) / freq)) * freq;
+                } else {
+                    ropca = ((int) (opac / freq)) * freq;
+                }
+                synchronized (highlighed) {
+                    img = disp.img(ropca, highlighed.toArray(new String[0]));
+                }
+            } else {
+                img = disp.img();
+            }
             if (img != null)
                 g.image(img, ul, cmaps.div(scalef()));
         } catch (Loading l) {
