@@ -72,7 +72,7 @@ function startFunc() {
         info("Peace");
 
         while (toPeace.length > 0) {
-            if (isStop() || isPause()) return;
+            if (stopCheck() || pauseCheck()) return;
             let toPeaceDelete = [];
             for (let rel of toPeace) {
                 peace(rel);
@@ -114,7 +114,7 @@ function startFunc() {
         switchAggro(true);
 
         while (toAggro.length > 0) {
-            if (isStop() || isPause()) return;
+            if (stopCheck() || pauseCheck()) return;
             if (!pauseCheckBox.a) {
                 let toAggroDelete = [];
                 for (let targetId of toAggro) {
@@ -122,6 +122,10 @@ function startFunc() {
                 }
                 PBotUtils.sleep(100);
                 for (let targetId of toAggro) {
+                    if (stopCheck() || pauseCheck()) {
+                        switchAggro(false);
+                        return;
+                    }
                     if (idInList(targetId, rels)) {
                         toAggroDelete.push(targetId);
                     } else if (idIsUndefined(targetId, rels)) {
@@ -205,31 +209,31 @@ function isPeace(rel) {
 let stop = false;
 
 function stopTrigger() {
-    stopCheckBox.set(true);
+    stopCheckBox.a = true;
 }
 
-function isStop() {
+function stopCheck() {
     if (!stop) {
+        if (stopCheckBox.a) {
+            window.close();
+            PBotUtils.debugMsg(ui, "Stopped!");
+        }
         if (window.closed()) {
             stop = true;
             PBotUtils.debugMsg(ui, "Windows closed!");
-        }
-        if (stopCheckBox.a) {
-            stop = true;
-            PBotUtils.debugMsg(ui, "Stopped!");
         }
     }
     return stop;
 }
 
-function isPause() {
+function pauseCheck() {
     return pauseCheckBox.a;
 }
 
 while (true) {
     try {
-        if (isStop()) break;
-        if (!isPause()) {
+        if (stopCheck()) break;
+        if (!pauseCheck()) {
             startFunc();
         }
         PBotUtils.sleep(200);
@@ -239,4 +243,4 @@ while (true) {
     }
 }
 window.close();
-script.kill();
+PBotUtils.run(() => script.kill());

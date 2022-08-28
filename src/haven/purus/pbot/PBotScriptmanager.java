@@ -31,7 +31,10 @@ public class PBotScriptmanager {
     public static void runScript(PBotScript script) {
         scripts.put(script.getScriptId(), script);
         script.start();
-        configuration.classMaker(() -> script.ui.gui.PBotScriptlist.threadsUpdate());
+        for (UI ui : PBotAPI.uis()) {
+            if (ui.gui == null) continue;
+            ui.gui.PBotScriptlist.threadsUpdate();
+        }
     }
 
     public static PBotScript getScript(String id) {
@@ -45,7 +48,10 @@ public class PBotScriptmanager {
                     scripts.remove(item.getKey());
                     break;
                 }
-            configuration.classMaker(() -> script.ui.gui.PBotScriptlist.removeFromList(script));
+            for (UI ui : PBotAPI.uis()) {
+                if (ui.gui == null) continue;
+                ui.gui.PBotScriptlist.removeFromList(script);
+            }
         }
     }
 }
