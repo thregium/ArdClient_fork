@@ -258,6 +258,7 @@ public class PBotScriptlist extends GameUI.Hidewnd {
 
         public ThreadList(int w, int h) {
             super(w, h, 24);
+            refreshItemList();
         }
 
         public void changeFilter(String filter) {

@@ -72,7 +72,7 @@ function startFunc() {
         info("Peace");
 
         while (toPeace.length > 0) {
-            if (stopCheck() || pauseCheck()) return;
+            if (stopCheck() || pauseCheck()) break;
             let toPeaceDelete = [];
             for (let rel of toPeace) {
                 peace(rel);
@@ -114,34 +114,29 @@ function startFunc() {
         switchAggro(true);
 
         while (toAggro.length > 0) {
-            if (stopCheck() || pauseCheck()) return;
-            if (!pauseCheckBox.a) {
-                let toAggroDelete = [];
-                for (let targetId of toAggro) {
-                    aggro(targetId);
-                }
-                PBotUtils.sleep(100);
-                for (let targetId of toAggro) {
-                    if (stopCheck() || pauseCheck()) {
-                        switchAggro(false);
-                        return;
-                    }
-                    if (idInList(targetId, rels)) {
-                        toAggroDelete.push(targetId);
-                    } else if (idIsUndefined(targetId, rels)) {
-                        toDelete.push(targetId);
-                    }
-                }
-                toAggro = toAggro.filter(id => !toAggroDelete.includes(id));
-                toAggroDelete = [];
-
-                lastTargets = lastTargets.filter(id => !toDelete.includes(id));
-                toDelete = [];
+            if (stopCheck() || pauseCheck()) break;
+            if (!cursorIs(CURS_ATK)) switchAggro(true);
+            let toAggroDelete = [];
+            for (let targetId of toAggro) {
+                aggro(targetId);
             }
+            PBotUtils.sleep(100);
+            for (let targetId of toAggro) {
+                if (idInList(targetId, rels)) {
+                    toAggroDelete.push(targetId);
+                } else if (idIsUndefined(targetId, rels)) {
+                    toDelete.push(targetId);
+                }
+            }
+            toAggro = toAggro.filter(id => !toAggroDelete.includes(id));
+            toAggroDelete = [];
+
+            lastTargets = lastTargets.filter(id => !toDelete.includes(id));
+            toDelete = [];
         }
+        switchAggro(false);
         return;
     }
-    switchAggro(false);
 
     if (!rels.isEmpty()) {
         currentState = 1;
