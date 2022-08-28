@@ -1,17 +1,4 @@
-import haven.BGL;
-import haven.Config;
-import haven.Coord;
-import haven.Coord3f;
-import haven.GLState;
-import haven.GOut;
-import haven.Gob;
-import haven.Light;
-import haven.Material;
-import haven.Message;
-import haven.RenderList;
-import haven.Resource;
-import haven.Sprite;
-import haven.Utils;
+import haven.*;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -23,7 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-public class Cavein extends Sprite implements Gob.Overlay.CDel {
+public class Cavein extends Sprite implements Gob.Overlay.CDel, PView.Render2D {
     static final GLState mat;
     List<Boll> bollar = new LinkedList<>();
     Random rnd = new Random();
@@ -53,6 +40,14 @@ public class Cavein extends Sprite implements Gob.Overlay.CDel {
                     new Color(rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256)),
                     new Color(rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256)),
                     new Color(0, 0, 0), 1);
+        }
+    }
+
+    @Override
+    public void draw2d(GOut g) {
+        if (owner instanceof Gob) {
+            Gob gob = (Gob) owner;
+            g.text(Math.round(str / 30.0) + " ", gob.sc);
         }
     }
 

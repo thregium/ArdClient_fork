@@ -34,8 +34,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
 public class FoodService {
-    public static final String API_ENDPOINT = "https://hnhfood.vatsul.com/api/";
-    private static final String FOOD_DATA_URL = "https://hnhfood.vatsul.com/api/data/food-info.json";
+    public static final String API_ENDPOINT = "https://food.hearthlands.net/api/";
+    private static final String FOOD_DATA_URL = "https://food.hearthlands.net/api/data/food-info.json";
     private static final File FOOD_DATA_CACHE_FILE = new File("food_data.json");
     private static String token = "Purus-Pasta-the-new-2";  //Config.confid maybe ArdClient also works
 
