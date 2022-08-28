@@ -189,19 +189,18 @@ public class MapFileWidget extends Widget implements Console.Directory {
         }
     }
 
-    private static final List<DisplayGrid.Highlighted> highlightedList = Collections.synchronizedList(new ArrayList<>());
-
     public static class DisplayGrid {
         public final Segment seg;
         public final Coord sc;
         public final Indir<Grid> gref;
         private Grid cgrid = null;
-        private Defer.Future<Tex> img = null;
-        private Tex tex = null;
+        private Defer.Future<TexI> img = null;
+        private TexI tex = null;
         private final Map<String, Defer.Future<Tex>> olimg_c = new HashMap<>();
-        private final Map<Highlighted, Defer.Future<Tex>> highlightedMap = Collections.synchronizedMap(new HashMap<>());
 
-        private Color highlightColor = MapFile.highlightColor;
+        private String[] tiles;
+        private final Map<String[], Defer.Future<TexI>> highlightedMap = new HashMap<>();
+        private final Map<String[], Boolean> highlightedHas = new HashMap<>();
 
         public DisplayGrid(Segment seg, Coord sc, Indir<Grid> gref) {
             this.seg = seg;
@@ -210,65 +209,36 @@ public class MapFileWidget extends Widget implements Console.Directory {
         }
 
         public Tex img() {
-            return (img(0));
-        }
-
-        public Tex img(double opacity, String... tileNames) {
             Grid grid = gref.get();
-            if (!highlightColor.equals(MapFile.highlightColor)) {
-                highlightColor = MapFile.highlightColor;
-                synchronized (highlightedList) {
-                    highlightedMap.clear();
+            if (grid != cgrid) {
+                if (img != null)
+                    img.cancel();
+                synchronized (olimg_c) {
+                    if (!olimg_c.isEmpty()) {
+                        olimg_c.forEach((s, d) -> d.cancel());
+                        olimg_c.clear();
+                    }
                 }
-            }
-            Defer.Future<Tex> imgt;
-            Highlighted hgt = null;
-            if (opacity > 0) {
-                synchronized (highlightedList) {
-                    hgt = highlightedList.stream().filter(h -> h.opacity == opacity).filter(h -> Arrays.equals(h.timeNames, tileNames)).findFirst().orElseGet(() -> {
-                        Highlighted nhgt = new Highlighted(opacity, tileNames);
-                        synchronized (highlightedList) {
-                            highlightedList.add(nhgt);
-                        }
-                        return (nhgt);
-                    });
+                synchronized (highlightedHas) {
+                    if (!highlightedHas.isEmpty()) {
+                        highlightedHas.clear();
+                    }
                 }
                 synchronized (highlightedMap) {
-                    imgt = highlightedMap.get(hgt);
-                }
-            } else {
-                imgt = img;
-            }
-            if (grid != cgrid || imgt == null) {
-                if (grid != cgrid) {
-                    if (img != null)
-                        img.cancel();
-                    synchronized (olimg_c) {
-                        if (!olimg_c.isEmpty()) {
-                            olimg_c.forEach((s, d) -> d.cancel());
-                            olimg_c.clear();
-                        }
+                    if (!highlightedMap.isEmpty()) {
+                        highlightedMap.forEach((s, d) -> d.cancel());
+                        highlightedMap.clear();
                     }
-                    img = Defer.later(() -> new TexI(grid.render(sc.mul(cmaps.div(scalef())))));
                 }
-                if (opacity > 0) {
-                    if (imgt != null)
-                        imgt.cancel();
-                    imgt = Defer.later(() -> new TexI(grid.render(sc.mul(cmaps.div(scalef())), opacity, tileNames)));
-                    synchronized (highlightedMap) {
-                        highlightedMap.put(hgt, imgt);
-                    }
-                } else {
-                    imgt = img;
-                }
+                img = Defer.later(() -> new TexI(grid.render(sc.mul(cmaps.div(scalef())))));
                 cgrid = grid;
             }
 
-            if (imgt != null && imgt.done()) {
+            if (img != null && img.done()) {
                 try {
-                    tex = imgt.get();
+                    tex = img.get();
                 } catch (Exception e) {
-//                    dev.resourceLog("DisplayGrid: " + e + " " + seg.id);
+//                    dev.simpleLog(e);
                 }
             }
             return tex;
@@ -286,7 +256,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
                     }
                 }
 
-                if (ret != null) {
+                if (ret != null && ret.done()) {
                     try {
                         tret = ret.get();
                     } catch (Exception e) {
@@ -294,32 +264,40 @@ public class MapFileWidget extends Widget implements Console.Directory {
                     }
                 }
             }
-            return tret;
+            return (tret);
         }
 
-        private class Highlighted {
-            private final double opacity;
-            private final String[] timeNames;
+        public Tex highlight(String... tileNames) {
+            Tex tret = null;
+            body:
+            {
+                if (tex == null) break body;
+                if (tileNames == null || tileNames.length == 0) break body;
 
-            private Highlighted(double opacity, String[] timeNames) {
-                this.opacity = opacity;
-                this.timeNames = timeNames;
-            }
+                if (!Arrays.equals(tileNames, tiles)) {
+                    tiles = tileNames;
+                }
 
-            @Override
-            public boolean equals(Object o) {
-                if (this == o) return (true);
-                if (o == null || getClass() != o.getClass()) return (false);
-                Highlighted that = (Highlighted) o;
-                return Double.compare(that.opacity, opacity) == 0 && Arrays.equals(timeNames, that.timeNames);
-            }
+                Boolean isHas;
+                synchronized (highlightedHas) {
+                    isHas = highlightedHas.computeIfAbsent(tiles, t -> cgrid.hasTiles(t));
+                }
 
-            @Override
-            public int hashCode() {
-                int result = Objects.hash(opacity);
-                result = 31 * result + Arrays.hashCode(timeNames);
-                return (result);
+                if (!isHas) break body;
+
+                Defer.Future<TexI> ret;
+                synchronized (highlightedMap) {
+                    ret = highlightedMap.computeIfAbsent(tiles, t -> Defer.later(() -> new TexI(cgrid.highlightOverlay(t))));
+                }
+                if (ret != null && ret.done()) {
+                    try {
+                        tret = ret.get();
+                    } catch (Exception e) {
+//                    dev.resourceLog("DisplayGrid: " + e + " " + seg.id);
+                    }
+                }
             }
+            return (tret);
         }
     }
 
@@ -447,35 +425,12 @@ public class MapFileWidget extends Widget implements Console.Directory {
         return (loc.tc.add(sz.div(2)).sub(curloc.tc));
     }
 
-    private long timer = System.currentTimeMillis();
     public void drawgrid(GOut g, Coord ul, DisplayGrid disp) {
         try {
-            int size;
-            synchronized (highlighed) {
-                size = highlighed.size();
-            }
-            Tex img;
-            if (size > 0) {
-                double period = configuration.highlightTilePeriod;
-                long now = System.currentTimeMillis();
-                long div = now - timer;
-                double opac = div % period / (period / 2);
-                if (div > period) timer = now;
-                double ropca;
-                double freq = 1.0 / configuration.highlightTileFrequency;
-                if (opac > 1.0) {
-                    ropca = ((int) ((1.0 - (opac % 1.0)) / freq)) * freq;
-                } else {
-                    ropca = ((int) (opac / freq)) * freq;
-                }
-                synchronized (highlighed) {
-                    img = disp.img(ropca, highlighed.toArray(new String[0]));
-                }
-            } else {
-                img = disp.img();
-            }
-            if (img != null)
+            Tex img = disp.img();
+            if (img != null) {
                 g.image(img, ul, cmaps.div(scalef()));
+            }
         } catch (Loading l) {
         }
     }
@@ -1073,17 +1028,6 @@ public class MapFileWidget extends Widget implements Console.Directory {
                     }
                     return true;
                 });
-            }
-        }
-    }
-
-    private final List<String> highlighed = Collections.synchronizedList(new ArrayList<>());
-    public void highlight(final String tilename, final boolean toggle) {
-        synchronized (highlighed) {
-            if (toggle) {
-                highlighed.add(tilename);
-            } else {
-                highlighed.remove(tilename);
             }
         }
     }

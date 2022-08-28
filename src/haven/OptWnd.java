@@ -4033,17 +4033,6 @@ public class OptWnd extends Window {
                 tilesUpdate.accept(searchEntry.text());
             }
         });
-        appender.add(new HSlider(190, 1, 100, configuration.highlightTileFrequency) {
-            @Override
-            public void changed() {
-                Utils.setprefi("highlightTileFrequency", configuration.highlightTileFrequency = val);
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Highlight frequency: " + val).tex();
-            }
-        });
         appender.add(new HSlider(190, 1, 10000, configuration.highlightTilePeriod) {
             @Override
             public void changed() {

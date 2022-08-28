@@ -187,6 +187,7 @@ public class Window extends MovableWidget implements DTarget {
         setfocustab(true);
     }
 
+    public static final List<String> hideableNames = Arrays.asList("Belt", "Inventory", "Equipment", "Study", "Chat", "Character Sheet", "Timers", "Basker", "Creel");
     public Window(Coord sz, String cap, final String moveKey, boolean lg, Coord tlo, Coord rbo) {
         super(moveKey);
         this.mrgn = lg ? dlmrgn : dsmrgn;
@@ -196,7 +197,7 @@ public class Window extends MovableWidget implements DTarget {
         on = lbtn.hover;
         off = lbtn.up;
         origcap = cap;
-        if (origcap.equals("Belt") || origcap.equals("Inventory") || origcap.equals("Equipment") || origcap.equals("Study") || origcap.equals("Chat") || origcap.equals("Character Sheet") || origcap.equals("Timers"))
+        if (hideableNames.contains(origcap))
             makeHidable();
         chcap(Resource.getLocString(Resource.BUNDLE_WINDOW, cap));
         resize2(sz);

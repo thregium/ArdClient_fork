@@ -38,8 +38,8 @@ public class CheckBox extends Widget {
     private final String type;
     public boolean a = false;
     private Consumer<Boolean> onChange;
-    Text lbl;
-    String defstr;
+    public Text lbl;
+    public String defstr;
     Color clr = Color.WHITE;
 
     @RName("chk")

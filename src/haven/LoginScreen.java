@@ -81,7 +81,10 @@ public class LoginScreen extends Widget {
         status = adda(new StatusLabel("www.havenandhearth.com", 0.5), Coord.of(sz.x - 10, 80), 1, 1);
     }
 
+    private static boolean changeLogShowed = false;
+
     private void showChangeLog() {
+        changeLogShowed = true;
         log = ui.root.add(new Window(new Coord(50, 50), "Changelog"), new Coord(100, 50));
         log.justclose = true;
         Textlog txt = log.add(new Textlog(new Coord(450, 500)));
@@ -414,7 +417,7 @@ public class LoginScreen extends Widget {
         lower();
         presize();
         parent.setfocus(this);
-        if (Config.isUpdate) {
+        if (Config.isUpdate && !changeLogShowed) {
             showChangeLog();
         }
     }

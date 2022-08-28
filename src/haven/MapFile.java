@@ -546,7 +546,7 @@ public class MapFile {
                 if (tilesets[i].res.name().equalsIgnoreCase(name))
                     return i;
             }
-            return 0;
+            return -1;
         }
 
         public double getfz(Coord c) {
@@ -600,11 +600,40 @@ public class MapFile {
             }
         }
 
-        public BufferedImage render(Coord off) {
-            return (render(off, 0));
+        public boolean hasTiles(String... tilenames) {
+            Coord c = new Coord();
+            for (c.y = 0; c.y < cmaps.y; c.y++) {
+                for (c.x = 0; c.x < cmaps.x; c.x++) {
+                    for (String tnm : tilenames) {
+                        if (gettile(tnm) != -1) return (true);
+                    }
+                }
+            }
+            return (false);
         }
 
-        public BufferedImage render(Coord off, double opacity, String... tilenames) {
+        public BufferedImage highlightOverlay(String... tilenames) {
+            WritableRaster buf = PUtils.imgraster(cmaps);
+            Coord c = new Coord();
+            for (c.y = 0; c.y < buf.getHeight(); c.y++) {
+                for (c.x = 0; c.x < buf.getWidth(); c.x++) {
+                    final int t = gettile(c);
+                    final String tname = tileName(t);
+                    for (String tnm : tilenames) {
+                        if (tname.equalsIgnoreCase(tnm)) {
+                            buf.setSample(c.x, c.y, 0, 255);
+                            buf.setSample(c.x, c.y, 1, 255);
+                            buf.setSample(c.x, c.y, 2, 255);
+                            buf.setSample(c.x, c.y, 3, 255);
+                            break;
+                        }
+                    }
+                }
+            }
+            return (PUtils.rasterimg(buf));
+        }
+
+        public BufferedImage render(Coord off) {
             BufferedImage[] texes = new BufferedImage[256];
             boolean[] cached = new boolean[256];
             WritableRaster buf = PUtils.imgraster(cmaps);
@@ -612,7 +641,7 @@ public class MapFile {
             if (configuration.allowtexturemap) {
                 for (c.y = 0; c.y < cmaps.y; c.y++) {
                     for (c.x = 0; c.x < cmaps.x; c.x++) {
-                        try {
+//                        try {
                             int t = gettile(c);
                             final String tname = tileName(t);
                             BufferedImage tex;
@@ -645,27 +674,19 @@ public class MapFile {
                                 }
                             }
 
-                            for (String tnm : tilenames) {
-                                if (tname.contains(tnm)) {
-                                    Color tempColor = Utils.blendcol(new Color(rgb, true), highlightColor, opacity);
-                                    rgb = tempColor.getRGB();
-                                    break;
-                                }
-                            }
-
                             buf.setSample(c.x, c.y, 0, (rgb & 0x00ff0000) >>> 16);
                             buf.setSample(c.x, c.y, 1, (rgb & 0x0000ff00) >>> 8);
                             buf.setSample(c.x, c.y, 2, (rgb & 0x000000ff) >>> 0);
                             buf.setSample(c.x, c.y, 3, (rgb & 0xff000000) >>> 24);
-                        } catch (Exception e) {
-                        }
+//                        } catch (Exception e) {
+//                        }
                     }
                 }
             }
             if (configuration.allowoutlinemap) {
                 for (c.y = 0; c.y < cmaps.y; c.y++) {
                     for (c.x = 0; c.x < cmaps.x; c.x++) {
-                        try {
+//                        try {
                             int p = tilesets[gettile(c)].prio;
                             int t = gettile(c);
                             if (!(configuration.disablepavingoutlineonmap && isContains(t, "gfx/tiles/paving/"))) {
@@ -682,8 +703,8 @@ public class MapFile {
                                     }
                                 }
                             }
-                        } catch (Exception e) {
-                        }
+//                        } catch (Exception e) {
+//                        }
                     }
                 }
             }
@@ -694,7 +715,7 @@ public class MapFile {
                 if (configuration.allowridgesmap) {
                     for (c.y = 0; c.y < cmaps.y; c.y++) {
                         for (c.x = 0; c.x < cmaps.x; c.x++) {
-                            try {
+//                            try {
                                 final Tiler t = tiler(gettile(c), tilers, tlcached);
                                 if (t instanceof Ridges.RidgeTile && brokenp(t, c, tilers, tlcached)) {
                                     final Color black = Color.BLACK;
@@ -718,8 +739,8 @@ public class MapFile {
                                         }
                                     }
                                 }
-                            } catch (Exception e) {
-                            }
+//                            } catch (Exception e) {
+//                            }
                         }
                     }
                 }

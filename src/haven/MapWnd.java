@@ -613,19 +613,42 @@ public class MapWnd extends ResizableWnd {
             super(file, Coord.z);
         }
 
+        private long timer = System.currentTimeMillis();
+
         public void drawgrid(GOut g, Coord ul, DisplayGrid disp) {
             super.drawgrid(g, ul, disp);
-            for (String tag : overlays) {
+            if (!overlays.isEmpty()) {
+                for (String tag : overlays) {
+                    try {
+                        Tex img = disp.olimg(tag);
+                        if (img != null) {
+                            g.chcolor(255, 255, 255, olalpha);
+                            g.image(img, ul, cmaps.div(scalef()));
+                        }
+                    } catch (Loading l) {
+                    }
+                }
+                g.chcolor();
+            }
+
+            if (!highlighed.isEmpty()) {
+                int period = configuration.highlightTilePeriod;
+                long now = System.currentTimeMillis();
+                long dt = now - timer;
+                double opac = dt % period / (period / 2.0);
+                if (dt > period) timer = now;
+                double ropca = opac > 1.0 ? 1.0 - (opac % 1.0) : opac;
                 try {
-                    Tex img = disp.olimg(tag);
+                    Tex img = disp.highlight(highlighed.toArray(new String[0]));
                     if (img != null) {
-                        g.chcolor(255, 255, 255, olalpha);
+                        Color color = MapFile.highlightColor;
+                        g.chcolor(color.getRed(), color.getGreen(), color.getBlue(), (int) (ropca * 255.0 * (color.getAlpha() / 255.0)));
                         g.image(img, ul, cmaps.div(scalef()));
+                        g.chcolor();
                     }
                 } catch (Loading l) {
                 }
             }
-            g.chcolor();
         }
 
         public boolean clickmarker(DisplayMarker mark, int button) {
@@ -1625,7 +1648,16 @@ public class MapWnd extends ResizableWnd {
         return (true);
     }
 
+    private final List<String> highlighed = Collections.synchronizedList(new ArrayList<>());
+
     public void highlight(final String tilename, final boolean toggle) {
-        view.highlight(tilename, toggle);
+        synchronized (highlighed) {
+            if (toggle) {
+                if (!highlighed.contains(tilename))
+                    highlighed.add(tilename);
+            } else {
+                highlighed.remove(tilename);
+            }
+        }
     }
 }

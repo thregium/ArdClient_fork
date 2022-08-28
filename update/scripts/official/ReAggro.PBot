@@ -14,19 +14,27 @@ const player = (u) => PBotGobAPI.player(u);
 
 const window = PBotUtils.PBotWindow(ui, "ReAggro", 50, 50, ScriptID);
 const appender = new WVA(window);
+const pauseCheckBox = new CheckBox("Pause");
 const stopCheckBox = new CheckBox("Stop");
 const infoLabel = new Label("");
 appender.addRow([infoLabel]);
+appender.addRow([pauseCheckBox]);
 appender.addRow([stopCheckBox]);
 window.pack();
+
+const CURS_ATK = "gfx/hud/curs/atk";
+const CURS_ARW = "gfx/hud/curs/arw";
 
 function info(msg) {
     infoLabel.settext(msg);
     window.pack();
 }
 
-let currentState = 0; //0 - no combat no target, 1 - combat red/blue, 2 - combat green target run, 3 - no combat target run
-let lastTarget = -1;
+const lsrel = () => ui.gui.fv.lsrel;
+
+let currentState = 0; //0 - no combat no targets, 1 - combat red/blue all targets, 2 - combat green target run, 3 - no combat target run, 4 - combat target run
+let lastTargets = [];
+let peacesTargets = [];
 
 function startFunc() {
     if (ui.gui == null) {
@@ -34,58 +42,163 @@ function startFunc() {
         return;
     }
 
-    let crn = ui.gui.fv.current;
-    if (crn == null) {
-        if (lastTarget === -1) {
+    let rels = lsrel();
+    if (rels.isEmpty()) {
+        if (lastTargets.length === 0) {
             currentState = 0;
             info("Waiting for combat");
-        } else {
-            let ntarget = PBotGobAPI.findGobById(ui, lastTarget);
-            if (ntarget != null && ntarget.isKnocked()) {
-                lastTarget = -1;
-                return;
+            return;
+        }
+    }
+
+    for (let rel of rels) {
+        if (!lastTargets.includes(rel.gobid)) {
+            lastTargets.push(rel.gobid);
+        }
+    }
+
+    let toDelete = [];
+    let toPeace = [];
+    for (let rel of rels) {
+        if (idIsUndefined(rel.gobid, rels)) {
+            toDelete.push(rel.gobid);
+        } else if (isPeace(rel)) {
+            toPeace.push(rel);
+        }
+    }
+
+    if (toPeace.length > 0) {
+        currentState = 2;
+        info("Peace");
+
+        while (toPeace.length > 0) {
+            if (isStop() || isPause()) return;
+            let toPeaceDelete = [];
+            for (let rel of toPeace) {
+                peace(rel);
             }
-            currentState = 3;
-            info("Trying reaggro");
-            aggro(lastTarget);
+            PBotUtils.sleep(100);
+            for (let rel of toPeace) {
+                if (!idInList(rel.gobid, rels)) {
+                    toPeaceDelete.push(rel.gobid);
+                } else if (idIsUndefined(rel.gobid, rels)) {
+                    toDelete.push(rel.gobid);
+                }
+            }
+            toPeace = toPeace.filter(rel => !toPeaceDelete.includes(rel.gobid));
+            toPeaceDelete = [];
+
+            lastTargets = lastTargets.filter(id => !toDelete.includes(id));
+            toDelete = [];
         }
-    } else {
-        if (lastTarget !== crn.gobid) {
-            lastTarget = crn.gobid;
+        return;
+    }
+
+    let toAggro = [];
+    for (let targetId of lastTargets) {
+        if (!idInList(targetId, rels)) {
+            if (idIsUndefined(targetId, rels)) {
+                toDelete.push(targetId);
+            } else {
+                toAggro.push(targetId);
+            }
         }
-        if (isPeace(crn)) {
-            currentState = 2;
-            info("Peace");
-            peace(crn);
-        } else {
-            currentState = 1;
-            info("Combat");
+    }
+
+    lastTargets = lastTargets.filter(id => !toDelete.includes(id));
+    toDelete = [];
+
+    if (toAggro.length > 0) {
+        currentState = 3;
+        info("Trying reaggro");
+        switchAggro(true);
+
+        while (toAggro.length > 0) {
+            if (isStop() || isPause()) return;
+            if (!pauseCheckBox.a) {
+                let toAggroDelete = [];
+                for (let targetId of toAggro) {
+                    aggro(targetId);
+                }
+                PBotUtils.sleep(100);
+                for (let targetId of toAggro) {
+                    if (idInList(targetId, rels)) {
+                        toAggroDelete.push(targetId);
+                    } else if (idIsUndefined(targetId, rels)) {
+                        toDelete.push(targetId);
+                    }
+                }
+                toAggro = toAggro.filter(id => !toAggroDelete.includes(id));
+                toAggroDelete = [];
+
+                lastTargets = lastTargets.filter(id => !toDelete.includes(id));
+                toDelete = [];
+            }
+        }
+        return;
+    }
+    switchAggro(false);
+
+    if (!rels.isEmpty()) {
+        currentState = 1;
+        info("Combat");
+    }
+}
+
+function idIsUndefined(targetId, rels) {
+    let ntarget = PBotGobAPI.findGobById(ui, targetId);
+    return (!idInList(targetId, rels) && (ntarget == null || ntarget.isKnocked()));
+}
+
+function idInList(targetId, rels) {
+    for (let rel of rels) {
+        if (targetId === rel.gobid) {
+            return (true);
+        }
+    }
+    return (false);
+}
+
+function switchAggro(val) {
+    let isAggro = cursorIs(CURS_ATK);
+    if (val && !isAggro) {
+        PBotCharacterAPI.doAct(ui, "aggro");
+        waitForCursor(CURS_ATK, 500);
+    } else if (!val && isAggro) {
+        PBotCharacterAPI.cancelAct(ui);
+        // waitForCursor(CURS_ARW, 500); //cursor can be not arw (e.g. dig)
+    }
+}
+
+function aggro(targetId) {
+    if (cursorIs(CURS_ATK)) {
+        let ntarget = PBotGobAPI.findGobById(ui, targetId);
+        if (ntarget != null) {
+            ntarget.doClick(1, 0);
         }
     }
 }
 
-function aggro(gobid) {
-    PBotCharacterAPI.doAct(ui, "aggro");
-
-    let ntarget = PBotGobAPI.findGobById(ui, gobid);
-    if (ntarget != null) {
-        ntarget.doClick(1, 0);
-        PBotUtils.sleep(50);
+function waitForCursor(name, time) {
+    for (let i = 0; i < time; i += 10) {
+        if (ui.root.cursor != null && ui.root.cursor.name.contains(name)) return (true);
     }
-
-    PBotCharacterAPI.cancelAct(ui);
+    return (false);
 }
 
+function cursorIs(name) {
+    return (ui.root.cursor != null && ui.root.cursor.name.contains(name));
+}
 
-function peace(current) { //0 - red, 1 - blue, 2 - green
-    let give = current.give;
+function peace(rel) { //0 - red, 1 - blue, 2 - green
+    let give = rel.give;
     if (give.state !== 1) {
         give.wdgmsg("click", 1);
     }
 }
 
-function isPeace(current) {
-    let give = current.give;
+function isPeace(rel) {
+    let give = rel.give;
     return give.state === 2;
 }
 
@@ -109,10 +222,16 @@ function isStop() {
     return stop;
 }
 
+function isPause() {
+    return pauseCheckBox.a;
+}
+
 while (true) {
     try {
         if (isStop()) break;
-        startFunc();
+        if (!isPause()) {
+            startFunc();
+        }
         PBotUtils.sleep(200);
     } catch (e) {
         PBotUtils.debugMsg(ui, e + "");

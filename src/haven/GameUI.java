@@ -261,7 +261,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 //        PBotAPI.gui = this;
         if (Config.showTroughrad && Config.showBeehiverad)
             saferadius = 4;
-        else if (Config.showTroughrad && Config.showBeehiverad)
+        else if (!Config.showTroughrad && Config.showBeehiverad)
             saferadius = 3;
         else if (Config.showTroughrad && !Config.showBeehiverad)
             saferadius = 2;
@@ -273,10 +273,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     protected void added() {
         ui.gui = this;
         resize(parent.sz);
-        synchronized (crutchList) {
-            crutchList.forEach(Runnable::run);
-            crutchList.clear();
-        }
         ui.cons.out = new java.io.PrintWriter(new java.io.Writer() {
             StringBuilder buf = new StringBuilder();
 
@@ -385,6 +381,11 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         ui.root.sessionDisplay.unlink();
         if (Config.sessiondisplay) {
             add(ui.root.sessionDisplay);
+        }
+
+        synchronized (crutchList) {
+            crutchList.forEach(Runnable::run);
+            crutchList.clear();
         }
     }
 

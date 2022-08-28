@@ -1350,7 +1350,5 @@ public class configuration {
             }
         }
     }
-
-    public static int highlightTileFrequency = Utils.getprefi("highlightTileFrequency", 5);
     public static int highlightTilePeriod = Utils.getprefi("highlightTilePeriod", 2000);
 }
