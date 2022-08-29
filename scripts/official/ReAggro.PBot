@@ -3,6 +3,7 @@ const PBotUtils = Java.type('haven.purus.pbot.PBotUtils');
 const PBotGobAPI = Java.type('haven.purus.pbot.PBotGobAPI');
 const PBotScriptmanager = Java.type('haven.purus.pbot.PBotScriptmanager');
 const PBotCharacterAPI = Java.type('haven.purus.pbot.PBotCharacterAPI');
+const PBotWindowAPI = Java.type('haven.purus.pbot.PBotWindowAPI');
 const WVA = Java.type('haven.WidgetVerticalAppender');
 const Label = Java.type('haven.Label');
 const Button = Java.type('haven.Button');
@@ -11,6 +12,11 @@ const CheckBox = Java.type('haven.CheckBox');
 const script = PBotScriptmanager.getScript(ScriptID);
 const ui = script.ui;
 const player = (u) => PBotGobAPI.player(u);
+
+{
+    let wnd = PBotWindowAPI.getWindow(ui, "ReAggro");
+    if (wnd != null) wnd.close();
+}
 
 const window = PBotUtils.PBotWindow(ui, "ReAggro", 50, 50, ScriptID);
 const appender = new WVA(window);
@@ -22,8 +28,15 @@ appender.addRow([pauseCheckBox]);
 appender.addRow([stopCheckBox]);
 window.pack();
 
+
 const CURS_ATK = "gfx/hud/curs/atk";
 const CURS_ARW = "gfx/hud/curs/arw";
+const WAIT_TIME = 10;
+
+const DEBUG = true;
+function debug(msg) {
+    if (DEBUG) PBotUtils.debugMsg(ui, msg + "");
+}
 
 function info(msg) {
     infoLabel.settext(msg);
@@ -60,9 +73,13 @@ function startFunc() {
     let toDelete = [];
     let toPeace = [];
     for (let rel of rels) {
-        if (idIsUndefined(rel.gobid, rels)) {
-            toDelete.push(rel.gobid);
-        } else if (isPeace(rel)) {
+        // if (idIsUndefined(rel.gobid, rels)) {
+        //     toDelete.push(rel.gobid);
+        // } else if (isPeace(rel)) {
+        //     toPeace.push(rel);
+        // }
+
+        if (isPeace(rel)) {
             toPeace.push(rel);
         }
     }
@@ -71,30 +88,29 @@ function startFunc() {
         currentState = 2;
         info("Peace");
 
-        while (toPeace.length > 0) {
-            if (stopCheck() || pauseCheck()) break;
-            let toPeaceDelete = [];
-            for (let rel of toPeace) {
-                peace(rel);
-            }
-            PBotUtils.sleep(50);
+        let toPeaceDelete = [];
+        for (let rel of toPeace) rel.peace();//peace(rel);
+
+        PBotUtils.sleep(50);
+
+        waitFor(200, () => {
+            if (stopCheck() || pauseCheck()) return (true);
             for (let rel of toPeace) {
                 if (!idInList(rel.gobid, rels)) {
                     toPeaceDelete.push(rel.gobid);
-                } else if (idIsUndefined(rel.gobid, rels)) {
-                    toDelete.push(rel.gobid);
                 }
             }
             toPeace = toPeace.filter(rel => !toPeaceDelete.includes(rel.gobid));
             toPeaceDelete = [];
+            if (toPeace.length === 0) return (true);
+            return (false);
+        }, (i) => debug("Peace " + i))
 
-            lastTargets = lastTargets.filter(id => !toDelete.includes(id));
-            toDelete = [];
-        }
+        // lastTargets = lastTargets.filter(id => !toDelete.includes(id));
+        // toDelete = [];
         return;
     }
 
-    rels = lsrel();
     let toAggro = [];
     for (let targetId of lastTargets) {
         if (!idInList(targetId, rels)) {
@@ -119,6 +135,9 @@ function startFunc() {
             if (!cursorIs(CURS_ATK)) switchAggro(true);
             let toAggroDelete = [];
             for (let targetId of toAggro) aggro(targetId);
+
+            PBotUtils.sleep(50);
+
             for (let targetId of toAggro) {
                 if (idInList(targetId, rels)) {
                     toAggroDelete.push(targetId);
@@ -148,12 +167,16 @@ function idIsUndefined(targetId, rels) {
 }
 
 function idInList(targetId, rels) {
-    for (let rel of rels) {
-        if (targetId === rel.gobid) {
-            return (true);
+    let b = false;
+    PBotUtils.syncWith(rels, () => {
+        for (let rel of rels) {
+            if (targetId === rel.gobid) {
+                b = true;
+                break;
+            }
         }
-    }
-    return (false);
+    })
+    return (b);
 }
 
 function switchAggro(val) {
@@ -177,16 +200,20 @@ function aggro(targetId) {
     }
 }
 
-function waitForCursor(name, time, task) {
-    for (let i = 0; i < time; i += 10) {
-        if (ui.root.cursor != null && ui.root.cursor.name.contains(name)) {
-            PBotUtils.debugMsg(ui, "Attack " + i);
+function waitForCursor(name, time) {
+    return (waitFor(time, () => cursorIs(name), (i) => debug("Attack " + i)));
+}
+
+function waitFor(time, task, finishMsg) {
+    for (let i = 0; i < time; i += WAIT_TIME) {
+        if (task()) {
+            finishMsg(i);
             return (true);
         } else {
-            task();
-            PBotUtils.sleep(10);
+            PBotUtils.sleep(WAIT_TIME);
         }
     }
+    finishMsg(time);
     return (false);
 }
 
@@ -216,11 +243,11 @@ function stopCheck() {
     if (!stop) {
         if (stopCheckBox.a) {
             window.close();
-            PBotUtils.debugMsg(ui, "Stopped!");
+            debug("Stopped!");
         }
         if (window.closed()) {
             stop = true;
-            PBotUtils.debugMsg(ui, "Windows closed!");
+            debug("Windows closed!");
         }
     }
     return stop;
@@ -242,5 +269,6 @@ while (true) {
         break;
     }
 }
+PBotUtils.debugMsg(ui, "ReAggro Stopped!");
 window.close();
 PBotUtils.run(() => script.kill());
