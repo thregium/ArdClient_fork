@@ -2149,4 +2149,10 @@ public class PBotUtils {
             }
         }).start()));
     }
+
+    public static void syncWith(final Object syncObject, final Runnable runnable) {
+        synchronized (syncObject) {
+            runnable.run();
+        }
+    }
 }

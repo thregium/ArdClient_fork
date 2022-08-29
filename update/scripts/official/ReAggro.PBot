@@ -94,6 +94,7 @@ function startFunc() {
         return;
     }
 
+    rels = lsrel();
     let toAggro = [];
     for (let targetId of lastTargets) {
         if (!idInList(targetId, rels)) {
@@ -117,10 +118,7 @@ function startFunc() {
             if (stopCheck() || pauseCheck()) break;
             if (!cursorIs(CURS_ATK)) switchAggro(true);
             let toAggroDelete = [];
-            for (let targetId of toAggro) {
-                aggro(targetId);
-            }
-            PBotUtils.sleep(50);
+            for (let targetId of toAggro) aggro(targetId);
             for (let targetId of toAggro) {
                 if (idInList(targetId, rels)) {
                     toAggroDelete.push(targetId);
@@ -162,7 +160,7 @@ function switchAggro(val) {
     let isAggro = cursorIs(CURS_ATK);
     if (val && !isAggro) {
         PBotCharacterAPI.doAct(ui, "aggro");
-        waitForCursor(CURS_ATK, 250);
+        waitForCursor(CURS_ATK, 200);
     } else if (!val && isAggro) {
         PBotCharacterAPI.cancelAct(ui);
         // waitForCursor(CURS_ARW, 500); //cursor can be not arw (e.g. dig)
@@ -170,6 +168,7 @@ function switchAggro(val) {
 }
 
 function aggro(targetId) {
+    if (!cursorIs(CURS_ATK)) switchAggro(true);
     if (cursorIs(CURS_ATK)) {
         let ntarget = PBotGobAPI.findGobById(ui, targetId);
         if (ntarget != null) {
@@ -178,12 +177,13 @@ function aggro(targetId) {
     }
 }
 
-function waitForCursor(name, time) {
+function waitForCursor(name, time, task) {
     for (let i = 0; i < time; i += 10) {
         if (ui.root.cursor != null && ui.root.cursor.name.contains(name)) {
             PBotUtils.debugMsg(ui, "Attack " + i);
             return (true);
         } else {
+            task();
             PBotUtils.sleep(10);
         }
     }

@@ -1433,7 +1433,7 @@ public class MapWnd extends ResizableWnd {
             tool.c = Coord.z;
         }
         view.resize(viewf.inner());
-        toolbar2.c = viewf.c.add(viewf.sz.x / 2 - toolbar2.sz.x / 2, viewf.sz.y - toolbar2.sz.y).sub(0, 7);
+        toolbar2.c = viewf.c.add(viewf.sz.x / 2 - toolbar2.sz.x / 2, 0).sub(0, 7);
         toolbar.c = viewf.c.add(0, viewf.sz.y - toolbar.sz.y).add(UI.scale(2), UI.scale(-2));
         zoombar.c = viewf.c.add(viewf.sz.x - zoombar.sz.x, viewf.sz.y - zoombar.sz.y).sub(7, 7);
     }
