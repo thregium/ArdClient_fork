@@ -3,6 +3,7 @@ package haven.sloth.script.pathfinding;
 import haven.Coord;
 import haven.DefSettings;
 import haven.UI;
+import modification.dev;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -227,10 +228,13 @@ public class NBAPathfinder extends Pathfinder {
         }
     }
 
-    public ArrayList<Move> path(final Coord start, final Coord goal) {
+    public List<Move> path(final Coord start, final Coord goal) {
         long t = System.currentTimeMillis();
-        ArrayList<Move> moves = advreduce(findpath(start, goal));
-        System.out.println("Pathfinding from " + start + " to " + goal + " for " + (System.currentTimeMillis() - t) + " ms");
+        List<Coord> path = findpath(start, goal);
+        long t1 = System.currentTimeMillis();
+        List<Move> moves = advreduce(path);
+        long now = System.currentTimeMillis();
+        dev.simpleLog("Pathfinding from " + start + " to " + goal + " for [" + (now - t) + " ms] Finding: [" + (t1 - t) + "] Reduce: [" + (now - t1) + "]");
         return moves;
     }
 }

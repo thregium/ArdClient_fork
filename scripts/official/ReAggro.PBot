@@ -100,14 +100,13 @@ function startFunc() {
                     toPeaceDelete.push(rel.gobid);
                 }
             }
-            toPeace = toPeace.filter(rel => !toPeaceDelete.includes(rel.gobid));
-            toPeaceDelete = [];
+            if (toPeaceDelete.length > 0) {
+                toPeace = toPeace.filter(rel => !toPeaceDelete.includes(rel.gobid));
+                toPeaceDelete = [];
+            }
             if (toPeace.length === 0) return (true);
             return (false);
         }, (i) => debug("Peace " + i))
-
-        // lastTargets = lastTargets.filter(id => !toDelete.includes(id));
-        // toDelete = [];
         return;
     }
 
@@ -122,8 +121,10 @@ function startFunc() {
         }
     }
 
-    lastTargets = lastTargets.filter(id => !toDelete.includes(id));
-    toDelete = [];
+    if (toDelete.length > 0) {
+        lastTargets = lastTargets.filter(id => !toDelete.includes(id));
+        toDelete = [];
+    }
 
     if (toAggro.length > 0) {
         currentState = 3;
@@ -145,11 +146,15 @@ function startFunc() {
                     toDelete.push(targetId);
                 }
             }
-            toAggro = toAggro.filter(id => !toAggroDelete.includes(id));
-            toAggroDelete = [];
+            if (toAggroDelete.length > 0) {
+                toAggro = toAggro.filter(id => !toAggroDelete.includes(id));
+                toAggroDelete = [];
+            }
 
-            lastTargets = lastTargets.filter(id => !toDelete.includes(id));
-            toDelete = [];
+            if (toDelete.length > 0) {
+                lastTargets = lastTargets.filter(id => !toDelete.includes(id));
+                toDelete = [];
+            }
         }
         switchAggro(false);
         return;

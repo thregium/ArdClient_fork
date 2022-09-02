@@ -10,9 +10,6 @@ import haven.Utils;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class DamageText extends FloatSprite {
     public static final int id = -14115;

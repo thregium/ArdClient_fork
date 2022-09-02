@@ -32,14 +32,12 @@ import haven.Skeleton.PoseMod;
 import haven.sloth.gob.Type;
 import modification.configuration;
 import modification.resources;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Composited implements Rendered, MapView.Clickable {

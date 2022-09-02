@@ -2109,9 +2109,20 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
     }
 
+    private Window pathFinding() {
+        Window wnd = new Window(Coord.z, "PathFinding");
+        Label lbl = new Label("PathFinding...");
+        wnd.add(lbl);
+        wnd.pack();
+        return (wnd);
+    }
+
     public Move[] findpath(final Coord2d c) {
         final NBAPathfinder finder = new NBAPathfinder(ui);
+        Window pfwnd = pathFinding();
+        ui.root.add(pfwnd);
         final List<Move> moves = finder.path(new Coord(ui.sess.glob.oc.getgob(plgob).getc()), c.floor());
+        pfwnd.reqdestroy();
         return moves != null ? moves.toArray(new Move[0]) : null;
     }
 
@@ -2203,9 +2214,10 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         if (!movequeue.isEmpty() && (System.currentTimeMillis() - lastMove > 500) && triggermove()) {
             movingto = movequeue.poll();
             if (movingto != null) {
-                ui.gui.pointer.update(movingto);
-                wdgmsg("click", new Coord(1, 1), movingto.floor(posres), 1, 0);
-                pllastcc = movingto;
+                Coord2d tmovingto = new Coord2d(movingto);
+                ui.gui.pointer.update(tmovingto);
+                wdgmsg("click", new Coord(1, 1), tmovingto.floor(posres), 1, 0);
+                pllastcc = tmovingto;
                 lastMove = System.currentTimeMillis();
             }
         }

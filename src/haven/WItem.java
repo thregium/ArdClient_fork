@@ -243,7 +243,7 @@ public class WItem extends Widget implements DTarget2 {
             return () -> minf.meter();
         }
         itm.metertex = null;
-        return minf::meter;
+        return () -> minf.meter();
     }));
     public final AttrCache<QualityList> itemq = new AttrCache<>(this::info, AttrCache.cache(info -> {
         List<ItemInfo.Contents> contents = ItemInfo.findall(ItemInfo.Contents.class, info);

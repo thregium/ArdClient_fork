@@ -35,6 +35,7 @@ import haven.MapFile.SMarker;
 import haven.MapFileWidget.Locator;
 import haven.MapFileWidget.MapLocator;
 import haven.MapFileWidget.SpecLocator;
+import static haven.OCache.posres;
 import haven.purus.pbot.PBotGob;
 import haven.purus.pbot.PBotGobAPI;
 import haven.sloth.gob.Type;
@@ -691,6 +692,30 @@ public class MapWnd extends ResizableWnd {
             if (domark && (button == 3)) {
                 domark = false;
                 return (true);
+            }
+            if (configuration.tempmarks) {
+                int flags = ui.modflags();
+                Location loc = this.curloc;
+                if (loc != null) {
+                    Coord hsz = sz.div(2);
+                    Coord mc = c.sub(hsz).add(loc.tc);
+                    Coord hiconsize = new Coord2d(20, 20).mul(MapFileWidget.zoom == 0 ? 1 : (scaleFactors[0] / scaleFactors[MapFileWidget.zoom] + 0.5)).round().div(2);
+                    full:
+                    for (TempMark cm : getTempMarkList()) {
+                        if (check.test(cm)) {
+                            for (int x = -hiconsize.x; x < hiconsize.x; x++)
+                                for (int y = -hiconsize.y; y < hiconsize.y; y++)
+                                    if ((cm.gc.div(scalef())).add(new Coord(x, y)).equals(mc)) {
+                                        PBotGob gob = PBotGobAPI.findGobById(ui, cm.id);
+                                        if (gob != null) {
+                                            gob.doClick(button, flags);
+                                            return (true);
+                                        }
+                                        break full;
+                                    }
+                        }
+                    }
+                }
             }
             return (super.mousedown(c, button));
         }

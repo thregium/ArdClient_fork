@@ -1,6 +1,7 @@
 /* Preprocessed source code */
 package haven.res.lib.uspr;
 
+import haven.Config;
 import haven.FastMesh;
 import haven.GLState;
 import haven.Gob;
@@ -257,9 +258,15 @@ public class UnivSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
     private Object constant = new Gob.Static();
 
     public Object staticp() {
-        if (!stat || (manims.length > 0) || (ipold > 0))
-            return (null);
-        return ((skel == null) ? constant : semistat);
+        if (!Config.disableAllAnimations) {
+            if (!stat || (manims.length > 0) || (ipold > 0)) {
+                return (null);
+            } else {
+                return ((skel == null) ? constant : semistat);
+            }
+        } else {
+            return constant;
+        }
     }
 
     public Pose getpose() {
