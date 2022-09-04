@@ -660,13 +660,15 @@ public class LocalMiniMap extends Widget {
                             Audio.play(Resource.local().loadwait(Config.alarmredplayer), Config.alarmredvol);
                             return (null);
                         });
-                        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
-                            if (Config.discorduser) {
-                                PBotDiscord.mapAlert(ui.sess.username, Config.discordalertstring, "Player");
-                            } else if (Config.discordrole) {
-                                PBotDiscord.mapAlertRole(ui.sess.username, Config.discordalertstring, "Player");
-                            } else {
-                                PBotDiscord.mapAlertEveryone(ui.sess.username, "Player");
+                        if (Config.discordplayeralert) {
+                            if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                                if (Config.discorduser) {
+                                    PBotDiscord.mapAlert(ui.sess.username, Config.discordalertstring, "Player");
+                                } else if (Config.discordrole) {
+                                    PBotDiscord.mapAlertRole(ui.sess.username, Config.discordalertstring, "Player");
+                                } else {
+                                    PBotDiscord.mapAlertEveryone(ui.sess.username, "Player");
+                                }
                             }
                         }
                         enemy = true;

@@ -28,6 +28,7 @@ package haven;
 
 import haven.sloth.script.SessionDetails;
 import integrations.mapv4.MappingClient;
+import modification.dev;
 
 import java.io.IOException;
 import java.lang.ref.Reference;
@@ -377,6 +378,7 @@ public class Session implements Resource.Resolver {
                 String resname = msg.string();
                 int resver = msg.uint16();
                 cachedres(resid).set(resname, resver);
+                dev.simpleLog(String.format("Resource %d:%s(v%d)", resid, resname, resver));
             } else if (msg.type == RMessage.RMSG_PARTY) {
                 glob.party.msg(msg);
             } else if (msg.type == RMessage.RMSG_SFX) {
