@@ -146,9 +146,9 @@ public class FoodInfo extends ItemInfo.Tip {
             QBuff q = ((GItem) owner).quality();
             imgs.add(RichText.render(String.format("Total FEP: $col[%d,%d,%d]{%s (%s)}, FEP/Hunger: $col[%d,%d,%d]{%s (%s)}",
                     0, 180, 0, Utils.odformat2(totalFeps, 2), q != null ? Utils.odformat2(totalFeps / Math.sqrt(q.q / 10), 2) : "???",
-                    0, 180, 0, Utils.odformat2(totalFeps / (glut * 100), 2), q != null ? Utils.odformat2(totalFeps / Math.sqrt(q.q / 10) / (glut * 100), 2) : "???"), 0).img);
+                    0, 180, 0, Utils.odformat2(totalFeps / (glut * 1000), 2), q != null ? Utils.odformat2(totalFeps / Math.sqrt(q.q / 10) / (glut * 1000), 2) : "???"), 0).img);
         } else
-            imgs.add(RichText.render(String.format("Total FEP: $col[%d,%d,%d]{%s}, FEP/Hunger: $col[%d,%d,%d]{%s}", 0, 180, 0, Utils.odformat2(totalFeps, 2), 0, 180, 0, Utils.odformat2(totalFeps / (glut * 100), 2)), 0).img);
+            imgs.add(RichText.render(String.format("Total FEP: $col[%d,%d,%d]{%s}, FEP/Hunger: $col[%d,%d,%d]{%s}", 0, 180, 0, Utils.odformat2(totalFeps, 2), 0, 180, 0, Utils.odformat2(totalFeps / (glut * 1000), 2)), 0).img);
         for (int i = 0; i < efs.length; i++) {
             BufferedImage efi = ItemInfo.longtip(efs[i].info);
             if (efs[i].p != 1)

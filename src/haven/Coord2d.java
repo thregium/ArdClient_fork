@@ -63,6 +63,10 @@ public class Coord2d implements Comparable<Coord2d>, java.io.Serializable {
         return (of(c.x, c.y));
     }
 
+    public static Coord2d of(Coord2d c) {
+        return (of(c.x, c.y));
+    }
+
     public static Coord2d of(Coord3f c) {
         return (of(c.x, c.y));
     }

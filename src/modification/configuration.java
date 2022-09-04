@@ -102,6 +102,7 @@ public class configuration {
     public static Coord savedHavenPanelSize = Utils.getprefc("havpansz", new Coord(800, 600));
 
     public static boolean autoclick = Utils.getprefb("autoclick", false);
+    public static boolean puruspfignoreridge = Utils.getprefb("puruspfignoreridge", false);
 
     public static boolean statustooltip = Utils.getprefb("statustooltip", false);
 

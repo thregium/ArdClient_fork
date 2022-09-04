@@ -3532,6 +3532,7 @@ public class OptWnd extends Window {
         appender.addRow(new IndirLabel(() -> String.format("Pathfinding Tier: %s", tiers[PATHFINDINGTIER.get()])), new IndirHSlider(200, 0, 2, PATHFINDINGTIER));
         appender.add(new IndirCheckBox("Limit pathfinding search to 40 tiles", LIMITPATHFINDING));
         appender.add(new IndirCheckBox("Research if goal was not found (requires Limited pathfinding)", RESEARCHUNTILGOAL));
+        appender.add(new CheckBox("Purus pathfinder evade riges", val -> Utils.setprefb("puruspfignoreridge", configuration.puruspfignoreridge = val), configuration.puruspfignoreridge));
 
         appender.add(new Label("Flowermenu"));
         appender.addRow(new Label("Instant Flowermenu: "),

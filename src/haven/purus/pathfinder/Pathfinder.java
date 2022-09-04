@@ -4,8 +4,11 @@ import haven.Coord;
 import haven.Coord2d;
 import haven.GameUI;
 import haven.Gob;
+import static haven.MCache.cmaps;
+import static haven.MCache.tilesz;
+import static haven.MCache.tilesz2;
 import haven.Resource;
-import haven.purus.pbot.PBotUtils;
+import haven.Tiler;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
@@ -19,11 +22,14 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import static haven.OCache.posres;
+import haven.resutil.TerrainTile;
 import haven.sloth.script.pathfinding.Hitbox;
+import modification.configuration;
 
 public class Pathfinder extends Thread {
 
@@ -70,17 +76,17 @@ public class Pathfinder extends Thread {
         }
     }
 
-    HashSet<String> inaccessibleTiles = new HashSet<String>() {{
+    Set<String> inaccessibleTiles = new HashSet<String>() {{
         add("gfx/tiles/nil");
         add("gfx/tiles/deep");
         add("gfx/tiles/cave");
         add("gfx/tiles/rocks/.*");
     }};
 
-    HashSet<String> whitelistedGobs = new HashSet<String>();
+    Set<String> whitelistedGobs = new HashSet<>();
 
     private Coord coordToTile(Coord2d c) {
-        return c.div(11, 11).floor();
+        return c.floor(tilesz);
     }
 
     // True if tile is within the given matrix and its not inaccessible
@@ -131,10 +137,17 @@ public class Pathfinder extends Thread {
                     bMap = new BufferedImage(1000, 1000, BufferedImage.TYPE_INT_RGB);
                     g = bMap.getGraphics();
                 }
-                int[][] accessMatrix = new int[111][111]; //  0 <= accessible, 0 < inaccessible, 1 = object blocking, 2 = innaccessible tile, -1 = destinationgob
-                Coord2d origin = new Coord2d(gui.map.player().rc.div(11).floor().mul(11));
+                int xmatrix = (int) (cmaps.x * 9 / tilesz.x);
+                int ymatrix = (int) (cmaps.y * 9 / tilesz.y);
+
+                int[][] accessMatrix = new int[xmatrix + 2][ymatrix + 2]; //  0 <= accessible, 0 < inaccessible, 1 = object blocking, 2 = innaccessible tile, -1 = destinationgob
+                Coord2d origintile = new Coord2d(gui.map.player().rc.floor(tilesz).mul(tilesz));
                 // Get rid of negative coordinates
-                origin = origin.sub(11 * 45, 11 * 45);
+                Coord2d originview = new Coord2d(gui.map.player().rc.floor(cmaps).mul(cmaps));
+                Coord2d originmap = originview.sub(cmaps.mul(4));
+                Coord2d origin = originmap.floor(tilesz).mul(tilesz);
+                if (origin.x < originmap.x) origin.x += tilesz.x;
+                if (origin.y < originmap.y) origin.y += tilesz.y;
 
                 Predicate<String> inaccess = s -> {
                     for (String act : inaccessibleTiles) {
@@ -145,11 +158,37 @@ public class Pathfinder extends Thread {
                     return (false);
                 };
 
-                for (int i = 1; i < 90; i++) {
-                    for (int j = 1; j < 90; j++) {
-                        int t = gui.map.glob.map.gettile(origin.div(11).floor().add(i, j));
+                for (int i = 0; i < accessMatrix.length; i++) {
+                    for (int j = 0; j < accessMatrix[i].length; j++) {
+                        Coord2d current = Coord2d.of(origin.floor(tilesz).add(i, j));
+                        if (current.mul(tilesz).x < originmap.x || current.mul(tilesz).y < originmap.y) {
+                            accessMatrix[i][j] = 2;
+                            continue;
+                        }
+                        if (current.mul(tilesz).x + tilesz.x > originmap.x + (cmaps.x * 9) || current.mul(tilesz).y + tilesz.y > originmap.y + (cmaps.y * 9)) {
+                            accessMatrix[i][j] = 2;
+                            continue;
+                        }
+
+                        int t = gui.map.glob.map.gettile(current.floor());
+
+                        boolean inac = false;
+                        final Tiler tiler = gui.map.glob.map.tiler(t);
+                        if (configuration.puruspfignoreridge && tiler instanceof TerrainTile.RidgeTile) {
+                            double max = Double.NEGATIVE_INFINITY;
+                            double min = Double.POSITIVE_INFINITY;
+                            for (Coord2d off : new Coord2d[]{Coord2d.z, Coord2d.of(tilesz.x, 0), Coord2d.of(tilesz), Coord2d.of(0, tilesz.y)}) {
+                                double z = gui.map.glob.map.getcz(current.mul(tilesz).add(off));
+                                max = Double.max(max, z);
+                                min = Double.min(min, z);
+                            }
+
+                            if (max - min >= ((TerrainTile.RidgeTile) tiler).breakz()) inac = true;
+                        }
+
                         Resource res = gui.map.glob.map.tilesetr(t);
-                        if (res != null && inaccess.test(res.name)) {
+
+                        if ((res != null && inaccess.test(res.name)) || inac) {
                             accessMatrix[i][j] = 2;
                         }
                     }
@@ -160,56 +199,62 @@ public class Pathfinder extends Thread {
                         if (gob.isplayer())
                             continue;
                         Hitbox[] box = Hitbox.hbfor(gob);
-                        if (box != null && box.length == 1 && box[0].points.length == 4 && !whitelistedGobs.contains(gob.getres().name) && box[0].ishitable()) {//FIXME
-                            Coord2d rel = gob.rc.sub(origin);
+                        if (box == null) continue;
+                        for (Hitbox hitbox : box) {
+                            if (!whitelistedGobs.contains(gob.getres().name) && hitbox.ishitable()) {//FIXME
+                                Coord2d rel = gob.rc.sub(origin);
 
-                            Coord2d[] points = new Coord2d[4];
+                                Coord2d[] points = new Coord2d[hitbox.points.length];
 
-                            points[0] = box[0].points[0].rotate(gob.a).add(rel);
-                            points[1] = box[0].points[1].rotate(gob.a).add(rel);
-                            points[2] = box[0].points[2].rotate(gob.a).add(rel);
-                            points[3] = box[0].points[3].rotate(gob.a).add(rel);
+                                for (int i = 0; i < points.length; i++)
+                                    points[i] = hitbox.points[i].rotate(gob.a).add(rel);
 
-                            double maxY = Double.max(Double.max(points[0].y, points[1].y), Double.max(points[2].y, points[3].y));
-                            double minY = Double.min(Double.min(points[0].y, points[1].y), Double.min(points[2].y, points[3].y));
-                            for (int i = (int) Math.floor(minY); i <= (int) Math.ceil(maxY); i++) {
-                                List<Double> plist = new ArrayList<>();
-                                for (int j = 0; j < points.length; j++) {
-                                    if (Math.min(points[j].y, points[(j + 1) % points.length].y) <= i && i <= Math.max(points[j].y, points[(j + 1) % points.length].y)) {
-                                        Line l = segmentToLine(points[j], points[(j + 1) % points.length]);
-                                        if (l.isVertical())
-                                            plist.add(l.constant);
-                                        else if (l.isHorizontal()) {
-                                            plist.add(Math.min(points[j].x, points[(j + 1) % points.length].x));
-                                            plist.add(Math.max(points[j].x, points[(j + 1) % points.length].x));
-                                        } else {
-                                            plist.add((l.xAtY(i)));
-                                        }
-                                    }
+                                double maxY = Double.NEGATIVE_INFINITY;
+                                double minY = Double.POSITIVE_INFINITY;
+
+                                for (Coord2d point : points){
+                                    maxY = Double.max(maxY, point.y);
+                                    minY = Double.min(minY, point.y);
                                 }
-                                Collections.sort(plist);
-                                for (int j = 1; j < plist.size(); j += 2) {
-                                    int left = (int) Math.ceil(plist.get(j - 1));
-                                    int right = (int) Math.floor(plist.get(j));
-                                    for (int k = left; k <= right; k++) {
-                                        if (j < 0 || k < 0 || j / 11 > 110 || k / 11 > 110)
-                                            continue;
-                                        try {
-                                            if (destGob != null && gob.id == destGob.id)
-                                                accessMatrix[(k) / 11][(i) / 11] = -1;
-                                            else
-                                                accessMatrix[(k) / 11][(i) / 11] = 1;
-                                        } catch (ArrayIndexOutOfBoundsException a) {
-                                            a.printStackTrace();
+
+                                for (int i = (int) Math.floor(minY); i <= (int) Math.ceil(maxY); i++) {
+                                    List<Double> plist = new ArrayList<>();
+                                    for (int j = 0; j < points.length; j++) {
+                                        if (Math.min(points[j].y, points[(j + 1) % points.length].y) <= i && i <= Math.max(points[j].y, points[(j + 1) % points.length].y)) {
+                                            Line l = segmentToLine(points[j], points[(j + 1) % points.length]);
+                                            if (l.isVertical())
+                                                plist.add(l.constant);
+                                            else if (l.isHorizontal()) {
+                                                plist.add(Math.min(points[j].x, points[(j + 1) % points.length].x));
+                                                plist.add(Math.max(points[j].x, points[(j + 1) % points.length].x));
+                                            } else {
+                                                plist.add((l.xAtY(i)));
+                                            }
                                         }
                                     }
-                                    if (left == right) {
-                                        j--;
-                                        continue;
+                                    Collections.sort(plist);
+                                    for (int j = 1; j < plist.size(); j += 2) {
+                                        int left = (int) Math.ceil(plist.get(j - 1));
+                                        int right = (int) Math.floor(plist.get(j));
+                                        for (int k = left; k <= right; k++) {
+                                            if (j < 0 || k < 0 || j / 11 > 110 || k / 11 > 110)
+                                                continue;
+                                            try {
+                                                if (destGob != null && gob.id == destGob.id)
+                                                    accessMatrix[(k) / 11][(i) / 11] = -1;
+                                                else
+                                                    accessMatrix[(k) / 11][(i) / 11] = 1;
+                                            } catch (ArrayIndexOutOfBoundsException a) {
+                                                a.printStackTrace();
+                                            }
+                                        }
+                                        if (left == right) {
+                                            j--;
+                                            continue;
+                                        }
                                     }
                                 }
                             }
-
                         }
                     }
                 }
@@ -226,16 +271,16 @@ public class Pathfinder extends Thread {
                 }
                 // Only pathfind within 37 tiles to every distance around player TODO: Find the precise distance where objects are loaded
                 Coord playerTile = coordToTile(gui.map.player().rc.sub(origin));
-                for (int i = -38; i <= 38; i++) {
-                    accessMatrix[playerTile.x + 38][playerTile.y + i] = 2;
-                    accessMatrix[playerTile.x - 38][playerTile.y + i] = 2;
-                    accessMatrix[playerTile.x + i][playerTile.y + 38] = 2;
-                    accessMatrix[playerTile.x + i][playerTile.y - 38] = 2;
-                }
+//                for (int i = -38; i <= 38; i++) {
+//                    accessMatrix[playerTile.x + 38][playerTile.y + i] = 2;
+//                    accessMatrix[playerTile.x - 38][playerTile.y + i] = 2;
+//                    accessMatrix[playerTile.x + i][playerTile.y + 38] = 2;
+//                    accessMatrix[playerTile.x + i][playerTile.y - 38] = 2;
+//                }
                 // Color tiles
                 if (DEBUG) {
-                    for (int i = 0; i < 100; i++) {
-                        for (int j = 0; j < 100; j++) {
+                    for (int i = 0; i < xmatrix; i++) {
+                        for (int j = 0; j < ymatrix; j++) {
                             if (accessMatrix[i][j] == 0)
                                 continue;
                             else if (accessMatrix[i][j] == -1)
@@ -260,9 +305,24 @@ public class Pathfinder extends Thread {
                 while (true) {
                     // Move player to tile that is accessible
                     playerTile = coordToTile(gui.map.player().rc.sub(origin));
-                    int t = gui.map.glob.map.gettile(origin.div(11).floor().add(playerTile.x, playerTile.y));
+                    int t = gui.map.glob.map.gettile(origin.floor(tilesz).add(playerTile.x, playerTile.y));
                     Resource res = gui.map.glob.map.tilesetr(t);
-                    if (res != null && inaccess.test(res.name)) {
+
+                    boolean inac = false;
+                    final Tiler tiler = gui.map.glob.map.tiler(t);
+                    if (configuration.puruspfignoreridge && tiler instanceof TerrainTile.RidgeTile) {
+                        double max = Double.NEGATIVE_INFINITY;
+                        double min = Double.POSITIVE_INFINITY;
+                        for (Coord off : new Coord[]{Coord.z, Coord.of(tilesz2.x, 0), Coord.of(tilesz2), Coord.of(0, tilesz2.y)}) {
+                            double z = gui.map.glob.map.getcz(playerTile.mul(tilesz).add(off));
+                            max = Double.max(max, z);
+                            min = Double.min(min, z);
+                        }
+
+                        if (max - min >= ((TerrainTile.RidgeTile) tiler).breakz()) inac = true;
+                    }
+
+                    if ((res != null && inaccess.test(res.name)) || inac) {
                         accessMatrix[playerTile.x][playerTile.y] = 2;
                     }
 
