@@ -1023,10 +1023,10 @@ public class MapFileWidget extends Widget implements Console.Directory {
                     if (m instanceof MapFile.SMarker) {
                         return (((MapFile.SMarker) m).autosend);
                     }
-                    if (m instanceof MapFile.PMarker && configuration.loadMapSetting(ui.sess.username, "green")) {
-                        return ((MapFile.PMarker) m).color.equals(Color.GREEN) && !m.name().equals("");
+                    if (m instanceof MapFile.PMarker) {
+                        return ((MapFile.PMarker) m).color.equals(Color.GREEN) && configuration.loadMapSetting(ui.sess.username, "green") && !m.name().equals("");
                     }
-                    return true;
+                    return false;
                 });
             }
         }
