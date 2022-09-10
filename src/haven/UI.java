@@ -803,4 +803,9 @@ public class UI {
     public static Coord unscale(Coord v) {
         return (v.div(scalef));
     }
+
+
+    public long time = System.currentTimeMillis();
+    public static long timewait = Utils.getprefi("uitickwaittime", 500);
+    public static boolean canwait = Utils.getprefb("uitickwait", false);
 }

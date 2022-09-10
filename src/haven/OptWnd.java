@@ -3569,6 +3569,17 @@ public class OptWnd extends Window {
                 });
         appender.add(new IndirCheckBox("Don't close flowermenu on clicks", BUGGEDMENU));
         appender.add(new IndirCheckBox("Close button to each flowermenu", CLOSEFORMENU));
+        appender.addRow(new CheckBox("Background UI timeout ticks", val -> Utils.setprefb("uitickwait", UI.canwait = val), UI.canwait), new HSlider(200, 1, 10000, (int) UI.timewait) {
+            @Override
+            public void changed() {
+                Utils.setprefi("uitickwaittime", (int) (UI.timewait = val));
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("UI tick timeout: " + val + "ms").tex();
+            }
+        });
 
         modification.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
         modification.pack();

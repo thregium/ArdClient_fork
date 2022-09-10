@@ -237,7 +237,7 @@ public class Pathfinder extends Thread {
                                         int left = (int) Math.ceil(plist.get(j - 1));
                                         int right = (int) Math.floor(plist.get(j));
                                         for (int k = left; k <= right; k++) {
-                                            if (j < 0 || k < 0 || j / 11 > 110 || k / 11 > 110)
+                                            if (i < 0 || k < 0 || i / 11 > ymatrix || k / 11 > xmatrix)
                                                 continue;
                                             try {
                                                 if (destGob != null && gob.id == destGob.id)

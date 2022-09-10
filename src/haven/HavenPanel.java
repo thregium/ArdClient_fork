@@ -279,6 +279,7 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
                 synchronized (events) {
                     events.add(e);
                     events.notifyAll();
+                    if (e.getKeyCode() == KeyEvent.VK_ALT) {e.consume();}
                 }
             }
 
@@ -286,6 +287,7 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
                 synchronized (events) {
                     events.add(e);
                     events.notifyAll();
+                    if (e.getKeyCode() == KeyEvent.VK_ALT) {e.consume();}
                 }
             }
 
@@ -293,6 +295,7 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
                 synchronized (events) {
                     events.add(e);
                     events.notifyAll();
+                    if (e.getKeyCode() == KeyEvent.VK_ALT) {e.consume();}
                 }
             }
         });
@@ -834,6 +837,11 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
                     synchronized (sessions) {
                         for (final UI lui : sessions) {
                             if (lui != ui) {
+                                if (UI.canwait) {
+                                    long time = System.currentTimeMillis();
+                                    if (time - lui.time < UI.timewait) continue;
+                                    else lui.time = time;
+                                }
                                 if (lui.sess != null)
                                     lui.sess.glob.ctick();
                                 lui.tick();
