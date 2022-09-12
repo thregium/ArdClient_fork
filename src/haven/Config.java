@@ -482,7 +482,11 @@ public class Config {
             "pegmatite",
             "ilmenite",
             "rhyolite",
-            "pumice"
+            "pumice",
+            "sunstone",
+            "chert",
+            "graywacke",
+            "serpentine"
     ));
 
     public final static Set<String> mineablesOre = new HashSet<String>(Arrays.asList(
@@ -494,7 +498,8 @@ public class Config {
             "hematite",
             "magnetite",
             "leadglance",
-            "peacockore"
+            "peacockore",
+            "cuprite"
     ));
 
     public final static Set<String> mineablesOrePrecious = new HashSet<>(Arrays.asList(
@@ -504,7 +509,6 @@ public class Config {
             "petzite",
             "sylvanite",
             "nagyagite"
-
     ));
 
     public final static Set<String> mineablesCurios = new HashSet<>(Arrays.asList(

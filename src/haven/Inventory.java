@@ -567,6 +567,10 @@ public class Inventory extends Widget implements DTarget {
         }
 
         items.sort(Comparator.comparing(InvItem::getSloti));
+        if (s.contains("!n"))
+            items.sort((o1, o2) -> o2.getName().compareTo(o1.getName()));
+        else if (s.contains("n"))
+            items.sort(Comparator.comparing(InvItem::getName));
         if (s.contains("!q"))
             items.sort((o1, o2) -> {
                 if (o1.getQuality() == null && o2.getQuality() == null) return (0);
@@ -586,13 +590,9 @@ public class Inventory extends Widget implements DTarget {
             items.sort((o1, o2) -> o2.getResname().compareTo(o1.getResname()));
         else if (s.contains("r"))
             items.sort(Comparator.comparing(InvItem::getResname));
-        if (s.contains("!n"))
-            items.sort((o1, o2) -> o2.getName().compareTo(o1.getName()));
-        else if (s.contains("n"))
-            items.sort(Comparator.comparing(InvItem::getName));
 
         sort:
-        for (int i = 0; i < items.size(); i++) { //ugly пиздец страшно, плохо сортирует, не проверяет тот же объект, думай лучше
+        for (int i = 0; i < items.size(); i++) {
             InvItem invItem = items.get(i);
             InvItem iItem = getItem(invItem.getSlot());
             if (invItem.equals(iItem) && invItem.getSloti() != i) {

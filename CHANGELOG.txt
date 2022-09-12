@@ -1,4 +1,4 @@
-[2022.09.10] >>> Details in https://github.com/Cediner/ArdClient/commits/ <<<
+[2022.09.12] >>> Details in https://github.com/Cediner/ArdClient/commits/ <<<
 
 [2022.08.12]
 > An attempt to fix the map

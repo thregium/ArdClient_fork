@@ -587,17 +587,18 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             resname().ifPresent(this::discovered);
         }
 
-        synchronized (dattrs) {
-            for (Pair<GAttrib, Consumer<Gob>> pair : dattrs) {
-                setattr(pair.a);
-                pair.b.accept(this);
-            }
-            dattrs.clear();
-        }
-
         synchronized (attr) {
             for (GAttrib a : attr.values())
                 a.ctick(dt);
+        }
+
+        synchronized (dattrs) {
+            for (Pair<GAttrib, Consumer<Gob>> pair : dattrs) {
+                setattr(pair.a);
+                pair.a.ctick(dt);
+                pair.b.accept(this);
+            }
+            dattrs.clear();
         }
 
         synchronized (ols) {
@@ -694,6 +695,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             }
         }
 
+        Map<Class<? extends GAttrib>, GAttrib> attr;
+        synchronized (this.attr) {
+            attr = new HashMap<>(this.attr);
+        }
         if (attr.size() > 0) {
             sb.append("GAttribs: ").append(attr.size()).append("\n");
             for (GAttrib ga : attr.values()) {
@@ -974,7 +979,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     }
 
     public void delayedsetattr(GAttrib a, Consumer<Gob> cb) {
-        dattrs.add(new Pair<>(a, cb));
+        synchronized (dattrs) {
+            dattrs.add(new Pair<>(a, cb));
+        }
     }
 
     public <C extends GAttrib> C getattr(Class<C> c) {

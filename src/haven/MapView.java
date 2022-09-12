@@ -88,6 +88,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -103,6 +104,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.DoubleUnaryOperator;
+import java.util.stream.Collectors;
 
 public class MapView extends PView implements DTarget, Console.Directory, PFListener {
     public long plgobid;
@@ -2588,73 +2590,35 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     }
                 }
 
-                if (Config.proximityaggro && Config.proximityaggropvp && clickb == 1 && curs != null && curs.name.equals("gfx/hud/curs/atk")) {
-                    Gob target = null;
+                /*Proximity for aggro or shoot*/
+                if (clickb == 1 && curs != null && (curs.name.equals("gfx/hud/curs/shoot") || curs.name.equals("gfx/hud/curs/atk"))
+                        && (ui.modflags() == UI.MOD_META || Config.proximityaggro || Config.proximityaggropvp)) {
+                    boolean isAttack = curs.name.equals("gfx/hud/curs/atk");
+                    List<Gob> gobs;
                     synchronized (glob.oc) {
-                        for (Gob gob : glob.oc) {
-                            if (!gob.isplayer()) {
-                                if (gob.type == Type.HUMAN || gob.type == Type.ANIMAL || gob.type == Type.TAMEDANIMAL || gob.type == Type.DANGANIMAL) {
-                                    double dist = gob.rc.dist(mc);
-                                    if ((target == null || dist < target.rc.dist(mc)) && dist <= 5 * tilesz.x)
-                                        target = gob;
-                                }
-                            }
-                        }
-                        if (target != null) {
-                            wdgmsg("click", target.sc, target.rc.floor(posres), 1, 0, 0, (int) target.id, target.rc.floor(posres), 0, -1);
-                            pllastcc = target.rc;
-                            return;
-                        }
+                        gobs = Arrays.stream(glob.oc.getallgobs()).collect(Collectors.toList());
                     }
-                } else if (Config.proximityaggropvp && !Config.proximityaggro && clickb == 1 && curs != null && curs.name.equals("gfx/hud/curs/atk")) {
-                    Gob target = null;
-                    synchronized (glob.oc) {
-                        for (Gob gob : glob.oc) {
-                            if (gob.type == Type.HUMAN && !gob.isplayer()) {
-                                double dist = gob.rc.dist(mc);
-                                if ((target == null || dist < target.rc.dist(mc)) && dist <= 5 * tilesz.x)
-                                    target = gob;
-                            }
+                    gobs.stream().filter(Gob::isplayer).collect(Collectors.toList()).forEach(gobs::remove);
+                    double offDist = (ui.modflags() == UI.MOD_META) ? configuration.attackproximityradius : 5 * tilesz.x;
+                    gobs.stream().filter(gob -> gob.rc.dist(mc) > offDist).collect(Collectors.toList()).forEach(gobs::remove);
+                    gobs = gobs.stream().filter(gob -> {
+                        if (ui.modflags() == UI.MOD_META) {
+                            return (true);
+                        } else if (isAttack && Config.proximityaggropvp && gob.type == Type.HUMAN) {
+                            return (true);
+                        } else if (isAttack && Config.proximityaggro && (gob.type == Type.ANIMAL || gob.type == Type.TAMEDANIMAL || gob.type == Type.DANGANIMAL)) {
+                            return (true);
+                        } else {
+                            return (false);
                         }
-                        if (target != null) {
-                            wdgmsg("click", target.sc, target.rc.floor(posres), 1, 0, 0, (int) target.id, target.rc.floor(posres), 0, -1);
-                            pllastcc = target.rc;
-                            return;
-                        }
-                    }
-                } else if (Config.proximityaggro && !Config.proximityaggropvp && clickb == 1 && curs != null && curs.name.equals("gfx/hud/curs/atk")) {
-                    Gob target = null;
-                    synchronized (glob.oc) {
-                        for (Gob gob : glob.oc) {
-                            if (!gob.isplayer()) {
-                                if (gob.type == Type.ANIMAL || gob.type == Type.TAMEDANIMAL || gob.type == Type.DANGANIMAL) {
-                                    double dist = gob.rc.dist(mc);
-                                    if ((target == null || dist < target.rc.dist(mc)) && dist <= 5 * tilesz.x)
-                                        target = gob;
-                                }
-                            }
-                        }
-                        if (target != null) {
-                            wdgmsg("click", target.sc, target.rc.floor(posres), 1, 0, 0, (int) target.id, target.rc.floor(posres), 0, -1);
-                            pllastcc = target.rc;
-                            return;
-                        }
-                    }
-                } else if (ui.modflags() == UI.MOD_META && clickb == 1 && curs != null && (curs.name.equals("gfx/hud/curs/shoot") || curs.name.equals("gfx/hud/curs/atk"))) {
-                    Gob target = null;
-                    synchronized (glob.oc) {
-                        for (Gob gob : glob.oc) {
-                            if (!gob.isplayer()) {
-                                double dist = gob.rc.dist(mc);
-                                if ((target == null || dist < target.rc.dist(mc)) && dist <= configuration.attackproximityradius)
-                                    target = gob;
-                            }
-                        }
-                        if (target != null) {
-                            wdgmsg("click", target.sc, target.rc.floor(posres), 1, 0, 0, (int) target.id, target.rc.floor(posres), 0, -1);
-                            pllastcc = target.rc;
-                            return;
-                        }
+                    }).collect(Collectors.toList());
+                    gobs.sort(Comparator.comparingDouble(o -> o.rc.dist(mc)));
+
+                    if (!gobs.isEmpty()) {
+                        Gob target = gobs.get(0);
+                        wdgmsg("click", target.sc, target.rc.floor(posres), 1, 0, 0, (int) target.id, target.rc.floor(posres), 0, -1);
+                        pllastcc = target.rc;
+                        return;
                     }
                 }
                 final Object[] gobargs = gobclickargs(inf);

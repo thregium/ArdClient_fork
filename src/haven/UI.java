@@ -29,7 +29,10 @@ package haven;
 import modification.configuration;
 import modification.dev;
 
+import java.awt.DisplayMode;
 import java.awt.Font;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -65,7 +68,7 @@ public class UI {
     private final Context uictx;
     public ActAudio audio = new ActAudio();
     public Charlist charlist;
-    private static final double scalef = 1.0;
+    private static double scalef = 1.0;
 
     {
         lastevent = lasttick = Utils.rtime();
@@ -808,4 +811,47 @@ public class UI {
     public long time = System.currentTimeMillis();
     public static long timewait = Utils.getprefi("uitickwaittime", 500);
     public static boolean canwait = Utils.getprefb("uitickwait", false);
+
+
+    private static double maxscale = -1;
+
+    public static double getScale() {
+        return (scalef);
+    }
+
+    public static void updateScale() {
+        scalef = loadscale();
+    }
+
+    public static double maxscale() {
+        synchronized (UI.class) {
+            if (maxscale < 0) {
+                double fscale = 1.25;
+                try {
+                    GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                    for (GraphicsDevice dev : env.getScreenDevices()) {
+                        DisplayMode mode = dev.getDisplayMode();
+                        double scale = Math.min(mode.getWidth() / 800.0, mode.getHeight() / 600.0);
+                        fscale = Math.max(fscale, scale);
+                    }
+                } catch (Exception exc) {
+                    new Warning(exc, "could not determine maximum scaling factor").issue();
+                }
+                maxscale = fscale;
+            }
+            return (maxscale);
+        }
+    }
+
+    private static double loadscale() {
+//        if (Config.uiscale != null)
+//            return (Config.uiscale);
+        double scale = Utils.getprefd("uiscale", 1.0);
+        scale = Math.max(Math.min(scale, maxscale()), 1.0);
+        return (scale);
+    }
+
+    static {
+        updateScale();
+    }
 }

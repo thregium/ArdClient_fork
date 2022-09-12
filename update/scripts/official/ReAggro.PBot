@@ -156,7 +156,7 @@ function startFunc() {
                 toDelete = [];
             }
         }
-        switchAggro(false);
+        // switchAggro(false);
         return;
     }
 
@@ -205,7 +205,7 @@ function aggro(targetId) {
     }
 }
 
-function waitForCursor(name, time) {
+function waitForCursor(name, time){
     return (waitFor(time, () => cursorIs(name), (i) => debug("Attack " + i)));
 }
 

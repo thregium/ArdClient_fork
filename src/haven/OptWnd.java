@@ -6625,6 +6625,30 @@ public class OptWnd extends Window {
                 disanimlist.items.addAll(Config.disableanim.values());
                 appender.add(disanimlist);
 
+                {
+                    Label dpy = new Label("");
+                    final double smin = 1, smax = Math.floor(UI.maxscale() / 0.25) * 0.25;
+                    final int steps = (int) Math.round((smax - smin) / 0.25);
+                    appender.addRow(new Label("UGLY UI scale (don't use)"), new HSlider(160, 0, steps, (int) Math.round(steps * (Utils.getprefd("uiscale", 1.0) - smin) / (smax - smin))) {
+                        @Override
+                        protected void added() {
+                            dpy();
+                        }
+
+                        void dpy() {
+                            dpy.settext(String.format("%.2f\u00d7", smin + (((double) this.val / steps) * (smax - smin))));
+                        }
+
+                        @Override
+                        public void changed() {
+                            double val = smin + (((double) this.val / steps) * (smax - smin));
+                            Utils.setprefd("uiscale", val);
+                            UI.updateScale();
+                            dpy();
+                        }
+                    }, dpy);
+                }
+
                 pack();
             }
         }

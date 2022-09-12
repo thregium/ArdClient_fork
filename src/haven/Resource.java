@@ -27,6 +27,12 @@
 package haven;
 
 import dolda.xiphutil.VorbisStream;
+import modification.configuration;
+import modification.dev;
+import javax.imageio.ImageIO;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.Sequence;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -83,12 +89,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
-import javax.imageio.ImageIO;
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiSystem;
-import javax.sound.midi.Sequence;
-import modification.configuration;
-import modification.dev;
 
 public class Resource implements Serializable {
     public static Resource fake = new Resource(null, "fake", -1);
@@ -1113,7 +1113,7 @@ public class Resource implements Serializable {
             if (tsz == null)
                 tsz = sz;
             ssz = new Coord(Math.round(UI.scale(sz.x / scale)), Math.round(UI.scale(sz.y / scale)));
-            if (scale != 1) {
+            if (scale != UI.getScale()) {
                 img = scaled();
                 sz = ssz;
             }
@@ -1958,6 +1958,7 @@ public class Resource implements Serializable {
     }
 
     private final static List<String> depresList = Arrays.asList("gfx/borka/reedweavebelt", "gfx/terobjs/bushes/reeds");
+
     private void load(InputStream st) throws IOException {
         Message in = new StreamMessage(st);
         byte[] sig = "Haven Resource 1".getBytes(Utils.ascii);
@@ -2022,7 +2023,7 @@ public class Resource implements Serializable {
     }
 
     public static BufferedImage loadimg(String name) {
-        return (local().loadwait(name).layer(imgc).img);
+        return (local().loadwait(name).layer(imgc).scaled());
     }
 
     public static BufferedImage loadimg(final String name, final int id) {
