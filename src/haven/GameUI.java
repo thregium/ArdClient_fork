@@ -261,7 +261,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
                         g.aimage(btime, new Coord(sz.x - 5, y), 1, 0);
                         y += btime.sz().y;
                     }
-                    if (winfo != null) {
+                    if (configuration.showweatherinfo && winfo != null) {
                         g.aimage(winfo, new Coord(sz.x - 5, y), 1, 0);
                         y += winfo.sz().y;
                     }

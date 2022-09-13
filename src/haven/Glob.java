@@ -30,6 +30,7 @@ package haven;
 
 import haven.res.gfx.fx.floatimg.DamageText;
 import haven.sloth.script.pathfinding.GobHitmap;
+import modification.configuration;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.lang.ref.WeakReference;
@@ -387,12 +388,14 @@ public class Glob {
         infoUpdate(rservertimetex, rservertime);
         infoUpdate(bservertimetex, bservertime);
 
-        List<String> tempw;
-        synchronized (weatherinfo) {
-            tempw = new ArrayList<>(weatherinfo);
-        }
+        if (configuration.showweatherinfo) {
+            List<String> tempw;
+            synchronized (weatherinfo) {
+                tempw = new ArrayList<>(weatherinfo);
+            }
 
-        infoUpdate(weathertimetex, String.join("", tempw.toArray(new String[0])), () -> new TexI(ItemInfo.catimgs(0, true, tempw.stream().map(in -> Text.render(in).img).toArray(BufferedImage[]::new))));
+            infoUpdate(weathertimetex, String.join("", tempw.toArray(new String[0])), () -> new TexI(ItemInfo.catimgs(0, true, tempw.stream().map(in -> Text.render(in).img).toArray(BufferedImage[]::new))));
+        }
     }
 
     private void infoUpdate(AtomicReference<Pair<String, Tex>> t, String text) {

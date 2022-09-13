@@ -710,18 +710,19 @@ public class OptWnd extends Window {
                         ui.root.add(ui.root.sessionDisplay);
             }
         });
-
-        appender.add(new CheckBox("Big Animals (required for Small World)") {
-            {
-                a = Config.biganimals;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("biganimals", val);
-                Config.biganimals = val;
-                a = val;
-            }
-        });
+        appender.add(new CheckBox("Show server time (game time)", val -> Utils.setprefb("showservertime", Config.showservertime = val), Config.showservertime));
+        appender.add(new CheckBox("Show weather info (req. server time)", val -> Utils.setprefb("showweatherinfo", configuration.showweatherinfo = val), configuration.showweatherinfo));
+//        appender.add(new CheckBox("Show polowners info") {
+//            {
+//                a = configuration.showpolownersinfo;
+//            }
+//
+//            public void set(boolean val) {
+//                Utils.setprefb("showpolownersinfo", val);
+//                configuration.showpolownersinfo = val;
+//                a = val;
+//            }
+//        });
 
         appender.add(new CheckBox("Show IMeter Text") {
             {
@@ -734,7 +735,17 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("Big Animals (required for Small World)") {
+            {
+                a = Config.biganimals;
+            }
 
+            public void set(boolean val) {
+                Utils.setprefb("biganimals", val);
+                Config.biganimals = val;
+                a = val;
+            }
+        });
         appender.add(new CheckBox("Flatten Cupboards - Requires Restart") {
             {
                 a = Config.flatcupboards;
@@ -1462,28 +1473,6 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Show server time") {
-            {
-                a = Config.showservertime;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("showservertime", val);
-                Config.showservertime = val;
-                a = val;
-            }
-        });
-//        appender.add(new CheckBox("Show polowners info") {
-//            {
-//                a = configuration.showpolownersinfo;
-//            }
-//
-//            public void set(boolean val) {
-//                Utils.setprefb("showpolownersinfo", val);
-//                configuration.showpolownersinfo = val;
-//                a = val;
-//            }
-//        });
         appender.add(new CheckBox("Drop leeches automatically") {
             {
                 a = Config.leechdrop;
