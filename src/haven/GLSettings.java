@@ -170,7 +170,7 @@ public class GLSettings implements java.io.Serializable {
 
     public final BoolSetting fsaa = new BoolSetting("fsaa") {
         public Boolean defval() {
-            return (false);
+            return (cfg.havefsaa());
         }
 
         public void validate(Boolean val) {

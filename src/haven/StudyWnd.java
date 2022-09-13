@@ -1,6 +1,7 @@
 package haven;
 
 import haven.resutil.Curiosity;
+import java.text.DecimalFormat;
 
 public class StudyWnd extends GameUI.Hidewnd {
     InventoryProxy study;
@@ -23,7 +24,8 @@ public class StudyWnd extends GameUI.Hidewnd {
 
     private static class StudyInfo extends Widget {
         public Widget study;
-        public int texp, tw, tenc, tlph;
+        public int texp, tw, tenc;
+        public double tlph;
         private final Text.UText<?> texpt = new Text.UText<Integer>(Text.std) {
             public Integer value() {
                 return (texp);
@@ -47,13 +49,17 @@ public class StudyWnd extends GameUI.Hidewnd {
                 return (Integer.toString(tenc));
             }
         };
-        private final Text.UText<?> tlphr = new Text.UText<Integer>(Text.std) {
-            public Integer value() {
+        private final Text.UText<?> tlphr = new Text.UText<Double>(Text.std) {
+            DecimalFormat f = new DecimalFormat("##.##");
+
+            @Override
+            public Double value() {
                 return (tlph);
             }
 
-            public String text(Integer v) {
-                return (Integer.toString(tlph));
+            @Override
+            public String text(Double v) {
+                return (String.format("%s (%s)", f.format(tlph), f.format(tlph * ui.sess.glob.getTimeFac())));
             }
         };
 

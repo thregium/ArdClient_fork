@@ -350,17 +350,21 @@ public class Window extends MovableWidget implements DTarget {
 
     // Input time as minutes
     String sensibleTimeFormat(Double time) {
+        double rtime = time / ui.sess.glob.getTimeFac();
         StringBuilder sb = new StringBuilder();
         int days = new Double(time / 1440).intValue();
+        int rdays = new Double(rtime / 1440).intValue();
         time -= days * 1440;
+        rtime -= rdays * 1440;
         int hours = new Double(time / 60).intValue();
+        int rhours = new Double(rtime / 60).intValue();
         time -= hours * 60;
+        rtime -= rhours * 60;
         int minutes = time.intValue();
-        if (days > 0) {
-            sb.append(days + "d ");
-        }
-        sb.append(hours + "h ");
-        sb.append(minutes + "m");
+        int rminutes = (int) Math.round(rtime);
+        sb.append(String.format("%s%s%s%s%s (%s%s%s%s%s)",
+                days > 0 ? days + "d" : "", hours > 0 ? " " : "", hours > 0 ? hours + "h" : "", minutes > 0 ? " " : "", minutes > 0 ? minutes + "m" : "",
+                rdays > 0 ? rdays + "d" : "", rhours > 0 ? " " : "", rhours > 0 ? rhours + "h" : "", rminutes > 0 ? " " : "", rminutes > 0 ? rminutes + "m" : ""));
         return sb.toString();
     }
 
@@ -514,14 +518,15 @@ public class Window extends MovableWidget implements DTarget {
                         }
                     }
                 }
-                g.image(Text.labelFnd.render("Total LP: " + String.format("%,d", totalLP)).tex(), new Coord(30, 306));
+                int offX = 5;
+                g.image(Text.labelFnd.render("Total LP: " + String.format("%,d", totalLP)).tex(), new Coord(offX, 306));
 
                 int y = 320;
                 List<Map.Entry<String, Integer>> lst2 = AttnTotal.entrySet().stream().sorted((e1, e2) -> e1.getValue().compareTo(e2.getValue())).collect(Collectors.toList());
                 for (Map.Entry<String, Integer> entry : lst2) {
                     totalAttn += entry.getValue();
                 }
-                g.image(Text.labelFnd.render("Total Attention: " + String.format("%,d", totalAttn)).tex(), new Coord(30, 293));
+                g.image(Text.labelFnd.render("Total Attention: " + String.format("%,d", totalAttn)).tex(), new Coord(offX, 293));
                 //iterates the curio list to only print out total study times for unique curios
                 List<Map.Entry<String, Double>> lst = studyTimes.entrySet().stream().sorted((e1, e2) -> e1.getValue().compareTo(e2.getValue())).collect(Collectors.toList());
                 for (Map.Entry<String, Double> entry : lst) {
@@ -533,7 +538,7 @@ public class Window extends MovableWidget implements DTarget {
                     }
                     if (entry.getValue() > Config.curiotimetarget * 3) {
 
-                        g.image(Text.labelFnd.render(entry.getKey() + ": " + sensibleTimeFormat(entry.getValue()) + " - " + sensibleLPFormat(LP), CURIOHIGH.get()).tex(), new Coord(30, y));
+                        g.image(Text.labelFnd.render(entry.getKey() + ": " + sensibleTimeFormat(entry.getValue()) + " - " + sensibleLPFormat(LP), CURIOHIGH.get()).tex(), new Coord(offX, y));
                         y += 15;
                         sizeY += 15;
                         for (int i = 0; i < Curios.size(); i++) {
@@ -543,7 +548,7 @@ public class Window extends MovableWidget implements DTarget {
                         }
                         GetCurios.add(entry.getKey());
                     } else if (entry.getValue() < Config.curiotimetarget) {
-                        g.image(Text.labelFnd.render(entry.getKey() + ": " + sensibleTimeFormat(entry.getValue()) + " - " + sensibleLPFormat(LP), CURIOLOW.get()).tex(), new Coord(30, y));
+                        g.image(Text.labelFnd.render(entry.getKey() + ": " + sensibleTimeFormat(entry.getValue()) + " - " + sensibleLPFormat(LP), CURIOLOW.get()).tex(), new Coord(offX, y));
                         y += 15;
                         sizeY += 15;
                         for (int i = 0; i < Curios.size(); i++) {
@@ -554,7 +559,7 @@ public class Window extends MovableWidget implements DTarget {
                         GetCurios.add(entry.getKey());
 
                     } else {
-                        g.image(Text.labelFnd.render(entry.getKey() + ": " + sensibleTimeFormat(entry.getValue()) + " - " + sensibleLPFormat(LP), CURIOTARGET.get()).tex(), new Coord(30, y));
+                        g.image(Text.labelFnd.render(entry.getKey() + ": " + sensibleTimeFormat(entry.getValue()) + " - " + sensibleLPFormat(LP), CURIOTARGET.get()).tex(), new Coord(offX, y));
                         y += 15;
                         sizeY += 15;
                         for (int i = 0; i < Curios.size(); i++) {

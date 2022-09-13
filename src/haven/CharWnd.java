@@ -38,6 +38,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.font.TextAttribute;
 import java.awt.image.BufferedImage;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -763,7 +764,8 @@ public class CharWnd extends Window {
 
     public class StudyInfo extends Widget {
         public Widget study;
-        public int texp, tw, tenc, tlph;
+        public int texp, tw, tenc;
+        public double tlph;
         private final Text.UText<?> texpt = new Text.UText<Integer>(numfnd) {
             public Integer value() {
                 return (texp);
@@ -785,13 +787,17 @@ public class CharWnd extends Window {
                 return (Integer.toString(tenc));
             }
         };
-        private final Text.UText<?> tlpht = new Text.UText<Integer>(numfnd) {
-            public Integer value() {
+        private final Text.UText<?> tlpht = new Text.UText<Double>(numfnd) {
+            DecimalFormat f = new DecimalFormat("##.##");
+
+            @Override
+            public Double value() {
                 return (tlph);
             }
 
-            public String text(Integer v) {
-                return (Integer.toString(tlph));
+            @Override
+            public String text(Double v) {
+                return (String.format("%s (%s)", f.format(tlph), f.format(tlph * ui.sess.glob.getTimeFac())));
             }
         };
 
@@ -800,7 +806,7 @@ public class CharWnd extends Window {
             this.study = study;
             add(new Label("Attention:"), 2, 2);
             add(new Label("Experience cost:"), 2, 32);
-            add(new Label("LP/hour"), 2, sz.y - 64);
+            add(new Label("LP/H"), 2, sz.y - 64);
             add(new Label("Learning points:"), 2, sz.y - 32);
 
             if (Config.studybuff && ((Inventory) study).getFreeSpace() > 0) {
@@ -828,7 +834,7 @@ public class CharWnd extends Window {
             this.texp = texp;
             this.tw = tw;
             this.tenc = tenc;
-            this.tlph = (int) Math.round(tlph);
+            this.tlph = tlph;
         }
 
         public void draw(GOut g) {

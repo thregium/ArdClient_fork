@@ -37,6 +37,7 @@ import haven.Session;
 import haven.Utils;
 
 import java.awt.image.BufferedImage;
+import java.text.DecimalFormat;
 
 import static haven.QualityList.SingleType.Quality;
 
@@ -53,6 +54,8 @@ public class Curiosity extends ItemInfo.Tip {
         if (owner instanceof GItem)
             ((GItem) owner).studytime = this.time;
     }
+
+    DecimalFormat f = new DecimalFormat("##.##");
 
     private String timefmt() {
         double rtime = time / owner.glob().getTimeFac();
@@ -85,9 +88,9 @@ public class Curiosity extends ItemInfo.Tip {
             double lphw = lph / mw;
             double rlphw = rlph / mw;
             buf.append(timefmt()).append("\n");
-            buf.append(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/HR: $col[192,192,255]{%.2f (%.2f)}"), lph, rlph)).append("\n");
+            buf.append(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/H: $col[192,192,255]{%s (%s)}"), f.format(lph), f.format(rlph))).append("\n");
             if (exp > 0 && mw > 0)
-                buf.append(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/HR/Weight: $col[255,255,192]{%.2f (%.2f)}\n"), lphw, rlphw));
+                buf.append(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/H/Weight: $col[255,255,192]{%s (%s)}\n"), f.format(lphw), f.format(rlphw)));
         }
         return (RichText.render(buf.toString(), 0).img);
     }
