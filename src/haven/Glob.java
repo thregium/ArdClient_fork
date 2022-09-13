@@ -36,6 +36,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -84,7 +85,7 @@ public class Glob {
     public String lservertime;
     public String rservertime;
     public String bservertime;
-    public final List<String> weatherinfo = new ArrayList<>();
+    public final List<String> weatherinfo = Collections.synchronizedList(new ArrayList<>());
     public final AtomicReference<Pair<String, Tex>> mservertimetex = new AtomicReference<>(new Pair<>(null, null));
     public final AtomicReference<Pair<String, Tex>> lservertimetex = new AtomicReference<>(new Pair<>(null, null));
     public final AtomicReference<Pair<String, Tex>> rservertimetex = new AtomicReference<>(new Pair<>(null, null));
@@ -386,7 +387,12 @@ public class Glob {
         infoUpdate(rservertimetex, rservertime);
         infoUpdate(bservertimetex, bservertime);
 
-        infoUpdate(weathertimetex, String.join("", weatherinfo.toArray(new String[0])), () -> new TexI(ItemInfo.catimgs(0, true, weatherinfo.stream().map(in -> Text.render(in).img).toArray(BufferedImage[]::new))));
+        List<String> tempw;
+        synchronized (weatherinfo) {
+            tempw = new ArrayList<>(weatherinfo);
+        }
+
+        infoUpdate(weathertimetex, String.join("", tempw.toArray(new String[0])), () -> new TexI(ItemInfo.catimgs(0, true, tempw.stream().map(in -> Text.render(in).img).toArray(BufferedImage[]::new))));
     }
 
     private void infoUpdate(AtomicReference<Pair<String, Tex>> t, String text) {
@@ -462,12 +468,12 @@ public class Glob {
                     if (!inc)
                         wmap.clear();
                     Collection<Object> old = new LinkedList<Object>(wmap.keySet());
-                    weatherinfo.clear();
+                    List<String> tempw = new ArrayList<>();
                     while (n < a.length) {
                         Indir<Resource> res = sess.getres(((Number) a[n++]).intValue());
                         Object[] args = (Object[]) a[n++];
                         Object curv = wmap.get(res);
-                        weatherinfo.add(res.toString() + " " + Arrays.deepToString(args));
+                        tempw.add(res.toString() + " " + Arrays.deepToString(args));
                         if (curv instanceof Weather) {
                             Weather cur = (Weather) curv;
                             cur.update(args);
@@ -475,6 +481,10 @@ public class Glob {
                             wmap.put(res, args);
                         }
                         old.remove(res);
+                    }
+                    synchronized (weatherinfo) {
+                        weatherinfo.clear();
+                        weatherinfo.addAll(tempw);
                     }
                     for (Object p : old)
                         wmap.remove(p);
