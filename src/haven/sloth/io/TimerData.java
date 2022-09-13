@@ -17,7 +17,6 @@ import java.util.Optional;
 
 public class TimerData extends Thread {
     private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-    private static final double timefac = 3.0;
     private static final ObservableCollection<Timer> timers = new ObservableCollection<>(new ArrayList<>());
 
     static {
@@ -56,28 +55,6 @@ public class TimerData extends Thread {
                 stmt.executeUpdate();
             }
         });
-//        oldload();
-    }
-
-    public static void oldload() {
-        JSONObject[] tstarr = Utils.getprefjsona("timers", null);
-        if (tstarr == null)
-            return;
-        int tinit = timers.size();
-        for (int i = 0; i < tstarr.length; i++) {
-            JSONObject t = tstarr[i];
-            long start = 0;
-            try {
-                start = t.getLong("start");
-            } catch (JSONException e) {
-            }
-            Timer timer = new Timer(tinit + i, t.getString("name"), t.getLong("duration") / 1000 * 3);
-            addTimer(timer);
-            if (start > 0)
-                timer.makeInstance((long) (start / 1000 * Glob.SERVER_TIME_RATIO));
-        }
-        JSONObject[] timersjson = new JSONObject[0];
-        Utils.setprefjsona("timers", timersjson);
     }
 
     public static class Timer {

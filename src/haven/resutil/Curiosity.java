@@ -49,20 +49,25 @@ public class Curiosity extends ItemInfo.Tip {
         this.exp = exp;
         this.mw = mw;
         this.enc = enc;
-        this.time = time / owner.glob().getTimeFac() / 60;
+        this.time = time / 60.0;
         if (owner instanceof GItem)
             ((GItem) owner).studytime = this.time;
     }
 
     private String timefmt() {
+        double rtime = time / owner.glob().getTimeFac();
         int hours = (int) (time / 60.0);
-        int minutes = (int) ((time % 60));
+        int rhours = (int) (rtime / 60.0);
+        int minutes = (int) (time % 60);
+        int rminutes = (int) (rtime % 60);
 
-        String fmt = Resource.getLocString(Resource.BUNDLE_LABEL, "Study time: %s (LP/hour: $col[192,192,255]{%d})");
-        String hstr = hours > 0 ? String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "$col[192,255,192]{%d} h "), hours) : "";
-        String mstr = minutes > 0 ? String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "$col[192,255,192]{%d} m"), minutes) : "";
+        String fmt = Resource.getLocString(Resource.BUNDLE_LABEL, "Study time: %s%s%s (%s%s%s)"); // / owner.glob().getTimeFac()
+        String hstr = hours > 0 ? String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "$col[192,255,192]{%d}h"), hours) : "";
+        String rhstr = rhours > 0 ? String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "$col[192,255,192]{%d}h"), rhours) : "";
+        String mstr = minutes > 0 ? String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "$col[192,255,192]{%d}m"), minutes) : "";
+        String rmstr = rminutes > 0 ? String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "$col[192,255,192]{%d}m"), rminutes) : "";
 
-        return String.format(fmt, hstr + mstr, (int) Math.round(exp / (time / 60)));
+        return (String.format(fmt, hstr, mstr.equals("") ? "" : " ", mstr, rhstr, rmstr.equals("") ? "" : " ", rmstr));
     }
 
     public BufferedImage tipimg() {
@@ -73,10 +78,17 @@ public class Curiosity extends ItemInfo.Tip {
             buf.append(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Mental weight: $col[255,192,255]{%d}\n"), mw));
         if (enc > 0)
             buf.append(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Experience cost: $col[255,255,192]{%d}\n"), enc));
-        if (time > 0)
-            buf.append(timefmt());
-        if (exp > 0 && mw > 0)
-            buf.append(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "\nLP/HR/Weight: $col[255,255,192]{%s}\n"), (Math.round(exp / (time / 60)) / mw)));
+        if (time > 0) {
+            double rtime = time / owner.glob().getTimeFac();
+            double lph = 1d * exp / (time / 60.0);
+            double rlph = 1d * exp / (rtime / 60.0);
+            double lphw = lph / mw;
+            double rlphw = rlph / mw;
+            buf.append(timefmt()).append("\n");
+            buf.append(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/HR: $col[192,192,255]{%.2f (%.2f)}"), lph, rlph)).append("\n");
+            if (exp > 0 && mw > 0)
+                buf.append(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/HR/Weight: $col[255,255,192]{%.2f (%.2f)}\n"), lphw, rlphw));
+        }
         return (RichText.render(buf.toString(), 0).img);
     }
 

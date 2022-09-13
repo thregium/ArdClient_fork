@@ -4,7 +4,6 @@ package haven.sloth.gui.Timer;
 import haven.Button;
 import haven.CheckBox;
 import haven.Coord;
-import haven.Glob;
 import haven.Label;
 import haven.TextEntry;
 import haven.Window;
@@ -56,17 +55,13 @@ public class TimerEditWnd extends Window {
         };
         add(txtseconds, new Coord(305, 30));
 
-        CheckBox gametime = new CheckBox("Ingame time") {
+        CheckBox realtime = new CheckBox("Real time") {
             public void set(boolean val) {
                 long hours = Long.parseLong(txthours.text().equals("") ? "0" : txthours.text());
                 long minutes = Long.parseLong(txtminutes.text().equals("") ? "0" : txtminutes.text());
                 long seconds = Long.parseLong(txtseconds.text().equals("") ? "0" : txtseconds.text());
                 long duration = ((60 * hours + minutes) * 60 + seconds);
-                if (val) {
-                    duration = Math.round(duration * ui.sess.glob.getTimeFac());
-                } else {
-                    duration = Math.round(duration / ui.sess.glob.getTimeFac());
-                }
+                duration = val ? Math.round(duration / ui.sess.glob.getTimeFac()) : Math.round(duration * ui.sess.glob.getTimeFac());
                 int h = (int) (duration / 3600);
                 int m = (int) ((duration % 3600) / 60);
                 int s = (int) (duration % 60);
@@ -77,7 +72,7 @@ public class TimerEditWnd extends Window {
                 a = val;
             }
         };
-        adda(gametime, new Coord(sz.x / 2, 70), 0.5, 0);
+        adda(realtime, new Coord(sz.x / 2, 70), 0.5, 0);
 
         Button add = new Button(60, "Add", () -> {
             try {
@@ -85,7 +80,7 @@ public class TimerEditWnd extends Window {
                 long minutes = Long.parseLong(txtminutes.text().equals("") ? "0" : txtminutes.text());
                 long seconds = Long.parseLong(txtseconds.text().equals("") ? "0" : txtseconds.text());
                 long duration = ((60 * hours + minutes) * 60 + seconds) * 3;
-                if (gametime.a) duration = Math.round(duration / ui.sess.glob.getTimeFac());
+                if (realtime.a) duration = Math.round(duration * ui.sess.glob.getTimeFac());
                 TimerData.addTimer(txtname.text(), duration);
                 ui.destroy(this);
             } catch (Exception e) {
@@ -148,17 +143,13 @@ public class TimerEditWnd extends Window {
         };
         add(txtseconds, new Coord(305, 30));
 
-        CheckBox gametime = new CheckBox("Ingame time") {
+        CheckBox gametime = new CheckBox("Real time") {
             public void set(boolean val) {
                 long hours = Long.parseLong(txthours.text().equals("") ? "0" : txthours.text());
                 long minutes = Long.parseLong(txtminutes.text().equals("") ? "0" : txtminutes.text());
                 long seconds = Long.parseLong(txtseconds.text().equals("") ? "0" : txtseconds.text());
-                long duration = ((60 * hours + minutes) * 60 + seconds);
-                if (val) {
-                    duration = Math.round(duration * ui.sess.glob.getTimeFac());
-                } else {
-                    duration = Math.round(duration / ui.sess.glob.getTimeFac());
-                }
+                long duration = (60 * hours + minutes) * 60 + seconds;
+                duration = val ? Math.round(duration / ui.sess.glob.getTimeFac()) : Math.round(duration * ui.sess.glob.getTimeFac());
                 int h = (int) (duration / 3600);
                 int m = (int) ((duration % 3600) / 60);
                 int s = (int) (duration % 60);
