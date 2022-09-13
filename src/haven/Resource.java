@@ -86,12 +86,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
 
 public class Resource implements Serializable {
-    public static Resource fake = new Resource(null, "fake", -1);
     private static ResCache prscache;
     public static ThreadGroup loadergroup = null;
     private static Map<String, LayerFactory<?>> ltypes = new TreeMap<String, LayerFactory<?>>();
@@ -646,7 +646,7 @@ public class Resource implements Serializable {
         }
 
         public Named load(String name, int ver) {
-            return (load(name, ver, -5));
+            return (load(name, ver, 0));
         }
 
         public Named load(String name) {
@@ -2407,6 +2407,27 @@ public class Resource implements Serializable {
         String cmd = args[0].intern();
         if (cmd == "update") {
             updateloadlist(new File(args[1]), new File(args[2]));
+        }
+    }
+
+
+    public static class FakeResource extends Resource {
+        public final String realName;
+        public final int realVer;
+
+        public FakeResource(String name, int ver) {
+            super(null, "fake", -1);
+            this.realName = name;
+            this.realVer = ver;
+        }
+
+        public FakeResource(Resource res) {
+            this(res.name, res.ver);
+        }
+
+        @Override
+        public String toString() {
+            return (new StringJoiner(", ", super.toString() + "[", "]").add("realName=" + realName).add("realVer=" + realVer).toString());
         }
     }
 }

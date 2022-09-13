@@ -30,23 +30,28 @@ package haven;
 
 import haven.res.gfx.fx.floatimg.DamageText;
 import haven.sloth.script.pathfinding.GobHitmap;
-
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Observable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 public class Glob {
     //TODO: Glob should honestly make the ui, not have the UI attach onto it.
     public WeakReference<UI> ui;
     public final GobHitmap gobhitmap;
-    @Deprecated public static final double SERVER_TIME_RATIO = 3.29d;
+    @Deprecated
+    public static final double SERVER_TIME_RATIO = 3.29d;
     public double gtime;
     public double sgtime;
     public double epoch = Utils.rtime();
@@ -70,7 +75,7 @@ public class Glob {
     public double skyblend = 0.0;
     public final Map<String, CAttr> cattr = new HashMap<>();
     private Map<Indir<Resource>, Object> wmap = new HashMap<>();
-//    public static haven.timers.TimersThread timersThread;
+    //    public static haven.timers.TimersThread timersThread;
     public String servertime;
     public Tex servertimetex;
     public int moonid = 0;
@@ -81,8 +86,15 @@ public class Glob {
     public Tex mservertimetex;
     public Tex lservertimetex;
     public Tex rservertimetex;
-    public boolean night = false; //true is night
     public Tex bservertimetex;
+    public final Map<String, Tex> mservertimetexm = new HashMap<>(1);
+    public final Map<String, Tex> lservertimetexm = new HashMap<>(1);
+    public final Map<String, Tex> rservertimetexm = new HashMap<>(1);
+    public final Map<String, Tex> bservertimetexm = new HashMap<>(1);
+    public boolean night = false; //true is night
+    public final List<String> weatherinfo = new ArrayList<>();
+    public Tex weathertimetex;
+    public final Map<String, Tex> weatherinfotexm = new HashMap<>(1);
     public final Map<Long, DamageText.Numbers> gobmap = new ConcurrentHashMap<>();
 
     private static Map<String, Glob> reference = new HashMap<>();
@@ -209,14 +221,15 @@ public class Glob {
 
     private static final double itimefac = 3.0;
     private double stimefac = itimefac, ctimefac = itimefac;
+
     private void tickgtime(double now, double dt) {
         double sgtime = this.sgtime + ((now - epoch) * stimefac);
         gtime += dt * ctimefac;
-        if((sgtime > gtime) && (ctimefac / stimefac < 1.1))
+        if ((sgtime > gtime) && (ctimefac / stimefac < 1.1))
             ctimefac += Math.min((sgtime - gtime) * 0.001, 0.02) * dt;
-        else if((sgtime < gtime) && (stimefac / ctimefac < 1.1))
+        else if ((sgtime < gtime) && (stimefac / ctimefac < 1.1))
             ctimefac -= Math.min((gtime - sgtime) * 0.001, 0.02) * dt;
-        ctimefac += Math.signum(stimefac - ctimefac) *0.002 * dt;
+        ctimefac += Math.signum(stimefac - ctimefac) * 0.002 * dt;
     }
 
     public double getTimeFac() {
@@ -227,11 +240,11 @@ public class Glob {
         double now = Utils.rtime();
         double delta = now - epoch;
         epoch = now;
-        if((this.sgtime == 0) || !inc || (Math.abs(sgtime - this.sgtime) > 500)) {
+        if ((this.sgtime == 0) || !inc || (Math.abs(sgtime - this.sgtime) > 500)) {
             this.gtime = this.sgtime = sgtime;
             return;
         }
-        if((sgtime - this.sgtime) > 1) {
+        if ((sgtime - this.sgtime) > 1) {
             double utimefac = (sgtime - this.sgtime) / delta;
             double f = Math.min(delta * 0.01, 0.5);
             stimefac = (stimefac * (1 - f)) + (utimefac * f);
@@ -241,7 +254,7 @@ public class Glob {
 
     public String gtimestats() {
         double sgtime = this.sgtime + ((Utils.rtime() - epoch) * stimefac);
-        return(String.format("%.2f %.2f %.2f %.2f %.2f %.2f %.2f", gtime, this.sgtime, epoch, sgtime, sgtime - gtime, ctimefac, stimefac));
+        return (String.format("%.2f %.2f %.2f %.2f %.2f %.2f %.2f", gtime, this.sgtime, epoch, sgtime, sgtime - gtime, ctimefac, stimefac));
     }
 
     public double globtime() {
@@ -249,7 +262,7 @@ public class Glob {
     }
 
     public double newglobtime() {
-        return(gtime);
+        return (gtime);
     }
 
     private static final long secinday = 60 * 60 * 24;
@@ -347,8 +360,8 @@ public class Glob {
             phaseOfMoon = mPhaseNames[mp] + " Moon";
         }
 
-        lservertime = String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "%s"), dayOfMonth);
         mservertime = Resource.getLocString(Resource.BUNDLE_LABEL, "Day") + String.format(" %d, %02d:%02d:%02d", day, hours, mins, seconds);
+        lservertime = String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "%s"), dayOfMonth);
         rservertime = Resource.getLocString(Resource.BUNDLE_LABEL, phaseOfMoon);
         if (secintoday >= dewyladysmantletimemin && secintoday <= dewyladysmantletimemax)
             bservertime = Resource.getLocString(Resource.BUNDLE_LABEL, "(Dewy Lady's Mantle)");
@@ -374,9 +387,25 @@ public class Glob {
             servertime += Resource.getLocString(Resource.BUNDLE_LABEL, " (Daytime)");
         */
         mservertimetex = Text.render(mservertime).tex();
-        lservertimetex = Text.render(lservertime).tex();
-        rservertimetex = Text.render(rservertime).tex();
-        bservertimetex = Text.render(bservertime).tex();
+        lservertimetex = mapInfoUpdate(lservertime, lservertimetexm);
+        rservertimetex = mapInfoUpdate(rservertime, rservertimetexm);
+        if (!bservertime.isEmpty()) bservertimetex = mapInfoUpdate(bservertime, bservertimetexm);
+        else bservertimetex = null;
+
+        if (!weatherinfo.isEmpty())
+            weathertimetex = mapInfoUpdate(String.join("", weatherinfo.toArray(new String[0])), weatherinfotexm, () -> new TexI(ItemInfo.catimgs(0, weatherinfo.stream().map(in -> Text.render(in).img).toArray(BufferedImage[]::new))));
+    }
+
+    private Tex mapInfoUpdate(String text, Map<String, Tex> map) {
+        return (mapInfoUpdate(text, map, () -> Text.render(text).tex()));
+    }
+
+    private Tex mapInfoUpdate(String text, Map<String, Tex> map, Supplier<Tex> getter) {
+        if (map.containsKey(text)) return (map.get(text));
+        else {
+            map.clear();
+            return (map.put(text, getter.get()));
+        }
     }
 
     public void blob(Message msg) {
@@ -386,7 +415,7 @@ public class Glob {
             Object[] a = msg.list();
             int n = 0;
             if (t == "tm") {
-                updgtime(((Number)a[n++]).doubleValue(), inc);
+                updgtime(((Number) a[n++]).doubleValue(), inc);
             } else if (t == "astro") {
                 double dt = ((Number) a[n++]).doubleValue();
                 double mp = ((Number) a[n++]).doubleValue();
@@ -396,9 +425,9 @@ public class Glob {
                 int is = (n < a.length) ? ((Number) a[n++]).intValue() : 1;
                 double sp = (n < a.length) ? ((Number) a[n++]).doubleValue() : 0.5;
                 double sd = (n < a.length) ? ((Number) a[n++]).doubleValue() : 0.5;
-                double years = (n < a.length) ? ((Number)a[n++]).doubleValue() : 0.5;
-                double ym = (n < a.length) ? ((Number)a[n++]).doubleValue() : 0.5;
-                double md = (n < a.length) ? ((Number)a[n++]).doubleValue() : 0.5;
+                double years = (n < a.length) ? ((Number) a[n++]).doubleValue() : 0.5;
+                double ym = (n < a.length) ? ((Number) a[n++]).doubleValue() : 0.5;
+                double md = (n < a.length) ? ((Number) a[n++]).doubleValue() : 0.5;
                 ast = new Astronomy(dt, mp, yt, night, mc, is, sp, sd, years, ym, md);
             } else if (t == "light") {
                 synchronized (this) {
@@ -444,10 +473,12 @@ public class Glob {
                     if (!inc)
                         wmap.clear();
                     Collection<Object> old = new LinkedList<Object>(wmap.keySet());
+                    weatherinfo.clear();
                     while (n < a.length) {
                         Indir<Resource> res = sess.getres(((Number) a[n++]).intValue());
                         Object[] args = (Object[]) a[n++];
                         Object curv = wmap.get(res);
+                        weatherinfo.add(res.toString() + " " + Arrays.deepToString(args));
                         if (curv instanceof Weather) {
                             Weather cur = (Weather) curv;
                             cur.update(args);
@@ -477,12 +508,15 @@ public class Glob {
                             if (!bk.hasNext())
                                 return (false);
                             Map.Entry<Indir<Resource>, Object> cur = bk.next();
+                            Indir<Resource> ir = cur.getKey();
                             Object v = cur.getValue();
                             if (v instanceof Weather) {
                                 n = (Weather) v;
                                 break;
                             }
-                            Class<? extends Weather> cl = cur.getKey().get().layer(Resource.CodeEntry.class).getcl(Weather.class);
+                            Resource r = ir.get();
+                            if (r instanceof Resource.FakeResource) continue;
+                            Class<? extends Weather> cl = r.layer(Resource.CodeEntry.class).getcl(Weather.class);
                             Weather w;
                             try {
                                 w = Utils.construct(cl.getConstructor(Object[].class), new Object[]{v});
@@ -519,20 +553,20 @@ public class Glob {
     }
 
     public CAttr getcattr(String nm) {
-        synchronized(cattr) {
+        synchronized (cattr) {
             CAttr a = cattr.get(nm);
-            if(a == null) {
+            if (a == null) {
                 a = new CAttr(nm, 0, 0);
                 cattr.put(nm, a);
             }
-            return(a);
+            return (a);
         }
     }
 
     public void cattr(String nm, int base, int comp) {
-        synchronized(cattr) {
+        synchronized (cattr) {
             CAttr a = cattr.get(nm);
-            if(a == null) {
+            if (a == null) {
                 a = new CAttr(nm, base, comp);
                 cattr.put(nm, a);
             } else {
@@ -542,8 +576,8 @@ public class Glob {
     }
 
     public void cattr(Message msg) {
-        synchronized(cattr) {
-            while(!msg.eom()) {
+        synchronized (cattr) {
+            while (!msg.eom()) {
                 String nm = msg.string();
                 int base = msg.int32();
                 int comp = msg.int32();

@@ -29,7 +29,6 @@ package haven;
 import haven.sloth.script.SessionDetails;
 import integrations.mapv4.MappingClient;
 import modification.dev;
-
 import java.io.IOException;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -144,8 +143,16 @@ public class Session implements Resource.Resolver {
             public Resource get() {
                 if (resnm == null)
                     throw (new LoadingIndir(CachedRes.this));
-                if (res == null)
-                    res = Resource.remote().load(resnm, resver, 0).get();
+                if (res == null) {
+                    try {
+                        res = Resource.remote().load(resnm, resver, 0).get();
+                    } catch (Loading l) {
+                        throw (l);
+                    } catch (Exception e) {
+                        dev.simpleLog(e);
+                        res = new Resource.FakeResource(resnm, resver);
+                    }
+                }
                 return (res);
             }
 

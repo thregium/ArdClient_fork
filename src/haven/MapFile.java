@@ -2348,7 +2348,9 @@ public class MapFile {
         Collection<MCache.Grid> grids = new ArrayList<>();
         for (Coord off : inout) {
             Coord gc = cgc.add(off);
-            grids.add(map.getgrid(gc));
+            try {//FIXME need fix repeat?
+                grids.add(map.getgrid(gc));
+            } catch (Loading ingored) {}
         }
         if (!grids.isEmpty()) {
             synchronized (procmon) {

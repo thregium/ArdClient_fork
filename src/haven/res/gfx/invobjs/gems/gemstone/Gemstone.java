@@ -4,22 +4,6 @@ import haven.Coord;
 import haven.GOut;
 import haven.GSprite;
 import haven.Message;
-import haven.Resource;
-import haven.Tex;
-import haven.TexI;
-import haven.TexL;
-import haven.TexR;
-import modification.configuration;
-import org.json.JSONObject;
-
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBuffer;
-import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
-import java.util.HashMap;
-import java.util.Map;
-
 import static haven.PUtils.Lanczos;
 import static haven.PUtils.alphablit;
 import static haven.PUtils.blit;
@@ -28,6 +12,21 @@ import static haven.PUtils.imgraster;
 import static haven.PUtils.imgsz;
 import static haven.PUtils.rasterimg;
 import static haven.PUtils.tilemod;
+import haven.Resource;
+import haven.Tex;
+import haven.TexI;
+import haven.TexL;
+import haven.TexR;
+import haven.UI;
+import modification.configuration;
+import org.json.JSONObject;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Gemstone extends GSprite implements GSprite.ImageSprite, haven.res.ui.tt.defn.DynName {
     public final BufferedImage img;
@@ -137,13 +136,13 @@ public class Gemstone extends GSprite implements GSprite.ImageSprite, haven.res.
             outl = cut.layer(Resource.imgc, 0);
             body = cut.layer(Resource.imgc, 1);
             hili = cut.layer(Resource.imgc, 2);
-            outli = convert(outl.img);
-            bodyi = convert(body.img);
-            hilii = convert(hili.img);
+            outli = convert(outl.scaled());
+            bodyi = convert(body.scaled());
+            hilii = convert(hili.scaled());
         } catch (RuntimeException e) {
             throw (new RuntimeException("invalid gemstone in " + cut.name, e));
         }
-        Coord sz = new Coord(32, 32);
+        Coord sz = UI.scale(32, 32);
         WritableRaster buf = imgraster(sz);
         blit(buf, outli.getRaster(), outl.o);
         WritableRaster buf2 = imgraster(sz);

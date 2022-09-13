@@ -26,14 +26,14 @@
 
 package haven;
 
+import modification.Bed;
+import modification.Decal;
+import modification.Fixedplob;
 import java.lang.reflect.Constructor;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
-import modification.Bed;
-import modification.Decal;
-import modification.Fixedplob;
 
 public abstract class Sprite implements Rendered {
     public static final int GOB_HEALTH_ID = -1001;
@@ -158,6 +158,9 @@ public abstract class Sprite implements Rendered {
     }
 
     public static Sprite create(Owner owner, Resource res, Message sdt) {
+        if (res instanceof Resource.FakeResource) {
+            return (new FakeSprite(owner, res, sdt));
+        }
         if (res.name.equals("gfx/terobjs/coronationstone")) {
             Factory f = new modification.Corostone();
             return (f.create(owner, res, sdt));
@@ -200,5 +203,19 @@ public abstract class Sprite implements Rendered {
     }
 
     public void dispose() {
+    }
+
+
+    public static class FakeSprite extends Sprite {
+        public final byte[] data;
+        public FakeSprite(Owner owner, Resource resource, Message sdt) {
+            super(owner, resource);
+            this.data = sdt.bytes();
+        }
+
+        @Override
+        public boolean setup(RenderList d) {
+            return (false);
+        }
     }
 }

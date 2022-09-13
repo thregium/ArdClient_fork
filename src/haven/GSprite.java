@@ -26,15 +26,11 @@
 
 package haven;
 
-import org.json.JSONObject;
-
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 public abstract class GSprite implements Drawn {
@@ -95,6 +91,9 @@ public abstract class GSprite implements Drawn {
     }
 
     public static GSprite create(Owner owner, Resource res, Message sdt) {
+        if (res instanceof Resource.FakeResource) {
+            return (new FakeGSprite(owner, res, sdt));
+        }
         if (res.name.equals("gfx/invobjs/parchment-decal")) {
             return (new modification.DecalItem(owner, res, sdt));
         }
@@ -128,5 +127,25 @@ public abstract class GSprite implements Drawn {
         } catch (IllegalAccessException iae) {
         }
         return null;
+    }
+
+
+    public static class FakeGSprite extends GSprite {
+        public final Resource res;
+        public final byte[] data;
+
+        public FakeGSprite(Owner owner, Resource res, Message sdt) {
+            super(owner);
+            this.res = res;
+            this.data = sdt.bytes();
+        }
+
+        @Override
+        public void draw(GOut g) {}
+
+        @Override
+        public Coord sz() {
+            return (Coord.z);
+        }
     }
 }
