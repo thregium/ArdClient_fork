@@ -125,6 +125,7 @@ public class configuration {
     public static String numericpos = Utils.getpref("numericpos", "Right-Top");
     public static boolean showstudytime = Utils.getprefb("showstudytime", true);
     public static String studytimepos = Utils.getpref("studytimepos", "Left-Top");
+    public static boolean studytimereal = Utils.getprefb("studytimereal", false);
 
     public static boolean rightclickproximity = Utils.getprefb("rightclickproximity", false);
     public static int rightclickproximityradius = Utils.getprefi("rightclickproximityradius", 5);

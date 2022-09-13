@@ -2475,7 +2475,7 @@ public class OptWnd extends Window {
                 configuration.studytimepos = item;
                 Utils.setpref("studytimepos", item);
             }
-        });
+        }, new CheckBox("Real time", val -> Utils.setprefb("studytimereal", configuration.studytimereal = val), configuration.studytimereal));
         appender.add(new CheckBox("Draw old mountbar") {
             {
                 a = configuration.oldmountbar;

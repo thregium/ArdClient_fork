@@ -69,7 +69,7 @@ public class StudyWnd extends GameUI.Hidewnd {
             add(new Label("Attention:"), 2, 2);
             add(new Label("Experience cost:"), 2, 18);
             add(new Label("Learning points:"), 2, 34);
-            add(new Label("LP/HR:"), 2, 50);
+            add(new Label("LP/H:"), 2, 50);
         }
 
         private void upd() {
@@ -90,7 +90,7 @@ public class StudyWnd extends GameUI.Hidewnd {
             this.texp = texp;
             this.tw = tw;
             this.tenc = tenc;
-            this.tlph = (int) Math.round(tlph);
+            this.tlph = tlph;
         }
 
         public void draw(GOut g) {

@@ -234,6 +234,7 @@ public class WItem extends Widget implements DTarget2 {
             double meter = minf.meter();
             if (itm.studytime > 0 && parent instanceof InventoryStudy) {
                 int timeleft = (int) (itm.studytime * (1.0 - meter));
+                if (configuration.studytimereal) timeleft /= ui.sess.glob.getTimeFac();
                 int hoursleft = timeleft / 60;
                 int minutesleft = timeleft - hoursleft * 60;
                 itm.metertex = Text.renderstroked(String.format("%d:%02d", hoursleft, minutesleft), hoursleft < 1 ? Color.YELLOW : Color.WHITE, Color.BLACK, num11Fnd).tex();
