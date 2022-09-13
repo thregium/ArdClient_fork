@@ -148,7 +148,7 @@ public class Session implements Resource.Resolver {
                         res = Resource.remote().load(resnm, resver, 0).get();
                     } catch (Loading l) {
                         throw (l);
-                    } catch (Resource.LoadException e) {
+                    } catch (RuntimeException e) {
                         dev.simpleLog(e);
                         res = new Resource.FakeResource(resnm, resver);
                     }

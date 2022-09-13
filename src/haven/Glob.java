@@ -386,7 +386,7 @@ public class Glob {
         infoUpdate(rservertimetex, rservertime);
         infoUpdate(bservertimetex, bservertime);
 
-        infoUpdate(weathertimetex, String.join("", weatherinfo.toArray(new String[0])), () -> new TexI(ItemInfo.catimgs(0, weatherinfo.stream().map(in -> Text.render(in).img).toArray(BufferedImage[]::new))));
+        infoUpdate(weathertimetex, String.join("", weatherinfo.toArray(new String[0])), () -> new TexI(ItemInfo.catimgs(0, true, weatherinfo.stream().map(in -> Text.render(in).img).toArray(BufferedImage[]::new))));
     }
 
     private void infoUpdate(AtomicReference<Pair<String, Tex>> t, String text) {
