@@ -2427,7 +2427,8 @@ public class Resource implements Serializable {
 
         @Override
         public String toString() {
-            return (new StringJoiner(", ", super.toString() + "[", "]").add("realName=" + realName).add("realVer=" + realVer).toString());
+            return ("f:" + realName + "(v" + realVer + ")");
+//            return (new StringJoiner(", ", super.toString() + "[", "]").add("realName=" + realName).add("realVer=" + realVer).toString());
         }
     }
 }

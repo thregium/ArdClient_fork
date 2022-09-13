@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Observable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 public class Glob {
@@ -83,18 +84,13 @@ public class Glob {
     public String lservertime;
     public String rservertime;
     public String bservertime;
-    public Tex mservertimetex;
-    public Tex lservertimetex;
-    public Tex rservertimetex;
-    public Tex bservertimetex;
-    public final Map<String, Tex> mservertimetexm = new HashMap<>(1);
-    public final Map<String, Tex> lservertimetexm = new HashMap<>(1);
-    public final Map<String, Tex> rservertimetexm = new HashMap<>(1);
-    public final Map<String, Tex> bservertimetexm = new HashMap<>(1);
-    public boolean night = false; //true is night
     public final List<String> weatherinfo = new ArrayList<>();
-    public Tex weathertimetex;
-    public final Map<String, Tex> weatherinfotexm = new HashMap<>(1);
+    public final AtomicReference<Pair<String, Tex>> mservertimetex = new AtomicReference<>(new Pair<>(null, null));
+    public final AtomicReference<Pair<String, Tex>> lservertimetex = new AtomicReference<>(new Pair<>(null, null));
+    public final AtomicReference<Pair<String, Tex>> rservertimetex = new AtomicReference<>(new Pair<>(null, null));
+    public final AtomicReference<Pair<String, Tex>> bservertimetex = new AtomicReference<>(new Pair<>(null, null));
+    public final AtomicReference<Pair<String, Tex>> weathertimetex = new AtomicReference<>(new Pair<>(null, null));
+    public boolean night = false; //true is night
     public final Map<Long, DamageText.Numbers> gobmap = new ConcurrentHashMap<>();
 
     private static Map<String, Glob> reference = new HashMap<>();
@@ -343,7 +339,6 @@ public class Glob {
         long mins = (secintoday % 3600) / 60;
         long seconds = secintoday % 60;
 
-        bservertime = " ";
         String dayOfMonth = "";
         String phaseOfMoon = " ";
         if (ast != null) {
@@ -386,26 +381,20 @@ public class Glob {
         }else
             servertime += Resource.getLocString(Resource.BUNDLE_LABEL, " (Daytime)");
         */
-        mservertimetex = Text.render(mservertime).tex();
-        lservertimetex = mapInfoUpdate(lservertime, lservertimetexm);
-        rservertimetex = mapInfoUpdate(rservertime, rservertimetexm);
-        if (!bservertime.isEmpty()) bservertimetex = mapInfoUpdate(bservertime, bservertimetexm);
-        else bservertimetex = null;
+        infoUpdate(mservertimetex, mservertime);
+        infoUpdate(lservertimetex, lservertime);
+        infoUpdate(rservertimetex, rservertime);
+        infoUpdate(bservertimetex, bservertime);
 
-        if (!weatherinfo.isEmpty())
-            weathertimetex = mapInfoUpdate(String.join("", weatherinfo.toArray(new String[0])), weatherinfotexm, () -> new TexI(ItemInfo.catimgs(0, weatherinfo.stream().map(in -> Text.render(in).img).toArray(BufferedImage[]::new))));
+        infoUpdate(weathertimetex, String.join("", weatherinfo.toArray(new String[0])), () -> new TexI(ItemInfo.catimgs(0, weatherinfo.stream().map(in -> Text.render(in).img).toArray(BufferedImage[]::new))));
     }
 
-    private Tex mapInfoUpdate(String text, Map<String, Tex> map) {
-        return (mapInfoUpdate(text, map, () -> Text.render(text).tex()));
+    private void infoUpdate(AtomicReference<Pair<String, Tex>> t, String text) {
+        infoUpdate(t, text, () -> Text.render(text).tex());
     }
 
-    private Tex mapInfoUpdate(String text, Map<String, Tex> map, Supplier<Tex> getter) {
-        if (map.containsKey(text)) return (map.get(text));
-        else {
-            map.clear();
-            return (map.put(text, getter.get()));
-        }
+    private void infoUpdate(AtomicReference<Pair<String, Tex>> t, String text, Supplier<Tex> getter) {
+        if (text != null && (t.get().a == null || !t.get().a.equals(text))) t.set(new Pair<>(text, text.isEmpty() ? null : getter.get()));
     }
 
     public void blob(Message msg) {

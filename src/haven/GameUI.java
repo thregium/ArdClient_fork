@@ -239,24 +239,24 @@ public class GameUI extends ConsoleHost implements Console.Directory {
                 if (c.x != umpanel.c.x - 360)
                     c.x = umpanel.c.x - 360;
                 if (Config.showservertime) {
-                    Tex mtime = ui.sess.glob.mservertimetex;
-                    Tex ltime = ui.sess.glob.lservertimetex;
-                    Tex rtime = ui.sess.glob.rservertimetex;
-                    Tex btime = ui.sess.glob.bservertimetex;
-                    Tex winfo = ui.sess.glob.weathertimetex;
+                    Tex mtime = ui.sess.glob.mservertimetex.get().b;
+                    Tex ltime = ui.sess.glob.lservertimetex.get().b;;
+                    Tex rtime = ui.sess.glob.rservertimetex.get().b;;
+                    Tex btime = ui.sess.glob.bservertimetex.get().b;;
+                    Tex winfo = ui.sess.glob.weathertimetex.get().b;;
                     int y = 10;
                     if (mtime != null) {
                         g.aimage(mtime, new Coord(sz.x - 5, y), 1, 0);
+                        y += mtime.sz().y;
                     }
-                    y += 12;
                     if (ltime != null) {
                         g.aimage(ltime, new Coord(sz.x - 5, y), 1, 0);
+                        y += ltime.sz().y;
                     }
-                    y += 12;
                     if (rtime != null) {
                         g.aimage(rtime, new Coord(sz.x - 5, y), 1, 0);
+                        y += rtime.sz().y;
                     }
-                    y += 12;
                     if (btime != null) {
                         g.aimage(btime, new Coord(sz.x - 5, y), 1, 0);
                         y += btime.sz().y;
