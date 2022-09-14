@@ -787,7 +787,7 @@ public class CharWnd extends Window {
                 return (Integer.toString(tenc));
             }
         };
-        private final Text.UText<?> tlpht = new Text.UText<Double>(numfnd) {
+        private final Text.UText<?> tlpht = new Text.UText<Double>(Text.std) {
             DecimalFormat f = new DecimalFormat("##.##");
 
             @Override

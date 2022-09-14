@@ -481,6 +481,26 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
+                            } else if (name.equals("gfx/terobjs/map/cavepubble")) {
+                                try {
+                                    resources.IndirResource res = resources.getCachedRes("gfx/invobjs/clay-cave");
+                                    if (res.get() != null)
+                                        setattr(new GobIcon(Gob.this, res));
+                                } catch (Loading loading) {
+                                    Defer.later(this);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            } else if (name.equals("gfx/terobjs/map/dustpile")) {
+                                try {
+                                    resources.IndirResource res = resources.getCachedRes("gfx/invobjs/cavedust");
+                                    if (res.get() != null)
+                                        setattr(new GobIcon(Gob.this, res));
+                                } catch (Loading loading) {
+                                    Defer.later(this);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                         return (null);
