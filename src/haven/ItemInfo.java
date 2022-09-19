@@ -30,6 +30,7 @@ import haven.res.ui.tt.ArmorFactory;
 import haven.res.ui.tt.WearFactory;
 import haven.res.ui.tt.attrmod.AttrMod;
 import haven.res.ui.tt.wpn.Damage;
+import modification.dev;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -179,7 +180,7 @@ public abstract class ItemInfo {
         }
 
         public BufferedImage render() {
-            Collections.sort(tips, Comparator.comparingInt(Tip::order));
+            tips.sort(Comparator.comparingInt(Tip::order));
             for (Tip tip : tips)
                 tip.layout(this);
             return (cmp.compose());
@@ -207,9 +208,13 @@ public abstract class ItemInfo {
         }
 
         public void layout(Layout l) {
-            BufferedImage t = tipimg(l.width);
-            if (t != null)
-                l.cmp.add(t, new Coord(0, l.cmp.sz.y));
+            try {
+                BufferedImage t = tipimg(l.width);
+                if (t != null)
+                    l.cmp.add(t, new Coord(0, l.cmp.sz.y));
+            } catch (Exception e) {
+                dev.simpleLog(e);
+            }
         }
 
         public int order() {

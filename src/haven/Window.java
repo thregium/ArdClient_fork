@@ -986,6 +986,7 @@ public class Window extends MovableWidget implements DTarget {
                 }
             };
             final FlowerMenu modmenu = new FlowerMenu(callback, options);
+            ui.root.getchilds(FlowerMenu.class).forEach(wdg -> wdg.choose(null));
             ui.root.add(modmenu, ui.mc);
             return (true);
         } else {

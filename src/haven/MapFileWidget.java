@@ -732,6 +732,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
                                 deletemarker(mark);
                             }
                         }, !sm.autosend ? "Enable sending to mapper" : "Disable sending to mapper", "Remove mark");
+                        ui.root.getchilds(FlowerMenu.class).forEach(wdg -> wdg.choose(null));
                         ui.root.add(menu, ui.mc);
                     }
                 }
