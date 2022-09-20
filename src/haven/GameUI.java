@@ -1581,17 +1581,26 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         }
     }
 
-    public void notifyProvince(int id, String province, String realm) {
+    public void notifyProvince(Object... cargs) {
         if (map != null) {
-            String text = "";
-            text = "Entering ";
-//            text = "Leaving ";
+            try {
+                String name = (String) cargs[0];
+                int id = 0;
+                String realmName = "";
+                if (cargs.length == 4) {
+                    id = (int) cargs[2];
+                    realmName = (String) cargs[3];
+                }
+                String text = "Entering ";
 
-            String finish = text + province + " of " + realm;
-            if (Config.DivertPolityMessages)
-                PBotUtils.sysMsg(ui, finish, Color.GREEN);
-            else
-                map.setpoltext(id, finish);
+                String finish = text + name + (!realmName.isEmpty() ? " of " + realmName : "");
+                if (Config.DivertPolityMessages)
+                    PBotUtils.sysMsg(ui, finish, Color.GREEN);
+                else
+                    map.setpoltext(id, finish);
+            } catch (Exception e) {
+                dev.simpleLog(e);
+            }
         }
     }
 

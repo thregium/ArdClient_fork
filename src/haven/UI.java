@@ -252,11 +252,7 @@ public class UI {
         }
 
         if (type.startsWith("ui/province")) {
-            try {
-                if (gui != null)
-                    gui.notifyProvince((int) cargs[2], (String) cargs[0], (String) cargs[3]);
-            } catch (Exception ignore) {
-            }
+            if (gui != null) gui.notifyProvince(cargs);
             return;
         }
 
