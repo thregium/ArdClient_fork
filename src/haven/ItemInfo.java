@@ -237,14 +237,24 @@ public abstract class ItemInfo {
 
     public static class Name extends Tip {
         public final Text str;
+        public final Text ostr;
 
-        public Name(Owner owner, Text str) {
+        public Name(Owner owner, Text ostr, Text str) {
             super(owner);
             this.str = str;
+            this.ostr = ostr;
+        }
+
+        public Name(Owner owner, Text str) {
+            this(owner, str, str);
         }
 
         public Name(Owner owner, String str) {
             this(owner, Text.render(str));
+        }
+
+        public Name(Owner owner, String origin, String str) {
+            this(owner, Text.render(origin), Text.render(str));
         }
 
         public BufferedImage tipimg() {

@@ -11,14 +11,13 @@ import haven.Resource;
 import haven.Resource.Tooltip;
 
 public class DefName implements InfoFactory {
-    public DefName() {
-    }
+    public DefName() {}
 
     public ItemInfo build(Owner owner, Object... args) {
         if (owner instanceof SpriteOwner) {
             GSprite spr = ((SpriteOwner) owner).sprite();
             if (spr instanceof DynName) {
-                return new Name(owner, ((DynName) spr).name());
+                return (new Name(owner, ((DynName) spr).oname(), ((DynName) spr).name()));
             }
         }
 
@@ -26,11 +25,11 @@ public class DefName implements InfoFactory {
             return null;
         } else {
             Resource res = ((ResOwner) owner).resource();
-            Tooltip tt = (Tooltip) res.layer(Resource.tooltip);
+            Tooltip tt = res.layer(Resource.tooltip);
             if (tt == null) {
                 throw new RuntimeException("Item resource " + res + " is missing default tooltip");
             } else {
-                return new Name(owner, tt.t);
+                return (new Name(owner, tt.origt, tt.t));
             }
         }
     }

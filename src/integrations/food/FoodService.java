@@ -145,7 +145,7 @@ public class FoodService {
                         }
                     }
                     if (info instanceof ItemInfo.Name) {
-                        parsedFoodInfo.itemName = res.layer(Resource.tooltip).origt;
+                        parsedFoodInfo.itemName = ((ItemInfo.Name) info).ostr.text;
                     }
                     if (info.getClass().getName().equals("Ingredient")) {
                         String name = (String) info.getClass().getField("oname").get(info);

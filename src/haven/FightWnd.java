@@ -190,7 +190,7 @@ public class FightWnd extends Widget {
                 if (rawinfo != null)
                     info = ItemInfo.buildinfo(this, rawinfo);
                 else
-                    info = Arrays.asList(new ItemInfo.Name(this, res.get().layer(Resource.tooltip).t));
+                    info = Arrays.asList(new ItemInfo.Name(this, res.get().layer(Resource.tooltip).origt, res.get().layer(Resource.tooltip).t));
             }
             return (info);
         }
