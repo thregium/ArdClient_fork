@@ -32,7 +32,7 @@ public class Meat extends Layered implements haven.res.ui.tt.defn.DynName {
                 ocn = tt.origt;
             } else {
                 cn = ncomb(cn, tt.t);
-                ocn = ncomb(cn, tt.origt);
+                ocn = ncomb(ocn, tt.origt);
             }
         }
         if (ocn != null) {
