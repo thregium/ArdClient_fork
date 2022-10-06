@@ -268,6 +268,7 @@ public class configuration {
     public static boolean cachedGem = Utils.getprefb("cachedGem", false);
 
     public static boolean showweatherinfo = Utils.getprefb("showweatherinfo", true);
+    public static boolean keyboardkeys = Utils.getprefb("keyboardkeys", false);
 
     public static String[] customMenuGrid = new String[]{Utils.getpref("customMenuGrid0", "6"), Utils.getpref("customMenuGrid1", "4")};
 

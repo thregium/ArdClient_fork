@@ -1960,6 +1960,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("Keyboard keys (experimantal)", val -> Utils.setprefb("keyboardkeys", configuration.keyboardkeys = val), configuration.keyboardkeys));
         appender.add(new Label("Disable Shift Right Click for :"));
         CheckListbox disableshiftclick = new CheckListbox(320, Math.min(8, Config.disableshiftclick.values().size()), 18 + Config.fontadd) {
             @Override

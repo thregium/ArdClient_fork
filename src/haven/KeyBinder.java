@@ -4,8 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import static haven.Action.*;
+import static haven.WidgetList.BOX;
+import modification.configuration;
+import modification.dev;
 import rx.functions.Func0;
-
 import java.awt.Color;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -15,8 +17,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static haven.WidgetList.BOX;
 
 //import static haven.Action.FILTER;
 //import static haven.Action.OPEN_CRAFT_DB;
@@ -137,19 +137,44 @@ public class KeyBinder {
     }
 
     public static boolean handle(UI ui, KeyEvent e) {
+        boolean result = false;
+
         if (Config.iswindows && Config.userazerty) { //should fix the french keyboard ` not working as a keybind.
             Long key = Utils.getScancode(e);
             if (key != null && key == 41) {
                 KeyEvent f = new KeyEvent(e.getComponent(), e.getID(), e.getWhen(), 0, KeyEvent.VK_BACK_QUOTE);
-                return (get(f).execute(ui));
+                result = get(f).execute(ui);
             }
         }
+        if (result) return (true);
+
         KeyBind kb = get(e);
         if (kb.code == 0 && kb.mods == 0) { //if the "null" unbound keybind, do nothing, else execute keybind.
-            return (false);
+            result = false;
         } else {
-            return (kb.execute(ui));
+            result = kb.execute(ui);
         }
+        if (result) return (true);
+
+        if (configuration.keyboardkeys) {
+            try {
+                String keyString = e.toString();
+                String rawCodeText = "rawCode=";
+                int rawCodeIndex = keyString.indexOf(rawCodeText);
+                if (rawCodeIndex != -1) {
+                    String rawCodeString = keyString.substring(rawCodeIndex + rawCodeText.length(), keyString.indexOf(',', rawCodeIndex));
+                    int rawCodeInt = Integer.parseInt(rawCodeString);
+                    if (rawCodeIndex != e.getKeyCode()) {
+                        KeyEvent f = new KeyEvent(e.getComponent(), e.getID(), e.getWhen(), e.getModifiers(), rawCodeInt);
+                        result = get(f).execute(ui);
+                    }
+                }
+            } catch (Exception exception) {
+                dev.simpleLog(exception);
+            }
+        }
+
+        return (result);
     }
 
     public static int getModFlags(int modflags) {
