@@ -813,12 +813,50 @@ public class Widget {
             parent.wdgmsg(sender, msg, args);
     }
 
+    private List<ErrorWidget> errorWdgs = new ArrayList<>();
+
+    private class ErrorWidget {
+        private final Widget errWdg;
+        private String errStr;
+        private long errTime;
+
+        private final long repeat = 10000;
+
+        private ErrorWidget(Widget w, String str) {
+            this.errWdg = w;
+            this.errStr = str;
+            this.errTime = System.currentTimeMillis();
+        }
+
+        private boolean repeat() {
+            long time = System.currentTimeMillis();
+            if (errTime + repeat > time) {
+                errTime = time;
+                return (true);
+            }
+            return (false);
+        }
+    }
+
     public void tick(double dt) {
         Widget next;
 
         for (Widget wdg = child; wdg != null; wdg = next) {
             next = wdg.next;
-            wdg.tick(dt);
+            try {
+                wdg.tick(dt);
+            } catch (Exception e) {
+                String strErr = wdg.getClass().getSimpleName() + " " + wdg.getClass().getClassLoader() + " " + e.getMessage();
+                Widget finalWdg = wdg;
+                if (errorWdgs.stream().noneMatch(w -> w.errWdg.equals(finalWdg))) {
+                    errorWdgs.add(new ErrorWidget(wdg, strErr));
+                    if (ui != null) PBotUtils.sysMsg(ui, strErr + " Please contact the developer!");
+                    e.printStackTrace();
+                } else if (errorWdgs.stream().anyMatch(w -> w.errWdg.equals(finalWdg) && w.repeat())) {
+                    if (ui != null) PBotUtils.sysMsg(ui, strErr + " Please contact the developer!");
+                    e.printStackTrace();
+                }
+            }
         }
         /* It would be very nice to do these things in harmless mix-in
          * classes, but alas, this is Java. */
