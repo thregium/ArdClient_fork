@@ -1957,7 +1957,7 @@ public class Resource implements Serializable {
         return (o.name.equals(this.name) && (o.ver == this.ver));
     }
 
-    private final static List<String> depresList = Arrays.asList("gfx/borka/reedweavebelt", "gfx/terobjs/bushes/reeds");
+    private final static List<String> depresList = Arrays.asList("gfx/borka/reedweavebelt", "gfx/terobjs/bushes/reeds", "paginae/gov/enact/.*");
 
     private void load(InputStream st) throws IOException {
         Message in = new StreamMessage(st);
@@ -1975,7 +1975,8 @@ public class Resource implements Serializable {
         else if (ver != this.ver) {
             if (dev.reslog)
                 dev.simpleLog(String.format("Wrong res version (%d != %d) %s", ver, this.ver, this));
-            if (!depresList.contains(name))
+            System.out.printf("Wrong res version (%d != %d) %s%n", ver, this.ver, this);
+            if (depresList.stream().noneMatch(name::matches))
                 throw (new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
         }
         while (!in.eom()) {

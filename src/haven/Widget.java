@@ -849,7 +849,7 @@ public class Widget {
                 String strErr = wdg.getClass().getSimpleName() + " " + wdg.getClass().getClassLoader() + " " + e.getMessage();
                 Widget finalWdg = wdg;
                 if (errorWdgs.stream().noneMatch(w -> w.errWdg.equals(finalWdg))) {
-                    errorWdgs.add(new ErrorWidget(wdg, strErr));
+                    errorWdgs.add(new ErrorWidget(finalWdg, strErr));
                     if (ui != null) PBotUtils.sysMsg(ui, strErr + " Please contact the developer!");
                     e.printStackTrace();
                 } else if (errorWdgs.stream().anyMatch(w -> w.errWdg.equals(finalWdg) && w.repeat())) {
