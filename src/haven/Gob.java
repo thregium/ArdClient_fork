@@ -1434,22 +1434,29 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 remol(hitboxOl);
             }
             Overlay plantOl = findol(Sprite.GROWTH_STAGE_ID);
+            plants:
             if (Config.showplantgrowstage) {
-                if (type == Type.PLANT || type == Type.MULTISTAGE_PLANT) {
+                Resource res;
+                try {
+                    res = getres();
+                } catch (Exception e) {
+                    break plants;
+                }
+                if (res == null) break plants;
+                if (type == Type.PLANT || type == Type.MULTISTAGE_PLANT || res.name.startsWith("gfx/terobjs/plants/")) {
                     int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
                     if (cropstgmaxval == 0) {
-                        for (FastMesh.MeshRes layer : getres().layers(FastMesh.MeshRes.class)) {
+                        for (FastMesh.MeshRes layer : res.layers(FastMesh.MeshRes.class)) {
                             int stg = layer.id / 10;
                             if (stg > cropstgmaxval)
                                 cropstgmaxval = stg;
                         }
                     }
-                    Resource res = getres();
                     if (plantOl == null && (stage == cropstgmaxval || (Config.showfreshcropstage ? stage >= 0 : stage > 0) && stage < 6)) {
                         if (configuration.newCropStageOverlay)
-                            addol(new Gob.Overlay(Sprite.GROWTH_STAGE_ID, new newPlantStageSprite(stage, cropstgmaxval, type == Type.MULTISTAGE_PLANT, (res != null && res.basename().contains("turnip") || res != null && res.basename().contains("leek") || res != null && res.basename().contains("carrot")))));
+                            addol(new Gob.Overlay(Sprite.GROWTH_STAGE_ID, new newPlantStageSprite(stage, cropstgmaxval, type == Type.MULTISTAGE_PLANT, (res.basename().contains("turnip") || res.basename().contains("leek") || res.basename().contains("carrot")))));
                         else
-                            addol(new Gob.Overlay(Sprite.GROWTH_STAGE_ID, new PlantStageSprite(stage, cropstgmaxval, type == Type.MULTISTAGE_PLANT, (res != null && res.basename().contains("turnip") || res != null && res.basename().contains("leek")))));
+                            addol(new Gob.Overlay(Sprite.GROWTH_STAGE_ID, new PlantStageSprite(stage, cropstgmaxval, type == Type.MULTISTAGE_PLANT, (res.basename().contains("turnip") || res.basename().contains("leek")))));
                     } else if (plantOl != null && !Config.showfreshcropstage && stage == 0 || (stage != cropstgmaxval && stage >= 6)) {
                         remol(plantOl);
                     } else if (plantOl != null && configuration.newCropStageOverlay && plantOl.spr instanceof newPlantStageSprite && ((newPlantStageSprite) plantOl.spr).stg != stage) {

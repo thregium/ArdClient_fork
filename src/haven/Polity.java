@@ -26,14 +26,13 @@
 
 package haven;
 
+import static haven.BuddyWnd.width;
 import java.awt.Color;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static haven.BuddyWnd.width;
 
 public class Polity extends Widget {
     public final String cap, name;
@@ -45,6 +44,7 @@ public class Polity extends Widget {
 
     public static final Text unk = Text.render("???");
     public static final Text self = Text.render("You", new Color(192, 192, 255));
+
     public class Member {
         public final Integer id;
 
@@ -54,7 +54,7 @@ public class Polity extends Widget {
 
         public void draw(GOut g) {
             Text rn;
-            if(id == null) {
+            if (id == null) {
                 rn = self;
             } else {
                 BuddyWnd.Buddy b = getparent(GameUI.class).buddies.find(id);
@@ -129,7 +129,7 @@ public class Polity extends Widget {
                 g.frect(new Coord(0, 0), new Coord(sz.x, sz.y));
                 g.chcolor(128, 0, 0, 255);
                 //g.frect(new Coord(1, 1), new Coord(((sz.x - 2) * auth) / ((acap == 0) ? 1 : acap), sz.y - 2));
-                int mw = (int) ((sz.x - 2) * (long) auth) / ((acap == 0) ? 1 : acap);
+                int mw = (int) (((sz.x - 2) * (long) auth) / ((acap == 0) ? 1 : acap));
                 g.frect(new Coord(1, 1), new Coord(mw, sz.y - 2));
                 g.chcolor();
                 if ((rauth != null) && (aseq != Polity.this.aseq)) {
@@ -146,15 +146,15 @@ public class Polity extends Widget {
         }
 
         public Object tooltip(Coord c, Widget prev) {
-            if(adrain > 0)
-                return(String.format("Drain: %,d/day", adrain));
-            return(null);
+            if (adrain > 0)
+                return (String.format("Drain: %,d/day", adrain));
+            return (null);
         }
     }
 
     protected Member parsememb(Object[] args) {
-        Integer id = (Integer)args[0];
-        return(new Member(id));
+        Integer id = (Integer) args[0];
+        return (new Member(id));
     }
 
     public void uimsg(String msg, Object... args) {

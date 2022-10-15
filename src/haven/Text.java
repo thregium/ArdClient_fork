@@ -128,7 +128,7 @@ public class Text {
             cfg.font.put("dialog", Config.font);
         } else {
             cfg.font.put("serif", "Serif");
-            cfg.font.put("sans", "Dialog");
+            cfg.font.put("sans", "Sans");
             cfg.font.put("sansserif", "SansSerif");
             cfg.font.put("dialog", "Dialog");
         }

@@ -1,4 +1,4 @@
-[2022.10.06]
+[2022.10.15]
 https://github.com/Cediner/ArdClient/commits/
 ~
 
