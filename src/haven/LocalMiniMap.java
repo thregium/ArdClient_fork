@@ -734,7 +734,7 @@ public class LocalMiniMap extends Widget {
                         f = Defer.later(() -> {
                             Coord ul = plg.ul;
                             Coord gc = plg.gc;
-                            BufferedImage[] texes = new BufferedImage[256];
+                            BufferedImage[] texes = new BufferedImage[ui.sess.glob.map.tiles.length];
                             maptiles.put(gc.add(-1, -1), drawmap(ul.add(-100, -100), texes));
                             maptiles.put(gc.add(0, -1), drawmap(ul.add(0, -100), texes));
                             maptiles.put(gc.add(1, -1), drawmap(ul.add(100, -100), texes));

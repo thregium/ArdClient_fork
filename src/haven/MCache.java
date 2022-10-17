@@ -63,13 +63,13 @@ public class MCache {
     public static final Coord cutsz = new Coord(25, 25);
     public static final Coord cutn = cmaps.div(cutsz);
     private final Object setmon = new Object();
-    private Resource.Spec[] nsets = new Resource.Spec[0];
+    public Resource.Spec[] nsets = new Resource.Spec[0];
     @SuppressWarnings("unchecked")
-    private Reference<Resource>[] sets = new Reference[0];
+    public Reference<Resource>[] sets = new Reference[0];
     @SuppressWarnings("unchecked")
-    private Reference<Tileset>[] csets = new Reference[0];
+    public Reference<Tileset>[] csets = new Reference[0];
     @SuppressWarnings("unchecked")
-    private Reference<Tiler>[] tiles = new Reference[0];
+    public Reference<Tiler>[] tiles = new Reference[0];
     private final Waitable.Queue gridwait = new Waitable.Queue();
     final Map<Coord, Request> req = new HashMap<>();
     final Map<Coord, Grid> grids = new HashMap<>();

@@ -2,6 +2,7 @@ package integrations.mapv4;
 
 import haven.Coord;
 import haven.MCache;
+import static haven.MCache.cmaps;
 import haven.Resource;
 import haven.TexI;
 import haven.Tiler;
@@ -32,7 +33,7 @@ public class MinimapImageGenerator {
     }
 
     public static BufferedImage drawmap(MCache map, MCache.Grid grid) {
-        BufferedImage[] texes = new BufferedImage[256];
+        BufferedImage[] texes = new BufferedImage[map.tiles.length];
         BufferedImage buf = TexI.mkbuf(MCache.cmaps);
         Coord c = new Coord();
         for (c.y = 0; c.y < MCache.cmaps.y; c.y++) {
@@ -45,14 +46,17 @@ public class MinimapImageGenerator {
                 buf.setRGB(c.x, c.y, rgb);
             }
         }
-        for (c.y = 1; c.y < MCache.cmaps.y - 1; c.y++) {
-            for (c.x = 1; c.x < MCache.cmaps.x - 1; c.x++) {
+        for (c.y = 0; c.y < MCache.cmaps.y; c.y++) {
+            for (c.x = 0; c.x < MCache.cmaps.x; c.x++) {
                 int t = grid.gettile(c);
                 Tiler tl = map.tiler(t);
                 if (tl instanceof Ridges.RidgeTile) {
                     if (Ridges.brokenp(map, c, grid)) {
-                        for (int y = c.y - 1; y <= c.y + 1; y++) {
-                            for (int x = c.x - 1; x <= c.x + 1; x++) {
+                        buf.setRGB(c.x, c.y, Color.BLACK.getRGB());
+                        for (int y = Math.max(c.y - 1, 0); y <= Math.min(c.y + 1, cmaps.y - 1); y++) {
+                            for (int x = Math.max(c.x - 1, 0); x <= Math.min(c.x + 1, cmaps.x - 1); x++) {
+                                if (x == c.x && y == c.y)
+                                    continue;
                                 Color cc = new Color(buf.getRGB(x, y));
                                 buf.setRGB(x, y, Utils.blendcol(cc, Color.BLACK, ((x == c.x) && (y == c.y)) ? 1 : 0.1).getRGB());
                             }

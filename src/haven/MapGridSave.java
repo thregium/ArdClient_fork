@@ -97,7 +97,7 @@ public class MapGridSave {
     }
 
     public BufferedImage drawmap(Coord sz) {
-        BufferedImage[] texes = new BufferedImage[256];
+        BufferedImage[] texes = new BufferedImage[map.tiles.length];
         BufferedImage buf = TexI.mkbuf(sz);
         Coord c = new Coord();
         int blackpxs = 0;

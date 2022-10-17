@@ -586,7 +586,7 @@ public class MapFile {
                 } catch (Loading l) {
                     throw (l);
                 } catch (Exception e) {
-                    warn("mapfile warning: could not load tileset resource %s(v%d): %s", r.name, r.ver, e);
+                    warn("could not load tileset resource %s: %s", res, e);
                 }
                 if (r != null) {
                     Resource.Image ir = r.layer(Resource.imgc);
@@ -712,8 +712,8 @@ public class MapFile {
             }
 
             if (zmap[0] != Float.POSITIVE_INFINITY) {//FIXME
-                Tiler[] tilers = new Tiler[256];
-                boolean[] tlcached = new boolean[256];
+                Tiler[] tilers = new Tiler[tilesets.length];
+                boolean[] tlcached = new boolean[tilesets.length];
                 if (configuration.allowridgesmap) {
                     for (c.y = 0; c.y < cmaps.y; c.y++) {
                         for (c.x = 0; c.x < cmaps.x; c.x++) {
