@@ -10,6 +10,7 @@ import haven.Sprite.Owner;
 import haven.resutil.CSprite;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class GaussianPlant implements Factory {
@@ -24,20 +25,20 @@ public class GaussianPlant implements Factory {
     }
 
     public Sprite create(Owner owner, Resource res, Message sdt) {
-        ArrayList<Object> allmeshes = new ArrayList<Object>(res.layers(MeshRes.class));
+        List<MeshRes> meshes = new ArrayList<>(res.layers(MeshRes.class));
         CSprite cs = new CSprite(owner, res);
         if (Config.simpleforage) {
-            MeshRes mesh = (MeshRes) allmeshes.get(0);
+            MeshRes mesh = meshes.get(0);
             cs.addpart(0, 0, mesh.mat.get(), mesh.m);
         } else {
             Random rnd = owner.mkrandoom();
             int scount = rnd.nextInt(this.numh - this.numl + 1) + this.numl;
             for (int i = 0; i < scount; ++i) {
-                MeshRes var9 = (MeshRes) allmeshes.get(rnd.nextInt(allmeshes.size()));
-                cs.addpart((float) rnd.nextGaussian() * this.r, (float) rnd.nextGaussian() * this.r, var9.mat.get(), var9.m);
+                MeshRes mesh = meshes.get(rnd.nextInt(meshes.size()));
+                cs.addpart((float) rnd.nextGaussian() * this.r, (float) rnd.nextGaussian() * this.r, mesh.mat.get(), mesh.m);
             }
         }
 
-        return cs;
+        return (cs);
     }
 }

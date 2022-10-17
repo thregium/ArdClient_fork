@@ -51,6 +51,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -623,13 +625,13 @@ public class MapFileWidget extends Widget implements Console.Directory {
                             buf.append('/');
                         }
                         buf.append(gridstring);
-                        File base = HashDirCache.findbase();
+                        Path base = HashDirCache.findbase();
                         long h = configuration.namehash(configuration.namehash(0, Config.resurl.toString()), buf.toString());
-                        File gridfile = new File(base, String.format("%016x.0", h));
-                        if (gridfile.delete())
-                            System.out.println(gridfile.getAbsolutePath() + " deleted");
+                        Path gridfile = Utils.pj(base, String.format("%016x.0", h));
+                        if (Files.deleteIfExists(gridfile))
+                            System.out.println(gridfile.toFile().getAbsolutePath() + " deleted");
                         else
-                            System.err.println(gridfile.getAbsolutePath() + " failed");
+                            System.err.println(gridfile.toFile().getAbsolutePath() + " failed");
                     } catch (Exception er) {
                         er.printStackTrace();
                     }

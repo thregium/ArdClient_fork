@@ -27,7 +27,6 @@
 package haven;
 
 import modification.resources;
-
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.event.KeyEvent;
@@ -41,6 +40,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Scanner;
 
 public class LoginScreen extends Widget {
@@ -87,12 +87,26 @@ public class LoginScreen extends Widget {
         changeLogShowed = true;
         log = ui.root.add(new Window(new Coord(50, 50), "Changelog"), new Coord(100, 50));
         log.justclose = true;
-        Textlog txt = log.add(new Textlog(new Coord(450, 500)));
+        Textlog txt = log.add(new Textlog(new Coord(450, 200)));
         txt.quote = false;
         int maxlines = txt.maxLines = 200;
         log.pack();
         try {
-            InputStream in = LoginScreen.class.getResourceAsStream("/CHANGELOG.txt");
+            {
+                try (InputStream in = ClassLoader.getSystemResourceAsStream("buildinfo")) {
+                    if (in != null) {
+                        Properties info = new Properties();
+                        info.load(in);
+                        String ver = info.getProperty("version");
+                        String git = info.getProperty("git-rev");
+                        txt.append(String.format("Current version: %s", ver));
+                        txt.append(String.format("Current git: %s", git));
+                    }
+                } catch (IOException e) {
+                }
+            }
+
+            InputStream in = ClassLoader.getSystemResourceAsStream("CHANGELOG.txt");
             BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
             File f = Config.getFile("CHANGELOG.txt");
             FileOutputStream out = new FileOutputStream(f);

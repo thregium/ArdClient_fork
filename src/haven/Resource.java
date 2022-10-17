@@ -84,9 +84,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
-import java.util.StringJoiner;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
@@ -1929,6 +1929,12 @@ public class Resource implements Serializable {
         });
     }
 
+    public static class NoSuchLayerException extends NoSuchElementException {
+        public NoSuchLayerException(String message) {
+            super(message);
+        }
+    }
+
     public <L extends Layer> L layer(Class<L> cl) {
         used = true;
         for (Layer l : layers) {
@@ -1936,6 +1942,12 @@ public class Resource implements Serializable {
                 return (cl.cast(l));
         }
         return (null);
+    }
+
+    public <L extends Layer> L flayer(Class<L> cl) {
+        L l = layer(cl);
+        if (l == null) throw (new NoSuchLayerException("no " + cl + " in " + name));
+        return (l);
     }
 
     public <I, L extends IDLayer<I>> L layer(Class<L> cl, I id) {
@@ -1948,6 +1960,12 @@ public class Resource implements Serializable {
             }
         }
         return (null);
+    }
+
+    public <I, L extends IDLayer<I>> L flayer(Class<L> cl, I id) {
+        L l = layer(cl, id);
+        if (l == null) throw (new NoSuchLayerException("no " + cl + " in " + name + " with id " + id));
+        return (l);
     }
 
     public boolean equals(Object other) {

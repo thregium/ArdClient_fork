@@ -32,6 +32,7 @@ import haven.purus.pathfinder.Pathfinder;
 import haven.purus.pbot.PBotDiscord;
 import haven.purus.pbot.PBotUtils;
 import haven.res.gfx.fx.msrad.MSRad;
+import haven.res.ui.music.MusicBot;
 import haven.resutil.BPRadSprite;
 import haven.resutil.FoodInfo;
 import haven.resutil.WaterTile;
@@ -53,6 +54,7 @@ import java.awt.Color;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -62,6 +64,10 @@ import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.net.JarURLConnection;
 import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -71,12 +77,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class OptWnd extends Window {
@@ -4508,15 +4516,15 @@ public class OptWnd extends Window {
             public void click() {
                 if (hashid.text() != null && !hashid.text().equals("")) {
                     try {
-                        File basedir = HashDirCache.findbase();
-                        File file = new File(basedir, hashid.text());
-                        if (!file.exists()) {
-                            dev.resourceLog("Resource", "NOT FOUND", file.getAbsolutePath());
+                        Path basedir = HashDirCache.findbase();
+                        Path file = Utils.pj(basedir, hashid.text());
+                        if (!Files.exists(file)) {
+                            dev.resourceLog("Resource", "NOT FOUND", file.toFile().getAbsolutePath());
                         } else {
-                            if (file.delete()) {
-                                dev.resourceLog("Resource", "DELETED", file.getAbsolutePath());
+                            if (Files.deleteIfExists(file)) {
+                                dev.resourceLog("Resource", "DELETED", file.toFile().getAbsolutePath());
                             } else {
-                                dev.resourceLog("Resource", "NOT DELETED", file.getAbsolutePath());
+                                dev.resourceLog("Resource", "NOT DELETED", file.toFile().getAbsolutePath());
                             }
                         }
                     } catch (Exception e) {
@@ -5787,12 +5795,26 @@ public class OptWnd extends Window {
     private void showChangeLog() {
         Window log = ui.root.add(new Window(new Coord(50, 50), "Changelog"), new Coord(100, 50));
         log.justclose = true;
-        Textlog txt = log.add(new Textlog(new Coord(450, 500)));
+        Textlog txt = log.add(new Textlog(new Coord(450, 200)));
         txt.quote = false;
         int maxlines = txt.maxLines = 200;
         log.pack();
         try {
-            InputStream in = LoginScreen.class.getResourceAsStream("/CHANGELOG.txt");
+            {
+                try (InputStream in = ClassLoader.getSystemResourceAsStream("buildinfo")) {
+                    if (in != null) {
+                        Properties info = new Properties();
+                        info.load(in);
+                        String ver = info.getProperty("version");
+                        String git = info.getProperty("git-rev");
+                        txt.append(String.format("Current version: %s", ver));
+                        txt.append(String.format("Current git: %s", git));
+                    }
+                } catch (IOException e) {
+                }
+            }
+
+            InputStream in = ClassLoader.getSystemResourceAsStream("CHANGELOG.txt");
             BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
             File f = Config.getFile("CHANGELOG.txt");
             FileOutputStream out = new FileOutputStream(f);
@@ -6665,22 +6687,25 @@ public class OptWnd extends Window {
                         super.draw(g);
                     }
                 });
-            File file = HashDirCache.findbase();
-            File[] listFiles = file.listFiles(new configuration.MyFileNameFilter(".0"));
-            List<File> files = new ArrayList<>();
+            Path file = HashDirCache.findbase();
+            List<Path> listFiles = new ArrayList<>();
+            try (Stream<Path> s = Files.list(file)) {
+                listFiles.addAll(s.filter(p -> p.toString().toLowerCase().endsWith(".0")).collect(Collectors.toList()));
+            } catch (IOException ignored) {}
+            List<Path> files = new ArrayList<>();
             boolean success = false;
             if (listFiles != null)
-                for (int i = 0; i < listFiles.length; i++) {
+                for (int i = 0; i < listFiles.size(); i++) {
                     if (!success)
                         success = true;
                     try {
                         HashDirCache.Header head;
-                        try (RandomAccessFile fp = HashDirCache.open2(listFiles[i], "r")) {
-                            head = ((HashDirCache) ResCache.global).readhead(fp);
+                        try (FileChannel fp = HashDirCache.open2(listFiles.get(i))) {
+                            head = ((HashDirCache) ResCache.global).readhead(new DataInputStream(Channels.newInputStream(fp)));
                         }
                         if (head != null && Config.resurl.toString().equals(head.cid) && head.name.startsWith(part)) {
-                            files.add(listFiles[i]);
-                            search.settext("Searching files for deleting: " + ((i + 1) + "/" + listFiles.length) + " - " + files.size() + " added");
+                            files.add(listFiles.get(i));
+                            search.settext("Searching files for deleting: " + ((i + 1) + "/" + listFiles.size()) + " - " + files.size() + " added");
                             search.move(ui.root.sz.div(2), 0.5, 0.5);
                         }
                     } catch (Exception e) {
@@ -6690,17 +6715,18 @@ public class OptWnd extends Window {
             search.reqdestroy();
             for (int i = 0; i < files.size(); i++) {
                 try {
-                    final RandomAccessFile fp = HashDirCache.open2(files.get(i), "r");
-                    HashDirCache.Header head = ((HashDirCache) ResCache.global).readhead(fp);
-                    fp.close();
+                    HashDirCache.Header head;
+                    try (final FileChannel fp = HashDirCache.open2(files.get(i))) {
+                        head = ((HashDirCache) ResCache.global).readhead(new DataInputStream(Channels.newInputStream(fp)));
+                    }
                     String text;
                     Color clr;
-                    if (files.get(i).delete()) {
+                    if (Files.deleteIfExists(files.get(i))) {
                         clr = Color.GREEN;
-                        text = String.format("Resource %s: [%s] [%s] DELETED", (i + 1) + "/" + files.size(), head.name, files.get(i).getName());
+                        text = String.format("Resource %s: [%s] [%s] DELETED", (i + 1) + "/" + files.size(), head.name, files.get(i).toFile().getName());
                     } else {
                         clr = Color.RED;
-                        text = String.format("Resource %s: [%s] [%s] NOT DELETED", (i + 1) + "/" + files.size(), head.name, files.get(i).getName());
+                        text = String.format("Resource %s: [%s] [%s] NOT DELETED", (i + 1) + "/" + files.size(), head.name, files.get(i).toFile().getName());
                     }
                     String finalText = text;
                     Color finalClr = clr;

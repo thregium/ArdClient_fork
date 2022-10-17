@@ -12,7 +12,9 @@ import haven.resutil.CSprite;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class GrowingPlant implements Factory {
     public final int num;
@@ -23,27 +25,20 @@ public class GrowingPlant implements Factory {
 
     public Sprite create(Owner owner, Resource res, Message sdt) {
         int stg = sdt.uint8();
-        ArrayList<MeshRes> meshes = new ArrayList<MeshRes>();
-        Iterator allmeshes = res.layers(MeshRes.class).iterator();
-
-        while (allmeshes.hasNext()) {
-            MeshRes mesh = (MeshRes) allmeshes.next();
-            if (mesh.id / 10 == stg) {
-                meshes.add(mesh);
-            }
-        }
+        List<MeshRes> meshes = res.layers(MeshRes.class).stream().filter(m -> m.id / 10 == stg).collect(Collectors.toList());
 
         if (meshes.size() < 1) {
-            throw new ResourceException("No variants for grow stage " + stg, res);
+            throw (new ResourceException("No variants for grow stage " + stg, res));
         } else {
             CSprite cs = new CSprite(owner, res);
             if (Config.simplecrops) {
-                MeshRes mesh = (MeshRes) meshes.get(0);
+                MeshRes mesh = meshes.get(0);
                 cs.addpart(0, 0, mesh.mat.get(), mesh.m);
             } else {
                 Random rnd = owner.mkrandoom();
                 for (int i = 0; i < this.num; ++i) {
-                    MeshRes mesh = (MeshRes) meshes.get(rnd.nextInt(meshes.size()));
+                    MeshRes mesh = meshes.get(rnd.nextInt(meshes.size()));
+                    cs.addpart(0, 0, mesh.mat.get(), mesh.m);
                     if (this.num > 1) {
                         cs.addpart(rnd.nextFloat() * 11.0F - 5.5F, rnd.nextFloat() * 11.0F - 5.5F, mesh.mat.get(), mesh.m);
                     } else {
@@ -51,7 +46,7 @@ public class GrowingPlant implements Factory {
                     }
                 }
             }
-            return cs;
+            return (cs);
         }
     }
 }

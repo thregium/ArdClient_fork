@@ -36,6 +36,7 @@ import haven.MCache;
 import haven.MapMesh;
 import haven.MapMesh.Model;
 import haven.MapMesh.Scan;
+import haven.MapSource;
 import haven.Material;
 import haven.MeshBuf;
 import haven.States;
@@ -45,14 +46,13 @@ import haven.Surface.Vertex;
 import haven.Tiler;
 import haven.Tiler.MPart;
 import haven.Utils;
+import static haven.Utils.clip;
 import modification.configuration;
-
 import java.util.Arrays;
 import java.util.Random;
 
-import static haven.Utils.clip;
-
 public class Ridges extends MapMesh.Hooks {
+    private static final float EPSILON = 0.01f;
     public static final MapMesh.DataID<Ridges> id = MapMesh.makeid(Ridges.class);
     public static final int segh = 8;
     public final MapMesh m;
@@ -809,6 +809,23 @@ public class Ridges extends MapMesh.Hooks {
 //                    coord2.x < 0 || coord2.x > cmaps.x - 1 || coord2.y < 0 || coord2.y > cmaps.y - 1)
 //                continue;
             if (Math.abs(g.getz(coord2) - g.getz(coord1)) > bz)
+                return (true);
+        }
+        return (false);
+    }
+
+    public static boolean brokenp(MapSource map, Coord tc) {
+        Tiler t = map.tiler(map.gettile(tc));
+        if (!(t instanceof RidgeTile))
+            return (false);
+        double bz = ((RidgeTile) t).breakz() + EPSILON;
+        for (Coord ec : tecs) {
+            t = map.tiler(map.gettile(tc.add(ec)));
+            if (t instanceof RidgeTile)
+                bz = Math.min(bz, ((RidgeTile) t).breakz() + EPSILON);
+        }
+        for (int i = 0; i < 4; i++) {
+            if (Math.abs(map.getfz(tc.add(tccs[(i + 1) % 4])) - map.getfz(tc.add(tccs[i]))) > bz)
                 return (true);
         }
         return (false);
