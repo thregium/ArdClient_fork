@@ -7,9 +7,14 @@ import haven.TexI;
 import haven.Text;
 import haven.Utils;
 import haven.Widget;
+import modification.dev;
 import java.awt.Color;
 
 public class PowerMeter extends Widget {
+    static {
+        dev.checkFileVersion("ui/apower", 11);
+    }
+
     public final int N;
     public double apow;
     private final Tex[] lbls;

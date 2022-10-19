@@ -13,11 +13,16 @@ import haven.Text;
 import haven.UI;
 import haven.Utils;
 import haven.Widget;
-import haven.res.ui.apower.PowerMeter;
 import haven.res.ui.polity.GroupWidget;
+import haven.res.ui.sboost.BoostMeter;
+import modification.dev;
 import java.awt.Color;
 
 public class Village extends Polity {
+    static {
+        dev.checkFileVersion("ui/vlg", 36);
+    }
+
     final BuddyWnd.GroupSelector gsel;
     private final int my;
     double power;
@@ -49,11 +54,8 @@ public class Village extends Polity {
                 g.aimage(rt, sz.div(2), 0.5, 0.5);
             }
         }, prev.pos("bl").adds(0, 10));
-        add(new PowerMeter(prev.sz, 10, 2, 1, 2) {
-            public void draw(GOut g) {
-                apow = boost;
-                super.draw(g);
-            }
+        add(new BoostMeter(prev.sz) {
+            public int level() {return (boost);}
         }, prev.pos("ur").adds(10, 0));
         prev = add(new Label("Groups:"), prev.pos("bl").adds(0, 15));
         gsel = add(new BuddyWnd.GroupSelector(-1) {
