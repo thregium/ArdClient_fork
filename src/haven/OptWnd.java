@@ -32,7 +32,6 @@ import haven.purus.pathfinder.Pathfinder;
 import haven.purus.pbot.PBotDiscord;
 import haven.purus.pbot.PBotUtils;
 import haven.res.gfx.fx.msrad.MSRad;
-import haven.res.ui.music.MusicBot;
 import haven.resutil.BPRadSprite;
 import haven.resutil.FoodInfo;
 import haven.resutil.WaterTile;
@@ -61,7 +60,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.nio.channels.Channels;
@@ -4228,7 +4226,7 @@ public class OptWnd extends Window {
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Draw outline on large map").tex();
             }
-        }, new HSlider(255, 0, 255, configuration.mapoutlinetransparency) {
+        }, new CheckBox("Another outline", val -> Utils.setprefb("anotheroutlinemap", configuration.anotheroutlinemap = val), configuration.anotheroutlinemap), new HSlider(100, 0, 255, configuration.mapoutlinetransparency) {
             public void changed() {
                 configuration.mapoutlinetransparency = val;
                 Utils.setprefi("mapoutlinetransparency", val);

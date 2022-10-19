@@ -688,25 +688,22 @@ public class MapFile {
             if (configuration.allowoutlinemap) {
                 for (c.y = 0; c.y < cmaps.y; c.y++) {
                     for (c.x = 0; c.x < cmaps.x; c.x++) {
-//                        try {
                         int p = tilesets[gettile(c)].prio;
                         int t = gettile(c);
                         if (!(configuration.disablepavingoutlineonmap && isContains(t, "gfx/tiles/paving/"))) {
-                            for (Coord ec : tecs) {
+                            for (Coord ec : configuration.anotheroutlinemap ? cset : tecs) {
                                 Coord coord = c.add(ec);
                                 if (coord.x < 0 || coord.x > cmaps.x - 1 || coord.y < 0 || coord.y > cmaps.y - 1)
                                     continue;
                                 if (tilesets[gettile(coord)].prio > p) {
-                                    buf.setSample(c.x, c.y, 0, 0);
-                                    buf.setSample(c.x, c.y, 1, 0);
-                                    buf.setSample(c.x, c.y, 2, 0);
-                                    buf.setSample(c.x, c.y, 3, configuration.mapoutlinetransparency);
+                                    buf.setSample(coord.x, coord.y, 0, 0);
+                                    buf.setSample(coord.x, coord.y, 1, 0);
+                                    buf.setSample(coord.x, coord.y, 2, 0);
+                                    buf.setSample(coord.x, coord.y, 3, configuration.mapoutlinetransparency);
                                     break;
                                 }
                             }
                         }
-//                        } catch (Exception e) {
-//                        }
                     }
                 }
             }
@@ -727,17 +724,16 @@ public class MapFile {
                                 buf.setSample(c.x, c.y, 3, black.getAlpha());
 
                                 if (configuration.allowoutlinemap) {
-                                    for (int y = Math.max(c.y - 1, 0); y <= Math.min(c.y + 1, cmaps.y - 1); y++) {
-                                        for (int x = Math.max(c.x - 1, 0); x <= Math.min(c.x + 1, cmaps.x - 1); x++) {
-                                            if (x == c.x && y == c.y)
-                                                continue;
-                                            Color cc = new Color(buf.getSample(x, y, 0), buf.getSample(x, y, 1), buf.getSample(x, y, 2), buf.getSample(x, y, 3));
-                                            final Color blended = Utils.blendcol(cc, Color.BLACK, 0.1 * (configuration.mapoutlinetransparency / 255.0));
-                                            buf.setSample(x, y, 0, blended.getRed());
-                                            buf.setSample(x, y, 1, blended.getGreen());
-                                            buf.setSample(x, y, 2, blended.getBlue());
-                                            buf.setSample(x, y, 3, blended.getAlpha());
-                                        }
+                                    for (Coord ec : configuration.anotheroutlinemap ? cset : tecs) {
+                                        Coord coord = c.add(ec);
+                                        if (coord.x < 0 || coord.x > cmaps.x - 1 || coord.y < 0 || coord.y > cmaps.y - 1)
+                                            continue;
+                                        Color cc = new Color(buf.getSample(coord.x, coord.y, 0), buf.getSample(coord.x, coord.y, 1), buf.getSample(coord.x, coord.y, 2), buf.getSample(coord.x, coord.y, 3));
+                                        final Color blended = Utils.blendcol(cc, Color.BLACK, 0.1 * (configuration.mapoutlinetransparency / 255.0));
+                                        buf.setSample(coord.x, coord.y, 0, blended.getRed());
+                                        buf.setSample(coord.x, coord.y, 1, blended.getGreen());
+                                        buf.setSample(coord.x, coord.y, 2, blended.getBlue());
+                                        buf.setSample(coord.x, coord.y, 3, blended.getAlpha());
                                     }
                                 }
                             }
@@ -794,7 +790,7 @@ public class MapFile {
         public BufferedImage olrender(Coord off, String tag) {
             WritableRaster buf = PUtils.imgraster(cmaps);
             for (Overlay ol : ols) {
-                MCache.ResOverlay olid = ol.olid.loadsaved().layer(MCache.ResOverlay.class);
+                MCache.ResOverlay olid = ol.olid.loadsaved().flayer(MCache.ResOverlay.class);
                 String ovl = null;
                 Iterator<String> i = olid.tags().iterator();
                 while (i.hasNext()) {
@@ -825,10 +821,10 @@ public class MapFile {
 
         public static void savetiles(Message fp, TileInfo[] tilesets, int[] tiles) {
             fp.adduint16(tilesets.length);
-            for (int i = 0; i < tilesets.length; i++) {
-                fp.addstring(tilesets[i].res.name);
-                fp.adduint16(tilesets[i].res.ver);
-                fp.adduint8(tilesets[i].prio);
+            for (TileInfo tileset : tilesets) {
+                fp.addstring(tileset.res.name);
+                fp.adduint16(tileset.res.ver);
+                fp.adduint8(tileset.prio);
             }
             if (tilesets.length <= 256) {
                 for (int tn : tiles)
@@ -963,6 +959,8 @@ public class MapFile {
         static {
             nogrid = new DataGrid(new TileInfo[]{new TileInfo(notile, 0)}, new int[cmaps.x * cmaps.y], new float[cmaps.x * cmaps.y], 0);
         }
+
+        private static final Coord[] cset = {Coord.of(-1, -1), Coord.of(0, -1), Coord.of(1, -1), Coord.of(-1, 0), Coord.of(1, 0), Coord.of(-1, 1), Coord.of(0, 1), Coord.of(1, 1)};
 
         @Deprecated
         private static final Coord[] tecs = {
@@ -1108,15 +1106,19 @@ public class MapFile {
             TileInfo[] infos = new TileInfo[nt];
             boolean[] norepl = new boolean[nt];
             int[] prios = new int[nt];
+            //FIXME from
+            //===========
+            for (int i = 0, tn = 0; i < tmap.length; i++) {
+                if (tmap[i] != -1)
+                    prios[tmap[i]] = tn++;
+            }
+            //===========
             for (int i = 0; i < nt; i++) {
                 int tn = rmap[i];
                 infos[i] = new TileInfo(map.tilesetn(tn), prios[i]);
                 norepl[i] = (Utils.index(Loading.waitfor(() -> map.tileset(tn)).tags, "norepl") >= 0);
             }
-            for (int i = 0, tn = 0; i < tmap.length; i++) {
-                if (tmap[i] != -1)
-                    prios[tmap[i]] = tn++;
-            }
+            //FIXME to ===========
             int[] tiles = new int[cmaps.x * cmaps.y];
             float[] zmap = new float[cmaps.x * cmaps.y];
             for (int i = 0; i < cg.tiles.length; i++) {
@@ -2122,14 +2124,11 @@ public class MapFile {
     }
 
     public interface ExportStatus {
-        default void grid(int cs, int ns, int cg, int ng) {
-        }
+        default void grid(int cs, int ns, int cg, int ng) {}
 
-        default void info(String text) {
-        }
+        default void info(String text) {}
 
-        default void mark(int cm, int nm) {
-        }
+        default void mark(int cm, int nm) {}
     }
 
     private static final byte[] EXPORT_SIG = "Haven Mapfile 1".getBytes(Utils.ascii);
@@ -2508,9 +2507,9 @@ public class MapFile {
         Collection<MCache.Grid> grids = new ArrayList<>();
         for (Coord off : inout) {
             Coord gc = cgc.add(off);
-            try {//FIXME need fix repeat?
-                grids.add(map.getgrid(gc));
-            } catch (Loading ingored) {}
+//            try {//FIXME need fix repeat?
+            grids.add(map.getgrid(gc));
+//            } catch (Loading ingored) {}
         }
         if (!grids.isEmpty()) {
             synchronized (procmon) {

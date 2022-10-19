@@ -237,6 +237,7 @@ public class configuration {
     public static boolean bigmaphidemarks = Utils.getprefb("bigmapshowmarks", false);
     public static boolean allowtexturemap = Utils.getprefb("allowtexturemap", true);
     public static boolean allowoutlinemap = Utils.getprefb("allowoutlinemap", true);
+    public static boolean anotheroutlinemap = Utils.getprefb("anotheroutlinemap", false);
     public static boolean allowridgesmap = Utils.getprefb("allowridgesmap", true);
     public static int mapoutlinetransparency = Utils.getprefi("mapoutlinetransparency", 255);
     public static float simplelmapintens = Utils.getpreff("simplelmapintens", 0.75f);
