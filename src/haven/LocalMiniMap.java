@@ -26,6 +26,10 @@
 
 package haven;
 
+import static haven.DefSettings.MINIMAPTYPE;
+import static haven.MCache.cmaps;
+import static haven.MCache.tilesz;
+import static haven.OCache.posres;
 import haven.purus.Iconfinder;
 import haven.purus.pbot.PBotDiscord;
 import haven.purus.pbot.PBotUtils;
@@ -33,7 +37,6 @@ import haven.resutil.Ridges;
 import haven.sloth.gob.Type;
 import haven.sloth.gui.DowseWnd;
 import modification.configuration;
-
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -46,11 +49,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import static haven.DefSettings.MINIMAPTYPE;
-import static haven.MCache.cmaps;
-import static haven.MCache.tilesz;
-import static haven.OCache.posres;
 
 public class LocalMiniMap extends Widget {
     public final static Tex roadicn = Resource.loadtex("gfx/icons/milestone");
@@ -143,9 +141,8 @@ public class LocalMiniMap extends Widget {
 
     public boolean isContains(int t, String type) {
         Resource r = ui.sess.glob.map.tilesetr(t);
-        if (r == null)
-            return (false);
-        return ui.sess.glob.map.tilesetr(t).name.contains(type);
+        if (r == null) return (false);
+        return r.name.contains(type);
     }
 
     private BufferedImage tileimg(int t, BufferedImage[] texes, String res) {
@@ -236,19 +233,16 @@ public class LocalMiniMap extends Widget {
             for (c.y = 0; c.y < sz.y; c.y++) {
                 for (c.x = 0; c.x < sz.x; c.x++) {
                     int t = m.gettile(ul.add(c));
-                    try {
-                        if (!(configuration.disablepavingoutlineonmap && isContains(t, "gfx/tiles/paving/"))) {
-                            for (Coord ec : tecs) {
-                                Coord coord = ul.add(c).add(ec);
-                                if (coord.x < 0 || coord.x > sz.x - 1 || coord.y < 0 || coord.y > sz.y - 1)
-                                    continue;
-                                if (m.gettile(coord) > t) {
-                                    buf.setRGB(c.x, c.y, Color.BLACK.getRGB());
-                                    break;
-                                }
+                    if (!(configuration.disablepavingoutlineonmap && isContains(t, "gfx/tiles/paving/"))) {
+                        for (Coord ec : tecs) {
+                            Coord coord = c.add(ec);
+                            if (coord.x < 0 || coord.x > sz.x - 1 || coord.y < 0 || coord.y > sz.y - 1)
+                                continue;
+                            if (m.gettile(ul.add(coord)) > t) {
+                                buf.setRGB(c.x, c.y, Color.BLACK.getRGB());
+                                break;
                             }
                         }
-                    } catch (Exception e) {
                     }
                 }
             }
@@ -256,24 +250,21 @@ public class LocalMiniMap extends Widget {
 
         for (c.y = 0; c.y < sz.y; c.y++) {
             for (c.x = 0; c.x < sz.x; c.x++) {
-                try {
-                    int t = m.gettile(ul.add(c));
-                    Tiler tl = m.tiler(t);
-                    if (tl instanceof Ridges.RidgeTile && Ridges.brokenp(m, ul.add(c))) {
-                        buf.setRGB(c.x, c.y, Color.BLACK.getRGB());
+                int t = m.gettile(ul.add(c));
+                Tiler tl = m.tiler(t);
+                if (tl instanceof Ridges.RidgeTile && Ridges.brokenp(m, ul.add(c))) {
+                    buf.setRGB(c.x, c.y, Color.BLACK.getRGB());
 
-                        if (!Config.disableBlackOutLinesOnMap) {
-                            for (int y = Math.max(c.y - 1, 0); y <= Math.min(c.y + 1, sz.y - 1); y++) {
-                                for (int x = Math.max(c.x - 1, 0); x <= Math.min(c.x + 1, sz.x - 1); x++) {
-                                    if (x == c.x && y == c.y)
-                                        continue;
-                                    Color cc = new Color(buf.getRGB(x, y));
-                                    buf.setRGB(x, y, Utils.blendcol(cc, Color.BLACK, 0.1).getRGB());
-                                }
+                    if (!Config.disableBlackOutLinesOnMap) {
+                        for (int y = Math.max(c.y - 1, 0); y <= Math.min(c.y + 1, sz.y - 1); y++) {
+                            for (int x = Math.max(c.x - 1, 0); x <= Math.min(c.x + 1, sz.x - 1); x++) {
+                                if (x == c.x && y == c.y)
+                                    continue;
+                                Color cc = new Color(buf.getRGB(x, y));
+                                buf.setRGB(x, y, Utils.blendcol(cc, Color.BLACK, 0.1).getRGB());
                             }
                         }
                     }
-                } catch (Exception e) {
                 }
             }
         }
