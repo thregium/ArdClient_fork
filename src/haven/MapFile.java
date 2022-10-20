@@ -696,10 +696,10 @@ public class MapFile {
                                 if (coord.x < 0 || coord.x > cmaps.x - 1 || coord.y < 0 || coord.y > cmaps.y - 1)
                                     continue;
                                 if (tilesets[gettile(coord)].prio > p) {
-                                    buf.setSample(coord.x, coord.y, 0, 0);
-                                    buf.setSample(coord.x, coord.y, 1, 0);
-                                    buf.setSample(coord.x, coord.y, 2, 0);
-                                    buf.setSample(coord.x, coord.y, 3, configuration.mapoutlinetransparency);
+                                    buf.setSample(c.x, c.y, 0, 0);
+                                    buf.setSample(c.x, c.y, 1, 0);
+                                    buf.setSample(c.x, c.y, 2, 0);
+                                    buf.setSample(c.x, c.y, 3, configuration.mapoutlinetransparency);
                                     break;
                                 }
                             }
