@@ -143,7 +143,7 @@ public class TimerEditWnd extends Window {
         };
         add(txtseconds, new Coord(305, 30));
 
-        CheckBox gametime = new CheckBox("Real time") {
+        CheckBox realtime = new CheckBox("Real time") {
             public void set(boolean val) {
                 long hours = Long.parseLong(txthours.text().equals("") ? "0" : txthours.text());
                 long minutes = Long.parseLong(txtminutes.text().equals("") ? "0" : txtminutes.text());
@@ -160,7 +160,7 @@ public class TimerEditWnd extends Window {
                 a = val;
             }
         };
-        adda(gametime, new Coord(sz.x / 2, 70), 0.5, 0);
+        adda(realtime, new Coord(sz.x / 2, 70), 0.5, 0);
 
         Button edit = new Button(60, "Edit", () -> {
             try {
@@ -168,7 +168,7 @@ public class TimerEditWnd extends Window {
                 long minutes = Long.parseLong(txtminutes.text().equals("") ? "0" : txtminutes.text());
                 long seconds = Long.parseLong(txtseconds.text().equals("") ? "0" : txtseconds.text());
                 long duration = ((60 * hours + minutes) * 60 + seconds) * 3;
-                if (gametime.a) duration = Math.round(duration / ui.sess.glob.getTimeFac());
+                if (realtime.a) duration = Math.round(duration * ui.sess.glob.getTimeFac());
                 TimerData.editTimer(timer, txtname.text(), duration);
                 ui.destroy(this);
             } catch (Exception e) {
