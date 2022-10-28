@@ -14,14 +14,14 @@ import java.util.Map;
 
 public class Materials extends Mapping {
     static {
-        dev.checkFileVersion("lib/vmat", 35);
+        dev.checkFileVersion("lib/vmat", 36);
     }
 
-    public static final Map<Integer, Material> empty = Collections.<Integer, Material>emptyMap();
+    public static final Map<Integer, Material> empty = Collections.emptyMap();
     public final Map<Integer, Material> mats;
 
     public static Map<Integer, Material> decode(Resource.Resolver rr, Message sdt) {
-        Map<Integer, Material> ret = new IntMap<Material>();
+        Map<Integer, Material> ret = new IntMap<>();
         int idx = 0;
         while (!sdt.eom()) {
             Indir<Resource> mres = rr.getres(sdt.uint16());

@@ -129,13 +129,13 @@ public class VMeter extends Widget implements ItemInfo.Owner {
             if (type == null) return "";
             switch (type) {
                 case fuel:
-                    return "\n1 tick = 4 minutes 50 seconds\n1 branch = 1 tick\nCoal, Black coal = 2 ticks\nBlock of Wood = 5 ticks\nTarsticks = 20 ticks";
+                    return "\n1 tick = 15 minutes\n1 branch = 1 tick\nCoal, Black coal = 2 ticks\nBlock of Wood = 5 ticks\nTarsticks = 20 ticks";
                 case fireplace:
-                    return "\n1 tick = 6 minutes\n1 branch = 1 tick\nCoal, Black coal = 2 ticks\nBlock of Wood = 5 ticks\nTarsticks = 20 ticks";
+                    return "\n1 tick = 20 minutes\n1 branch = 1 tick\nCoal, Black coal = 2 ticks\nBlock of Wood = 5 ticks\nTarsticks = 20 ticks";
                 case smeltery:
-                    return "\n1 tick = 4 minutes 50 seconds\nCoal, Black coal = 1 ticks";
+                    return "\n1 tick = 15 minutes\nCoal, Black coal = 1 ticks";
                 case crucible:
-                    return "\n1 tick = 40 minutes\n1 branch = 1 tick\nCoal, Black coal = 2 ticks\nBlock of Wood = 5 ticks\nTarsticks = 20 ticks";
+                    return "\n1 tick = 2 hour\n1 branch = 1 tick\nCoal, Black coal = 2 ticks\nBlock of Wood = 5 ticks\nTarsticks = 20 ticks";
                 default:
                     return "";
             }
@@ -202,6 +202,7 @@ public class VMeter extends Widget implements ItemInfo.Owner {
         return (info);
     }
 
+    private static final String INGAME_TIME = "\nIngame time";
     private double hoverstart;
     private Tex shorttip, longtip;
 
@@ -216,7 +217,7 @@ public class VMeter extends Widget implements ItemInfo.Owner {
                                 String ca = (tl.limit * amount / 100 % 1 == 0 ? String.format("%.0f", tl.limit * amount / 100) : tl.limit * amount / 100) + "";
                                 String cl = (tl.limit % 1 == 0 ? String.format("%.0f", tl.limit) : tl.limit) + "";
                                 String stt = "$b{$col[255,223,5]{" + ca + " / " + cl + " " + tl.subText + " (" + amount + "%)}}";
-                                return (RichText.render(stt + tl.tooltip + tl.addTooltip, -1).tex());
+                                return (RichText.render(stt + tl.tooltip + INGAME_TIME + tl.addTooltip, -1).tex());
                             }
                         }
                     }

@@ -872,7 +872,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             int mseq = glob.map.olseq;
             if (loading || !Utils.eq(cc, this.cc) || (mseq != this.mseq)) {
                 loading = false;
-                Collection<Gob> fol = new ArrayList<Gob>();
+                Collection<Gob> fol = new ArrayList<>();
                 Coord o = new Coord();
                 for (o.y = -view; o.y <= view; o.y++) {
                     for (o.x = -view; o.x <= view; o.x++) {
@@ -1032,8 +1032,8 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             xf = gob.loc;
             try {
                 Coord3f c = gob.getc();
-                Tiler tile = glob.map.tiler(glob.map.gettile(new Coord2d(c).floor(tilesz)));
-                extra = tile.drawstate(glob, rl.cfg, c);
+                Tiler tile = glob.map.tiler(glob.map.gettile_safe(new Coord2d(c).floor(tilesz)));
+                if (tile != null) extra = tile.drawstate(glob, rl.cfg, c);
             } catch (Loading e) {
                 extra = null;
             }
@@ -1078,8 +1078,8 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     public static class ChangeSet implements OCache.ChangeCallback {
-        public final Set<Gob> changed = new HashSet<Gob>();
-        public final Set<Gob> removed = new HashSet<Gob>();
+        public final Set<Gob> changed = new HashSet<>();
+        public final Set<Gob> removed = new HashSet<>();
 
         public void changed(Gob ob) {
             changed.add(ob);
@@ -1130,7 +1130,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     private class Gobs implements Rendered {
         final OCache oc = glob.oc;
         final ChangeSet changed = new ChangeSet();
-        final Map<Gob, GobSet> parts = new HashMap<Gob, GobSet>();
+        final Map<Gob, GobSet> parts = new HashMap<>();
         Integer ticks = 0;
 
         {
@@ -1139,7 +1139,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
         class GobSet implements Rendered {
             private final String nm;
-            final Collection<Gob> obs = new HashSet<Gob>();
+            final Collection<Gob> obs = new HashSet<>();
             Object seq = this;
 
             GobSet(String nm) {
@@ -1156,11 +1156,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     seq = ticks;
             }
 
-            void update() {
-            }
+            void update() {}
 
-            public void draw(GOut g) {
-            }
+            public void draw(GOut g) {}
 
             public boolean setup(RenderList rl) {
                 for (Gob gob : obs)
@@ -1182,7 +1180,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
 
         class Transitory extends GobSet {
-            final Map<Gob, Integer> age = new HashMap<Gob, Integer>();
+            final Map<Gob, Integer> age = new HashMap<>();
 
             Transitory(String nm) {
                 super(nm);
@@ -1206,7 +1204,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
             void update() {
                 if (++cycle >= 300) {
-                    Collection<Gob> cache = new ArrayList<Gob>();
+                    Collection<Gob> cache = new ArrayList<>();
                     for (Map.Entry<Gob, Integer> ob : age.entrySet()) {
                         if (ticks - ob.getValue() > 450)
                             cache.add(ob.getKey());
@@ -1222,8 +1220,8 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
             void update() {
                 if (++cycle >= 20) {
-                    Collection<Gob> cache = new ArrayList<Gob>();
-                    Collection<Gob> scache = new ArrayList<Gob>();
+                    Collection<Gob> cache = new ArrayList<>();
+                    Collection<Gob> scache = new ArrayList<>();
                     for (Map.Entry<Gob, Integer> ob : age.entrySet()) {
                         if (ticks - ob.getValue() > 30) {
                             Gob gob = ob.getKey();
@@ -1246,7 +1244,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
             void update() {
                 if (++cycle >= 5) {
-                    Collection<Gob> cache = new ArrayList<Gob>();
+                    Collection<Gob> cache = new ArrayList<>();
                     for (Gob ob : obs) {
                         Object seq = ob.staticp();
                         if ((seq instanceof Gob.Static) || (seq instanceof Gob.SemiStatic))
@@ -1565,7 +1563,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             States.ColState cst = new States.ColState(col);
             i++;
             rmap.put(cst, t);
-            idmap.put(t, new WeakReference<States.ColState>(cst));
+            idmap.put(t, new WeakReference<>(cst));
             return (cst);
         }
 
@@ -1788,7 +1786,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     private static final Text.Furnace polownertf = new PUtils.BlurFurn(new Text.Foundry(Text.serif, 30).aa(true), 3, 1, Color.BLACK);
-    private final Map<Integer, PolText> polowners = new HashMap<Integer, PolText>();
+    private final Map<Integer, PolText> polowners = new HashMap<>();
 
 
     public void setpoltext(int id, String text) {
@@ -2531,6 +2529,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     private Loader.Future<Boolean> pfdefer;
+
     private class Click extends Hittest {
         int clickb;
 
@@ -2632,9 +2631,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             pfdefer = null;
                         }
                         pfdefer = glob.loader.defer(() -> {
-                             pathto(mc);
-                             pfdefer = null;
-                             return (null);
+                            pathto(mc);
+                            pfdefer = null;
+                            return (null);
                         });
                         //      purusPfLeftClick(mc.floor(), null);
                     } else if (clickb == 1 && ui.modmeta && ui.gui.vhand == null && curs != null && curs.name.equals("gfx/hud/curs/arw")) {

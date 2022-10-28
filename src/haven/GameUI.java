@@ -26,6 +26,13 @@
 
 package haven;
 
+import static haven.Action.TOGGLE_CHARACTER;
+import static haven.Action.TOGGLE_EQUIPMENT;
+import static haven.Action.TOGGLE_INVENTORY;
+import static haven.Action.TOGGLE_KIN_LIST;
+import static haven.Action.TOGGLE_OPTIONS;
+import static haven.Action.TOGGLE_SEARCH;
+import static haven.KeyBinder.KeyBind;
 import haven.automation.Discord;
 import haven.automation.ErrorSysMsgCallback;
 import haven.automation.PickForageable;
@@ -54,7 +61,6 @@ import haven.sloth.gui.script.ScriptManager;
 import modification.configuration;
 import modification.dev;
 import modification.newQuickSlotsWdg;
-
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.image.WritableRaster;
@@ -71,21 +77,13 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Consumer;
 
-import static haven.Action.TOGGLE_CHARACTER;
-import static haven.Action.TOGGLE_EQUIPMENT;
-import static haven.Action.TOGGLE_INVENTORY;
-import static haven.Action.TOGGLE_KIN_LIST;
-import static haven.Action.TOGGLE_OPTIONS;
-import static haven.Action.TOGGLE_SEARCH;
-import static haven.KeyBinder.KeyBind;
-
 public class GameUI extends ConsoleHost implements Console.Directory {
     public static final Text.Foundry msgfoundry = new Text.Foundry(Text.dfont, Text.cfg.msg);
     private static final int blpw = 142;
     public final String chrid, genus;
     public final long plid;
     public final Hidepanel ulpanel, umpanel, urpanel, brpanel, menupanel;
-    public Avaview portrait;
+    public Widget portrait;
     public Partyview partyview;
     public MenuGrid menu;
     public MenuSearch menuSearch;
@@ -214,11 +212,11 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         // brpanel.add(new Img(Resource.loadtex("gfx/hud/brframe")), 0, 0);
         if (Config.lockedmainmenu)
             menupanel.add(new MainMenu(), 0, 0);
-        portrait = ulpanel.add(new Avaview(Avaview.dasz, plid, "avacam") {
+        portrait = ulpanel.add(Frame.with(new Avaview(Avaview.dasz, plid, "avacam") {
             public boolean mousedown(Coord c, int button) {
                 return (true);
             }
-        }, new Coord(10, 10));
+        }, false), UI.scale(10, 10));
         cal = umpanel.add(new Cal(), new Coord(0, 10));
         if (Config.hidecalendar)
             cal.hide();
@@ -240,10 +238,10 @@ public class GameUI extends ConsoleHost implements Console.Directory {
                     c.x = umpanel.c.x - 360;
                 if (Config.showservertime) {
                     Tex mtime = ui.sess.glob.mservertimetex.get().b;
-                    Tex ltime = ui.sess.glob.lservertimetex.get().b;;
-                    Tex rtime = ui.sess.glob.rservertimetex.get().b;;
-                    Tex btime = ui.sess.glob.bservertimetex.get().b;;
-                    Tex winfo = ui.sess.glob.weathertimetex.get().b;;
+                    Tex ltime = ui.sess.glob.lservertimetex.get().b; ;
+                    Tex rtime = ui.sess.glob.rservertimetex.get().b; ;
+                    Tex btime = ui.sess.glob.bservertimetex.get().b; ;
+                    Tex winfo = ui.sess.glob.weathertimetex.get().b; ;
                     int y = 10;
                     if (mtime != null) {
                         g.aimage(mtime, new Coord(sz.x - 5, y), 1, 0);
@@ -1429,7 +1427,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         } else if (afk && (idle <= 300)) {
             afk = false;
         }
-
     }
 
     private void togglebuff(String err, Resource res) {

@@ -31,7 +31,6 @@ import haven.Composited.MD;
 import haven.Skeleton.Pose;
 import haven.Skeleton.PoseMod;
 import haven.sloth.gob.Type;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -78,7 +77,18 @@ public class Composite extends Drawable {
         rl.add(comp, null);
     }
 
-    private List<PoseMod> loadposes(Collection<ResData> rl, Skeleton skel, boolean old) {
+    public static List<PoseMod> loadposes(Collection<ResData> rl, Skeleton.ModOwner owner, Skeleton skel, boolean old) {
+        List<PoseMod> mods = new ArrayList<>(rl.size());
+        for (ResData dat : rl) {
+            PoseMod mod = skel.mkposemod(owner, dat.res.get(), dat.sdt.clone());
+            if (old)
+                mod.age();
+            mods.add(mod);
+        }
+        return (mods);
+    }
+
+    public List<PoseMod> loadposes(Collection<ResData> rl, Skeleton skel, boolean old) {
         List<PoseMod> mods = new ArrayList<>(rl.size());
         for (ResData dat : rl) {
             PoseMod mod = skel.mkposemod(gob, dat.res.get(), dat.sdt.clone());
@@ -89,7 +99,7 @@ public class Composite extends Drawable {
         return (mods);
     }
 
-    private List<PoseMod> loadposes(Collection<ResData> rl, Skeleton skel, WrapMode mode) {
+    public List<PoseMod> loadposes(Collection<ResData> rl, Skeleton skel, WrapMode mode) {
         List<PoseMod> mods = new ArrayList<>(rl.size());
         for (ResData dat : rl) {
             for (Skeleton.ResPose p : dat.res.get().layers(Skeleton.ResPose.class))

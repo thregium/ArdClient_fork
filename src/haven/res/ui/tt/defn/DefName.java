@@ -27,7 +27,8 @@ public class DefName implements InfoFactory {
             Resource res = ((ResOwner) owner).resource();
             Tooltip tt = res.layer(Resource.tooltip);
             if (tt == null) {
-                throw new RuntimeException("Item resource " + res + " is missing default tooltip");
+                return (new Name(owner, "*Broken Name", "*Broken Name"));
+//                throw new RuntimeException("Item resource " + res + " is missing default tooltip");
             } else {
                 return (new Name(owner, tt.origt, tt.t));
             }

@@ -83,7 +83,7 @@ public class AttrBonusesWdg extends Widget implements ItemInfo.Owner {
             bar.ch(0);
 
             needRedraw = false;
-        } catch (Loading ignored) {
+        } catch (Exception ignored) {
         }
     }
 

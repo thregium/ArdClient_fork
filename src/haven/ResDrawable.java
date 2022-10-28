@@ -34,20 +34,24 @@ public class ResDrawable extends Drawable {
     public Sprite spr = null;
     public MessageBuf sdt;
     private int delay = 0;
-    String name = null;
+    protected boolean inited;
+    protected Loading error;
 
     public ResDrawable(Gob gob, Indir<Resource> res, Message sdt) {
         super(gob);
         this.res = res;
         this.sdt = new MessageBuf(sdt);
+        waitforinit();
+    }
+
+    private void waitforinit() {
+        if (inited) return;
         try {
             init();
-            if (name == null) {
-                //Large Animal debug
-                this.name = res.get().name;
-                //System.out.println(this.name);
-            }
-        } catch (Loading e) {
+            inited = true;
+        } catch (Loading l) {
+            error = l;
+            l.waitfor(this::waitforinit, waiting -> {});
         }
     }
 
@@ -129,8 +133,8 @@ public class ResDrawable extends Drawable {
     }
 
     public void setup(RenderList rl) {
+        if (!inited) return;
         try {
-            init();
             String name = getres().name;
             if (name.equals("gfx/terobjs/trees/yulestar-fir") || name.equals("gfx/terobjs/trees/yulestar-spruce") || name.equals("gfx/terobjs/trees/yulestar-silverfir")) {
                 if (name.equals("gfx/terobjs/trees/yulestar-fir"))
@@ -174,7 +178,7 @@ public class ResDrawable extends Drawable {
     }
 
     public Skeleton.Pose getpose() {
-        init();
+        if (!inited && error != null) throw (error);
         return (Skeleton.getpose(spr));
     }
 

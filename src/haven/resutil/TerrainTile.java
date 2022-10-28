@@ -76,7 +76,8 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
 
     public class Blend {
         final MapMesh m;
-        final Scan vs, es;
+        final Scan vs;
+        final Scan es;
         final float[][] bv;
         final boolean[][] en;
 
@@ -228,6 +229,7 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
                                 (((bv[l][vs.o(lc.x + 0, lc.y + 1)] * icx) + (bv[l][vs.o(lc.x + 1, lc.y + 1)] * tcx)) * tcy));
                     }
 
+                    @Override
                     public Surface.MeshVertex make(MeshBuf buf, MPart d, int i) {
                         Surface.MeshVertex ret = new Surface.MeshVertex(buf, d.v[i]);
                         Coord3f tan = Coord3f.yu.cmul(ret.nrm).norm();
@@ -245,19 +247,16 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
         }
     }
 
-    public final MapMesh.DataID<Blend> blend = new MapMesh.DataID<Blend>() {
-        public Blend make(MapMesh m) {
-            return (new Blend(m));
-        }
-    };
+    public final MapMesh.DataID<Blend> blend = Blend::new;
 
     @ResName("trn")
     public static class Factory implements Tiler.Factory {
+        @Override
         public TerrainTile create(int id, Tileset set) {
             Resource res = set.getres();
             Tileset trans = null;
             GLState base = null;
-            Collection<Var> var = new LinkedList<Var>();
+            Collection<Var> var = new LinkedList<>();
             GLState commat = null;
             for (Object rdesc : set.ta) {
                 Object[] desc = (Object[]) rdesc;
@@ -265,12 +264,12 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
                 if (p.equals("common-mat")) {
                     if (desc[1] instanceof Integer) {
                         int mid = (Integer) desc[1];
-                        commat = res.layer(Material.Res.class, mid).get();
+                        commat = res.flayer(Material.Res.class, mid).get();
                     } else if (desc[1] instanceof String) {
                         String mnm = (String) desc[1];
                         int mver = (Integer) desc[2];
                         if (desc.length > 3) {
-                            commat = res.pool.load(mnm, mver).get().layer(Material.Res.class, (Integer) desc[3]).get();
+                            commat = res.pool.load(mnm, mver).get().flayer(Material.Res.class, (Integer) desc[3]).get();
                         } else {
                             commat = Material.fromres((Material.Owner) null, res.pool.load(mnm, mver).get(), Message.nil);
                         }
@@ -282,7 +281,7 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
                 String p = (String) desc[0];
                 if (p.equals("base")) {
                     int mid = (Integer) desc[1];
-                    base = GLState.compose(commat, res.layer(Material.Res.class, mid).get());
+                    base = GLState.compose(commat, res.flayer(Material.Res.class, mid).get());
                 } else if (p.equals("var")) {
                     int mid = (Integer) desc[1];
                     double thrl, thrh;
@@ -319,10 +318,12 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
         this.transset = transset;
     }
 
+    @Override
     public void lay(MapMesh m, Random rnd, Coord lc, Coord gc) {
         lay(m, lc, gc, this, false);
     }
 
+    @Override
     public void faces(MapMesh m, MPart d) {
         Blend b = m.data(blend);
         Surface.MeshVertex[] mv = new Surface.MeshVertex[d.v.length];
@@ -338,7 +339,7 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
         }
     }
 
-    private final static Map<TexGL, AlphaTex> transtex = new WeakHashMap<TexGL, AlphaTex>();
+    private final static Map<TexGL, AlphaTex> transtex = new WeakHashMap<>();
 
     /* XXX: Some strange javac bug seems to make it resolve the
      * trans() references to the wrong signature, thus the name
@@ -377,27 +378,23 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
     }
 
     private MCons tcons(final int z, final Tile t) {
-        return (new MCons() {
-            public void faces(MapMesh m, MPart d) {
-                _faces(m, z, t, d);
-            }
-        });
+        return ((m, d) -> _faces(m, z, t, d));
     }
 
+    @Override
     public MCons tcons(final int z, final int bmask, final int cmask) {
         if ((transset == null) || ((bmask == 0) && (cmask == 0)))
             return (MCons.nil);
-        return (new MCons() {
-            public void faces(MapMesh m, MPart d) {
-                Random rnd = m.rnd(d.lc);
-                if ((transset.btrans != null) && (bmask != 0))
-                    tcons(z, transset.btrans[bmask - 1].pick(rnd)).faces(m, d);
-                if ((transset.ctrans != null) && (cmask != 0))
-                    tcons(z, transset.ctrans[cmask - 1].pick(rnd)).faces(m, d);
-            }
+        return ((m, d) -> {
+            Random rnd = m.rnd(d.lc);
+            if ((transset.btrans != null) && (bmask != 0))
+                tcons(z, transset.btrans[bmask - 1].pick(rnd)).faces(m, d);
+            if ((transset.ctrans != null) && (cmask != 0))
+                tcons(z, transset.ctrans[cmask - 1].pick(rnd)).faces(m, d);
         });
     }
 
+    @Override
     public void trans(MapMesh m, Random rnd, Tiler gt, Coord lc, Coord gc, int z, int bmask, int cmask) {
         if (transset == null)
             return;
@@ -415,9 +412,10 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
 
         @ResName("trn-r")
         public static class RFactory implements Tiler.Factory {
+            @Override
             public Tiler create(int id, Tileset set) {
                 TerrainTile base = new TerrainTile.Factory().create(id, set);
-                int rth = 20;
+                double rth = 20;
                 GLState mat = null;
                 float texh = 11f;
                 for (Object rdesc : set.ta) {
@@ -425,16 +423,16 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
                     String p = (String) desc[0];
                     if (p.equals("rmat")) {
                         Resource mres = set.getres().pool.load((String) desc[1], (Integer) desc[2]).get();
-                        mat = mres.layer(Material.Res.class).get();
+                        mat = mres.flayer(Material.Res.class).get();
                         if (desc.length > 3)
                             texh = (Float) desc[3];
                     } else if (p.equals("rthres")) {
-                        rth = (Integer) desc[1];
+                        rth = ((Number) desc[1]).doubleValue();
                     }
                 }
                 if (mat == null)
                     throw (new RuntimeException("Ridge-tiles must be given a ridge material, in " + set.getres().name));
-                return (new RidgeTile(base.id, base.noise, base.base, base.var, base.transset, rth, mat, texh));
+                return (new RidgeTile(base.id, base.noise, base.base, base.var, base.transset, (int) rth, mat, texh));
             }
         }
 
@@ -444,15 +442,18 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
             this.rcons = new Ridges.TexCons(rmat, texh);
         }
 
-        public int breakz() {
+        @Override
+        public double breakz() {
             return (rth);
         }
 
+        @Override
         public void model(MapMesh m, Random rnd, Coord lc, Coord gc) {
             if (!m.data(Ridges.id).model(lc))
                 super.model(m, rnd, lc, gc);
         }
 
+        @Override
         public void lay(MapMesh m, Coord lc, Coord gc, MCons cons, boolean cover) {
             Ridges r = m.data(Ridges.id);
             if (!r.laygnd(lc, cons))
@@ -461,6 +462,7 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
                 r.layridge(lc, cons);
         }
 
+        @Override
         public void lay(MapMesh m, Random rnd, Coord lc, Coord gc) {
             super.lay(m, rnd, lc, gc);
             m.data(Ridges.id).layridge(lc, rcons);

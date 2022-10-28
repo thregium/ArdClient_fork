@@ -122,12 +122,7 @@ public class WaterTile extends Tiler {
             ed = new int[ss.l];
             for (int y = ds.ul.y; y < ds.br.y; y++) {
                 for (int x = ds.ul.x; x < ds.br.x; x++) {
-                    Tiler t = null;
-                    try {
-                        t = map.tiler(map.gettile(m.ul.add(x, y)));
-                    } catch (Loading e) {
-//                        e.printStackTrace();
-                    }
+                    Tiler t = map.tiler(map.gettile(m.ul.add(x, y)));
                     if (t instanceof WaterTile)
                         d[ds.o(x, y)] = ((WaterTile) t).depth;
                     else

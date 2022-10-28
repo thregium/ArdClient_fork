@@ -27,8 +27,9 @@
 package haven;
 
 import haven.Composited.Desc;
-
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -37,7 +38,7 @@ public class Avaview extends PView {
     public static final Tex missing = Resource.loadtex("gfx/hud/equip/missing");
     public static final Coord dasz = missing.sz();
     public Color color = Color.WHITE;
-    public Color clearcolor = Color.BLACK;
+    public FColor clearcolor = FColor.BLACK;
     public long avagob;
     public Desc avadesc;
     public Resource.Resolver resmap = null;
@@ -52,17 +53,21 @@ public class Avaview extends PView {
 
     @RName("av")
     public static class $_ implements Factory {
+        @Override
         public Widget create(UI ui, Object[] args) {
             long avagob = -1;
             Coord sz = dasz;
+            boolean inner = false;
             String camnm = "avacam";
             if (args[0] != null)
                 avagob = Utils.uint32((Integer) args[0]);
-            if ((args.length > 1) && (args[1] != null))
+            if ((args.length > 1) && (args[1] != null)) {
                 sz = (Coord) args[1];
+                inner = true;
+            }
             if ((args.length > 2) && (args[2] != null))
                 camnm = (String) args[2];
-            return (new Avaview(sz, avagob, camnm));
+            return (new ProxyFrame<>(new Avaview(sz, avagob, camnm), inner));
         }
     }
 
@@ -102,6 +107,7 @@ public class Avaview extends PView {
         this.avagob = avagob;
     }
 
+    @Override
     public void uimsg(String msg, Object... args) {
         if (msg == "upd") {
             if (args[0] == null)
@@ -109,12 +115,10 @@ public class Avaview extends PView {
             else
                 this.avagob = Utils.uint32((Integer) args[0]);
             this.avadesc = null;
-        } else if (msg == "col") {
-            this.color = (Color) args[0];
         } else if (msg == "pop") {
             pop(Desc.decode(ui.sess, args));
         } else if (msg == "bg") {
-            clearcolor = (Color) args[0];
+            clearcolor = new FColor((Color) args[0]);
         } else {
             super.uimsg(msg, args);
         }
@@ -130,29 +134,59 @@ public class Avaview extends PView {
         pop(ava, null);
     }
 
+    private Collection<ResData> nposes = null;
+    private Collection<ResData> lposes = null;
+    private boolean nposesold;
+
+    public void chposes(Collection<ResData> poses, boolean interp) {
+        nposes = poses;
+        nposesold = !interp;
+    }
+
+    private void updposes() {
+        if (nposes == null) {
+            nposes = lposes;
+            nposesold = true;
+        }
+    }
+
     private static final OwnerContext.ClassResolver<Avaview> ctxr = new OwnerContext.ClassResolver<Avaview>()
             .add(Glob.class, v -> v.ui.sess.glob)
             .add(Session.class, v -> v.ui.sess)
             .add(Resource.Resolver.class, v -> (v.resmap == null ? v.ui.sess : v.resmap));
 
-    public class AvaOwner implements Sprite.Owner {
+    public class AvaOwner implements Sprite.Owner, Skeleton.ModOwner {
+        @Override
         public Random mkrandoom() {
             return (new Random());
         }
 
-        public Resource getres() {
-            return (null);
-        }
+        @Override
+        public Resource getres() {return (null);}
 
+        @Override
         public <T> T context(Class<T> cl) {
             return (ctxr.context(cl, Avaview.this));
         }
+
+        @Override
+        @Deprecated
+        public Glob glob() {return (context(Glob.class));}
+
+        @Override
+        public double getv() {return (0);}
+
+        @Override
+        public Coord3f getc() {return (new Coord3f(0, 0, 0));}
     }
+
+    private final AvaOwner avaowner = new AvaOwner();
 
     private void initcomp(Composite gc) {
         if ((comp == null) || (comp.skel != gc.comp.skel)) {
             comp = new Composited(gc.comp.skel);
-            comp.eqowner = new AvaOwner();
+            comp.eqowner = avaowner;
+            updposes();
         }
     }
 
@@ -167,17 +201,26 @@ public class Avaview extends PView {
 
     private Camera cam = null;
 
+    @Override
     protected Camera camera() {
         if (cam == null)
             throw (new Loading());
         return (cam);
     }
 
+    @Override
     protected void setup(RenderList rl) {
         if (comp == null)
             throw (new Loading());
         rl.add(comp, null);
         rl.add(new DirLight(Color.WHITE, Color.WHITE, Color.WHITE, new Coord3f(1, 1, 1).norm()), null);
+        makeproj(rl);
+    }
+
+    protected void makeproj(RenderList rl) {
+        float field = 0.5f;
+        float aspect = ((float) sz.y) / ((float) sz.x);
+        rl.prepc(Projection.frustum(-field, field, -aspect * field, aspect * field, 1, 5000));
     }
 
     private Composite getgcomp() {
@@ -193,9 +236,25 @@ public class Avaview extends PView {
         return (gc);
     }
 
+    private static List<Composited.MD> copy1(List<Composited.MD> in) {
+        List<Composited.MD> ret = new ArrayList<>();
+        for (Composited.MD ob : in)
+            ret.add(ob.clone());
+        return (ret);
+    }
+
+    private static List<Composited.ED> copy2(List<Composited.ED> in) {
+        List<Composited.ED> ret = new ArrayList<>();
+        for (Composited.ED ob : in)
+            ret.add(ob.clone());
+        return (ret);
+    }
+
     private Indir<Resource> lbase = null;
 
     public void updcomp() {
+        /* XXX: This "retry mechanism" is quite ugly and should
+         * probably be rewritten to use the Loader instead. */
         if (avagob != -1) {
             Composite gc = getgcomp();
             if (gc == null)
@@ -204,16 +263,18 @@ public class Avaview extends PView {
             if ((cam == null) || (gc.base != lbase))
                 cam = makecam((lbase = gc.base).get(), comp, camnm);
             if (gc.comp.cmod != this.cmod)
-                comp.chmod(this.cmod = gc.comp.cmod);
+                comp.chmod(this.cmod = copy1(gc.comp.cmod));
             if (gc.comp.cequ != this.cequ)
-                comp.chequ(this.cequ = gc.comp.cequ);
+                comp.chequ(this.cequ = copy2(gc.comp.cequ));
         } else if (avadesc != null) {
             Desc d = avadesc;
             if ((d.base != lbase) || (cam == null) || (comp == null)) {
+                Resource base = d.base.get();
+                comp = new Composited(base.flayer(Skeleton.Res.class).s);
+                comp.eqowner = avaowner;
                 lbase = d.base;
-                comp = new Composited(d.base.get().layer(Skeleton.Res.class).s);
-                comp.eqowner = new AvaOwner();
-                cam = makecam(d.base.get(), comp, camnm);
+                cam = makecam(base, comp, camnm);
+                updposes();
             }
             if (d.mod != this.cmod)
                 comp.chmod(this.cmod = d.mod);
@@ -222,9 +283,20 @@ public class Avaview extends PView {
         }
     }
 
+    @Override
     public void tick(double dt) {
-        if (comp != null)
+        super.tick(dt);
+        if (comp != null) {
             comp.tick((int) (dt * 1000));
+            if (nposes != null) {
+                try {
+                    Composited.Poses np = comp.new Poses(Composite.loadposes(nposes, avaowner, comp.skel, nposesold));
+                    np.set(nposesold ? 0 : 0.2f);
+                    lposes = nposes;
+                    nposes = null;
+                } catch (Loading e) {}
+            }
+        }
     }
 
     private String rnm(Indir<Resource> r) {
@@ -237,6 +309,7 @@ public class Avaview extends PView {
         return "";
     }
 
+    @Override
     public Object tooltip(Coord cc, Widget prev) {
         if ((!camnm.equals("equcam") || fight) && Config.avatooltips) {
             StringBuilder base = new StringBuilder();
@@ -258,10 +331,12 @@ public class Avaview extends PView {
         return null;
     }
 
-    protected Color clearcolor() {
+    @Override
+    protected FColor clearcolor() {
         return (clearcolor);
     }
 
+    @Override
     public void draw(GOut g) {
         if (TexGL.disableall)
             return;
@@ -289,16 +364,12 @@ public class Avaview extends PView {
                 updcomp();
                 super.draw(g);
             } catch (Loading e) {
-                if (avagob != -1)
-                    g.image(missing, Coord.z, sz);
+                g.image(missing, Coord.z, sz);
             }
-        }
-        if (color != null) {
-            g.chcolor(color);
-            Window.wbox.draw(g, Coord.z, sz);
         }
     }
 
+    @Override
     public boolean mousedown(Coord c, int button) {
         if (canactivate) {
             wdgmsg("click", button);

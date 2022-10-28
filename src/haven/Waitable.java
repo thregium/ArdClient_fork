@@ -31,18 +31,15 @@ import java.util.HashSet;
 import java.util.function.Consumer;
 
 public interface Waitable {
-    public void waitfor(Runnable callback, Consumer<Waiting> reg);
+    void waitfor(Runnable callback, Consumer<Waiting> reg);
 
-    public static interface Waiting {
-        public void cancel();
+    interface Waiting {
+        void cancel();
 
-        public static Waiting dummy = new Waiting() {
-            public void cancel() {
-            }
-        };
+        Waiting dummy = () -> {};
     }
 
-    public static class Queue implements Waitable {
+    class Queue implements Waitable {
         private Collection<Waiter> waiters = null;
 
         private class Waiter implements Waiting {
@@ -67,8 +64,7 @@ public interface Waitable {
                 waiters = null;
             }
             if (list != null) {
-                for (Waiter w : list)
-                    w.callback.run();
+                for (Waiter w : list) w.callback.run();
             }
         }
 
@@ -92,7 +88,7 @@ public interface Waitable {
         }
     }
 
-    public static class Disjunction implements Waiting, Runnable {
+    class Disjunction implements Waiting, Runnable {
         private final Waiting[] ops;
         private final Runnable callback;
         private boolean done = false, ready = false;
@@ -130,7 +126,7 @@ public interface Waitable {
         }
     }
 
-    public static void or(Runnable callback, Consumer<Waiting> reg, Waitable... ops) {
+    static void or(Runnable callback, Consumer<Waiting> reg, Waitable... ops) {
         Disjunction ret = new Disjunction(callback, ops);
         synchronized (ret) {
             if (ret.done) {
@@ -143,7 +139,7 @@ public interface Waitable {
         }
     }
 
-    public abstract static class Checker implements Waiting, Runnable {
+    abstract class Checker implements Waiting, Runnable {
         public final Runnable callback;
         private Waiting cw;
 

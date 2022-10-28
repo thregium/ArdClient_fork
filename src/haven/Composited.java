@@ -317,16 +317,18 @@ public class Composited implements Rendered, MapView.Clickable {
                 if (bone != null)
                     bt = pose.bonetrans(bone.idx);
             }
-            if ((bt == null) && !ed.at.equals(""))
-                throw (new RuntimeException("Transformation " + ed.at + " for equipment " + ed.res + " on skeleton " + skel + " could not be resolved"));
-            if ((ed.off.x != 0.0f) || (ed.off.y != 0.0f) || (ed.off.z != 0.0f))
-                this.et = GLState.compose(bt, Location.xlate(ed.off));
-            else
-                this.et = bt;
+            if ((bt == null) && !ed.at.equals("")) {
+                this.et = Location.xlate(ed.off);
+//                throw (new RuntimeException("Transformation " + ed.at + " for equipment " + ed.res + " on skeleton " + skel + " could not be resolved"));
+            } else {
+                if ((ed.off.x != 0.0f) || (ed.off.y != 0.0f) || (ed.off.z != 0.0f))
+                    this.et = GLState.compose(bt, Location.xlate(ed.off));
+                else
+                    this.et = bt;
+            }
         }
 
-        public void tick(int dt) {
-        }
+        public void tick(int dt) {}
 
         public Object staticp() {
             return Gob.STATIC;
@@ -619,11 +621,13 @@ public class Composited implements Rendered, MapView.Clickable {
     */
 
     public boolean setup(RenderList rl) {
-        changes();
-        for (Model mod : this.mod)
-            rl.add(mod, null);
-        for (Equ equ : this.equ)
-            rl.add(equ, equ.et);
+        try {
+            changes();
+            for (Model mod : this.mod)
+                rl.add(mod, null);
+            for (Equ equ : this.equ)
+                rl.add(equ, equ.et);
+        } catch (Exception e) {}
         return (false);
     }
 
@@ -632,6 +636,7 @@ public class Composited implements Rendered, MapView.Clickable {
 
     private final AtomicLong ticktime = new AtomicLong(System.currentTimeMillis());
     private int buffertime = 0;
+
     public void tick(int dt) {
         if (configuration.allowAnim(ticktime)) {
             if (poses != null)
@@ -642,11 +647,6 @@ public class Composited implements Rendered, MapView.Clickable {
         } else {
             buffertime += dt;
         }
-    }
-
-    @Deprecated
-    public void tick(int dt, double v) {
-        tick(dt);
     }
 
     public Object staticp() {

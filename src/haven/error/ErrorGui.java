@@ -89,7 +89,7 @@ public abstract class ErrorGui extends JDialog implements ErrorStatus {
                         }
                     });
                 }});
-                add(hidebtn = new JButton("Hide") {{
+                add(hidebtn = new JButton("Skip") {{
                     addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent ev) {
                             hide = true;

@@ -47,7 +47,7 @@ public class Cavein extends Sprite implements Gob.Overlay.CDel, PView.Render2D {
     public void draw2d(GOut g) {
         if (owner instanceof Gob) {
             Gob gob = (Gob) owner;
-            g.text(Math.round(str / 30.0) + " ", gob.sc);
+            g.atextstroked(Math.round(str / 30.0) + " ", gob.sc, 0, 0, Color.WHITE, Color.BLACK, Text.num12boldFnd);
         }
     }
 

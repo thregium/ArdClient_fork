@@ -41,7 +41,6 @@ import haven.Tex;
 import haven.TexGL;
 import haven.Tiler;
 import haven.Tileset;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;

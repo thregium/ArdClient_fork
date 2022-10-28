@@ -18,7 +18,6 @@ import haven.sloth.gob.Type;
 import modification.dev;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -174,7 +173,7 @@ public class MappingClient {
         }
     }
 
-    private Map<Long, MapRef> cache = new HashMap<Long, MapRef>();
+    private Map<Long, MapRef> cache = new HashMap<>();
 
     /***
      * Gets a MapRef (mapid, coordinate pair) for the players current location
@@ -481,24 +480,28 @@ public class MappingClient {
         public void run() {
             if (gridEnabled) {
                 final String[][] gridMap = new String[3][3];
-                Map<String, WeakReference<MCache.Grid>> gridRefs = new HashMap<String, WeakReference<MCache.Grid>>();
+                Map<String, WeakReference<MCache.Grid>> gridRefs = new HashMap<>();
                 Glob glob = Glob.getByReference(accName);
-                try {
-                    for (int x = -1; x <= 1; x++) {
-                        for (int y = -1; y <= 1; y++) {
+                LoadingMap error = null;
+                for (int x = -1; x <= 1; x++) {
+                    for (int y = -1; y <= 1; y++) {
+                        try {
                             final MCache.Grid subg = glob.map.getgrid(coord.add(x, y));
                             gridMap[x + 1][y + 1] = String.valueOf(subg.id);
-                            gridRefs.put(String.valueOf(subg.id), new WeakReference<MCache.Grid>(subg));
+                            gridRefs.put(String.valueOf(subg.id), new WeakReference<>(subg));
+                        } catch (LoadingMap l) {
+                            error = l;
                         }
                     }
-                    //System.out.println("Scheduling grid request");
-                    scheduler.execute(new UploadGridUpdateTask(new GridUpdate(gridMap, gridRefs)));
-                } catch (LoadingMap lm) {
-                    retries--;
-                    if (retries >= 0) {
-                        scheduler.schedule(this, 1L, TimeUnit.SECONDS);
-                    }
                 }
+                if (error != null) {
+                    error.waitfor(() -> {
+                        retries--;
+                        if (retries >= 0) {
+                            scheduler.schedule(this, 0L, TimeUnit.SECONDS);
+                        }
+                    }, w -> {});
+                } else scheduler.execute(new UploadGridUpdateTask(new GridUpdate(gridMap, gridRefs)));
             }
         }
     }
@@ -552,7 +555,6 @@ public class MappingClient {
                             }
                         }
                     }
-
                 } catch (Exception ex) {
                 }
             }

@@ -56,12 +56,10 @@ import haven.sloth.script.pathfinding.Hitbox;
 import integrations.mapv4.MappingClient;
 import modification.configuration;
 import modification.resources;
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -371,8 +369,8 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     private final List<Overlay> dols = new ArrayList<>();
     private final List<Pair<GAttrib, Consumer<Gob>>> dattrs = new ArrayList<>();
 
-    private final Collection<ResAttr.Cell<?>> rdata = new LinkedList<ResAttr.Cell<?>>();
-    private final Collection<ResAttr.Load> lrdata = new LinkedList<ResAttr.Load>();
+    private final Collection<ResAttr.Cell<?>> rdata = new LinkedList<>();
+    private final Collection<ResAttr.Load> lrdata = new LinkedList<>();
     private HitboxMesh hitboxmesh[];
     private boolean pathfinding_blackout = false;
     private List<Coord> hitboxcoords;
@@ -448,64 +446,42 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 if (name.endsWith("log"))
                     type = Type.LOG;
 
-                Defer.later(new Defer.Callable<Void>() {
-                    public Void call() {
-                        if (getattr(GobIcon.class) == null) {
-                            if (type == Type.TREE || type == Type.BUSH || type == Type.STUMP || type == Type.LOG) {
-                                String fistname1 = name.substring(0, name.lastIndexOf('/'));
-                                String fistname = fistname1.substring(0, fistname1.lastIndexOf('/'));
-                                String lastname = name.replace(fistname, "");
-                                if (lastname.endsWith("stump"))
-                                    lastname = lastname.substring(0, lastname.length() - "stump".length());
-                                if (lastname.endsWith("log"))
-                                    lastname = lastname.substring(0, lastname.length() - "log".length());
+                String customIcon = null;
+                if (type == Type.TREE || type == Type.BUSH || type == Type.STUMP || type == Type.LOG) {
+                    String fistname1 = name.substring(0, name.lastIndexOf('/'));
+                    String fistname = fistname1.substring(0, fistname1.lastIndexOf('/'));
+                    String lastname = name.replace(fistname, "");
+                    if (lastname.endsWith("stump"))
+                        lastname = lastname.substring(0, lastname.length() - "stump".length());
+                    if (lastname.endsWith("log"))
+                        lastname = lastname.substring(0, lastname.length() - "log".length());
 
-                                String icon = fistname + "/mm" + lastname;
-                                try {
-                                    resources.IndirResource res = resources.getCachedRes(icon);
-                                    if (res.get() != null)
-                                        setattr(new GobIcon(Gob.this, res));
-                                } catch (Loading loading) {
-                                    Defer.later(this);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
+                    customIcon = fistname + "/mm" + lastname;
+                } else if (type == Type.BOULDER) {
+                    customIcon = name.substring(0, name.length() - 1).replace("terobjs/bumlings", "invobjs");
+                } else if (name.equals("gfx/terobjs/map/cavepubble")) {
+                    customIcon = "gfx/invobjs/clay-cave";
+                } else if (name.equals("gfx/terobjs/map/dustpile")) {
+                    customIcon = "gfx/invobjs/cavedust";
+                }
+
+                if (customIcon != null) {
+                    String finalCustomIcon = customIcon;
+                    glob.loader.defer(() -> {
+                        if (getattr(GobIcon.class) == null) {
+                            Resource res = null;
+                            try {
+                                res = Resource.remote().loadwait(finalCustomIcon);
+                                setattr(new GobIcon(Gob.this, res.indir()));
+                            } catch (Loading l) {
+                                if (res != null) {
+                                    Resource finalRes = res;
+                                    l.waitfor(() -> setattr(new GobIcon(Gob.this, finalRes.indir())), waiting -> {});
                                 }
-                            } else if (type == Type.BOULDER) {
-                                String icon = name.substring(0, name.length() - 1).replace("terobjs/bumlings", "invobjs");
-                                try {
-                                    resources.IndirResource res = resources.getCachedRes(icon);
-                                    if (res.get() != null)
-                                        setattr(new GobIcon(Gob.this, res));
-                                } catch (Loading loading) {
-                                    Defer.later(this);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            } else if (name.equals("gfx/terobjs/map/cavepubble")) {
-                                try {
-                                    resources.IndirResource res = resources.getCachedRes("gfx/invobjs/clay-cave");
-                                    if (res.get() != null)
-                                        setattr(new GobIcon(Gob.this, res));
-                                } catch (Loading loading) {
-                                    Defer.later(this);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            } else if (name.equals("gfx/terobjs/map/dustpile")) {
-                                try {
-                                    resources.IndirResource res = resources.getCachedRes("gfx/invobjs/cavedust");
-                                    if (res.get() != null)
-                                        setattr(new GobIcon(Gob.this, res));
-                                } catch (Loading loading) {
-                                    Defer.later(this);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
+                            } catch (Exception ignored) {}
                         }
-                        return (null);
-                    }
-                });
+                    }, null);
+                }
 
                 if (type == Type.UNKNOWN && name.startsWith("gfx/terobjs/bumlings/"))
                     type = Type.BOULDER;
@@ -1034,34 +1010,39 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             if (rd.clsid == c)
                 return ((ResAttr.Cell<T>) rd);
         }
-        ResAttr.Cell<T> rd = new ResAttr.Cell<T>(c);
+        ResAttr.Cell<T> rd = new ResAttr.Cell<>(c);
         rdata.add(rd);
         return (rd);
     }
 
     public static <T extends ResAttr> ResAttr.Cell<T> getrattr(Object obj, Class<T> c) {
         if (!(obj instanceof Gob))
-            return (new ResAttr.Cell<T>(c));
+            return (new ResAttr.Cell<>(c));
         return (((Gob) obj).getrattr(c));
     }
 
     private void loadrattr() {
         boolean upd = false;
         for (Iterator<ResAttr.Load> i = lrdata.iterator(); i.hasNext(); ) {
-            ResAttr.Load rd = i.next();
-            ResAttr attr;
-            try {
-                attr = rd.resid.get().getcode(ResAttr.Factory.class, true).mkattr(this, rd.dat.clone());
-            } catch (Exception l) {
-                continue;
+            task:
+            {
+                ResAttr.Load rd = i.next();
+                ResAttr attr;
+                try {
+                    attr = rd.resid.get().getcode(ResAttr.Factory.class, true).mkattr(this, rd.dat.clone());
+                } catch (Loading l) {
+                    continue;
+                } catch (Exception e) {
+                    break task;
+                }
+                ResAttr.Cell<?> rc = getrattr(rattrclass(attr.getClass()));
+                if (rc.resid == null)
+                    rc.resid = rd.resid;
+                else if (rc.resid != rd.resid)
+                    throw (new RuntimeException("Conflicting resattr resource IDs on " + rc.clsid + ": " + rc.resid + " -> " + rd.resid));
+                rc.odat = rd.dat;
+                rc.set(attr);
             }
-            ResAttr.Cell<?> rc = getrattr(rattrclass(attr.getClass()));
-            if (rc.resid == null)
-                rc.resid = rd.resid;
-            else if (rc.resid != rd.resid)
-                throw (new RuntimeException("Conflicting resattr resource IDs on " + rc.clsid + ": " + rc.resid + " -> " + rd.resid));
-            rc.odat = rd.dat;
-            rc.set(attr);
             i.remove();
             upd = true;
         }
@@ -1072,8 +1053,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     }
 
     public void setrattr(Indir<Resource> resid, Message dat) {
-        for (Iterator<ResAttr.Cell<?>> i = rdata.iterator(); i.hasNext(); ) {
-            ResAttr.Cell<?> rd = i.next();
+        for (ResAttr.Cell<?> rd : rdata) {
             if (rd.resid == resid) {
                 if (dat.equals(rd.odat))
                     return;
@@ -1776,6 +1756,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     }
 
     private static final List<StorageMaterial> storageMaterialList = new ArrayList<>();
+
     static {
         storageMaterialList.add(new StorageMaterial("/cupboard", new Pair<>(29, storagefullcolormaterial), new Pair<>(30, storagefullcolormaterial), new Pair<>(1, storageemptycolormaterial), new Pair<>(2, storageemptycolormaterial), new Pair<>(-1, storagehalfcolormaterial)));
         storageMaterialList.add(new StorageMaterial("/metalcabinet", new Pair<>(65, storagefullcolormaterial), new Pair<>(66, storagefullcolormaterial), new Pair<>(1, storageemptycolormaterial), new Pair<>(2, storageemptycolormaterial), new Pair<>(-1, storagehalfcolormaterial)));

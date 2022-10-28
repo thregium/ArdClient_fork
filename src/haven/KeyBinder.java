@@ -164,7 +164,7 @@ public class KeyBinder {
                 if (rawCodeIndex != -1) {
                     String rawCodeString = keyString.substring(rawCodeIndex + rawCodeText.length(), keyString.indexOf(',', rawCodeIndex));
                     int rawCodeInt = Integer.parseInt(rawCodeString);
-                    if (rawCodeIndex != e.getKeyCode()) {
+                    if (rawCodeIndex != 0 && rawCodeIndex != e.getKeyCode()) {
                         KeyEvent f = new KeyEvent(e.getComponent(), e.getID(), e.getWhen(), e.getModifiers(), rawCodeInt);
                         result = get(f).execute(ui);
                     }
@@ -213,7 +213,7 @@ public class KeyBinder {
 
     public static KeyBind get(final KeyEvent e) {
         //	System.out.println(binds.values().stream().filter(b -> b.match(e.getKeyCode(), getModFlags(e.getModifiersEx()))).count());
-        return binds.values().stream().filter(b -> b.match(e.getKeyCode(), getModFlags(e.getModifiersEx()))).findFirst().orElse(EMPTY);
+        return binds.values().stream().filter(b -> !b.match(EMPTY.code, EMPTY.mods)).filter(b -> b.match(e.getKeyCode(), getModFlags(e.getModifiersEx()))).findFirst().orElse(EMPTY);
     }
 
     public static KeyBind make(KeyEvent e, Action action) {

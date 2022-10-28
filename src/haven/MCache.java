@@ -299,11 +299,7 @@ public class MCache {
             }
 
             public void setup(RenderList rl) {
-                try {
-                    init();
-                } catch (Loading e) {
-                    return;
-                }
+                if (!inited) return;
                 rl.add(spr, extra);
             }
         }
@@ -392,6 +388,7 @@ public class MCache {
         public MapMesh getcut(Coord cc) {
             Cut cut = geticut(cc);
             if (cut.dmesh != null) {
+                if (!cut.dmesh.done()) throw new LoadingMap(MCache.this, cc);
                 if (cut.dmesh.done() || (cut.mesh == null)) {
                     MapMesh old = cut.mesh;
                     cut.mesh = cut.dmesh.get();
@@ -402,6 +399,25 @@ public class MCache {
                 }
             }
             return (cut.mesh);
+        }
+
+        public Optional<MapMesh> getcuto(Coord cc) {
+            Cut cut = geticut(cc);
+            if (cut.dmesh != null) {
+                MapMesh nmesh = null;
+                if (cut.dmesh.done()) {
+                    nmesh = cut.dmesh.get();
+                    cut.dmesh = null;
+                }
+                if ((nmesh != null) || (cut.mesh == null)) {
+                    MapMesh old = cut.mesh;
+                    cut.mesh = nmesh;
+                    cut.ols.clear();
+                    if (old != null)
+                        old.dispose();
+                }
+            }
+            return (Optional.ofNullable(cut.mesh));
         }
 
         /**
@@ -1053,6 +1069,12 @@ public class MCache {
         }
     }
 
+    public Optional<MapMesh> getcuto(Coord cc) {
+        synchronized (grids) {
+            return (getgrido(cc.div(cutn)).flatMap(g -> g.getcuto(cc.mod(cutn))));
+        }
+    }
+
     public FastMesh getgcut(Coord cc) {
         synchronized (grids) {
             return (getgrid(cc.div(cutn)).getgcut(cc.mod(cutn)));
@@ -1208,7 +1230,7 @@ public class MCache {
     public void request(Coord gc) {
         synchronized (req) {
             if (!req.containsKey(gc))
-                req.put(new Coord(gc), new Request());
+                req.put(Coord.of(gc), new Request());
         }
     }
 
@@ -1218,10 +1240,7 @@ public class MCache {
         Coord rc = new Coord();
         for (rc.y = ul.y; rc.y <= br.y; rc.y++) {
             for (rc.x = ul.x; rc.x <= br.x; rc.x++) {
-                try {
-                    getcut(new Coord(rc));
-                } catch (Loading e) {
-                }
+                getcuto(Coord.of(rc));
             }
         }
     }

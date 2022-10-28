@@ -32,6 +32,7 @@ import haven.res.ui.tt.attrmod.AttrMod;
 import haven.res.ui.tt.wpn.Damage;
 import modification.dev;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -227,7 +228,7 @@ public abstract class ItemInfo {
 
         public AdHoc(Owner owner, String str) {
             super(owner);
-            this.str = Text.render(str);
+            this.str = Text.render(str, Color.GRAY);
         }
 
         public BufferedImage tipimg() {

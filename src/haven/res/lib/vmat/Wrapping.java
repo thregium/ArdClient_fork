@@ -8,7 +8,7 @@ import modification.dev;
 
 public class Wrapping implements Rendered {
     static {
-        dev.checkFileVersion("lib/vmat", 35);
+        dev.checkFileVersion("lib/vmat", 36);
     }
 
     public final Rendered r;

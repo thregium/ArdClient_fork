@@ -78,22 +78,19 @@ public class HSlider extends Widget {
         minus.draw(g.reclip(Coord.of(0, -((minus.sz.y - sz.y) / 2)), Coord.of(minus.sz.x, sz.y + ((minus.sz.y - sz.y) / 2))));
     }
 
+    public double scale() {
+        return (5);
+    }
+
     private int scval(int amount) {
         final int v;
-        if (ui.modflags() == UI.MOD_SHIFT)
-            v = amount * 10;
-        else if (ui.modflags() == UI.MOD_CTRL)
-            v = amount * 5;
-        else if (ui.modflags() == (UI.MOD_CTRL | UI.MOD_SHIFT))
-            v = amount * 100;
-        else if (ui.modflags() == UI.MOD_META)
-            v = amount * 1000;
-        else if (ui.modflags() == (UI.MOD_META | UI.MOD_CTRL))
-            v = amount * 5000;
-        else if (ui.modflags() == (UI.MOD_META | UI.MOD_CTRL | UI.MOD_SHIFT))
-            v = amount * 10000;
-        else
-            v = amount;
+        if (ui.modflags() == UI.MOD_SHIFT) v = (int) (amount * scale() * 2);
+        else if (ui.modflags() == UI.MOD_CTRL) v = (int) (amount * scale());
+        else if (ui.modflags() == (UI.MOD_CTRL | UI.MOD_SHIFT)) v = (int) (amount * scale() * 20);
+        else if (ui.modflags() == UI.MOD_META) v = (int) (amount * scale() * 200);
+        else if (ui.modflags() == (UI.MOD_META | UI.MOD_CTRL)) v = (int) (amount * scale() * 1000);
+        else if (ui.modflags() == (UI.MOD_META | UI.MOD_CTRL | UI.MOD_SHIFT)) v = (int) (amount * scale() * 2000);
+        else v = amount;
         return (v);
     }
 

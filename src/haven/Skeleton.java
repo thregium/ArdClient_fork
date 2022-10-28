@@ -38,12 +38,12 @@ import java.util.Map;
 import java.util.Set;
 
 public class Skeleton {
-    public final Map<String, Bone> bones = new HashMap<String, Bone>();
+    public final Map<String, Bone> bones = new HashMap<>();
     public final Bone[] blist; /* Topologically sorted */
     public final Pose bindpose;
 
     public Skeleton(Collection<Bone> bones) {
-        Set<Bone> bset = new HashSet<Bone>(bones);
+        Set<Bone> bset = new HashSet<>(bones);
         blist = new Bone[bones.size()];
         int idx = 0;
         for (Bone b : bones)
@@ -407,7 +407,7 @@ public class Skeleton {
     }
 
     public interface HasPose {
-        public Pose getpose();
+        Pose getpose();
     }
 
     public static Pose getpose(Object owner) {
@@ -417,16 +417,16 @@ public class Skeleton {
     }
 
     public interface ModOwner extends OwnerContext {
-        public double getv();
+        double getv();
 
-        public Coord3f getc();
+        Coord3f getc();
 
         @Deprecated
-        public default Glob glob() {
+        default Glob glob() {
             return (context(Glob.class));
         }
 
-        public static final ModOwner nil = new ModOwner() {
+        ModOwner nil = new ModOwner() {
             public double getv() {
                 return (0);
             }
@@ -559,12 +559,12 @@ public class Skeleton {
 
     @Resource.PublishedCode(name = "pose")
     public interface ModFactory {
-        public PoseMod create(Skeleton skel, ModOwner owner, Resource res, Message sdt);
+        PoseMod create(Skeleton skel, ModOwner owner, Resource res, Message sdt);
 
-        public static final ModFactory def = new ModFactory() {
+        ModFactory def = new ModFactory() {
             public PoseMod create(Skeleton skel, ModOwner owner, Resource res, Message sdt) {
                 int mask = Sprite.decnum(sdt);
-                Collection<PoseMod> poses = new ArrayList<PoseMod>(16);
+                Collection<PoseMod> poses = new ArrayList<>(16);
                 for (ResPose p : res.layers(ResPose.class)) {
                     if ((p.id < 0) || ((mask & (1 << p.id)) != 0)) {
                         CheckListboxItem itm = Config.disableanim.get("/idle");
@@ -609,8 +609,8 @@ public class Skeleton {
 
         public Res(Resource res, Message buf) {
             res.super();
-            Map<String, Bone> bones = new HashMap<String, Bone>();
-            Map<Bone, String> pm = new HashMap<Bone, String>();
+            Map<String, Bone> bones = new HashMap<>();
+            Map<Bone, String> pm = new HashMap<>();
             while (!buf.eom()) {
                 String bnm = buf.string();
                 Coord3f pos = new Coord3f((float) buf.cpfloat(), (float) buf.cpfloat(), (float) buf.cpfloat());
@@ -648,7 +648,7 @@ public class Skeleton {
     public class TrackMod extends PoseMod {
         public final Track[] tracks;
         public final FxTrack[] effects;
-        private final Collection<FxTrack.EventListener> cbl = new ArrayList<FxTrack.EventListener>(0);
+        private final Collection<FxTrack.EventListener> cbl = new ArrayList<>(0);
         public final float len;
         public final WrapMode mode;
         private final boolean stat;
@@ -848,8 +848,8 @@ public class Skeleton {
     public static class FxTrack {
         public final Event[] events;
 
-        public static interface EventListener {
-            public void event(Event ev);
+        public interface EventListener {
+            void event(Event ev);
         }
 
         public static abstract class Event {
@@ -1003,8 +1003,8 @@ public class Skeleton {
             } else {
                 nspeed = -1;
             }
-            Collection<Track> tracks = new LinkedList<Track>();
-            Collection<FxTrack> fx = new LinkedList<FxTrack>();
+            Collection<Track> tracks = new LinkedList<>();
+            Collection<FxTrack> fx = new LinkedList<>();
             while (!buf.eom()) {
                 String bnm = buf.string();
                 if (bnm.equals("{ctl}")) {
@@ -1075,98 +1075,66 @@ public class Skeleton {
         private static final HatingJava[] opcodes = new HatingJava[256];
 
         static {
-            opcodes[0] = new HatingJava() {
-                public Command make(Message buf) {
-                    final float x = (float) buf.cpfloat();
-                    final float y = (float) buf.cpfloat();
-                    final float z = (float) buf.cpfloat();
-                    return (new Command() {
-                        public GLState make(Pose pose) {
-                            return (Location.xlate(new Coord3f(x, y, z)));
-                        }
-                    });
-                }
+            opcodes[0] = buf -> {
+                final float x = (float) buf.cpfloat();
+                final float y = (float) buf.cpfloat();
+                final float z = (float) buf.cpfloat();
+                return (pose -> (Location.xlate(new Coord3f(x, y, z))));
             };
-            opcodes[1] = new HatingJava() {
-                public Command make(Message buf) {
-                    final float ang = (float) buf.cpfloat();
-                    final float ax = (float) buf.cpfloat();
-                    final float ay = (float) buf.cpfloat();
-                    final float az = (float) buf.cpfloat();
-                    return (new Command() {
-                        public GLState make(Pose pose) {
-                            return (Location.rot(new Coord3f(ax, ay, az), ang));
-                        }
-                    });
-                }
+            opcodes[1] = buf -> {
+                final float ang = (float) buf.cpfloat();
+                final float ax = (float) buf.cpfloat();
+                final float ay = (float) buf.cpfloat();
+                final float az = (float) buf.cpfloat();
+                return (pose -> (Location.rot(new Coord3f(ax, ay, az), ang)));
             };
-            opcodes[2] = new HatingJava() {
-                public Command make(Message buf) {
-                    final String bonenm = buf.string();
-                    return (new Command() {
-                        public GLState make(Pose pose) {
-                            Bone bone = pose.skel().bones.get(bonenm);
-                            return (pose.bonetrans(bone.idx));
-                        }
-                    });
-                }
+            opcodes[2] = buf -> {
+                final String bonenm = buf.string();
+                return (pose -> {
+                    Bone bone = pose.skel().bones.get(bonenm);
+                    return (pose.bonetrans(bone.idx));
+                });
             };
-            opcodes[3] = new HatingJava() {
-                public Command make(Message buf) {
-                    float rx1 = (float) buf.cpfloat();
-                    float ry1 = (float) buf.cpfloat();
-                    float rz1 = (float) buf.cpfloat();
-                    float l = (float) Math.sqrt((rx1 * rx1) + (ry1 * ry1) + (rz1 * rz1));
-                    final Coord3f ref = new Coord3f(rx1 / l, ry1 / l, rz1 / l);
-                    final String orignm = buf.string();
-                    final String tgtnm = buf.string();
-                    return (new Command() {
-                        public GLState make(Pose pose) {
-                            Bone orig = pose.skel().bones.get(orignm);
-                            Bone tgt = pose.skel().bones.get(tgtnm);
-                            return (pose.new BoneAlign(ref, orig, tgt));
-                        }
-                    });
-                }
+            opcodes[3] = buf -> {
+                float rx1 = (float) buf.cpfloat();
+                float ry1 = (float) buf.cpfloat();
+                float rz1 = (float) buf.cpfloat();
+                float l = (float) Math.sqrt((rx1 * rx1) + (ry1 * ry1) + (rz1 * rz1));
+                final Coord3f ref = new Coord3f(rx1 / l, ry1 / l, rz1 / l);
+                final String orignm = buf.string();
+                final String tgtnm = buf.string();
+                return (pose -> {
+                    Bone orig = pose.skel().bones.get(orignm);
+                    Bone tgt = pose.skel().bones.get(tgtnm);
+                    return (pose.new BoneAlign(ref, orig, tgt));
+                });
             };
-            opcodes[16] = new HatingJava() {
-                public Command make(Message buf) {
-                    final float x = buf.float32();
-                    final float y = buf.float32();
-                    final float z = buf.float32();
-                    return (new Command() {
-                        public GLState make(Pose pose) {
-                            return (Location.xlate(new Coord3f(x, y, z)));
-                        }
-                    });
-                }
+            opcodes[16] = buf -> {
+                final float x = buf.float32();
+                final float y = buf.float32();
+                final float z = buf.float32();
+                return (pose -> (Location.xlate(new Coord3f(x, y, z))));
             };
-            opcodes[17] = new HatingJava() {
-                public Command make(Message buf) {
-                    final float ang = buf.unorm16() * 2 * (float) Math.PI;
-                    float[] ax = new float[3];
-                    Utils.oct2uvec(ax, buf.snorm16(), buf.snorm16());
-                    return (new Command() {
-                        public GLState make(Pose pose) {
-                            return (Location.rot(new Coord3f(ax[0], ax[1], ax[2]), ang));
-                        }
-                    });
-                }
+            opcodes[17] = buf -> {
+                final float ang = buf.unorm16() * 2 * (float) Math.PI;
+                float[] ax = new float[3];
+                Utils.oct2uvec(ax, buf.snorm16(), buf.snorm16());
+                return (pose -> (Location.rot(new Coord3f(ax[0], ax[1], ax[2]), ang)));
             };
         }
 
         public interface Command {
-            public GLState make(Pose pose);
+            GLState make(Pose pose);
         }
 
         public interface HatingJava {
-            public Command make(Message buf);
+            Command make(Message buf);
         }
 
         public BoneOffset(Resource res, Message buf) {
             res.super();
             this.nm = buf.string();
-            List<Command> cbuf = new LinkedList<Command>();
+            List<Command> cbuf = new LinkedList<>();
             while (!buf.eom())
                 cbuf.add(opcodes[buf.uint8()].make(buf));
             this.prog = cbuf.toArray(new Command[0]);

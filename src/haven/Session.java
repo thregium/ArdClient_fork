@@ -37,7 +37,9 @@ import java.net.DatagramSocket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.nio.ByteBuffer;
 import java.nio.channels.ClosedByInterruptException;
+import java.nio.channels.DatagramChannel;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -72,7 +74,7 @@ public class Session implements Resource.Resolver {
             "gfx/hud/chr/custom/asoft"
     };
 
-    DatagramSocket sk;
+    DatagramChannel sk;
     SocketAddress server;
     Thread rworker, sworker, ticker;
     Object[] args;
@@ -115,6 +117,17 @@ public class Session implements Resource.Resolver {
             this.resid = res.resid;
         }
 
+        public void waitfor(Runnable callback, Consumer<Waitable.Waiting> reg) {
+            synchronized (res) {
+                if (res.resnm != null) {
+                    reg.accept(Waiting.dummy);
+                    callback.run();
+                } else {
+                    reg.accept(res.wq.add(callback));
+                }
+            }
+        }
+
         public void waitfor() throws InterruptedException {
             synchronized (res) {
                 while (res.resnm == null)
@@ -132,6 +145,7 @@ public class Session implements Resource.Resolver {
         private String resnm = null;
         private int resver;
         private Reference<Ref> ind;
+        private final Waitable.Queue wq = new Waitable.Queue();
 
         private CachedRes(int id) {
             resid = id;
@@ -188,7 +202,7 @@ public class Session implements Resource.Resolver {
                 this.resnm = nm;
                 this.resver = ver;
                 get().reset();
-                notifyAll();
+                wq.wnotify();
             }
         }
 
@@ -197,7 +211,7 @@ public class Session implements Resource.Resolver {
                 this.resnm = res.name;
                 this.resver = res.ver;
                 ind = new WeakReference<>(new SRef(res));
-                notifyAll();
+                wq.wnotify();
             }
         }
     }
@@ -446,15 +460,16 @@ public class Session implements Resource.Resolver {
         public void run() {
             try {
                 alive = true;
-                try {
-                    sk.setSoTimeout(1000);
-                } catch (SocketException e) {
-                    throw (new RuntimeException(e));
-                }
+//                try {
+//                    sk.setSoTimeout(1000);
+//                } catch (SocketException e) {
+//                    throw (new RuntimeException(e));
+//                }
                 while (alive) {
-                    DatagramPacket p = new DatagramPacket(new byte[65536], 65536);
+                    ByteBuffer p = ByteBuffer.allocate(65536);
+//                    DatagramPacket p = new DatagramPacket(new byte[65536], 65536);
                     try {
-                        sk.receive(p);
+                        if (!sk.receive(p).equals(server)) continue;
                     } catch (ClosedByInterruptException e) {
                         /* Except apparently Sun's J2SE doesn't throw this when interrupted :P*/
                         break;
@@ -463,10 +478,16 @@ public class Session implements Resource.Resolver {
                     } catch (IOException e) {
                         throw (new RuntimeException(e));
                     }
-                    if (!p.getSocketAddress().equals(server))
-                        continue;
-                    PMessage msg = new PMessage(p.getData()[0], p.getData(), 1, p.getLength() - 1);
-                    recv += p.getLength();
+//                    if (!p.getSocketAddress().equals(server)) continue;
+                    p.flip();
+                    final int length = p.remaining();
+                    final int ptype = p.get();
+                    final byte[] array = new byte[p.remaining()];
+                    p.get(array);
+//                    PMessage msg = new PMessage(p.getData()[0], p.getData(), 1, p.getLength() - 1);
+                    PMessage msg = new PMessage(ptype, array);
+//                    recv += p.getLength();
+                    recv += length;
                     if (msg.type == MSG_SESS) {
                         if (Objects.equals(state, "conn")) {
                             int error = msg.uint8();
@@ -732,8 +753,9 @@ public class Session implements Resource.Resolver {
         glob = new Glob(this);
         character = new CharacterInfo();
         try {
-            sk = new DatagramSocket();
-        } catch (SocketException e) {
+            sk = DatagramChannel.open();
+            sk.configureBlocking(true);
+        } catch (IOException e) {
             throw (new RuntimeException(e));
         }
         rworker = new RWorker();
@@ -800,7 +822,8 @@ public class Session implements Resource.Resolver {
 
     public void sendmsg(byte[] msg) {
         try {
-            sk.send(new DatagramPacket(msg, msg.length, server));
+//            sk.send(new DatagramPacket(msg, msg.length, server));
+            sk.send(ByteBuffer.wrap(msg), server);
             sent += msg.length;
         } catch (IOException e) {
         }

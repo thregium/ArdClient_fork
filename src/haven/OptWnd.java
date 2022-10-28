@@ -5190,6 +5190,11 @@ public class OptWnd extends Window {
         Label placegridtext = new Label("Place Grid (" + Utils.getprefd("plobpgran", 8) + "): ");
         appender.addRow(placegridtext, new HSlider(200, 0, 255 * 100, (int) (Utils.getprefd("plobpgran", 8) * 100)) {
                     @Override
+                    public double scale() {
+                        return (5.5);
+                    }
+
+                    @Override
                     public void changed() {
                         placegridtext.settext("Place Grid (" + val / 100.0 + "): ");
                         try {

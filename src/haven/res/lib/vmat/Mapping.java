@@ -12,13 +12,13 @@ import java.util.LinkedList;
 
 public abstract class Mapping extends Gob.ResAttr {
     static {
-        dev.checkFileVersion("lib/vmat", 35);
+        dev.checkFileVersion("lib/vmat", 36);
     }
 
     public abstract Material mergemat(Material orig, int mid);
 
     public Rendered[] apply(Resource res) {
-        Collection<Rendered> rl = new LinkedList<Rendered>();
+        Collection<Rendered> rl = new LinkedList<>();
         for (FastMesh.MeshRes mr : res.layers(FastMesh.MeshRes.class)) {
             String sid = mr.rdat.get("vm");
             int mid = (sid == null) ? -1 : Integer.parseInt(sid);

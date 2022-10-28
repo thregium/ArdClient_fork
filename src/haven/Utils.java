@@ -2105,9 +2105,7 @@ public class Utils {
     public static <T> T construct(Constructor<T> cons, Object... args) {
         try {
             return (cons.newInstance(args));
-        } catch (InstantiationException e) {
-            throw (new RuntimeException(e));
-        } catch (IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException e) {
             throw (new RuntimeException(e));
         } catch (InvocationTargetException e) {
             if (e.getCause() instanceof RuntimeException)

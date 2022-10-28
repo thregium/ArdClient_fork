@@ -31,13 +31,17 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 public class Defer extends ThreadGroup {
     private static final Map<ThreadGroup, Defer> groups = new WeakHashMap<>();
@@ -98,6 +102,16 @@ public class Defer extends ThreadGroup {
 
         public boolean canwait() {
             return (true);
+        }
+
+        @Override
+        public void waitfor(Runnable callback, Consumer<Waiting> reg) {
+            if (future.done()) {
+                callback.run();
+                reg.accept(Waiting.dummy);
+            } else {
+                future.waitfor(callback, reg);
+            }
         }
 
         public void waitfor() throws InterruptedException {
@@ -161,6 +175,7 @@ public class Defer extends ThreadGroup {
                 }
                 lastload = null;
                 chstate("done");
+                onDone();
             } catch (InterruptedException exc) {
                 this.exc = new CancelledException(exc);
                 chstate("done");
@@ -180,6 +195,27 @@ public class Defer extends ThreadGroup {
                  * though, and the risk should be quite low. Fix if
                  * possible. */
                 Thread.interrupted();
+            }
+        }
+
+        private final List<Runnable> waitlist = Collections.synchronizedList(new ArrayList<>());
+
+        public void waitfor(Runnable callback, Consumer<Waitable.Waiting> reg) {
+            if (done()) {
+                callback.run();
+                reg.accept(Waitable.Waiting.dummy);
+            }
+            else {
+                synchronized (waitlist) {
+                    waitlist.add(callback);
+                }
+            }
+        }
+
+        private void onDone() {
+            synchronized (waitlist) {
+                waitlist.forEach(Runnable::run);
+                waitlist.clear();
             }
         }
 
@@ -282,9 +318,9 @@ public class Defer extends ThreadGroup {
             if ((pool.isEmpty() || !e) && (pool.size() < maxthreads)) {
                 Thread n = AccessController.doPrivileged(new PrivilegedAction<Thread>() {
                     public Thread run() {
-                    Thread ret = new Worker();
-                    ret.start();
-                    return (ret);
+                        Thread ret = new Worker();
+                        ret.start();
+                        return (ret);
                     }
                 });
                 pool.add(n);
@@ -301,15 +337,15 @@ public class Defer extends ThreadGroup {
     private static Defer getgroup() {
         return (AccessController.doPrivileged(new PrivilegedAction<Defer>() {
             public Defer run() {
-            ThreadGroup tg = Thread.currentThread().getThreadGroup();
-            if (tg instanceof Defer)
-                return ((Defer) tg);
-            Defer d;
-            synchronized (groups) {
-                if ((d = groups.get(tg)) == null)
-                    groups.put(tg, d = new Defer(tg));
-            }
-            return (d);
+                ThreadGroup tg = Thread.currentThread().getThreadGroup();
+                if (tg instanceof Defer)
+                    return ((Defer) tg);
+                Defer d;
+                synchronized (groups) {
+                    if ((d = groups.get(tg)) == null)
+                        groups.put(tg, d = new Defer(tg));
+                }
+                return (d);
             }
         }));
     }

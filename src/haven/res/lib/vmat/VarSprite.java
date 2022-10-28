@@ -13,7 +13,7 @@ import java.util.LinkedList;
 
 public class VarSprite extends UnivSprite {
     static {
-        dev.checkFileVersion("lib/vmat", 35);
+        dev.checkFileVersion("lib/vmat", 36);
     }
 
     private Gob.ResAttr.Cell<Mapping> aptr;
@@ -29,7 +29,7 @@ public class VarSprite extends UnivSprite {
     }
 
     public Collection<Rendered> iparts(int mask) {
-        Collection<Rendered> rl = new LinkedList<Rendered>();
+        Collection<Rendered> rl = new LinkedList<>();
         Mapping mats = mats();
         for (FastMesh.MeshRes mr : res.layers(FastMesh.MeshRes.class)) {
             String sid = mr.rdat.get("vm");

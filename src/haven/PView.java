@@ -29,16 +29,15 @@ package haven;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-import java.awt.Color;
 import java.util.Map;
 
 public abstract class PView extends Widget {
     public RenderList rls;
-    public static final GLState.Slot<RenderContext> ctx = new GLState.Slot<RenderContext>(GLState.Slot.Type.SYS, RenderContext.class);
-    public static final GLState.Slot<RenderState> wnd = new GLState.Slot<RenderState>(GLState.Slot.Type.SYS, RenderState.class, HavenPanel.proj2d, GLFrameBuffer.slot);
-    public static final GLState.Slot<Projection> proj = new GLState.Slot<Projection>(GLState.Slot.Type.SYS, Projection.class, wnd);
-    public static final GLState.Slot<Camera> cam = new GLState.Slot<Camera>(GLState.Slot.Type.SYS, Camera.class, proj);
-    public static final GLState.Slot<Location.Chain> loc = new GLState.Slot<Location.Chain>(GLState.Slot.Type.GEOM, Location.Chain.class, cam).instanced(Location.Chain.instancer);
+    public static final GLState.Slot<RenderContext> ctx = new GLState.Slot<>(GLState.Slot.Type.SYS, RenderContext.class);
+    public static final GLState.Slot<RenderState> wnd = new GLState.Slot<>(GLState.Slot.Type.SYS, RenderState.class, HavenPanel.proj2d, GLFrameBuffer.slot);
+    public static final GLState.Slot<Projection> proj = new GLState.Slot<>(GLState.Slot.Type.SYS, Projection.class, wnd);
+    public static final GLState.Slot<Camera> cam = new GLState.Slot<>(GLState.Slot.Type.SYS, Camera.class, proj);
+    public static final GLState.Slot<Location.Chain> loc = new GLState.Slot<>(GLState.Slot.Type.GEOM, Location.Chain.class, cam).instanced(Location.Chain.instancer);
     public CPUProfile prof = new CPUProfile(300);
     protected Light.Model lm;
     private final WidgetContext cstate = new WidgetContext();
@@ -46,10 +45,10 @@ public abstract class PView extends Widget {
     private GLState pstate;
 
     public static class RenderContext extends GLState.Abstract {
-        private Map<DataID, Object> data = new CacheMap<DataID, Object>(CacheMap.RefType.WEAK);
+        private Map<DataID, Object> data = new CacheMap<>(CacheMap.RefType.WEAK);
 
         public interface DataID<T> {
-            public T make(RenderContext c);
+            T make(RenderContext c);
         }
 
         @SuppressWarnings("unchecked")
@@ -198,8 +197,7 @@ public abstract class PView extends Widget {
     }
 
     private final Rendered scene = new Rendered() {
-        public void draw(GOut g) {
-        }
+        public void draw(GOut g) {}
 
         public boolean setup(RenderList rl) {
             PView.this.setup(rl);
@@ -207,8 +205,8 @@ public abstract class PView extends Widget {
         }
     };
 
-    protected Color clearcolor() {
-        return (Color.BLACK);
+    protected FColor clearcolor() {
+        return (FColor.BLACK);
     }
 
     public void draw(GOut g) {
@@ -226,54 +224,50 @@ public abstract class PView extends Widget {
         try {
             lm.prep(def);
             new Light.LightList().prep(def);
-            try {
-                rls.setup(scene, def);
-                if (DefSettings.WIREFRAMEMODE.get())
-                    g.gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
-                if (curf != null)
-                    curf.tick("setup");
-                rls.fin();
-                if (curf != null)
-                    curf.tick("sort");
-                GOut rg;
-                if (cstate.cur.fb != null) {
-                    GLState.Buffer gb = g.basicstate();
-                    HavenPanel.OrthoState.fixed(cstate.cur.fb.sz()).prep(gb);
-                    cstate.cur.fb.prep(gb);
-                    cstate.cur.fb.prep(def);
-                    rg = new GOut(g.gl, g.curgl, g.gc, g.st, gb, cstate.cur.fb.sz());
-                } else {
-                    rg = g;
-                }
-                rg.st.set(def);
-                Color cc = clearcolor();
-                if ((cc == null) && (cstate.cur.fb != null))
-                    cc = new Color(0, 0, 0, 0);
-                rg.apply();
-                if (curf != null)
-                    curf.add("apply", g.st.time);
-                BGL gl = rg.gl;
-                if (cc == null) {
-                    gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
-                } else {
-                    gl.glClearColor((float) cc.getRed() / 255f, (float) cc.getGreen() / 255f, (float) cc.getBlue() / 255f, (float) cc.getAlpha() / 255f);
-                    gl.glClear(GL.GL_DEPTH_BUFFER_BIT | GL.GL_COLOR_BUFFER_BIT);
-                }
-                if (curf != null)
-                    curf.tick("cls");
-                g.st.time = 0;
-                rls.render(rg);
-                if (DefSettings.WIREFRAMEMODE.get())
-                    g.gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
-                if (cstate.cur.fb != null)
-                    cstate.cur.resolve(g);
-                if (curf != null) {
-                    curf.add("apply", g.st.time);
-                    curf.tick("render", g.st.time);
-                }
-            } catch (Exception e) { //for test
-                e.printStackTrace();
-                //    System.out.println("Skipped a frame due to error");
+            rls.setup(scene, def);
+            if (DefSettings.WIREFRAMEMODE.get())
+                g.gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
+            if (curf != null)
+                curf.tick("setup");
+            rls.fin();
+            if (curf != null)
+                curf.tick("sort");
+            GOut rg;
+            if (cstate.cur.fb != null) {
+                GLState.Buffer gb = g.basicstate();
+                HavenPanel.OrthoState.fixed(cstate.cur.fb.sz()).prep(gb);
+                cstate.cur.fb.prep(gb);
+                cstate.cur.fb.prep(def);
+                rg = new GOut(g.gl, g.curgl, g.gc, g.st, gb, cstate.cur.fb.sz());
+            } else {
+                rg = g;
+            }
+            rg.st.set(def);
+            FColor cc = clearcolor();
+            if ((cc == null) && (cstate.cur.fb != null))
+                cc = new FColor(0, 0, 0, 0);
+            rg.apply();
+            if (curf != null)
+                curf.add("apply", g.st.time);
+            BGL gl = rg.gl;
+            if (cc == null || cc.a == 0) {
+                gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
+            } else {
+                gl.glClearColor(cc.r, cc.g, cc.b, cc.a);
+                gl.glClear(GL.GL_DEPTH_BUFFER_BIT | GL.GL_COLOR_BUFFER_BIT);
+            }
+
+            if (curf != null)
+                curf.tick("cls");
+            g.st.time = 0;
+            rls.render(rg);
+            if (DefSettings.WIREFRAMEMODE.get())
+                g.gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
+            if (cstate.cur.fb != null)
+                cstate.cur.resolve(g);
+            if (curf != null) {
+                curf.add("apply", g.st.time);
+                curf.tick("render", g.st.time);
             }
         } finally {
             g.st.set(bk);
@@ -291,7 +285,7 @@ public abstract class PView extends Widget {
     }
 
     public interface Render2D extends Rendered {
-        public void draw2d(GOut g);
+        void draw2d(GOut g);
     }
 
     public static abstract class Draw2D implements Render2D {

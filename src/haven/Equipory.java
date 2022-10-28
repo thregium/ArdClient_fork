@@ -146,7 +146,7 @@ public class Equipory extends Widget implements DTarget {
                 rl.add(outlines, null);
             }
 
-            protected java.awt.Color clearcolor() {
+            protected FColor clearcolor() {
                 return (null);
             }
         }, new Coord(invsq.sz().x, 0));

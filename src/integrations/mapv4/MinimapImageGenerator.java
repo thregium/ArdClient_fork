@@ -8,7 +8,6 @@ import haven.TexI;
 import haven.Tiler;
 import haven.Utils;
 import haven.resutil.Ridges;
-
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
@@ -67,16 +66,13 @@ public class MinimapImageGenerator {
         }
         for (c.y = 0; c.y < MCache.cmaps.y; c.y++) {
             for (c.x = 0; c.x < MCache.cmaps.x; c.x++) {
-                try {
-                    int t = grid.gettile(c);
-                    Coord r = c.add(grid.ul);
-                    if ((map.gettile(r.add(-1, 0)) > t) ||
-                            (map.gettile(r.add(1, 0)) > t) ||
-                            (map.gettile(r.add(0, -1)) > t) ||
-                            (map.gettile(r.add(0, 1)) > t)) {
-                        buf.setRGB(c.x, c.y, Color.BLACK.getRGB());
-                    }
-                } catch (Exception e) {
+                int t = grid.gettile(c);
+                Coord r = c.add(grid.ul);
+                if ((map.gettile(r.add(-1, 0)) > t) ||
+                        (map.gettile(r.add(1, 0)) > t) ||
+                        (map.gettile(r.add(0, -1)) > t) ||
+                        (map.gettile(r.add(0, 1)) > t)) {
+                    buf.setRGB(c.x, c.y, Color.BLACK.getRGB());
                 }
             }
         }

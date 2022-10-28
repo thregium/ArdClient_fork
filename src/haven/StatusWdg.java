@@ -104,7 +104,7 @@ public class StatusWdg extends Widget {
                 se.printStackTrace();
         } catch (IOException ioe) {
             ioe.printStackTrace();
-        }
+        } catch (Exception ignored) {}
     }
 
     @Override

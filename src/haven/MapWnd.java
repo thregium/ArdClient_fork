@@ -1032,10 +1032,12 @@ public class MapWnd extends ResizableWnd {
 
         public void tick(double dt) {
             super.tick(dt);
-            if (configuration.tempmarks && System.currentTimeMillis() - lastMarkCheck > configuration.tempmarksfrequency) {
-                checkmarks();
-                lastMarkCheck = System.currentTimeMillis();
-            }
+            try {
+                if (configuration.tempmarks && System.currentTimeMillis() - lastMarkCheck > configuration.tempmarksfrequency) {
+                    checkmarks();
+                    lastMarkCheck = System.currentTimeMillis();
+                }
+            } catch (Loading l) {}
         }
 
         public Object tooltip(Coord c, Widget prev) {

@@ -743,8 +743,7 @@ public class LocalMiniMap extends Widget {
                 if (f.done()) {
                     cur = f.get();
                     MapFile save = this.save;
-                    if (save != null)
-                        save.update(ui.sess.glob.map, cur.grid.gc);
+                    if (save != null) save.update(ui.sess.glob.map, cur.grid.gc);
                 }
             }
         }

@@ -123,39 +123,15 @@ public class MapFile {
     }
 
     private InputStream sfetch(String ctl, Object... args) throws IOException {
-        do {
-            try {
-                return (store.fetch(mangle(String.format(ctl, args))));
-            } catch (IOException e) {
-                if (e.getMessage().contains("another process")) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException ex) {
-                        throw (new RuntimeException(ex));
-                    }
-                } else {
-                    throw (e);
-                }
-            }
-        } while (true);
+        synchronized (store) {
+            return (store.fetch(mangle(String.format(ctl, args))));
+        }
     }
 
     private OutputStream sstore(String ctl, Object... args) throws IOException {
-        do {
-            try {
-                return (store.store(mangle(String.format(ctl, args))));
-            } catch (IOException e) {
-                if (e.getMessage().contains("another process")) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException ex) {
-                        throw (new RuntimeException(ex));
-                    }
-                } else {
-                    throw (e);
-                }
-            }
-        } while (true);
+        synchronized (store) {
+            return (store.store(mangle(String.format(ctl, args))));
+        }
     }
 
     public static void warn(Throwable cause, String msg) {
@@ -1012,38 +988,32 @@ public class MapFile {
 
         @Deprecated
         private boolean brokenp(Tiler t, Coord tc, final Tiler[] tilers, final boolean[] tlcache) {
-            int bz = ((Ridges.RidgeTile) t).breakz();  //The distance at which a ridge is formed
+            double bz = ((Ridges.RidgeTile) t).breakz() + Ridges.EPSILON;  //The distance at which a ridge is formed
             //Look at the four tiles around us to get the minimum break distance
             for (Coord ec : tecs) {
-                try {
-                    Coord coord = tc.add(ec);
-                    if (coord.x < 0 || coord.x > cmaps.x - 1 || coord.y < 0 || coord.y > cmaps.y - 1)
-                        continue;
-                    t = tiler(gettile(coord), tilers, tlcache);
-                    if (t instanceof Ridges.RidgeTile)
-                        bz = Math.min(bz, ((Ridges.RidgeTile) t).breakz());
-                } catch (Exception e) {
-                }
+                Coord coord = tc.add(ec);
+                if (coord.x < 0 || coord.x > cmaps.x - 1 || coord.y < 0 || coord.y > cmaps.y - 1)
+                    continue;
+                t = tiler(gettile(coord), tilers, tlcache);
+                if (t instanceof Ridges.RidgeTile)
+                    bz = Math.min(bz, ((Ridges.RidgeTile) t).breakz() + Ridges.EPSILON);
             }
 
             //Now figure out based on other tiles around us if we hit that break limit and should be a ridge
             //Ignore NOZ heights as these are nonupdated maps
             for (int i = 0; i < tccs.length; i++) {
-                try {
-                    Coord coord1 = tc.add(tccs[i]);
-                    Coord coord2 = tc.add(tccs[(i + 1) % tccs.length]);
-                    if ((coord1.x < 0 || coord1.x > cmaps.x - 1 || coord1.y < 0 || coord1.y > cmaps.y - 1) ||
-                            (coord2.x < 0 || coord2.x > cmaps.x - 1 || coord2.y < 0 || coord2.y > cmaps.y - 1))
-                        continue;
-                    final float z1 = getz(coord1);
-                    final float z2 = getz(coord2);
-                    //dumb mistake - 99999999
-                    if (z1 != Float.POSITIVE_INFINITY && z2 != Float.POSITIVE_INFINITY && z1 != Float.NEGATIVE_INFINITY && z2 != Float.NEGATIVE_INFINITY) {
-                        if (Math.abs(z2 - z1) > bz) {
-                            return (true);
-                        }
+                Coord coord1 = tc.add(tccs[i]);
+                Coord coord2 = tc.add(tccs[(i + 1) % tccs.length]);
+                if ((coord1.x < 0 || coord1.x > cmaps.x - 1 || coord1.y < 0 || coord1.y > cmaps.y - 1) ||
+                        (coord2.x < 0 || coord2.x > cmaps.x - 1 || coord2.y < 0 || coord2.y > cmaps.y - 1))
+                    continue;
+                final float z1 = getz(coord1);
+                final float z2 = getz(coord2);
+                //dumb mistake - 99999999
+                if (z1 != Float.POSITIVE_INFINITY && z2 != Float.POSITIVE_INFINITY && z1 != Float.NEGATIVE_INFINITY && z2 != Float.NEGATIVE_INFINITY) {
+                    if (Math.abs(z2 - z1) > bz) {
+                        return (true);
                     }
-                } catch (Exception e) {
                 }
             }
             return (false);
@@ -1673,7 +1643,7 @@ public class MapFile {
 
         private void include(long id, Coord sc) {
             map.put(sc, id);
-            int zl = ZoomGrid.inval(MapFile.this, this.id, sc);
+//            int zl = ZoomGrid.inval(MapFile.this, this.id, sc);
             synchronized (zcache) {
                 /* XXX? Not sure how nice it is to iterate through the
                  * entire zcache to do invalidations, but I also don't
@@ -2505,16 +2475,24 @@ public class MapFile {
 
     public void update(MCache map, Coord cgc) {
         Collection<MCache.Grid> grids = new ArrayList<>();
+        Loading error = null;
         for (Coord off : inout) {
             Coord gc = cgc.add(off);
-//            try {//FIXME need fix repeat?
-            grids.add(map.getgrid(gc));
-//            } catch (Loading ingored) {}
+            try {
+                grids.add(map.getgrid(gc));
+            } catch (Loading l) {
+                error = l;
+            }
         }
-        if (!grids.isEmpty()) {
-            synchronized (procmon) {
-                updqueue.add(new Pair<>(map, grids));
-                process();
+
+        if (error != null) {
+            error.waitfor(() -> update(map, cgc), w -> {});
+        } else {
+            if (!grids.isEmpty()) {
+                synchronized (procmon) {
+                    updqueue.add(new Pair<>(map, grids));
+                    process();
+                }
             }
         }
     }

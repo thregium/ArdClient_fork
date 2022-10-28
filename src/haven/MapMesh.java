@@ -26,9 +26,9 @@
 
 package haven;
 
+import static haven.MCache.tilesz;
 import haven.Surface.MeshVertex;
 import haven.Surface.Vertex;
-
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
@@ -39,52 +39,42 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import static haven.MCache.tilesz;
-
 public class MapMesh implements Rendered, Disposable {
     public final Coord ul, sz;
     public final MCache map;
     private final long rnd;
-    private Map<Tex, GLState[]> texmap = new HashMap<Tex, GLState[]>();
-    private Map<DataID, Object> data = new LinkedHashMap<DataID, Object>();
-    private List<Rendered> extras = new ArrayList<Rendered>();
+    private Map<Tex, GLState[]> texmap = new HashMap<>();
+    private Map<DataID, Object> data = new LinkedHashMap<>();
+    private List<Rendered> extras = new ArrayList<>();
     private FastMesh[] flats;
-    private List<Disposable> dparts = new ArrayList<Disposable>();
+    private List<Disposable> dparts = new ArrayList<>();
 
     public interface DataID<T> {
-        public T make(MapMesh m);
+        T make(MapMesh m);
     }
 
     public static <T> DataID<T> makeid(Class<T> cl) {
         try {
             final java.lang.reflect.Constructor<T> cons = cl.getConstructor(MapMesh.class);
-            return (new DataID<T>() {
-                public T make(MapMesh m) {
-                    return (Utils.construct(cons, m));
-                }
-            });
+            return (m -> (Utils.construct(cons, m)));
         } catch (NoSuchMethodException e) {
         }
         try {
             final java.lang.reflect.Constructor<T> cons = cl.getConstructor();
-            return (new DataID<T>() {
-                public T make(MapMesh m) {
-                    return (Utils.construct(cons));
-                }
-            });
+            return (m -> (Utils.construct(cons)));
         } catch (NoSuchMethodException e) {
         }
         throw (new Error("No proper data-ID constructor found"));
     }
 
-    public static interface ConsHooks {
-        public void sfin();
+    public interface ConsHooks {
+        void sfin();
 
-        public void calcnrm();
+        void calcnrm();
 
-        public void postcalcnrm(Random rnd);
+        void postcalcnrm(Random rnd);
 
-        public boolean clean();
+        boolean clean();
     }
 
     public static class Hooks implements ConsHooks {
@@ -139,12 +129,8 @@ public class MapMesh implements Rendered, Disposable {
         public MapSurface() {
             for (int y = vs.ul.y; y < vs.br.y; y++) {
                 for (int x = vs.ul.x; x < vs.br.x; x++) {
-                    int z = 0;
-                    try {
-                        z = Config.disableelev ? 0 : map.getz(ul.add(x, y));
-                    } catch (Loading e) {
-                    }
-                    surf[vs.o(x, y)] = new Vertex(x * (float) tilesz.x, y * -(float) tilesz.y, z);
+                    double z = Config.disableelev ? 0 : map.getfz(ul.add(x, y));
+                    surf[vs.o(x, y)] = new Vertex(x * (float) tilesz.x, y * -(float) tilesz.y, (float) z);
                     //  z = !Config.disableelev ? map.getz(ul.add(x, y)) : 0;surf[vs.o(x, y)] = new Vertex(x * (float)tilesz.x, y * -(float)tilesz.y, z);
                 }
             }
@@ -208,11 +194,7 @@ public class MapMesh implements Rendered, Disposable {
             return (z);
         }
 
-        private final static RComparator<Rendered> cmp = new RComparator<Rendered>() {
-            public int compare(Rendered a, Rendered b, GLState.Buffer sa, GLState.Buffer sb) {
-                return (((MLOrder) sa.get(order)).z - ((MLOrder) sb.get(order)).z);
-            }
-        };
+        private final static RComparator<Rendered> cmp = (a, b, sa, sb) -> (((MLOrder) sa.get(order)).z - ((MLOrder) sb.get(order)).z);
 
         public RComparator<Rendered> cmp() {
             return (cmp);
@@ -415,7 +397,7 @@ public class MapMesh implements Rendered, Disposable {
 
             Tiler.MCons cons = new Tiler.MCons() {
                 final MeshBuf.Tex ta = buf.layer(MeshBuf.tex);
-                final Map<Vertex, MeshVertex> cv = new HashMap<Vertex, MeshVertex>();
+                final Map<Vertex, MeshVertex> cv = new HashMap<>();
 
                 public void faces(MapMesh m, Tiler.MPart d) {
                     Coord3f[] texc = new Coord3f[d.v.length];

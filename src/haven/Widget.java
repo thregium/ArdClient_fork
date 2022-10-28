@@ -862,11 +862,7 @@ public class Widget {
          * classes, but alas, this is Java. */
         anims.addAll(nanims);
         nanims.clear();
-        for (Iterator<Anim> i = anims.iterator(); i.hasNext(); ) {
-            Anim anim = i.next();
-            if (anim.tick(dt))
-                i.remove();
-        }
+        anims.removeIf(anim -> anim.tick(dt));
     }
 
     public void draw(GOut g, boolean strict) {
@@ -884,7 +880,20 @@ public class Widget {
                 g2 = g.reclip(cc, wdg.sz);
             else
                 g2 = g.reclipl(cc, wdg.sz);
-            wdg.draw(g2);
+            try {
+                wdg.draw(g2);
+            } catch (Exception e) {
+                String strErr = wdg.getClass().getSimpleName() + " " + wdg.getClass().getClassLoader() + " " + e.getMessage();
+                Widget finalWdg = wdg;
+                if (errorWdgs.stream().noneMatch(w -> w.errWdg.equals(finalWdg))) {
+                    errorWdgs.add(new ErrorWidget(finalWdg, strErr));
+                    if (ui != null) PBotUtils.sysMsg(ui, strErr + " Please contact the developer!");
+                    e.printStackTrace();
+                } else if (errorWdgs.stream().anyMatch(w -> w.errWdg.equals(finalWdg) && w.repeat())) {
+                    if (ui != null) PBotUtils.sysMsg(ui, strErr + " Please contact the developer!");
+                    e.printStackTrace();
+                }
+            }
             if (configuration.focusrectangle) {
                 RootWidget rw = getparent(RootWidget.class);
                 if (rw != null && Objects.equals(rw.lastfocused, wdg)) {

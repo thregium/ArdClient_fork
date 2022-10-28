@@ -44,18 +44,18 @@ public abstract class GSprite implements Drawn {
     }
 
     public interface Owner extends OwnerContext {
-        public Random mkrandoom();
+        Random mkrandoom();
 
-        public Resource getres();
+        Resource getres();
 
         @Deprecated
-        public default Glob glob() {
+        default Glob glob() {
             return (context(Glob.class));
         }
     }
 
     public interface ImageSprite {
-        public BufferedImage image();
+        BufferedImage image();
     }
 
     public GSprite(Owner owner) {
@@ -87,7 +87,7 @@ public abstract class GSprite implements Drawn {
 
     @Resource.PublishedCode(name = "ispr", instancer = FactMaker.class)
     public interface Factory {
-        public GSprite create(Owner owner, Resource res, Message sdt);
+        GSprite create(Owner owner, Resource res, Message sdt);
     }
 
     public static GSprite create(Owner owner, Resource res, Message sdt) {
@@ -141,11 +141,13 @@ public abstract class GSprite implements Drawn {
         }
 
         @Override
-        public void draw(GOut g) {}
+        public void draw(GOut g) {
+            g.image(res.layer(Resource.imgc).tex(), Coord.z, sz());
+        }
 
         @Override
         public Coord sz() {
-            return (Coord.z);
+            return (Coord.o);
         }
     }
 }

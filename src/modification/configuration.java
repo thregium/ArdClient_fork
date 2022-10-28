@@ -1357,4 +1357,10 @@ public class configuration {
         }
     }
     public static int highlightTilePeriod = Utils.getprefi("highlightTilePeriod", 2000);
+
+    public static <KEY, VALUE> Map<KEY, VALUE> copyMap(final Map<KEY, VALUE> original) {
+        synchronized (original) {
+            return (new HashMap<>(original));
+        }
+    }
 }
