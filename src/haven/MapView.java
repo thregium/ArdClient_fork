@@ -907,15 +907,17 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             for (o.y = -view; o.y <= view; o.y++) {
                 for (o.x = -view; o.x <= view; o.x++) {
                     Coord2d pc = cc.add(o).mul(MCache.cutsz).mul(tilesz);
-                    MapMesh cut = null;
-                    try {
-                        cut = glob.map.getcut(cc.add(o));
-                    } catch (Loading e) {
+//                    MapMesh cut = null;
+//                    try {
+//                        cut = glob.map.getcut(cc.add(o));
+//                    } catch (Loading e) {
 //                        e.printStackTrace();
-                    }
-                    if (cut != null) {
-                        rl.add(cut, Location.xlate(new Coord3f((float) pc.x, -(float) pc.y, 0)));
-                    }
+//                    }
+//                    if (cut != null) {
+//                        rl.add(cut, Location.xlate(new Coord3f((float) pc.x, -(float) pc.y, 0)));
+//                    }
+
+                    glob.map.getcuto(cc.add(o)).ifPresent(cut -> rl.add(cut, Location.xlate(new Coord3f((float) pc.x, -(float) pc.y, 0))));
                 }
             }
             if (!Config.hideflocomplete) {

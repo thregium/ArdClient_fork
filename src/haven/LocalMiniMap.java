@@ -64,7 +64,7 @@ public class LocalMiniMap extends Widget {
     private static float[] ziArray = {.8f, .9f, 1f, 1f, 1f, 1f};
     // public Tex biometex;
     public final MapView mv;
-    private final HashSet<Long> sgobs = new HashSet<Long>();
+    private final HashSet<Long> sgobs = new HashSet<>();
     private final Map<Coord, Tex> maptiles = new LinkedHashMap<Coord, Tex>(100, 0.75f, false) {
         @Override
         protected boolean removeEldestEntry(Map.Entry<Coord, Tex> eldest) {
@@ -252,7 +252,7 @@ public class LocalMiniMap extends Widget {
             for (c.x = 0; c.x < sz.x; c.x++) {
                 int t = m.gettile(ul.add(c));
                 Tiler tl = m.tiler(t);
-                if (tl instanceof Ridges.RidgeTile && Ridges.brokenp(m, ul.add(c))) {
+                if (tl instanceof Ridges.RidgeTile && Ridges.brokenp(m, ul, c)) {
                     buf.setRGB(c.x, c.y, Color.BLACK.getRGB());
 
                     if (!Config.disableBlackOutLinesOnMap) {
@@ -311,7 +311,7 @@ public class LocalMiniMap extends Widget {
 
     public void drawicons(GOut g) {
         OCache oc = ui.sess.glob.oc;
-        List<Gob> dangergobs = new ArrayList<Gob>();
+        List<Gob> dangergobs = new ArrayList<>();
         synchronized (oc) {
             Gob player = mv.player();
             for (Gob gob : oc) {
@@ -599,7 +599,7 @@ public class LocalMiniMap extends Widget {
         icons = findicons(icons);
         icons.sort(Comparator.comparingInt(a -> a.priority));
 
-        List<Gob> dangergobs = new ArrayList<Gob>();
+        List<Gob> dangergobs = new ArrayList<>();
         synchronized (oc) {
             Gob player = mv.player();
             for (Gob gob : oc) {

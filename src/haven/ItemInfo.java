@@ -228,7 +228,12 @@ public abstract class ItemInfo {
 
         public AdHoc(Owner owner, String str) {
             super(owner);
-            this.str = Text.render(str, Color.GRAY);
+            this.str = Text.render(str);
+        }
+
+        public AdHoc(Owner owner, String str, Color color) {
+            super(owner);
+            this.str = Text.render(str, color);
         }
 
         public BufferedImage tipimg() {
@@ -538,7 +543,7 @@ public abstract class ItemInfo {
                 s = owner.toString();
             }
             if (s != null)
-                ret.add(new AdHoc(owner, "\n" + s));
+                ret.add(new AdHoc(owner, "\n" + s, Color.GRAY));
         }
         return (ret);
     }

@@ -619,7 +619,6 @@ public class MapFile {
             if (configuration.allowtexturemap) {
                 for (c.y = 0; c.y < cmaps.y; c.y++) {
                     for (c.x = 0; c.x < cmaps.x; c.x++) {
-//                        try {
                         int t = gettile(c);
                         final String tname = tileName(t);
                         BufferedImage tex;
@@ -656,8 +655,6 @@ public class MapFile {
                         buf.setSample(c.x, c.y, 1, (rgb & 0x0000ff00) >>> 8);
                         buf.setSample(c.x, c.y, 2, (rgb & 0x000000ff) >>> 0);
                         buf.setSample(c.x, c.y, 3, (rgb & 0xff000000) >>> 24);
-//                        } catch (Exception e) {
-//                        }
                     }
                 }
             }
@@ -690,7 +687,6 @@ public class MapFile {
                 if (configuration.allowridgesmap) {
                     for (c.y = 0; c.y < cmaps.y; c.y++) {
                         for (c.x = 0; c.x < cmaps.x; c.x++) {
-//                            try {
                             final Tiler t = tiler(gettile(c), tilers, tlcached);
                             if (t instanceof Ridges.RidgeTile && brokenp(t, c, tilers, tlcached)) {
                                 final Color black = Color.BLACK;
@@ -713,8 +709,6 @@ public class MapFile {
                                     }
                                 }
                             }
-//                            } catch (Exception e) {
-//                            }
                         }
                     }
                 }
@@ -1007,10 +1001,10 @@ public class MapFile {
                 if ((coord1.x < 0 || coord1.x > cmaps.x - 1 || coord1.y < 0 || coord1.y > cmaps.y - 1) ||
                         (coord2.x < 0 || coord2.x > cmaps.x - 1 || coord2.y < 0 || coord2.y > cmaps.y - 1))
                     continue;
-                final float z1 = getz(coord1);
-                final float z2 = getz(coord2);
+                final double z1 = getfz(coord1);
+                final double z2 = getfz(coord2);
                 //dumb mistake - 99999999
-                if (z1 != Float.POSITIVE_INFINITY && z2 != Float.POSITIVE_INFINITY && z1 != Float.NEGATIVE_INFINITY && z2 != Float.NEGATIVE_INFINITY) {
+                if (z1 != Double.POSITIVE_INFINITY && z2 != Double.POSITIVE_INFINITY && z1 != Double.NEGATIVE_INFINITY && z2 != Double.NEGATIVE_INFINITY) {
                     if (Math.abs(z2 - z1) > bz) {
                         return (true);
                     }

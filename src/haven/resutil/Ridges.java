@@ -757,27 +757,27 @@ public class Ridges extends MapMesh.Hooks {
         return (true);
     }
 
-    public static boolean brokenp(MCache map, Coord tc) {
-        Tiler t = map.tiler(map.gettile(tc));
+    public static boolean brokenp(MCache map, Coord ul, Coord gc) {
+        Tiler t = map.tiler(map.gettile(ul.add(gc)));
         if (!(t instanceof RidgeTile))
             return (false);
         double bz = ((RidgeTile) t).breakz() + EPSILON;
         for (Coord ec : tecs) {
-            Coord coord = tc.add(ec);
+            Coord coord = gc.add(ec);
             if (coord.x < 0 || coord.x > MCache.cmaps.x - 1 || coord.y < 0 || coord.y > MCache.cmaps.y - 1)
                 continue;
-            t = map.tiler(map.gettile(coord));
+            t = map.tiler(map.gettile(ul.add(coord)));
             if (t instanceof RidgeTile)
                 bz = Math.min(bz, ((RidgeTile) t).breakz() + EPSILON);
         }
-        for (int i = 0; i < 4; i++) {
-            Coord coord1 = tc.add(tccs[i]);
-            Coord coord2 = tc.add(tccs[(i + 1) % 4]);
+        for (int i = 0; i < tccs.length; i++) {
+            Coord coord1 = gc.add(tccs[i]);
+            Coord coord2 = gc.add(tccs[(i + 1) % tccs.length]);
             if (coord1.x < 0 || coord1.x > MCache.cmaps.x - 1 || coord1.y < 0 || coord1.y > MCache.cmaps.y - 1 ||
                     coord2.x < 0 || coord2.x > MCache.cmaps.x - 1 || coord2.y < 0 || coord2.y > MCache.cmaps.y - 1)
                 continue;
-            double z1 = map.getfz(coord1);
-            double z2 = map.getfz(coord2);
+            double z1 = map.getfz(ul.add(coord1));
+            double z2 = map.getfz(ul.add(coord2));
             if (Math.abs(z2 - z1) > bz)
                 return (true);
         }
