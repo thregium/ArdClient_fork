@@ -1981,8 +1981,8 @@ public class Resource implements Serializable {
     private final static List<String> depresList = Arrays.asList("gfx/borka/reedweavebelt", "gfx/terobjs/bushes/reeds", "paginae/gov/enact/.*");
 
     private void load(InputStream st) throws IOException {
-        if (st.available() == 0) throw new Message.EOF("Empty stream of " + this);
         Message in = new StreamMessage(st);
+        if (in.eom()) throw new Message.EOF("Empty stream of " + this);
         byte[] sig = "Haven Resource 1".getBytes(Utils.ascii);
         if (!Arrays.equals(sig, in.bytes(sig.length))) {
             dev.simpleLog(String.format("Invalid res signature %s", this));
