@@ -208,6 +208,7 @@ public abstract class Sprite implements Rendered {
 
     public static class FakeSprite extends Sprite {
         public final byte[] data;
+
         public FakeSprite(Owner owner, Resource resource, Message sdt) {
             super(owner, resource);
             this.data = sdt.bytes();
@@ -216,6 +217,31 @@ public abstract class Sprite implements Rendered {
         @Override
         public boolean setup(RenderList d) {
             return (false);
+        }
+    }
+
+    public static class DelayedSprite extends Sprite {
+        public Sprite sprite;
+
+        public DelayedSprite(Owner owner, Resource resource) {
+            super(owner, resource);
+        }
+
+        public void draw(GOut g) {
+            if (sprite != null) sprite.draw(g);
+        }
+
+        @Override
+        public boolean setup(RenderList d) {
+            return (sprite != null && sprite.setup(d));
+        }
+
+        public boolean tick(int dt) {
+            return (sprite != null && sprite.tick(dt));
+        }
+
+        public void dispose() {
+            if (sprite != null) sprite.dispose();
         }
     }
 }

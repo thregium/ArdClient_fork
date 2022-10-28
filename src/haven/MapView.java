@@ -938,15 +938,16 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             for (o.y = -view; o.y <= view; o.y++) {
                 for (o.x = -view; o.x <= view; o.x++) {
                     Coord2d pc = cc.add(o).mul(MCache.cutsz).mul(tilesz);
-                    FastMesh cut = null;
-                    try {
-                        cut = glob.map.getgcut(cc.add(o));
-                    } catch (Loading e) {
+//                    FastMesh cut = null;
+//                    try {
+//                        cut = glob.map.getgcut(cc.add(o));
+//                    } catch (Loading e) {
 //                        e.printStackTrace();
-                    }
-                    if (cut != null) {
-                        rl.add(cut, Location.xlate(new Coord3f((float) pc.x, (float) -pc.y, 0)));
-                    }
+//                    }
+//                    if (cut != null) {
+//                        rl.add(cut, Location.xlate(new Coord3f((float) pc.x, (float) -pc.y, 0)));
+//                    }
+                    glob.map.getgcuto(cc.add(o)).ifPresent(cut -> rl.add(cut, Location.xlate(new Coord3f((float) pc.x, (float) -pc.y, 0))));
                 }
             }
             return (false);
@@ -1002,18 +1003,19 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             for (Coord gc : va) {
                 Coord2d pc = gc.mul(MCache.cutsz).mul(tilesz);
                 for (OverlayInfo olid : visol) {
-                    Rendered olcut = null;
-                    try {
-                        olcut = glob.map.getolcut(olid, gc);
-                    } catch (Loading e) {
+//                    Rendered olcut = null;
+//                    try {
+//                        olcut = glob.map.getolcut(olid, gc);
+//                    } catch (Loading e) {
 //                        e.printStackTrace();
-                    }
-                    if (olcut != null) {
-                        try {
-                            rl.add(olcut, GLState.compose(Location.xlate(new Coord3f((float) pc.x, -(float) pc.y, 0)), olid.mat()));
-                        } catch (Loading l) {
-                        }
-                    }
+//                    }
+//                    if (olcut != null) {
+//                        try {
+//                            rl.add(olcut, GLState.compose(Location.xlate(new Coord3f((float) pc.x, -(float) pc.y, 0)), olid.mat()));
+//                        } catch (Loading l) {
+//                        }
+//                    }
+                    glob.map.getolcuto(olid, gc).ifPresent(olcut -> rl.add(olcut, GLState.compose(Location.xlate(new Coord3f((float) pc.x, -(float) pc.y, 0)), olid.mat())));
                 }
             }
             return (false);

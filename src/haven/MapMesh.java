@@ -37,6 +37,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 
 public class MapMesh implements Rendered, Disposable {
@@ -544,6 +545,32 @@ public class MapMesh implements Rendered, Disposable {
         return (new OLArray(vbuf, vl));
     }
 
+    private Optional<Object[]> makeolvbufo() {
+        MapSurface ms = data(gnd);
+        MeshBuf.Vertex[] vl = new MeshBuf.Vertex[ms.vl.length];
+        haven.Surface.Normals sn = ms.data(haven.Surface.nrm);
+        MeshBuf vbuf = new MeshBuf();
+        class Buf implements Tiler.MCons {
+            public void faces(MapMesh m, Tiler.MPart d) {
+                for (Vertex v : d.v) {
+                    if (vl[v.vi] == null)
+                        vl[v.vi] = vbuf.new Vertex(v, sn.get(v));
+                }
+            }
+        }
+        boolean fail = false;
+        Buf buf = new Buf();
+        for (int y = 0; y < sz.y; y++) {
+            for (int x = 0; x < sz.x; x++) {
+                Coord gc = ul.add(x, y);
+                Tiler t = map.tiler(map.gettile_safe(gc));
+                if (t != null) t.lay(this, new Coord(x, y), gc, buf, false);
+                else fail = true;
+            }
+        }
+        return (Optional.of(new Object[]{new OLArray(vbuf, vl), fail}));
+    }
+
     private OLArray olvert = null;
 
     public Rendered makeol(MCache.OverlayInfo id) {
@@ -597,6 +624,71 @@ public class MapMesh implements Rendered, Disposable {
             }
         }
         return (new OL());
+    }
+
+    private Object[] olverto = null; //OLArray Boolean
+
+    public Optional<Object[]> makeolo(MCache.OverlayInfo id) {
+        boolean fail = false;
+        OLArray tolvert = null;
+        if (olverto == null || (Boolean) olverto[1]) makeolvbufo().ifPresent(objects -> olverto = objects);
+        if (olverto != null) {
+            tolvert = (OLArray) olverto[0];
+            fail = (Boolean) olverto[1];
+        }
+        if (tolvert == null)
+            return (Optional.empty());
+        OLArray olvert = tolvert;
+        olvert.dat.clearfaces();
+        class Buf implements Tiler.MCons {
+            public void faces(MapMesh m, Tiler.MPart d) {
+                MeshBuf.Vertex[] vl = olvert.vl;
+                for (int i = 0; i < d.f.length; i += 3)
+                    olvert.dat.new Face(vl[d.v[d.f[i + 0]].vi],
+                            vl[d.v[d.f[i + 1]].vi],
+                            vl[d.v[d.f[i + 2]].vi]);
+            }
+        }
+        Coord t = new Coord();
+        Area a = Area.sized(ul, sz);
+        boolean[] ol = new boolean[a.area()];
+        if (map.getolo(id, a, ol)) fail = true;
+        Buf buf = new Buf();
+        for (t.y = 0; t.y < sz.y; t.y++) {
+            for (t.x = 0; t.x < sz.x; t.x++) {
+                if (ol[t.x + (t.y * sz.x)]) {
+                    Coord gc = t.add(ul);
+                    Tiler tl = map.tiler(map.gettile_safe(gc));
+                    if (tl != null) tl.lay(this, t, gc, buf, false);
+                    else fail = true;
+                }
+            }
+        }
+        if (olvert.dat.f.isEmpty())
+            return (Optional.empty());
+        FastMesh mesh = olvert.dat.mkmesh();
+        olvert.dat.clearfaces();
+        class OL implements Rendered, Disposable {
+            final OLOrder order = new OLOrder(id);
+
+            public boolean setup(RenderList rl) {
+                rl.prepo(order);
+                return (true);
+            }
+
+            public void draw(GOut g) {
+                mesh.draw(g);
+            }
+
+            public void dispose() {
+                mesh.dispose();
+            }
+
+            public String toString() {
+                return (String.format("#<overlay %s>", id));
+            }
+        }
+        return (Optional.of(new Object[]{new OL(), fail}));
     }
 
     private void clean() {

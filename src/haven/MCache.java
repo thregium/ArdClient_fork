@@ -45,6 +45,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -337,8 +338,7 @@ public class MCache {
                     return;
                 }
             }
-            for (int o = 0; o < buf.length; o++)
-                buf[o] = false;
+            Arrays.fill(buf, false);
         }
 
         private void makeflavor() {
@@ -437,6 +437,24 @@ public class MCache {
             return cut.grid;
         }
 
+        public Optional<FastMesh> getgcuto(Coord cc) {
+            Cut cut = geticut(cc);
+            if (cut.dgrid != null) {
+                FastMesh nmesh = null;
+                if (cut.dgrid.done()) {
+                    nmesh = cut.dgrid.get();
+                    cut.dgrid = null;
+                }
+                if ((nmesh != null) || (cut.grid == null)) {
+                    FastMesh old = cut.grid;
+                    cut.grid = nmesh;
+                    if (old != null)
+                        old.dispose();
+                }
+            }
+            return (Optional.ofNullable(cut.grid));
+        }
+
         public Rendered getolcut(OverlayInfo id, Coord cc) {
             int nseq = MCache.this.olseq;
             if (this.olseq != nseq) {
@@ -453,6 +471,29 @@ public class MCache {
             if (!cut.ols.containsKey(id))
                 cut.ols.put(id, getcut(cc).makeol(id));
             return (cut.ols.get(id));
+        }
+
+        public Optional<Rendered> getolcuto(OverlayInfo id, Coord cc) {
+            int nseq = MCache.this.olseq;
+            if (this.olseq != nseq) {
+                for (int i = 0; i < cutn.x * cutn.y; i++) {
+                    for (Rendered r : cuts[i].ols.values()) {
+                        if (r instanceof Disposable)
+                            ((Disposable) r).dispose();
+                    }
+                    cuts[i].ols.clear();
+                }
+                this.olseq = nseq;
+            }
+            Cut cut = geticut(cc);
+            AtomicReference<Rendered> ret = new AtomicReference<>();
+            if (cut.ols.containsKey(id)) ret.set(cut.ols.get(id));
+            else getcuto(cc).flatMap(mm -> mm.makeolo(id)).ifPresent(objs -> {
+                ret.set((Rendered) objs[0]);
+                if (!(Boolean) objs[1])
+                    cut.ols.put(id, (Rendered) objs[0]);
+            });
+            return (Optional.ofNullable(ret.get()));
         }
 
         private void buildcut(final Coord cc) {
@@ -886,10 +927,10 @@ public class MCache {
                 cached = grids.get(gc);
                 if (cached == null) {
                     request(gc);
-                    return Optional.empty();
+                    return (Optional.empty());
                 }
             }
-            return Optional.of(cached);
+            return (Optional.of(cached));
         }
     }
 
@@ -899,12 +940,12 @@ public class MCache {
                 for (Grid g : grids.values()) {
                     if (g.id == id) {
                         cached = g;
-                        return Optional.of(g);
+                        return (Optional.of(g));
                     }
                 }
-                return Optional.empty();
+                return (Optional.empty());
             } else {
-                return Optional.of(cached);
+                return (Optional.of(cached));
             }
         }
     }
@@ -1063,6 +1104,40 @@ public class MCache {
         }
     }
 
+    public boolean getolo(OverlayInfo id, Area a, boolean[] buf) {
+        boolean fail = false;
+        Area ga = a.div(cmaps);
+        if (ga.area() == 1) {
+            Optional<Grid> og = getgrido(ga.ul);
+            if (og.isPresent()) {
+                Grid g = og.get();
+                g.getol(id, a.xl(g.ul.inv()), buf);
+            } else fail = true;
+        } else {
+            boolean[] gbuf = new boolean[cmaps.x * cmaps.y];
+            for (Coord gc : ga) {
+                Optional<Grid> og = getgrido(gc);
+                if (og.isPresent()) {
+                    Grid g = og.get();
+                    Area gt = Area.sized(g.ul, cmaps);
+                    g.getol(id, Area.sized(Coord.z, cmaps), gbuf);
+                    for (Coord tc : a.overlap(gt))
+                        buf[a.ri(tc)] = gbuf[(tc.x - gt.ul.x) + ((tc.y - gt.ul.y) * cmaps.x)];
+                } else fail = true;
+            }
+        }
+        for (Overlay lol : ols) {
+            if (lol.id != id)
+                continue;
+            Area la = lol.a.overlap(a);
+            if (la != null) {
+                for (Coord lc : la)
+                    buf[a.ri(lc)] = true;
+            }
+        }
+        return (fail);
+    }
+
     public MapMesh getcut(Coord cc) {
         synchronized (grids) {
             return (getgrid(cc.div(cutn)).getcut(cc.mod(cutn)));
@@ -1081,6 +1156,12 @@ public class MCache {
         }
     }
 
+    public Optional<FastMesh> getgcuto(Coord cc) {
+        synchronized (grids) {
+            return (getgrido(cc.div(cutn)).flatMap(g -> g.getgcuto(cc.mod(cutn))));
+        }
+    }
+
     public Collection<Gob> getfo(Coord cc) {
         synchronized (grids) {
             return (getgrid(cc.div(cutn)).getfo(cc.mod(cutn)));
@@ -1090,6 +1171,12 @@ public class MCache {
     public Rendered getolcut(OverlayInfo id, Coord cc) {
         synchronized (grids) {
             return (getgrid(cc.div(cutn)).getolcut(id, cc.mod(cutn)));
+        }
+    }
+
+    public Optional<Rendered> getolcuto(OverlayInfo id, Coord cc) {
+        synchronized (grids) {
+            return (getgrido(cc.div(cutn)).flatMap(g -> g.getolcuto(id, cc.mod(cutn))));
         }
     }
 
