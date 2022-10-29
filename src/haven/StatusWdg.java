@@ -19,8 +19,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class StatusWdg extends Widget {
-    private static final Tex hearthlingsplayingdef = Text.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Players: %s"), "?"), Color.WHITE).tex();
-    private static final Tex pingtimedef = Text.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Ping: %s ms"), "?"), Color.WHITE).tex();
+    private static final Tex hearthlingsplayingdef = Text.renderstroked(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Players: %s"), "?")).tex();
+    private static final Tex pingtimedef = Text.renderstroked(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Ping: %s ms"), "?")).tex();
     private Tex players = hearthlingsplayingdef;
     private Tex pingtime = pingtimedef;
     private long lastPingUpdate = System.currentTimeMillis();
@@ -62,7 +62,7 @@ public class StatusWdg extends Widget {
             ping = "?";
 
         synchronized (this) {
-            pingtime = Text.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Ping: %s ms"), ping), Color.WHITE).tex();
+            pingtime = Text.renderstroked(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Ping: %s ms"), ping)).tex();
         }
     }
 
@@ -76,28 +76,26 @@ public class StatusWdg extends Widget {
             } finally {
                 conn.disconnect();
             }
+            StringBuilder brt = new StringBuilder();
             lines.forEach(line -> {
                 if (line.contains("There are")) {
                     String p = line.substring("<p>There are  ".length(), line.length() - " hearthlings playing.</p>".length()); //need testing
-                    players = Text.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Players: %s"), p), Color.WHITE).tex();
+                    players = Text.renderstroked(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Players: %s"), p)).tex();
                 }
-                StringBuilder brt = new StringBuilder();
                 if (configuration.statustooltip) {
-                    if (!line.contains("<div class")) {
+                    if (!line.contains("<div") && !line.contains("</div>")) {
                         line = line.replace("<p>", "");
                         line = line.replace("</p>", "");
                         line = line.replace("<h2>", "");
                         line = line.replace("</h2>", "");
-                        line = line.replace("</div>", "");
-                        while (line.length() > 0 && line.startsWith(" ")) {
+                        while (line.startsWith(" ")) {
                             line = line.substring(" ".length());
                         }
                         brt.append(line).append("\n");
                     }
-                    tooltip = RichText.Parser.quote(String.format("%s", brt));
-                    tooltip = RichText.render((String) tooltip, 250);
                 }
             });
+            if (configuration.statustooltip) tooltip = RichText.render(RichText.Parser.quote(String.format("%s", brt)), 250);
         } catch (SocketException se) {
             // don't print socket exceptions when network is unreachable to prevent console spamming on bad connections
             if (!se.getMessage().equals("Network is unreachable"))
@@ -122,10 +120,5 @@ public class StatusWdg extends Widget {
     public void reqdestroy() {
         executor.shutdown();
         super.reqdestroy();
-    }
-
-    @Override
-    public Object tooltip(Coord c0, Widget prev) {
-        return tooltip;
     }
 }

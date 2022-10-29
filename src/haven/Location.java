@@ -159,6 +159,8 @@ public class Location extends Transform {
         return (new Location(makerot(new Matrix4f(), axis.norm(), angle)));
     }
 
+    public static final Location nullrot = new Location(Transform.nullrot.apply(Matrix4f.id));
+
     public static final Location onlyxl = new Location(Matrix4f.id) {
         private Matrix4f lp = null, fin;
 

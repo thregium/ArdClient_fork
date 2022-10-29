@@ -61,7 +61,7 @@ public abstract class MovableWidget extends Widget {
     public static final double VISIBLE_PER = 0.9;
 
     //Database key
-    private final String key;
+    protected final String key;
     //Whether we want to lock the current position or not
     private boolean lock;
 

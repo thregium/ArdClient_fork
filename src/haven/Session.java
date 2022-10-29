@@ -74,7 +74,8 @@ public class Session implements Resource.Resolver {
             "gfx/hud/chr/custom/asoft"
     };
 
-    DatagramChannel sk;
+//    DatagramChannel sk;
+    DatagramSocket sk;
     SocketAddress server;
     Thread rworker, sworker, ticker;
     Object[] args;
@@ -460,16 +461,17 @@ public class Session implements Resource.Resolver {
         public void run() {
             try {
                 alive = true;
-//                try {
-//                    sk.setSoTimeout(1000);
-//                } catch (SocketException e) {
-//                    throw (new RuntimeException(e));
-//                }
+                try {
+                    sk.setSoTimeout(1000);
+                } catch (SocketException e) {
+                    throw (new RuntimeException(e));
+                }
                 while (alive) {
-                    ByteBuffer p = ByteBuffer.allocate(65536);
-//                    DatagramPacket p = new DatagramPacket(new byte[65536], 65536);
+//                    ByteBuffer p = ByteBuffer.allocate(65536);
+                    DatagramPacket p = new DatagramPacket(new byte[65536], 65536);
                     try {
-                        if (!sk.receive(p).equals(server)) continue;
+//                        if (!sk.receive(p).equals(server)) continue;
+                        sk.receive(p);
                     } catch (ClosedByInterruptException e) {
                         /* Except apparently Sun's J2SE doesn't throw this when interrupted :P*/
                         break;
@@ -478,16 +480,17 @@ public class Session implements Resource.Resolver {
                     } catch (IOException e) {
                         throw (new RuntimeException(e));
                     }
-//                    if (!p.getSocketAddress().equals(server)) continue;
-                    p.flip();
-                    final int length = p.remaining();
-                    final int ptype = p.get();
-                    final byte[] array = new byte[p.remaining()];
-                    p.get(array);
-//                    PMessage msg = new PMessage(p.getData()[0], p.getData(), 1, p.getLength() - 1);
-                    PMessage msg = new PMessage(ptype, array);
-//                    recv += p.getLength();
-                    recv += length;
+                    if (!p.getSocketAddress().equals(server)) continue;
+
+                    PMessage msg = new PMessage(p.getData()[0], p.getData(), 1, p.getLength() - 1);
+                    recv += p.getLength();
+//                    p.flip();
+//                    final int length = p.remaining();
+//                    final int ptype = p.get();
+//                    final byte[] array = new byte[p.remaining()];
+//                    p.get(array);
+//                    PMessage msg = new PMessage(ptype, array);
+//                    recv += length;
                     if (msg.type == MSG_SESS) {
                         if (Objects.equals(state, "conn")) {
                             int error = msg.uint8();
@@ -753,8 +756,9 @@ public class Session implements Resource.Resolver {
         glob = new Glob(this);
         character = new CharacterInfo();
         try {
-            sk = DatagramChannel.open();
-            sk.configureBlocking(true);
+            sk = new DatagramSocket();
+//            sk = DatagramChannel.open();
+//            sk.configureBlocking(true);
         } catch (IOException e) {
             throw (new RuntimeException(e));
         }
@@ -822,8 +826,8 @@ public class Session implements Resource.Resolver {
 
     public void sendmsg(byte[] msg) {
         try {
-//            sk.send(new DatagramPacket(msg, msg.length, server));
-            sk.send(ByteBuffer.wrap(msg), server);
+            sk.send(new DatagramPacket(msg, msg.length, server));
+//            sk.send(ByteBuffer.wrap(msg), server);
             sent += msg.length;
         } catch (IOException e) {
         }

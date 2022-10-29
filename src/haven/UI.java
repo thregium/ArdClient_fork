@@ -359,7 +359,7 @@ public class UI {
                 gui.livestockwnd.applyName(wdg);
             else if (wdg instanceof Label)
                 gui.livestockwnd.applyAttr(cap, wdg);
-            else if (wdg instanceof Avaview)
+            else if (wdg instanceof ProxyFrame)
                 gui.livestockwnd.applyId(wdg);
         } else if (wdg instanceof ISBox && cap.equals("Stockpile")) {
             TextEntry entry = new TextEntry(40, "") {

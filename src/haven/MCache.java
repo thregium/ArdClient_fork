@@ -40,11 +40,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -473,6 +475,9 @@ public class MCache {
             return (cut.ols.get(id));
         }
 
+        private final List<Pair<OverlayInfo, AtomicBoolean>> olloaded = new ArrayList<>();
+        private final List<Pair<OverlayInfo, AtomicReference<Rendered>>> ollast = new ArrayList<>();
+
         public Optional<Rendered> getolcuto(OverlayInfo id, Coord cc) {
             int nseq = MCache.this.olseq;
             if (this.olseq != nseq) {
@@ -488,11 +493,33 @@ public class MCache {
             Cut cut = geticut(cc);
             AtomicReference<Rendered> ret = new AtomicReference<>();
             if (cut.ols.containsKey(id)) ret.set(cut.ols.get(id));
-            else getcuto(cc).flatMap(mm -> mm.makeolo(id)).ifPresent(objs -> {
-                ret.set((Rendered) objs[0]);
-                if (!(Boolean) objs[1])
-                    cut.ols.put(id, (Rendered) objs[0]);
-            });
+            else {
+                Pair<OverlayInfo, AtomicBoolean> pb = olloaded.stream().filter(p -> p.a.equals(id)).findFirst().orElseGet(() -> {
+                    Pair<OverlayInfo, AtomicBoolean> p = new Pair<>(id, new AtomicBoolean(true));
+                    olloaded.add(p);
+                    return (p);
+                });
+                Pair<OverlayInfo, AtomicReference<Rendered>> pr = ollast.stream().filter(p -> p.a.equals(id)).findFirst().orElseGet(() -> {
+                    Pair<OverlayInfo, AtomicReference<Rendered>> p = new Pair<>(id, new AtomicReference<>());
+                    ollast.add(p);
+                    return (p);
+                });
+                if (pb.b.get()) {
+                    getcuto(cc).ifPresent(mm -> {
+                        try {
+                            cut.ols.put(id, mm.makeol(id));
+                            pr.b.set(cut.ols.get(id));
+                            ret.set(pr.b.get());
+                        } catch (Loading l) {
+                            pb.b.set(false);
+                            ret.set(pr.b.get());
+                            l.waitfor(() -> pb.b.set(true), w -> {});
+                        }
+                    });
+                } else {
+                    ret.set(pr.b.get());
+                }
+            }
             return (Optional.ofNullable(ret.get()));
         }
 

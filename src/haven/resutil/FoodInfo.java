@@ -27,42 +27,41 @@
 package haven.resutil;
 
 import haven.CharWnd;
+import static haven.CharWnd.Constipations.color;
+import static haven.CharWnd.Constipations.tflt;
 import haven.CharacterInfo;
+import haven.CompImage;
 import haven.Coord;
 import haven.GItem;
 import haven.ItemData;
 import haven.ItemInfo;
 import haven.OwnerContext;
+import static haven.PUtils.convolvedown;
 import haven.Pair;
 import haven.QualityList;
+import static haven.QualityList.SingleType.Quality;
 import haven.Resource;
 import haven.RichText;
 import haven.Session;
 import haven.TexI;
 import haven.Text;
+import haven.UI;
 import haven.Utils;
 import haven.res.ui.tt.q.qbuff.QBuff;
-
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
-
-import static haven.CharWnd.Constipations.color;
-import static haven.CharWnd.Constipations.tflt;
-import static haven.PUtils.convolvedown;
-import static haven.QualityList.SingleType.Quality;
 
 public class FoodInfo extends ItemInfo.Tip {
     public final double end, glut, cons;
     public final Event[] evs;
     public final Effect[] efs;
     public final int[] types;
-    public static boolean showbaseq = Utils.getprefb("showbaseq", false);;
+    public static boolean showbaseq = Utils.getprefb("showbaseq", false);
+    ;
     private final CharacterInfo.Constipation constipation;
     private final static DecimalFormat basefepfmt = new DecimalFormat("0.##");
 
@@ -116,15 +115,20 @@ public class FoodInfo extends ItemInfo.Tip {
     }
 
     public BufferedImage tipimg() {
-        String head = String.format("Energy: $col[128,128,255]{%s%%}, Hunger: $col[255,192,128]{%s\u2030}", Utils.odformat2(end * 100, 2), Utils.odformat2(glut * 1000, 2));
-        if (cons != 0)
-            head += String.format(", Satiation: $col[192,192,128]{%s%%}", Utils.odformat2(cons * 100, 2));
-        BufferedImage base = RichText.render(head, 0).img;
-        Collection<BufferedImage> imgs = new LinkedList<BufferedImage>();
-        imgs.add(base);
+        UI ui = owner.glob().ui.get();
+        boolean extended = ui != null && ui.modflags() == UI.MOD_SHIFT;
+        CompImage imgs = new CompImage();
+//        Collection<BufferedImage> imgs = new LinkedList<>();
+        imgs.add(RichText.render(String.format("Energy: $col[128,128,255]{%s%%}", Utils.odformat2(end * 100, 2)), 0).img);
+        imgs.add(RichText.render(String.format("Hunger: $col[255,192,128]{%s\u2030}", Utils.odformat2(glut * 1000, 2)), 0).img);
+        if (cons != 0) imgs.add(RichText.render(String.format(", Satiation: $col[192,192,128]{%s%%}", Utils.odformat2(cons * 100, 2)), 0).img);
         double totalFeps = 0;
         for (int i = 0; i < evs.length; i++) {
             totalFeps += evs[i].a;
+        }
+        if (evs.length > 0) {
+            imgs.sz.y += 5;
+            imgs.add(RichText.render("Food Event Points:", 0).img);
         }
         for (int i = 0; i < evs.length; i++) {
             Color col = Utils.blendcol(evs[i].ev.col, Color.WHITE, 0.5);
@@ -140,22 +144,29 @@ public class FoodInfo extends ItemInfo.Tip {
             } else {
                 str = String.format("%s: $col[%d,%d,%d]{%s - %s}", evs[i].ev.nm, col.getRed(), col.getGreen(), col.getBlue(), Utils.odformat2(evs[i].a, 2), Utils.odformat2(evs[i].a / (totalFeps / 100.0), 2) + "%");
             }
-            imgs.add(catimgsh(5, evs[i].img, RichText.render(str, 0).img));
+            imgs.add(catimgsh(5, evs[i].img, RichText.render(str, 0).img), Coord.of(10, imgs.sz.y));
         }
+
+        imgs.sz.y += 5;
+
         if (showbaseq && owner instanceof GItem) {
             QBuff q = ((GItem) owner).quality();
-            imgs.add(RichText.render(String.format("Total FEP: $col[%d,%d,%d]{%s (%s)}, FEP/Hunger: $col[%d,%d,%d]{%s (%s)}",
-                    0, 180, 0, Utils.odformat2(totalFeps, 2), q != null ? Utils.odformat2(totalFeps / Math.sqrt(q.q / 10), 2) : "???",
-                    0, 180, 0, Utils.odformat2(totalFeps / (glut * 1000), 2), q != null ? Utils.odformat2(totalFeps / Math.sqrt(q.q / 10) / (glut * 1000), 2) : "???"), 0).img);
-        } else
-            imgs.add(RichText.render(String.format("Total FEP: $col[%d,%d,%d]{%s}, FEP/Hunger: $col[%d,%d,%d]{%s}", 0, 180, 0, Utils.odformat2(totalFeps, 2), 0, 180, 0, Utils.odformat2(totalFeps / (glut * 1000), 2)), 0).img);
+            imgs.add(RichText.render(String.format("Total FEP: $col[0,180,0]{%s (%s)}", Utils.odformat2(totalFeps, 2), q != null ? Utils.odformat2(totalFeps / Math.sqrt(q.q / 10), 2) : "???"), 0).img);
+            if (extended) imgs.add(RichText.render(String.format("FEP/Hunger: $col[0,180,0]{%s (%s)}", Utils.odformat2(totalFeps / (glut * 1000), 2), q != null ? Utils.odformat2(totalFeps / Math.sqrt(q.q / 10) / (glut * 1000), 2) : "???"), 0).img);
+        } else {
+            imgs.add(RichText.render(String.format("Total FEP: $col[0,180,0]{%s}", Utils.odformat2(totalFeps, 2)), 0).img);
+            if (extended) imgs.add(RichText.render(String.format("FEP/Hunger: $col[0,180,0]{%s}", Utils.odformat2(totalFeps / (glut * 1000), 2)), 0).img);
+        }
+        if (extended) imgs.add(RichText.render(String.format("Energy/Hunger: $col[0,180,0]{%s}", Utils.odformat2((end * 100) / (glut * 1000), 2)), 0).img);
         for (int i = 0; i < efs.length; i++) {
+            imgs.sz.y += 5;
             BufferedImage efi = ItemInfo.longtip(efs[i].info);
             if (efs[i].p != 1)
                 efi = catimgsh(5, efi, RichText.render(String.format("$i{($col[192,192,255]{%d%%} chance)}", (int) Math.round(efs[i].p * 100)), 0).img);
             imgs.add(efi);
         }
         if (types.length > 0 && constipation != null) {
+            imgs.sz.y += 5;
             imgs.add(Text.render("Categories:").img);
             double total = 1;
             for (int type : types) {
@@ -168,7 +179,8 @@ public class FoodInfo extends ItemInfo.Tip {
             Color col = color(total);
             imgs.add(RichText.render(String.format("Total: $col[%d,%d,%d]{%s%%}", col.getRed(), col.getGreen(), col.getBlue(), Utils.odformat2(100 * total, 2)), 0).img);
         }
-        return (catimgs(0, imgs.toArray(new BufferedImage[0])));
+//        return (catimgs(0, imgs.toArray(new BufferedImage[0])));
+        return (imgs.compose());
     }
 
     private static BufferedImage renderConstipation(CharacterInfo.Constipation.Data data) {

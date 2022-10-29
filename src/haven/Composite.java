@@ -48,10 +48,24 @@ public class Composite extends Drawable {
     public List<MD> nmod;
     private List<ED> nequ;
     public List<ED> lastnequ;
+    protected boolean inited;
+    protected Loading error;
 
     public Composite(Gob gob, Indir<Resource> base) {
         super(gob);
         this.base = base;
+        waitforinit();
+    }
+
+    private void waitforinit() {
+        if (inited) return;
+        try {
+            init();
+            inited = true;
+        } catch (Loading l) {
+            error = l;
+            l.waitfor(this::waitforinit, waiting -> {});
+        }
     }
 
     private void init() {
@@ -69,11 +83,7 @@ public class Composite extends Drawable {
     }
 
     public void setup(RenderList rl) {
-        try {
-            init();
-        } catch (Loading e) {
-            return;
-        }
+        if (!inited) return;
         rl.add(comp, null);
     }
 
@@ -121,46 +131,50 @@ public class Composite extends Drawable {
         }
     }
 
+    private int delay = 0;
+
     public void ctick(int dt) {
-        if (comp == null)
-            return;
-        if (nposes != null) {
-            try {
-                Composited.Poses np = comp.new Poses(loadposes(nposes, comp.skel, nposesold));
-                np.set(nposesold ? 0 : ipollen);
+        if (comp == null) {
+            delay += dt;
+        } else {
+            if (nposes != null) {
+                try {
+                    Composited.Poses np = comp.new Poses(loadposes(nposes, comp.skel, nposesold));
+                    np.set(nposesold ? 0 : ipollen);
+                    updequ();
+                    prevposes = nposes;
+                    nposes = null;
+                } catch (Loading e) {
+                }
+            } else if (tposes != null) {
+                try {
+                    final Composited.Poses cp = comp.poses;
+                    Composited.Poses np = comp.new Poses(loadposes(tposes, comp.skel, tpmode)) {
+                        protected void done() {
+                            cp.set(ipollen);
+                            updequ();
+                        }
+                    };
+                    np.limit = tptime;
+                    np.set(ipollen);
+                    tposes = null;
+                    retainequ = true;
+                } catch (Loading e) {
+                }
+            } else if (!retainequ) {
                 updequ();
-                prevposes = nposes;
-                nposes = null;
-            } catch (Loading e) {
             }
-        } else if (tposes != null) {
-            try {
-                final Composited.Poses cp = comp.poses;
-                Composited.Poses np = comp.new Poses(loadposes(tposes, comp.skel, tpmode)) {
-                    protected void done() {
-                        cp.set(ipollen);
-                        updequ();
-                    }
-                };
-                np.limit = tptime;
-                np.set(ipollen);
-                tposes = null;
-                retainequ = true;
-            } catch (Loading e) {
-            }
-        } else if (!retainequ) {
-            updequ();
+            comp.tick(dt);
+            delay = 0;
         }
-        comp.tick(dt);
     }
 
     public Resource getres() {
         return (base.get());
     }
 
-
     public Pose getpose() {
-        init();
+        if (!inited && error != null) throw (error);
         return (comp.pose);
     }
 

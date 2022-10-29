@@ -27,12 +27,10 @@
 package haven;
 
 import haven.sloth.gui.MovableWidget;
-
 import java.awt.Color;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -69,10 +67,16 @@ public class IMeter extends MovableWidget {
         }
     }
 
+    protected float scale = Utils.getpreff("scale-" + this.key, 1f);
+
     private IMeter(Indir<Resource> bg, List<Meter> meters, final String name) {
-        super(fsz, name);
+        super(fsz.mul(Utils.getpreff("scale-" + name, 1f)), name);
         this.bg = bg;
         this.meters = meters;
+    }
+
+    public IMeter(Indir<Resource> bg, final String name) {
+        this(bg, Collections.emptyList(), name);
     }
 
     public static class Meter {
@@ -85,28 +89,33 @@ public class IMeter extends MovableWidget {
         }
     }
 
-    public final Map<String, Tex> infocached = new HashMap<>();
+    protected Tex tex() {
+        return (this.bg.get().layer(Resource.imgc).tex(this.scale));
+    }
+
+    protected void drawBg(GOut g) {
+        g.chcolor(0, 0, 0, 255);
+        g.frect(off.mul(this.scale), msz.mul(this.scale));
+    }
+
+    protected void drawMeters(GOut g) {
+        for (Meter m : meters) {
+            int w = msz.x;
+            w = (w * m.a) / 100;
+            g.chcolor(m.c);
+            g.frect(off.mul(this.scale), Coord.of(w, msz.y).mul(this.scale));
+        }
+    }
 
     public void draw(GOut g) {
+        drawBg(g);
+        drawMeters(g);
+        g.chcolor();
+        if (Config.showmetertext) {
+            if (!meterinfo.isEmpty()) g.atextstroked(meterinfo, sz.div(2).add(10 * this.scale, -1 * this.scale), 0.5, 0.5, Color.WHITE, Color.BLACK, new Text.Foundry(Text.latin, (int) (10 * this.scale)));
+        }
         try {
-            Tex bg = this.bg.get().layer(Resource.imgc).tex();
-            g.chcolor(0, 0, 0, 255);
-            g.frect(off, msz);
-            g.chcolor();
-            for (Meter m : meters) {
-                int w = msz.x;
-                w = (w * m.a) / 100;
-                g.chcolor(m.c);
-                g.frect(off, new Coord(w, msz.y));
-                if (Config.showmetertext) {
-                    g.chcolor();
-//                    new Coord(msz.x / 2 + 10, msz.y / 2 - 1)
-                    Tex info = infocached.computeIfAbsent(meterinfo, i -> Text.renderstroked(i, Color.WHITE, Color.BLACK, Text.num10Fnd).tex());
-                    g.aimage(info, sz.div(2).add(10, -1), 0.5, 0.5);
-                }
-            }
-            g.chcolor();
-            g.image(bg, Coord.z);
+            g.image(tex(), Coord.z);
         } catch (Loading l) {
             //Ignore
         }
@@ -158,10 +167,23 @@ public class IMeter extends MovableWidget {
                 } else {
                     meterinfo = args[0].toString().split(" ")[1];
                 }
-                if (meterinfo.contains("/")) {
-                    meterinfo = Integer.toString(ui.sess.details.shp);
-                }
+//                if (meterinfo.contains("/")) {
+//                    meterinfo = Integer.toString(ui.sess.details.shp);
+//                }
             }
         }
+    }
+
+    public boolean mousewheel(Coord coord, int amount) {
+        if (ui.modflags() == (UI.MOD_CTRL | UI.MOD_META)) {
+            float scale = Math.max(Math.min(this.scale - (0.1f * amount), 5f), 1f);
+            float lastscale = this.scale;
+            Utils.setpreff("scale-" + this.key, this.scale = scale);
+
+            resize(fsz.mul(this.scale));
+            move(c.sub(sz.sub(fsz.mul(lastscale)).div(2)));
+            return (true);
+        }
+        return (super.mousewheel(c, amount));
     }
 }

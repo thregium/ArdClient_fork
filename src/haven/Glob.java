@@ -394,12 +394,12 @@ public class Glob {
                 tempw = new ArrayList<>(weatherinfo);
             }
 
-            infoUpdate(weathertimetex, String.join("", tempw.toArray(new String[0])), () -> new TexI(ItemInfo.catimgs(0, true, tempw.stream().map(in -> Text.render(in).img).toArray(BufferedImage[]::new))));
+            infoUpdate(weathertimetex, String.join("", tempw.toArray(new String[0])), () -> new TexI(ItemInfo.catimgs(0, true, tempw.stream().map(in -> Text.renderstroked(in).img).toArray(BufferedImage[]::new))));
         }
     }
 
     private void infoUpdate(AtomicReference<Pair<String, Tex>> t, String text) {
-        infoUpdate(t, text, () -> Text.render(text).tex());
+        infoUpdate(t, text, () -> Text.renderstroked(text).tex());
     }
 
     private void infoUpdate(AtomicReference<Pair<String, Tex>> t, String text, Supplier<Tex> getter) {

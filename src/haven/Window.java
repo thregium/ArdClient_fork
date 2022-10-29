@@ -523,6 +523,7 @@ public class Window extends MovableWidget implements DTarget {
                 int sizeY = 36 * 7 + 5;
                 int totalLP = 0;
                 int totalAttn = 0;
+                Map<String, String> names = new HashMap<>();
                 HashMap<String, Double> studyTimes = new HashMap<String, Double>();
                 HashMap<String, Integer> AttnTotal = new HashMap<String, Integer>();
                 List<Curio> curiolist = new ArrayList<>();
@@ -532,9 +533,10 @@ public class Window extends MovableWidget implements DTarget {
                             try {
                                 Curiosity ci = ItemInfo.find(Curiosity.class, item.item.info());
                                 totalLP += ci.exp;
-                                curiolist.add(new Curio(item.item.getname(), studyTimes.get(item.item.getname()) == null ? item.item.studytime : studyTimes.get(item.item.getname()) + item.item.studytime, ci.exp));
-                                studyTimes.put(item.item.getname(), studyTimes.get(item.item.getname()) == null ? item.item.studytime : studyTimes.get(item.item.getname()) + item.item.studytime);
-                                AttnTotal.put(item.item.getname(), AttnTotal.get(item.item.getname()) == null ? ci.mw : AttnTotal.get(item.item.getname()));
+                                names.put(item.item.getres().name, item.item.getname());
+                                curiolist.add(new Curio(item.item.getres().name, studyTimes.get(item.item.getres().name) == null ? item.item.studytime : studyTimes.get(item.item.getres().name) + item.item.studytime, ci.exp));
+                                studyTimes.put(item.item.getres().name, studyTimes.get(item.item.getres().name) == null ? item.item.studytime : studyTimes.get(item.item.getres().name) + item.item.studytime);
+                                AttnTotal.put(item.item.getres().name, AttnTotal.get(item.item.getres().name) == null ? ci.mw : AttnTotal.get(item.item.getres().name));
                             } catch (NullPointerException qq) {
                             }
                         }
@@ -561,7 +563,7 @@ public class Window extends MovableWidget implements DTarget {
                     }
                     if (entry.getValue() > Config.curiotimetarget * 3) {
 
-                        g.image(Text.labelFnd.render(entry.getKey() + ": " + sensibleTimeFormat(entry.getValue()) + " - " + sensibleLPFormat(LP), CURIOHIGH.get()).tex(), new Coord(offX, sizeY));
+                        g.image(Text.labelFnd.render(names.get(entry.getKey()) + ": " + sensibleTimeFormat(entry.getValue()) + " - " + sensibleLPFormat(LP), CURIOHIGH.get()).tex(), new Coord(offX, sizeY));
                         sizeY += 15;
                         for (int i = 0; i < Curios.size(); i++) {
                             if (Curios.contains(entry.getKey())) {
@@ -570,7 +572,7 @@ public class Window extends MovableWidget implements DTarget {
                         }
                         GetCurios.add(entry.getKey());
                     } else if (entry.getValue() < Config.curiotimetarget) {
-                        g.image(Text.labelFnd.render(entry.getKey() + ": " + sensibleTimeFormat(entry.getValue()) + " - " + sensibleLPFormat(LP), CURIOLOW.get()).tex(), new Coord(offX, sizeY));
+                        g.image(Text.labelFnd.render(names.get(entry.getKey()) + ": " + sensibleTimeFormat(entry.getValue()) + " - " + sensibleLPFormat(LP), CURIOLOW.get()).tex(), new Coord(offX, sizeY));
                         sizeY += 15;
                         for (int i = 0; i < Curios.size(); i++) {
                             if (Curios.contains(entry.getKey())) {
@@ -580,7 +582,7 @@ public class Window extends MovableWidget implements DTarget {
                         GetCurios.add(entry.getKey());
 
                     } else {
-                        g.image(Text.labelFnd.render(entry.getKey() + ": " + sensibleTimeFormat(entry.getValue()) + " - " + sensibleLPFormat(LP), CURIOTARGET.get()).tex(), new Coord(offX, sizeY));
+                        g.image(Text.labelFnd.render(names.get(entry.getKey()) + ": " + sensibleTimeFormat(entry.getValue()) + " - " + sensibleLPFormat(LP), CURIOTARGET.get()).tex(), new Coord(offX, sizeY));
                         sizeY += 15;
                         for (int i = 0; i < Curios.size(); i++) {
                             if (Curios.contains(entry.getKey())) {

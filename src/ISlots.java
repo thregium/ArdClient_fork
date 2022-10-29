@@ -5,6 +5,7 @@ import haven.GSprite;
 import haven.ItemInfo;
 import haven.ItemInfo.Tip;
 import haven.Loading;
+import static haven.PUtils.convolvedown;
 import haven.ResData;
 import haven.Resource;
 import haven.RichText;
@@ -13,7 +14,6 @@ import haven.UI;
 import haven.Utils;
 import haven.res.lib.tspec.Spec;
 import haven.res.ui.tt.attrmod.AttrMod;
-
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -23,12 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static haven.PUtils.convolvedown;
-
 
 public class ISlots extends Tip implements NumberInfo {
     public static final Text ch = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Gilding:"));
-    public final Collection<SItem> s = new ArrayList<SItem>();
+    public final Collection<SItem> s = new ArrayList<>();
     public final int left;
     public final double pmin, pmax;
     public final Resource[] attrs;
@@ -111,12 +109,7 @@ public class ISlots extends Tip implements NumberInfo {
                 for (Map.Entry<Resource, Integer> entry : sortAttr) {
                     lmods.add(new AttrMod.Mod(entry.getKey(), entry.getValue()));
                 }
-
-                BufferedImage tip = AttrMod.modimg(lmods);
-                l.cmp.add(tip, new Coord(10, l.cmp.sz.y));
-
-                BufferedImage totalString = RichText.render("[Shift for details]", Color.GRAY).img;
-                l.cmp.add(totalString, new Coord(10, l.cmp.sz.y));
+                l.cmp.add(AttrMod.modimg(lmods), new Coord(10, l.cmp.sz.y));
             }
 
         if (left > 0) {

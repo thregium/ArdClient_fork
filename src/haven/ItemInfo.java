@@ -31,7 +31,6 @@ import haven.res.ui.tt.WearFactory;
 import haven.res.ui.tt.attrmod.AttrMod;
 import haven.res.ui.tt.wpn.Damage;
 import modification.dev;
-
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -383,6 +382,28 @@ public abstract class ItemInfo {
             if (img == null)
                 continue;
             g.drawImage(img, right ? w - img.getWidth() : 0, y, null);
+            y += img.getHeight() + margin;
+        }
+        g.dispose();
+        return (ret);
+    }
+
+    public static BufferedImage catimgs_center(int margin, BufferedImage... imgs) {
+        int w = 0, h = -margin;
+        for (BufferedImage img : imgs) {
+            if (img == null)
+                continue;
+            if (img.getWidth() > w)
+                w = img.getWidth();
+            h += img.getHeight() + margin;
+        }
+        BufferedImage ret = TexI.mkbuf(new Coord(w, h));
+        Graphics g = ret.getGraphics();
+        int y = 0;
+        for (BufferedImage img : imgs) {
+            if (img == null)
+                continue;
+            g.drawImage(img, (w - img.getWidth()) / 2, y, null);
             y += img.getHeight() + margin;
         }
         g.dispose();

@@ -1109,6 +1109,9 @@ public class Skeleton {
                     return (pose.new BoneAlign(ref, orig, tgt));
                 });
             };
+            opcodes[4] = buf -> {
+                return (pose -> (Location.nullrot));
+            };
             opcodes[16] = buf -> {
                 final float x = buf.float32();
                 final float y = buf.float32();

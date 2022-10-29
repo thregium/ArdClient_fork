@@ -1075,7 +1075,9 @@ public class Resource implements Serializable {
     public class Image extends Layer implements Comparable<Image>, IDLayer<Integer> {
         public transient BufferedImage img, rawimage;
         private transient BufferedImage scaled;
+        public final List<Pair<Double, BufferedImage>> scaleIList = new ArrayList<>();
         private transient TexI tex, rawtex;
+        public final List<Pair<Double, TexI>> scaleTList = new ArrayList<>();
         public final int z, subz;
         public final boolean nooff;
         public final int id;
@@ -1150,6 +1152,15 @@ public class Resource implements Serializable {
             return (scaled);
         }
 
+        public BufferedImage scaled(double scale) {
+            return (scaleIList.stream().filter(p -> p.a.equals(scale)).findFirst().orElseGet(() -> {
+                Coord sz = Utils.imgsz(rawimage);
+                Pair<Double, BufferedImage> pp = new Pair<>(scale, PUtils.uiscale(rawimage, Coord.of((int) (sz.x / this.scale * scale), (int) (sz.y / this.scale * scale))));
+                scaleIList.add(pp);
+                return (pp);
+            }).b);
+        }
+
         public Tex rawtex() {
             if (rawtex == null) {
                 synchronized (this) {
@@ -1178,6 +1189,18 @@ public class Resource implements Serializable {
                 }
             }
             return (tex);
+        }
+
+        public Tex tex(double scale) {
+            return (scaleTList.stream().filter(p -> p.a.equals(scale)).findFirst().orElseGet(() -> {
+                Pair<Double, TexI> pp = new Pair<>(scale, new TexI(scaled(scale)) {
+                    public String toString() {
+                        return ("TexI(" + Resource.this.name + ", " + id + ")");
+                    }
+                });
+                scaleTList.add(pp);
+                return (pp);
+            }).b);
         }
 
         public TexI texi() {

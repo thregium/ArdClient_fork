@@ -30,6 +30,8 @@ import haven.ItemInfo.AttrCache;
 import haven.automation.WItemDestroyCallback;
 import haven.res.ui.tt.Wear;
 import haven.res.ui.tt.q.qbuff.QBuff;
+import haven.resutil.Curiosity;
+import haven.resutil.FoodInfo;
 import modification.configuration;
 
 import java.awt.Color;
@@ -37,6 +39,7 @@ import java.awt.image.BufferedImage;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static haven.Inventory.sqsz;
@@ -83,23 +86,36 @@ public class WItem extends Widget implements DTarget2 {
         spr.draw(g);
     }
 
-    public synchronized static BufferedImage shorttip(List<ItemInfo> info) {
-        return (ItemInfo.shorttip(info));
+    public static BufferedImage shorttip(List<ItemInfo> info) {
+        synchronized (Collections.unmodifiableList(info)) {
+            return (ItemInfo.shorttip(info));
+        }
     }
 
-    public synchronized static BufferedImage longtip(GItem item, List<ItemInfo> info) {
-        BufferedImage img = ItemInfo.longtip(info);
-        if (img == null) {
-            img = ItemInfo.shorttip(info);
+    public static BufferedImage longtip(GItem item, List<ItemInfo> info) {
+        synchronized (Collections.unmodifiableList(info)) {
+            BufferedImage img = ItemInfo.longtip(info);
+            if (img == null) {
+                img = ItemInfo.shorttip(info);
+            } else {
+                if (info.stream().anyMatch(i -> i instanceof Curiosity || i.getClass().toString().contains("ISlots") || i instanceof FoodInfo)) {
+                    UI ui = item.glob().ui.get();
+                    if (ui != null && ui.modflags() != UI.MOD_SHIFT) {
+                        img = ItemInfo.catimgs_center(5, img, RichText.render("[Shift for details]", new Color(150, 150, 150)).img);
+                    }
+                }
+            }
+            Resource.Pagina pg = item.res.get().layer(Resource.pagina);
+            if (pg != null)
+                img = ItemInfo.catimgs(0, img, RichText.render("\n" + pg.text, 200).img);
+            return (img);
         }
-        Resource.Pagina pg = item.res.get().layer(Resource.pagina);
-        if (pg != null)
-            img = ItemInfo.catimgs(0, img, RichText.render("\n" + pg.text, 200).img);
-        return (img);
     }
 
     public BufferedImage longtip(List<ItemInfo> info) {
-        return (longtip(item, info));
+        synchronized (Collections.unmodifiableList(info)) {
+            return (longtip(item, info));
+        }
     }
 
     public class ItemTip implements Indir<Tex>, ItemInfo.InfoTip {

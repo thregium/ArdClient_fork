@@ -1,39 +1,35 @@
 package haven;
 
-import haven.sloth.gui.MovableWidget;
-
-import java.awt.Color;
-
-public class HungerMeter extends MovableWidget {
-    private static final Tex bg = Resource.loadtex("hud/meter/hungermeter");
-
+public class HungerMeter extends IMeter {
     private final CharWnd.GlutMeter glut;
 
     public HungerMeter(CharWnd.GlutMeter glut, final String name) {
-        super(IMeter.fsz, name);
+        super(Resource.local().load("hud/meter/hungermeter"), name);
         this.glut = glut;
     }
 
     @Override
-    public void draw(GOut g) {
-        if (glut.bg == null)
-            return;
-        Coord isz = IMeter.msz;
-        Coord off = IMeter.off;
+    protected void drawBg(GOut g) {
+        if (glut.bg == null) return;
         g.chcolor(glut.bg);
-        g.frect(off, isz);
+        g.frect(off.mul(this.scale), msz.mul(this.scale));
+    }
+
+    @Override
+    protected void drawMeters(GOut g) {
+        if (glut.fg == null) return;
         g.chcolor(glut.fg);
-        g.frect(off, new Coord((int) Math.round(isz.x * (glut.glut - Math.floor(glut.glut))), isz.y));
-        g.chcolor();
-        g.image(bg, Coord.z);
-        if (Config.showmetertext) {
-            g.atextstroked(String.format("%.2f\u2030:%d%%", glut.lglut * 1000, Math.round(glut.gmod * 100)), sz.div(2).add(10, -1), 0.5, 0.5, Color.WHITE, Color.BLACK, Text.num10Fnd);
-        }
-        super.draw(g);
+        g.frect(off.mul(this.scale), Coord.of((int) Math.round(msz.x * (glut.glut - Math.floor(glut.glut))), msz.y).mul(this.scale));
+    }
+
+    @Override
+    public void tick(double dt) {
+        super.tick(dt);
+        meterinfo = String.format("%.2f\u2030:%d%%", glut.lglut * 1000, Math.round(glut.gmod * 100));
     }
 
     @Override
     public Object tooltip(Coord c, Widget prev) {
-        return glut.tooltip(c, prev);
+        return (glut.tooltip(c, prev));
     }
 }
