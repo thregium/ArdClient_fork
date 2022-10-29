@@ -10,6 +10,7 @@ import haven.GOut;
 import haven.GameUI;
 import haven.Label;
 import haven.MapView;
+import haven.ProxyFrame;
 import haven.Resource;
 import haven.Scrollport;
 import haven.Tex;
