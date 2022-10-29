@@ -1423,7 +1423,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     break plants;
                 }
                 if (res == null) break plants;
-                if (type == Type.PLANT || type == Type.MULTISTAGE_PLANT || res.name.startsWith("gfx/terobjs/plants/")) {
+                if (type == Type.PLANT || type == Type.MULTISTAGE_PLANT) {
                     int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
                     if (cropstgmaxval == 0) {
                         for (FastMesh.MeshRes layer : res.layers(FastMesh.MeshRes.class)) {

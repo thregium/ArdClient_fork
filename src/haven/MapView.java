@@ -1023,7 +1023,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     };
 
     void addgob(RenderList rl, final Gob gob) {
-        if (Config.hidegobs && Config.hideCrops && gob.type != null && (gob.type == Type.PLANT || gob.type == Type.MULTISTAGE_PLANT || gob.getres().name.startsWith("gfx/terobjs/plants/")))
+        if (Config.hidegobs && Config.hideCrops && gob.type != null && (gob.type == Type.PLANT || gob.type == Type.MULTISTAGE_PLANT))
             return;
         GLState xf;
         try {
@@ -3636,7 +3636,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         OCache oc = glob.oc;
         synchronized (oc) {
             for (Gob gob : oc) {
-                if (gob.type == Type.PLANT || gob.type == Type.MULTISTAGE_PLANT || gob.type == Type.TREE || gob.type == Type.BUSH || gob.getres().name.startsWith("gfx/terobjs/plants/"))
+                if (gob.type == Type.PLANT || gob.type == Type.MULTISTAGE_PLANT || gob.type == Type.TREE || gob.type == Type.BUSH)
                     oc.changed(gob);
             }
         }
