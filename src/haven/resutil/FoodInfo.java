@@ -127,7 +127,7 @@ public class FoodInfo extends ItemInfo.Tip {
             totalFeps += evs[i].a;
         }
         if (evs.length > 0) {
-            imgs.sz.y += 5;
+            imgs.sz.y += 3;
             imgs.add(RichText.render("Food Event Points:", 0).img);
         }
         for (int i = 0; i < evs.length; i++) {
@@ -147,8 +147,6 @@ public class FoodInfo extends ItemInfo.Tip {
             imgs.add(catimgsh(5, evs[i].img, RichText.render(str, 0).img), Coord.of(10, imgs.sz.y));
         }
 
-        imgs.sz.y += 5;
-
         if (showbaseq && owner instanceof GItem) {
             QBuff q = ((GItem) owner).quality();
             imgs.add(RichText.render(String.format("Total FEP: $col[0,180,0]{%s (%s)}", Utils.odformat2(totalFeps, 2), q != null ? Utils.odformat2(totalFeps / Math.sqrt(q.q / 10), 2) : "???"), 0).img);
@@ -158,21 +156,21 @@ public class FoodInfo extends ItemInfo.Tip {
             if (extended) imgs.add(RichText.render(String.format("FEP/Hunger: $col[0,180,0]{%s}", Utils.odformat2(totalFeps / (glut * 1000), 2)), 0).img);
         }
         if (extended) imgs.add(RichText.render(String.format("Energy/Hunger: $col[0,180,0]{%s}", Utils.odformat2((end * 100) / (glut * 1000), 2)), 0).img);
+        if (efs.length > 0) imgs.sz.y += 3;
         for (int i = 0; i < efs.length; i++) {
-            imgs.sz.y += 5;
             BufferedImage efi = ItemInfo.longtip(efs[i].info);
             if (efs[i].p != 1)
                 efi = catimgsh(5, efi, RichText.render(String.format("$i{($col[192,192,255]{%d%%} chance)}", (int) Math.round(efs[i].p * 100)), 0).img);
             imgs.add(efi);
         }
         if (types.length > 0 && constipation != null) {
-            imgs.sz.y += 5;
+            imgs.sz.y += 3;
             imgs.add(Text.render("Categories:").img);
             double total = 1;
             for (int type : types) {
                 CharacterInfo.Constipation.Data c = constipation.get(type);
                 if (c != null) {
-                    imgs.add(constipation.render(FoodInfo.class, c));
+                    imgs.add(constipation.render(FoodInfo.class, c), Coord.of(10, imgs.sz.y));
                     total *= c.value;
                 }
             }

@@ -155,8 +155,8 @@ public abstract class ItemInfo {
     }
 
     public static class Layout {
-        private final List<Tip> tips = new ArrayList<Tip>();
-        private final Map<ID, Tip> itab = new HashMap<ID, Tip>();
+        private final List<Tip> tips = new ArrayList<>();
+        private final Map<ID, Tip> itab = new HashMap<>();
         public final CompImage cmp = new CompImage();
         public int width = 0;
 
@@ -204,8 +204,7 @@ public abstract class ItemInfo {
             return (null);
         }
 
-        public void prepare(Layout l) {
-        }
+        public void prepare(Layout l) {}
 
         public void layout(Layout l) {
             try {

@@ -140,7 +140,7 @@ public class Curiosity extends ItemInfo.Tip {
                     rlphs = rlph / size;
                 }
             }
-            imgs.sz.y += 5;
+            imgs.sz.y += 3;
             if (lph > 0)
                 imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/Time") + ": $col[128,128,255]{%s (~%s RL)}", f.format(lph), f.format(rlph)), 0).img);
             if (lpw > 0)
