@@ -399,20 +399,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         //Don't try to discover anything until we know who the plgob is.
         final UI ui = glob.ui.get();
         if (ui != null && ui.gui != null && ui.gui.map != null && ui.gui.map.plgob != -1) {
-            if (type == Type.DUNGEONDOOR) {
-                Defer.later(() -> {
-                    if (getattr(GobIcon.class) == null) {
-                        try {
-                            resources.IndirResource res = resources.getCachedRes("gfx/icons/door");
-                            if (res.get() != null)
-                                setattr(new GobIcon(this, res));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    return null;
-                });
-            }
             if (ui.gui.mapfile != null && resources.customMarkObj) {
                 for (Map.Entry<String, Boolean> entry : resources.customMarks.entrySet()) {
                     if (name.equals(entry.getKey()) && entry.getValue()) {
@@ -463,6 +449,8 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     customIcon = "gfx/invobjs/clay-cave";
                 } else if (name.equals("gfx/terobjs/map/dustpile")) {
                     customIcon = "gfx/invobjs/cavedust";
+                } else if (type == Type.DUNGEONDOOR) {
+                    customIcon = "gfx/icons/door";
                 }
 
                 if (customIcon != null) {

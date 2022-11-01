@@ -72,7 +72,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         public Widget create(UI ui, Object[] args) {
             int res = (Integer) args[0];
             Message sdt = (args.length > 1) ? new MessageBuf((byte[]) args[1]) : Message.nil;
-            return (new GItem(ui.sess.getres(res), sdt));
+            return (new GItem(ui, ui.sess.getres(res), sdt));
         }
     }
 
@@ -149,9 +149,15 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         }
     }
 
-    public GItem(Indir<Resource> res, Message sdt) {
+    public GItem(UI ui, Indir<Resource> res, Message sdt) {
+        this.ui = ui;
         this.res = res;
         this.sdt = new MessageBuf(sdt);
+        waitforinit();
+    }
+
+    public GItem(Indir<Resource> res, Message sdt) {
+        this(null, res, sdt);
     }
 
     public GItem(Indir<Resource> res) {
@@ -195,16 +201,28 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         return (ui.sess.glob);
     }
 
-    public GSprite spr() {
-        GSprite spr = this.spr;
-        if (spr == null) {
-            try {
-                spr = this.spr = GSprite.create(this, res.get(), sdt.clone());
-                //IconService.checkIcon(info(), spr);
-            } catch (Exception l) {
-                dev.simpleLog(l.getMessage());
-            }
+    protected boolean inited;
+    protected Loading error;
+
+    private void init() {
+        if (spr != null) return;
+        this.spr = GSprite.create(this, res.get(), sdt.clone());
+    }
+
+    private void waitforinit() {
+        if (inited) return;
+        try {
+            init();
+            inited = true;
+        } catch (Loading l) {
+            error = l;
+            l.waitfor(this::waitforinit, waiting -> {});
         }
+    }
+
+    public GSprite spr() {
+        if (!inited) return (null);
+        GSprite spr = this.spr;
         if (!postProcessed) {
             try {
                 dropItMaybe();
@@ -224,6 +242,8 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         return "";
     }
 
+    private int delay = 0;
+
     public void tick(double dt) {
         super.tick(dt);
         if (drop) {
@@ -234,8 +254,8 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
             }
         }
         GSprite spr = spr();
-        if (spr != null)
-            spr.tick(dt);
+        if (spr != null) spr.tick(delay + dt);
+        else delay += dt;
         testMatch();
     }
 
@@ -328,6 +348,8 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
                 res = ui.sess.getres((Integer) args[0]);
                 sdt = (args.length > 1) ? new MessageBuf((byte[]) args[1]) : MessageBuf.nil;
                 spr = null;
+                inited = false;
+                waitforinit();
             }
         } else if (name == "tt") {
             info = null;

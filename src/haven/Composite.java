@@ -69,8 +69,7 @@ public class Composite extends Drawable {
     }
 
     private void init() {
-        if (comp != null)
-            return;
+        if (comp != null) return;
         Resource res = base.get();
         comp = new Composited(base.get().layer(Skeleton.Res.class).s);
         comp.eqowner = gob;
@@ -164,7 +163,7 @@ public class Composite extends Drawable {
             } else if (!retainequ) {
                 updequ();
             }
-            comp.tick(dt);
+            comp.tick(delay + dt);
             delay = 0;
         }
     }

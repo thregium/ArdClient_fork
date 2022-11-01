@@ -29,6 +29,7 @@ package haven;
 import modification.Bed;
 import modification.Decal;
 import modification.Fixedplob;
+import modification.dev;
 import java.lang.reflect.Constructor;
 import java.util.LinkedList;
 import java.util.List;
@@ -194,6 +195,7 @@ public abstract class Sprite implements Rendered {
         } catch (Loading l) {
             throw l;
         } catch (Exception e) {
+            dev.simpleLog(e);
             return (new FakeSprite(owner, res, sdt));
         }
         return (new FakeSprite(owner, res, sdt));

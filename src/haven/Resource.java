@@ -38,7 +38,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -121,7 +120,7 @@ public class Resource implements Serializable {
 
     protected Collection<Layer> layers = new LinkedList<>();
     public final String name;
-    public int ver;
+    public int ver, realVer;
     public ResSource source;
     public final transient Pool pool;
     private boolean used = false;
@@ -255,9 +254,18 @@ public class Resource implements Serializable {
     }
 
     private Resource(Pool pool, String name, int ver) {
+        this(pool, name, ver, ver);
+    }
+
+    private Resource(Pool pool, String name, int ver, int realVer) {
         this.pool = pool;
         this.name = name;
         this.ver = ver;
+        this.realVer = realVer;
+    }
+
+    private void setRealVer(int ver) {
+        this.realVer = ver;
     }
 
     public static void setcache(ResCache cache) {
@@ -557,12 +565,19 @@ public class Resource implements Serializable {
         }
 
         private void handle(Queued res) {
+            Map<Integer, Object[]> map = new HashMap<>();
             for (ResSource src : sources) {
                 try {
                     try (InputStream in = src.get(res.name)) {
                         Resource ret = new Resource(this, res.name, res.ver);
                         ret.source = src;
-                        ret.load(in);
+                        Object[] objs = ret.load(in);
+                        ret.setRealVer((Integer) objs[0]);
+                        if (objs[1] != null) {
+                            map.put((Integer) objs[0], new Object[]{src, ret, objs[2]});
+                            throw ((LoadException) objs[1]);
+                        }
+                        ret.loadlayers((Message)objs[2]);
                         res.res = ret;
                         res.error = null;
                         break;
@@ -579,6 +594,19 @@ public class Resource implements Serializable {
                         error.addSuppressed(res.error);
                     }
                     res.error = error;
+                }
+            }
+            if (res.error != null && map.size() > 0) {
+                if (!(res.error instanceof LoadException))
+                    throw (res.error);
+                Integer maxVer = map.keySet().stream().max(Comparator.comparingInt(Integer::intValue)).get();
+                Object[] objs = map.get(maxVer);
+                Resource ret = (Resource)objs[1];
+                ret.source = (ResSource)objs[0];
+                if (!(ret.source instanceof JarSource)) {
+                    ret.loadlayers((Message) objs[2]);
+                    res.res = ret;
+                    res.error = null;
                 }
             }
             res.done();
@@ -808,8 +836,9 @@ public class Resource implements Serializable {
         if (_local == null) {
             synchronized (Resource.class) {
                 if (_local == null) {
-                    Pool local = new Pool(new JarSource("res"));
+                    Pool local = new Pool();
                     try {
+                        local.add(new JarSource("res"));
                         if (Config.resdir != null)
                             local.add(new FileSource(new File(Config.resdir)));
                     } catch (Exception e) {
@@ -830,7 +859,8 @@ public class Resource implements Serializable {
         if (_remote == null) {
             synchronized (Resource.class) {
                 if (_remote == null) {
-                    Pool remote = new Pool(local(), new JarSource("res-preload"));
+                    Pool remote = new Pool(local());
+                    remote.add(new JarSource("res-preload"));
                     if (prscache != null)
                         remote.add(new CacheSource(prscache));
                     _remote = remote;
@@ -1000,7 +1030,6 @@ public class Resource implements Serializable {
         for (Class<?> cl : dolda.jglob.Loader.get(LayerName.class).classes()) {
             String nm = cl.getAnnotation(LayerName.class).value();
             if (LayerFactory.class.isAssignableFrom(cl)) {
-//              addltype(nm, cl.asSubclass(LayerFactory.class).newInstance());
                 addltype(nm, (LayerFactory<?>) Utils.construct(cl.asSubclass(LayerFactory.class)));
             } else if (Layer.class.isAssignableFrom(cl)) {
                 addltype(nm, cl.asSubclass(Layer.class));
@@ -1576,6 +1605,61 @@ public class Resource implements Serializable {
         }
     }
 
+    private static final List<String> overridedResources = new ArrayList<>();
+    protected static final Map<String, Resource> classResources = new HashMap<>();
+
+    static { //don't work
+        for (Class<?> cl : dolda.jglob.Loader.get(FromResource.class).classes()) {
+            String nm = cl.getAnnotation(FromResource.class).name();
+            overridedResources.add(nm);
+        }
+    }
+
+    public class CustomClassLoader extends ClassLoader {
+        public CustomClassLoader(ClassLoader parent) {
+            super(parent);
+        }
+
+        public FromResource getsource(Class<?> cl) {
+            for (; cl != null; cl = cl.getEnclosingClass()) {
+                FromResource src = cl.getAnnotation(FromResource.class);
+                if (src != null) return (src);
+            }
+            return (null);
+        }
+
+        public Resource getres() {
+            return (Resource.this);
+        }
+
+        @Override
+        public Class<?> loadClass(String name) throws ClassNotFoundException {
+            char point = '.';
+            int p = name.lastIndexOf(point);
+            String res = getres().name.replace('/', point);
+            String resname = res + point + (p < 0 ? name : name.substring(name.lastIndexOf(point) + 1));
+            String text = "haven.res" + point + resname;
+            Class<?> cl = super.loadClass(text);
+            classResources.put(text, getres());
+            try {
+                FromResource src = getsource(cl);
+                if (src != null && src.override()) {
+                    if (src.version() != getres().ver) {
+                        dev.simpleLog(String.format("New version of %s is available %d -> %d. Please inform the developer!", text, getres().ver, src.version()));
+                    }
+                }
+                String fmt = "local copy of %s (%s) would be overridden by code from %s";
+
+                Warning.warn(fmt, name, (src == null) ? "unannotated" : String.format("fetched from %s v%d", src.name(), src.version()), String.format("%s v%d", getres().name, getres().ver));
+            } catch (Exception e) {
+                dev.simpleLog(String.format("%s %s %s %s", name, text, res, e.getMessage()));
+                classResources.remove(text);
+                throw (e);
+            }
+            return (cl);
+        }
+    }
+
     public class ResClassLoader extends ClassLoader {
         public ResClassLoader(ClassLoader parent) {
             super(parent);
@@ -1595,6 +1679,9 @@ public class Resource implements Serializable {
             ClassLoader l = cl.getClassLoader();
             if (l instanceof ResClassLoader)
                 return (((ResClassLoader) l).getres());
+            Resource res = classResources.get(cl.getName());
+            if (res != null)
+                return (res);
             throw (new RuntimeException("Cannot fetch resource of non-resloaded class " + cl));
         }));
     }
@@ -1688,6 +1775,8 @@ public class Resource implements Serializable {
                 if (this.loader == null) {
                     this.loader = AccessController.doPrivileged((PrivilegedAction<ClassLoader>) () -> {
                         ClassLoader ret = Resource.class.getClassLoader();
+                        if (overridedResources.contains(Resource.this.name))
+                            ret = new CustomClassLoader(ret);
                         if (classpath.size() > 0) {
                             Collection<ClassLoader> loaders = new LinkedList<>();
                             for (Indir<Resource> res : classpath) {
@@ -1972,7 +2061,7 @@ public class Resource implements Serializable {
 
     public <L extends Layer> L flayer(Class<L> cl) {
         L l = layer(cl);
-        if (l == null) throw (new NoSuchLayerException("no " + cl + " in " + name));
+        if (l == null) throw (new NoSuchLayerException("no " + cl + " in " + name + " " + ver + "(" + realVer + ")"));
         return (l);
     }
 
@@ -1990,7 +2079,7 @@ public class Resource implements Serializable {
 
     public <I, L extends IDLayer<I>> L flayer(Class<L> cl, I id) {
         L l = layer(cl, id);
-        if (l == null) throw (new NoSuchLayerException("no " + cl + " in " + name + " with id " + id));
+        if (l == null) throw (new NoSuchLayerException("no " + cl + " in " + name + " " + ver + "(" + realVer + ")" + " with id " + id));
         return (l);
     }
 
@@ -2003,7 +2092,8 @@ public class Resource implements Serializable {
 
     private final static List<String> depresList = Arrays.asList("gfx/borka/reedweavebelt", "gfx/terobjs/bushes/reeds", "paginae/gov/enact/.*");
 
-    private void load(InputStream st) throws IOException {
+    private Object[] load(InputStream st) throws IOException {
+        LoadException exception = null;
         Message in = new StreamMessage(st);
         if (in.eom()) throw new Message.EOF("Empty stream of " + this);
         byte[] sig = "Haven Resource 1".getBytes(Utils.ascii);
@@ -2012,7 +2102,6 @@ public class Resource implements Serializable {
             throw (new LoadException("Invalid res signature", this));
         }
         int ver = in.uint16();
-        List<Layer> layers = new LinkedList<>();
         if (this.ver == -1)
             this.ver = ver;
         else if (ver == 0 || ver == -1)
@@ -2021,9 +2110,16 @@ public class Resource implements Serializable {
             if (dev.reslog)
                 dev.simpleLog(String.format("Wrong res version (%d != %d) %s", ver, this.ver, this));
             System.out.printf("Wrong res version (%d != %d) %s%n", ver, this.ver, this);
-            if (depresList.stream().noneMatch(name::matches))
-                throw (new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
+            exception = new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this);
+//            if (depresList.stream().noneMatch(name::matches))
+//                throw (exception);
         }
+        //to load layers
+        return (new Object[]{ver, exception, in});
+    }
+
+    private void loadlayers(Message in) {
+        List<Layer> layers = new LinkedList<>();
         while (!in.eom()) {
             String title = in.string();
             LayerFactory<?> lc = ltypes.get(title);
@@ -2456,12 +2552,10 @@ public class Resource implements Serializable {
 
     public static class FakeResource extends Resource {
         public final String realName;
-        public final int realVer;
 
         public FakeResource(String name, int ver) {
-            super(null, "f:" + name, -1);
+            super(null, "f:" + name, -1, ver);
             this.realName = name;
-            this.realVer = ver;
 
             layers.add(Resource.local().loadwait("gfx/invobjs/missing").layer(imgc));
             MessageBuf tooltip = new MessageBuf();
@@ -2475,7 +2569,7 @@ public class Resource implements Serializable {
 
         @Override
         public String toString() {
-            return ("f:" + realName + "(v" + realVer + ")");
+            return ("f:" + realName + "(v" + ver + "(" + realVer + "))");
         }
     }
 }
