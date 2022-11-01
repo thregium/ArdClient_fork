@@ -161,36 +161,43 @@ public abstract class Sprite implements Rendered {
         if (res instanceof Resource.FakeResource) {
             return (new FakeSprite(owner, res, sdt));
         }
-        if (res.name.equals("gfx/terobjs/coronationstone")) {
-            Factory f = new modification.Corostone();
-            return (f.create(owner, res, sdt));
-        }
-        if (res.name.equals("gfx/terobjs/thingwall")) {
-            Factory f = new modification.Thingwall();
-            return (f.create(owner, res, sdt));
-        }
-        if (res.name.startsWith("gfx/terobjs/items/decal-") || res.name.startsWith("gfx/terobjs/items/parchment-decal")) {
-            Factory f = new Decal();
-            return (f.create(owner, res, sdt));
-        }
-        if (res.name.equals("ui/plob-fdir")) {
-            return (new Fixedplob(owner, res, sdt));
-        }
-        if (res.name.equals("gfx/terobjs/furn/bed-sturdy")) {
-            Factory f = new Bed();
-            return (f.create(owner, res, sdt));
-        }
-        {
-            Factory f = res.getcode(Factory.class, false);
-            if (f != null)
+        try {
+            if (res.name.equals("gfx/terobjs/coronationstone")) {
+                Factory f = new modification.Corostone();
                 return (f.create(owner, res, sdt));
+            }
+            if (res.name.equals("gfx/terobjs/thingwall")) {
+                Factory f = new modification.Thingwall();
+                return (f.create(owner, res, sdt));
+            }
+            if (res.name.startsWith("gfx/terobjs/items/decal-") || res.name.startsWith("gfx/terobjs/items/parchment-decal")) {
+                Factory f = new Decal();
+                return (f.create(owner, res, sdt));
+            }
+            if (res.name.equals("ui/plob-fdir")) {
+                return (new Fixedplob(owner, res, sdt));
+            }
+            if (res.name.equals("gfx/terobjs/furn/bed-sturdy")) {
+                Factory f = new Bed();
+                return (f.create(owner, res, sdt));
+            }
+            {
+                Factory f = res.getcode(Factory.class, false);
+                if (f != null)
+                    return (f.create(owner, res, sdt));
+            }
+            for (Factory f : factories) {
+                Sprite ret = f.create(owner, res, sdt);
+                if (ret != null)
+                    return (ret);
+            }
+        } catch (Loading l) {
+            throw l;
+        } catch (Exception e) {
+            return (new FakeSprite(owner, res, sdt));
         }
-        for (Factory f : factories) {
-            Sprite ret = f.create(owner, res, sdt);
-            if (ret != null)
-                return (ret);
-        }
-        throw (new ResourceException("Does not know how to draw resource " + res.name, res));
+        return (new FakeSprite(owner, res, sdt));
+//        throw (new ResourceException("Does not know how to draw resource " + res.name, res));
     }
 
     public void draw(GOut g) {
