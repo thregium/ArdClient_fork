@@ -2981,7 +2981,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         } else if ((placing_l != null) && placing_l.done()) {
             Plob placing = placing_l.get();
             if (placing.lastmc != null) {
-                if (ui.modflags() == 0) wdgmsg("place", placing.rc.floor(posres), (int) Math.round(placing.a * 32768 / Math.PI), button, ui.modflags());
+                if (ui.modflags() != UI.MOD_CTRL) wdgmsg("place", placing.rc.floor(posres), (int) Math.round(placing.a * 32768 / Math.PI), button, ui.modflags());
                 else if (ui.modflags() == UI.MOD_CTRL) delay(new Click(c, 0, button));
             }
         } else if (fakeGob != null) {
