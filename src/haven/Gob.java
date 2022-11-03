@@ -793,6 +793,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         addol(new Overlay(ol));
     }
 
+    public void addol(Indir<Resource> res, Message sdt) {
+        addol(new Overlay(-1, res, sdt));
+    }
+
     public void remol(Overlay ol) {
         synchronized (ols) {
             ols.remove(ol);

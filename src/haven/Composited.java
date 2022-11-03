@@ -47,16 +47,21 @@ public class Composited implements Rendered, MapView.Clickable {
     public Collection<Model> mod = new LinkedList<>();
     public Collection<Equ> equ = new LinkedList<>();
     public Poses poses = new Poses();
-    public List<MD> nmod = null, cmod = new LinkedList<>();
-    public List<ED> nequ = null, cequ = new LinkedList<>();
+    public List<MD> nmod = null;
+    public List<MD> cmod = new LinkedList<>();
+    public List<ED> nequ = null;
+    public List<ED> cequ = new LinkedList<>();
     public Sprite.Owner eqowner = null;
 
     public class Poses {
         public final PoseMod[] mods;
         Pose old;
-        float ipold = 0.0f, ipol = 0.0f;
+        float ipold = 0.0f;
+        float ipol = 0.0f;
         public float limit = -1.0f;
-        public boolean stat, ldone, finished;
+        public boolean stat;
+        public boolean ldone;
+        public boolean finished;
         private Random srnd = new Random();
         private float rsmod = (srnd.nextFloat() * 0.1f) + 0.95f;
 
@@ -128,8 +133,7 @@ public class Composited implements Rendered, MapView.Clickable {
             tick(dt);
         }
 
-        protected void done() {
-        }
+        protected void done() {}
 
         /**
          * Poses are where most of the animation is.
@@ -210,8 +214,7 @@ public class Composited implements Rendered, MapView.Clickable {
             lay.add(new Layer(mat, z, lz++));
         }
 
-        public void draw(GOut g) {
-        }
+        public void draw(GOut g) {}
 
         public boolean setup(RenderList r) {
             m.setup(r);
@@ -317,15 +320,12 @@ public class Composited implements Rendered, MapView.Clickable {
                 if (bone != null)
                     bt = pose.bonetrans(bone.idx);
             }
-            if ((bt == null) && !ed.at.equals("")) {
-                this.et = Location.xlate(ed.off);
-//                throw (new RuntimeException("Transformation " + ed.at + " for equipment " + ed.res + " on skeleton " + skel + " could not be resolved"));
-            } else {
-                if ((ed.off.x != 0.0f) || (ed.off.y != 0.0f) || (ed.off.z != 0.0f))
-                    this.et = GLState.compose(bt, Location.xlate(ed.off));
-                else
-                    this.et = bt;
-            }
+            if ((bt == null) && !ed.at.equals(""))
+                throw (new RuntimeException("Transformation " + ed.at + " for equipment " + ed.res + " on skeleton " + skel + " could not be resolved"));
+            if ((ed.off.x != 0.0f) || (ed.off.y != 0.0f) || (ed.off.z != 0.0f))
+                this.et = GLState.compose(bt, Location.xlate(ed.off));
+            else
+                this.et = bt;
         }
 
         public void tick(int dt) {}
@@ -357,6 +357,7 @@ public class Composited implements Rendered, MapView.Clickable {
             try {
                 MD ret = (MD) super.clone();
                 ret.tex = new ArrayList<>(tex);
+                ret.real = null;
                 return (ret);
             } catch (CloneNotSupportedException e) {
                 /* This is ridiculous. */
@@ -370,10 +371,12 @@ public class Composited implements Rendered, MapView.Clickable {
     }
 
     public static class ED implements Cloneable {
-        public int t, id = -1;
+        public int t;
+        public int id = -1;
         public String at;
         public ResData res;
         public Coord3f off;
+        private Equ real;
 
         public ED(int t, String at, ResData res, Coord3f off) {
             this.t = t;
@@ -400,6 +403,7 @@ public class Composited implements Rendered, MapView.Clickable {
             try {
                 ED ret = (ED) super.clone();
                 ret.res = res.clone();
+                ret.real = null;
                 return (ret);
             } catch (CloneNotSupportedException e) {
                 /* This is ridiculous. */
@@ -472,6 +476,7 @@ public class Composited implements Rendered, MapView.Clickable {
     }
 
     private final Material.Owner matowner = new Material.Owner() {
+        @Override
         public <T> T context(Class<T> cl) {
             if (eqowner == null)
                 throw (new NoContext(cl));
@@ -621,13 +626,13 @@ public class Composited implements Rendered, MapView.Clickable {
     */
 
     public boolean setup(RenderList rl) {
-        try {
-            changes();
-            for (Model mod : this.mod)
-                rl.add(mod, null);
-            for (Equ equ : this.equ)
-                rl.add(equ, equ.et);
-        } catch (Exception e) {}
+//        try {
+        changes();
+        for (Model mod : this.mod)
+            rl.add(mod, null);
+        for (Equ equ : this.equ)
+            rl.add(equ, equ.et);
+//        } catch (Exception e) {}
         return (false);
     }
 

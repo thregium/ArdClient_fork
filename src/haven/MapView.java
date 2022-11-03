@@ -104,6 +104,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.DoubleUnaryOperator;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class MapView extends PView implements DTarget, Console.Directory, PFListener {
@@ -120,7 +121,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     private Collection<Delayed> delayed2 = new LinkedList<>();
     private Collection<Rendered> extradraw = new LinkedList<>();
     public Camera camera = restorecam();
-    public Plob placing = null;
+    public Loader.Future<Plob> placing = null;
     private Grabber grab;
     public Selector selection;
     private MCache.Overlay miningOverlay;
@@ -1435,8 +1436,12 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             rl.add(Config.slothgrid ? grid : gridol, null);
         if (DefSettings.SHOWGOBS.get())
             rl.add(gobs, null);
-        if (placing != null)
-            addgob(rl, placing);
+        Loader.Future<Plob> placing_l = this.placing;
+        if ((placing_l != null) && placing_l.done()) {
+            Plob placing = placing_l.get();
+            if (placing != null)
+                addgob(rl, placing);
+        }
         if (fakeGob != null)
             addfakegrid(rl, fakeGob);
         synchronized (extradraw) {
@@ -2211,10 +2216,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             camload = e;
         }
         updateSpeed(dt);
-        if (placing != null)
-            placing.ctick((int) (dt * 1000));
-        if (fakeGob != null)
-            fakeGob.ctick((int) (dt * 1000));
         if (!movequeue.isEmpty() && (System.currentTimeMillis() - lastMove > 500) && triggermove()) {
             movingto = movequeue.poll();
             if (movingto != null) {
@@ -2234,6 +2235,12 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             clearmovequeue();
         }
         partyHighlight.update();
+
+        Loader.Future<Plob> placing = this.placing;
+        if ((placing != null) && placing.done())
+            placing.get().ctick((int) (dt * 1000));
+        if (fakeGob != null)
+            fakeGob.ctick((int) (dt * 1000));
     }
 
     public void resize(Coord sz) {
@@ -2302,6 +2309,12 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             return (MapView.this);
         }
 
+        void place() {
+            if (ui.mc.isect(rootpos(), sz))
+                delay(new Adjust(ui.mc.sub(rootpos()), 0));
+//            this.slot = basic.add(this.placed);
+        }
+
         private class Adjust extends Maptest {
             int modflags;
 
@@ -2344,18 +2357,51 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 sdt = new MessageBuf((byte[]) args[a++]);
             else
                 sdt = Message.nil;
-            placing = new Plob(res, sdt);
-            while (a < args.length) {
-                Indir<Resource> ores = ui.sess.getres((Integer) args[a++]);
-                Message odt;
-                if ((args.length > a) && (args[a] instanceof byte[]))
-                    odt = new MessageBuf((byte[]) args[a++]);
-                else
-                    odt = Message.nil;
-                placing.ols.add(new Gob.Overlay(-1, ores, odt));
-            }
+//            placing = new Plob(res, sdt);
+//            while (a < args.length) {
+//                Indir<Resource> ores = ui.sess.getres((Integer) args[a++]);
+//                Message odt;
+//                if ((args.length > a) && (args[a] instanceof byte[]))
+//                    odt = new MessageBuf((byte[]) args[a++]);
+//                else
+//                    odt = Message.nil;
+//                placing.ols.add(new Gob.Overlay(-1, ores, odt));
+//            }
+            int oa = a;
+            this.placing = glob.loader.defer(new Supplier<Plob>() {
+                int a = oa;
+                Plob ret = null;
+
+                @Override
+                public Plob get() {
+                    if (ret == null)
+                        ret = new Plob(res, new MessageBuf(sdt));
+                    while (a < args.length) {
+                        int a2 = a;
+                        Indir<Resource> ores = ui.sess.getres((Integer) args[a2++]);
+                        Message odt;
+                        if ((args.length > a2) && (args[a2] instanceof byte[]))
+                            odt = new MessageBuf((byte[]) args[a2++]);
+                        else
+                            odt = Message.nil;
+                        ret.addol(ores, odt);
+                        a = a2;
+                    }
+                    ret.place();
+                    return (ret);
+                }
+            });
         } else if (msg == "unplace") {
-            placing = null;
+            Loader.Future<Plob> placing = this.placing;
+            if (placing != null) {
+                if (!placing.cancel()) {
+//                    Plob ob = placing.get();
+//                    synchronized (ob) {
+//                        ob.slot.remove();
+//                    }
+                }
+                this.placing = null;
+            }
         } else if (msg == "move") {
             cc = ((Coord) args[0]).mul(posres);
         } else if (msg == "plob") {
@@ -2559,7 +2605,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     return;
                 }
             }
-            if (clickb == 3 && ui.modflags() == UI.MOD_META && ui.gui.vhand == null) {
+            if (clickb == 3 && flags == UI.MOD_META && ui.gui.vhand == null) {
                 final Optional<Gob> clickgob = gobFromClick(inf);
                 if (clickgob.isPresent()) {
                     showSpecialMenu(clickgob.get());
@@ -2580,7 +2626,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             } else {
                 lastItemactClickArgs = null;
                 // reset alt so we could walk with alt+lmb while having item on the cursor
-                int modflags = ui.modflags();
+                int modflags = flags;
                 if (ui.gui.vhand != null && clickb == 1)
                     modflags = modflags & ~4;
 
@@ -2595,17 +2641,17 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
                 /*Proximity for aggro or shoot*/
                 if (clickb == 1 && curs != null && (curs.name.equals("gfx/hud/curs/shoot") || curs.name.equals("gfx/hud/curs/atk"))
-                        && (ui.modflags() == UI.MOD_META || Config.proximityaggro || Config.proximityaggropvp)) {
+                        && (flags == UI.MOD_META || Config.proximityaggro || Config.proximityaggropvp)) {
                     boolean isAttack = curs.name.equals("gfx/hud/curs/atk");
                     List<Gob> gobs;
                     synchronized (glob.oc) {
                         gobs = Arrays.stream(glob.oc.getallgobs()).collect(Collectors.toList());
                     }
                     gobs.stream().filter(Gob::isplayer).collect(Collectors.toList()).forEach(gobs::remove);
-                    double offDist = (ui.modflags() == UI.MOD_META) ? configuration.attackproximityradius : 5 * tilesz.x;
+                    double offDist = (flags == UI.MOD_META) ? configuration.attackproximityradius : 5 * tilesz.x;
                     gobs.stream().filter(gob -> gob.rc.dist(mc) > offDist).collect(Collectors.toList()).forEach(gobs::remove);
                     gobs = gobs.stream().filter(gob -> {
-                        if (ui.modflags() == UI.MOD_META) {
+                        if (flags == UI.MOD_META) {
                             return (true);
                         } else if (isAttack && Config.proximityaggropvp && gob.type == Type.HUMAN) {
                             return (true);
@@ -2683,7 +2729,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         //we're inspecting an object, prepared to intercept the system message.
                         ui.gui.inspectedgobid = gob.id;
                     }
-                    if (gob != null && gob.type == Type.TAMEDANIMAL && ui.modflags() == UI.MOD_CTRL && clickb == 1 && Config.shooanimals) {
+                    if (gob != null && gob.type == Type.TAMEDANIMAL && flags == UI.MOD_CTRL && clickb == 1 && Config.shooanimals) {
                         Resource res = gob.getres();
                         if (res != null && (res.name.startsWith("gfx/kritter/horse") ||
                                 res.name.startsWith("gfx/kritter/sheep") ||
@@ -2693,13 +2739,13 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             shooanimal = gob;
                             new Thread(new ShooTargeted(ui.gui), "ShooTargeted").start();
                         }
-                    } else if (ui.modflags() == (UI.MOD_CTRL | UI.MOD_META) && clickb == 1 && gob != null) {
+                    } else if (flags == (UI.MOD_CTRL | UI.MOD_META) && clickb == 1 && gob != null) {
                         if (markedGobs.contains(gob.id))
                             markedGobs.remove(gob.id);
                         else
                             markedGobs.add(gob.id);
                         glob.oc.changed(gob);
-                    } else if (ui.modflags() == UI.MOD_META && clickb == 1) {
+                    } else if (flags == UI.MOD_META && clickb == 1) {
                         if (gobselcb != null)
                             gobselcb.gobselect(gob);
 
@@ -2928,12 +2974,16 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             miningOverlay = null;
         }
         parent.setfocus(this);
+        Loader.Future<Plob> placing_l = this.placing;
         if (button == 2) {
             if (camera.click(c))
                 camdrag = ui.grabmouse(this);
-        } else if (placing != null) {
-            if (placing.lastmc != null)
-                wdgmsg("place", placing.rc.floor(posres), (int) Math.round(placing.a * 32768 / Math.PI), button, ui.modflags());
+        } else if ((placing_l != null) && placing_l.done()) {
+            Plob placing = placing_l.get();
+            if (placing.lastmc != null) {
+                if (ui.modflags() == 0) wdgmsg("place", placing.rc.floor(posres), (int) Math.round(placing.a * 32768 / Math.PI), button, ui.modflags());
+                else if (ui.modflags() == UI.MOD_CTRL) delay(new Click(c, 0, button));
+            }
         } else if (fakeGob != null) {
             fakeGob = null;
         } else if ((grab != null) && grab.mmousedown(c, button)) {
@@ -2982,12 +3032,15 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 delay(new Click(c, ui.modflags(), 1));
         if (grab != null)
             grab.mmousemove(c);
+
+        Loader.Future<Plob> placing_l = this.placing;
         if (camdrag != null) {
             try {
                 ((Camera) camera).drag(c);
             } catch (Exception e) {
             }//ignore exceptions here, possible to cause a crash if you change camera WHILE dragging the camera. Why you'd do this, I have no idea, but pls dont crash from it.
-        } else if (placing != null || fakeGob != null) {
+        } else if ((placing_l != null && placing_l.done()) || fakeGob != null) {
+            Plob placing = placing_l.get();
             if (placing != null) {
                 if ((placing.lastmc == null) || !placing.lastmc.equals(c)) {
                     delay(placing.new Adjust(c, ui.modflags()));
@@ -3132,7 +3185,11 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     public boolean mousewheel(Coord c, int amount) {
         if ((grab != null) && grab.mmousewheel(c, amount))
             return (true);
-        if (placing != null || fakeGob != null) {
+
+        Loader.Future<Plob> placing_l = this.placing;
+        if (((placing_l != null) && (placing_l.done())) || fakeGob != null) {
+            Plob placing = null;
+            if (((placing_l != null) && (placing_l.done()))) placing = placing_l.get();
             boolean pr = placing != null && placing.adjust.rotate(placing, amount, ui.modflags());
             boolean fr = fakeGob != null && fakeGob.adjust.rotate(fakeGob, amount, ui.modflags());
             if (pr || fr)
@@ -3220,7 +3277,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     public boolean keydown(KeyEvent ev) {
-        if (placing != null) {
+        Loader.Future<Plob> placing_l = this.placing;
+        if ((placing_l != null) && (placing_l.done())) {
+            Plob placing = placing_l.get();
             if ((ev.getKeyCode() == KeyEvent.VK_LEFT) && placing.adjust.rotate(placing, -1, ui.modflags()))
                 return (true);
             if ((ev.getKeyCode() == KeyEvent.VK_RIGHT) && placing.adjust.rotate(placing, 1, ui.modflags()))

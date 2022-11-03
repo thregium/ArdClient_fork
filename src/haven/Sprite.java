@@ -83,6 +83,14 @@ public abstract class Sprite implements Rendered {
         }
     }
 
+    public interface CDel {
+        void delete();
+    }
+
+    public interface CUpd {
+        void update(Message sdt);
+    }
+
     public static class FactMaker implements Resource.PublishedCode.Instancer {
         public Factory make(Class<?> cl, Resource ires, Object... args) {
             if (Factory.class.isAssignableFrom(cl))

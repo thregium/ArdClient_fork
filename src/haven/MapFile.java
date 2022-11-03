@@ -122,15 +122,34 @@ public class MapFile {
         return (buf.toString());
     }
 
+    private final List<Pair<String, Object>> sync = new ArrayList<>();
     private InputStream sfetch(String ctl, Object... args) throws IOException {
-        synchronized (store) {
-            return (store.fetch(mangle(String.format(ctl, args))));
+        String name = mangle(String.format(ctl, args));
+        final Pair<String, Object> pp;
+        synchronized (sync) {
+            pp = sync.stream().filter(p -> p.a.equals(name)).findFirst().orElseGet(() -> {
+                Pair<String, Object> p = new Pair<>(name, new Object());
+                sync.add(p);
+                return (p);
+            });
+        }
+        synchronized (pp.b) {
+            return (store.fetch(name));
         }
     }
 
     private OutputStream sstore(String ctl, Object... args) throws IOException {
-        synchronized (store) {
-            return (store.store(mangle(String.format(ctl, args))));
+        String name = mangle(String.format(ctl, args));
+        final Pair<String, Object> pp;
+        synchronized (sync) {
+            pp = sync.stream().filter(p -> p.a.equals(name)).findFirst().orElseGet(() -> {
+                Pair<String, Object> p = new Pair<>(name, new Object());
+                sync.add(p);
+                return (p);
+            });
+        }
+        synchronized (pp.b) {
+            return (store.store(name));
         }
     }
 
@@ -2480,6 +2499,7 @@ public class MapFile {
         }
 
         if (error != null) {
+            map.sendreqs();
             error.waitfor(() -> update(map, cgc), w -> {});
         } else {
             if (!grids.isEmpty()) {
