@@ -26,6 +26,7 @@
 
 package haven;
 
+import haven.res.gfx.terobjs.road.routeindicator.Route;
 import modification.Bed;
 import modification.Decal;
 import modification.Fixedplob;
@@ -171,6 +172,9 @@ public abstract class Sprite implements Rendered {
             return (new FakeSprite(owner, res, sdt));
         }
         try {
+            if (res.name.equals("gfx/terobjs/road/routeindicator")) {
+                return (new Route(owner, res, sdt));
+            }
             if (res.name.equals("gfx/terobjs/coronationstone")) {
                 Factory f = new modification.Corostone();
                 return (f.create(owner, res, sdt));
