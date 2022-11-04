@@ -97,7 +97,9 @@ public class Traverse implements Runnable {
 
     @Override
     public void run() {
-        Coord2d plc = gui.map.player().rc;
+        Gob player = gui.map.player();
+        if (player == null) return;
+        Coord2d plc = player.rc;
         target targetDoor = getTarget(gui, buildings, 40 * 11);
         Gob targetGob = getGob(gui, gobNameSuffix, 40 * 11);
         if ((targetDoor == null) && (targetGob == null))

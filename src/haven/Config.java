@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 import static haven.Utils.getprop;
 
@@ -1358,6 +1359,31 @@ public class Config {
         }
     }
 
+    public static void parsesvcaddr(String spec, Consumer<String> host, Consumer<Integer> port) {
+        if((spec.length() > 0) && (spec.charAt(0) == '[')) {
+            int p = spec.indexOf(']');
+            if(p > 0) {
+                String hspec = spec.substring(1, p);
+                if(spec.length() == p + 1) {
+                    host.accept(hspec);
+                    return;
+                } else if((spec.length() > p + 1) && (spec.charAt(p + 1) == ':')) {
+                    host.accept(hspec);
+                    port.accept(Integer.parseInt(spec.substring(p + 2)));
+                    return;
+                }
+            }
+        }
+        int p = spec.indexOf(':');
+        if(p >= 0) {
+            host.accept(spec.substring(0, p));
+            port.accept(Integer.parseInt(spec.substring(p + 1)));
+            return;
+        } else {
+            host.accept(spec);
+            return;
+        }
+    }
 
     private static void loadLogins() {
         try {
@@ -1439,13 +1465,7 @@ public class Config {
                     profilegpu = true;
                     break;
                 case 'A':
-                    int p = opt.arg.indexOf(':');
-                    if (p >= 0) {
-                        authserv = opt.arg.substring(0, p);
-                        authport = Integer.parseInt(opt.arg.substring(p + 1));
-                    } else {
-                        authserv = opt.arg;
-                    }
+                    parsesvcaddr(opt.arg, s -> authserv = s, p -> authport = p);
                     break;
                 case 'U':
                     try {
@@ -1466,6 +1486,8 @@ public class Config {
                     break;
             }
         }
+        if(opt.rest.length > 0)
+            parsesvcaddr(opt.rest[0], s -> defserv = s, p -> mainport = p);
         if (opt.rest.length > 0) {
             int p = opt.rest[0].indexOf(':');
             if (p >= 0) {

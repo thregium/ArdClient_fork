@@ -1112,6 +1112,11 @@ public class Skeleton {
             opcodes[4] = buf -> {
                 return (pose -> (Location.nullrot));
             };
+            opcodes[5] = buf -> {
+                final float scale = buf.float32();
+                Location loc = Location.scale(scale);
+                return(post -> loc);
+            };
             opcodes[16] = buf -> {
                 final float x = buf.float32();
                 final float y = buf.float32();

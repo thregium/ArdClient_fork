@@ -2,7 +2,7 @@
 
 <project name="hafen" default="deftgt">
     <property name="name" value="ArdClient"/>
-    <property name="version" value="2022.11.03"/>
+    <property name="version" value="2022.11.04"/>
 
     <target name="build-env">
         <mkdir dir="build"/>
@@ -38,7 +38,7 @@
 
     <target name="hafen-client" depends="build-env">
         <javac srcdir="src" destdir="build/classes" debug="on"
-               source="1.8" target="1.8" includeantruntime="no" encoding="UTF-8">
+               source="1.8" target="1.8" includeantruntime="no" encoding="UTF-8" bootclasspath="${boot-classpath}">
             <classpath>
                 <pathelement path="lib/jogl.jar"/>
                 <pathelement path="lib/gluegen-rt.jar"/>
