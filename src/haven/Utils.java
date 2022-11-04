@@ -33,7 +33,6 @@ import haven.sloth.util.ObservableMap;
 import modification.configuration;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.RenderingHints;
@@ -61,7 +60,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -84,7 +89,6 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
@@ -305,6 +309,7 @@ public class Utils {
             throw (new IllegalArgumentException(String.valueOf(cl) + " has a malformed location", e));
         }
     }
+
     public static int drawtext(Graphics g, String text, Coord c) {
         java.awt.FontMetrics m = g.getFontMetrics();
         g.drawString(text, c.x, c.y + m.getAscent());
@@ -1328,6 +1333,7 @@ public class Utils {
                 Thread.currentThread().interrupt();
         }
     }
+
     private static void dumptg(ThreadGroup tg, PrintWriter out, int indent) {
         for (int o = 0; o < indent; o++)
             out.print("    ");
@@ -2347,6 +2353,169 @@ public class Utils {
         while (o.hasNext())
             dst.add(o.next());
         return (dst);
+    }
+
+    public static Inet4Address in4_pton(CharSequence as) {
+        int dbuf = -1, o = 0;
+        byte[] abuf = new byte[4];
+        for (int i = 0; i < as.length(); i++) {
+            char c = as.charAt(i);
+            if ((c >= '0') && (c <= '9')) {
+                dbuf = (((dbuf < 0) ? 0 : dbuf) * 10) + (c - '0');
+                if (dbuf >= 256)
+                    throw (new IllegalArgumentException("illegal octet"));
+            } else if (c == '.') {
+                if (dbuf < 0)
+                    throw (new IllegalArgumentException("dot without preceding octet"));
+                if (o >= 3)
+                    throw (new IllegalArgumentException("too many address octets"));
+                abuf[o++] = (byte) dbuf;
+                dbuf = -1;
+            } else {
+                throw (new IllegalArgumentException("illegal address character"));
+            }
+        }
+        if (dbuf < 0)
+            throw (new IllegalArgumentException("end without preceding octet"));
+        if (o != 3)
+            throw (new IllegalArgumentException("too few address octets"));
+        abuf[o++] = (byte) dbuf;
+        try {
+            return ((Inet4Address) InetAddress.getByAddress(abuf));
+        } catch (UnknownHostException e) {
+            throw (new RuntimeException(e));
+        }
+    }
+
+    public static InetAddress in6_pton(CharSequence as) {
+        int hbuf = -1, dbuf = -1, p = 0, v4map = -1;
+        int[] o = {0, 0};
+        byte[][] abuf = {new byte[16], new byte[16]};
+        String scope = null;
+        for (int i = 0; i < as.length(); i++) {
+            char c = as.charAt(i);
+            int dv = -1;
+            if ((c >= '0') && (c <= '9'))
+                dv = c - '0';
+            else if ((c >= 'A') && (c <= 'F'))
+                dv = c + 10 - 'A';
+            else if ((c >= 'a') && (c <= 'f'))
+                dv = c + 10 - 'a';
+            if (dv >= 0) {
+                if (hbuf < 0)
+                    hbuf = dbuf = 0;
+                hbuf = (hbuf * 16) + dv;
+                if (hbuf >= 65536)
+                    throw (new IllegalArgumentException("illegal address number"));
+                if (dbuf >= 0)
+                    dbuf = (dv >= 10) ? -1 : ((dbuf * 10) + dv);
+                if (dbuf >= 256)
+                    dbuf = -1;
+            } else if (c == ':') {
+                if (v4map >= 0)
+                    throw (new IllegalArgumentException("illegal embedded v4 address"));
+                if (hbuf < 0) {
+                    if (p == 0) {
+                        if (o[p] == 0) {
+                            if ((i < as.length() - 1) && (as.charAt(i + 1) == ':')) {
+                                p = 1;
+                                i++;
+                            } else {
+                                throw (new IllegalArgumentException("colon without preceeding address number"));
+                            }
+                        } else {
+                            p = 1;
+                        }
+                    } else {
+                        throw (new IllegalArgumentException("duplicate zero-string"));
+                    }
+                } else {
+                    if (o[p] >= 14)
+                        throw (new IllegalArgumentException("too many address numbers"));
+                    abuf[p][o[p]++] = (byte) ((hbuf & 0xff00) >> 8);
+                    abuf[p][o[p]++] = (byte) (hbuf & 0x00ff);
+                    hbuf = -1;
+                }
+            } else if (c == '.') {
+                if ((hbuf < 0) || (dbuf < 0))
+                    throw (new IllegalArgumentException("illegal embedded v4 octet"));
+                if ((p == 0) && (o[p] == 0))
+                    throw (new IllegalArgumentException("embedded v4 at start of address"));
+                if (v4map++ >= 2)
+                    throw (new IllegalArgumentException("too many embedded v4 octets"));
+                if (o[p] >= 15)
+                    throw (new IllegalArgumentException("too many address numbers"));
+                abuf[p][o[p]++] = (byte) dbuf;
+                hbuf = -1;
+            } else if (c == '%') {
+                scope = as.subSequence(i + 1, as.length()).toString();
+                break;
+            } else {
+                throw (new IllegalArgumentException("illegal address character"));
+            }
+        }
+        if (hbuf < 0) {
+            if ((p < 1) || (o[p] > 0))
+                throw (new IllegalArgumentException("unterminated address"));
+        } else {
+            if (v4map < 0) {
+                if (o[p] >= 15)
+                    throw (new IllegalArgumentException("too many address numbers"));
+                abuf[p][o[p]++] = (byte) ((hbuf & 0xff00) >> 8);
+                abuf[p][o[p]++] = (byte) (hbuf & 0x00ff);
+            } else {
+                if (dbuf < 0)
+                    throw (new IllegalArgumentException("illegal embedded v4 octet"));
+                if (v4map != 2)
+                    throw (new IllegalArgumentException("too few embedded v4 octets"));
+                if (o[p] >= 16)
+                    throw (new IllegalArgumentException("too many address numbers"));
+                abuf[p][o[p]++] = (byte) dbuf;
+            }
+        }
+        byte[] fbuf;
+        if (p == 0) {
+            if (o[0] != 16)
+                throw (new IllegalArgumentException("too few address numbers"));
+            fbuf = abuf[0];
+        } else {
+            if ((o[0] + o[1]) >= 16)
+                throw (new IllegalArgumentException("illegal zero-string"));
+            fbuf = new byte[16];
+            System.arraycopy(abuf[0], 0, fbuf, 0, o[0]);
+            System.arraycopy(abuf[1], 0, fbuf, 16 - o[1], o[1]);
+        }
+        try {
+            if (scope == null)
+                return (InetAddress.getByAddress(fbuf));
+            try {
+                return (Inet6Address.getByAddress(null, fbuf, Integer.parseInt(scope)));
+            } catch (NumberFormatException e) {
+                try {
+                    NetworkInterface iface = NetworkInterface.getByName(scope);
+                    if (iface == null)
+                        throw (new IllegalArgumentException("could not resolve scoped interface: " + scope));
+                    return (Inet6Address.getByAddress(null, fbuf, iface));
+                } catch (SocketException e2) {
+                    throw (new IllegalArgumentException("could not resolve scoped interface: " + scope, e));
+                }
+            }
+        } catch (UnknownHostException e) {
+            throw (new RuntimeException(e));
+        }
+    }
+
+    public static InetAddress inet_pton(CharSequence as) {
+        try {
+            return (in4_pton(as));
+        } catch (IllegalArgumentException e) {
+            try {
+                return (in6_pton(as));
+            } catch (IllegalArgumentException e2) {
+                e2.addSuppressed(e);
+                throw (e2);
+            }
+        }
     }
 
     public static int sidcmp(Object a, Object b) {

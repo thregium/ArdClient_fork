@@ -47,6 +47,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -59,19 +60,21 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static haven.Utils.getprop;
 
 public class Config {
     public static String revVersion = "1.0";
     public static final File HOMEDIR = new File("").getAbsoluteFile();
-    public static boolean dumpcode = getprop("haven.dumpcode", "off").equals("on");
+    public static boolean dumpcode = Utils.getprop("haven.dumpcode", "off").equals("on");
     public static final boolean iswindows = System.getProperty("os.name").startsWith("Windows");
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
-    public static String resdir = getprop("haven.resdir", System.getenv("HAFEN_RESDIR"));
+    public static String resdir = Utils.getprop("haven.resdir", System.getenv("HAFEN_RESDIR"));
     public static String authuser = null;
     public static String authserv = null;
-    public static String defserv = getprop("haven.defserv", "game.havenandhearth.com");
+    public static String defserv = Utils.getprop("haven.defserv", "game.havenandhearth.com");
     public static URL resurl = geturl("haven.resurl", "https://game.havenandhearth.com/hres/");
     public static boolean dbtext = false;
     public static boolean profile = false;
@@ -318,7 +321,7 @@ public class Config {
     public static String playerposfile;
     public static Double uiscale = getfloat("haven.uiscale", null);
     public static byte[] authck = null;
-    public static String prefspec = getprop("haven.prefspec", "hafen");
+    public static String prefspec = Utils.getprop("haven.prefspec", "hafen");
     //public static String version;
     public static String version = Utils.getpref("version", "1.0");
     public static String newversion;
@@ -1176,7 +1179,7 @@ public class Config {
         Utils.loadCurioList();
         Utils.loadAutodropList();
         String p;
-        if ((p = getprop("haven.authck", null)) != null)
+        if ((p = Utils.getprop("haven.authck", null)) != null)
             authck = Utils.hex2byte(p);
 //        try {
 //            InputStream in = ErrorHandler.class.getResourceAsStream("/buildinfo");
@@ -1342,14 +1345,14 @@ public class Config {
     }
 
     private static int getint(String name, int def) {
-        String val = getprop(name, null);
+        String val = Utils.getprop(name, null);
         if (val == null)
             return (def);
         return (Integer.parseInt(val));
     }
 
     private static URL geturl(String name, String def) {
-        String val = getprop(name, def);
+        String val = Utils.getprop(name, def);
         if (val.equals(""))
             return (null);
         try {
@@ -1382,6 +1385,152 @@ public class Config {
         } else {
             host.accept(spec);
             return;
+        }
+    }
+
+    private static Config global = null;
+
+    public static Config get() {
+        if (global != null)
+            return (global);
+        synchronized (Config.class) {
+            if (global == null)
+                global = new Config();
+            return (global);
+        }
+    }
+
+    private static Properties getjarprops() {
+        Properties ret = new Properties();
+        try (InputStream fp = Config.class.getResourceAsStream("boot-props")) {
+            if (fp != null)
+                ret.load(fp);
+        } catch (Exception exc) {
+            /* XXX? Catch all exceptions? It just seems dumb to
+             * potentially crash here for unforeseen reasons. */
+            new Warning(exc, "unexpected error occurred when loading local properties").issue();
+        }
+        return (ret);
+    }
+
+    private static Properties getlocalprops() {
+        Properties ret = new Properties();
+        try {
+            Path jar = Utils.srcpath(Config.class);
+            if (jar != null) {
+                try (InputStream fp = Files.newInputStream(jar.resolveSibling("haven-config.properties"))) {
+                    ret.load(fp);
+                } catch (NoSuchFileException exc) {
+                    /* That's quite alright. */
+                }
+            }
+        } catch (Exception exc) {
+            new Warning(exc, "unexpected error occurred when loading neighboring properties").issue();
+        }
+        return (ret);
+    }
+
+    public static final Properties jarprops = getjarprops();
+    public final Properties localprops = getlocalprops();
+
+    public String getprop(String name, String def) {
+        String ret;
+        if ((ret = jarprops.getProperty(name)) != null)
+            return (ret);
+        if ((ret = localprops.getProperty(name)) != null)
+            return (ret);
+        return (Utils.getprop(name, def));
+    }
+
+    public static final Path parsepath(String p) {
+        if ((p == null) || p.equals(""))
+            return (null);
+        return (Utils.path(p));
+    }
+
+    public static final URL parseurl(String url) {
+        if ((url == null) || url.equals(""))
+            return (null);
+        try {
+            return (new URL(url));
+        } catch (java.net.MalformedURLException e) {
+            throw (new RuntimeException(e));
+        }
+    }
+
+    public static class Variable<T> {
+        public final Function<Config, T> init;
+        private boolean inited = false;
+        private T val;
+
+        private Variable(Function<Config, T> init) {
+            this.init = init;
+        }
+
+        public T get() {
+            if (!inited) {
+                synchronized (this) {
+                    if (!inited) {
+                        val = init.apply(Config.get());
+                        inited = true;
+                    }
+                }
+            }
+            return (val);
+        }
+
+        public void set(T val) {
+            synchronized (this) {
+                inited = true;
+                this.val = val;
+            }
+        }
+
+        public static <V> Variable<V> def(Supplier<V> defval) {
+            return (new Variable<>(cfg -> defval.get()));
+        }
+
+        public static <V> Variable<V> prop(String name, Function<String, V> parse, Supplier<V> defval) {
+            return (new Variable<>(cfg -> {
+                String pv = cfg.getprop(name, null);
+                return ((pv == null) ? defval.get() : parse.apply(pv));
+            }));
+        }
+
+        public static Variable<String> prop(String name, String defval) {
+            return (prop(name, Function.identity(), () -> defval));
+        }
+
+        public static Variable<Integer> propi(String name, int defval) {
+            return (prop(name, Integer::parseInt, () -> defval));
+        }
+
+        public static Variable<Boolean> propb(String name, boolean defval) {
+            return (prop(name, Utils::parsebool, () -> defval));
+        }
+
+        public static Variable<Double> propf(String name, Double defval) {
+            return (prop(name, Double::parseDouble, () -> defval));
+        }
+
+        public static Variable<byte[]> propb(String name, byte[] defval) {
+            return (prop(name, Utils::hex2byte, () -> defval));
+        }
+
+        public static Variable<URL> propu(String name, URL defval) {
+            return (prop(name, Config::parseurl, () -> defval));
+        }
+
+        public static Variable<URL> propu(String name, String defval) {
+            return (propu(name, parseurl(defval)));
+        }
+
+        public static Variable<Path> propp(String name, Path defval) {
+            return (prop(name, Config::parsepath, () -> defval));
+        }
+
+        public static Variable<Path> propp(String name, String defval) {
+            return (propp(name, parsepath(defval)));
         }
     }
 
@@ -1514,7 +1663,7 @@ public class Config {
     }
 
     private static Double getfloat(String name, Double def) {
-        String val = getprop(name, null);
+        String val = Utils.getprop(name, null);
         if (val == null)
             return (def);
         return (Double.parseDouble(val));
