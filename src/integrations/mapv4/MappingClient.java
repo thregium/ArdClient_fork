@@ -495,6 +495,7 @@ public class MappingClient {
                     }
                 }
                 if (error != null) {
+                    glob.map.sendreqs();
                     error.waitfor(() -> {
                         retries--;
                         if (retries >= 0) {
