@@ -499,7 +499,7 @@ public class MappingClient {
                     error.waitfor(() -> {
                         retries--;
                         if (retries >= 0) {
-                            scheduler.schedule(this, 0L, TimeUnit.SECONDS);
+                            scheduler.schedule(this, 250L, TimeUnit.MILLISECONDS);
                         }
                     }, w -> {});
                 } else scheduler.execute(new UploadGridUpdateTask(new GridUpdate(gridMap, gridRefs)));
@@ -578,10 +578,9 @@ public class MappingClient {
                 Glob glob = Glob.getByReference(accName);
                 MCache.Grid g = grid.get();
                 if (g != null && glob != null && glob.map != null) {
+                    Loading l = MinimapImageGenerator.checkForLoading(glob.map, g);
+                    if (l != null) throw (l);
                     BufferedImage image = MinimapImageGenerator.drawmap(glob.map, g);
-                    if (image == null) {
-                        throw new Loading();
-                    }
                     try {
                         JSONObject extraData = new JSONObject();
                         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -607,9 +606,11 @@ public class MappingClient {
                 }
             } catch (Loading ex) {
                 // Retry on Loading
-                if (retries-- > 0) {
-                    gridsUploader.submit(this);
-                }
+                ex.waitfor(() -> {
+                    if (retries-- > 0) {
+                        gridsUploader.submit(this);
+                    }
+                }, w -> {});
             }
 
         }

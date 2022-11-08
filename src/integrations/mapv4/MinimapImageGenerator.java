@@ -1,6 +1,7 @@
 package integrations.mapv4;
 
 import haven.Coord;
+import haven.Loading;
 import haven.MCache;
 import static haven.MCache.cmaps;
 import haven.Resource;
@@ -29,6 +30,21 @@ public class MinimapImageGenerator {
             texes[t] = img;
         }
         return (img);
+    }
+
+    public static Loading checkForLoading(MCache map, MCache.Grid grid) {
+        Loading error = null;
+        Coord c = new Coord();
+        for (c.y = 0; c.y < MCache.cmaps.y; c.y++) {
+            for (c.x = 0; c.x < MCache.cmaps.x; c.x++) {
+                try {
+                    grid.gettile(c);
+                } catch (Loading l) {
+                    error = l;
+                }
+            }
+        }
+        return (error);
     }
 
     public static BufferedImage drawmap(MCache map, MCache.Grid grid) {
@@ -67,12 +83,14 @@ public class MinimapImageGenerator {
         for (c.y = 0; c.y < MCache.cmaps.y; c.y++) {
             for (c.x = 0; c.x < MCache.cmaps.x; c.x++) {
                 int t = grid.gettile(c);
-                Coord r = c.add(grid.ul);
-                if ((map.gettile(r.add(-1, 0)) > t) ||
-                        (map.gettile(r.add(1, 0)) > t) ||
-                        (map.gettile(r.add(0, -1)) > t) ||
-                        (map.gettile(r.add(0, 1)) > t)) {
-                    buf.setRGB(c.x, c.y, Color.BLACK.getRGB());
+                for (Coord ec : new Coord[]{new Coord(-1, 0), new Coord(1, 0), new Coord(0, -1), new Coord(0, 1)}) {
+                    Coord coord = c.add(ec);
+                    if (coord.x < 0 || coord.x > MCache.cmaps.x - 1 || coord.y < 0 || coord.y > MCache.cmaps.y - 1)
+                        continue;
+                    if (grid.gettile(coord) > t) {
+                        buf.setRGB(c.x, c.y, Color.BLACK.getRGB());
+                        break;
+                    }
                 }
             }
         }
