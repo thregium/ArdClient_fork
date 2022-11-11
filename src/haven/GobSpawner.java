@@ -145,6 +145,7 @@ public class GobSpawner extends Window {
         put("gfx/kritter/wolf/wolf", "Wolves");
         put("gfx/kritter/mole/mole", "Moles");
         put("gfx/kritter/spermwhale/spermwhale", "Whale");
+        put("gfx/kritter/orca/orca", "Orca");
         put("Whale Knocked", "Whale Knocked");
         put("Whale Dead", "Whale Dead");
         put("Whale Swimming", "Whale Swimming");
