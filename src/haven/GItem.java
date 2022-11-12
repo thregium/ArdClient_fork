@@ -245,6 +245,10 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     private int delay = 0;
 
     public void tick(double dt) {
+        if (!inited) {
+            delay += dt;
+            return;
+        }
         super.tick(dt);
         if (drop) {
             dropTimer += dt;
@@ -254,8 +258,10 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
             }
         }
         GSprite spr = spr();
-        if (spr != null) spr.tick(delay + dt);
-        else delay += dt;
+        if (spr != null) {
+            spr.tick(delay + dt);
+            delay = 0;
+        } else delay += dt;
         testMatch();
     }
 
@@ -410,7 +416,8 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         String invname = this.getname();
         for (Map.Entry<String, Boolean> entry : Config.autodroplist.entrySet()) {
             if (entry.getValue() && (invname.equals(entry.getKey()) || resname.equals(entry.getKey()))) {
-                this.wdgmsg("drop", Coord.z);
+                drop = true;
+//                this.wdgmsg("drop", Coord.z);
             }
         }
         if (curs != null && curs.name.equals("gfx/hud/curs/mine")) {
@@ -424,7 +431,8 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
                     Config.dropMinedCrystals && this.getname().contains("Strange Crystal") ||
                     Config.dropMinedSeaShells && this.getname().contains("Petrified Seashell") ||
                     Config.dropMinedQuarryquartz && this.resname().contains("quarryquartz"))
-                this.wdgmsg("drop", Coord.z);
+                drop = true;
+//                this.wdgmsg("drop", Coord.z);
         }
     }
 
