@@ -167,9 +167,10 @@ public class IMeter extends MovableWidget {
                 } else {
                     meterinfo = args[0].toString().split(" ")[1];
                 }
-//                if (meterinfo.contains("/")) {
-//                    meterinfo = Integer.toString(ui.sess.details.shp);
-//                }
+                if (meterinfo.contains("/")) {
+                    String[] hps = meterinfo.split("/");
+                    meterinfo = hps[0] + "/" + hps[hps.length - 1];
+                }
             }
         }
     }
