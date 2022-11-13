@@ -1626,7 +1626,7 @@ public class PBotUtils {
 
     public static boolean placeThing(UI ui, double x, double y, int timeout) {
         ui.gui.map.wdgmsg("place", player(ui).rc.add(x, y).floor(posres), 0, 1, 0);
-        for (int i = 0, sleep = 10; ui.gui.map.placing != null; i += sleep) {
+        for (int i = 0, sleep = 10; ui.gui.map.placing != null && ui.gui.map.placing.done(); i += sleep) {
             if (i >= timeout) {
                 return (false);
             }
@@ -1641,7 +1641,7 @@ public class PBotUtils {
 
     public static boolean unplaceThing(UI ui, int timeout) {
         ui.gui.map.wdgmsg("place", player(ui).rc.floor(posres), 0, 3, 0);
-        for (int i = 0, sleep = 10; ui.gui.map.placing != null; i += sleep) {
+        for (int i = 0, sleep = 10; ui.gui.map.placing != null && ui.gui.map.placing.done(); i += sleep) {
             if (i >= timeout) {
                 return (false);
             }

@@ -552,7 +552,7 @@ public class PBotGobAPI {
 
     public static boolean placeThing(UI ui, double x, double y, int timeout) {
         ui.gui.map.wdgmsg("place", new Coord2d(x, y).floor(posres), 0, 1, 0);
-        for (int i = 0, sleep = 10; ui.gui.map.placing != null; i += sleep) {
+        for (int i = 0, sleep = 10; ui.gui.map.placing != null && ui.gui.map.placing.done(); i += sleep) {
             if (i >= timeout) {
                 return (false);
             }
@@ -567,7 +567,7 @@ public class PBotGobAPI {
 
     public static boolean unplaceThing(UI ui, int timeout) {
         ui.gui.map.wdgmsg("place", player(ui).getRcCoords().floor(posres), 0, 3, 0);
-        for (int i = 0, sleep = 10; ui.gui.map.placing != null; i += sleep) {
+        for (int i = 0, sleep = 10; ui.gui.map.placing != null && ui.gui.map.placing.done(); i += sleep) {
             if (i >= timeout) {
                 return (false);
             }
