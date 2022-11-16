@@ -541,7 +541,7 @@ public class UI {
 
     public void uimsg(int id, String msg, Object... args) {
         Widget wdg;
-        synchronized (this) {
+        synchronized (widgets) {
             wdg = widgets.get(id);
         }
         if (realmchat != null) {

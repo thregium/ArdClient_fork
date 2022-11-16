@@ -30,6 +30,7 @@ package haven;
 import static haven.DefSettings.*;
 import haven.purus.pathfinder.Pathfinder;
 import haven.purus.pbot.PBotDiscord;
+import haven.purus.pbot.PBotScriptlist;
 import haven.purus.pbot.PBotUtils;
 import haven.res.gfx.fx.msrad.MSRad;
 import haven.resutil.BPRadSprite;
@@ -344,6 +345,18 @@ public class OptWnd extends Window {
                 showChangeLog();
             }
         }, new Coord(210, 270));
+        main.add(new Button(200, "Scripts") {
+            public void click() {
+                Widget wdg = getparent(GameUI.class);
+                if (wdg == null) wdg = ui.root;
+
+                PBotScriptlist pblist = ui.root.findchild(PBotScriptlist.class);
+                if (pblist == null) pblist = new PBotScriptlist();
+                else pblist.unlink();
+                wdg.add(pblist);
+                pblist.show(true);
+            }
+        }, new Coord(420, 240));
 
         if (gopts) {
 //            main.add(new Button(200, "Disconnect Discord") {

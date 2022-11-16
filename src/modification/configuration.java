@@ -1363,4 +1363,7 @@ public class configuration {
             return (new HashMap<>(original));
         }
     }
+
+    public static boolean autorunscriptsenable = Utils.getprefb("autorunscriptsenable", false);
+    public static final ObservableCollection<String> autorunscripts = new ObservableCollection<>(Utils.loadcollection("autorunscripts"));
 }

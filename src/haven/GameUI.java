@@ -64,6 +64,7 @@ import modification.newQuickSlotsWdg;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.image.WritableRaster;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -382,7 +383,12 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         highlighted.hide();
         overlayed = add(new OverlayManager());
         overlayed.hide();
-        PBotScriptlist = add(new PBotScriptlist());
+
+        PBotScriptlist pblist = ui.root.findchild(PBotScriptlist.class);
+        if (pblist == null) pblist = new PBotScriptlist();
+        else pblist.unlink();
+
+        PBotScriptlist = add(pblist);
         PBotScriptlist.hide();
         PBotScriptlistold = add(new PBotScriptlistOld());
         PBotScriptlistold.hide();
@@ -399,6 +405,10 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         synchronized (crutchList) {
             crutchList.forEach(Runnable::run);
             crutchList.clear();
+        }
+
+        if (configuration.autorunscriptsenable) {
+            configuration.autorunscripts.forEach(name -> PBotScriptlist.getScript(name.replace(":", File.separator)).runScript());
         }
     }
 

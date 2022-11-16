@@ -140,21 +140,23 @@ public class Curiosity extends ItemInfo.Tip {
                     rlphs = rlph / size;
                 }
             }
-            imgs.sz.y += 3;
-            if (lph > 0)
-                imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/Time") + ": $col[128,128,255]{%s (~%s RL)}", f.format(lph), f.format(rlph)), 0).img);
-            if (lpw > 0)
-                imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/Weight") + ": $col[255,128,255]{%s}", f.format(lpw)), 0).img);
-            if (lphw > 0)
-                imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/Time/Weight") + ": $col[255,128,255]{%s (~%s RL)}", f.format(lphw), f.format(rlphw)), 0).img);
-            if (lpexp > 0)
-                imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/Exp") + ": $col[255,255,128]{%s}", f.format(lpexp)), 0).img);
-            if (lphexp > 0)
-                imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/Time/Exp") + ": $col[255,255,128]{%s (~%s RL)}", f.format(lphexp), f.format(rlphexp)), 0).img);
-            if (lps > 0)
-                imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/Size") + ": $col[128,255,255]{%s}", f.format(lps)), 0).img);
-            if (lphs > 0)
-                imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/Time/Size") + ": $col[128,255,255]{%s (~%s RL)}", f.format(lphs), f.format(rlphs)), 0).img);
+            if (lph > 0 || lpw > 0 || lphw > 0 || lpexp > 0 || lphexp > 0 || lps > 0 || lphs > 0) {
+                imgs.sz.y += 3;
+                if (lph > 0)
+                    imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/Time") + ": $col[128,128,255]{%s (~%s RL)}", f.format(lph), f.format(rlph)), 0).img);
+                if (lpw > 0)
+                    imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/Weight") + ": $col[255,128,255]{%s}", f.format(lpw)), 0).img);
+                if (lphw > 0)
+                    imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/Time/Weight") + ": $col[255,128,255]{%s (~%s RL)}", f.format(lphw), f.format(rlphw)), 0).img);
+                if (lpexp > 0)
+                    imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/Exp") + ": $col[255,255,128]{%s}", f.format(lpexp)), 0).img);
+                if (lphexp > 0)
+                    imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/Time/Exp") + ": $col[255,255,128]{%s (~%s RL)}", f.format(lphexp), f.format(rlphexp)), 0).img);
+                if (lps > 0)
+                    imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/Size") + ": $col[128,255,255]{%s}", f.format(lps)), 0).img);
+                if (lphs > 0)
+                    imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/Time/Size") + ": $col[128,255,255]{%s (~%s RL)}", f.format(lphs), f.format(rlphs)), 0).img);
+            }
         }
         return (imgs.compose());
     }

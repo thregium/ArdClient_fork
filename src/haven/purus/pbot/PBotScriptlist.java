@@ -2,14 +2,17 @@ package haven.purus.pbot;
 
 import haven.Button;
 import haven.Coord;
+import haven.FlowerMenu;
 import haven.GOut;
 import haven.GameUI;
 import haven.Listbox;
 import haven.Text;
 import haven.TextEntry;
 import haven.UI;
+import haven.Utils;
 import haven.Widget;
 import haven.WidgetList;
+import modification.configuration;
 
 import java.io.File;
 import java.io.IOException;
@@ -153,7 +156,27 @@ public class PBotScriptlist extends GameUI.Hidewnd {
         @Override
         public boolean mousedown(Coord c, int button) {
             Coord cc = xlate(sb.c, true);
-            if (!(c.isect(cc, sb.sz) && sb.mousedown(c.add(cc.inv()), button))) {
+            if (button == 3) {
+                PBotScriptlistItem script = itemat(c);
+                if (script != null && !script.isFolder()) {
+                    String fileName = script.scriptFile.toAbsolutePath().toString().substring(System.getProperty("user.dir").length() + 1).replace("/", File.separator).replace("\\", File.separator).replace(File.separator, ":");
+                    FlowerMenu menu = new FlowerMenu(ch -> {
+                        if (ch == -1) return;
+                        if (ch == 0) {
+                            if (configuration.autorunscripts.contains(fileName)) {
+                                configuration.autorunscripts.remove(fileName);
+                            } else {
+                                configuration.autorunscripts.add(fileName);
+                            }
+                            Utils.setcollection("autorunscripts", configuration.autorunscripts.items());
+                        }
+                    }, configuration.autorunscripts.contains(fileName) ? "Remove from autorun" : "Add to autorun");
+                    ui.root.getchilds(FlowerMenu.class).forEach(wdg -> wdg.choose(null));
+                    ui.root.add(menu, ui.mc);
+                    menu.z(1);
+                    return (true);
+                }
+            } else if (!(c.isect(cc, sb.sz) && sb.mousedown(c.add(cc.inv()), button))) {
                 mdItem = itemat(c);
                 if (button == 1 && mdItem != null && !mdItem.isFolder()) {
                     grab = ui.grabmouse(this);
@@ -355,5 +378,21 @@ public class PBotScriptlist extends GameUI.Hidewnd {
 
     public void removeFromList(PBotScript script) {
         threadList.removeFromList(script);
+    }
+
+    @Override
+    public boolean mousedown(Coord c, int button) {
+        if (button == 3 && ui.modflags() == UI.MOD_META) {
+            FlowerMenu menu = new FlowerMenu(ch -> {
+                if (ch == -1) return;
+                if (ch == 0) {
+                    Utils.setprefb("autorunscriptsenable", configuration.autorunscriptsenable = !configuration.autorunscriptsenable);
+                }
+            }, configuration.autorunscriptsenable ? "Disable autorun" : "Enable autorun");
+            ui.root.getchilds(FlowerMenu.class).forEach(wdg -> wdg.choose(null));
+            ui.root.add(menu, ui.mc);
+            return (true);
+        }
+        return (super.mousedown(c, button));
     }
 }

@@ -1138,9 +1138,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         final Map<Gob, GobSet> parts = new HashMap<>();
         Integer ticks = 0;
 
-        {
-            oc.callback(changed);
-        }
+//        {
+//            oc.callback(changed);
+//        }
 
         class GobSet implements Rendered {
             private final String nm;
@@ -1287,6 +1287,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
         Gobs() {
             synchronized (oc) {
+                oc.callback(changed);
                 for (Gob ob : oc)
                     changed.changed(ob);
             }
