@@ -35,34 +35,32 @@ public abstract class GAttrib {
         this.gob = gob;
     }
 
-    public void tick() {
-    }
+    public void tick() {}
 
-    public void ctick(int dt) {
-    }
+    public void ctick(int dt) {}
 
-    public void dispose() {
-    }
+    public void dispose() {}
 
-    public Object staticp() {
-        return (Gob.STATIC);
-    }
+    public Object staticp() {return (Gob.STATIC);}
 
-    public static class ParserMaker implements Resource.PublishedCode.Instancer {
+    public static class ParserMaker implements Resource.PublishedCode.Instancer<Parser> {
         public Parser make(Class<?> cl, Resource ires, Object... argv) {
             if (Parser.class.isAssignableFrom(cl))
-                return (Resource.PublishedCode.Instancer.stdmake(cl.asSubclass(Parser.class), ires, argv));
+                return (Resource.PublishedCode.Instancer.stdmake(Parser.class, cl.asSubclass(Parser.class), ires, argv));
             try {
                 Function<Object[], Void> parse = Utils.smthfun(cl, "parse", Void.TYPE, Gob.class, Message.class);
-                return ((gob, sdt) -> parse.apply(new Object[]{gob, sdt}));
-            } catch (NoSuchMethodException e) {
-            }
+                return (new Parser() {
+                    public void apply(Gob gob, Message sdt) {
+                        parse.apply(new Object[]{gob, sdt});
+                    }
+                });
+            } catch (NoSuchMethodException e) {}
             return (null);
         }
     }
 
     @Resource.PublishedCode(name = "objdelta", instancer = ParserMaker.class)
-    public static interface Parser {
-        public void apply(Gob gob, Message sdt);
+    public interface Parser {
+        void apply(Gob gob, Message sdt);
     }
 }

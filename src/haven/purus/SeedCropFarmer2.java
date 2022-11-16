@@ -8,17 +8,15 @@ import haven.Gob;
 import haven.IMeter;
 import haven.Inventory;
 import haven.Label;
+import static haven.OCache.posres;
 import haven.Resource;
 import haven.Widget;
 import haven.Window;
 import haven.purus.pbot.PBotUtils;
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-
-import static haven.OCache.posres;
 
 public class SeedCropFarmer2 extends Window implements Runnable {
 
@@ -260,12 +258,10 @@ public class SeedCropFarmer2 extends Window implements Runnable {
         double smallX = rc1.x < rc2.x ? rc1.x : rc2.x;
         double bigY = rc1.y > rc2.y ? rc1.y : rc2.y;
         double smallY = rc1.y < rc2.y ? rc1.y : rc2.y;
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
-                if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
-                        && gob.rc.y >= smallY && gob.getres().name.contains(cropName) && gob.getStage() == stage) {
-                    gobs.add(gob);
-                }
+        for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+            if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
+                    && gob.rc.y >= smallY && gob.getres().name.contains(cropName) && gob.getStage() == stage) {
+                gobs.add(gob);
             }
         }
         gobs.sort(new CoordSort());

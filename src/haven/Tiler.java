@@ -236,24 +236,11 @@ public abstract class Tiler {
         return (null);
     }
 
-    public static class FactMaker implements Resource.PublishedCode.Instancer {
-        public Factory make(Class<?> cl, Resource ires, Object... argv) {
-            if (Factory.class.isAssignableFrom(cl)) {
-                return (Resource.PublishedCode.Instancer.stdmake(cl.asSubclass(Factory.class), ires, argv));
-            } else if (Tiler.class.isAssignableFrom(cl)) {
-                Class<? extends Tiler> tcl = cl.asSubclass(Tiler.class);
-                try {
-                    final Constructor<? extends Tiler> cons = tcl.getConstructor(Integer.TYPE, Tileset.class);
-                    return (new Factory() {
-                        public Tiler create(int id, Tileset set) {
-                            return (Utils.construct(cons, id, set));
-                        }
-                    });
-                } catch (NoSuchMethodException e) {
-                }
-                throw (new RuntimeException("Could not find dynamic tiler contructor for " + tcl));
-            }
-            return (null);
+    public static class FactMaker extends Resource.PublishedCode.Instancer.Chain<Factory> {
+        public FactMaker() {
+            super(Factory.class);
+            add(new Direct<>(Factory.class));
+            add(new Construct<>(Factory.class, Tiler.class, new Class<?>[]{Integer.TYPE, Tileset.class}, (cons) -> (id, set) -> cons.apply(new Object[]{id, set})));
         }
     }
 
@@ -269,7 +256,7 @@ public abstract class Tiler {
         public String value();
     }
 
-    private static final Map<String, Factory> rnames = new TreeMap<String, Factory>();
+    private static final Map<String, Factory> rnames = new TreeMap<>();
 
     static {
         java.security.AccessController.doPrivileged(new java.security.PrivilegedAction<Object>() {

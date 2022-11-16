@@ -22,7 +22,6 @@ import haven.Window;
 import haven.purus.pbot.PBotGobAPI;
 import haven.purus.pbot.PBotUtils;
 import haven.sloth.gob.Mark;
-
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -76,6 +75,7 @@ public class MinerAlert extends Window {
     }};
 
     private final Map<String, GobCustomSprite> cachedSpriteList = new HashMap<>();
+
     private GobCustomSprite getCachedSprite(String text, int time) {
         GobCustomSprite gcs = cachedSpriteList.get(text);
         if (gcs == null) {
@@ -288,12 +288,10 @@ public class MinerAlert extends Window {
                                     final Coord2d offset = tcd.sub(new Coord2d(grid.ul));
                                     ui.sess.glob.map.getgrido(grid.id).ifPresent(grid2 -> {
                                         final Coord2d mc2 = new Coord2d(grid2.ul).add(offset.x, offset.y).mul(MCache.tilesz);
-                                        synchronized (ui.sess.glob.oc) {
-                                            maxmarks--;
-                                            final Gob g2 = ui.sess.glob.oc.new ModdedGob(mc2, 0);
-                                            g2.addol(new Mark(4000));
-                                            g2.addol(getCachedSprite(res.basename().substring(0, 1).toUpperCase() + res.basename().substring(1) + " " + smeltchance.get(res.basename()), 4000));
-                                        }
+                                        maxmarks--;
+                                        final Gob g2 = ui.sess.glob.oc.new ModdedGob(mc2, 0);
+                                        g2.addol(new Mark(4000));
+                                        g2.addol(getCachedSprite(res.basename().substring(0, 1).toUpperCase() + res.basename().substring(1) + " " + smeltchance.get(res.basename()), 4000));
                                     });
                                 });
                             }

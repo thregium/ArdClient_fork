@@ -236,22 +236,11 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             public ResAttr mkattr(Gob gob, Message dat);
         }
 
-        public static class FactMaker implements Resource.PublishedCode.Instancer {
-            public Factory make(Class<?> cl, Resource ires, Object... argv) {
-                if (Factory.class.isAssignableFrom(cl))
-                    return (Resource.PublishedCode.Instancer.stdmake(cl.asSubclass(Factory.class), ires, argv));
-                if (ResAttr.class.isAssignableFrom(cl)) {
-                    try {
-                        final java.lang.reflect.Constructor<? extends ResAttr> cons = cl.asSubclass(ResAttr.class).getConstructor(Gob.class, Message.class);
-                        return (new Factory() {
-                            public ResAttr mkattr(Gob gob, Message dat) {
-                                return (Utils.construct(cons, gob, dat));
-                            }
-                        });
-                    } catch (NoSuchMethodException e) {
-                    }
-                }
-                return (null);
+        public static class FactMaker extends Resource.PublishedCode.Instancer.Chain<Factory> {
+            public FactMaker() {
+                super(Factory.class);
+                add(new Direct<>(Factory.class));
+                add(new Construct<>(Factory.class, ResAttr.class, new Class<?>[]{Gob.class, Message.class}, (cons) -> (gob, dat) -> cons.apply(new Object[]{gob, dat})));
             }
         }
     }

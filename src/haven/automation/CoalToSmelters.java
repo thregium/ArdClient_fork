@@ -12,13 +12,13 @@ import haven.Gob;
 import haven.Inventory;
 import haven.Label;
 import haven.Loading;
+import static haven.OCache.posres;
 import haven.Resource;
 import haven.Text;
 import haven.WItem;
 import haven.Widget;
 import haven.Window;
 import haven.purus.pbot.PBotUtils;
-
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -26,8 +26,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-
-import static haven.OCache.posres;
 
 public class CoalToSmelters extends Window implements GobSelectCallback {
     private static final Text.Foundry infof = new Text.Foundry(Text.sans, 10).aa(true);
@@ -923,10 +921,8 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
                 return;
 
             // make sure stockpile still exists
-            synchronized (glob.oc) {
-                if (glob.oc.getgob(s.id) == null)
-                    continue;
-            }
+            if (glob.oc.getgob(s.id) == null)
+                continue;
 
 
             System.out.println("Triggering stockpile shift rightclick");
@@ -960,10 +956,8 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
                 return;
 
             // make sure stockpile still exists
-            synchronized (glob.oc) {
-                if (glob.oc.getgob(s.id) == null)
-                    continue;
-            }
+            if (glob.oc.getgob(s.id) == null)
+                continue;
             int freeslots = PBotUtils.invFreeSlots(ui);
 
 
@@ -1076,13 +1070,11 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
         double smallX = selectedAreaA.x < selectedAreaB.x ? selectedAreaA.x : selectedAreaB.x;
         double bigY = selectedAreaA.y > selectedAreaB.y ? selectedAreaA.y : selectedAreaB.y;
         double smallY = selectedAreaA.y < selectedAreaB.y ? selectedAreaA.y : selectedAreaB.y;
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
-                if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
-                        && gob.rc.y >= smallY && gob.getres().name.contains("smelter") || gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
-                        && gob.rc.y >= smallY && gob.getres().name.contains("oven")) {
-                    gobs.add(gob);
-                }
+        for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+            if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
+                    && gob.rc.y >= smallY && gob.getres().name.contains("smelter") || gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
+                    && gob.rc.y >= smallY && gob.getres().name.contains("oven")) {
+                gobs.add(gob);
             }
         }
         gobs.sort(new CoordSortSmelters());
@@ -1096,14 +1088,12 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
         double smallX = selectedAreaA.x < selectedAreaB.x ? selectedAreaA.x : selectedAreaB.x;
         double bigY = selectedAreaA.y > selectedAreaB.y ? selectedAreaA.y : selectedAreaB.y;
         double smallY = selectedAreaA.y < selectedAreaB.y ? selectedAreaA.y : selectedAreaB.y;
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
-                if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
-                        && gob.rc.y >= smallY && gob.getres().name.contains("branch") || gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
-                        && gob.rc.y >= smallY && gob.getres().name.contains("coal") || gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
-                        && gob.rc.y >= smallY && gob.getres().name.contains("ore")) {
-                    gobs.add(gob);
-                }
+        for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+            if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
+                    && gob.rc.y >= smallY && gob.getres().name.contains("branch") || gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
+                    && gob.rc.y >= smallY && gob.getres().name.contains("coal") || gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
+                    && gob.rc.y >= smallY && gob.getres().name.contains("ore")) {
+                gobs.add(gob);
             }
         }
         gobs.sort(new CoordSort());

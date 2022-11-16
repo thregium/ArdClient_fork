@@ -8,6 +8,7 @@ import haven.Glob;
 import haven.Gob;
 import haven.Inventory;
 import haven.Label;
+import static haven.OCache.posres;
 import haven.Resource;
 import haven.Text;
 import haven.VMeter;
@@ -16,7 +17,6 @@ import haven.Widget;
 import haven.Window;
 import haven.purus.pbot.PBotUtils;
 import net.dv8tion.jda.core.entities.TextChannel;
-
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -24,8 +24,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-
-import static haven.OCache.posres;
 
 
 public class SteelRefueler extends Window implements GobSelectCallback {
@@ -372,10 +370,8 @@ public class SteelRefueler extends Window implements GobSelectCallback {
                 return;
 
             // make sure stockpile still exists
-            synchronized (glob.oc) {
-                if (glob.oc.getgob(s.id) == null)
-                    continue;
-            }
+            if (glob.oc.getgob(s.id) == null)
+                continue;
 
             PBotUtils.pfRightClick(ui, s, 1);
             while (!PBotUtils.player(ui).isMoving())
@@ -441,12 +437,10 @@ public class SteelRefueler extends Window implements GobSelectCallback {
         double smallX = selectedAreaA.x < selectedAreaB.x ? selectedAreaA.x : selectedAreaB.x;
         double bigY = selectedAreaA.y > selectedAreaB.y ? selectedAreaA.y : selectedAreaB.y;
         double smallY = selectedAreaA.y < selectedAreaB.y ? selectedAreaA.y : selectedAreaB.y;
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
-                if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
-                        && gob.rc.y >= smallY && gob.getres().name.contains("steel")) {
-                    gobs.add(gob);
-                }
+        for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+            if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
+                    && gob.rc.y >= smallY && gob.getres().name.contains("steel")) {
+                gobs.add(gob);
             }
         }
         gobs.sort(new CoordSort());
@@ -460,13 +454,11 @@ public class SteelRefueler extends Window implements GobSelectCallback {
         double smallX = selectedAreaA.x < selectedAreaB.x ? selectedAreaA.x : selectedAreaB.x;
         double bigY = selectedAreaA.y > selectedAreaB.y ? selectedAreaA.y : selectedAreaB.y;
         double smallY = selectedAreaA.y < selectedAreaB.y ? selectedAreaA.y : selectedAreaB.y;
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
-                if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY && gob.rc.y >= smallY && gob.getres().name.contains("branch") ||
-                        gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY && gob.rc.y >= smallY && gob.getres().name.contains("coal") ||
-                        gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY && gob.rc.y >= smallY && gob.getres().name.contains("block")) {
-                    gobs.add(gob);
-                }
+        for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+            if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY && gob.rc.y >= smallY && gob.getres().name.contains("branch") ||
+                    gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY && gob.rc.y >= smallY && gob.getres().name.contains("coal") ||
+                    gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY && gob.rc.y >= smallY && gob.getres().name.contains("block")) {
+                gobs.add(gob);
             }
         }
         gobs.sort(new CoordSort());

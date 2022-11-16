@@ -11,11 +11,9 @@ import haven.Text;
 import haven.Widget;
 import haven.Window;
 import haven.purus.pbot.PBotUtils;
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 
 public class PepperBotUp extends Window implements GobSelectCallback {
@@ -203,24 +201,22 @@ public class PepperBotUp extends Window implements GobSelectCallback {
         double smallX = Math.min(rc1.x, rc2.x);
         double bigY = Math.max(rc1.y, rc2.y);
         double smallY = Math.min(rc1.y, rc2.y);
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
-                if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
-                        && gob.rc.y >= smallY && cropName.contains(gob.getres().name)) {
-                    // Add to list if its max stage
-                    if (checkStage) {
-                        int cropstgmaxval = 0;
-                        for (FastMesh.MeshRes layer : gob.getres().layers(FastMesh.MeshRes.class)) {
-                            int stg = layer.id / 10;
-                            if (stg > cropstgmaxval)
-                                cropstgmaxval = stg;
-                        }
-                        if (gob.getStage() == cropstgmaxval) {
-                            gobs.add(gob);
-                        }
-                    } else
+        for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+            if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
+                    && gob.rc.y >= smallY && cropName.contains(gob.getres().name)) {
+                // Add to list if its max stage
+                if (checkStage) {
+                    int cropstgmaxval = 0;
+                    for (FastMesh.MeshRes layer : gob.getres().layers(FastMesh.MeshRes.class)) {
+                        int stg = layer.id / 10;
+                        if (stg > cropstgmaxval)
+                            cropstgmaxval = stg;
+                    }
+                    if (gob.getStage() == cropstgmaxval) {
                         gobs.add(gob);
-                }
+                    }
+                } else
+                    gobs.add(gob);
             }
         }
         gobs.sort(new CoordSort());
@@ -235,13 +231,11 @@ public class PepperBotUp extends Window implements GobSelectCallback {
         double smallX = Math.min(rc1.x, rc2.x);
         double bigY = Math.max(rc1.y, rc2.y);
         double smallY = Math.min(rc1.y, rc2.y);
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
-                if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
-                        && gob.rc.y >= smallY && storagesTypes.contains(gob.getres().name)) {
-                    // Add to list if its max stage
-                    gobs.add(gob);
-                }
+        for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+            if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
+                    && gob.rc.y >= smallY && storagesTypes.contains(gob.getres().name)) {
+                // Add to list if its max stage
+                gobs.add(gob);
             }
         }
         gobs.sort(new CoordSort());
@@ -256,12 +250,10 @@ public class PepperBotUp extends Window implements GobSelectCallback {
         double smallX = Math.min(rc1.x, rc2.x);
         double bigY = Math.max(rc1.y, rc2.y);
         double smallY = Math.min(rc1.y, rc2.y);
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
-                if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
-                        && gob.rc.y >= smallY && gob.getres().basename().contains("htable")) {
-                    gobs.add(gob);
-                }
+        for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+            if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
+                    && gob.rc.y >= smallY && gob.getres().basename().contains("htable")) {
+                gobs.add(gob);
             }
         }
         gobs.sort(new CoordSort());

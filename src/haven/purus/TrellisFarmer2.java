@@ -8,18 +8,16 @@ import haven.GItem;
 import haven.Gob;
 import haven.Inventory;
 import haven.Label;
+import static haven.OCache.posres;
 import haven.Resource;
 import haven.Widget;
 import haven.Window;
 import haven.purus.pbot.PBotCharacterAPI;
 import haven.purus.pbot.PBotUtils;
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
-import static haven.OCache.posres;
 
 public class TrellisFarmer2 extends Window implements Runnable {
 
@@ -294,18 +292,16 @@ public class TrellisFarmer2 extends Window implements Runnable {
         double smallX = Math.min(rc1.x, rc2.x);
         double bigY = Math.max(rc1.y, rc2.y);
         double smallY = Math.min(rc1.y, rc2.y);
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
-                if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
-                        && gob.rc.y >= smallY && cropName.contains(gob.getres().name)) {
-                    // Add to list if its max stage
-                    if (checkStage) {
-                        if (gob.getStage() == getMaxStage(gob)) {
-                            gobs.add(gob);
-                        }
-                    } else
+        for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+            if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
+                    && gob.rc.y >= smallY && cropName.contains(gob.getres().name)) {
+                // Add to list if its max stage
+                if (checkStage) {
+                    if (gob.getStage() == getMaxStage(gob)) {
                         gobs.add(gob);
-                }
+                    }
+                } else
+                    gobs.add(gob);
             }
         }
         gobs.sort(new CoordSort());
@@ -319,12 +315,10 @@ public class TrellisFarmer2 extends Window implements Runnable {
         double smallX = Math.min(rc1.x, rc2.x);
         double bigY = Math.max(rc1.y, rc2.y);
         double smallY = Math.min(rc1.y, rc2.y);
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
-                if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
-                        && gob.rc.y >= smallY && gob.getres().name.equals(trellis)) {
-                    gobs.add(gob);
-                }
+        for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+            if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
+                    && gob.rc.y >= smallY && gob.getres().name.equals(trellis)) {
+                gobs.add(gob);
             }
         }
         gobs.sort(new CoordSort());

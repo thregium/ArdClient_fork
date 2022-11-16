@@ -413,7 +413,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         Resource res = this.resource();
         String name = res.basename();
         String resname = res.name;
-        String invname = this.getname();
+        String invname = ItemInfo.find(ItemInfo.Name.class, info()).str.text;
         for (Map.Entry<String, Boolean> entry : Config.autodroplist.entrySet()) {
             if (entry.getValue() && (invname.equals(entry.getKey()) || resname.equals(entry.getKey()))) {
                 drop = true;
@@ -427,10 +427,10 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
             if (Config.dropMinedStones && Config.mineablesStone.contains(name) ||
                     Config.dropMinedOre && Config.mineablesOre.contains(name) ||
                     Config.dropMinedOrePrecious && Config.mineablesOrePrecious.contains(name) ||
-                    Config.dropMinedCatGold && this.getname().contains("Cat Gold") ||
-                    Config.dropMinedCrystals && this.getname().contains("Strange Crystal") ||
-                    Config.dropMinedSeaShells && this.getname().contains("Petrified Seashell") ||
-                    Config.dropMinedQuarryquartz && this.resname().contains("quarryquartz"))
+                    Config.dropMinedCatGold && invname.contains("Cat Gold") ||
+                    Config.dropMinedCrystals && invname.contains("Strange Crystal") ||
+                    Config.dropMinedSeaShells && invname.contains("Petrified Seashell") ||
+                    Config.dropMinedQuarryquartz && invname.contains("quarryquartz"))
                 drop = true;
 //                this.wdgmsg("drop", Coord.z);
         }

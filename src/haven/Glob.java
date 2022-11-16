@@ -476,7 +476,7 @@ public class Glob {
                         Indir<Resource> res = sess.getres(((Number) a[n++]).intValue());
                         Object[] args = (Object[]) a[n++];
                         Object curv = wmap.get(res);
-                        tempw.add(res.toString() + " " + Arrays.deepToString(args));
+                        tempw.add(resToHuman(res.toString()) + " " + Arrays.deepToString(args));
                         if (curv instanceof Weather) {
                             Weather cur = (Weather) curv;
                             cur.update(args);
@@ -496,6 +496,15 @@ public class Glob {
                 System.err.println("Unknown globlob type: " + t);
             }
         }
+    }
+
+    private String resToHuman(final String text) {
+        if (text.matches(".*gfx/fx/rain.*")) return ("Rainy");
+        if (text.matches(".*gfx/fx/wet.*")) return ("Wet");
+        if (text.matches(".*gfx/fx/snow.*")) return ("Snowy");
+        if (text.matches(".*gfx/fx/seasonmap.*")) return ("Season Effect");
+        if (text.matches(".*gfx/fx/clouds.*")) return ("Cloudy");
+        return (text);
     }
 
     public final Iterable<Weather> weather = new Iterable<Weather>() {

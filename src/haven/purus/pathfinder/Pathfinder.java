@@ -7,9 +7,12 @@ import haven.Gob;
 import static haven.MCache.cmaps;
 import static haven.MCache.tilesz;
 import static haven.MCache.tilesz2;
+import static haven.OCache.posres;
 import haven.Resource;
 import haven.Tiler;
-
+import haven.resutil.TerrainTile;
+import haven.sloth.script.pathfinding.Hitbox;
+import modification.configuration;
 import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -25,11 +28,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-
-import static haven.OCache.posres;
-import haven.resutil.TerrainTile;
-import haven.sloth.script.pathfinding.Hitbox;
-import modification.configuration;
 
 public class Pathfinder extends Thread {
 
@@ -194,64 +192,62 @@ public class Pathfinder extends Thread {
                     }
                 }
                 long start = System.currentTimeMillis();
-                synchronized (gui.ui.sess.glob.oc) {
-                    for (Gob gob : gui.ui.sess.glob.oc) {
-                        if (gob.isplayer())
-                            continue;
-                        Hitbox[] box = Hitbox.hbfor(gob);
-                        if (box == null) continue;
-                        for (Hitbox hitbox : box) {
-                            if (!whitelistedGobs.contains(gob.getres().name) && hitbox.ishitable()) {//FIXME
-                                Coord2d rel = gob.rc.sub(origin);
+                for (Gob gob : gui.ui.sess.glob.oc.getallgobs()) {
+                    if (gob.isplayer())
+                        continue;
+                    Hitbox[] box = Hitbox.hbfor(gob);
+                    if (box == null) continue;
+                    for (Hitbox hitbox : box) {
+                        if (!whitelistedGobs.contains(gob.getres().name) && hitbox.ishitable()) {//FIXME
+                            Coord2d rel = gob.rc.sub(origin);
 
-                                Coord2d[] points = new Coord2d[hitbox.points.length];
+                            Coord2d[] points = new Coord2d[hitbox.points.length];
 
-                                for (int i = 0; i < points.length; i++)
-                                    points[i] = hitbox.points[i].rotate(gob.a).add(rel);
+                            for (int i = 0; i < points.length; i++)
+                                points[i] = hitbox.points[i].rotate(gob.a).add(rel);
 
-                                double maxY = Double.NEGATIVE_INFINITY;
-                                double minY = Double.POSITIVE_INFINITY;
+                            double maxY = Double.NEGATIVE_INFINITY;
+                            double minY = Double.POSITIVE_INFINITY;
 
-                                for (Coord2d point : points){
-                                    maxY = Double.max(maxY, point.y);
-                                    minY = Double.min(minY, point.y);
-                                }
+                            for (Coord2d point : points) {
+                                maxY = Double.max(maxY, point.y);
+                                minY = Double.min(minY, point.y);
+                            }
 
-                                for (int i = (int) Math.floor(minY); i <= (int) Math.ceil(maxY); i++) {
-                                    List<Double> plist = new ArrayList<>();
-                                    for (int j = 0; j < points.length; j++) {
-                                        if (Math.min(points[j].y, points[(j + 1) % points.length].y) <= i && i <= Math.max(points[j].y, points[(j + 1) % points.length].y)) {
-                                            Line l = segmentToLine(points[j], points[(j + 1) % points.length]);
-                                            if (l.isVertical())
-                                                plist.add(l.constant);
-                                            else if (l.isHorizontal()) {
-                                                plist.add(Math.min(points[j].x, points[(j + 1) % points.length].x));
-                                                plist.add(Math.max(points[j].x, points[(j + 1) % points.length].x));
-                                            } else {
-                                                plist.add((l.xAtY(i)));
-                                            }
+                            for (int i = (int) Math.floor(minY); i <= (int) Math.ceil(maxY); i++) {
+                                List<Double> plist = new ArrayList<>();
+                                for (int j = 0; j < points.length; j++) {
+                                    if (Math.min(points[j].y, points[(j + 1) % points.length].y) <= i && i <= Math.max(points[j].y, points[(j + 1) % points.length].y)) {
+                                        Line l = segmentToLine(points[j], points[(j + 1) % points.length]);
+                                        if (l.isVertical())
+                                            plist.add(l.constant);
+                                        else if (l.isHorizontal()) {
+                                            plist.add(Math.min(points[j].x, points[(j + 1) % points.length].x));
+                                            plist.add(Math.max(points[j].x, points[(j + 1) % points.length].x));
+                                        } else {
+                                            plist.add((l.xAtY(i)));
                                         }
                                     }
-                                    Collections.sort(plist);
-                                    for (int j = 1; j < plist.size(); j += 2) {
-                                        int left = (int) Math.ceil(plist.get(j - 1));
-                                        int right = (int) Math.floor(plist.get(j));
-                                        for (int k = left; k <= right; k++) {
-                                            if (i < 0 || k < 0 || i / 11 > ymatrix || k / 11 > xmatrix)
-                                                continue;
-                                            try {
-                                                if (destGob != null && gob.id == destGob.id)
-                                                    accessMatrix[(k) / 11][(i) / 11] = -1;
-                                                else
-                                                    accessMatrix[(k) / 11][(i) / 11] = 1;
-                                            } catch (ArrayIndexOutOfBoundsException a) {
-                                                a.printStackTrace();
-                                            }
-                                        }
-                                        if (left == right) {
-                                            j--;
+                                }
+                                Collections.sort(plist);
+                                for (int j = 1; j < plist.size(); j += 2) {
+                                    int left = (int) Math.ceil(plist.get(j - 1));
+                                    int right = (int) Math.floor(plist.get(j));
+                                    for (int k = left; k <= right; k++) {
+                                        if (i < 0 || k < 0 || i / 11 > ymatrix || k / 11 > xmatrix)
                                             continue;
+                                        try {
+                                            if (destGob != null && gob.id == destGob.id)
+                                                accessMatrix[(k) / 11][(i) / 11] = -1;
+                                            else
+                                                accessMatrix[(k) / 11][(i) / 11] = 1;
+                                        } catch (ArrayIndexOutOfBoundsException a) {
+                                            a.printStackTrace();
                                         }
+                                    }
+                                    if (left == right) {
+                                        j--;
+                                        continue;
                                     }
                                 }
                             }

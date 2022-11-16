@@ -56,12 +56,12 @@ public abstract class Sprite implements Rendered {
     }
 
     public interface Owner extends OwnerContext {
-        public Random mkrandoom();
+        Random mkrandoom();
 
-        public Resource getres();
+        Resource getres();
 
         @Deprecated
-        public default Glob glob() {
+        default Glob glob() {
             return (context(Glob.class));
         }
     }
@@ -92,35 +92,20 @@ public abstract class Sprite implements Rendered {
         void update(Message sdt);
     }
 
-    public static class FactMaker implements Resource.PublishedCode.Instancer {
-        public Factory make(Class<?> cl, Resource ires, Object... args) {
-            if (Factory.class.isAssignableFrom(cl))
-                return (Resource.PublishedCode.Instancer.stdmake(cl.asSubclass(Factory.class), ires, args));
-            try {
-                Function<Object[], Sprite> make = Utils.smthfun(cl, "mksprite", Sprite.class, Owner.class, Resource.class, Message.class);
-                return ((owner, res, sdt) -> (make.apply(new Object[]{owner, res, sdt})));
-            } catch (NoSuchMethodException e) {
-            }
-            if (Sprite.class.isAssignableFrom(cl)) {
-                Class<? extends Sprite> scl = cl.asSubclass(Sprite.class);
-                try {
-                    Function<Object[], ? extends Sprite> make = Utils.consfun(scl, Owner.class, Resource.class);
-                    return ((owner, res, sdt) -> make.apply(new Object[]{owner, res}));
-                } catch (NoSuchMethodException e) {
-                }
-                try {
-                    Function<Object[], ? extends Sprite> make = Utils.consfun(scl, Owner.class, Resource.class, Message.class);
-                    return ((owner, res, sdt) -> make.apply(new Object[]{owner, res, sdt}));
-                } catch (NoSuchMethodException e) {
-                }
-            }
-            throw (new RuntimeException("Could not find any suitable constructor for dynamic sprite"));
+    public static class FactMaker extends Resource.PublishedCode.Instancer.Chain<Factory> {
+        public FactMaker() {super(Factory.class);}
+
+        {
+            add(new Direct<>(Factory.class));
+            add(new StaticCall<>(Factory.class, "mksprite", Sprite.class, new Class<?>[]{Owner.class, Resource.class, Message.class}, (make) -> (owner, res, sdt) -> make.apply(new Object[]{owner, res, sdt})));
+            add(new Construct<>(Factory.class, Sprite.class, new Class<?>[]{Owner.class, Resource.class}, (cons) -> (owner, res, sdt) -> cons.apply(new Object[]{owner, res})));
+            add(new Construct<>(Factory.class, Sprite.class, new Class<?>[]{Owner.class, Resource.class, Message.class}, (cons) -> (owner, res, sdt) -> cons.apply(new Object[]{owner, res, sdt})));
         }
     }
 
     @Resource.PublishedCode(name = "spr", instancer = FactMaker.class)
     public interface Factory {
-        public Sprite create(Owner owner, Resource res, Message sdt);
+        Sprite create(Owner owner, Resource res, Message sdt);
     }
 
     public static Factory mkdynfact(Class<? extends Sprite> cl) {
@@ -214,17 +199,13 @@ public abstract class Sprite implements Rendered {
 //        throw (new ResourceException("Does not know how to draw resource " + res.name, res));
     }
 
-    public void draw(GOut g) {
-    }
+    public void draw(GOut g) {}
 
     public abstract boolean setup(RenderList d);
 
-    public boolean tick(int dt) {
-        return (false);
-    }
+    public boolean tick(int dt) {return (false);}
 
-    public void dispose() {
-    }
+    public void dispose() {}
 
 
     public static class FakeSprite extends Sprite {

@@ -160,14 +160,12 @@ public class DestroyArea extends Window implements GobSelectCallback {
         double smallX = Math.min(selectedAreaA.x, selectedAreaB.x);
         double bigY = Math.max(selectedAreaA.y, selectedAreaB.y);
         double smallY = Math.min(selectedAreaA.y, selectedAreaB.y);
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc.getallgobs()) {
                 if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
                         && gob.rc.y >= smallY && gob.getres().name == gobselected.getres().name) {
                     gobs.add(gob);
                 }
             }
-        }
         gobs.sort(new CoordSort());
         return gobs;
     }

@@ -5,9 +5,9 @@ import haven.Coord2d;
 import haven.Gob;
 import haven.Loading;
 import haven.MCache;
+import static haven.OCache.posres;
 import haven.UI;
 import haven.automation.GobSelectCallback;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,8 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static haven.OCache.posres;
 
 public class PBotGobAPI {
 
@@ -63,10 +61,8 @@ public class PBotGobAPI {
      */
     public static List<PBotGob> getAllGobs(UI ui) {
         List<PBotGob> list = new ArrayList<>();
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
-                list.add(new PBotGob(gob));
-            }
+        for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+            list.add(new PBotGob(gob));
         }
         return list;
     }
@@ -81,15 +77,13 @@ public class PBotGobAPI {
         double min = radius;
 
         List<PBotGob> list = new ArrayList<>();
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc.getallgobs()) {
                 if (gob.isplayer()) continue;
                 double dist = gob.rc.dist(plc);
                 if (dist < min) {
                     list.add(new PBotGob(gob));
                 }
             }
-        }
         return list;
     }
 
@@ -104,8 +98,7 @@ public class PBotGobAPI {
         double min = radius;
 
         List<PBotGob> list = new ArrayList<>();
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc.getallgobs()) {
                 if (gob.isplayer())
                     continue;
                 double dist = gob.rc.dist(center);
@@ -113,7 +106,6 @@ public class PBotGobAPI {
                     list.add(new PBotGob(gob));
                 }
             }
-        }
         return list;
     }
 
@@ -130,8 +122,7 @@ public class PBotGobAPI {
         double min = radius;
 
         List<PBotGob> list = new ArrayList<>();
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc.getallgobs()) {
                 if (gob.isplayer())
                     continue;
                 double dist = gob.rc.dist(center);
@@ -139,7 +130,6 @@ public class PBotGobAPI {
                     list.add(new PBotGob(gob));
                 }
             }
-        }
         return list;
     }
 
@@ -155,8 +145,7 @@ public class PBotGobAPI {
         double min = radius;
 
         List<PBotGob> list = new ArrayList<>();
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc.getallgobs()) {
                 double dist = gob.rc.dist(center);
                 if (dist < min) {
                     boolean matches = false;
@@ -171,7 +160,6 @@ public class PBotGobAPI {
                     }
                 }
             }
-        }
         return list;
     }
 
@@ -193,8 +181,7 @@ public class PBotGobAPI {
         double min = radius;
 
         List<PBotGob> list = new ArrayList<>();
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc.getallgobs()) {
                 double dist = gob.rc.dist(center);
                 if (dist < min) {
                     boolean matches = false;
@@ -209,7 +196,6 @@ public class PBotGobAPI {
                     }
                 }
             }
-        }
         return list;
     }
 
@@ -229,8 +215,7 @@ public class PBotGobAPI {
         double min = radius;
 
         List<PBotGob> list = new ArrayList<>();
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc.getallgobs()) {
                 double dist = gob.rc.dist(plc);
                 if (dist < min) {
                     boolean matches = false;
@@ -245,7 +230,6 @@ public class PBotGobAPI {
                     }
                 }
             }
-        }
         return list;
     }
 
@@ -255,8 +239,7 @@ public class PBotGobAPI {
 
     public static List<PBotGob> findObjectsByNames(UI ui, String... names) {
         List<PBotGob> list = new ArrayList<>();
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc.getallgobs()) {
                 boolean matches = false;
                 for (String name : names) {
                     if (gob.getres() != null && gob.getres().name.equals(name)) {
@@ -268,7 +251,6 @@ public class PBotGobAPI {
                     list.add(new PBotGob(gob));
                 }
             }
-        }
         return list;
     }
 
@@ -305,15 +287,13 @@ public class PBotGobAPI {
         Coord2d plc = player(ui).getRcCoords();
         double min = radius;
         Gob nearest = null;
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc.getallgobs()) {
                 double dist = gob.rc.dist(plc);
                 if (dist < min) {
                     min = dist;
                     nearest = gob;
                 }
             }
-        }
         if (nearest == null)
             return (null);
         else
@@ -323,15 +303,13 @@ public class PBotGobAPI {
     public static PBotGob getClosestGobInRadius(UI ui, Coord2d center, double radius) {
         double min = radius;
         Gob nearest = null;
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc.getallgobs()) {
                 double dist = gob.rc.dist(center);
                 if (dist < min) {
                     min = dist;
                     nearest = gob;
                 }
             }
-        }
         if (nearest == null)
             return (null);
         else
@@ -350,8 +328,7 @@ public class PBotGobAPI {
         double min = radius;
         Gob nearest = null;
         List<Pattern> patterns = Arrays.stream(pattern).map(Pattern::compile).collect(Collectors.toList());
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc.getallgobs()) {
                 double dist = gob.rc.dist(plc);
                 if (dist < min) {
                     boolean matches = false;
@@ -370,7 +347,6 @@ public class PBotGobAPI {
                     }
                 }
             }
-        }
         if (nearest == null)
             return null;
         else
@@ -386,8 +362,7 @@ public class PBotGobAPI {
         double min = Double.MAX_VALUE;
         Gob nearest = null;
         List<Pattern> patterns = Arrays.stream(pattern).map(Pattern::compile).collect(Collectors.toList());
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc.getallgobs()) {
                 double dist = gob.rc.dist(plc);
                 if (dist < min) {
                     boolean matches = false;
@@ -406,7 +381,6 @@ public class PBotGobAPI {
                     }
                 }
             }
-        }
         if (nearest == null)
             return null;
         else
@@ -428,12 +402,10 @@ public class PBotGobAPI {
      * @return Gob with coordinates or null
      */
     public static PBotGob getGobWithCoords(UI ui, Coord2d c) {
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc.getallgobs()) {
                 if (gob.rc.x == c.x && gob.rc.y == c.y)
                     return new PBotGob(gob);
             }
-        }
         return null;
     }
 
@@ -462,11 +434,9 @@ public class PBotGobAPI {
      * @return Object, or null if not found
      */
     public static PBotGob findGobById(UI ui, long id) {
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc)
-                if (gob.id == id)
-                    return (new PBotGob(gob));
-        }
+        for (Gob gob : ui.sess.glob.oc.getallgobs())
+            if (gob.id == id)
+                return (new PBotGob(gob));
         return (null);
     }
 
@@ -529,6 +499,7 @@ public class PBotGobAPI {
 
     /**
      * Itemact with item in hand, for example, to make a stockpile
+     *
      * @param c2d - coord for click mouse
      */
     public static boolean makePile(UI ui, Coord2d c2d) {

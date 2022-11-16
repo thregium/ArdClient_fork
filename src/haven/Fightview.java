@@ -774,19 +774,14 @@ public class Fightview extends MovableWidget {
             Gob closestGob = null;
             Gob rGob = null;
             double distanceRange = 0.0D;
-            Gob player;
-            synchronized (this.ui.sess.glob.oc) {
-                player = this.ui.sess.glob.oc.getgob(ui.gui.map.plgob);
-            }
+            Gob player = this.ui.sess.glob.oc.getgob(ui.gui.map.plgob);
 
             Iterator var7 = this.lsrel.iterator();
 
             while (var7.hasNext()) {
                 Fightview.Relation r = (Fightview.Relation) var7.next();
                 if (r != null) {
-                    synchronized (this.ui.sess.glob.oc) {
-                        rGob = this.ui.sess.glob.oc.getgob(r.gobid);
-                    }
+                    rGob = this.ui.sess.glob.oc.getgob(r.gobid);
 
                     if (closestGob == null && rGob != null) {
                         closestGob = rGob;

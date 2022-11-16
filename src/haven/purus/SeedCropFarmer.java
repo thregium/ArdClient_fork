@@ -9,6 +9,7 @@ import haven.Gob;
 import haven.Inventory;
 import haven.Label;
 import haven.Loading;
+import static haven.OCache.posres;
 import haven.Resource;
 import haven.Sprite;
 import haven.WItem;
@@ -20,7 +21,6 @@ import haven.purus.pbot.PBotInventory;
 import haven.purus.pbot.PBotItem;
 import haven.purus.pbot.PBotUtils;
 import haven.res.ui.tt.q.qbuff.QBuff;
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,8 +28,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-
-import static haven.OCache.posres;
 
 public class SeedCropFarmer extends Window implements Runnable {
 
@@ -997,12 +995,10 @@ public class SeedCropFarmer extends Window implements Runnable {
         double smallX = Math.min(rc1.x, rc2.x);
         double bigY = Math.max(rc1.y, rc2.y);
         double smallY = Math.min(rc1.y, rc2.y);
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
-                if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
-                        && gob.rc.y >= smallY && gob.getres().name.contains(cropName) && gob.getStage() == stage) {
-                    gobs.add(gob);
-                }
+        for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+            if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
+                    && gob.rc.y >= smallY && gob.getres().name.contains(cropName) && gob.getStage() == stage) {
+                gobs.add(gob);
             }
         }
         gobs.sort(new CoordSort());
@@ -1070,12 +1066,10 @@ public class SeedCropFarmer extends Window implements Runnable {
         double smallX = Math.min(a.x, b.x);
         double bigY = Math.max(a.y, b.y);
         double smallY = Math.min(a.y, b.y);
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
-                if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
-                        && gob.rc.y >= smallY && gob.getres().name.contains("stockpile")) {
-                    gobs.add(gob);
-                }
+        for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+            if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
+                    && gob.rc.y >= smallY && gob.getres().name.contains("stockpile")) {
+                gobs.add(gob);
             }
         }
         gobs.sort(new CoordSort());

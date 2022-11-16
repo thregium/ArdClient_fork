@@ -5,14 +5,12 @@ import haven.GameUI;
 import haven.Gob;
 import haven.Inventory;
 import haven.Loading;
+import static haven.OCache.posres;
 import haven.Widget;
 import haven.Window;
 import haven.purus.pbot.PBotGobAPI;
-
 import java.util.Set;
 import java.util.TreeSet;
-
-import static haven.OCache.posres;
 
 public class TransferToObject implements Runnable {
 
@@ -83,19 +81,17 @@ public class TransferToObject implements Runnable {
         Gob player = gui.map.player();
         Gob ret = null;
         double minDist = 110; // Only look for objects not farther than 10 tiles
-        synchronized (gui.ui.sess.glob.oc) {
-            for (Gob gob : gui.ui.sess.glob.oc) {
-                try {
-                    if (gob == player || gob.getres() == null || !PBotGobAPI.gobWindowMap.containsKey(gob.getres().name))
-                        continue;
-                } catch (Loading l) {
+        for (Gob gob : gui.ui.sess.glob.oc.getallgobs()) {
+            try {
+                if (gob == player || gob.getres() == null || !PBotGobAPI.gobWindowMap.containsKey(gob.getres().name))
+                    continue;
+            } catch (Loading l) {
 
-                }
-                double dist = gob.rc.dist(player.rc);
-                if (dist < minDist) {
-                    minDist = dist;
-                    ret = gob;
-                }
+            }
+            double dist = gob.rc.dist(player.rc);
+            if (dist < minDist) {
+                minDist = dist;
+                ret = gob;
             }
         }
         return ret;

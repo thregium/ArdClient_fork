@@ -32,6 +32,7 @@ import java.awt.Color;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -828,12 +829,10 @@ public class PBotUtils {
         double smallX = Math.min(a.x, b.x);
         double bigY = Math.max(a.y, b.y);
         double smallY = Math.min(a.y, b.y);
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
-                if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
-                        && gob.rc.y >= smallY) {
-                    gobs.add(new PBotGob(gob));
-                }
+        for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+            if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
+                    && gob.rc.y >= smallY) {
+                gobs.add(new PBotGob(gob));
             }
         }
         gobs.sort(new CoordSort());
@@ -945,21 +944,19 @@ public class PBotUtils {
         Coord2d plc = player(ui).rc;
         double min = radius;
         Gob nearest = null;
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
-                double dist = gob.rc.dist(plc);
-                if (dist < min) {
-                    boolean matches = false;
-                    for (String name : names) {
-                        if (gob.getres() != null && gob.getres().name.contains(name)) {
-                            matches = true;
-                            break;
-                        }
+        for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+            double dist = gob.rc.dist(plc);
+            if (dist < min) {
+                boolean matches = false;
+                for (String name : names) {
+                    if (gob.getres() != null && gob.getres().name.contains(name)) {
+                        matches = true;
+                        break;
                     }
-                    if (matches) {
-                        min = dist;
-                        nearest = gob;
-                    }
+                }
+                if (matches) {
+                    min = dist;
+                    nearest = gob;
                 }
             }
         }
@@ -977,24 +974,22 @@ public class PBotUtils {
         Coord2d plc = player(ui).rc;
         double min = radius;
         Gob nearest = null;
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
-                double dist = gob.rc.dist(plc);
-                if (dist < min) {
-                    if (gob.getres() != null && gob.getres().name.startsWith("gfx/terobjs/barrel")) {
-                        System.out.println("Barrel found");
-                        if (blacklist.size() > 0) {
-                            if (!blacklist.contains(gob)) {
-                                System.out.println("BlackList Didn't Contain Gob, adding");
-                                min = dist;
-                                nearest = gob;
-                            } else
-                                System.out.println("BlackList Did Contain Gob, not adding");
-                        } else {
-                            System.out.println("BlackList size 0, adding");
+        for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+            double dist = gob.rc.dist(plc);
+            if (dist < min) {
+                if (gob.getres() != null && gob.getres().name.startsWith("gfx/terobjs/barrel")) {
+                    System.out.println("Barrel found");
+                    if (blacklist.size() > 0) {
+                        if (!blacklist.contains(gob)) {
+                            System.out.println("BlackList Didn't Contain Gob, adding");
                             min = dist;
                             nearest = gob;
-                        }
+                        } else
+                            System.out.println("BlackList Did Contain Gob, not adding");
+                    } else {
+                        System.out.println("BlackList size 0, adding");
+                        min = dist;
+                        nearest = gob;
                     }
                 }
             }
@@ -1012,11 +1007,9 @@ public class PBotUtils {
 //    }
 
     public static Gob findObjectById(UI ui, long id) {
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc)
-                if (gob.id == id)
-                    return (gob);
-        }
+        for (Gob gob : ui.sess.glob.oc.getallgobs())
+            if (gob.id == id)
+                return (gob);
         return (null);
     }
 
@@ -1117,23 +1110,21 @@ public class PBotUtils {
         double min = radius;
         Gob nearest = null;
         try {
-            synchronized (ui.sess.glob.oc) {
-                for (Gob gob : ui.sess.glob.oc) {
-                    double dist = gob.rc.dist(plc);
-                    if (dist < min) {
-                        boolean matches = false;
-                        for (String name : names) {
-                            if (gob.getres() != null && gob.getres().name.contains(name)) {
-                                if (gob.getStage() == stage) {
-                                    matches = true;
-                                    break;
-                                }
+            for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+                double dist = gob.rc.dist(plc);
+                if (dist < min) {
+                    boolean matches = false;
+                    for (String name : names) {
+                        if (gob.getres() != null && gob.getres().name.contains(name)) {
+                            if (gob.getStage() == stage) {
+                                matches = true;
+                                break;
                             }
                         }
-                        if (matches) {
-                            min = dist;
-                            nearest = gob;
-                        }
+                    }
+                    if (matches) {
+                        min = dist;
+                        nearest = gob;
                     }
                 }
             }
@@ -1156,23 +1147,21 @@ public class PBotUtils {
         double min = radius;
         Gob nearest = null;
         try {
-            synchronized (ui.sess.glob.oc) {
-                for (Gob gob : ui.sess.glob.oc) {
-                    double dist = gob.rc.dist(plc);
-                    if (dist < min) {
-                        boolean matches = false;
-                        for (String name : names) {
-                            if (gob.getres() != null && gob.getres().basename().contains(name)) {
-                                if (!blacklist.contains(gob)) {
-                                    matches = true;
-                                    break;
-                                }
+            for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+                double dist = gob.rc.dist(plc);
+                if (dist < min) {
+                    boolean matches = false;
+                    for (String name : names) {
+                        if (gob.getres() != null && gob.getres().basename().contains(name)) {
+                            if (!blacklist.contains(gob)) {
+                                matches = true;
+                                break;
                             }
                         }
-                        if (matches) {
-                            min = dist;
-                            nearest = gob;
-                        }
+                    }
+                    if (matches) {
+                        min = dist;
+                        nearest = gob;
                     }
                 }
             }
@@ -1240,7 +1229,7 @@ public class PBotUtils {
 
     // Returns witems with specific names from inventory
     public static List<PBotItem> getInventoryItemsByNames(Inventory invwdg, List<String> items) {
-        List<PBotItem> witems = new ArrayList<PBotItem>();
+        List<PBotItem> witems = new ArrayList<>();
         for (WItem wi : getInventoryContents(invwdg)) {
             String resname = wi.item.resource().name;
             for (String s : items) {
@@ -1253,7 +1242,7 @@ public class PBotUtils {
 
     // Returns witems with specific name from inventory
     public static List<PBotItem> getInventoryItemsByName(Inventory invwdg, String item) {
-        List<PBotItem> witems = new ArrayList<PBotItem>();
+        List<PBotItem> witems = new ArrayList<>();
         for (WItem wi : getInventoryContents(invwdg)) {
             String resname = wi.item.resource().name;
             if (resname.equals(item))
@@ -1385,21 +1374,19 @@ public class PBotUtils {
         Coord2d plc = player(ui).rc;
         double min = radius;
         Gob nearest = null;
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
-                double dist = gob.rc.dist(plc);
-                if (dist < min) {
-                    boolean matches = false;
-                    for (String name : names) {
-                        if (gob.getres() != null && gob.getres().name.contains(name)) {
-                            matches = true;
-                            break;
-                        }
+        for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+            double dist = gob.rc.dist(plc);
+            if (dist < min) {
+                boolean matches = false;
+                for (String name : names) {
+                    if (gob.getres() != null && gob.getres().name.contains(name)) {
+                        matches = true;
+                        break;
                     }
-                    if (matches) {
-                        min = dist;
-                        nearest = gob;
-                    }
+                }
+                if (matches) {
+                    min = dist;
+                    nearest = gob;
                 }
             }
         }
@@ -1765,7 +1752,7 @@ public class PBotUtils {
      * @return List of items in the inventory
      */
     public static List<WItem> getInventoryContents(Inventory invwdg) {
-        List<WItem> witems = new ArrayList<WItem>();
+        List<WItem> witems = new ArrayList<>();
         for (Widget witm = invwdg.lchild; witm != null; witm = witm.prev) {
             if (witm instanceof WItem) {
                 witems.add((WItem) witm);
@@ -1776,7 +1763,7 @@ public class PBotUtils {
 
     //same as above for returns a list of all WItems from all inventories seen on screen
     public static List<WItem> getallInventoryContents(UI ui) {
-        List<WItem> witems = new ArrayList<WItem>();
+        List<WItem> witems = new ArrayList<>();
         synchronized (ui.root.lchild) {
             try {
                 for (Widget q = ui.root.lchild; q != null; q = q.rnext()) {
@@ -1796,7 +1783,7 @@ public class PBotUtils {
 
     //same as above for returns a list of all WItems from all inventories seen on screen
     public static List<WItem> getallInventoryContentsbyString(UI ui, String witem) {
-        List<WItem> witems = new ArrayList<WItem>();
+        List<WItem> witems = new ArrayList<>();
         List<WItem> finallist = new ArrayList<>();
         synchronized (ui.root.lchild) {
             try {
@@ -1946,12 +1933,7 @@ public class PBotUtils {
      * @return List of all gobs
      */
     public static List<Gob> getGobs(UI ui) {
-        List<Gob> list = new ArrayList<Gob>();
-        synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc)
-                list.add(gob);
-        }
-        return list;
+        return new ArrayList<>(Arrays.asList(ui.sess.glob.oc.getallgobs()));
     }
 
 //    public static List<Gob> getGobs() {
