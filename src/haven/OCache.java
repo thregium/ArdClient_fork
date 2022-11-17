@@ -75,7 +75,7 @@ public class OCache implements Iterable<Gob> {
     private Glob glob;
     private final Map<Long, DamageSprite> gobdmgs = Collections.synchronizedMap(new HashMap<>());
     public boolean isfight = false;
-    private final Collection<ChangeCallback> cbs = new WeakList<>();
+    private final Collection<ChangeCallback> cbs = Collections.synchronizedCollection(new WeakList<>());
 
 
     public interface ChangeCallback {
@@ -89,17 +89,14 @@ public class OCache implements Iterable<Gob> {
     }
 
     public void callback(ChangeCallback cb) {
-        synchronized (this) {
-            cbs.add(cb);
-        }
+        cbs.add(cb);
     }
 
     public void changed(Gob ob) {
-        synchronized (this) {
-            ob.changed();
-            for (ChangeCallback cb : cbs)
-                cb.changed(ob);
-        }
+        ob.changed();
+        Collection<ChangeCallback> values = new ArrayList<>(cbs);
+        for (ChangeCallback cb : values)
+            cb.changed(ob);
     }
 
     void changeAllGobs() {
@@ -141,10 +138,8 @@ public class OCache implements Iterable<Gob> {
                 deleted.put(id, frame);
                 if (old != null) {
                     old.dispose();
-                    synchronized (this) {
-                        for (ChangeCallback cb : cbs)
-                            cb.removed(old);
-                    }
+                    for (ChangeCallback cb : new ArrayList<>(cbs))
+                        cb.removed(old);
                 }
             }
         }
@@ -158,10 +153,8 @@ public class OCache implements Iterable<Gob> {
                 deleted.put(id, gob.frame);
                 if (old != null) {
                     old.dispose();
-                    synchronized (this) {
-                        for (ChangeCallback cb : cbs)
-                            cb.removed(old);
-                    }
+                    for (ChangeCallback cb : new ArrayList<>(cbs))
+                        cb.removed(old);
                 }
             }
         }
@@ -196,21 +189,19 @@ public class OCache implements Iterable<Gob> {
 
     public void ladd(Collection<Gob> gob) {
         local.add(gob);
-        synchronized (this) {
-            for (Gob g : gob) {
-                for (ChangeCallback cb : cbs)
-                    cb.changed(g);
-            }
+        Collection<ChangeCallback> values = new ArrayList<>(cbs);
+        for (Gob g : gob) {
+            for (ChangeCallback cb : values)
+                cb.changed(g);
         }
     }
 
     public void lrem(Collection<Gob> gob) {
         local.remove(gob);
-        synchronized (this) {
-            for (Gob g : gob) {
-                for (ChangeCallback cb : cbs)
-                    cb.removed(g);
-            }
+        Collection<ChangeCallback> values = new ArrayList<>(cbs);
+        for (Gob g : gob) {
+            for (ChangeCallback cb : values)
+                cb.removed(g);
         }
     }
 
@@ -260,9 +251,7 @@ public class OCache implements Iterable<Gob> {
             this.a = a;
             virtual = true;
             objs.put(id, this);
-            synchronized (OCache.this) {
                 OCache.this.changed(this);
-            }
         }
     }
 

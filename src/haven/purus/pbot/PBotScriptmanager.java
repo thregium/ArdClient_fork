@@ -18,9 +18,9 @@ public class PBotScriptmanager {
         scripts.put(id, script);
         script.start();
         configuration.classMaker(() -> {
-            Widget wdg = ui.gui;
-            if (wdg == null) wdg = ui.root;
-            wdg.findchild(PBotScriptlist.class).threadsUpdate();
+            PBotScriptlist list = ui.root.findchild(PBotScriptlist.class);
+            if (list == null) list = ui.root.add(new PBotScriptlist());
+            list.threadsUpdate();
         });
         return (script);
     }
@@ -53,8 +53,8 @@ public class PBotScriptmanager {
                     break;
                 }
             for (UI ui : PBotAPI.uis()) {
-                if (ui.gui == null) continue;
-                ui.gui.PBotScriptlist.removeFromList(script);
+                PBotScriptlist list = ui.root.findchild(PBotScriptlist.class);
+                if (list != null) list.removeFromList(script);
             }
         }
     }
