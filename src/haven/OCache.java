@@ -147,15 +147,11 @@ public class OCache implements Iterable<Gob> {
 
     public void remove(long id) {
         if (objs.containsKey(id) && !DefSettings.KEEPGOBS.get()) {
-            if (!deleted.containsKey(id)) {
-                Gob gob = objs.get(id);
-                Gob old = objs.remove(id);
-                deleted.put(id, gob.frame);
-                if (old != null) {
-                    old.dispose();
-                    for (ChangeCallback cb : new ArrayList<>(cbs))
-                        cb.removed(old);
-                }
+            Gob old = objs.remove(id);
+            if (old != null) {
+                old.dispose();
+                for (ChangeCallback cb : new ArrayList<>(cbs))
+                    cb.removed(old);
             }
         }
     }
@@ -183,8 +179,7 @@ public class OCache implements Iterable<Gob> {
         Collection<Iterator<Gob>> is = new LinkedList<>();
         for (Collection<Gob> gc : local)
             is.add(gc.iterator());
-        Collection<Gob> values = new ArrayList<>(objs.values());
-        return (new I2<>(values.iterator(), new I2<>(is)));
+        return (new I2<>(objs.values().iterator(), new I2<>(is)));
     }
 
     public void ladd(Collection<Gob> gob) {
@@ -251,7 +246,7 @@ public class OCache implements Iterable<Gob> {
             this.a = a;
             virtual = true;
             objs.put(id, this);
-                OCache.this.changed(this);
+            OCache.this.changed(this);
         }
     }
 
