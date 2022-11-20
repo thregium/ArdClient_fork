@@ -88,6 +88,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1083,8 +1084,8 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     public static class ChangeSet implements OCache.ChangeCallback {
-        public final Set<Gob> changed = new HashSet<>();
-        public final Set<Gob> removed = new HashSet<>();
+        public final Set<Gob> changed = Collections.synchronizedSet(new HashSet<>());
+        public final Set<Gob> removed = Collections.synchronizedSet(new HashSet<>());
 
         public void changed(Gob ob) {
             changed.add(ob);
@@ -1135,7 +1136,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     private class Gobs implements Rendered {
         final OCache oc = glob.oc;
         final ChangeSet changed = new ChangeSet();
-        final Map<Gob, GobSet> parts = new HashMap<>();
+        final Map<Gob, GobSet> parts = Collections.synchronizedMap(new HashMap<>());
         Integer ticks = 0;
 
 //        {
@@ -1144,7 +1145,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
         class GobSet implements Rendered {
             private final String nm;
-            final Collection<Gob> obs = new HashSet<>();
+            final Collection<Gob> obs = Collections.synchronizedSet(new HashSet<>());
             Object seq = this;
 
             GobSet(String nm) {
@@ -1185,7 +1186,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
 
         class Transitory extends GobSet {
-            final Map<Gob, Integer> age = new HashMap<>();
+            final Map<Gob, Integer> age = Collections.synchronizedMap(new HashMap<>());
 
             Transitory(String nm) {
                 super(nm);
@@ -1286,25 +1287,26 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
 
         Gobs() {
-            synchronized (oc) {
-                oc.callback(changed);
-                for (Gob ob : oc)
-                    changed.changed(ob);
-            }
+            oc.callback(changed);
+            for (Gob ob : oc.getallgobs())
+                changed.changed(ob);
         }
 
         void update() {
-            for (Gob ob : changed.removed)
+            for (Gob ob : changed.removed.toArray(new Gob[0]))
                 remove(ob);
             changed.removed.clear();
 
-            for (Gob ob : changed.changed) {
+            for (Gob ob : changed.changed.toArray(new Gob[0])) {
                 if (ob.staticp() instanceof Gob.Static)
                     put(newfags, ob);
                 else
                     put(dynamic, ob);
             }
             changed.changed.clear();
+
+            Collection<Gob> values = Arrays.asList(oc.getallgobs());
+            parts.keySet().stream().filter(g -> !values.contains(g)).collect(Collectors.toList()).forEach(this::remove);
 
             for (GobSet set : all)
                 set.update();
@@ -1314,17 +1316,15 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
 
         public boolean setup(RenderList rl) {
-            synchronized (oc) {
-                update();
-                for (GobSet set : all) {
-                    try {
-                        rl.add(set, null);
-                    } catch (Exception e) {
-                        dev.simpleLog(e);
-                    }
+            update();
+            for (GobSet set : all) {
+                try {
+                    rl.add(set, null);
+                } catch (Exception e) {
+                    dev.simpleLog(e);
                 }
-                ticks++;
             }
+            ticks++;
             return (false);
         }
 
@@ -2272,7 +2272,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
 
         public boolean rotate(Plob plob, int amount, int modflags) {
-            if((modflags & (UI.MOD_CTRL | UI.MOD_SHIFT)) == 0)
+            if ((modflags & (UI.MOD_CTRL | UI.MOD_SHIFT)) == 0)
                 return (false);
             freerot = true;
             if ((modflags & UI.MOD_CTRL) == 0)
@@ -3596,34 +3596,32 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
     public void aggroclosest() {
         OCache oc = ui.sess.glob.oc;
-        synchronized (oc) {
-            Gob gobcls = null;
-            double gobclsdist = Double.MAX_VALUE;
+        Gob gobcls = null;
+        double gobclsdist = Double.MAX_VALUE;
 
-            for (Gob gob : oc) {
-                try {
-                    Resource res = gob.getres();
-                    if (res != null && "body".equals(res.basename()) && gob.id != player().id) {
-                        if (!gob.isFriend()) {
-                            double dist = player().rc.dist(gob.rc);
-                            if (dist < gobclsdist) {
-                                gobcls = gob;
-                                gobclsdist = dist;
-                            }
+        for (Gob gob : oc.getallgobs()) {
+            try {
+                Resource res = gob.getres();
+                if (res != null && "body".equals(res.basename()) && gob.id != player().id) {
+                    if (!gob.isFriend()) {
+                        double dist = player().rc.dist(gob.rc);
+                        if (dist < gobclsdist) {
+                            gobcls = gob;
+                            gobclsdist = dist;
                         }
                     }
-                } catch (Loading l) {
                 }
+            } catch (Loading l) {
             }
+        }
 
-            if (gobcls != null) {
-                ui.gui.act("aggro");
-                wdgmsg("click", gobcls.sc, Coord.z, 1, ui.modflags(), 0, (int) gobcls.id, gobcls.rc.floor(posres), 0, 0);
-                pllastcc = gobcls.rc;
-                Gob pl = player();
-                wdgmsg("click", pl.sc, pl.rc.floor(posres), 3, 0);
-                pllastcc = pl.rc;
-            }
+        if (gobcls != null) {
+            ui.gui.act("aggro");
+            wdgmsg("click", gobcls.sc, Coord.z, 1, ui.modflags(), 0, (int) gobcls.id, gobcls.rc.floor(posres), 0, 0);
+            pllastcc = gobcls.rc;
+            Gob pl = player();
+            wdgmsg("click", pl.sc, pl.rc.floor(posres), 3, 0);
+            pllastcc = pl.rc;
         }
     }
 
@@ -3640,64 +3638,54 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
     public void removeCustomSprites(int id) {
         OCache oc = ui.sess.glob.oc;
-        synchronized (oc) {
-            for (Gob gob : oc) {
-                Gob.Overlay ol = gob.findol(id);
-                if (ol != null)
-                    gob.ols.remove(ol);
-            }
+        for (Gob gob : oc.getallgobs()) {
+            Gob.Overlay ol = gob.findol(id);
+            if (ol != null)
+                gob.ols.remove(ol);
         }
     }
 
     public void addHealthSprites() {
         OCache oc = glob.oc;
-        synchronized (oc) {
-            for (Gob gob : oc) {
-                final GobHealth hlt = gob.getattr(GobHealth.class);
-                if (hlt != null && hlt.hp < 4) {
-                    Gob.Overlay ol = gob.findol(Sprite.GOB_HEALTH_ID);
-                    if (ol == null)
-                        gob.addol(new Gob.Overlay(Sprite.GOB_HEALTH_ID, new GobHealthSprite(hlt.hp)));
-                    else if (((GobHealthSprite) ol.spr).val != hlt.hp)
-                        ((GobHealthSprite) ol.spr).update(hlt.hp);
-                    oc.changed(gob);
-                }
+        for (Gob gob : oc.getallgobs()) {
+            final GobHealth hlt = gob.getattr(GobHealth.class);
+            if (hlt != null && hlt.hp < 4) {
+                Gob.Overlay ol = gob.findol(Sprite.GOB_HEALTH_ID);
+                if (ol == null)
+                    gob.addol(new Gob.Overlay(Sprite.GOB_HEALTH_ID, new GobHealthSprite(hlt.hp)));
+                else if (((GobHealthSprite) ol.spr).val != hlt.hp)
+                    ((GobHealthSprite) ol.spr).update(hlt.hp);
+                oc.changed(gob);
             }
         }
     }
 
     public void addQualitySprites() {
         OCache oc = glob.oc;
-        synchronized (oc) {
-            for (Gob gob : oc) {
-                final GobQuality hlt = gob.getattr(GobQuality.class);
-                if (hlt != null && hlt.quality > 0) {
-                    Gob.Overlay ol = gob.findol(Sprite.GOB_QUALITY_ID);
-                    if (ol == null)
-                        gob.addol(new Gob.Overlay(Sprite.GOB_QUALITY_ID, new GobQualitySprite(hlt.quality)));
-                    else if (((GobQualitySprite) ol.spr).val != hlt.quality)
-                        ((GobQualitySprite) ol.spr).update(hlt.quality);
-                    oc.changed(gob);
-                }
+        for (Gob gob : oc.getallgobs()) {
+            final GobQuality hlt = gob.getattr(GobQuality.class);
+            if (hlt != null && hlt.quality > 0) {
+                Gob.Overlay ol = gob.findol(Sprite.GOB_QUALITY_ID);
+                if (ol == null)
+                    gob.addol(new Gob.Overlay(Sprite.GOB_QUALITY_ID, new GobQualitySprite(hlt.quality)));
+                else if (((GobQualitySprite) ol.spr).val != hlt.quality)
+                    ((GobQualitySprite) ol.spr).update(hlt.quality);
+                oc.changed(gob);
             }
         }
     }
 
     public void refreshGobsAll() {
         OCache oc = glob.oc;
-        synchronized (oc) {
-            for (Gob gob : oc)
-                oc.changed(gob);
-        }
+        for (Gob gob : oc.getallgobs())
+            oc.changed(gob);
     }
 
     public void refreshGobsGrowthStages() {
         OCache oc = glob.oc;
-        synchronized (oc) {
-            for (Gob gob : oc) {
-                if (gob.type == Type.PLANT || gob.type == Type.MULTISTAGE_PLANT || gob.type == Type.TREE || gob.type == Type.BUSH)
-                    oc.changed(gob);
-            }
+        for (Gob gob : oc.getallgobs()) {
+            if (gob.type == Type.PLANT || gob.type == Type.MULTISTAGE_PLANT || gob.type == Type.TREE || gob.type == Type.BUSH)
+                oc.changed(gob);
         }
     }
 

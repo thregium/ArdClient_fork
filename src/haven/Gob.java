@@ -602,7 +602,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         StringBuilder sb = new StringBuilder();
         sb.append("Res: ");
         if (res().isPresent()) sb.append(getres());
-        sb.append(" [").append(id).append("]\n");
+        sb.append(" [").append(id).append("][").append(frame).append("]\n");
         final GobIcon icon = getattr(GobIcon.class);
         if (icon != null) {
             sb.append("Icon: ").append(icon.res.get()).append("\n");

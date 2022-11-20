@@ -37,9 +37,7 @@ import java.net.DatagramSocket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.nio.ByteBuffer;
 import java.nio.channels.ClosedByInterruptException;
-import java.nio.channels.DatagramChannel;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -74,7 +72,7 @@ public class Session implements Resource.Resolver {
             "gfx/hud/chr/custom/asoft"
     };
 
-//    DatagramChannel sk;
+    //    DatagramChannel sk;
     DatagramSocket sk;
     SocketAddress server;
     Thread rworker, sworker, ticker;
@@ -326,25 +324,25 @@ public class Session implements Resource.Resolver {
                 int fl = msg.uint8();
                 long id = msg.uint32();
                 int frame = msg.int32();
-                synchronized (oc) {
-                    if ((fl & 1) != 0)
+//                synchronized (oc) {
+                if ((fl & 1) != 0)
+                    oc.remove(id, frame - 1);
+                Gob gob = oc.getgob(id, frame);
+                if (gob != null) {
+                    gob.frame = frame;
+                    gob.virtual = ((fl & 2) != 0);
+                }
+                while (true) {
+                    int type = msg.uint8();
+                    if (type == OCache.OD_REM) {
                         oc.remove(id, frame - 1);
-                    Gob gob = oc.getgob(id, frame);
-                    if (gob != null) {
-                        gob.frame = frame;
-                        gob.virtual = ((fl & 2) != 0);
-                    }
-                    while (true) {
-                        int type = msg.uint8();
-                        if (type == OCache.OD_REM) {
-                            oc.remove(id, frame - 1);
-                        } else if (type == OCache.OD_END) {
-                            break;
-                        } else {
-                            oc.receive(gob, type, msg);
-                        }
+                    } else if (type == OCache.OD_END) {
+                        break;
+                    } else {
+                        oc.receive(gob, type, msg);
                     }
                 }
+//                }
                 synchronized (objacks) {
                     if (objacks.containsKey(id)) {
                         ObjAck a = objacks.get(id);

@@ -132,7 +132,6 @@ public class MapMesh implements Rendered, Disposable {
                 for (int x = vs.ul.x; x < vs.br.x; x++) {
                     double z = Config.disableelev ? 0 : map.getfz(ul.add(x, y));
                     surf[vs.o(x, y)] = new Vertex(x * (float) tilesz.x, y * -(float) tilesz.y, (float) z);
-                    //  z = !Config.disableelev ? map.getz(ul.add(x, y)) : 0;surf[vs.o(x, y)] = new Vertex(x * (float)tilesz.x, y * -(float)tilesz.y, z);
                 }
             }
             for (int y = ts.ul.y; y < ts.br.y; y++) {

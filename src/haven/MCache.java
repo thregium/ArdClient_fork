@@ -74,8 +74,8 @@ public class MCache {
     @SuppressWarnings("unchecked")
     public Reference<Tiler>[] tiles = new Reference[256];
     private final Waitable.Queue gridwait = new Waitable.Queue();
-    final Map<Coord, Request> req = new HashMap<>();
-    final Map<Coord, Grid> grids = new HashMap<>();
+    final Map<Coord, Request> req = Collections.synchronizedMap(new HashMap<>());
+    final Map<Coord, Grid> grids = Collections.synchronizedMap(new HashMap<>());
     Session sess;
     final Set<Overlay> ols = new HashSet<>();
     public int olseq = 0;
@@ -892,19 +892,13 @@ public class MCache {
     }
 
     public void ctick(int dt) {
-        Collection<Grid> copy;
-        synchronized (grids) {
-            copy = new ArrayList<>(grids.values());
-        }
+        Collection<Grid> copy = new ArrayList<>(grids.values());
         for (Grid g : copy)
             g.tick(dt);
     }
 
     public void invalidateAll() {
-        Collection<Grid> copy;
-        synchronized (grids) {
-            copy = new ArrayList<>(grids.values());
-        }
+        Collection<Grid> copy = new ArrayList<>(grids.values());
         for (Grid gr : copy)
             gr.invalidate();
     }
@@ -986,38 +980,44 @@ public class MCache {
     }
 
     public int gettile_safe(Coord tc) {
-        final Optional<Grid> grid = getgridto(tc);
-        if (grid.isPresent()) {
-            final Grid g = grid.get();
-            return g.gettile(tc.sub(g.ul));
-        } else {
-            return 0;
+        synchronized (grids) {
+            final Optional<Grid> grid = getgridto(tc);
+            if (grid.isPresent()) {
+                final Grid g = grid.get();
+                return g.gettile(tc.sub(g.ul));
+            } else {
+                return 0;
+            }
         }
     }
 
     public Tile gethitmap(Coord tc) {
-        final Optional<Grid> g = getgridto(tc);
-        if (g.isPresent()) {
-            return g.get().gethitmap(tc.sub(g.get().ul));
-        } else {
-            return null;
+        synchronized (grids) {
+            final Optional<Grid> g = getgridto(tc);
+            return (g.map(grid -> grid.gethitmap(tc.sub(grid.ul))).orElse(null));
         }
     }
 
     public void sethitmap(Coord tc, Tile t) {
-        getgridto(tc).ifPresent(g -> {
-            g.sethitmap(tc.sub(g.ul), t);
-        });
+        synchronized (grids) {
+            getgridto(tc).ifPresent(g -> {
+                g.sethitmap(tc.sub(g.ul), t);
+            });
+        }
     }
 
     public int gettile(Coord tc) {
-        Grid g = getgridt(tc);
-        return (g.gettile(tc.sub(g.ul)));
+        synchronized (grids) {
+            Grid g = getgridt(tc);
+            return (g.gettile(tc.sub(g.ul)));
+        }
     }
 
     public double getfz(Coord tc) {
-        Grid g = getgridt(tc);
-        return (g.getz(tc.sub(g.ul)));
+        synchronized (grids) {
+            Grid g = getgridt(tc);
+            return (g.getz(tc.sub(g.ul)));
+        }
     }
 
     @Deprecated
@@ -1026,12 +1026,14 @@ public class MCache {
     }
 
     public int getz_safe(Coord tc) {
-        final Optional<Grid> grid = getgridto(tc);
-        if (grid.isPresent()) {
-            final Grid g = grid.get();
-            return ((int) Math.round(g.getz(tc.sub(g.ul))));
-        } else {
-            return 0;
+        synchronized (grids) {
+            final Optional<Grid> grid = getgridto(tc);
+            if (grid.isPresent()) {
+                final Grid g = grid.get();
+                return ((int) Math.round(g.getz(tc.sub(g.ul))));
+            } else {
+                return 0;
+            }
         }
     }
 

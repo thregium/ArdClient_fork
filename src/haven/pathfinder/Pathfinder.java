@@ -9,14 +9,12 @@ import haven.LinMove;
 import haven.MCache;
 import haven.MapView;
 import haven.OCache;
+import static haven.OCache.posres;
 import haven.Pair;
-
+import haven.sloth.script.pathfinding.Hitbox;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-
-import static haven.OCache.posres;
-import haven.sloth.script.pathfinding.Hitbox;
 
 public class Pathfinder implements Runnable {
     private OCache oc;
@@ -86,20 +84,18 @@ public class Pathfinder implements Runnable {
         Gob player = mv.player();
 
         long start = System.nanoTime();
-        synchronized (oc) {
-            for (Gob gob : oc) {
-                if (gob.isplayer())
-                    continue;
-                // need to exclude destination gob so it won't get into TO candidates list
-                if (this.gob != null && this.gob.id == gob.id)
-                    continue;
-                Hitbox[] box = Hitbox.hbfor(gob);
-                if (box != null && box.length == 1 && box[0].points.length == 4 && isInsideBoundBox(gob.rc.floor(), gob.a, box, player.rc.floor())) {
-                    m.excludeGob(gob);
-                    continue;
-                }
-                m.addGob(gob);
+        for (Gob gob : oc.getallgobs()) {
+            if (gob.isplayer())
+                continue;
+            // need to exclude destination gob so it won't get into TO candidates list
+            if (this.gob != null && this.gob.id == gob.id)
+                continue;
+            Hitbox[] box = Hitbox.hbfor(gob);
+            if (box != null && box.length == 1 && box[0].points.length == 4 && isInsideBoundBox(gob.rc.floor(), gob.a, box, player.rc.floor())) {
+                m.excludeGob(gob);
+                continue;
             }
+            m.addGob(gob);
         }
 
         // if player is located at a position occupied by a gob (can happen when starting too close to gobs)

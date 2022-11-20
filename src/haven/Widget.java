@@ -834,10 +834,12 @@ public class Widget {
                 if (errorWdgs.stream().noneMatch(w -> w.errWdg.equals(finalWdg))) {
                     errorWdgs.add(new ErrorWidget(finalWdg, strErr));
                     if (ui != null) PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
-                    e.printStackTrace(Debug.log);
+                    if (ui != null && ui.cons != null) e.printStackTrace(ui.cons.out);
+                    else e.printStackTrace(System.err);
                 } else if (errorWdgs.stream().anyMatch(w -> w.errWdg.equals(finalWdg) && w.repeat())) {
                     if (ui != null) PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
-                    e.printStackTrace(Debug.log);
+                    if (ui != null && ui.cons != null) e.printStackTrace(ui.cons.out);
+                    else e.printStackTrace(System.err);
                 }
             }
         }
@@ -871,10 +873,12 @@ public class Widget {
                 if (errorWdgs.stream().noneMatch(w -> w.errWdg.equals(finalWdg))) {
                     errorWdgs.add(new ErrorWidget(finalWdg, strErr));
                     if (ui != null) PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
-                    e.printStackTrace(Debug.log);
+                    if (ui != null && ui.cons != null) e.printStackTrace(ui.cons.out);
+                    else e.printStackTrace(System.err);
                 } else if (errorWdgs.stream().anyMatch(w -> w.errWdg.equals(finalWdg) && w.repeat())) {
                     if (ui != null) PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
-                    e.printStackTrace(Debug.log);
+                    if (ui != null && ui.cons != null) e.printStackTrace(ui.cons.out);
+                    else e.printStackTrace(System.err);
                 }
             }
             if (configuration.focusrectangle) {

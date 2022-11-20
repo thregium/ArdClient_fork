@@ -642,9 +642,7 @@ public class configuration {
         public void run() {
             running.set(true);
             while (running.get() && configuration.blizzardoverlay) {
-                synchronized (oc) {
-                    configuration.addsnow(oc);
-                }
+                configuration.addsnow(oc);
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {

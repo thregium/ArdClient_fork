@@ -312,128 +312,127 @@ public class LocalMiniMap extends Widget {
     public void drawicons(GOut g) {
         OCache oc = ui.sess.glob.oc;
         List<Gob> dangergobs = new ArrayList<>();
-        synchronized (oc) {
-            Gob player = mv.player();
-            for (Gob gob : oc) {
-                try {
-                    Resource res = gob.getres();
-                    if (res == null)
-                        continue;
+        Gob player = mv.player();
+        for (Gob gob : oc.getallgobs()) {
+            try {
+                Resource res = gob.getres();
+                if (res == null)
+                    continue;
 
-                    if (gob.type == Type.HUMAN && player != null && gob.id != player.id) {
-                        dangergobs.add(gob);
-                        continue;
-                    }
-                    GobIcon icon = gob.getattr(GobIcon.class);
-                    if (!Config.hideallicons && (icon != null || Config.additonalicons.containsKey(res.name))) {
-                        CheckListboxItem itm = Config.icons.get(res.basename());
-                        if (itm != null && !itm.selected) {
-                            Tex tex;
-                            if (icon != null)
-                                tex = gob.isDead() ? icon.texgrey() : icon.tex();
-                            else
-                                tex = Config.additonalicons.get(res.name);
-                            g.image(tex, p2c(gob.rc).sub(tex.sz().mul(iconZoom).div(2)).add(delta), tex.dim.mul(iconZoom));
-                        }
-                    }
-                    String basename = res.basename();
-                    if (gob.type == Type.BOULDER) {
-                        CheckListboxItem itm = Config.boulders.get(basename.substring(0, basename.length() - 1));
-                        if (itm != null && itm.selected) {
-                            if (Iconfinder.icons.containsKey(basename.substring(0, basename.length() - 1))) {
-                                try {
-                                    Tex tex = Resource.remote().loadwait(Iconfinder.icons.get(basename.substring(0, basename.length() - 1))).layer(Resource.imgc).tex();
-                                    g.image(tex, p2c(gob.rc).sub(tex.sz().mul(iconZoom).div(4)).add(delta), tex.dim.mul(iconZoom / 2));
-                                } catch (Resource.Loading l) {
-                                }
-                            } else {
-                                g.image(bldricn, p2c(gob.rc).add(delta).sub(bldricn.sz().div(2)));
-                            }
-                        }
-                    } else if (gob.type == Type.BUSH) {
-                        CheckListboxItem itm = Config.bushes.get(basename);
-                        if (itm != null && itm.selected) {
-                            if (Iconfinder.icons.containsKey(basename)) {
-                                try {
-                                    Tex tex = Resource.remote().loadwait(Iconfinder.icons.get(basename)).layer(Resource.imgc).tex();
-                                    g.image(tex, p2c(gob.rc).sub(tex.sz().mul(iconZoom).div(4)).add(delta), tex.dim.mul(iconZoom / 2));
-                                } catch (Resource.Loading l) {
-
-                                }
-                            } else {
-                                g.image(bushicn, p2c(gob.rc).add(delta).sub(bldricn.sz().div(2)));
-                            }
-                        }
-                    } else if (gob.type == Type.TREE) {
-                        CheckListboxItem itm = Config.trees.get(basename);
-                        if (itm != null && itm.selected) {
-                            if (Iconfinder.icons.containsKey(basename)) {
-                                try {
-                                    Tex tex = Resource.remote().loadwait(Iconfinder.icons.get(basename)).layer(Resource.imgc).tex();
-                                    g.image(tex, p2c(gob.rc).sub(tex.sz().mul(iconZoom).div(4)).add(delta), tex.dim.mul(iconZoom / 2));
-                                } catch (Resource.Loading l) {
-
-                                }
-                            } else {
-                                g.image(treeicn, p2c(gob.rc).add(delta).sub(bldricn.sz().div(2)));
-                            }
-                        }
-                    } else if (gob.type == Type.ROAD && Config.showroadmidpoint) {
-                        g.image(roadicn, p2c(gob.rc).sub(roadicn.sz().div(2)).add(delta));
-                    } else if (gob.type == Type.ROADENDPOINT && Config.showroadendpoint) {
-                        g.image(roadicn, p2c(gob.rc).sub(roadicn.sz().div(2)).add(delta));
-                    } else if (gob.type == Type.DUNGEONDOOR) {
-                        int stage = 0;
-                        if (gob.getattr(ResDrawable.class) != null)
-                            stage = gob.getattr(ResDrawable.class).sdt.peekrbuf(0);
-                        if (stage == 10 || stage == 14)
-                            g.image(dooricn, p2c(gob.rc).sub(dooricn.sz().div(2)).add(delta));
-                    }
-
-                    if (sgobs.contains(gob.id))
-                        continue;
-                } catch (Loading l) {
+                if (gob.type == Type.HUMAN && player != null && gob.id != player.id) {
+                    dangergobs.add(gob);
+                    continue;
                 }
+                GobIcon icon = gob.getattr(GobIcon.class);
+                if (!Config.hideallicons && (icon != null || Config.additonalicons.containsKey(res.name))) {
+                    CheckListboxItem itm = Config.icons.get(res.basename());
+                    if (itm != null && !itm.selected) {
+                        Tex tex;
+                        if (icon != null)
+                            tex = gob.isDead() ? icon.texgrey() : icon.tex();
+                        else
+                            tex = Config.additonalicons.get(res.name);
+                        g.image(tex, p2c(gob.rc).sub(tex.sz().mul(iconZoom).div(2)).add(delta), tex.dim.mul(iconZoom));
+                    }
+                }
+                String basename = res.basename();
+                if (gob.type == Type.BOULDER) {
+                    CheckListboxItem itm = Config.boulders.get(basename.substring(0, basename.length() - 1));
+                    if (itm != null && itm.selected) {
+                        if (Iconfinder.icons.containsKey(basename.substring(0, basename.length() - 1))) {
+                            try {
+                                Tex tex = Resource.remote().loadwait(Iconfinder.icons.get(basename.substring(0, basename.length() - 1))).layer(Resource.imgc).tex();
+                                g.image(tex, p2c(gob.rc).sub(tex.sz().mul(iconZoom).div(4)).add(delta), tex.dim.mul(iconZoom / 2));
+                            } catch (Resource.Loading l) {
+                            }
+                        } else {
+                            g.image(bldricn, p2c(gob.rc).add(delta).sub(bldricn.sz().div(2)));
+                        }
+                    }
+                } else if (gob.type == Type.BUSH) {
+                    CheckListboxItem itm = Config.bushes.get(basename);
+                    if (itm != null && itm.selected) {
+                        if (Iconfinder.icons.containsKey(basename)) {
+                            try {
+                                Tex tex = Resource.remote().loadwait(Iconfinder.icons.get(basename)).layer(Resource.imgc).tex();
+                                g.image(tex, p2c(gob.rc).sub(tex.sz().mul(iconZoom).div(4)).add(delta), tex.dim.mul(iconZoom / 2));
+                            } catch (Resource.Loading l) {
+
+                            }
+                        } else {
+                            g.image(bushicn, p2c(gob.rc).add(delta).sub(bldricn.sz().div(2)));
+                        }
+                    }
+                } else if (gob.type == Type.TREE) {
+                    CheckListboxItem itm = Config.trees.get(basename);
+                    if (itm != null && itm.selected) {
+                        if (Iconfinder.icons.containsKey(basename)) {
+                            try {
+                                Tex tex = Resource.remote().loadwait(Iconfinder.icons.get(basename)).layer(Resource.imgc).tex();
+                                g.image(tex, p2c(gob.rc).sub(tex.sz().mul(iconZoom).div(4)).add(delta), tex.dim.mul(iconZoom / 2));
+                            } catch (Resource.Loading l) {
+
+                            }
+                        } else {
+                            g.image(treeicn, p2c(gob.rc).add(delta).sub(bldricn.sz().div(2)));
+                        }
+                    }
+                } else if (gob.type == Type.ROAD && Config.showroadmidpoint) {
+                    g.image(roadicn, p2c(gob.rc).sub(roadicn.sz().div(2)).add(delta));
+                } else if (gob.type == Type.ROADENDPOINT && Config.showroadendpoint) {
+                    g.image(roadicn, p2c(gob.rc).sub(roadicn.sz().div(2)).add(delta));
+                } else if (gob.type == Type.DUNGEONDOOR) {
+                    int stage = 0;
+                    if (gob.getattr(ResDrawable.class) != null)
+                        stage = gob.getattr(ResDrawable.class).sdt.peekrbuf(0);
+                    if (stage == 10 || stage == 14)
+                        g.image(dooricn, p2c(gob.rc).sub(dooricn.sz().div(2)).add(delta));
+                }
+
+                if (sgobs.contains(gob.id))
+                    continue;
+            } catch (Loading l) {
             }
+        }
 
-            for (Gob gob : dangergobs) {
-                try {
-                    if (gob.type == Type.HUMAN && gob.id != mv.player().id) {
-                        if (ui.sess.glob.party.memb.containsKey(gob.id))
-                            continue;
+        for (Gob gob : dangergobs) {
+            try {
+                if (gob.type == Type.HUMAN && gob.id != mv.player().id) {
+                    if (ui.sess.glob.party.memb.containsKey(gob.id))
+                        continue;
 
-                        Coord pc = p2c(gob.rc).add(delta);
+                    Coord pc = p2c(gob.rc).add(delta);
 
-                        KinInfo kininfo = gob.getattr(KinInfo.class);
-                        if (pc.x >= 0 && pc.x <= sz.x && pc.y >= 0 && pc.y < sz.y) {
+                    KinInfo kininfo = gob.getattr(KinInfo.class);
+                    if (pc.x >= 0 && pc.x <= sz.x && pc.y >= 0 && pc.y < sz.y) {
 //                            g.chcolor(Color.BLACK);
 //                            g.fcircle(pc.x, pc.y, 5, 16);
 //                            g.chcolor(kininfo != null ? BuddyWnd.gc[kininfo.group] : Color.WHITE);
 //                            g.fcircle(pc.x, pc.y, 4, 16);
 //                            g.chcolor();
 
-                            double angle = gob.geta();
+                        double angle = gob.geta();
 //                            final Coord front = new Coord(5, 0).rotate(angle).add(pc);
 //                            final Coord right = new Coord(-3, 3).rotate(angle).add(pc);
 //                            final Coord left = new Coord(-3, -3).rotate(angle).add(pc);
 //                            final Coord notch = new Coord(0, 0).rotate(angle).add(pc);
 
-                            final Coord coord1 = new Coord(8, 0).rotate(angle).add(pc);
-                            final Coord coord2 = new Coord(0, -5).rotate(angle).add(pc);
-                            final Coord coord3 = new Coord(0, -1).rotate(angle).add(pc);
-                            final Coord coord4 = new Coord(-8, -1).rotate(angle).add(pc);
-                            final Coord coord5 = new Coord(-8, 1).rotate(angle).add(pc);
-                            final Coord coord6 = new Coord(0, 1).rotate(angle).add(pc);
-                            final Coord coord7 = new Coord(0, 5).rotate(angle).add(pc);
-                            g.chcolor(kininfo != null ? BuddyWnd.gc[kininfo.group] : Color.WHITE);
-                            g.poly(coord1, coord2, coord3, coord4, coord5, coord6, coord7);
-                            g.chcolor(Color.BLACK);
-                            g.polyline(1, coord1, coord2, coord3, coord4, coord5, coord6, coord7);
-                            g.chcolor();
-                        }
+                        final Coord coord1 = new Coord(8, 0).rotate(angle).add(pc);
+                        final Coord coord2 = new Coord(0, -5).rotate(angle).add(pc);
+                        final Coord coord3 = new Coord(0, -1).rotate(angle).add(pc);
+                        final Coord coord4 = new Coord(-8, -1).rotate(angle).add(pc);
+                        final Coord coord5 = new Coord(-8, 1).rotate(angle).add(pc);
+                        final Coord coord6 = new Coord(0, 1).rotate(angle).add(pc);
+                        final Coord coord7 = new Coord(0, 5).rotate(angle).add(pc);
+                        g.chcolor(kininfo != null ? BuddyWnd.gc[kininfo.group] : Color.WHITE);
+                        g.poly(coord1, coord2, coord3, coord4, coord5, coord6, coord7);
+                        g.chcolor(Color.BLACK);
+                        g.polyline(1, coord1, coord2, coord3, coord4, coord5, coord6, coord7);
+                        g.chcolor();
+                    }
 
-                        if (sgobs.contains(gob.id))
-                            continue;
+                    if (sgobs.contains(gob.id))
+                        continue;
 
 //                        boolean enemy = false;
 //                        if (!Config.alarmunknownplayer.equals("None") && kininfo == null) {
@@ -468,73 +467,70 @@ public class LocalMiniMap extends Widget {
 //                        } else if (Config.autohearth && enemy)
 //                            ui.gui.act("travel", "hearth");
 
-                    } else {
-                        GobIcon icon = gob.getattr(GobIcon.class);
-                        if (icon != null) {
-                            Tex tex;
-                            if (icon != null)
-                                tex = gob.isDead() == Boolean.TRUE ? icon.texgrey() : icon.tex();
-                            else
-                                tex = Config.additonalicons.get(gob.getres().name);
-                            g.image(tex, p2c(gob.rc).sub(tex.sz().mul(iconZoom).div(2)).add(delta), tex.dim.mul(iconZoom));
-                        }
+                } else {
+                    GobIcon icon = gob.getattr(GobIcon.class);
+                    if (icon != null) {
+                        Tex tex;
+                        if (icon != null)
+                            tex = gob.isDead() == Boolean.TRUE ? icon.texgrey() : icon.tex();
+                        else
+                            tex = Config.additonalicons.get(gob.getres().name);
+                        g.image(tex, p2c(gob.rc).sub(tex.sz().mul(iconZoom).div(2)).add(delta), tex.dim.mul(iconZoom));
                     }
-                } catch (Exception e) { // fail silently
                 }
+            } catch (Exception e) { // fail silently
             }
         }
     }
 
     public Gob findicongob(Coord c) {
         OCache oc = ui.sess.glob.oc;
-        synchronized (oc) {
-            for (Gob gob : oc) {
-                try {
-                    GobIcon icon = gob.getattr(GobIcon.class);
-                    if (icon != null) {
-                        CheckListboxItem itm = Config.icons.get(gob.getres().basename());
-                        if ((itm != null && !itm.selected) || icons.stream().anyMatch(i -> i.gob.equals(gob))) {
-                            Coord gc = p2c(gob.rc).add(delta);
-                            Coord sz = icon.tex().sz();
-                            if (c.isect(gc.sub(sz.div(2)), sz)) {
-                                Resource res = icon.res.get();
-                                itm = Config.icons.get(res.basename());
-                                if (itm == null || !itm.selected)
-                                    return gob;
-                            }
-                        }
-                    } else { // custom icons
+        for (Gob gob : oc.getallgobs()) {
+            try {
+                GobIcon icon = gob.getattr(GobIcon.class);
+                if (icon != null) {
+                    CheckListboxItem itm = Config.icons.get(gob.getres().basename());
+                    if ((itm != null && !itm.selected) || icons.stream().anyMatch(i -> i.gob.equals(gob))) {
                         Coord gc = p2c(gob.rc).add(delta);
-                        Coord sz = new Coord(18, 18);
+                        Coord sz = icon.tex().sz();
                         if (c.isect(gc.sub(sz.div(2)), sz)) {
-                            Resource res = gob.getres();
-                            KinInfo ki = gob.getattr(KinInfo.class);
-                            if (ki != null) {
-                                if (gob.type == Type.HUMAN)
-                                    return gob;
-                            } else if (gob.type == Type.TREE) {
-                                CheckListboxItem itm = Config.trees.get(res.basename());
-                                if (itm != null && itm.selected)
-                                    return gob;
-                            } else if (gob.type == Type.BUSH) {
-                                CheckListboxItem itm = Config.bushes.get(res.basename());
-                                if (itm != null && itm.selected)
-                                    return gob;
-                            } else if (gob.type == Type.BOULDER) {
-                                CheckListboxItem itm = Config.boulders.get(res.basename().substring(0, res.basename().length() - 1));
-                                if (itm != null && itm.selected)
-                                    return gob;
-                            } else if (res != null && Config.additonalicons.containsKey(res.name)) {
-                                CheckListboxItem itm = Config.icons.get(res.basename());
-                                if (itm == null || !itm.selected) {
-                                    return gob;
-                                }
+                            Resource res = icon.res.get();
+                            itm = Config.icons.get(res.basename());
+                            if (itm == null || !itm.selected)
+                                return gob;
+                        }
+                    }
+                } else { // custom icons
+                    Coord gc = p2c(gob.rc).add(delta);
+                    Coord sz = new Coord(18, 18);
+                    if (c.isect(gc.sub(sz.div(2)), sz)) {
+                        Resource res = gob.getres();
+                        KinInfo ki = gob.getattr(KinInfo.class);
+                        if (ki != null) {
+                            if (gob.type == Type.HUMAN)
+                                return gob;
+                        } else if (gob.type == Type.TREE) {
+                            CheckListboxItem itm = Config.trees.get(res.basename());
+                            if (itm != null && itm.selected)
+                                return gob;
+                        } else if (gob.type == Type.BUSH) {
+                            CheckListboxItem itm = Config.bushes.get(res.basename());
+                            if (itm != null && itm.selected)
+                                return gob;
+                        } else if (gob.type == Type.BOULDER) {
+                            CheckListboxItem itm = Config.boulders.get(res.basename().substring(0, res.basename().length() - 1));
+                            if (itm != null && itm.selected)
+                                return gob;
+                        } else if (res != null && Config.additonalicons.containsKey(res.name)) {
+                            CheckListboxItem itm = Config.icons.get(res.basename());
+                            if (itm == null || !itm.selected) {
+                                return gob;
                             }
                         }
                     }
-
-                } catch (Loading | NullPointerException l) {
                 }
+
+            } catch (Loading | NullPointerException l) {
             }
         }
         return (null);
@@ -600,77 +596,75 @@ public class LocalMiniMap extends Widget {
         icons.sort(Comparator.comparingInt(a -> a.priority));
 
         List<Gob> dangergobs = new ArrayList<>();
-        synchronized (oc) {
-            Gob player = mv.player();
-            for (Gob gob : oc) {
-                try {
-                    Resource res = gob.getres();
-                    if (res == null)
-                        continue;
-                    if (gob.type == Type.HUMAN && player != null && gob.id != player.id) {
-                        dangergobs.add(gob);
-                        continue;
-                    }
-                    if (sgobs.contains(gob.id))
-                        continue;
-                } catch (Loading l) {
+        Gob player = mv.player();
+        for (Gob gob : oc.getallgobs()) {
+            try {
+                Resource res = gob.getres();
+                if (res == null)
+                    continue;
+                if (gob.type == Type.HUMAN && player != null && gob.id != player.id) {
+                    dangergobs.add(gob);
+                    continue;
                 }
+                if (sgobs.contains(gob.id))
+                    continue;
+            } catch (Loading l) {
             }
-            for (Gob gob : dangergobs) {
-                if (gob.type == Type.HUMAN && gob.id != mv.player().id) {
-                    if (ui.sess.glob.party.memb.containsKey(gob.id))
-                        continue;
+        }
+        for (Gob gob : dangergobs) {
+            if (gob.type == Type.HUMAN && gob.id != mv.player().id) {
+                if (ui.sess.glob.party.memb.containsKey(gob.id))
+                    continue;
 
-                    KinInfo kininfo = gob.getattr(KinInfo.class);
+                KinInfo kininfo = gob.getattr(KinInfo.class);
 
-                    if (sgobs.contains(gob.id))
-                        continue;
+                if (sgobs.contains(gob.id))
+                    continue;
 
-                    boolean enemy = false;
-                    if (!Config.alarmunknownplayer.equals("None") && kininfo == null) {
-                        sgobs.add(gob.id);
-                        Defer.later(() -> {
-                            Audio.play(Resource.local().loadwait(Config.alarmunknownplayer), Config.alarmunknownvol);
-                            return (null);
-                        });
-                        if (Config.discordplayeralert) {
-                            if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
-                                if (Config.discorduser) {
-                                    PBotDiscord.mapAlert(ui.sess.username, Config.discordalertstring, "Player");
-                                } else if (Config.discordrole) {
-                                    PBotDiscord.mapAlertRole(ui.sess.username, Config.discordalertstring, "Player");
-                                } else {
-                                    PBotDiscord.mapAlertEveryone(ui.sess.username, "Player");
-                                }
+                boolean enemy = false;
+                if (!Config.alarmunknownplayer.equals("None") && kininfo == null) {
+                    sgobs.add(gob.id);
+                    Defer.later(() -> {
+                        Audio.play(Resource.local().loadwait(Config.alarmunknownplayer), Config.alarmunknownvol);
+                        return (null);
+                    });
+                    if (Config.discordplayeralert) {
+                        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                            if (Config.discorduser) {
+                                PBotDiscord.mapAlert(ui.sess.username, Config.discordalertstring, "Player");
+                            } else if (Config.discordrole) {
+                                PBotDiscord.mapAlertRole(ui.sess.username, Config.discordalertstring, "Player");
+                            } else {
+                                PBotDiscord.mapAlertEveryone(ui.sess.username, "Player");
                             }
                         }
-                        enemy = true;
-                    } else if (!Config.alarmredplayer.equals("None") && kininfo != null && kininfo.group == 2) {
-                        sgobs.add(gob.id);
-                        Defer.later(() -> {
-                            Audio.play(Resource.local().loadwait(Config.alarmredplayer), Config.alarmredvol);
-                            return (null);
-                        });
-                        if (Config.discordplayeralert) {
-                            if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
-                                if (Config.discorduser) {
-                                    PBotDiscord.mapAlert(ui.sess.username, Config.discordalertstring, "Player");
-                                } else if (Config.discordrole) {
-                                    PBotDiscord.mapAlertRole(ui.sess.username, Config.discordalertstring, "Player");
-                                } else {
-                                    PBotDiscord.mapAlertEveryone(ui.sess.username, "Player");
-                                }
-                            }
-                        }
-                        enemy = true;
                     }
-
-                    if (Config.autologout && enemy) {
-                        PBotUtils.sysMsg(ui, "Ememy spotted! Logging out!", Color.white);
-                        ui.gui.act("lo");
-                    } else if (Config.autohearth && enemy)
-                        ui.gui.act("travel", "hearth");
+                    enemy = true;
+                } else if (!Config.alarmredplayer.equals("None") && kininfo != null && kininfo.group == 2) {
+                    sgobs.add(gob.id);
+                    Defer.later(() -> {
+                        Audio.play(Resource.local().loadwait(Config.alarmredplayer), Config.alarmredvol);
+                        return (null);
+                    });
+                    if (Config.discordplayeralert) {
+                        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                            if (Config.discorduser) {
+                                PBotDiscord.mapAlert(ui.sess.username, Config.discordalertstring, "Player");
+                            } else if (Config.discordrole) {
+                                PBotDiscord.mapAlertRole(ui.sess.username, Config.discordalertstring, "Player");
+                            } else {
+                                PBotDiscord.mapAlertEveryone(ui.sess.username, "Player");
+                            }
+                        }
+                    }
+                    enemy = true;
                 }
+
+                if (Config.autologout && enemy) {
+                    PBotUtils.sysMsg(ui, "Ememy spotted! Logging out!", Color.white);
+                    ui.gui.act("lo");
+                } else if (Config.autohearth && enemy)
+                    ui.gui.act("travel", "hearth");
             }
         }
     }
@@ -1098,31 +1092,29 @@ public class LocalMiniMap extends Widget {
         }
         List<DisplayIcon> ret = new ArrayList<>();
         OCache oc = ui.sess.glob.oc;
-        synchronized (oc) {
-            for (Gob gob : oc) {
-                try {
-                    GobIcon icon = gob.getattr(GobIcon.class);
-                    if (icon != null && icon.res != null && icon.res.get() != null) {
-                        GobIcon.Setting conf = iconconf.get(icon.res.get());
-                        if ((conf != null) && conf.show) {
-                            DisplayIcon disp = pmap.get(gob);
-                            if (disp == null) {
-                                if (gob.isplayer()) disp = new DisplayIcon(icon, -1);
-                                else disp = new DisplayIcon(icon);
-                            }
-                            disp.update(gob.rc, gob.a);
-                            KinInfo kin = gob.getattr(KinInfo.class);
-                            if ((kin != null) && (kin.group < BuddyWnd.gc.length))
-                                disp.col = BuddyWnd.gc[kin.group];
-                            ret.add(disp);
+        for (Gob gob : oc.getallgobs()) {
+            try {
+                GobIcon icon = gob.getattr(GobIcon.class);
+                if (icon != null && icon.res != null && icon.res.get() != null) {
+                    GobIcon.Setting conf = iconconf.get(icon.res.get());
+                    if ((conf != null) && conf.show) {
+                        DisplayIcon disp = pmap.get(gob);
+                        if (disp == null) {
+                            if (gob.isplayer()) disp = new DisplayIcon(icon, -1);
+                            else disp = new DisplayIcon(icon);
                         }
+                        disp.update(gob.rc, gob.a);
+                        KinInfo kin = gob.getattr(KinInfo.class);
+                        if ((kin != null) && (kin.group < BuddyWnd.gc.length))
+                            disp.col = BuddyWnd.gc[kin.group];
+                        ret.add(disp);
                     }
-                } catch (Loading l) {
                 }
+            } catch (Loading l) {
             }
         }
         ret.sort(Comparator.comparingInt(a -> a.z));
-        if (ret.size() == 0)
+        if (ret.isEmpty())
             return (Collections.emptyList());
         return (ret);
     }
