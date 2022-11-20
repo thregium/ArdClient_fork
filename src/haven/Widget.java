@@ -829,15 +829,15 @@ public class Widget {
             try {
                 wdg.tick(dt);
             } catch (Exception e) {
-                String strErr = "Tick of " + wdg.getClass().getSimpleName() + " " + wdg.getClass().getClassLoader() + " cause a " + e.getClass() + " " + e;
+                String strErr = "Tick of " + wdg.getClass().getSimpleName() + " " + wdg.getClass().getClassLoader() + " cause a " + e;
                 Widget finalWdg = wdg;
                 if (errorWdgs.stream().noneMatch(w -> w.errWdg.equals(finalWdg))) {
                     errorWdgs.add(new ErrorWidget(finalWdg, strErr));
-                    if (ui != null) PBotUtils.sysMsg(ui, strErr + " Please contact the developer!");
-                    e.printStackTrace();
+                    if (ui != null) PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
+                    e.printStackTrace(Debug.log);
                 } else if (errorWdgs.stream().anyMatch(w -> w.errWdg.equals(finalWdg) && w.repeat())) {
-                    if (ui != null) PBotUtils.sysMsg(ui, strErr + " Please contact the developer!");
-                    e.printStackTrace();
+                    if (ui != null) PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
+                    e.printStackTrace(Debug.log);
                 }
             }
         }
@@ -866,15 +866,15 @@ public class Widget {
             try {
                 wdg.draw(g2);
             } catch (Exception e) {
-                String strErr = "Draw of " + wdg.getClass().getSimpleName() + " " + wdg.getClass().getClassLoader() + " cause a " + e.getClass() + " " + e;
+                String strErr = "Draw of " + wdg.getClass().getSimpleName() + " " + wdg.getClass().getClassLoader() + " cause a " + e;
                 Widget finalWdg = wdg;
                 if (errorWdgs.stream().noneMatch(w -> w.errWdg.equals(finalWdg))) {
                     errorWdgs.add(new ErrorWidget(finalWdg, strErr));
-                    if (ui != null) PBotUtils.sysMsg(ui, strErr + " Please contact the developer!");
-                    e.printStackTrace();
+                    if (ui != null) PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
+                    e.printStackTrace(Debug.log);
                 } else if (errorWdgs.stream().anyMatch(w -> w.errWdg.equals(finalWdg) && w.repeat())) {
-                    if (ui != null) PBotUtils.sysMsg(ui, strErr + " Please contact the developer!");
-                    e.printStackTrace();
+                    if (ui != null) PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
+                    e.printStackTrace(Debug.log);
                 }
             }
             if (configuration.focusrectangle) {
