@@ -1293,6 +1293,12 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
 
         void update() {
+            Collection<Gob> values = Arrays.asList(oc.getallgobs());
+            Collection<Gob> keys = new ArrayList<>(parts.keySet());
+
+            keys.stream().filter(g -> !values.contains(g)).collect(Collectors.toList()).forEach(changed::removed);
+            values.stream().filter(g -> !keys.contains(g)).collect(Collectors.toList()).forEach(changed::changed);
+
             for (Gob ob : changed.removed.toArray(new Gob[0]))
                 remove(ob);
             changed.removed.clear();
@@ -1304,9 +1310,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     put(dynamic, ob);
             }
             changed.changed.clear();
-
-            Collection<Gob> values = Arrays.asList(oc.getallgobs());
-            parts.keySet().stream().filter(g -> !values.contains(g)).collect(Collectors.toList()).forEach(this::remove);
 
             for (GobSet set : all)
                 set.update();
