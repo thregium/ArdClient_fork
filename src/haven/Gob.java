@@ -60,6 +60,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -358,8 +359,8 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     private final List<Overlay> dols = new ArrayList<>();
     private final List<Pair<GAttrib, Consumer<Gob>>> dattrs = new ArrayList<>();
 
-    private final Collection<ResAttr.Cell<?>> rdata = new LinkedList<>();
-    private final Collection<ResAttr.Load> lrdata = new LinkedList<>();
+    private final Collection<ResAttr.Cell<?>> rdata = Collections.synchronizedCollection(new LinkedList<>());
+    private final Collection<ResAttr.Load> lrdata = Collections.synchronizedCollection(new LinkedList<>());
     private HitboxMesh hitboxmesh[];
     private boolean pathfinding_blackout = false;
     private List<Coord> hitboxcoords;

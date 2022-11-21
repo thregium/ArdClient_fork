@@ -78,6 +78,7 @@ import java.awt.font.TextAttribute;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -407,7 +408,7 @@ public class MenuGrid extends Widget {
         }
     }
 
-    public Map<Indir<Resource>, Pagina> pmap = new WeakHashMap<Indir<Resource>, Pagina>();
+    public Map<Indir<Resource>, Pagina> pmap = Collections.synchronizedMap(new WeakHashMap<Indir<Resource>, Pagina>());
 
     public Pagina paginafor(Indir<Resource> res) {
         if (res == null)
