@@ -1005,10 +1005,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 
     private void loadrattr() {
         boolean upd = false;
-        for (Iterator<ResAttr.Load> i = lrdata.iterator(); i.hasNext(); ) {
+        for (ResAttr.Load rd : new ArrayList<>(lrdata)) {
             task:
             {
-                ResAttr.Load rd = i.next();
                 ResAttr attr;
                 try {
                     attr = rd.resid.get().getcode(ResAttr.Factory.class, true).mkattr(this, rd.dat.clone());
@@ -1025,7 +1024,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 rc.odat = rd.dat;
                 rc.set(attr);
             }
-            i.remove();
+            lrdata.remove(rd);
             upd = true;
         }
         if (upd) {
@@ -1044,10 +1043,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 break;
             }
         }
-        for (Iterator<ResAttr.Load> i = lrdata.iterator(); i.hasNext(); ) {
-            ResAttr.Load rd = i.next();
+        for (ResAttr.Load rd : new ArrayList<>(lrdata)) {
             if (rd.resid == resid) {
-                i.remove();
+                lrdata.remove(rd);
                 break;
             }
         }
@@ -1056,18 +1054,16 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     }
 
     public void delrattr(Indir<Resource> resid) {
-        for (Iterator<ResAttr.Cell<?>> i = rdata.iterator(); i.hasNext(); ) {
-            ResAttr.Cell<?> rd = i.next();
+        for (ResAttr.Cell<?> rd : new ArrayList<>(rdata)) {
             if (rd.resid == resid) {
-                i.remove();
+                rdata.remove(rd);
                 rd.attr.dispose();
                 break;
             }
         }
-        for (Iterator<ResAttr.Load> i = lrdata.iterator(); i.hasNext(); ) {
-            ResAttr.Load rd = i.next();
+        for (ResAttr.Load rd : new ArrayList<>(lrdata)) {
             if (rd.resid == resid) {
-                i.remove();
+                lrdata.remove(rd);
                 break;
             }
         }
