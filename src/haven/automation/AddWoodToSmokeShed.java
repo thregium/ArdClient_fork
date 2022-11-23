@@ -5,10 +5,9 @@ import haven.Coord;
 import haven.GItem;
 import haven.GameUI;
 import haven.Gob;
+import static haven.OCache.posres;
 import haven.Resource;
 import haven.WItem;
-
-import static haven.OCache.posres;
 
 public class AddWoodToSmokeShed implements Runnable {
     private GameUI gui;
@@ -26,15 +25,13 @@ public class AddWoodToSmokeShed implements Runnable {
 
     @Override
     public void run() {
-        synchronized (gui.map.glob.oc) {
-            for (Gob gob : gui.map.glob.oc) {
-                Resource res = gob.getres();
-                if (res != null && res.name.contains("smokeshed")) {
-                    if (shed == null)
-                        shed = gob;
-                    else if (gob.rc.dist(gui.map.player().rc) < shed.rc.dist(gui.map.player().rc))
-                        shed = gob;
-                }
+        for (Gob gob : gui.map.glob.oc.getallgobs()) {
+            Resource res = gob.getres();
+            if (res != null && res.name.contains("smokeshed")) {
+                if (shed == null)
+                    shed = gob;
+                else if (gob.rc.dist(gui.map.player().rc) < shed.rc.dist(gui.map.player().rc))
+                    shed = gob;
             }
         }
 

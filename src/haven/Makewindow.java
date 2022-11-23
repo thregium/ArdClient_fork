@@ -26,11 +26,13 @@
 
 package haven;
 
+import static haven.Inventory.invsq;
 import java.awt.Color;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -42,12 +44,11 @@ public class Makewindow extends Widget {
     public static final Text tooll = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Tools:"));
     private static final Tex softcapl = Text.render("Softcap:").tex();
     private Tex softcap;
-    public List<Spec> inputs = Collections.emptyList();
-    public List<Spec> outputs = Collections.emptyList();
+    public List<Input> inputs = Collections.emptyList();
+    public List<SpecWidget> outputs = Collections.emptyList();
     public List<Indir<Resource>> qmod = Collections.emptyList();
     public List<Indir<Resource>> tools = new ArrayList<>();
-    int xoff = 45;
-    private final int qmy = 38, outy = 65;
+    public int xoff = UI.scale(45), qmy = UI.scale(38), outy = UI.scale(65);
     public static final Text.Foundry nmf = new Text.Foundry(Text.serif, 20).aa(true);
     private long qModProduct = -1;
 
@@ -168,16 +169,8 @@ public class Makewindow extends Widget {
         }
     }
 
-    public void tick(double dt) {
-        for (Spec s : inputs) {
-            if (s.spr != null)
-                s.spr.tick(dt);
-        }
-        for (Spec s : outputs) {
-            if (s.spr != null)
-                s.spr.tick(dt);
-        }
-    }
+    public static final KeyBinding kb_make = KeyBinding.get("make/one", KeyMatch.forcode(java.awt.event.KeyEvent.VK_ENTER, 0));
+    public static final KeyBinding kb_makeall = KeyBinding.get("make/all", KeyMatch.forcode(java.awt.event.KeyEvent.VK_ENTER, KeyMatch.C));
 
     public Makewindow(String rcpnm) {
         Label lblIn = new Label("Input:");
@@ -192,15 +185,15 @@ public class Makewindow extends Widget {
 
         add(lblIn, new Coord(0, 8));
         add(lblOut, new Coord(0, outy + 8));
-        obtn = add(new Button(85, "Craft"), new Coord(230, 75));
-        cbtn = add(new Button(85, "Craft All"), new Coord(325, 75));
+        obtn = add(new Button(UI.scale(85), "Craft"), UI.scale(new Coord(265, 75))).action(() -> wdgmsg("make", 0));
+        cbtn = add(new Button(UI.scale(85), "Craft All"), UI.scale(new Coord(360, 75))).action(() -> wdgmsg("make", 1));
         pack();
         adda(new Label(rcpnm, nmf), sz.x, 0, 1, 0);
     }
 
     public void uimsg(String msg, Object... args) {
         if (msg == "inpop") {
-            List<Spec> inputs = new LinkedList<Spec>();
+            List<Spec> inputs = new ArrayList<>();
             for (int i = 0; i < args.length; ) {
                 int resid = (Integer) args[i++];
                 Message sdt = (args[i] instanceof byte[]) ? new MessageBuf((byte[]) args[i++]) : MessageBuf.nil;
@@ -210,9 +203,28 @@ public class Makewindow extends Widget {
                     info = (Object[]) args[i++];
                 inputs.add(new Spec(ui.sess.getres(resid), sdt, num, info));
             }
-            this.inputs = inputs;
+            ui.sess.glob.loader.defer(() -> {
+                List<Input> wdgs = new ArrayList<>();
+                int idx = 0;
+                for (Spec spec : inputs)
+                    wdgs.add(new Input(spec, idx++));
+                synchronized (ui) {
+                    for (Widget w : this.inputs)
+                        w.destroy();
+                    Position pos = new Position(xoff, 0);
+                    SpecWidget prev = null;
+                    for (Input wdg : wdgs) {
+                        if ((prev != null) && (wdg.opt != false))
+                            pos = pos.adds(10, 0);
+                        add(wdg, pos);
+                        pos = pos.add(Inventory.sqsz.x, 0);
+                        prev = wdg;
+                    }
+                    this.inputs = wdgs;
+                }
+            }, null);
         } else if (msg == "opop") {
-            List<Spec> outputs = new LinkedList<Spec>();
+            List<Spec> outputs = new ArrayList<Spec>();
             for (int i = 0; i < args.length; ) {
                 int resid = (Integer) args[i++];
                 Message sdt = (args[i] instanceof byte[]) ? new MessageBuf((byte[]) args[i++]) : MessageBuf.nil;
@@ -222,7 +234,25 @@ public class Makewindow extends Widget {
                     info = (Object[]) args[i++];
                 outputs.add(new Spec(ui.sess.getres(resid), sdt, num, info));
             }
-            this.outputs = outputs;
+            ui.sess.glob.loader.defer(() -> {
+                List<SpecWidget> wdgs = new ArrayList<>();
+                for (Spec spec : outputs)
+                    wdgs.add(new SpecWidget(spec));
+                synchronized (ui) {
+                    for (Widget w : this.outputs)
+                        w.destroy();
+                    Position pos = new Position(xoff, outy);
+                    SpecWidget prev = null;
+                    for (SpecWidget wdg : wdgs) {
+                        if ((prev != null) && (wdg.opt != prev.opt))
+                            pos = pos.adds(10, 0);
+                        add(wdg, pos);
+                        pos = pos.add(Inventory.sqsz.x, 0);
+                        prev = wdg;
+                    }
+                    this.outputs = wdgs;
+                }
+            }, null);
         } else if (msg == "qmod") {
             List<Indir<Resource>> qmod = new ArrayList<Indir<Resource>>();
             for (Object arg : args)
@@ -230,42 +260,144 @@ public class Makewindow extends Widget {
             this.qmod = qmod;
         } else if (msg == "tool") {
             tools.add(ui.sess.getres((Integer) args[0]));
+        } else if (msg == "inprcps") {
+            int idx = (Integer) args[0];
+            Collection<MenuGrid.Pagina> rcps = new ArrayList<>();
+            GameUI gui = getparent(GameUI.class);
+            if ((gui != null) && (gui.menu != null)) {
+                for (int a = 1; a < args.length; a++)
+                    rcps.add(gui.menu.paginafor(ui.sess.getres((Integer) args[a])));
+            }
+            inputs.get(idx).recipes(rcps); ;
         } else {
             super.uimsg(msg, args);
         }
     }
 
-    public static final Coord qmodsz = new Coord(20, 20);
+    public static final Coord qmodsz = UI.scale(20, 20);
     private static final Map<Indir<Resource>, Tex> qmicons = new WeakHashMap<>();
 
     private static Tex qmicon(Indir<Resource> qm) {
-        return (qmicons.computeIfAbsent(qm, res -> new TexI(PUtils.convolve(res.get().layer(Resource.imgc).img, qmodsz, CharWnd.iconfilter))));
+        return (qmicons.computeIfAbsent(qm, res -> new TexI(PUtils.convolve(res.get().flayer(Resource.imgc).img, qmodsz, CharWnd.iconfilter))));
+    }
+
+    public static class SpecWidget extends Widget {
+        public final Spec spec;
+        public final boolean opt;
+
+        public SpecWidget(Spec spec) {
+            super(invsq.sz());
+            this.spec = spec;
+            opt = spec.opt();
+        }
+
+        public void draw(GOut g) {
+            if (opt) {
+                g.chcolor(0, 255, 0, 255);
+                g.image(invsq, Coord.z);
+                g.chcolor();
+            } else {
+                g.image(invsq, Coord.z);
+            }
+            spec.draw(g);
+        }
+
+        private double hoverstart;
+        Indir<Object> stip, ltip;
+
+        public Object tooltip(Coord c, Widget prev) {
+            double now = Utils.rtime();
+            if (prev == this) {
+            } else if (prev instanceof SpecWidget) {
+                double ps = ((SpecWidget) prev).hoverstart;
+                hoverstart = (now - ps < 1.0) ? now : ps;
+            } else {
+                hoverstart = now;
+            }
+            if (now - hoverstart >= 1.0) {
+                if (stip == null) {
+                    BufferedImage tip = spec.shorttip();
+                    Tex tt = (tip == null) ? null : new TexI(tip);
+                    stip = () -> tt;
+                }
+                return (stip);
+            } else {
+                if (ltip == null) {
+                    BufferedImage tip = spec.longtip();
+                    Tex tt = (tip == null) ? null : new TexI(tip);
+                    ltip = () -> tt;
+                }
+                return (ltip);
+            }
+        }
+
+        public void tick(double dt) {
+            super.tick(dt);
+            if (spec.spr != null)
+                spec.spr.tick(dt);
+        }
+    }
+
+    public class Input extends SpecWidget {
+        public final int idx;
+        private Collection<MenuGrid.Pagina> rpag = null;
+        private Coord cc = null;
+
+        public Input(Spec spec, int idx) {
+            super(spec);
+            this.idx = idx;
+        }
+
+        public boolean mousedown(Coord c, int button) {
+            if (button == 1) {
+                if (rpag == null)
+                    Makewindow.this.wdgmsg("findrcps", idx);
+                this.cc = c;
+                return (true);
+            }
+            return (super.mousedown(c, button));
+        }
+
+        public void tick(double dt) {
+            super.tick(dt);
+            if ((cc != null) && (rpag != null)) {
+                if (!rpag.isEmpty()) {
+                    try {
+                        List<MenuGrid.PagButton> btns = new ArrayList<>();
+                        for (MenuGrid.Pagina pag : rpag)
+                            btns.add(pag.button());
+                        new SListMenu<MenuGrid.PagButton, Widget>(UI.scale(250, 120), CharWnd.attrf.height()) {
+                            public List<MenuGrid.PagButton> items() {return (btns);}
+
+                            public Widget makeitem(MenuGrid.PagButton btn, int idx, Coord sz) {
+                                return (SListWidget.IconText.of(sz, btn::img, btn::name));
+                            }
+
+                            public void choice(MenuGrid.PagButton btn) {
+                                if (btn != null)
+                                    btn.use(new MenuGrid.Interaction(1, ui.modflags()));
+                                destroy();
+                            }
+                        }.addat(this, cc.add(UI.scale(5, 5))).tick(dt);
+                    } catch (Loading l) {
+                        return;
+                    }
+                }
+                cc = null;
+            }
+        }
+
+        public void recipes(Collection<MenuGrid.Pagina> pag) {
+            rpag = pag;
+        }
     }
 
     public void draw(GOut g) {
-        Coord c = new Coord(xoff, 0);
-        boolean popt = false;
-        for (Spec s : inputs) {
-            boolean opt = s.opt();
-            if (opt != popt)
-                c = c.add(10, 0);
-            GOut sg = g.reclip(c, Inventory.invsq.sz());
-            if (opt) {
-                sg.chcolor(0, 255, 0, 255);
-                sg.image(Inventory.invsq, Coord.z);
-                sg.chcolor();
-            } else {
-                sg.image(Inventory.invsq, Coord.z);
-            }
-            s.draw(sg);
-            c = c.add(Inventory.sqsz.x, 0);
-            popt = opt;
-        }
         {
             int x = 0;
             if (!qmod.isEmpty()) {
                 g.aimage(qmodl.tex(), new Coord(x, qmy + (qmodsz.y / 2)), 0, 0.5);
-                x += qmodl.sz().x + 5;
+                x += qmodl.sz().x + UI.scale(5);
                 x = Math.max(x, xoff);
                 qmx = x;
 
@@ -281,7 +413,7 @@ public class Makewindow extends Widget {
                     try {
                         Tex t = qmicon(qm);
                         g.image(t, new Coord(x, qmy));
-                        x += t.sz().x + 1;
+                        x += t.sz().x + UI.scale(1);
 
                         if (Config.showcraftcap && chrwdg != null) {
                             String name = qm.get().basename();
@@ -305,7 +437,7 @@ public class Makewindow extends Widget {
                     } catch (Exception l) {
                     }
                 }
-                x += 25;
+                x += UI.scale(25);
 
                 if (Config.showcraftcap && qmodValues.size() > 0) {
                     long product = 1;
@@ -327,61 +459,24 @@ public class Makewindow extends Widget {
 
             if (!tools.isEmpty()) {
                 g.aimage(tooll.tex(), new Coord(x, qmy + (qmodsz.y / 2)), 0, 0.5);
-                x += tooll.sz().x + 5;
+                x += tooll.sz().x + UI.scale(5);
                 x = Math.max(x, xoff);
                 toolx = x;
                 for (Indir<Resource> tool : tools) {
                     try {
                         Tex t = qmicon(tool);
                         g.image(t, new Coord(x, qmy));
-                        x += t.sz().x + 1;
-                    } catch (Exception l) {
+                        x += t.sz().x + UI.scale(1);
+                    } catch (Loading l) {
                     }
                 }
-                x += 25;
+                x += UI.scale(25);
             }
-        }
-        c = new Coord(xoff, outy);
-        for (Spec s : outputs) {
-            GOut sg = g.reclip(c, Inventory.invsq.sz());
-            sg.image(Inventory.invsq, Coord.z);
-            s.draw(sg);
-            c = c.add(Inventory.sqsz.x, 0);
         }
         super.draw(g);
     }
 
-    public boolean mousedown(Coord c, int button) {
-        try {
-            Coord c1 = new Coord(xoff, 0);
-            boolean popt = false;
-            for (Spec s : inputs) {
-                boolean opt = s.opt();
-                if (opt != popt)
-                    c1 = c1.add(10, 0);
-
-                if (c.isect(c1, Inventory.sqsz)) {
-                    Resource res = s.getres();
-                    if (res != null) {
-                        String name = res.name.substring(res.name.lastIndexOf("/") + 1);
-                        ui.gui.menu.wdgmsg("act", "craft", name);
-                    }
-                    return (true);
-                }
-
-                c1 = c1.add(Inventory.sqsz.x, 0);
-                popt = opt;
-            }
-        } catch (Loading e) {
-            e.printStackTrace();
-        }
-        return super.mousedown(c, button);
-    }
-
     private int qmx, toolx;
-    private long hoverstart;
-    private Spec lasttip;
-    private Indir<Object> stip, ltip;
 
     public Object tooltip(Coord mc, Widget prev) {
         String name = null;
@@ -402,7 +497,7 @@ public class Makewindow extends Widget {
                 for (Indir<Resource> qm : qmod) {
                     Coord tsz = qmicon(qm).sz();
                     if (mc.isect(c, tsz))
-                        return (qm.get().layer(Resource.tooltip).t);
+                        return (qm.get().flayer(Resource.tooltip).t);
                     if (Config.showcraftcap && chrwdg != null) {
                         String value = qm.get().basename();
                         for (CharWnd.SAttr attr : chrwdg.skill) {
@@ -429,74 +524,13 @@ public class Makewindow extends Widget {
                 for (Indir<Resource> tool : tools) {
                     Coord tsz = qmicon(tool).sz();
                     if (mc.isect(c, tsz))
-                        return (tool.get().layer(Resource.tooltip).t);
-                    c = c.add(tsz.x + 1, 0);
+                        return (tool.get().flayer(Resource.tooltip).t);
+                    c = c.add(tsz.x + UI.scale(1), 0);
                 }
             } catch (Loading l) {
             }
         }
-        find:
-        {
-            c = new Coord(xoff, 0);
-            boolean popt = false;
-            for (Spec s : inputs) {
-                boolean opt = s.opt();
-                if (opt != popt)
-                    c = c.add(10, 0);
-                if (mc.isect(c, Inventory.invsq.sz())) {
-                    name = getDynamicName(s.spr);
-                    if (name == null) {
-                        tspec = s;
-                    }
-                    break find;
-                }
-                c = c.add(Inventory.sqsz.x, 0);
-                popt = opt;
-            }
-            c = new Coord(xoff, outy);
-            for (Spec s : outputs) {
-                if (mc.isect(c, Inventory.invsq.sz())) {
-                    tspec = s;
-                    break find;
-                }
-                c = c.add(Inventory.sqsz.x, 0);
-            }
-        }
-        if (lasttip != tspec) {
-            lasttip = tspec;
-            stip = ltip = null;
-        }
-        if (tspec == null)
-            return (name);
-        long now = System.currentTimeMillis();
-        boolean sh = true;
-        if (prev != this)
-            hoverstart = now;
-        else if (now - hoverstart > 1000)
-            sh = false;
-        if (sh) {
-            if (stip == null) {
-                BufferedImage tip = tspec.shorttip();
-                if (tip == null) {
-                    stip = () -> null;
-                } else {
-                    Tex tt = new TexI(tip);
-                    stip = () -> tt;
-                }
-            }
-            return (stip);
-        } else {
-            if (ltip == null) {
-                BufferedImage tip = tspec.longtip();
-                if (tip == null) {
-                    ltip = () -> null;
-                } else {
-                    Tex tt = new TexI(tip);
-                    ltip = () -> tt;
-                }
-            }
-            return (ltip);
-        }
+        return (super.tooltip(mc, prev));
     }
 
     private static String getDynamicName(GSprite spr) {
@@ -523,7 +557,7 @@ public class Makewindow extends Widget {
         super.wdgmsg(sender, msg, args);
     }
 
-    public boolean globtype(char ch, java.awt.event.KeyEvent ev) {
+    public boolean globtype(char ch, KeyEvent ev) {
         if (ch == '\n') {
             wdgmsg("make", ui.modctrl ? 1 : 0);
             return (true);

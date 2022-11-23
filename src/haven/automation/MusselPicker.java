@@ -4,9 +4,8 @@ package haven.automation;
 import haven.GameUI;
 import haven.Gob;
 import haven.Loading;
-import haven.Resource;
-
 import static haven.OCache.posres;
+import haven.Resource;
 
 public class MusselPicker implements Runnable {
     private GameUI gui;
@@ -37,22 +36,20 @@ public class MusselPicker implements Runnable {
         while (!Thread.currentThread().isInterrupted()) {
             Gob closestsMussel = null;
 
-            synchronized (gui.map.glob.oc) {
-                for (Gob gob : gui.map.glob.oc) {
-                    try {
-                        Resource res = gob.getres();
-                        if (res != null && (res.name.equals("gfx/terobjs/herbs/mussels") ||
-                                res.name.equals("gfx/terobjs/herbs/clay-gray") ||
-                                res.name.equals("gfx/terobjs/herbs/oyster") ||
-                                res.name.equals("gfx/terobjs/herbs/goosebarnacle") ||
-                                res.name.equals("gfx/terobjs/herbs/cattail") ||
-                                res.name.equals("gfx/kritter/jellyfish/jellyfish") ||
-                                res.name.equals("gfx/terobjs/herbs/lampstalk"))) {
-                            if (closestsMussel == null || gob.rc.dist(initMussel.rc) < closestsMussel.rc.dist(initMussel.rc))
-                                closestsMussel = gob;
-                        }
-                    } catch (Loading l) {
+            for (Gob gob : gui.map.glob.oc.getallgobs()) {
+                try {
+                    Resource res = gob.getres();
+                    if (res != null && (res.name.equals("gfx/terobjs/herbs/mussels") ||
+                            res.name.equals("gfx/terobjs/herbs/clay-gray") ||
+                            res.name.equals("gfx/terobjs/herbs/oyster") ||
+                            res.name.equals("gfx/terobjs/herbs/goosebarnacle") ||
+                            res.name.equals("gfx/terobjs/herbs/cattail") ||
+                            res.name.equals("gfx/kritter/jellyfish/jellyfish") ||
+                            res.name.equals("gfx/terobjs/herbs/lampstalk"))) {
+                        if (closestsMussel == null || gob.rc.dist(initMussel.rc) < closestsMussel.rc.dist(initMussel.rc))
+                            closestsMussel = gob;
                     }
+                } catch (Loading l) {
                 }
             }
 

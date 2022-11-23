@@ -245,22 +245,18 @@ public class MinerAlert extends Window {
                             if (distFromPlayer <= 13 * 11) {    //support is less than or equal to 13 tiles from current player position, check it's HP
                                 if (support.getattr(GobHealth.class) != null && support.getattr(GobHealth.class).hp <= 2 && SupportAlertHalf) {
                                     PBotUtils.debugMsg(ui, "Detected mine support at 50% or less HP", Color.ORANGE);
-                                    synchronized (ui.gui.map.glob.oc) {
-                                        support.addol(new Mark(4000));
-                                        support.delattr(GobHighlight.class);
-                                        support.setattr(new GobHighlight(support));
-                                    }
+                                    support.addol(new Mark(4000));
+                                    support.delattr(GobHighlight.class);
+                                    support.setattr(new GobHighlight(support));
                                     if (PBotGobAPI.player(ui).getPoses().contains("gfx/borka/choppan") || PBotGobAPI.player(ui).getPoses().contains("gfx/borka/pickan")) {
                                         ui.root.wdgmsg("gk", 27);
                                         Audio.play(supportalertsfx);
                                     }
                                 } else if (support.getattr(GobHealth.class) != null && support.getattr(GobHealth.class).hp <= 1 && SupportAlertQuarter) {
                                     PBotUtils.debugMsg(ui, "Detected mine support at 25% or less HP less than 13 tiles away", Color.RED);
-                                    synchronized (ui.gui.map.glob.oc) {
-                                        support.addol(new Mark(4000));
-                                        support.delattr(GobHighlight.class);
-                                        support.setattr(new GobHighlight(support));
-                                    }
+                                    support.addol(new Mark(4000));
+                                    support.delattr(GobHighlight.class);
+                                    support.setattr(new GobHighlight(support));
                                     if (PBotGobAPI.player(ui).getPoses().contains("gfx/borka/choppan") || PBotGobAPI.player(ui).getPoses().contains("gfx/borka/pickan")) {
                                         ui.root.wdgmsg("gk", 27);
                                         Audio.play(supportalertsfx);

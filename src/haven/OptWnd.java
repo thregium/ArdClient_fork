@@ -3411,16 +3411,14 @@ public class OptWnd extends Window {
                 configuration.gobspeedsprite = val;
                 a = val;
                 if (ui != null && ui.gui != null && ui.sess != null && ui.sess.glob != null && ui.sess.glob.oc != null) {
-                    synchronized (ui.sess.glob.oc) {
-                        for (Gob g : ui.sess.glob.oc) {
-                            if (val) {
-                                if (g.findol(GobSpeedSprite.id) == null && (g.type == Type.HUMAN || g.type == Type.ANIMAL || g.name().startsWith("gfx/kritter/")))
-                                    g.addol(new Gob.Overlay(GobSpeedSprite.id, new GobSpeedSprite(g)));
-                            } else {
-                                Gob.Overlay speed = g.findol(GobSpeedSprite.id);
-                                if (speed != null)
-                                    g.ols.remove(speed);
-                            }
+                    for (Gob g : ui.sess.glob.oc.getallgobs()) {
+                        if (val) {
+                            if (g.findol(GobSpeedSprite.id) == null && (g.type == Type.HUMAN || g.type == Type.ANIMAL || g.name().startsWith("gfx/kritter/")))
+                                g.addol(new Gob.Overlay(GobSpeedSprite.id, new GobSpeedSprite(g)));
+                        } else {
+                            Gob.Overlay speed = g.findol(GobSpeedSprite.id);
+                            if (speed != null)
+                                g.ols.remove(speed);
                         }
                     }
                 }
@@ -3470,16 +3468,14 @@ public class OptWnd extends Window {
                                 configuration.blizzardoverlay = val;
                                 a = val;
                                 if (ui != null && ui.gui != null && ui.sess != null && ui.sess.glob != null && ui.sess.glob.oc != null) {
-                                    synchronized (ui.sess.glob.oc) {
-                                        if (val) {
-                                            if (configuration.snowThread == null)
-                                                configuration.snowThread = new configuration.SnowThread(ui.sess.glob.oc);
-                                            if (!configuration.snowThread.isAlive())
-                                                configuration.snowThread.start();
-                                        } else {
-                                            if (configuration.snowThread != null && configuration.snowThread.isAlive())
-                                                configuration.snowThread.kill();
-                                        }
+                                    if (val) {
+                                        if (configuration.snowThread == null)
+                                            configuration.snowThread = new configuration.SnowThread(ui.sess.glob.oc);
+                                        if (!configuration.snowThread.isAlive())
+                                            configuration.snowThread.start();
+                                    } else {
+                                        if (configuration.snowThread != null && configuration.snowThread.isAlive())
+                                            configuration.snowThread.kill();
                                     }
                                 }
                             }
@@ -3496,14 +3492,12 @@ public class OptWnd extends Window {
                         Utils.setprefi("blizzarddensity", configuration.blizzarddensity);
 
                         if (configuration.blizzardoverlay && ui != null && ui.gui != null && ui.sess != null && ui.sess.glob != null && ui.sess.glob.oc != null) {
-                            synchronized (ui.sess.glob.oc) {
                                 OCache oc = ui.sess.glob.oc;
 
                                 if (configuration.getCurrentsnow(oc) < val)
                                     configuration.addsnow(oc);
                                 else
                                     configuration.deleteSnow(oc);
-                            }
                         }
                     }
 

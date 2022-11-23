@@ -5,12 +5,10 @@ import haven.Coord2d;
 import haven.GameUI;
 import haven.Gob;
 import haven.Loading;
+import static haven.OCache.posres;
 import haven.Resource;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import static haven.OCache.posres;
 
 public class Traverse implements Runnable {
 
@@ -122,31 +120,29 @@ public class Traverse implements Runnable {
         target result = null;
         ArrayList<target> targetList = new ArrayList<target>();
         if (r == 0) r = 1024.0;
-        synchronized (gui.map.glob.oc) {
-            for (Gob gob : gui.map.glob.oc) {
-                try {
-                    Resource res = gob.getres();
+        for (Gob gob : gui.map.glob.oc.getallgobs()) {
+            try {
+                Resource res = gob.getres();
 
-                    if (res == null)
-                        continue;
-                    if (!res.name.startsWith("gfx/terobjs/arch/"))
-                        continue;
+                if (res == null)
+                    continue;
+                if (!res.name.startsWith("gfx/terobjs/arch/"))
+                    continue;
 
-                    for (doorShiftData bld : b) {
-                        if (bld.gobName.equals(res.name)) {
-                            for (doors drs : bld.doorList) {
-                                targetList.add(new target(
-                                        gob.rc.add(drs.meshRC.rotate(gob.a)),
-                                        gob.sc,
-                                        gob.id,
-                                        drs.meshID
-                                ));
-                            }
+                for (doorShiftData bld : b) {
+                    if (bld.gobName.equals(res.name)) {
+                        for (doors drs : bld.doorList) {
+                            targetList.add(new target(
+                                    gob.rc.add(drs.meshRC.rotate(gob.a)),
+                                    gob.sc,
+                                    gob.id,
+                                    drs.meshID
+                            ));
                         }
                     }
-                } catch (Loading l) {
-                    l.printStackTrace();
                 }
+            } catch (Loading l) {
+                l.printStackTrace();
             }
         }
         for (target t : targetList) {
@@ -165,21 +161,19 @@ public class Traverse implements Runnable {
         Coord2d plc = gui.map.player().rc;
         Gob result = null;
         if (maxrange == 0) maxrange = 1024.0;
-        synchronized (gui.map.glob.oc) {
-            for (Gob gob : gui.map.glob.oc) {
-                try {
-                    if (gob.getres() == null)
-                        continue;
-                    boolean skipGob = true;
-                    for (String n : gobNameAL)
-                        if ((gob.getres().name.endsWith(n)) && (!gob.getres().name.endsWith("gfx/terobjs/arch/greathall-door")))
-                            skipGob = false;
-                    if (skipGob) continue;
-                    if ((result == null || gob.rc.dist(plc) < result.rc.dist(plc)) && gob.rc.dist(plc) < maxrange)
-                        result = gob;
-                } catch (Loading l) {
-                    l.printStackTrace();
-                }
+        for (Gob gob : gui.map.glob.oc.getallgobs()) {
+            try {
+                if (gob.getres() == null)
+                    continue;
+                boolean skipGob = true;
+                for (String n : gobNameAL)
+                    if ((gob.getres().name.endsWith(n)) && (!gob.getres().name.endsWith("gfx/terobjs/arch/greathall-door")))
+                        skipGob = false;
+                if (skipGob) continue;
+                if ((result == null || gob.rc.dist(plc) < result.rc.dist(plc)) && gob.rc.dist(plc) < maxrange)
+                    result = gob;
+            } catch (Loading l) {
+                l.printStackTrace();
             }
         }
         return result;

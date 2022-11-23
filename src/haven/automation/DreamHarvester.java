@@ -6,9 +6,8 @@ import haven.FlowerMenu;
 import haven.GameUI;
 import haven.Gob;
 import haven.Loading;
-import haven.Resource;
-
 import static haven.OCache.posres;
+import haven.Resource;
 
 public class DreamHarvester implements Runnable {
     private GameUI gui;
@@ -20,17 +19,15 @@ public class DreamHarvester implements Runnable {
     @Override
     public void run() {
         Gob dreca = null;
-        synchronized (gui.map.glob.oc) {
-            for (Gob gob : gui.map.glob.oc) {
-                try {
-                    Resource res = gob.getres();
-                    if (res != null && res.name.startsWith("gfx/terobjs/dreca")) {
-                        Coord2d plc = gui.map.player().rc;
-                        if ((dreca == null || gob.rc.dist(plc) < dreca.rc.dist(plc)))
-                            dreca = gob;
-                    }
-                } catch (Loading l) {
+        for (Gob gob : gui.map.glob.oc.getallgobs()) {
+            try {
+                Resource res = gob.getres();
+                if (res != null && res.name.startsWith("gfx/terobjs/dreca")) {
+                    Coord2d plc = gui.map.player().rc;
+                    if ((dreca == null || gob.rc.dist(plc) < dreca.rc.dist(plc)))
+                        dreca = gob;
                 }
+            } catch (Loading l) {
             }
         }
 

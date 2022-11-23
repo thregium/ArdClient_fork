@@ -1790,7 +1790,6 @@ public class Resource implements Serializable {
     }
 
     public <T> T getcode(Class<T> cl, boolean fail) {
-//        dev.sysPrintStackTrace("getcode " + Resource.this);
         CodeEntry e = layer(CodeEntry.class);
         if (e == null) {
             if (fail)
@@ -1871,6 +1870,12 @@ public class Resource implements Serializable {
         public void init() {
             for (Code c : layers(Code.class))
                 clmap.put(c.name, c);
+//            StringBuilder sb = new StringBuilder();
+//            pe.forEach((k, v) -> sb.append(k).append("=").append(v).append('\n'));
+//            pa.forEach((k, v) -> sb.append(k).append("=").append(Arrays.deepToString(v)).append('\n'));
+//            sb.append('\n').append("[CODE]").append('\n');
+//            clmap.forEach((k, v) -> sb.append(k).append('\n'));
+//            System.out.printf("Resource %s -> %s%n", Resource.this, sb);
         }
 
         public ClassLoader loader() {
@@ -2193,7 +2198,7 @@ public class Resource implements Serializable {
         return (o.name.equals(this.name) && (o.ver == this.ver));
     }
 
-    private final static List<String> depresList = Arrays.asList("gfx/borka/reedweavebelt", "gfx/terobjs/bushes/reeds", "paginae/gov/enact/.*");
+    private static final List<String> depresList = Arrays.asList("gfx/borka/reedweavebelt", "gfx/terobjs/bushes/reeds", "paginae/gov/enact/.*", "gfx/hud/rosters/.*");
 
     private Object[] load(InputStream st) throws IOException {
         LoadException exception = null;
@@ -2213,7 +2218,8 @@ public class Resource implements Serializable {
             if (dev.reslog)
                 dev.simpleLog(String.format("Wrong res version (%d != %d) %s", ver, this.ver, this));
             System.out.printf("Wrong res version (%d != %d) %s%n", ver, this.ver, this);
-            exception = new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this);
+            if (depresList.stream().noneMatch(name::matches))
+                exception = new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this);
 //            if (depresList.stream().noneMatch(name::matches))
 //                throw (exception);
         }

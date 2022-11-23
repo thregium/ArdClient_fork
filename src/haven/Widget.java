@@ -208,13 +208,7 @@ public class Widget {
                 name = name.substring(0, p);
             }
             Indir<Resource> res = Resource.remote().load(name, ver, 10);
-            while (true) {
-                try {
-                    return (res.get().getcode(Factory.class, true));
-                } catch (Loading l) {
-                    l.waitfor();
-                }
-            }
+            return (Loading.waitforint(() -> res.get().getcode(Factory.class, true)));
         }
     }
 
@@ -237,13 +231,7 @@ public class Widget {
                 name = name.substring(0, p);
             }
             Indir<Resource> res = Resource.local().load(name, ver, 10);
-            while (true) {
-                try {
-                    return (res.get().getcode(Factory.class, true));
-                } catch (Loading l) {
-                    l.waitfor();
-                }
-            }
+            return (Loading.waitforint(() -> res.get().getcode(Factory.class, true)));
         }
     }
 
@@ -1138,6 +1126,10 @@ public class Widget {
         if (parent != null)
             parent.cresize(this);
     }
+
+    public void resizew(int w) {resize(w, sz.y);}
+
+    public void resizeh(int h) {resize(sz.x, h);}
 
     public void z(int z) {
         if (z != this.z) {

@@ -26,13 +26,19 @@
 
 package haven;
 
+import static haven.DefSettings.CURIOHIGH;
+import static haven.DefSettings.CURIOLOW;
+import static haven.DefSettings.CURIOTARGET;
+import static haven.DefSettings.HUDTHEME;
+import static haven.PUtils.blurmask2;
+import static haven.PUtils.rasterimg;
+import static haven.Resource.cdec;
 import haven.purus.pbot.PBotUtils;
 import haven.purus.pbot.PBotWindowAPI;
 import haven.res.ui.tt.Wear;
 import haven.resutil.Curiosity;
 import haven.sloth.gui.MovableWidget;
 import haven.sloth.io.HiddenWndData;
-
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -48,15 +54,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static haven.DefSettings.CURIOHIGH;
-import static haven.DefSettings.CURIOLOW;
-import static haven.DefSettings.CURIOTARGET;
-import static haven.DefSettings.HUDTHEME;
-import static haven.PUtils.blurmask2;
-import static haven.PUtils.rasterimg;
-import static haven.Resource.cdec;
-
-public class Window extends MovableWidget implements DTarget {
+public class
+Window extends MovableWidget implements DTarget {
     @Resource.LayerName("windowconfig")
     public static class WindowConfig extends Resource.Layer {
         final Coord tlc;
@@ -125,9 +124,13 @@ public class Window extends MovableWidget implements DTarget {
             return (super.btloff().sub(bo));
         }
 
+        public Coord bbroff() {return (super.bbroff().sub(bo));}
+
         public Coord ctloff() {
             return (super.ctloff().sub(co));
         }
+
+        public Coord cbroff() {return (super.cbroff().sub(co));}
 
         public Coord bisz() {
             return (super.bisz().sub(bo.mul(2)));
@@ -188,6 +191,7 @@ public class Window extends MovableWidget implements DTarget {
     }
 
     public static final List<String> hideableNames = Arrays.asList("Belt", "Inventory", "Equipment", "Study", "Chat", "Character Sheet", "Timers", "Basket", "Creel", "Quiver");
+
     public Window(Coord sz, String cap, final String moveKey, boolean lg, Coord tlo, Coord rbo) {
         super(moveKey);
         this.mrgn = lg ? dlmrgn : dsmrgn;

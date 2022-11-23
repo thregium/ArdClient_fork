@@ -6,10 +6,9 @@ import haven.GItem;
 import haven.GameUI;
 import haven.Gob;
 import haven.Loading;
+import static haven.OCache.posres;
 import haven.Resource;
 import haven.WItem;
-
-import static haven.OCache.posres;
 
 public class LeashAnimal implements Runnable {
     private GameUI gui;
@@ -23,23 +22,21 @@ public class LeashAnimal implements Runnable {
 
     @Override
     public void run() {
-        synchronized (gui.map.glob.oc) {
-            for (Gob gob : gui.map.glob.oc) {
-                Resource res = null;
-                try {
-                    res = gob.getres();
-                } catch (Loading l) {
-                }
-                if (res != null && (res.name.startsWith("gfx/kritter/horse/") ||
-                        res.name.equals("gfx/kritter/sheep/sheep") ||
-                        res.name.equals("gfx/kritter/cattle/cattle") ||
-                        res.name.equals("gfx/kritter/boar/boar") ||
-                        res.name.equals("gfx/kritter/goat/wildgoat"))) {
-                    if (animal == null)
-                        animal = gob;
-                    else if (gob.rc.dist(gui.map.player().rc) < animal.rc.dist(gui.map.player().rc))
-                        animal = gob;
-                }
+        for (Gob gob : gui.map.glob.oc.getallgobs()) {
+            Resource res = null;
+            try {
+                res = gob.getres();
+            } catch (Loading l) {
+            }
+            if (res != null && (res.name.startsWith("gfx/kritter/horse/") ||
+                    res.name.equals("gfx/kritter/sheep/sheep") ||
+                    res.name.equals("gfx/kritter/cattle/cattle") ||
+                    res.name.equals("gfx/kritter/boar/boar") ||
+                    res.name.equals("gfx/kritter/goat/wildgoat"))) {
+                if (animal == null)
+                    animal = gob;
+                else if (gob.rc.dist(gui.map.player().rc) < animal.rc.dist(gui.map.player().rc))
+                    animal = gob;
             }
         }
 

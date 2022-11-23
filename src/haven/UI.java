@@ -259,8 +259,8 @@ public class UI {
         Widget.Factory f;
         if (parent == beltWndId)
             f = Widget.gettype2("inv-belt");
-        else if (type.startsWith("gfx/hud/rosters/"))
-            f = Widget.gettype3(type);
+//        else if (type.startsWith("gfx/hud/rosters/"))
+//            f = Widget.gettype3(type);
         else
             f = Widget.gettype2(type);
         if (f == null) {

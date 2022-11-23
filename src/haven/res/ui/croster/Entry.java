@@ -40,6 +40,10 @@ public class Entry extends Widget {
     public static final Tex lacty = Loading.waitfor(Resource.local().load("gfx/hud/rosters/lactate-y")).layer(Resource.imgc).tex();
     public static final Tex lactn = Loading.waitfor(Resource.local().load("gfx/hud/rosters/lactate-n")).layer(Resource.imgc).tex();
     public static final Function<Boolean, Tex> lactrend = v -> (v ? lacty : lactn);
+    public static final Tex ownedn = Loading.waitfor(Resource.local().load("gfx/hud/rosters/owned-n")).layer(Resource.imgc).tex();
+    public static final Tex ownedo = Loading.waitfor(Resource.local().load("gfx/hud/rosters/owned-o")).layer(Resource.imgc).tex();
+    public static final Tex ownedm = Loading.waitfor(Resource.local().load("gfx/hud/rosters/owned-m")).layer(Resource.imgc).tex();
+    public static final Function<Integer, Tex> ownrend = v -> ((v == 3) ? ownedm : ((v == 1) ? ownedo : ownedn));
     public final long id;
     public String name;
     public int grp;

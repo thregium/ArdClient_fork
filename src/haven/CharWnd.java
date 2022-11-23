@@ -2011,7 +2011,7 @@ public class CharWnd extends Window {
     }
 
     public class QuestList extends Listbox<Quest> {
-        public List<Quest> quests = new ArrayList<Quest>();
+        public List<Quest> quests = Collections.synchronizedList(new ArrayList<Quest>());
         private boolean loading = false;
         private final Comparator<Quest> comp = new Comparator<Quest>() {
             public int compare(Quest a, Quest b) {
@@ -2027,7 +2027,7 @@ public class CharWnd extends Window {
         public void tick(double dt) {
             if (loading) {
                 loading = false;
-                Collections.sort(quests, comp);
+                quests.sort(comp);
             }
         }
 

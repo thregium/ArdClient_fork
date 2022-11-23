@@ -2615,17 +2615,15 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     showSpecialMenu(clickgob.get());
                 } else if (configuration.rightclickproximity) {
                     Gob target = null;
-                    synchronized (glob.oc) {
-                        for (Gob gob : glob.oc) {
-                            if (!gob.isplayer()) {
-                                double dist = gob.rc.dist(mc);
-                                if ((target == null || dist < target.rc.dist(mc)) && dist <= configuration.rightclickproximityradius)
-                                    target = gob;
-                            }
+                    for (Gob gob : glob.oc.getallgobs()) {
+                        if (!gob.isplayer()) {
+                            double dist = gob.rc.dist(mc);
+                            if ((target == null || dist < target.rc.dist(mc)) && dist <= configuration.rightclickproximityradius)
+                                target = gob;
                         }
-                        if (target != null)
-                            showSpecialMenu(target);
                     }
+                    if (target != null)
+                        showSpecialMenu(target);
                 }
             } else {
                 lastItemactClickArgs = null;
@@ -2647,10 +2645,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 if (clickb == 1 && curs != null && (curs.name.equals("gfx/hud/curs/shoot") || curs.name.equals("gfx/hud/curs/atk"))
                         && (flags == UI.MOD_META || Config.proximityaggro || Config.proximityaggropvp)) {
                     boolean isAttack = curs.name.equals("gfx/hud/curs/atk");
-                    List<Gob> gobs;
-                    synchronized (glob.oc) {
-                        gobs = Arrays.stream(glob.oc.getallgobs()).collect(Collectors.toList());
-                    }
+                    List<Gob> gobs = Arrays.stream(glob.oc.getallgobs()).collect(Collectors.toList());
                     gobs.stream().filter(Gob::isplayer).collect(Collectors.toList()).forEach(gobs::remove);
                     double offDist = (flags == UI.MOD_META) ? configuration.attackproximityradius : 5 * tilesz.x;
                     gobs.stream().filter(gob -> gob.rc.dist(mc) > offDist).collect(Collectors.toList()).forEach(gobs::remove);
@@ -2696,18 +2691,16 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     } else {
                         Gob target = null;
                         if (configuration.rightclickproximity && clickb == 3) {
-                            synchronized (glob.oc) {
-                                for (Gob gob : glob.oc) {
-                                    if (!gob.isplayer()) {
-                                        double dist = gob.rc.dist(mc);
-                                        if ((target == null || dist < target.rc.dist(mc)) && dist <= configuration.rightclickproximityradius)
-                                            target = gob;
-                                    }
+                            for (Gob gob : glob.oc.getallgobs()) {
+                                if (!gob.isplayer()) {
+                                    double dist = gob.rc.dist(mc);
+                                    if ((target == null || dist < target.rc.dist(mc)) && dist <= configuration.rightclickproximityradius)
+                                        target = gob;
                                 }
-                                if (target != null) {
-                                    wdgmsg("click", target.sc, target.rc.floor(posres), 3, modflags, 0, (int) target.id, target.rc.floor(posres), 0, -1);
-                                    pllastcc = target.rc;
-                                }
+                            }
+                            if (target != null) {
+                                wdgmsg("click", target.sc, target.rc.floor(posres), 3, modflags, 0, (int) target.id, target.rc.floor(posres), 0, -1);
+                                pllastcc = target.rc;
                             }
                         }
                         if (target == null) {

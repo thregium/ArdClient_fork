@@ -8,21 +8,20 @@ import haven.GameUI;
 import haven.Gob;
 import haven.Indir;
 import haven.Loading;
+import static haven.OCache.posres;
 import haven.Resource;
 import haven.States;
 import haven.Tex;
 import haven.Text;
 import haven.UI;
+import haven.Utils;
 import haven.Widget;
 import haven.purus.pbot.PBotUtils;
 import haven.sloth.script.PointerData;
 import modification.configuration;
-
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import java.awt.Color;
-
-import static haven.OCache.posres;
 
 public class Pointer extends Widget {
     public static final States.ColState col = new States.ColState(241, 227, 157, 255);
@@ -31,20 +30,22 @@ public class Pointer extends Widget {
     public Coord2d tc;
     public Coord lc;
     public long gobid = -1L;
+    public boolean click;
     private PointerData data = new PointerData("Unknown", Coord2d.z);
 
-    public Pointer(Indir<Resource> res) {
+    public Pointer(Indir<Resource> icon) {
         super(Coord.z);
-        this.icon = res;
+        this.icon = icon;
     }
 
     public static Widget mkwidget(UI ui, Object... args) {
-        int i = ((Integer) args[0]);
-        return new Pointer(i < 0 ? null : ui.sess.getres(i));
+        int iconid = (Integer) args[0];
+        Indir<Resource> icon = (iconid < 0) ? null : ui.sess.getres(iconid);
+        return (new Pointer(icon));
     }
 
     public void presize() {
-        resize(this.parent.sz);
+        resize(parent.sz);
     }
 
     protected void added() {
@@ -59,14 +60,10 @@ public class Pointer extends Widget {
         ui.sess.details.removePointer(data);
     }
 
-    private int signum(int paramInt) {
-        if (paramInt < 0) {
-            return -1;
-        }
-        if (paramInt > 0) {
-            return 1;
-        }
-        return 0;
+    private int signum(int a) {
+        if (a < 0) return (-1);
+        if (a > 0) return (1);
+        return (0);
     }
 
     private void drawarrow(GOut g, Coord sc) {
@@ -141,9 +138,8 @@ public class Pointer extends Widget {
 
         if (icon != null) {
             try {
-                if (licon == null) {
-                    licon = ((icon.get()).layer(Resource.imgc)).tex();
-                }
+                if (licon == null)
+                    licon = icon.get().layer(Resource.imgc).tex();
                 g.aimage(licon, bc.add(Coord.sc(a, -30)), 0.5, 0.5);
                 if (configuration.showpointdist)
                     g.aimage(Text.renderstroked(dist + "", Color.WHITE, Color.BLACK, Text.num12boldFnd).tex(), bc.add(Coord.sc(a, -30)), 0.5, 0.5);
@@ -156,9 +152,8 @@ public class Pointer extends Widget {
 
     public void draw(GOut g) {
         this.lc = null;
-        if (this.tc == null) {
+        if (tc == null)
             return;
-        }
 
         if (ui.gui != null && ui.gui.map != null) {
             Gob questgob = this.gobid < 0L ? null : this.ui.sess.glob.oc.getgob(this.gobid);
@@ -208,21 +203,24 @@ public class Pointer extends Widget {
         switch (msg) {
             case "upd":
                 if (args[0] == null) {
-                    this.tc = null;
+                    tc = null;
                 } else {
-                    this.tc = ((Coord) args[0]).mul(posres);
+                    tc = ((Coord) args[0]).mul(posres);
                     data.updatec(this.tc);
                 }
-                if (args[1] == null) {
-                    this.gobid = -1L;
-                } else {
-                    this.gobid = ((Integer) args[1]);
-                }
+                if (args[1] == null)
+                    gobid = -1L;
+                else
+                    gobid = Utils.uint32((Integer) args[1]);
                 break;
             case "icon":
-                int i = ((Integer) args[0]);
-                this.icon = i < 0 ? null : this.ui.sess.getres(i);
-                this.licon = null;
+                int iconid = (Integer) args[0];
+                Indir<Resource> icon = (iconid < 0) ? null : ui.sess.getres(iconid);
+                this.icon = icon;
+                licon = null;
+                break;
+            case "cl":
+                click = ((Integer) args[0]) != 0;
                 break;
             default:
                 super.uimsg(msg, args);

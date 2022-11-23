@@ -38,14 +38,13 @@ public class PickForageable implements Runnable {
     @Override
     public void run() {
         Gob herb = null;
-        synchronized (gui.map.glob.oc) {
             Gob player = gui.map.player();
             if (player == null)
                 return;//player is null, possibly taking a road, don't bother trying to do all of the below.
             HeldBy held = player.getattr(HeldBy.class);
 //            List<PBotGob> gobs = new ArrayList<>();
 //            gobs.stream().filter(gob -> gob.getResname().contains("stockpile") && gob.getResname().endsWith("wblock")).collect(Collectors.toList());
-            for (Gob gob : gui.map.glob.oc) {
+            for (Gob gob : gui.map.glob.oc.getallgobs()) {
                 if (player == gob)
                     continue;
                 if (held != null && held.holder.id == gob.id)
@@ -115,7 +114,6 @@ public class PickForageable implements Runnable {
 //                    }
                 }
             }
-        }
         if (herb == null)
             return;
         if (configuration.quickactionauto)
