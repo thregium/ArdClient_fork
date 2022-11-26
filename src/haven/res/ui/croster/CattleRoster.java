@@ -4,9 +4,11 @@ import haven.Button;
 import haven.CharWnd;
 import haven.CheckBox;
 import haven.Coord;
+import haven.FastText;
 import haven.GOut;
 import haven.GameUI;
 import haven.Indir;
+import haven.Label;
 import haven.Loading;
 import haven.MenuGrid;
 import haven.MenuGrid.Pagina;
@@ -16,7 +18,6 @@ import haven.Tex;
 import haven.UI;
 import haven.Widget;
 import haven.Window;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class CattleRoster<T extends Entry> extends Widget {
     public static final int WIDTH = UI.scale(1050);
@@ -52,12 +54,18 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
         Widget prev;
         prev = add(new Button(UI.scale(100), "Select all", false).action(() -> {
             for (Entry entry : this.entries.values())
-                entry.mark.set(true);
+                entry.set(true);
         }), entrycont.pos("bl").adds(0, 5));
         prev = add(new Button(UI.scale(100), "Select none", false).action(() -> {
             for (Entry entry : this.entries.values())
-                entry.mark.set(false);
+                entry.set(false);
         }), prev.pos("ur").adds(5, 0));
+        add(new Label(Integer.toString(selectedCounter.get())) {
+            @Override
+            public void draw(GOut g) {
+                FastText.print(g, Coord.z, Integer.toString(selectedCounter.get()));
+            }
+        }, prev.pos("ur").adds(5, 0));
         adda(new Button(UI.scale(150), "Remove selected", false).action(() -> {
             Collection<Object> args = new ArrayList<>();
             for (Entry entry : this.entries.values()) {
@@ -79,6 +87,13 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
             x += UI.scale(attr.r ? 5 : 1);
         }
         return (Arrays.asList(attrs));
+    }
+
+    private final AtomicInteger selectedCounter = new AtomicInteger();
+
+    public void selected(boolean a) {
+        if (a) selectedCounter.incrementAndGet();
+        else selectedCounter.decrementAndGet();
     }
 
     public void redisplay(List<T> display) {

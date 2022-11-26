@@ -55,7 +55,7 @@ public class Entry extends Widget {
         super(sz);
         this.id = id;
         this.name = name;
-        this.mark = adda(new CheckBox(""), UI.scale(5), sz.y / 2, 0, 0.5);
+        this.mark = adda(new CheckBox("", this::selected, false), UI.scale(5), sz.y / 2, 0, 0.5);
     }
 
     protected void drawbg(GOut g) {
@@ -99,6 +99,14 @@ public class Entry extends Widget {
             if (p.test(ent))
                 ent.mark.click();
         }
+    }
+
+    public void set(boolean a) {
+        if (mark.a != a) mark.set(a);
+    }
+
+    public void selected(boolean a) {
+        getparent(CattleRoster.class).selected(a);
     }
 }
 
