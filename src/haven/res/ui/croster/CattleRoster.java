@@ -42,6 +42,7 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
     public boolean dirty = true;
     public Comparator<? super T> order = namecmp, torder = namecmp;
     public Column mousecol, ordercol, tordercol;
+    public Label lcounter;
 
     public CattleRoster() {
         super(new Coord(WIDTH, UI.scale(400)));
@@ -60,12 +61,7 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
             for (Entry entry : this.entries.values())
                 entry.set(false);
         }), prev.pos("ur").adds(5, 0));
-        add(new Label(Integer.toString(selectedCounter.get())) {
-            @Override
-            public void draw(GOut g) {
-                FastText.print(g, Coord.z, Integer.toString(selectedCounter.get()));
-            }
-        }, prev.pos("ur").adds(5, 0));
+        lcounter = add(new Label(Integer.toString(selectedCounter.get())), prev.pos("ur").adds(5, 0));
         adda(new Button(UI.scale(150), "Remove selected", false).action(() -> {
             Collection<Object> args = new ArrayList<>();
             for (Entry entry : this.entries.values()) {
@@ -94,6 +90,7 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
     public void selected(boolean a) {
         if (a) selectedCounter.incrementAndGet();
         else selectedCounter.decrementAndGet();
+        lcounter.settext(Integer.toString(selectedCounter.get()));
     }
 
     public void redisplay(List<T> display) {
