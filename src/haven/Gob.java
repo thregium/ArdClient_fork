@@ -344,7 +344,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     public final Glob glob;
     public int quality = 0;
     public final Map<Class<? extends GAttrib>, GAttrib> attr = Collections.synchronizedMap(new HashMap<>());
-    private final Set<haven.sloth.gob.Rendered> renderedattrs = new HashSet<>();
+    private final Set<haven.sloth.gob.Rendered> renderedattrs = Collections.synchronizedSet(new HashSet<>());
     public final Collection<Overlay> ols = Collections.synchronizedCollection(new LinkedList<Overlay>() {
         public boolean add(Overlay item) {
             /* XXX: Remove me once local code is changed to use addol(). */
@@ -356,8 +356,8 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             return (super.add(item));
         }
     });
-    private final List<Overlay> dols = new ArrayList<>();
-    private final List<Pair<GAttrib, Consumer<Gob>>> dattrs = new ArrayList<>();
+    private final List<Overlay> dols = Collections.synchronizedList(new ArrayList<>());
+    private final List<Pair<GAttrib, Consumer<Gob>>> dattrs = Collections.synchronizedList(new ArrayList<>());
 
     private final Collection<ResAttr.Cell<?>> rdata = Collections.synchronizedCollection(new LinkedList<>());
     private final Collection<ResAttr.Load> lrdata = Collections.synchronizedCollection(new LinkedList<>());
@@ -567,7 +567,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         }
 
         synchronized (dattrs) {
-            for (Pair<GAttrib, Consumer<Gob>> pair : dattrs) {
+            for (Pair<GAttrib, Consumer<Gob>> pair : new ArrayList<>(dattrs)) {
                 setattr(pair.a);
                 pair.a.ctick(dt);
                 pair.b.accept(this);
@@ -588,7 +588,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                         ols.remove(ol);
                 }
             }
-            for (Overlay ol : dols) {
+            for (Overlay ol : new ArrayList<>(dols)) {
                 ols.add(ol);
                 dols.remove(ol);
             }
@@ -1313,7 +1313,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             }
 
 
-            for (final haven.sloth.gob.Rendered attr : renderedattrs) {
+            for (final haven.sloth.gob.Rendered attr : new ArrayList<>(renderedattrs)) {
                 attr.setup(rl);
             }
 
