@@ -343,9 +343,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     public int frame;
     public final Glob glob;
     public int quality = 0;
-    public final Map<Class<? extends GAttrib>, GAttrib> attr = new HashMap<>();
+    public final Map<Class<? extends GAttrib>, GAttrib> attr = Collections.synchronizedMap(new HashMap<>());
     private final Set<haven.sloth.gob.Rendered> renderedattrs = new HashSet<>();
-    public final Collection<Overlay> ols = new LinkedList<Overlay>() {
+    public final Collection<Overlay> ols = Collections.synchronizedCollection(new LinkedList<Overlay>() {
         public boolean add(Overlay item) {
             /* XXX: Remove me once local code is changed to use addol(). */
             if (glob.oc.getgob(id) != null) {
@@ -355,7 +355,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             }
             return (super.add(item));
         }
-    };
+    });
     private final List<Overlay> dols = new ArrayList<>();
     private final List<Pair<GAttrib, Consumer<Gob>>> dattrs = new ArrayList<>();
 
@@ -576,8 +576,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         }
 
         synchronized (ols) {
-            for (Iterator<Overlay> i = ols.iterator(); i.hasNext(); ) {
-                Overlay ol = i.next();
+            for (Overlay ol : new ArrayList<>(ols)) {
                 if (ol.spr == null) {
                     try {
                         ol.spr = Sprite.create(this, ol.res.get(), ol.sdt.clone());
@@ -586,13 +585,12 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 } else {
                     boolean done = ol.spr.tick(dt);
                     if ((!ol.delign || (ol.spr instanceof Overlay.CDel)) && done)
-                        i.remove();
+                        ols.remove(ol);
                 }
             }
-            for (Iterator<Overlay> i = dols.iterator(); i.hasNext(); ) {
-                Overlay ol = i.next();
+            for (Overlay ol : dols) {
                 ols.add(ol);
-                i.remove();
+                dols.remove(ol);
             }
             if (virtual && ols.isEmpty())
                 glob.oc.remove(id);
