@@ -1883,7 +1883,7 @@ public class CharWnd extends Window {
     }
 
     public class WoundList extends Listbox<Wound> implements DTarget {
-        public List<Wound> wounds = new ArrayList<Wound>();
+        public List<Wound> wounds = Collections.synchronizedList(new ArrayList<Wound>());
         private boolean loading = false;
         private final Comparator<Wound> wcomp = new Comparator<Wound>() {
             public int compare(Wound a, Wound b) {
@@ -1896,7 +1896,7 @@ public class CharWnd extends Window {
         }
 
         private List<Wound> treesort(List<Wound> from, int pid, int level) {
-            List<Wound> direct = new ArrayList<>(from.size());
+            List<Wound> direct = Collections.synchronizedList(new ArrayList<>(from.size()));
             for (Wound w : from) {
                 if (w.parentid == pid) {
                     w.level = level;
@@ -1904,7 +1904,7 @@ public class CharWnd extends Window {
                 }
             }
             Collections.sort(direct, wcomp);
-            List<Wound> ret = new ArrayList<>(from.size());
+            List<Wound> ret = Collections.synchronizedList(new ArrayList<>(from.size()));
             for (Wound w : direct) {
                 ret.add(w);
                 ret.addAll(treesort(from, w.id, level + 1));
