@@ -123,6 +123,7 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
                 ndisp.sort(torder);
             ndisp.sort(order);
             redisplay(ndisp);
+            lcounter.settext(Integer.toString(selectedCounter.get()));
             dirty = false;
         }
         super.tick(dt);

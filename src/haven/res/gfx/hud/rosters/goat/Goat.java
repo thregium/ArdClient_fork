@@ -62,6 +62,10 @@ public class Goat extends Entry {
             markall(Goat.class, o -> (o.lactate == this.lactate));
             return (true);
         }
+        if (GoatRoster.cols.get(6).hasx(c.x)) {
+            markall(Goat.class, o -> ((o.owned == this.owned) && (o.mine == this.mine)));
+            return (true);
+        }
         return (super.mousedown(c, button));
     }
 }

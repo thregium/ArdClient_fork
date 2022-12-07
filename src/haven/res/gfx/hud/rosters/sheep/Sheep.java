@@ -62,6 +62,10 @@ public class Sheep extends Entry {
             markall(Sheep.class, o -> (o.lactate == this.lactate));
             return (true);
         }
+        if (SheepRoster.cols.get(6).hasx(c.x)) {
+            markall(Sheep.class, o -> ((o.owned == this.owned) && (o.mine == this.mine)));
+            return (true);
+        }
         return (super.mousedown(c, button));
     }
 }

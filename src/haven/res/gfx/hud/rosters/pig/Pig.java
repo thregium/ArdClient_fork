@@ -2,7 +2,6 @@ package haven.res.gfx.hud.rosters.pig;
 
 import haven.Coord;
 import haven.GOut;
-import haven.UI;
 import haven.res.ui.croster.Entry;
 
 public class Pig extends Entry {
@@ -60,6 +59,10 @@ public class Pig extends Entry {
         }
         if (PigRoster.cols.get(5).hasx(c.x)) {
             markall(Pig.class, o -> (o.lactate == this.lactate));
+            return (true);
+        }
+        if (PigRoster.cols.get(6).hasx(c.x)) {
+            markall(Pig.class, o -> ((o.owned == this.owned) && (o.mine == this.mine)));
             return (true);
         }
         return (super.mousedown(c, button));

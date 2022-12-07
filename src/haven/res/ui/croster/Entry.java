@@ -108,5 +108,11 @@ public class Entry extends Widget {
     public void selected(boolean a) {
         getparent(CattleRoster.class).selected(a);
     }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        if (mark.a) getparent(CattleRoster.class).selected(false);
+    }
 }
 
