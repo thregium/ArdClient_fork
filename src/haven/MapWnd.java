@@ -228,7 +228,7 @@ public class MapWnd extends ResizableWnd {
             mebtn = add(new Button(95, "Export...", false) {
                 public void click() {
                     boolean errors = ui.modflags() == UI.MOD_CTRL;
-                    view.exportmap(errors);
+                    view.exportmap(errors, -1);
                 }
 
                 @Override

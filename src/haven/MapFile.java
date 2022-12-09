@@ -2116,7 +2116,7 @@ public class MapFile {
 
     private static final byte[] EXPORT_SIG = "Haven Mapfile 1".getBytes(Utils.ascii);
 
-    public void export(boolean errors, Message out, ExportFilter filter, ExportStatus prog) throws InterruptedException {
+    public void export(boolean errors, int v, Message out, ExportFilter filter, ExportStatus prog) throws InterruptedException {
         if (prog == null) prog = new ExportStatus() {
         };
         out.addbytes(EXPORT_SIG);
@@ -2168,19 +2168,42 @@ public class MapFile {
                     continue;
                 }
                 MessageBuf buf = new MessageBuf();
-                buf.adduint8(4);
-                buf.addint64(gd.b);
-                buf.addint64(seg.id);
-                buf.addint64(grid.mtime);
-                buf.addcoord(gd.a);
-                buf.addint32(cmaps.x * cmaps.y);
-                DataGrid.savetiles(buf, grid.tilesets, grid.tiles);
-                DataGrid.savez(buf, grid.zmap);
-                DataGrid.saveols(buf, grid.ols);
-                byte[] od = buf.fin();
-                zout.addstring("grid");
-                zout.addint32(od.length);
-                zout.addbytes(od);
+                if (v == -1) {
+                    buf.adduint8(4);
+                    buf.addint64(gd.b);
+                    buf.addint64(seg.id);
+                    buf.addint64(grid.mtime);
+                    buf.addcoord(gd.a);
+                    buf.addint32(cmaps.x * cmaps.y);
+                    DataGrid.savetiles(buf, grid.tilesets, grid.tiles);
+                    DataGrid.savez(buf, grid.zmap);
+                    DataGrid.saveols(buf, grid.ols);
+                    byte[] od = buf.fin();
+                    zout.addstring("grid");
+                    zout.addint32(od.length);
+                    zout.addbytes(od);
+                } else if (v == 3) {
+                    buf.adduint8(3);
+                    buf.addint64(gd.b);
+                    buf.addint64(seg.id);
+                    buf.addint64(grid.mtime);
+                    buf.addcoord(gd.a);
+                    buf.adduint8(grid.tilesets.length);
+                    for (TileInfo tinf : grid.tilesets) {
+                        buf.addstring(tinf.res.name);
+                        buf.adduint16(tinf.res.ver);
+                        buf.adduint8(tinf.prio);
+                    }
+                    buf.addint32(cmaps.x * cmaps.y);
+                    for (int tn : grid.tiles)
+                        buf.adduint8(tn);
+                    DataGrid.savez(buf, grid.zmap);
+                    DataGrid.saveols(buf, grid.ols);
+                    byte[] od = buf.fin();
+                    zout.addstring("grid");
+                    zout.addint32(od.length);
+                    zout.addbytes(od);
+                }
                 Utils.checkirq();
             }
             nseg++;
@@ -2205,9 +2228,9 @@ public class MapFile {
         zout.finish();
     }
 
-    public void export(boolean errors, OutputStream out, ExportFilter filter, ExportStatus prog) throws InterruptedException {
+    public void export(boolean errors, int v, OutputStream out, ExportFilter filter, ExportStatus prog) throws InterruptedException {
         StreamMessage msg = new StreamMessage(null, out);
-        export(errors, msg, filter, prog);
+        export(errors, v, msg, filter, prog);
         msg.flush();
     }
 

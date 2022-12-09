@@ -911,13 +911,13 @@ public class MapFileWidget extends Widget implements Console.Directory {
         }
     }
 
-    public void exportmap(boolean errors, File path) {
+    public void exportmap(boolean errors, int v, File path) {
         GameUI gui = getparent(GameUI.class);
         ExportWindow prog = new ExportWindow();
         Thread th = new HackThread(() -> {
             try {
                 try (OutputStream out = new BufferedOutputStream(new FileOutputStream(path))) {
-                    file.export(errors, out, MapFile.ExportFilter.all, prog);
+                    file.export(errors, v, out, MapFile.ExportFilter.all, prog);
                 }
             } catch (IOException e) {
                 e.printStackTrace(ui.cons.out);
@@ -964,7 +964,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
         gui.adda(prog, gui.sz.div(2), 0.5, 1.0);
     }
 
-    public void exportmap(boolean errors) {
+    public void exportmap(boolean errors, int v) {
         java.awt.EventQueue.invokeLater(() -> {
             JFileChooser fc = new JFileChooser();
             fc.setFileFilter(new FileNameExtensionFilter("Exported Haven map data", "hmap"));
@@ -973,7 +973,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
             File path = fc.getSelectedFile();
             if (path.getName().indexOf('.') < 0)
                 path = new File(path + ".hmap");
-            exportmap(errors, path);
+            exportmap(errors, v, path);
         });
     }
 
@@ -991,10 +991,12 @@ public class MapFileWidget extends Widget implements Console.Directory {
 
     {
         cmdmap.put("exportmap", (cons, args) -> {
-            if (args.length > 1)
-                exportmap(false, new File(args[1]));
+            if (args.length == 2)
+                exportmap(false, -1, new File(args[1]));
+            else if (args.length == 3)
+                exportmap(false, Integer.parseInt(args[2]), new File(args[1]));
             else
-                exportmap(false);
+                exportmap(false, -1);
         });
         cmdmap.put("importmap", (cons, args) -> {
             if (args.length > 1)
