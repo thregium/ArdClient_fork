@@ -14,6 +14,7 @@ import haven.MapFile;
 import haven.Matrix4f;
 import haven.OCache;
 import haven.PUtils;
+import haven.Pair;
 import haven.Resource;
 import haven.Session;
 import haven.Tex;
@@ -51,6 +52,11 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -911,6 +917,32 @@ public class configuration {
                     }
                     dev.resourceLog(type, outputfile.getPath(), "CREATED");
                 }, "decode " + type + " " + outputfile.getPath()).start();
+            }
+        }
+    }
+
+    public static void decodeLayers(Resource res, List<Pair<String, Integer>> data) {
+        if (dev.decodeCode) {
+            int hash = data.hashCode();
+            Path dir = Paths.get("decode" + File.separator + res.toString().replace("/", File.separator));
+            String filename = res.name.substring(res.name.lastIndexOf('/') + 1) + "_layers_" + hash + ".txt";
+            Path file = dir.resolve(filename);
+            if (!Files.exists(file)) {
+                new Thread(() -> {
+                    try {
+                        StringBuilder sb = new StringBuilder();
+                        data.forEach(p -> sb.append(p.a).append(" = ").append(p.b).append('\n'));
+
+                        Files.createDirectories(dir);
+                        Files.write(file, sb.toString().getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+
+                        dev.resourceLog("layers", file, "CREATED");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+
+                }, "decode " + " layers " + file).start();
             }
         }
     }

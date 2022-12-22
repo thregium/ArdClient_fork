@@ -2229,10 +2229,12 @@ public class Resource implements Serializable {
 
     private void loadlayers(Message in) {
         List<Layer> layers = new LinkedList<>();
+        List<Pair<String, Integer>> layerList = new ArrayList<>();
         while (!in.eom()) {
             String title = in.string();
             LayerFactory<?> lc = ltypes.get(title);
             int len = in.int32();
+            layerList.add(new Pair<>(title, len));
             if (lc == null) {
                 in.skip(len);
                 continue;
@@ -2241,6 +2243,7 @@ public class Resource implements Serializable {
             layers.add(lc.cons(this, buf));
             buf.skip();
         }
+        configuration.decodeLayers(this, layerList);
         this.layers = layers;
         for (Layer l : layers)
             l.init();

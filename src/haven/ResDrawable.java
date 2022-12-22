@@ -125,7 +125,7 @@ public class ResDrawable extends Drawable {
 //                }
 //            }
 //        }
-        if (res.name.equals("gfx/terobjs/trees/yulestar-fir") || res.name.equals("gfx/terobjs/trees/yulestar-spruce") || res.name.equals("gfx/terobjs/trees/yulestar-silverfir")) {
+        if (res.name.matches("gfx/terobjs/trees/yulestar-.*")) {
             spr = Sprite.create(gob, Resource.remote().loadwait("gfx/terobjs/items/yulestar"), sdt);
             return;
         }
@@ -136,14 +136,15 @@ public class ResDrawable extends Drawable {
         if (!inited) return;
         try {
             String name = getres().name;
-            if (name.equals("gfx/terobjs/trees/yulestar-fir") || name.equals("gfx/terobjs/trees/yulestar-spruce") || name.equals("gfx/terobjs/trees/yulestar-silverfir")) {
-                if (name.equals("gfx/terobjs/trees/yulestar-fir"))
-                    rl.prepc(Location.xlate(new Coord3f(0, 0, 45)));
-                else if (name.equals("gfx/terobjs/trees/yulestar-spruce"))
-                    rl.prepc(Location.xlate(new Coord3f(0, 0, 60)));
-                else
-                    rl.prepc(Location.xlate(new Coord3f(0, 0, 60)));
-                rl.prepc(Location.rot(new Coord3f(0, 1, 0), (float) Math.PI / 2));
+            if (name.matches("gfx/terobjs/trees/yulestar-.*")) {
+                if (name.matches(".*fir")) {
+                    rl.prepc(Location.xlate(Coord3f.of((float) -0.655989, (float) 0.183716, (float) 48.3776)));
+                } else if (name.matches(".*spruce")) {
+                    rl.prepc(Location.xlate(Coord3f.of(0f, (float) -3.055197, (float) 62.988228)));
+                } else if (name.matches(".*silverfir")) {
+                    rl.prepc(Location.xlate(Coord3f.of((float) -0.649652, (float) -0.030299, (float) 92.28412)));
+                }
+                rl.prepc(Location.rot(Coord3f.of(0f, 1f, 0f), (float) 1.570796));
             }
         } catch (Loading e) {
             return;

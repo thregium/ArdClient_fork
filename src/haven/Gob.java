@@ -172,16 +172,16 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 
         public boolean setup(RenderList rl) {
             if (spr != null) {
-                if (name().equals("gfx/terobjs/trees/yulestar-fir") || name().equals("gfx/terobjs/trees/yulestar-spruce") || name().equals("gfx/terobjs/trees/yulestar-silverfir")) {
-                    if (name().equals("gfx/terobjs/trees/yulestar-fir"))
-                        rl.prepc(Location.xlate(new Coord3f(0, 0, 45)));
-                    else if (name().equals("gfx/terobjs/trees/yulestar-spruce"))
-                        rl.prepc(Location.xlate(new Coord3f(0, 0, 60)));
-                    else
-                        rl.prepc(Location.xlate(new Coord3f(0, 0, 60)));
-                    rl.prepc(Location.rot(new Coord3f(0, 1, 0), (float) Math.PI / 2));
+                if (name().matches("gfx/terobjs/trees/yulestar-.*")) {
+                    if (name().matches(".*fir")) {
+                        rl.prepc(Location.xlate(Coord3f.of((float) -0.655989, (float) 0.183716, (float) 48.3776)));
+                    } else if (name().matches(".*spruce")) {
+                        rl.prepc(Location.xlate(Coord3f.of(0f, (float) -3.055197, (float) 62.988228)));
+                    } else if (name().matches(".*silverfir")) {
+                        rl.prepc(Location.xlate(Coord3f.of((float) -0.649652, (float) -0.030299, (float) 92.28412)));
+                    }
+                    rl.prepc(Location.rot(Coord3f.of(0f, 1f, 0f), (float) 1.570796));
                 }
-
                 rl.add(spr, null);
             }
             return (false);
@@ -1086,34 +1086,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             }
         }
         if (!(hid != null && Config.hideuniquegobs) || configuration.showhiddenoverlay) {
-            synchronized (ols) {
-                for (Overlay ol : ols) {
-                    if (ol.name().equals("gfx/terobjs/trees/yulestar-fir") || ol.name().equals("gfx/terobjs/trees/yulestar-spruce") || ol.name().equals("gfx/terobjs/trees/yulestar-silverfir")) {
-                        if (ol.spr == null || ol.spr.res == null || ol.spr.res.name.contains("trees/yulestar-"))
-                            ol.spr = Sprite.create(this, Resource.remote().loadwait("gfx/terobjs/items/yulestar"), ol.sdt);
-                    }
-                    rl.add(ol, null);
-                }
-                for (Overlay ol : ols) {
-                    if (ol.spr instanceof Overlay.SetupMod)
-                        ((Overlay.SetupMod) ol.spr).setupmain(rl);
-                }
-            }
-
-            if (type == Type.HUMAN || type == Type.VEHICLE || type == Type.WATERVEHICLE || type == Type.ANIMAL || type == Type.SMALLANIMAL || type == Type.TAMEDANIMAL || type == Type.DANGANIMAL) {
-//                    if (Movable.isMovable(name)) {}
-                if (isMoving() && getattr(Movable.class) == null)
-                    setattr(new Movable(this));
-            }
-
-            if (configuration.resizableworld) {
-                float scale = (float) configuration.worldsize;
-                rl.prepc(new Location(new Matrix4f(
-                        scale, 0, 0, 0,
-                        0, scale, 0, 0,
-                        0, 0, scale, 0,
-                        0, 0, 0, 1)));
-            }
             if (configuration.rotateworld) {
                 rl.prepc(Location.rot(new Coord3f(1, 0, 0), (float) Math.toRadians(configuration.rotateworldvalx)));
                 rl.prepc(Location.rot(new Coord3f(0, 1, 0), (float) Math.toRadians(configuration.rotateworldvaly)));
@@ -1139,7 +1111,34 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     }
                 }
             }
+            synchronized (ols) {
+                for (Overlay ol : ols) {
+                    if (ol.name().matches("gfx/terobjs/trees/yulestar-.*")) {
+                        if (ol.spr == null || ol.spr.res == null || ol.spr.res.name.matches("gfx/terobjs/trees/yulestar-.*"))
+                            ol.spr = Sprite.create(this, Resource.remote().loadwait("gfx/terobjs/items/yulestar"), ol.sdt);
+                    }
+                    rl.add(ol, null);
+                }
+                for (Overlay ol : ols) {
+                    if (ol.spr instanceof Overlay.SetupMod)
+                        ((Overlay.SetupMod) ol.spr).setupmain(rl);
+                }
+            }
 
+            if (type == Type.HUMAN || type == Type.VEHICLE || type == Type.WATERVEHICLE || type == Type.ANIMAL || type == Type.SMALLANIMAL || type == Type.TAMEDANIMAL || type == Type.DANGANIMAL) {
+//                    if (Movable.isMovable(name)) {}
+                if (isMoving() && getattr(Movable.class) == null)
+                    setattr(new Movable(this));
+            }
+
+            if (configuration.resizableworld) {
+                float scale = (float) configuration.worldsize;
+                rl.prepc(new Location(new Matrix4f(
+                        scale, 0, 0, 0,
+                        0, scale, 0, 0,
+                        0, 0, scale, 0,
+                        0, 0, 0, 1)));
+            }
             final GobHealth hlt = getattr(GobHealth.class);
             if (hlt != null)
                 rl.prepc(hlt.getfx());
