@@ -888,13 +888,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             ntab(p, btn);
             btn.tooltip = Text.render(p.cap);
         }
-
-        @Override
-        public boolean show(boolean show) {
-            if (show)
-                ui.gui.buddies.clearSearch();
-            return super.show(show);
-        }
     }
 
     public static class DraggedItem {
@@ -1648,7 +1641,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
     private static final Tex menubg = Resource.loadtex("gfx/hud/mainmenu/rbtn-bg");
 
-    public static class MenuButton2 extends IButton {
+    public class MenuButton2 extends IButton {
         private final Action action;
         private final String tip;
 
@@ -1674,7 +1667,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
         @Override
         public void click() {
-            action.run(ui.gui);
+            action.run(GameUI.this);
         }
     }
 

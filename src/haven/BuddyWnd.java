@@ -457,6 +457,13 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         }
     }
 
+    @Override
+    public boolean show(boolean show) {
+        if (show)
+            clearSearch();
+        return (super.show(show));
+    }
+
     public void hide() {
         if (menu != null) {
             ui.destroy(menu);
