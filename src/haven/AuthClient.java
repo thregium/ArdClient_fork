@@ -30,6 +30,7 @@ import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import java.io.Closeable;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,6 +39,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -55,7 +58,19 @@ public class AuthClient implements Closeable {
     static {
         ssl = new SslHelper();
         try {
-            ssl.trust(Resource.class.getResourceAsStream("authsrv.crt"));
+            cert:
+            {
+                if (Config.authcrt != null) {
+                    try (InputStream customSertStream = Files.newInputStream(Paths.get(Config.authcrt))) {
+                        ssl.trust(customSertStream);
+                        break cert;
+                    } catch (final Exception e) {
+                        e.printStackTrace();
+                        System.err.println("Certificate failed. Using the default.");
+                    }
+                }
+                ssl.trust(Resource.class.getResourceAsStream("authsrv.crt"));
+            }
         } catch (Exception e) {
             throw (new RuntimeException(e));
         }

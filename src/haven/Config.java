@@ -72,6 +72,7 @@ public class Config {
     public static final boolean iswindows = System.getProperty("os.name").startsWith("Windows");
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
     public static String resdir = Utils.getprop("haven.resdir", System.getenv("HAFEN_RESDIR"));
+    public static String authcrt = Utils.getprop("haven.authcrt", System.getenv("HAFEN_AUTHCRT"));
     public static String authuser = null;
     public static String authserv = null;
     public static String defserv = Utils.getprop("haven.defserv", "game.havenandhearth.com");
