@@ -48,8 +48,8 @@ public enum Action {
         Utils.setprefb("playerbordersprite", configuration.playerbordersprite);
         Utils.setprefb("playerboxsprite", configuration.playerboxsprite);
     }, "Display view border"),
-    TOGGLE_DANGER_RADIUS(GameUI::toggleDangerRadius, "Toggles Mine/Animal Radii", "Toggles display of mine/animal danger radii"),
-    TOGGLE_SAFE_RADIUS(GameUI::toggleSafeRadius, "Toggles Trough/Beehive Radii", "Toggles between modes of displaying Trough/Beehive radii"),
+    TOGGLE_DANGER_RADIUS(GameUI::toggleDangerRadius, "Toggles Radius's", "Toggles between modes of displaying radius's"),
+    TOGGLE_SAFE_RADIUS(GameUI::toggleSafeRadius, "Toggles Radius's", "Toggles between modes of displaying radius's"),
     LOCAL_SCREENSHOT(GameUI::localScreenshot, "Take and save a local screenshot"),
     //   TOGGLE_TILE_GRID(gui -> gui.map.togglegrid(), "Show tile grid"),
     TOGGLE_TILE_CENTERING(GameUI::toggleGridCentering, "Toggle tile centering"),

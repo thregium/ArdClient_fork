@@ -109,6 +109,8 @@ public class DefSettings {
     public static final IndirSetting<Color> HITBOXCOLOR = new IndirSetting<>(global, "gameplay.hitbox-color");               //[RGBA] Color of guide lines (boundboxes)
     public static final IndirSetting<Color> TROUGHCOLOR = new IndirSetting<>(global, "gameplay.trough-color");               //[RGBA] Color trough radii circles
     public static final IndirSetting<Color> BEEHIVECOLOR = new IndirSetting<>(global, "gameplay.beehive-color");             //[RGBA] Color beehive radii circles
+    public static final IndirSetting<Color> MOUNDBEDCOLOR = new IndirSetting<>(global, "gameplay.moundbed-color");             //[RGBA] Color mound bed circles
+    public static final IndirSetting<Color> BARTERCOLOR = new IndirSetting<>(global, "gameplay.barterhand-color");             //[RGBA] Color barter hand circles
     public static final IndirSetting<Color> ANIMALDANGERCOLOR = new IndirSetting<>(global, "gameplay.danger-color");         //[RGBA] Color of animal radii circles
     public static final IndirSetting<Color> SUPPORTDANGERCOLOR = new IndirSetting<>(global, "gameplay.support-color");       //[RGBA] Color of mine suport radii circles
     public static final IndirSetting<Color> CHEESERACKEMPTYCOLOR = new IndirSetting<>(global, "gameplay.cheeserack-empty-color");//[RGBA] Color of cheese racks missing trays
@@ -285,6 +287,8 @@ public class DefSettings {
         HITBOXCOLOR.ensure(Color.WHITE);
         TROUGHCOLOR.ensure(new Color(0, 0, 255, 80));
         BEEHIVECOLOR.ensure(new Color(255, 255, 0, 80));
+        MOUNDBEDCOLOR.ensure(new Color(0, 255, 0, 80));
+        BARTERCOLOR.ensure(new Color(0, 255, 255, 80));
         ANIMALDANGERCOLOR.ensure(new Color(255, 0, 0, 80));
         SUPPORTDANGERCOLOR.ensure(new Color(0, 255, 0, 80));
         CHEESERACKEMPTYCOLOR.ensure(new Color(0, 255, 0, 255));

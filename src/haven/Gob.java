@@ -100,15 +100,21 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             case "doubleanimalradius":
                 return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 200.0F, -20.0F, BPRadSprite.smatDanger));
             case "rovlsupport":
-                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 100.0F, 0, BPRadSprite.smatSupports));
+                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 100.03125F, 0, BPRadSprite.smatSupports));
             case "rovlcolumn":
                 return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 125.0F, 0, BPRadSprite.smatSupports));
             case "rovlbeam":
-                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 150.0F, 0, BPRadSprite.smatSupports));
+                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 149.96094F, 0, BPRadSprite.smatSupports));
             case "rovltrough":
-                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 200.0F, -10.0F, BPRadSprite.smatTrough));
+                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 200.0625F, -10.0F, BPRadSprite.smatTrough));
             case "rovlbeehive":
-                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 151.0F, -10.0F, BPRadSprite.smatBeehive));
+                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 149.96094F, -10.0F, BPRadSprite.smatBeehive));
+            case "rovlbarterhand": {
+                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 55.0f, -10.0F, BPRadSprite.smatBarter));
+            }
+            case "rovlmoundbed": {
+                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 225.5F, -10.0F, BPRadSprite.smatMoundbed));
+            }
             default:
                 return (null);
         }

@@ -32,6 +32,12 @@ import static haven.Action.TOGGLE_INVENTORY;
 import static haven.Action.TOGGLE_KIN_LIST;
 import static haven.Action.TOGGLE_OPTIONS;
 import static haven.Action.TOGGLE_SEARCH;
+import static haven.DefSettings.ANIMALDANGERCOLOR;
+import static haven.DefSettings.BARTERCOLOR;
+import static haven.DefSettings.BEEHIVECOLOR;
+import static haven.DefSettings.MOUNDBEDCOLOR;
+import static haven.DefSettings.SUPPORTDANGERCOLOR;
+import static haven.DefSettings.TROUGHCOLOR;
 import static haven.KeyBinder.KeyBind;
 import haven.automation.Discord;
 import haven.automation.ErrorSysMsgCallback;
@@ -44,6 +50,8 @@ import haven.purus.pbot.PBotScriptlist;
 import haven.purus.pbot.PBotScriptlistOld;
 import haven.purus.pbot.PBotUtils;
 import haven.purus.pbot.PBotWindowAPI;
+import haven.res.gfx.fx.msrad.MSRad;
+import haven.resutil.BPRadSprite;
 import haven.resutil.FoodInfo;
 import haven.sloth.gob.AggroMark;
 import haven.sloth.gob.Mark;
@@ -122,7 +130,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public WItem vhand;
     public ChatUI chat;
     public ChatWnd chatwnd;
-    private int saferadius = 1;
+    //    private int saferadius = 1;
     private int dangerradius = 1;
     public ChatUI.Channel syslog;
     public ChatUI.Channel debuglog;
@@ -273,14 +281,14 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         opts.hide();
 
 //        PBotAPI.gui = this;
-        if (Config.showTroughrad && Config.showBeehiverad)
-            saferadius = 4;
-        else if (!Config.showTroughrad && Config.showBeehiverad)
-            saferadius = 3;
-        else if (Config.showTroughrad && !Config.showBeehiverad)
-            saferadius = 2;
-        else if (!Config.showTroughrad && !Config.showBeehiverad)
-            saferadius = 1;
+//        if (Config.showTroughrad && Config.showBeehiverad)
+//            saferadius = 4;
+//        else if (!Config.showTroughrad && Config.showBeehiverad)
+//            saferadius = 3;
+//        else if (Config.showTroughrad && !Config.showBeehiverad)
+//            saferadius = 2;
+//        else if (!Config.showTroughrad && !Config.showBeehiverad)
+//            saferadius = 1;
         fixAlarms();
     }
 
@@ -1944,42 +1952,69 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleDangerRadius() {
-        Config.showminerad = !Config.showminerad;
-        msg("Mine support radii are now : " + Config.showminerad, Color.white);
-        Utils.setprefb("showminerad", Config.showminerad);
+        toggleSafeRadius();
+//        Config.showminerad = !Config.showminerad;
+//        msg("Mine support radii are now : " + Config.showminerad, Color.white);
+//        Utils.setprefb("showminerad", Config.showminerad);
     }
 
     public void toggleSafeRadius() {
-        if (saferadius == 1) {
-            saferadius = 2;
-            Config.showTroughrad = false;
-            Config.showBeehiverad = true;
-            Utils.setprefb("showTroughrad", Config.showTroughrad);
-            Utils.setprefb("showBeehiverad", Config.showBeehiverad);
-            PBotUtils.sysMsg(ui, "Troughs off, Beehives on.", Color.white);
-        } else if (saferadius == 2) {
-            saferadius = 3;
-            Config.showTroughrad = true;
-            Config.showBeehiverad = true;
-            Utils.setprefb("showTroughrad", Config.showTroughrad);
-            Utils.setprefb("showBeehiverad", Config.showBeehiverad);
-            PBotUtils.sysMsg(ui, "Troughs on, Beehives on.", Color.white);
-        } else if (saferadius == 3) {
-            saferadius = 4;
-            Config.showTroughrad = true;
-            Config.showBeehiverad = false;
-            Utils.setprefb("showTroughrad", Config.showTroughrad);
-            Utils.setprefb("showBeehiverad", Config.showBeehiverad);
-            PBotUtils.sysMsg(ui, "Troughs on, Beehives off.", Color.white);
-        } else if (saferadius == 4) {
-            saferadius = 1;
-            Config.showTroughrad = false;
-            Config.showBeehiverad = false;
-            Utils.setprefb("showTroughrad", Config.showTroughrad);
-            Utils.setprefb("showBeehiverad", Config.showBeehiverad);
-            PBotUtils.sysMsg(ui, "Troughs off, Beehives off.", Color.white);
+        List<Window> wnds = PBotWindowAPI.getWindows(ui, "Radius Configurator");
+        if (!wnds.isEmpty()) {
+            wnds.forEach(Window::close);
+            return;
         }
+        Window w = new Window(Coord.z, "Radius Configurator");
+        WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
+        wva.addRow(new CheckBox("Show Animal Radius", val -> {
+            Utils.setprefb("showanimalrad", Config.showanimalrad = val);
+            msg("Animal Radius " + (val ? "on" : "off"), Color.white);
+        }, Config.showanimalrad), new ColorPreview(Coord.of(16), ANIMALDANGERCOLOR.get(), val -> {
+            BPRadSprite.smatDanger = new States.ColState(val);
+            if (ui.gui.map != null) ui.gui.map.refreshGobsAll();
+        }, "Dangerous animal radius color"));
+        wva.addRow(new CheckBox("Double animal radius size", val -> {
+            Utils.setprefb("doubleradius", Config.doubleradius = val);
+            msg("Double Radius " + (val ? "on" : "off"), Color.white);
+        }, Config.doubleradius));
+        wva.addRow(new CheckBox("Show Mine Support", val -> {
+            Utils.setprefb("showminerad", Config.showminerad = val);
+            msg("Mine support " + (val ? "on" : "off"), Color.white);
+        }, Config.showminerad), new ColorPreview(Coord.of(16), SUPPORTDANGERCOLOR.get(), val -> {
+            BPRadSprite.smatSupports = new States.ColState(val);
+            if (map != null) map.refreshGobsAll();
+        }, "Radius mine radius color"), new ColorPreview(Coord.of(16), MSRad.getColor1(), MSRad::changeColor1, "Vanilla mine radius first color"), new ColorPreview(Coord.of(16), MSRad.getColor2(), MSRad::changeColor2, "Vanilla mine radius second color"));
+        wva.addRow(new CheckBox("Show Trough Radius", val -> {
+            Utils.setprefb("showTroughrad", Config.showTroughrad = val);
+            msg("Troughs " + (val ? "on" : "off"), Color.white);
+        }, Config.showTroughrad), new ColorPreview(Coord.of(16), TROUGHCOLOR.get(), val -> {
+            BPRadSprite.smatTrough = new States.ColState(val);
+            if (map != null) map.refreshGobsAll();
+        }));
+        wva.addRow(new CheckBox("Show Beehive Radius", val -> {
+            Utils.setprefb("showBeehiverad", Config.showBeehiverad = val);
+            msg("Beehives " + (val ? "on" : "off"), Color.white);
+        }, Config.showBeehiverad), new ColorPreview(Coord.of(16), BEEHIVECOLOR.get(), val -> {
+            BPRadSprite.smatBeehive = new States.ColState(val);
+            if (map != null) map.refreshGobsAll();
+        }));
+        wva.addRow(new CheckBox("Show Mound Bed Radius", val -> {
+            Utils.setprefb("showMoundbedrad", Config.showMoundbedrad = val);
+            msg("Mound Beds " + (val ? "on" : "off"), Color.white);
+        }, Config.showMoundbedrad), new ColorPreview(Coord.of(16), MOUNDBEDCOLOR.get(), val -> {
+            BPRadSprite.smatMoundbed = new States.ColState(val);
+            if (map != null) map.refreshGobsAll();
+        }));
+        wva.addRow(new CheckBox("Show Barter Hand Radius", val -> {
+            Utils.setprefb("showBarterrad", Config.showBarterrad = val);
+            msg("Barter Hands " + (val ? "on" : "off"), Color.white);
+        }, Config.showBarterrad), new ColorPreview(Coord.of(16), BARTERCOLOR.get(), val -> {
+            BPRadSprite.smatBarter = new States.ColState(val);
+            if (map != null) map.refreshGobsAll();
+        }));
+        w.pack();
 
+        adda(w, sz.div(2), 0.5, 0.5);
     }
 
     public void toggleStatusWidget() {

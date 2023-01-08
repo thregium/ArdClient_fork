@@ -185,6 +185,8 @@ public class Config {
     public static boolean showminerad = Utils.getprefb("showminerad", false);
     public static boolean showTroughrad = Utils.getprefb("showTroughrad", false);
     public static boolean showBeehiverad = Utils.getprefb("showBeehiverad", false);
+    public static boolean showMoundbedrad = Utils.getprefb("showMoundbedrad", false);
+    public static boolean showBarterrad = Utils.getprefb("showBarterrad", false);
     public static boolean showweather = Utils.getprefb("showweather", true);
     public static boolean simplecrops = Utils.getprefb("simplecrops", false);
     public static boolean escclosewindows = Utils.getprefb("escclosewindows", true);

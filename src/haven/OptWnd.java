@@ -197,7 +197,7 @@ public class OptWnd extends Window {
         (current = p).show();
     }
 
-    private Widget ColorPreWithLabel(final String text, final IndirSetting<Color> cl) {
+    public static Widget ColorPreWithLabel(final String text, final IndirSetting<Color> cl) {
         final Widget container = new Widget();
         final Label lbl = new Label(text);
         final IndirColorPreview pre = new IndirColorPreview(new Coord(16, 16), cl);
@@ -208,7 +208,7 @@ public class OptWnd extends Window {
         return container;
     }
 
-    private Widget ColorPreWithLabel(final String text, final IndirSetting<Color> cl, final Consumer<Color> cb) {
+    public static Widget ColorPreWithLabel(final String text, final IndirSetting<Color> cl, final Consumer<Color> cb) {
         final Widget container = new Widget();
         final Label lbl = new Label(text);
         final IndirColorPreview pre = new IndirColorPreview(new Coord(16, 16), cl, cb);
@@ -925,28 +925,6 @@ public class OptWnd extends Window {
             }
         });
         appender.addRow(new Label("Cave-in Warning Dust Duration in Minutes"), makeCaveInDropdown());
-        appender.add(new CheckBox("Show animal radius") {
-            {
-                a = Config.showanimalrad;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("showanimalrad", val);
-                Config.showanimalrad = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Double animal radius size.") {
-            {
-                a = Config.doubleradius;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("doubleradius", val);
-                Config.doubleradius = val;
-                a = val;
-            }
-        });
         final Consumer<Color> fog = val -> {
             WaterTile.updateFog();
             if (ui.sess != null && ui.sess.glob != null && ui.sess.glob.map != null) {
@@ -961,47 +939,6 @@ public class OptWnd extends Window {
         appender.add(ColorPreWithLabel("Water Color: ", WATERCOL, fog));
         appender.add(ColorPreWithLabel("Shallow Water Color: ", SHALLOWWATERCOL, fog));
         appender.add(ColorPreWithLabel("All Other Water Color: ", ALLWATERCOL, fog));
-
-        appender.add(ColorPreWithLabel("Beehive radius color: ", BEEHIVECOLOR, val -> {
-            BPRadSprite.smatBeehive = new States.ColState(val);
-            if (ui.gui != null) {
-                if (ui.gui.map != null) {
-//                    MapView.rovlbeehive = new Gob.Overlay(new BPRadSprite(151.0F, -10.0F, BPRadSprite.smatBeehive));
-                    ui.gui.map.refreshGobsAll();
-                }
-            }
-        }));
-        appender.add(ColorPreWithLabel("Trough radius color: ", TROUGHCOLOR, val -> {
-            BPRadSprite.smatTrough = new States.ColState(val);
-            if (ui.gui != null) {
-                if (ui.gui.map != null) {
-//                    MapView.rovltrough = new Gob.Overlay(new BPRadSprite(200.0F, -10.0F, BPRadSprite.smatTrough));
-                    ui.gui.map.refreshGobsAll();
-                }
-            }
-        }));
-        appender.add(ColorPreWithLabel("Dangerous animal radius color: ", ANIMALDANGERCOLOR, val -> {
-            BPRadSprite.smatDanger = new States.ColState(val);
-            if (ui.gui != null) {
-                if (ui.gui.map != null) {
-//                    Gob.animalradius = new Gob.Overlay(new BPRadSprite(100.0F, -10.0F, BPRadSprite.smatDanger));
-//                    Gob.doubleanimalradius = new Gob.Overlay(new BPRadSprite(200.0F, -20.0F, BPRadSprite.smatDanger));
-                    ui.gui.map.refreshGobsAll();
-                }
-            }
-        }));
-        appender.add(ColorPreWithLabel("Mine support radius color: ", SUPPORTDANGERCOLOR, val -> {
-            BPRadSprite.smatSupports = new States.ColState(val);
-            if (ui.gui != null) {
-                if (ui.gui.map != null) {
-//                    MapView.rovlsupport = new Gob.Overlay(new BPRadSprite(100.0F, 0, BPRadSprite.smatSupports));
-//                    MapView.rovlcolumn = new Gob.Overlay(new BPRadSprite(125.0F, 0, BPRadSprite.smatSupports));
-//                    MapView.rovlbeam = new Gob.Overlay(new BPRadSprite(150.0F, 0, BPRadSprite.smatSupports));
-                    ui.gui.map.refreshGobsAll();
-                }
-            }
-        }));
-        appender.addRow(new Label("Mine support radius color (for Vanilla): "), new ColorPreview(new Coord(20, 20), MSRad.getColor1(), MSRad::changeColor1), new ColorPreview(new Coord(20, 20), MSRad.getColor2(), MSRad::changeColor2));
         appender.add(ColorPreWithLabel("Error message text color: ", ERRORTEXTCOLOR));
         appender.add(new CheckBox("Highlight empty/finished drying frames and full/empty tanning tubs. Requires restart.") {
             {

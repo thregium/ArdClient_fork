@@ -36,6 +36,8 @@ public class BPRadSprite extends Sprite {
     public static GLState smatSupports = new ColState(DefSettings.SUPPORTDANGERCOLOR.get());
     public static GLState smatBeehive = new ColState((DefSettings.BEEHIVECOLOR.get()));
     public static GLState smatTrough = new ColState(DefSettings.TROUGHCOLOR.get());
+    public static GLState smatMoundbed = new ColState(DefSettings.MOUNDBEDCOLOR.get());
+    public static GLState smatBarter = new ColState(DefSettings.BARTERCOLOR.get());
     final GLState smat;
     final VertexArray posa;
     final NormalArray nrma;

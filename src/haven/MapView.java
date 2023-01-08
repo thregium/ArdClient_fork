@@ -101,6 +101,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -1046,40 +1047,56 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
         rl.add(gob, GLState.compose(extra, xf, gob.olmod, gob.save));
 
-        Gob.Overlay rovl = null;
-        String olname = null;
-        boolean show = false;
+        AtomicReference<String> olname = new AtomicReference<>();
+        AtomicBoolean show = new AtomicBoolean(false);
 
         if (gob.type == Type.WOODEN_SUPPORT) {
-            rovl = gob.findol(BPRadSprite.getId("rovlsupport"));
-            olname = "rovlsupport";
-            show = Config.showminerad;
+            olname.set("rovlsupport");
+            show.set(Config.showminerad);
         } else if (gob.type == Type.STONE_SUPPORT) {
-            rovl = gob.findol(BPRadSprite.getId("rovlcolumn"));
-            olname = "rovlcolumn";
-            show = Config.showminerad;
+            olname.set("rovlcolumn");
+            show.set(Config.showminerad);
         } else if (gob.type == Type.METAL_SUPPORT) {
-            rovl = gob.findol(BPRadSprite.getId("rovlbeam"));
-            olname = "rovlbeam";
-            show = Config.showminerad;
+            olname.set("rovlbeam");
+            show.set(Config.showminerad);
         }
 
         if (gob.type == Type.TROUGH) {
-            rovl = gob.findol(BPRadSprite.getId("rovltrough"));
-            olname = "rovltrough";
-            show = Config.showTroughrad;
+            olname.set("rovltrough");
+            show.set(Config.showTroughrad);
         } else if (gob.type == Type.BEEHIVE) {
-            rovl = gob.findol(BPRadSprite.getId("rovlbeehive"));
-            olname = "rovlbeehive";
-            show = Config.showBeehiverad;
+            olname.set("rovlbeehive");
+            show.set(Config.showBeehiverad);
+        } else {
+            gob.resname().ifPresent(n -> {
+                switch (n) {
+                    case "gfx/terobjs/barterhand": {
+                        olname.set("rovlbarterhand");
+                        show.set(Config.showBarterrad);
+                        break;
+                    }
+                    case "gfx/terobjs/moundbed": {
+                        olname.set("rovlmoundbed");
+                        show.set(Config.showMoundbedrad);
+                        break;
+                    }
+                }
+            });
         }
 
-        if (show) {
-            if (!gob.ols.contains(rovl) && olname != null)
-                gob.ols.add(createBPRadSprite(gob, olname));
+        boolean fshow = show.get();
+        String folname = olname.get();
+
+        if (fshow) {
+            if (folname != null) {
+                Gob.Overlay rovl = gob.findol(BPRadSprite.getId(folname));
+                if (rovl == null) gob.ols.add(createBPRadSprite(gob, folname));
+            }
         } else {
-            if (rovl != null)
-                gob.ols.remove(rovl);
+            if (folname != null) {
+                Gob.Overlay rovl = gob.findol(BPRadSprite.getId(folname));
+                if (rovl != null) gob.ols.remove(rovl);
+            }
         }
     }
 
