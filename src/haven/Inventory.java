@@ -29,25 +29,22 @@ package haven;
 import haven.purus.pbot.PBotUtils;
 import haven.res.ui.tt.q.qbuff.QBuff;
 import modification.configuration;
-
 import java.awt.Color;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
 
 public class Inventory extends Widget implements DTarget {
     public static final Coord sqsz = UI.scale(new Coord(33, 33));
     public static final Tex invsq/* = Resource.loadtex("gfx/hud/invsq")*/;
     public boolean dropul = true;
     public Coord isz;
+    public boolean[] sqmask = null;
     public static final Comparator<WItem> ITEM_COMPARATOR_ASC = new Comparator<WItem>() {
         @Override
         public int compare(WItem o1, WItem o2) {
@@ -180,6 +177,18 @@ public class Inventory extends Widget implements DTarget {
         if (msg == "sz") {
             isz = (Coord) args[0];
             resize(invsq.sz().add(UI.scale(new Coord(-1, -1))).mul(isz).add(UI.scale(new Coord(1, 1))));
+            sqmask = null;
+        } else if (msg == "mask") {
+            boolean[] nmask;
+            if (args[0] == null) {
+                nmask = null;
+            } else {
+                nmask = new boolean[isz.x * isz.y];
+                byte[] raw = (byte[]) args[0];
+                for (int i = 0; i < isz.x * isz.y; i++)
+                    nmask[i] = (raw[i >> 3] & (1 << (i & 7))) != 0;
+            }
+            this.sqmask = nmask;
         } else if (msg == "mode") {
             dropul = (((Integer) args[0]) == 0);
         } else {

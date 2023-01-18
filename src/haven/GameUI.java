@@ -86,7 +86,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Consumer;
 
-public class GameUI extends ConsoleHost implements Console.Directory {
+public class GameUI extends ConsoleHost implements Console.Directory, UI.MessageWidget {
     public static final Text.Foundry msgfoundry = new Text.Foundry(Text.dfont, Text.cfg.msg);
     private static final int blpw = 142;
     public final String chrid, genus;
@@ -180,6 +180,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
     @RName("gameui")
     public static class $_ implements Factory {
+        @Override
         public Widget create(UI ui, Object[] args) {
             String chrid = (String) args[0];
             int plid = (Integer) args[1];
@@ -207,12 +208,14 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         });
         urpanel = add(new Hidepanel("gui-ur", null, new Coord(1, -1)));
         brpanel = add(new Hidepanel("gui-br", null, new Coord(1, 1)) {
+            @Override
             public void move(double a) {
                 super.move(a);
                 menupanel.move();
             }
         });
         menupanel = add(new Hidepanel("menu", new Indir<Coord>() {
+            @Override
             public Coord get() {
                 return (new Coord(GameUI.this.sz.x, Math.min(brpanel.c.y/* - menupanel.sz.y*/ + 1, GameUI.this.sz.y - menupanel.sz.y)));
             }
@@ -222,6 +225,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         if (Config.lockedmainmenu)
             menupanel.add(new MainMenu(), 0, 0);
         portrait = ulpanel.add(Frame.with(new Avaview(Avaview.dasz, plid, "avacam") {
+            @Override
             public boolean mousedown(Coord c, int button) {
                 return (true);
             }
@@ -292,12 +296,14 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         fixAlarms();
     }
 
+    @Override
     protected void added() {
         ui.gui = this;
         resize(parent.sz);
         ui.cons.out = new java.io.PrintWriter(new java.io.Writer() {
             StringBuilder buf = new StringBuilder();
 
+            @Override
             public void write(char[] src, int off, int len) {
                 List<String> lines = new ArrayList<>();
                 synchronized (this) {
@@ -312,9 +318,11 @@ public class GameUI extends ConsoleHost implements Console.Directory {
                     debuglog.append(ln, Color.WHITE);
             }
 
+            @Override
             public void close() {
             }
 
+            @Override
             public void flush() {
             }
         });
@@ -420,6 +428,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         }
     }
 
+    @Override
     protected void attached() {
         if (configuration.blizzardoverlay) {
             configuration.snowThread = new configuration.SnowThread(ui.sess.glob.oc);
@@ -734,6 +743,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         }
 
 
+        @Override
         public <T extends Widget> T add(T child) {
             super.add(child);
             pack();
@@ -770,6 +780,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             move(cur);
         }
 
+        @Override
         public void presize() {
             move();
         }
@@ -781,6 +792,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             new NormAnim(0.25) {
                 final double st = cur, f = vis ? 0 : 1;
 
+                @Override
                 public void ntick(double a) {
                     if ((a == 1.0) && !vis)
                         hide();
@@ -802,6 +814,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             return (vis);
         }
 
+        @Override
         public void cdestroy(Widget w) {
             parent.cdestroy(w);
         }
@@ -816,6 +829,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             super(sz, cap, cap, false);
         }
 
+        @Override
         public void wdgmsg(Widget sender, String msg, Object... args) {
             if ((sender == this) && msg.equals("close")) {
                 this.hide();
@@ -841,6 +855,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
                     inv = null;
             }
 
+            @Override
             public void draw(GOut g) {
                 if ((tab == null) && (inv != null))
                     g.image(inv, Coord.z);
@@ -848,6 +863,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
                     super.draw(g);
             }
 
+            @Override
             public void click() {
                 if (tab != null) {
                     tabs.showtab(tab);
@@ -874,6 +890,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
         Tabs.Tab ntab(Widget ch, TButton btn) {
             Tabs.Tab tab = add(tabs.new Tab() {
+                @Override
                 public void cresize(Widget ch) {
                     repack();
                 }
@@ -1112,6 +1129,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
     private final List<Runnable> crutchList = Collections.synchronizedList(new ArrayList<>());
 
+    @Override
     public void addchild(Widget child, Object... args) {
         Runnable run = () -> addchild2(child, args);
         if (parent == null) {
@@ -1197,6 +1215,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             fs = add((Fightsess) child, Coord.z);
         } else if (place == "inv") {
             invwnd = new Hidewnd(Coord.z, "Inventory") {
+                @Override
                 public void cresize(Widget ch) {
                     pack();
                 }
@@ -1292,6 +1311,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         }
     }
 
+    @Override
     public void cdestroy(Widget w) {
         if (w instanceof GItem) {
             for (Iterator<DraggedItem> i = hand.iterator(); i.hasNext(); ) {
@@ -1335,6 +1355,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             g.atextstroked((int) (prog * 100) + "%", hgc, 0.5, 2.5, Color.WHITE, Color.BLACK, Text.num12boldFnd);
     }
 
+    @Override
     public void draw(GOut g) {
         super.draw(g);
         if (prog >= 0)
@@ -1398,6 +1419,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
     private double lastwndsave = 0;
 
+    @Override
     public void tick(double dt) {
         super.tick(dt);
         double now = Utils.rtime();
@@ -1463,6 +1485,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         }
     }
 
+    @Override
     public void uimsg(String msg, Object... args) {
         if (msg == "err") {
             error((String) args[0]);
@@ -1612,6 +1635,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         }
     }
 
+    @Override
     public void wdgmsg(Widget sender, String msg, Object... args) {
         //   System.out.println("############");if(!sender.toString().contains("Camera")) System.out.println(sender);System.out.println(msg);for(Object o :args) System.out.println(o);
         if (msg.equals("close")) {
@@ -1690,6 +1714,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             add(new MenuButton2("rbtn-opt", "Options", TOGGLE_OPTIONS), 166, 1);
         }
 
+        @Override
         public void draw(GOut g) {
             g.image(menubg, Coord.z);
             super.draw(g);
@@ -2187,6 +2212,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         msg("Resource info on shift/shift+ctrl is now turned " + (Config.resinfo ? "on" : "off"), Color.WHITE);
     }
 
+    @Override
     public boolean globtype(char key, KeyEvent ev) {
         if (key == ':') {
             entercmd();
@@ -2212,6 +2238,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         return isfocused;
     }
 
+    @Override
     public boolean mousedown(Coord c, int button) {
         return (super.mousedown(c, button));
     }
@@ -2239,6 +2266,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         }
     }
 
+    @Override
     public void resize(Coord sz) {
         this.sz = sz;
         if (map != null)
@@ -2248,6 +2276,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         super.resize(sz);
     }
 
+    @Override
     public void presize() {
         resize(parent.sz);
     }
@@ -2300,6 +2329,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
     private double lasterrsfx = 0;
 
+    @Override
     public void error(String msg) {
         msg(msg, DefSettings.ERRORTEXTCOLOR.get(), new Color(255, 0, 0));
         if (errmsgcb != null)
@@ -2318,6 +2348,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
     private static final String charterMsg = "The name of this charterstone is \"";
 
+    @Override
     public void msg(String msg) {
         /*if (msg.startsWith(charterMsg)) //TravelWnd
             CharterList.addCharter(msg.substring(charterMsg.length(), msg.length() - 2));*/
@@ -2433,6 +2464,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             wdgmsg("act", ad);
         });
         cmdmap.put("chrmap", new Console.Command() {
+            @Override
             public void run(Console cons, String[] args) {
                 Utils.setpref("mapfile/" + chrid, args[1]);
             }
@@ -2459,6 +2491,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         this.itemClickCallback = null;
     }
 
+    @Override
     public Map<String, Console.Command> findcmds() {
         return (cmdmap);
     }

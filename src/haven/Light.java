@@ -26,15 +26,13 @@
 
 package haven;
 
+import static haven.Utils.c2fa;
 import haven.glsl.Phong;
 import haven.glsl.ShaderMacro;
-
 import javax.media.opengl.GL2;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
-
-import static haven.Utils.c2fa;
 
 public class Light implements Rendered {
     public float[] amb, dif, spc;
@@ -305,7 +303,7 @@ public class Light implements Rendered {
     }
 
     @Resource.LayerName("light")
-    public static class Res extends Resource.Layer {
+    public static class Res extends Resource.Layer implements Resource.IDLayer<Integer> {
         public final int id;
         public final Color amb, dif, spc;
         public boolean hatt, hexp;
@@ -396,7 +394,8 @@ public class Light implements Rendered {
             }
         }
 
-        public void init() {
-        }
+        public void init() {}
+
+        public Integer layerid() {return (id);}
     }
 }

@@ -28,16 +28,22 @@ package haven;
 
 import haven.sloth.gui.SessionDisplay;
 import modification.configuration;
-
+import java.awt.Color;
 import java.awt.event.KeyEvent;
 
-public class RootWidget extends ConsoleHost {
+public class RootWidget extends ConsoleHost implements UI.MessageWidget {
     public static final Resource defcurs = Resource.local().loadwait("gfx/hud/curs/arw");
+    public static final Text.Foundry msgfoundry = new Text.Foundry(Text.dfont, 14);
+    public static final Resource errsfx = Resource.local().loadwait("sfx/error");
+    public static final Resource msgsfx = Resource.local().loadwait("sfx/msg");
+    public boolean modtip = false;
     Profile guprof, grprof, ggprof;
     boolean afk = false;
     private char last_gk;
     private long last_gk_time;
     public SessionDisplay sessionDisplay = new SessionDisplay();
+    private Text lastmsg;
+    private double msgtime;
 
     public RootWidget(UI ui, Coord sz) {
         super(ui, new Coord(0, 0), sz);
@@ -49,6 +55,7 @@ public class RootWidget extends ConsoleHost {
         }
     }
 
+    @Override
     public boolean globtype(char key, KeyEvent ev) {
         if (!super.globtype(key, ev)) {
             if (key == '`') {
@@ -78,15 +85,14 @@ public class RootWidget extends ConsoleHost {
         return super.mousedown(c, button);
     }
 
+    @Override
     public void draw(GOut g) {
         super.draw(g);
         drawcmd(g, new Coord(20, sz.y - 20));
     }
 
-    public void error(String msg) {
-    }
-
     public Widget lastfocused;
+
     @Override
     public void tick(double dt) {
         super.tick(dt);
@@ -98,5 +104,75 @@ public class RootWidget extends ConsoleHost {
                 }
             }
         }
+    }
+
+    @Override
+    public void uimsg(String msg, Object... args) {
+        if (msg == "err") {
+            ui.error((String) args[0]);
+        } else if (msg == "msg") {
+            ui.msg((String) args[0]);
+        } else if (msg == "sfx") {
+            int a = 0;
+            Indir<Resource> resid = ui.sess.getres((Integer) args[a++]);
+            double vol = (args.length > a) ? ((Number) args[a++]).doubleValue() : 1.0;
+            double spd = (args.length > a) ? ((Number) args[a++]).doubleValue() : 1.0;
+            ui.sess.glob.loader.defer(() -> {
+                Audio.CS clip = Audio.fromres(resid.get());
+                if (spd != 1.0)
+                    clip = new Audio.Resampler(clip).sp(spd);
+                if (vol != 1.0)
+                    clip = new Audio.VolAdjust(clip, vol);
+                Audio.play(clip);
+            }, null);
+        } else if (msg == "bgm") {
+            int a = 0;
+            Indir<Resource> resid = (args.length > a) ? ui.sess.getres((Integer) args[a++]) : null;
+            boolean loop = (args.length > a) ? ((Number) args[a++]).intValue() != 0 : false;
+            if (Music.enabled) {
+                if (resid == null)
+                    Music.play(null, false);
+                else
+                    Music.play(resid, loop);
+            }
+        } else {
+            super.uimsg(msg, args);
+        }
+    }
+
+    public void msg(String msg, Color color) {
+        lastmsg = msgfoundry.render(msg, color);
+        msgtime = Utils.rtime();
+    }
+
+    private double lasterrsfx = 0;
+
+    @Override
+    public void error(String msg) {
+        msg(msg, new Color(192, 0, 0));
+        double now = Utils.rtime();
+        if (now - lasterrsfx > 0.1) {
+            ui.sfx(errsfx);
+            lasterrsfx = now;
+        }
+    }
+
+    private double lastmsgsfx = 0;
+
+    @Override
+    public void msg(String msg) {
+        msg(msg, Color.WHITE);
+        double now = Utils.rtime();
+        if (now - lastmsgsfx > 0.1) {
+            ui.sfx(msgsfx);
+            lastmsgsfx = now;
+        }
+    }
+
+    @Override
+    public Object tooltip(Coord c, Widget prev) {
+        if (modtip && (ui.modflags() != 0))
+            return (KeyMatch.modname(ui.modflags()));
+        return (super.tooltip(c, prev));
     }
 }

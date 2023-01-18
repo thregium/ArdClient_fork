@@ -37,6 +37,7 @@ import java.util.Map;
 
 public class ActAudio extends GLState.Abstract {
     public static final GLState.Slot<ActAudio> slot = new GLState.Slot<ActAudio>(GLState.Slot.Type.SYS, ActAudio.class);
+    public final Channel aui = new Channel("aui");
     public final Channel pos = new Channel("pos");
     public final Channel amb = new Channel("amb");
     private final Map<Global, Global> global = new HashMap<Global, Global>();

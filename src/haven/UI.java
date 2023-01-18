@@ -566,6 +566,34 @@ public class UI {
         dev.sysLog(dev.serverSender, wdg, id, msg, args);
     }
 
+    public interface MessageWidget {
+        void msg(String msg);
+
+        void error(String msg);
+
+        static MessageWidget find(Widget w) {
+            for (Widget ch = w.child; ch != null; ch = ch.next) {
+                MessageWidget ret = find(ch);
+                if (ret != null)
+                    return (ret);
+            }
+            if (w instanceof MessageWidget) return ((MessageWidget) w);
+            return (null);
+        }
+    }
+
+    public void error(String msg) {
+        MessageWidget h = MessageWidget.find(root);
+        if (h != null)
+            h.error(msg);
+    }
+
+    public void msg(String msg) {
+        MessageWidget h = MessageWidget.find(root);
+        if (h != null)
+            h.msg(msg);
+    }
+
     private void setmods(InputEvent ev) {
         int mod = ev.getModifiersEx();
         Debug.kf1 = modshift = (mod & InputEvent.SHIFT_DOWN_MASK) != 0;
@@ -741,6 +769,14 @@ public class UI {
             cons.out.close();
             cons.out = null;
         }
+    }
+
+    public void sfx(Audio.CS clip) {
+        audio.aui.add(clip);
+    }
+
+    public void sfx(Resource clip) {
+        sfx(Audio.fromres(clip));
     }
 
     public static double scale(double v) {

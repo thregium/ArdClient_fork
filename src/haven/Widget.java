@@ -601,6 +601,14 @@ public class Widget {
         }
     }
 
+    public void dispose() {}
+
+    public void rdispose() {
+        for (Widget ch = child; ch != null; ch = ch.next)
+            ch.rdispose();
+        dispose();
+    }
+
     public void reqdestroy() {
         destroy();
     }
