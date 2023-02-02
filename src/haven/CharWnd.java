@@ -2011,7 +2011,7 @@ public class CharWnd extends Window {
     }
 
     public class QuestList extends Listbox<Quest> {
-        public List<Quest> quests = Collections.synchronizedList(new ArrayList<Quest>());
+        public final List<Quest> quests = Collections.synchronizedList(new ArrayList<Quest>());
         private boolean loading = false;
         private final Comparator<Quest> comp = new Comparator<Quest>() {
             public int compare(Quest a, Quest b) {
