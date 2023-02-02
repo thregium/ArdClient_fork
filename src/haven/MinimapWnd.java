@@ -81,22 +81,26 @@ public class MinimapWnd extends ResizableWnd {
 
             @Override
             public Object tooltip(Coord c, Widget prev) {
-                if (this.locatedAC != null) {
-                    tooltip = Text.render("Located absolute coordinates: " + this.locatedAC.toGridCoordinate());
-                } else if (this.detectedAC != null) {
-                    tooltip = Text.render("Detected login absolute coordinates: " + this.detectedAC.toGridCoordinate());
-                } else {
-                    tooltip = Text.render("Unable to determine your current location.");
-                }
-                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
-                    if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
-                        MappingClient.MapRef mr = MappingClient.getInstance(ui.sess.username).lastMapRef;
-                        if (mr != null) {
-                            tooltip = Text.render("Coordinates: " + mr);
+                try {
+                    if (this.locatedAC != null) {
+                        tooltip = Text.render("Located absolute coordinates: " + this.locatedAC.toGridCoordinate());
+                    } else if (this.detectedAC != null) {
+                        tooltip = Text.render("Detected login absolute coordinates: " + this.detectedAC.toGridCoordinate());
+                    } else {
+                        tooltip = Text.render("Unable to determine your current location.");
+                    }
+                    if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                        if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
+                            MappingClient.MapRef mr = MappingClient.getInstance(ui.sess.username).lastMapRef;
+                            if (mr != null) {
+                                tooltip = Text.render("Coordinates: " + mr);
+                            }
                         }
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                return super.tooltip(c, prev);
+                return (super.tooltip(c, prev));
             }
 
             @Override
@@ -155,23 +159,27 @@ public class MinimapWnd extends ResizableWnd {
 
             @Override
             public Object tooltip(Coord c, Widget prev) {
-                Coord coords = getCurCoords();
-                String oddi = "";
-                String vatsul = "";
-                if (coords != null) {
-                    this.coords = coords;
-                    oddi = String.format("Current location: %d x %d", coords.x, coords.y);
-                } else
-                    oddi = "Location not found";
+                try {
+                    Coord coords = getCurCoords();
+                    String oddi = "";
+                    String vatsul = "";
+                    if (coords != null) {
+                        this.coords = coords;
+                        oddi = String.format("Current location: %d x %d", coords.x, coords.y);
+                    } else
+                        oddi = "Location not found";
 
-                MCache.Grid g = minimap.cur.grid;
-                if (g != null) {
-                    vatsul = String.format("Current grid id: %d", g.id);
-                } else
-                    vatsul = "Grid not found";
-                String addinfo = "Click to open the Odditown map\nShfit+Click to open the Vatsul map";
+                    MCache.Grid g = minimap.cur.grid;
+                    if (g != null) {
+                        vatsul = String.format("Current grid id: %d", g.id);
+                    } else
+                        vatsul = "Grid not found";
+                    String addinfo = "Click to open the Odditown map\nShfit+Click to open the Vatsul map";
 
-                tooltip = RichText.render(oddi + "\n" + vatsul + "\n" + addinfo, 300).tex();
+                    tooltip = RichText.render(oddi + "\n" + vatsul + "\n" + addinfo, 300).tex();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 return (super.tooltip(c, prev));
             }
 
