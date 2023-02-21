@@ -1265,7 +1265,7 @@ public class AreaPicker extends Window implements Runnable {
                     takenSlots += s;
                 }
             }
-            int allSlots = inv.isz.x * inv.isz.y;
+            int allSlots = inv.getMaxSlots();
             slots = allSlots - takenSlots;
 
             if (slots > 0) free = true;

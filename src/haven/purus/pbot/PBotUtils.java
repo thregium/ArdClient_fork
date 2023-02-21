@@ -1275,7 +1275,7 @@ public class PBotUtils {
                 takenSlots += buf.size().x * buf.size().y;
             }
         }
-        int allSlots = ui.gui.maininv.isz.x * ui.gui.maininv.isz.y;
+        int allSlots = ui.gui.maininv.getMaxSlots();
         return allSlots - takenSlots;
     }
 
@@ -1890,7 +1890,7 @@ public class PBotUtils {
                 takenSlots += buf.size().x * buf.size().y;
             }
         }
-        int allSlots = inventory.isz.x * inventory.isz.y;
+        int allSlots = inventory.getMaxSlots();
         return allSlots - takenSlots;
     }
 

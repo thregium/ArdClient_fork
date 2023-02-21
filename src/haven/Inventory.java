@@ -418,12 +418,12 @@ public class Inventory extends Widget implements DTarget {
     }
 
     public int getFreeSpace() {
-        int feespace = isz.x * isz.y;
+        int freespace = getMaxSlots();
         for (Widget wdg = child; wdg != null; wdg = wdg.next) {
             if (wdg instanceof WItem)
-                feespace -= (wdg.sz.x * wdg.sz.y) / (sqsz.x * sqsz.y);
+                freespace -= (wdg.sz.x * wdg.sz.y) / (sqsz.x * sqsz.y);
         }
-        return feespace;
+        return freespace;
     }
 
     // Null if no free slots found
@@ -437,13 +437,15 @@ public class Inventory extends Widget implements DTarget {
                         invTable[item.c.div(sqsz).x + j][item.c.div(sqsz).y + i] = 1;
             }
         }
+        int mo = 0;
         for (int i = 0; i < isz.y; i++) {
             for (int j = 0; j < isz.x; j++) {
+                if ((sqmask != null) && sqmask[mo++]) continue;
                 if (invTable[j][i] == 0)
-                    return new Coord(j, i);
+                    return (new Coord(j, i));
             }
         }
-        return null;
+        return (null);
     }
 
     public List<Coord> getFreeSlots() {
@@ -457,19 +459,32 @@ public class Inventory extends Widget implements DTarget {
                         invTable[item.c.div(sqsz).x + j][item.c.div(sqsz).y + i] = 1;
             }
         }
+        int mo = 0;
         for (int i = 0; i < isz.y; i++) {
             for (int j = 0; j < isz.x; j++) {
-                if (invTable[j][i] == 0)
-                    cordlist.add(new Coord(j, i));
+                if ((sqmask != null) && sqmask[mo++]) continue;
+                if (invTable[j][i] == 0) cordlist.add(new Coord(j, i));
             }
         }
-        return cordlist;
+        return (cordlist);
+    }
+
+    public int getMaxSlots() {
+        Coord c = new Coord();
+        int mo = 0;
+        int max = 0;
+        for (c.y = 0; c.y < isz.y; c.y++) {
+            for (c.x = 0; c.x < isz.x; c.x++) {
+                if (sqmask == null || !sqmask[mo++]) max++;
+            }
+        }
+        return (max);
     }
 
     public boolean drink(int threshold) {
         IMeter.Meter stam = ui.gui.getmeter("stam", 0);
         if (stam == null || stam.a > threshold)
-            return false;
+            return (false);
 
         List<WItem> containers = getItemsPartial("Waterskin", "Waterflask", "Kuksa");
         for (WItem wi : containers) {
@@ -478,11 +493,11 @@ public class Inventory extends Widget implements DTarget {
                 FlowerMenu.setNextSelection("Drink");
                 ui.lcc = wi.rootpos();
                 wi.item.wdgmsg("iact", wi.c, 0);
-                return true;
+                return (true);
             }
         }
 
-        return false;
+        return (false);
     }
 
     public static Coord invsz(Coord sz) {
@@ -659,9 +674,18 @@ public class Inventory extends Widget implements DTarget {
     }
 
     public Coord slotiToCoord(int slot) {
-        int y = slot / isz.x;
-        int x = slot - y * isz.x;
-        return (new Coord(x, y));
+        Coord c = new Coord();
+        int mo = 0;
+        int max = 0;
+        for (c.y = 0; c.y < isz.y; c.y++) {
+            for (c.x = 0; c.x < isz.x; c.x++) {
+                if (sqmask == null || !sqmask[mo++]) {
+                    if (slot == max) return (c);
+                    else max++;
+                }
+            }
+        }
+        return (null);
     }
 
     public class InvItem {
@@ -765,7 +789,18 @@ public class Inventory extends Widget implements DTarget {
         }
 
         public Integer slotToInt(Coord slot) {
-            return (slot.y * isz.x + slot.x);
+            Coord c = new Coord();
+            int mo = 0;
+            int max = 0;
+            for (c.y = 0; c.y < isz.y; c.y++) {
+                for (c.x = 0; c.x < isz.x; c.x++) {
+                    if (sqmask == null || !sqmask[mo++]) {
+                        if (slot.x == c.x && slot.y == c.y) return (max);
+                        else max++;
+                    }
+                }
+            }
+            return (null);
         }
 
         @Override

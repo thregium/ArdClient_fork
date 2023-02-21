@@ -254,7 +254,26 @@ public class PBotInventory {
 
     // Returns a matrix representing the container and items inside, 1 = item in this grid, 0 = free grid
     public boolean[][] containerMatrix() {
-        boolean[][] ret = new boolean[inv.isz.x][inv.isz.y];
+        boolean[][] ret = new boolean[inv.isz.x][];
+        { //matrix size calculating
+            Coord c = new Coord();
+            int mo = 0;
+            int[] xes = new int[inv.isz.y];
+            for (c.y = 0; c.y < inv.isz.y; c.y++) {
+                for (c.x = 0; c.x < inv.isz.x; c.x++) {
+                    if (inv.sqmask == null || !inv.sqmask[mo++]) xes[c.y]++;
+                }
+            }
+            int[] yes = new int[inv.isz.x];
+            for (int y = 0; y < yes.length; y++) {
+                for (int i : xes) {
+                    if (y < i) yes[y]++;
+                }
+            }
+            for (int i = 0; i < ret.length; i++) {
+                ret[i] = new boolean[yes[i]];
+            }
+        }
         for (PBotItem item : getInventoryContents()) {
             int xSize = item.gitem.size().x;
             int ySize = item.gitem.size().y;
@@ -319,7 +338,7 @@ public class PBotInventory {
                 takenSlots += buf.size().x * buf.size().y;
             }
         }
-        int allSlots = inv.isz.x * inv.isz.y;
+        int allSlots = inv.getMaxSlots();
         return allSlots - takenSlots;
     }
 
