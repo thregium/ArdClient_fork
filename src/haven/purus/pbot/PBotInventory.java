@@ -162,14 +162,19 @@ public class PBotInventory {
     }
 
     public Coord freeSpaceForItem(Coord size) {
-        boolean[][] inventoryMatrix = containerMatrix();
-        int[][] d = new int[inventoryMatrix.length][inventoryMatrix[0].length];
+        short[][] inventoryMatrix = containerMatrix();
+        int[][] d = new int[inventoryMatrix.length][];
+        {
+            for (int i = 0; i < d.length; i++) {
+                d[i] = new int[inventoryMatrix[i].length];
+            }
+        }
 
         int sizeX = size.x;
         int sizeY = size.y;
         for (int i = 0; i < inventoryMatrix.length; i++) {
             for (int j = 0; j < inventoryMatrix[i].length; j++) {
-                if (inventoryMatrix[i][j])
+                if (inventoryMatrix[i][j] == 1)
                     d[i][j] = 0;
                 else
                     d[i][j] = (j == 0 ? 1 : d[i][j - 1] + 1);
@@ -196,7 +201,7 @@ public class PBotInventory {
     }
 
     public Coord freeSpaceForItemAlt(Coord size) {
-        boolean[][] inventoryMatrix = containerMatrix();
+        short[][] inventoryMatrix = containerMatrix();
 
         int sizeX = size.x;
         int sizeY = size.y;
@@ -207,7 +212,7 @@ public class PBotInventory {
                 next:
                 for (int y = 0; y < sizeY; y++)
                     for (int x = 0; x < sizeX; x++)
-                        if (row + sizeX - 1 >= inventoryMatrix.length || collumn + sizeY - 1 >= inventoryMatrix[row].length || inventoryMatrix[row + x][collumn + y]) {
+                        if (row + sizeX - 1 >= inventoryMatrix.length || collumn + sizeY - 1 >= inventoryMatrix[row].length || inventoryMatrix[row + x][collumn + y] == 1) {
                             ok = false;
                             break next;
                         }
@@ -225,7 +230,7 @@ public class PBotInventory {
 
     public int itemCountAtFreeSpace(Coord size) {
         int count = 0;
-        boolean[][] inventoryMatrix = containerMatrix();
+        short[][] inventoryMatrix = containerMatrix();
 
         int sizeX = size.x;
         int sizeY = size.y;
@@ -236,7 +241,7 @@ public class PBotInventory {
                 next:
                 for (int y = 0; y < sizeY; y++)
                     for (int x = 0; x < sizeX; x++)
-                        if (row + sizeX - 1 >= inventoryMatrix.length || collumn + sizeY - 1 >= inventoryMatrix[row].length || inventoryMatrix[row + x][collumn + y]) {
+                        if (row + sizeX - 1 >= inventoryMatrix.length || collumn + sizeY - 1 >= inventoryMatrix[row].length || inventoryMatrix[row + x][collumn + y] == 1) {
                             ok = false;
                             break next;
                         }
@@ -244,7 +249,7 @@ public class PBotInventory {
                     count++;
                     for (int x = 0; x < sizeX; x++)
                         for (int y = 0; y < sizeY; y++)
-                            inventoryMatrix[row + x][collumn + y] = true;
+                            inventoryMatrix[row + x][collumn + y] = 1;
                 }
             }
 
@@ -252,28 +257,9 @@ public class PBotInventory {
     }
 
 
-    // Returns a matrix representing the container and items inside, 1 = item in this grid, 0 = free grid
-    public boolean[][] containerMatrix() {
-        boolean[][] ret = new boolean[inv.isz.x][];
-        { //matrix size calculating
-            Coord c = new Coord();
-            int mo = 0;
-            int[] xes = new int[inv.isz.y];
-            for (c.y = 0; c.y < inv.isz.y; c.y++) {
-                for (c.x = 0; c.x < inv.isz.x; c.x++) {
-                    if (inv.sqmask == null || !inv.sqmask[mo++]) xes[c.y]++;
-                }
-            }
-            int[] yes = new int[inv.isz.x];
-            for (int y = 0; y < yes.length; y++) {
-                for (int i : xes) {
-                    if (y < i) yes[y]++;
-                }
-            }
-            for (int i = 0; i < ret.length; i++) {
-                ret[i] = new boolean[yes[i]];
-            }
-        }
+    // Returns a matrix representing the container and items inside, 1 = item in this grid, 0 = free grid, -1 = invalid
+    public short[][] containerMatrix() {
+        short[][] ret = new short[inv.isz.x][inv.isz.y];
         for (PBotItem item : getInventoryContents()) {
             int xSize = item.gitem.size().x;
             int ySize = item.gitem.size().y;
@@ -282,15 +268,21 @@ public class PBotInventory {
 
             for (int i = 0; i < xSize; i++) {
                 for (int j = 0; j < ySize; j++) {
-                    ret[i + xLoc][j + yLoc] = true;
+                    ret[i + xLoc][j + yLoc] = 1;
                 }
+            }
+        }
+        int mo = 0;
+        for (int i = 0; i < inv.isz.y; i++) {
+            for (int j = 0; j < inv.isz.x; j++) {
+                if ((inv.sqmask != null) && inv.sqmask[mo++]) ret[j][i] = -1;
             }
         }
         return (ret);
     }
 
     public boolean isFreeSlot(Coord coord) {
-        return (!containerMatrix()[coord.x][coord.y]);
+        return (containerMatrix()[coord.x][coord.y] == 0);
     }
 
     /**
