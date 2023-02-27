@@ -168,7 +168,7 @@ public class PBotInventory {
         int sizeX = size.x;
         int sizeY = size.y;
         for (int i = 0; i < inventoryMatrix.length; i++) {
-            for (int j = 0; j < inventoryMatrix[0].length; j++) {
+            for (int j = 0; j < inventoryMatrix[i].length; j++) {
                 if (inventoryMatrix[i][j])
                     d[i][j] = 0;
                 else
