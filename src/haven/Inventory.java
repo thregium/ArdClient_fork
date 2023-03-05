@@ -113,13 +113,14 @@ public class Inventory extends Widget implements DTarget {
     public void draw(GOut g) {
         Coord c = new Coord();
         int mo = 0;
+        int cell = 0;
         for (c.y = 0; c.y < isz.y; c.y++) {
             for (c.x = 0; c.x < isz.x; c.x++) {
                 if ((sqmask != null) && sqmask[mo++])
                     continue;
                 g.image(invsq, c.mul(sqsz));
                 if (configuration.showinvnumber)
-                    g.aimage(cached.computeIfAbsent(c.y * isz.x + c.x + 1 + "", s -> Text.render(s, new Color(255, 255, 255, 100)).tex()), c.mul(sqsz).add(invsq.sz().div(2)), 0.5, 0.5);
+                    g.aimage(cached.computeIfAbsent(Integer.toString(++cell), s -> Text.render(s, new Color(255, 255, 255, 100)).tex()), c.mul(sqsz).add(invsq.sz().div(2)), 0.5, 0.5);
             }
         }
         super.draw(g);
