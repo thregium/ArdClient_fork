@@ -1274,7 +1274,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             if (configuration.showbeehivestatus && type == Type.BEEHIVE) {
                 int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
 
-                if (stage == 5 || stage == 6 || stage == 7 || stage == 15)
+                if (stage == 5 || stage == 6 || stage == 7 || stage == 9 || stage == 15)
                     rl.prepc(cRackFull);
             }
 
