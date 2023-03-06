@@ -116,13 +116,13 @@ public class WItem extends Widget implements DTarget2 {
 
     public class LongTip extends ItemTip {
         public LongTip(List<ItemInfo> info) {
-            super(info, ItemInfo.longtip(info));
+            super(info, shiftTooltip(info, ItemInfo.longtip(info)));
         }
     }
 
     public class FullTip extends ItemTip {
         public FullTip(List<ItemInfo> info) {
-            super(info, shiftTooltip(info, ItemInfo.longtip(info)));
+            super(info, ItemInfo.longtip(info));
         }
     }
 
