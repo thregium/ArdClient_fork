@@ -202,6 +202,8 @@ public class MenuGrid extends Widget {
         }
 
         private static final OwnerContext.ClassResolver<PagButton> ctxr = new OwnerContext.ClassResolver<PagButton>()
+                .add(PagButton.class, p -> p)
+                .add(MenuGrid.class, p -> p.pag.scm)
                 .add(Glob.class, p -> p.pag.scm.ui.sess.glob)
                 .add(Session.class, p -> p.pag.scm.ui.sess);
 

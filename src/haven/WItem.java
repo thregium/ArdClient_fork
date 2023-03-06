@@ -32,15 +32,14 @@ import haven.res.ui.tt.Wear;
 import haven.res.ui.tt.q.qbuff.QBuff;
 import haven.resutil.Curiosity;
 import haven.resutil.FoodInfo;
-import modification.configuration;
-
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import modification.configuration;
+
 
 import static haven.Inventory.sqsz;
 import static haven.Text.num10Fnd;
@@ -50,6 +49,9 @@ public class WItem extends Widget implements DTarget2 {
     public static final Resource missing = Resource.local().loadwait("gfx/invobjs/missing");
     public static final Tex lockt = Resource.loadtex("custom/inv/locked");
     public GItem item;
+    public Contents contents;
+    public Window contentswnd;
+    private boolean hovering = false;
     public static final Color famountclr = new Color(24, 116, 205);
 
     private static Color qualitybg() {
@@ -86,42 +88,12 @@ public class WItem extends Widget implements DTarget2 {
         spr.draw(g);
     }
 
-    public static BufferedImage shorttip(List<ItemInfo> info) {
-        synchronized (Collections.unmodifiableList(info)) {
-            return (ItemInfo.shorttip(info));
-        }
-    }
-
-    public static BufferedImage longtip(GItem item, List<ItemInfo> info) {
-        synchronized (Collections.unmodifiableList(info)) {
-            BufferedImage img = ItemInfo.longtip(info);
-            if (img == null) {
-                img = ItemInfo.shorttip(info);
-            } else {
-                if (info.stream().anyMatch(i -> i instanceof Curiosity || i.getClass().toString().contains("ISlots") || i instanceof FoodInfo)) {
-                    UI ui = item.glob().ui.get();
-                    if (ui != null && ui.modflags() != UI.MOD_SHIFT) {
-                        img = ItemInfo.catimgs_center(5, img, RichText.render("[Shift for details]", new Color(150, 150, 150)).img);
-                    }
-                }
-            }
-            Resource.Pagina pg = item.res.get().layer(Resource.pagina);
-            if (pg != null)
-                img = ItemInfo.catimgs(0, img, RichText.render("\n" + pg.text, 200).img);
-            return (img);
-        }
-    }
-
-    public BufferedImage longtip(List<ItemInfo> info) {
-        synchronized (Collections.unmodifiableList(info)) {
-            return (longtip(item, info));
-        }
-    }
-
     public class ItemTip implements Indir<Tex>, ItemInfo.InfoTip {
+        private final List<ItemInfo> info;
         private final TexI tex;
 
-        public ItemTip(BufferedImage img) {
+        public ItemTip(List<ItemInfo> info, BufferedImage img) {
+            this.info = info;
             if (img == null)
                 throw (new Loading());
             tex = new TexI(img);
@@ -131,7 +103,7 @@ public class WItem extends Widget implements DTarget2 {
             return (item);
         }
 
-        public List<ItemInfo> info() {return(item.info());}
+        public List<ItemInfo> info() {return (info);}
 
         public Tex get() {
             return (tex);
@@ -139,15 +111,26 @@ public class WItem extends Widget implements DTarget2 {
     }
 
     public class ShortTip extends ItemTip {
-        public ShortTip(List<ItemInfo> info) {
-            super(shorttip(info));
-        }
+        public ShortTip(List<ItemInfo> info) {super(info, ItemInfo.shorttip(info));}
     }
 
     public class LongTip extends ItemTip {
         public LongTip(List<ItemInfo> info) {
-            super(longtip(info));
+            super(info, ItemInfo.longtip(info));
         }
+    }
+
+    public class FullTip extends ItemTip {
+        public FullTip(List<ItemInfo> info) {
+            super(info, shiftTooltip(info, ItemInfo.longtip(info)));
+        }
+    }
+
+    private static BufferedImage shiftTooltip(List<ItemInfo> info, BufferedImage img) {
+        if (info.stream().anyMatch(i -> i instanceof Curiosity || i.getClass().toString().contains("ISlots") || i instanceof FoodInfo)) {
+            img = ItemInfo.catimgs_center(5, img, RichText.render("[Shift for details]", new Color(150, 150, 150)).img);
+        }
+        return (img);
     }
 
     public double hoverstart;
@@ -181,7 +164,7 @@ public class WItem extends Widget implements DTarget2 {
             } else {
                 if (ui.modflags() == UI.MOD_SHIFT) {
                     if (fulltip == null)
-                        fulltip = new LongTip(info);
+                        fulltip = new FullTip(info);
                     return (fulltip);
                 } else {
                     if (longtip == null)
@@ -218,18 +201,25 @@ public class WItem extends Widget implements DTarget2 {
     }
 
     public final AttrCache<Color> olcol = new AttrCache<>(this::info, info -> {
-        Color ret = null;
-        synchronized (info) {
-            for (ItemInfo inf : info) {
-                if (inf instanceof GItem.ColorInfo) {
-                    Color c = ((GItem.ColorInfo) inf).olcol();
-                    if (c != null)
-                        ret = (ret == null) ? c : Utils.preblend(ret, c);
-                }
-            }
+        ArrayList<GItem.ColorInfo> ols = new ArrayList<>();
+        for (ItemInfo inf : info) {
+            if (inf instanceof GItem.ColorInfo)
+                ols.add((GItem.ColorInfo) inf);
         }
-        Color fret = ret;
-        return (() -> fret);
+        if (ols.size() == 0)
+            return (() -> null);
+        if (ols.size() == 1)
+            return (ols.get(0)::olcol);
+        ols.trimToSize();
+        return (() -> {
+            Color ret = null;
+            for (GItem.ColorInfo ci : ols) {
+                Color c = ci.olcol();
+                if (c != null)
+                    ret = (ret == null) ? c : Utils.preblend(ret, c);
+            }
+            return (ret);
+        });
     });
 
     public final AttrCache<GItem.InfoOverlay<?>[]> itemols = new AttrCache<>(this::info, info -> {
@@ -281,6 +271,12 @@ public class WItem extends Widget implements DTarget2 {
         return !qualityList.isEmpty() ? qualityList : null;
     }));
 
+    private Widget contparent() {
+        /* XXX: This is a bit weird, but I'm not sure what the alternative is... */
+        Widget cont = getparent(GameUI.class);
+        return ((cont == null) ? cont = ui.root : cont);
+    }
+
     public final AttrCache<Tex> heurnum = new AttrCache<>(this::info, AttrCache.cache(info -> {
         String num = ItemInfo.getCount(info);
         if (num == null) return null;
@@ -313,6 +309,7 @@ public class WItem extends Widget implements DTarget2 {
 
 
     private GSprite lspr = null;
+    private Widget lcont = null;
 
     public void tick(double dt) {
         /* XXX: This is ugly and there should be a better way to
@@ -328,6 +325,43 @@ public class WItem extends Widget implements DTarget2 {
             resize(sz);
             lspr = spr;
         }
+        if (lcont != item.contents) {
+            if ((item.contents != null) && (item.contentsid != null) && (contents == null) && (contentswnd == null)) {
+                Coord c = Utils.getprefc(String.format("cont-wndc/%s", item.contentsid), null);
+                if (c != null) {
+                    item.contents.unlink();
+                    contentswnd = contparent().add(new ContentsWindow(this, item.contents), c);
+                }
+            }
+            lcont = item.contents;
+        }
+        if (hovering) {
+            if (contents == null) {
+                if ((item.contents != null) && (contentswnd == null)) {
+                    Widget cont = contparent();
+                    ckparent:
+                    for (Widget prev : cont.children()) {
+                        if (prev instanceof Contents) {
+                            for (Widget p = parent; p != null; p = p.parent) {
+                                if (p == prev)
+                                    break ckparent;
+                                if (p instanceof Contents)
+                                    break;
+                            }
+                            return;
+                        }
+                    }
+                    item.contents.unlink();
+                    contents = cont.add(new Contents(this, item.contents), parentpos(cont, sz.sub(5, 5).sub(Contents.hovermarg)));
+                }
+            }
+        } else {
+            if ((contents != null) && !contents.hovering && !contents.hasmore()) {
+                contents.reqdestroy();
+                contents = null;
+            }
+        }
+        hovering = false;
     }
 
     public void draw(GOut g) {
@@ -442,7 +476,7 @@ public class WItem extends Widget implements DTarget2 {
                     item.wdgmsg("transfer", c);
                 } else if (ui.modmeta)
                     wdgmsg("transfer-identical", this.item);
-                 else if (ui.modctrl) {
+                else if (ui.modctrl) {
                     if (ui.modshift)
                         item.wdgmsg("transfer", c, -1);
                     else {
@@ -495,6 +529,14 @@ public class WItem extends Widget implements DTarget2 {
         return (true);
     }
 
+    public boolean mousehover(Coord c) {
+        if (item.contents != null) {
+            hovering = true;
+            return (true);
+        }
+        return (super.mousehover(c));
+    }
+
     public boolean drop(WItem target, Coord cc, Coord ul) {
         return (false);
     }
@@ -504,6 +546,18 @@ public class WItem extends Widget implements DTarget2 {
         super.reqdestroy();
         if (destroycb != null)
             destroycb.notifyDestroy();
+    }
+
+    public void destroy() {
+        if (contents != null) {
+            contents.reqdestroy();
+            contents = null;
+        }
+        if (contentswnd != null) {
+            contentswnd.reqdestroy();
+            contentswnd = null;
+        }
+        super.destroy();
     }
 
     public void registerDestroyCallback(WItemDestroyCallback cb) {
@@ -534,5 +588,178 @@ public class WItem extends Widget implements DTarget2 {
 //        } else {
 //            return new Coord(1, 1);
 //        }
+    }
+
+    public static class Contents extends Widget {
+        public static final Coord hovermarg = UI.scale(8, 8);
+        public static final Tex bg = Window.bg;
+        public static final IBox obox = Window.wbox;
+        public final WItem cont;
+        public final Widget inv;
+        private boolean invdest, hovering;
+        private UI.Grab dm = null;
+        private Coord doff;
+
+        public Contents(WItem cont, Widget inv) {
+            z(90);
+            this.cont = cont;
+            /* XXX? This whole movement of the inv widget between
+             * various parents is kind of weird, but it's not
+             * obviously incorrect either. A proxy widget was tried,
+             * but that was even worse, due to rootpos and similar
+             * things being unavoidable wrong. */
+            this.inv = add(inv, hovermarg.add(obox.ctloff()));
+            this.tick(0);
+        }
+
+        public void draw(GOut g) {
+            Coord bgc = new Coord();
+            Coord ctl = hovermarg.add(obox.btloff());
+            Coord cbr = sz.sub(obox.cisz()).add(ctl);
+            for (bgc.y = ctl.y; bgc.y < cbr.y; bgc.y += bg.sz().y) {
+                for (bgc.x = ctl.x; bgc.x < cbr.x; bgc.x += bg.sz().x)
+                    g.image(bg, bgc, ctl, cbr);
+            }
+            obox.draw(g, hovermarg, sz.sub(hovermarg));
+            super.draw(g);
+        }
+
+        public void tick(double dt) {
+            super.tick(dt);
+            resize(inv.c.add(inv.sz).add(obox.btloff()));
+            hovering = false;
+        }
+
+        public void destroy() {
+            if (!invdest) {
+                inv.unlink();
+                cont.item.add(inv);
+            }
+            super.destroy();
+        }
+
+        public boolean hasmore() {
+            for (WItem item : children(WItem.class)) {
+                if (item.contents != null)
+                    return (true);
+            }
+            return (false);
+        }
+
+        public void cdestroy(Widget w) {
+            super.cdestroy(w);
+            if (w == inv) {
+                cont.item.cdestroy(w);
+                invdest = true;
+                this.destroy();
+                cont.contents = null;
+            }
+        }
+
+        public boolean mousedown(Coord c, int btn) {
+            if (super.mousedown(c, btn))
+                return (true);
+            if (btn == 1) {
+                dm = ui.grabmouse(this);
+                doff = c;
+                return (true);
+            }
+            return (false);
+        }
+
+        public boolean mouseup(Coord c, int btn) {
+            if ((dm != null) && (btn == 1)) {
+                dm.remove();
+                dm = null;
+                return (true);
+            }
+            return (super.mouseup(c, btn));
+        }
+
+        public void mousemove(Coord c) {
+            if (dm != null) {
+                if (c.dist(doff) > 10) {
+                    dm.remove();
+                    dm = null;
+                    Coord off = inv.c;
+                    inv.unlink();
+                    ContentsWindow wnd = new ContentsWindow(cont, inv);
+                    off = off.sub(wnd.xlate(wnd.inv.c, true));
+                    cont.contentswnd = parent.add(wnd, this.c.add(off));
+                    wnd.drag(doff.sub(off));
+                    invdest = true;
+                    destroy();
+                    cont.contents = null;
+                }
+            } else {
+                super.mousemove(c);
+            }
+        }
+
+        public boolean mousehover(Coord c) {
+            super.mousehover(c);
+            hovering = true;
+            return (true);
+        }
+    }
+
+    public static class ContentsWindow extends Window {
+        public final WItem cont;
+        public final Widget inv;
+        private boolean invdest;
+        private Coord psz = null;
+        private Object id;
+
+        public ContentsWindow(WItem cont, Widget inv) {
+            super(Coord.z, cont.item.contentsnm);
+            this.cont = cont;
+            this.inv = add(inv, Coord.z);
+            this.id = cont.item.contentsid;
+            this.tick(0);
+        }
+
+        private Coord lc = null;
+
+        public void tick(double dt) {
+            if (cont.item.contents != inv) {
+                destroy();
+                cont.contentswnd = null;
+                return;
+            }
+            super.tick(dt);
+            if (!Utils.eq(inv.sz, psz))
+                resize(inv.c.add(psz = inv.sz));
+            if (!Utils.eq(lc, this.c) && (cont.item.contentsid != null))
+                Utils.setprefc(String.format("cont-wndc/%s", cont.item.contentsid), lc = this.c);
+        }
+
+        public void wdgmsg(Widget sender, String msg, Object... args) {
+            if ((sender == this) && (msg == "close")) {
+                reqdestroy();
+                cont.contentswnd = null;
+                if (cont.item.contentsid != null)
+                    Utils.setprefc(String.format("cont-wndc/%s", cont.item.contentsid), null);
+            } else {
+                super.wdgmsg(sender, msg, args);
+            }
+        }
+
+        public void destroy() {
+            if (!invdest) {
+                inv.unlink();
+                cont.item.add(inv);
+            }
+            super.destroy();
+        }
+
+        public void cdestroy(Widget w) {
+            super.cdestroy(w);
+            if (w == inv) {
+                cont.item.cdestroy(w);
+                invdest = true;
+                this.destroy();
+                cont.contentswnd = null;
+            }
+        }
     }
 }

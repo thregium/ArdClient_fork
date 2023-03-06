@@ -27,8 +27,6 @@
 package haven;
 
 import haven.purus.pbot.PBotUtils;
-import modification.configuration;
-
 import java.awt.Color;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -36,8 +34,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.AbstractSequentialList;
 import java.util.AbstractSet;
 import java.util.ArrayList;
@@ -52,6 +48,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
+import modification.configuration;
+
 
 import static haven.sloth.gui.MovableWidget.VISIBLE_PER;
 
@@ -609,6 +607,18 @@ public class Widget {
         dispose();
     }
 
+    public void remove() {
+        if (canfocus)
+            setcanfocus(false);
+        if (parent != null) {
+            unlink();
+            parent.cdestroy(this);
+            parent = null;
+        }
+        if (ui != null)
+            ui.removed(this);
+    }
+
     public void reqdestroy() {
         destroy();
     }
@@ -616,11 +626,8 @@ public class Widget {
     public void destroy() {
         for (Widget wdg = child; wdg != null; wdg = wdg.next)
             wdg.reqdestroy();
-        if (canfocus)
-            setcanfocus(false);
-        unlink();
-        if (parent != null)
-            parent.cdestroy(this);
+        remove();
+        rdispose();
     }
 
     public void cdestroy(Widget w) {
@@ -829,11 +836,13 @@ public class Widget {
                 Widget finalWdg = wdg;
                 if (errorWdgs.stream().noneMatch(w -> w.errWdg.equals(finalWdg))) {
                     errorWdgs.add(new ErrorWidget(finalWdg, strErr));
-                    if (ui != null) PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
+                    if (ui != null)
+                        PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
                     if (ui != null && ui.cons != null) e.printStackTrace(ui.cons.out);
                     else e.printStackTrace(System.err);
                 } else if (errorWdgs.stream().anyMatch(w -> w.errWdg.equals(finalWdg) && w.repeat())) {
-                    if (ui != null) PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
+                    if (ui != null)
+                        PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
                     if (ui != null && ui.cons != null) e.printStackTrace(ui.cons.out);
                     else e.printStackTrace(System.err);
                 }
@@ -868,11 +877,13 @@ public class Widget {
                 Widget finalWdg = wdg;
                 if (errorWdgs.stream().noneMatch(w -> w.errWdg.equals(finalWdg))) {
                     errorWdgs.add(new ErrorWidget(finalWdg, strErr));
-                    if (ui != null) PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
+                    if (ui != null)
+                        PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
                     if (ui != null && ui.cons != null) e.printStackTrace(ui.cons.out);
                     else e.printStackTrace(System.err);
                 } else if (errorWdgs.stream().anyMatch(w -> w.errWdg.equals(finalWdg) && w.repeat())) {
-                    if (ui != null) PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
+                    if (ui != null)
+                        PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
                     if (ui != null && ui.cons != null) e.printStackTrace(ui.cons.out);
                     else e.printStackTrace(System.err);
                 }
@@ -948,6 +959,17 @@ public class Widget {
             Coord cc = xlate(wdg.c, true);
             wdg.mousemove(c.add(cc.inv()));
         }
+    }
+
+    public boolean mousehover(Coord c) {
+        for (Widget wdg = lchild; wdg != null; wdg = wdg.prev) {
+            if (!wdg.visible)
+                continue;
+            Coord cc = xlate(wdg.c, true);
+            if (c.isect(cc, wdg.sz) && wdg.mousehover(c.add(cc.inv())))
+                return (true);
+        }
+        return (false);
     }
 
     private static final Map<Integer, Integer> gkeys = Utils.<Integer, Integer>map().
@@ -1127,6 +1149,8 @@ public class Widget {
     }
 
     public void resize(Coord sz) {
+        if (Utils.eq(this.sz, sz))
+            return;
         this.oldsz = this.sz != null ? this.sz : sz;
         this.sz = sz;
         for (Widget ch = child; ch != null; ch = ch.next)

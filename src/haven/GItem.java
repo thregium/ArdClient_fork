@@ -26,13 +26,11 @@
 
 package haven;
 
-import static haven.Text.num10Fnd;
-import static haven.Text.num12boldFnd;
 import haven.purus.pbot.PBotUtils;
 import haven.res.ui.tt.q.qbuff.QBuff;
+import haven.resutil.Curiosity;
+import haven.resutil.FoodInfo;
 import integrations.food.FoodService;
-import modification.configuration;
-import modification.dev;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -41,6 +39,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import modification.configuration;
+import modification.dev;
+
+
+import static haven.Text.num10Fnd;
+import static haven.Text.num12boldFnd;
 
 public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owner {
     public Indir<Resource> res;
@@ -49,6 +53,9 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     public MessageBuf sdt;
     public int meter = 0;
     public int num = -1;
+    public Widget contents = null;
+    public String contentsnm = null;
+    public Object contentsid = null;
     private GSprite spr;
     private ItemInfo.Raw rawinfo;
     public List<ItemInfo> info = Collections.emptyList();
@@ -189,6 +196,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     }
 
     private static final OwnerContext.ClassResolver<GItem> ctxr = new OwnerContext.ClassResolver<GItem>()
+            .add(GItem.class, wdg -> wdg)
             .add(Glob.class, wdg -> wdg.ui.sess.glob)
             .add(Session.class, wdg -> wdg.ui.sess);
 
@@ -275,9 +283,32 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         }
     }
 
+    public static BufferedImage longtip(GItem item, List<ItemInfo> info) {
+        synchronized (Collections.unmodifiableList(info)) {
+            BufferedImage img = ItemInfo.longtip(info);
+            if (img == null) {
+                img = ItemInfo.shorttip(info);
+            } else {
+                if (info.stream().anyMatch(i -> i instanceof Curiosity || i.getClass().toString().contains("ISlots") || i instanceof FoodInfo)) {
+                    UI ui = item.glob().ui.get();
+                    if (ui != null && ui.modflags() != UI.MOD_SHIFT) {
+                        img = ItemInfo.catimgs_center(5, img, RichText.render("[Shift for details]", new Color(150, 150, 150)).img);
+                    }
+                }
+            }
+            Resource.Pagina pg = item.res.get().layer(Resource.pagina);
+            if (pg != null)
+                img = ItemInfo.catimgs(0, img, RichText.render("\n" + pg.text, 200).img);
+            return (img);
+        }
+    }
+
     public List<ItemInfo> info() {
         if (info == null) {
             info = ItemInfo.buildinfo(this, rawinfo);
+            Resource.Pagina pg = res.get().layer(Resource.pagina);
+            if (pg != null)
+                info.add(new ItemInfo.Pagina(this, pg.text));
             try {
                 // getres() can throw Loading, ignore it
                 FoodService.checkFood(info, getres());
@@ -369,6 +400,27 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         } else if (name == "meter") {
             meter = (int) ((Number) args[0]).doubleValue();
             metertex = Text.renderstroked(String.format("%d%%", meter), Color.WHITE, Color.BLACK, num10Fnd).tex();
+        }
+    }
+
+    public void addchild(Widget child, Object... args) {
+        /* XXX: Update this to use a checkable args[0] once a
+         * reasonable majority of clients can be expected to not crash
+         * on that. */
+        if (true || ((String) args[0]).equals("contents")) {
+            contents = add(child);
+            contentsnm = (String) args[1];
+            contentsid = null;
+            if (args.length > 2)
+                contentsid = args[2];
+        }
+    }
+
+    public void cdestroy(Widget w) {
+        super.cdestroy(w);
+        if (w == contents) {
+            contents = null;
+            contentsid = null;
         }
     }
 

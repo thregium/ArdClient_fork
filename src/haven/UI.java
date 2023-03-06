@@ -146,12 +146,22 @@ public class UI {
         }
     }
 
-    @SuppressWarnings("serial")
     public static class UIException extends RuntimeException {
         public String mname;
         public Object[] args;
 
         public UIException(String message, String mname, Object... args) {
+            super(message);
+            this.mname = mname;
+            this.args = args;
+        }
+    }
+
+    public static class UIWarning extends Warning {
+        public String mname;
+        public Object[] args;
+
+        public UIWarning(String message, String mname, Object... args) {
             super(message);
             this.mname = mname;
             this.args = args;
@@ -491,6 +501,11 @@ public class UI {
         }
     }
 
+    public void removed(Widget wdg) {
+        mousegrab.removeIf(g -> g.wdg.hasparent(wdg));
+        keygrab.removeIf(g -> g.wdg.hasparent(wdg));
+    }
+
     public void destroy(Widget wdg) {
         mousegrab.removeIf(g -> g.wdg.hasparent(wdg));
         keygrab.removeIf(g -> g.wdg.hasparent(wdg));
@@ -713,6 +728,10 @@ public class UI {
         setmods(ev);
         mc = c;
         root.mousemove(c);
+    }
+
+    public void mousehover(Coord c) {
+	    root.mousehover(c);
     }
 
     public void setmousepos(Coord c) {

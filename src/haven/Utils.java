@@ -30,9 +30,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import haven.sloth.util.ObservableMap;
-import modification.configuration;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.RenderingHints;
@@ -95,6 +92,9 @@ import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.prefs.Preferences;
+import modification.configuration;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class Utils {
     public static final java.nio.charset.Charset utf8 = java.nio.charset.Charset.forName("UTF-8");
@@ -808,7 +808,8 @@ public class Utils {
 
     public static void setprefc(String prefname, Coord val) {
         try {
-            prefs().put(prefname, val.x + "x" + val.y);
+            String enc = (val == null) ? "" : val.x + "x" + val.y;
+            prefs().put(prefname, enc);
         } catch (SecurityException e) {
         }
     }
@@ -1107,6 +1108,12 @@ public class Utils {
         buf[0] = x * f;
         buf[1] = y * f;
         buf[2] = z * f;
+    }
+
+    public static Coord3f oct2uvec(float x, float y) {
+        float[] buf = new float[3];
+        oct2uvec(buf, x, y);
+        return (Coord3f.of(buf[0], buf[1], buf[2]));
     }
 
     static char num2hex(int num) {
@@ -1814,16 +1821,16 @@ public class Utils {
 
     /*
     public static ByteBuffer wbbuf(int n) {
-	return(mkbbuf(n));
+    return(mkbbuf(n));
     }
     public static IntBuffer wibuf(int n) {
-	return(mkibuf(n));
+    return(mkibuf(n));
     }
     public static FloatBuffer wfbuf(int n) {
-	return(mkfbuf(n));
+    return(mkfbuf(n));
     }
     public static ShortBuffer wsbuf(int n) {
-	return(mksbuf(n));
+    return(mksbuf(n));
     }
     */
     public static ByteBuffer wbbuf(int n) {

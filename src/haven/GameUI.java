@@ -26,19 +26,6 @@
 
 package haven;
 
-import static haven.Action.TOGGLE_CHARACTER;
-import static haven.Action.TOGGLE_EQUIPMENT;
-import static haven.Action.TOGGLE_INVENTORY;
-import static haven.Action.TOGGLE_KIN_LIST;
-import static haven.Action.TOGGLE_OPTIONS;
-import static haven.Action.TOGGLE_SEARCH;
-import static haven.DefSettings.ANIMALDANGERCOLOR;
-import static haven.DefSettings.BARTERCOLOR;
-import static haven.DefSettings.BEEHIVECOLOR;
-import static haven.DefSettings.MOUNDBEDCOLOR;
-import static haven.DefSettings.SUPPORTDANGERCOLOR;
-import static haven.DefSettings.TROUGHCOLOR;
-import static haven.KeyBinder.KeyBind;
 import haven.automation.Discord;
 import haven.automation.ErrorSysMsgCallback;
 import haven.automation.PickForageable;
@@ -66,9 +53,6 @@ import haven.sloth.gui.Timer.TimersWnd;
 import haven.sloth.gui.chr.SkillnCredoWnd;
 import haven.sloth.gui.livestock.LivestockManager;
 import haven.sloth.gui.script.ScriptManager;
-import modification.configuration;
-import modification.dev;
-import modification.newQuickSlotsWdg;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.image.WritableRaster;
@@ -85,6 +69,24 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Consumer;
+import modification.configuration;
+import modification.dev;
+import modification.newQuickSlotsWdg;
+
+
+import static haven.Action.TOGGLE_CHARACTER;
+import static haven.Action.TOGGLE_EQUIPMENT;
+import static haven.Action.TOGGLE_INVENTORY;
+import static haven.Action.TOGGLE_KIN_LIST;
+import static haven.Action.TOGGLE_OPTIONS;
+import static haven.Action.TOGGLE_SEARCH;
+import static haven.DefSettings.ANIMALDANGERCOLOR;
+import static haven.DefSettings.BARTERCOLOR;
+import static haven.DefSettings.BEEHIVECOLOR;
+import static haven.DefSettings.MOUNDBEDCOLOR;
+import static haven.DefSettings.SUPPORTDANGERCOLOR;
+import static haven.DefSettings.TROUGHCOLOR;
+import static haven.KeyBinder.KeyBind;
 
 public class GameUI extends ConsoleHost implements Console.Directory, UI.MessageWidget {
     public static final Text.Foundry msgfoundry = new Text.Foundry(Text.dfont, Text.cfg.msg);
@@ -251,10 +253,14 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
                     c.x = umpanel.c.x - 360;
                 if (Config.showservertime) {
                     Tex mtime = ui.sess.glob.mservertimetex.get().b;
-                    Tex ltime = ui.sess.glob.lservertimetex.get().b; ;
-                    Tex rtime = ui.sess.glob.rservertimetex.get().b; ;
-                    Tex btime = ui.sess.glob.bservertimetex.get().b; ;
-                    Tex winfo = ui.sess.glob.weathertimetex.get().b; ;
+                    Tex ltime = ui.sess.glob.lservertimetex.get().b;
+                    ;
+                    Tex rtime = ui.sess.glob.rservertimetex.get().b;
+                    ;
+                    Tex btime = ui.sess.glob.bservertimetex.get().b;
+                    ;
+                    Tex winfo = ui.sess.glob.weathertimetex.get().b;
+                    ;
                     int y = 10;
                     if (mtime != null) {
                         g.aimage(mtime, new Coord(sz.x - 5, y), 1, 0);
@@ -1538,7 +1544,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             dev.sysPrintStackTrace("map-mark");
             dev.sysLog("map-mark", this, -1, msg, args);
             long gobid = ((Integer) args[0]) & 0xffffffff;
-            long oid = (Long) args[1];
+            long oid = ((Number) args[1]).longValue();
             Indir<Resource> res = ui.sess.getres((Integer) args[2]);
             String nm = (String) args[3];
             if (mapfile != null)
@@ -2241,12 +2247,11 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
 
     @Override
     public void resize(Coord sz) {
-        this.sz = sz;
+        super.resize(sz);
         if (map != null)
             map.resize(sz);
         if (statuswindow != null)
             statuswindow.c = new Coord(HavenPanel.w / 2 + 80, 10);
-        super.resize(sz);
     }
 
     @Override
@@ -2325,30 +2330,30 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
     public void msg(String msg) {
         /*if (msg.startsWith(charterMsg)) //TravelWnd
             CharterList.addCharter(msg.substring(charterMsg.length(), msg.length() - 2));*/
-            if (msg.startsWith("Swimming is now turned")) {
-                togglebuff(msg, Bufflist.buffswim);
-                if (swimautotgld) {
-                    msgnosfx(msg);
-                    swimautotgld = false;
-                    return;
-                }
-            } else if (msg.startsWith("Tracking is now turned")) {
-                togglebuff(msg, Bufflist.bufftrack);
-                if (trackautotgld) {
-                    msgnosfx(msg);
-                    trackautotgld = false;
-                    return;
-                }
-            } else if (msg.startsWith("Criminal acts are now turned")) {
-                togglebuff(msg, Bufflist.buffcrime);
-                if (crimeautotgld) {
-                    msgnosfx(msg);
-                    crimeautotgld = false;
-                    return;
-                }
-            } else if (msg.startsWith("Party permissions are now")) {
-                togglebuff(msg, Bufflist.partyperm);
+        if (msg.startsWith("Swimming is now turned")) {
+            togglebuff(msg, Bufflist.buffswim);
+            if (swimautotgld) {
+                msgnosfx(msg);
+                swimautotgld = false;
+                return;
             }
+        } else if (msg.startsWith("Tracking is now turned")) {
+            togglebuff(msg, Bufflist.bufftrack);
+            if (trackautotgld) {
+                msgnosfx(msg);
+                trackautotgld = false;
+                return;
+            }
+        } else if (msg.startsWith("Criminal acts are now turned")) {
+            togglebuff(msg, Bufflist.buffcrime);
+            if (crimeautotgld) {
+                msgnosfx(msg);
+                crimeautotgld = false;
+                return;
+            }
+        } else if (msg.startsWith("Party permissions are now")) {
+            togglebuff(msg, Bufflist.partyperm);
+        }
         msg(msg, Color.WHITE, Color.WHITE);
     }
 

@@ -28,10 +28,25 @@ package haven;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 public interface OwnerContext {
     public <T> T context(Class<T> cl);
+
+    public default <T> T context(Class<T> cl, boolean fail) {
+        try {
+            return (context(cl));
+        } catch (NoContext e) {
+            if (fail)
+                throw (e);
+            return (null);
+        }
+    }
+
+    public default <T> Optional<T> ocontext(Class<T> cl) {
+        return (Optional.ofNullable(context(cl, false)));
+    }
 
     public static class NoContext extends RuntimeException {
         public final Class<?> requested;
@@ -78,11 +93,18 @@ public interface OwnerContext {
             return ((Function<T, ? extends C>) p);
         }
 
-        public <C> C context(Class<C> cl, T on) {
+        public <C> C context(Class<C> cl, T on, boolean fail) {
             Function<T, ? extends C> p = get(cl);
-            if (p == null)
-                throw (new NoContext(cl));
+            if (p == null) {
+                if (fail)
+                    throw (new NoContext(cl));
+                return (null);
+            }
             return (get(cl).apply(on));
+        }
+
+        public <C> C context(Class<C> cl, T on) {
+            return (context(cl, on, true));
         }
 
         public OwnerContext curry(T on) {
@@ -92,6 +114,14 @@ public interface OwnerContext {
                 }
             });
         }
+    }
+
+    public static <C> C orparent(Class<C> cl, C val, OwnerContext parent) {
+        if (val != null)
+            return (val);
+        if (parent == null)
+            throw (new NoContext(cl));
+        return (parent.context(cl));
     }
 
     public static final ClassResolver<UI> uictx = new ClassResolver<UI>()

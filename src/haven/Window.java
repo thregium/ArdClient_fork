@@ -26,13 +26,6 @@
 
 package haven;
 
-import static haven.DefSettings.CURIOHIGH;
-import static haven.DefSettings.CURIOLOW;
-import static haven.DefSettings.CURIOTARGET;
-import static haven.DefSettings.HUDTHEME;
-import static haven.PUtils.blurmask2;
-import static haven.PUtils.rasterimg;
-import static haven.Resource.cdec;
 import haven.purus.pbot.PBotUtils;
 import haven.purus.pbot.PBotWindowAPI;
 import haven.res.ui.tt.Wear;
@@ -53,6 +46,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+
+import static haven.DefSettings.CURIOHIGH;
+import static haven.DefSettings.CURIOLOW;
+import static haven.DefSettings.CURIOTARGET;
+import static haven.DefSettings.HUDTHEME;
+import static haven.PUtils.blurmask2;
+import static haven.PUtils.rasterimg;
+import static haven.Resource.cdec;
 
 public class
 Window extends MovableWidget implements DTarget {
@@ -842,6 +844,11 @@ Window extends MovableWidget implements DTarget {
             }
         }
         super.mousemove(c);
+    }
+
+    public boolean mousehover(Coord c) {
+        super.mousehover(c);
+        return (true);
     }
 
     public void setDestroyHook(final Runnable r) {

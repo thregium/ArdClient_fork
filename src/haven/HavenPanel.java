@@ -758,6 +758,7 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
                                 if (ui.sess != null)
                                     ui.sess.glob.ctick();
                                 dispatch();
+                                ui.mousehover(ui.mc);
                                 ui.tick();
                                 if ((ui.root.sz.x != w) || (ui.root.sz.y != h))
                                     ui.root.resize(new Coord(w, h));
@@ -820,6 +821,7 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
                                 if (ui.sess != null)
                                     ui.sess.glob.ctick();
                                 dispatch();
+                                ui.mousehover(ui.mc);
                                 ui.tick();
                                 if ((ui.root.sz.x != w) || (ui.root.sz.y != h))
                                     ui.root.resize(new Coord(w, h));

@@ -26,6 +26,8 @@
 
 package haven;
 
+import dolda.coe.ObjectData;
+import dolda.coe.Symbol;
 import java.awt.Color;
 import java.util.ArrayList;
 
@@ -50,6 +52,15 @@ public abstract class Message {
     public static final int T_FCOORD64 = 19;
     public static final int T_FLOAT8 = 21;
     public static final int T_FLOAT16 = 22;
+    public static final int T_SNORM8 = 23;
+    public static final int T_UNORM8 = 24;
+    public static final int T_MNORM8 = 25;
+    public static final int T_SNORM16 = 26;
+    public static final int T_UNORM16 = 27;
+    public static final int T_MNORM16 = 28;
+    public static final int T_SNORM32 = 29;
+    public static final int T_UNORM32 = 30;
+    public static final int T_MNORM32 = 31;
 
     private final static byte[] empty = new byte[0];
     public int rh = 0, rt = 0, wh = 0, wt = 0;
@@ -268,6 +279,10 @@ public abstract class Message {
         return (uint8() / 0xffp0f);
     }
 
+    public float mnorm8() {
+        return (uint8() / 0x100p0f);
+    }
+
     public float snorm16() {
         return (Utils.clip(int16(), -0x7fff, 0x7fff) / 0x7fffp0f);
     }
@@ -276,12 +291,20 @@ public abstract class Message {
         return (uint16() / 0xffffp0f);
     }
 
+    public float mnorm16() {
+        return (uint16() / 0x10000p0f);
+    }
+
     public double snorm32() {
         return (Utils.clip(int32(), -0x7fffffff, 0x7fffffff) / 0x7fffffffp0);
     }
 
     public double unorm32() {
         return (uint32() / 0xffffffffp0);
+    }
+
+    public double mnorm32() {
+        return (uint32() / 0x100000000p0);
     }
 
     public Object[] list() {
@@ -353,6 +376,33 @@ public abstract class Message {
                     break;
                 case T_FCOORD64:
                     ret.add(new Coord2d(float64(), float64()));
+                    break;
+                case T_SNORM8:
+                    ret.add(NormNumber.decsnorm8(this));
+                    break;
+                case T_SNORM16:
+                    ret.add(NormNumber.decsnorm16(this));
+                    break;
+                case T_SNORM32:
+                    ret.add(NormNumber.decsnorm32(this));
+                    break;
+                case T_UNORM8:
+                    ret.add(NormNumber.decunorm8(this));
+                    break;
+                case T_UNORM16:
+                    ret.add(NormNumber.decunorm16(this));
+                    break;
+                case T_UNORM32:
+                    ret.add(NormNumber.decunorm32(this));
+                    break;
+                case T_MNORM8:
+                    ret.add(NormNumber.decmnorm8(this));
+                    break;
+                case T_MNORM16:
+                    ret.add(NormNumber.decmnorm16(this));
+                    break;
+                case T_MNORM32:
+                    ret.add(NormNumber.decmnorm32(this));
                     break;
                 default:
                     throw (new FormatError("Encountered unknown type " + t + " in TTO list.").msg(this));
@@ -522,7 +572,34 @@ public abstract class Message {
                 addfloat32(((Float) o));
             } else if (o instanceof Double) {
                 adduint8(T_FLOAT64);
-                addfloat64(((Double) o).floatValue());
+                addfloat64(((Double) o).doubleValue());
+            } else if (o instanceof NormNumber.SNorm8) {
+                adduint8(T_SNORM8);
+                addint8(((NormNumber.SNorm8) o).val);
+            } else if (o instanceof NormNumber.UNorm8) {
+                adduint8(T_UNORM8);
+                adduint8(((NormNumber.UNorm8) o).val & 0xff);
+            } else if (o instanceof NormNumber.MNorm8) {
+                adduint8(T_MNORM8);
+                adduint8(((NormNumber.MNorm8) o).val & 0xff);
+            } else if (o instanceof NormNumber.SNorm16) {
+                adduint8(T_SNORM16);
+                addint16(((NormNumber.SNorm16) o).val);
+            } else if (o instanceof NormNumber.UNorm16) {
+                adduint8(T_UNORM16);
+                adduint16(((NormNumber.UNorm16) o).val & 0xffff);
+            } else if (o instanceof NormNumber.MNorm16) {
+                adduint8(T_MNORM16);
+                adduint16(((NormNumber.MNorm16) o).val & 0xffff);
+            } else if (o instanceof NormNumber.SNorm32) {
+                adduint8(T_SNORM32);
+                addint32(((NormNumber.SNorm32) o).val);
+            } else if (o instanceof NormNumber.UNorm32) {
+                adduint8(T_UNORM32);
+                addint32(((NormNumber.UNorm32) o).val);
+            } else if (o instanceof NormNumber.MNorm32) {
+                adduint8(T_MNORM32);
+                adduint32(((NormNumber.MNorm32) o).val);
             } else if (o instanceof Coord2d) {
                 adduint8(T_FCOORD64);
                 addfloat64(((Coord2d) o).x);
@@ -542,5 +619,20 @@ public abstract class Message {
         if (rbuf.length - 1 < i)
             return -1;
         return rbuf[i];
+    }
+
+    static {
+        ObjectData.register(Message.class, (msg, buf) -> {
+            if((msg.rbuf.length > 0) || (msg.rh != 0) || (msg.rt != 0)) {
+                buf.put(Symbol.get("read-buf"), msg.rbuf);
+                buf.put(Symbol.get("read-head"), msg.rh);
+                buf.put(Symbol.get("read-tail"), msg.rt);
+            }
+            if((msg.wbuf.length > 0) || (msg.wh != 0) || (msg.wt != 0)) {
+                buf.put(Symbol.get("write-buf"), msg.wbuf);
+                buf.put(Symbol.get("write-head"), msg.wh);
+                buf.put(Symbol.get("write-tail"), msg.wt);
+            }
+        });
     }
 }
