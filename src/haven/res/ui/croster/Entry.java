@@ -111,8 +111,8 @@ public class Entry extends Widget {
 
     @Override
     public void destroy() {
-        super.destroy();
         if (mark.a) getparent(CattleRoster.class).selected(false);
+        super.destroy();
     }
 }
 
