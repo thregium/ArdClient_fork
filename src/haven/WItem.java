@@ -512,7 +512,18 @@ public class WItem extends Widget implements DTarget2 {
             }
             return (true);
         } else if (btn == 3) {
-             if (ui.modmeta && !(parent instanceof Equipory)) {
+            if (ui.modflags() == 0 && item.contents != null) {
+                if (contents != null && contentswnd == null) {
+                    Coord off = contents.inv.c;
+                    contents.inv.unlink();
+                    ContentsWindow wnd = new ContentsWindow(contents.cont, contents.inv);
+                    off = off.sub(wnd.xlate(wnd.inv.c, true));
+                    contents.cont.contentswnd = contents.parent.add(wnd, contents.c.add(off));
+                    contents.invdest = true;
+                    contents.destroy();
+                    contents.cont.contents = null;
+                }
+            } else if (ui.modmeta && !(parent instanceof Equipory)) {
                 wdgmsg("transfer-identical-asc", this.item);
             } else
                 item.wdgmsg("iact", c, ui.modflags());
