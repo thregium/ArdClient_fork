@@ -11,10 +11,9 @@ import haven.Widget;
 import haven.Window;
 import haven.purus.pbot.PBotGobAPI;
 import haven.purus.pbot.PBotUtils;
-import modification.configuration;
-
 import java.awt.Color;
 import java.util.regex.Pattern;
+import modification.configuration;
 
 public class DrinkWater implements Runnable {
 
@@ -49,25 +48,62 @@ public class DrinkWater implements Runnable {
             WItem r = e.quickslots[7];
             if (canDrinkFrom(l))
                 drinkFromThis = l;
-            if (canDrinkFrom(r))
-                drinkFromThis = r;
-            for (Widget w = gui.lchild; w != null; w = w.prev) {
-                if (w instanceof Window) {
-                    Window wnd = (Window) w;
-                    for (Widget wdg = wnd.lchild; wdg != null; wdg = wdg.prev) {
-                        if (wdg instanceof Inventory) {
-                            Inventory inv = (Inventory) wdg;
-                            for (WItem item : inv.children(WItem.class)) {
-                                if (canDrinkFrom(item))
-                                    drinkFromThis = item;
+            if (drinkFromThis == null) {
+                if (canDrinkFrom(r))
+                    drinkFromThis = r;
+            }
+            if (drinkFromThis == null) {
+                for (Widget w = gui.lchild; w != null; w = w.prev) {
+                    if (drinkFromThis != null) break;
+                    if (w instanceof Window) {
+                        Window wnd = (Window) w;
+                        for (Widget wdg = wnd.lchild; wdg != null; wdg = wdg.prev) {
+                            if (drinkFromThis != null) break;
+                            if (wdg instanceof Inventory) {
+                                for (WItem item : wdg.children(WItem.class)) {
+                                    if (canDrinkFrom(item)) {
+                                        drinkFromThis = item;
+                                        break;
+                                    } else if (item.item.contents instanceof Inventory) {
+                                        for (WItem nitem : item.item.contents.children(WItem.class)) {
+                                            if (canDrinkFrom(nitem)) {
+                                                drinkFromThis = nitem;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else if (w instanceof AltBeltWnd) { // Alternate belt must be separately enabled
+                        AltBeltWnd invBelt = (AltBeltWnd) w;
+                        for (WItem item : invBelt.children(WItem.class)) {
+                            if (drinkFromThis != null) break;
+                            if (canDrinkFrom(item)) {
+                                drinkFromThis = item;
+                                break;
+                            } else if (item.item.contents instanceof Inventory) {
+                                for (WItem nitem : item.item.contents.children(WItem.class)) {
+                                    if (canDrinkFrom(nitem)) {
+                                        drinkFromThis = nitem;
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
-                } else if (w instanceof AltBeltWnd) { // Alternate belt must be separately enabled
-                    AltBeltWnd invBelt = (AltBeltWnd) w;
-                    for (WItem item : invBelt.children(WItem.class)) {
-                        if (canDrinkFrom(item))
-                            drinkFromThis = item;
+                }
+            }
+            if (drinkFromThis == null) {
+                for (WItem item : e.slots) {
+                    if (drinkFromThis != null) break;
+                    if (item.item.contents instanceof Inventory) {
+                        for (WItem nitem : item.item.contents.children(WItem.class)) {
+                            if (canDrinkFrom(nitem)) {
+                                drinkFromThis = nitem;
+                                break;
+                            }
+                        }
                     }
                 }
             }

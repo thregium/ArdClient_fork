@@ -13,7 +13,6 @@ import haven.WItem;
 import haven.Widget;
 import haven.Window;
 import haven.purus.pbot.PBotUtils;
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,6 +36,7 @@ public class EquipSacks implements Runnable {
             InventoryBelt quickBeltInv = null;
             WItem righthand = gui.getequipory().quickslots[7];
             WItem lefthand = gui.getequipory().quickslots[6];
+            WItem belteq = gui.getequipory().quickslots[5];
             HashMap<WItem, Integer> wepmap = new HashMap<>();
             int iterations = 0;
 
@@ -79,27 +79,39 @@ public class EquipSacks implements Runnable {
                         }
                     }
 
-                    if (belt == null)
-                        return;
-
-                    for (Widget w = belt.lchild; w != null; w = w.prev) {
-                        if (w instanceof InventoryBelt) {
-                            wepmap.putAll(getWeaponQuickBelt((InventoryBelt) w));
-                            quickBeltInv = (InventoryBelt) w;
-                            break;
+                    if (belt != null) {
+                        for (Widget w = belt.lchild; w != null; w = w.prev) {
+                            if (w instanceof InventoryBelt) {
+                                wepmap.putAll(getWeaponQuickBelt((InventoryBelt) w));
+                                quickBeltInv = (InventoryBelt) w;
+                                break;
+                            }
                         }
+                        if (quickBeltInv == null) return;
+                    } else {
+                        if (belteq != null && belteq.item.contents instanceof Inventory) {
+                            wepmap.putAll(getWeapon((Inventory) belteq.item.contents));
+                            beltInv = (Inventory) belteq.item.contents;
+                        }
+                        if (beltInv == null) return;
                     }
                 } else {
                     Window belt = gui.getwnd("Belt");
-                    if (belt == null)
-                        return;
-
-                    for (Widget w = belt.lchild; w != null; w = w.prev) {
-                        if (w instanceof Inventory) {
-                            wepmap.putAll(getWeapon((Inventory) w));
-                            beltInv = (Inventory) w;
-                            break;
+                    if (belt != null) {
+                        for (Widget w = belt.lchild; w != null; w = w.prev) {
+                            if (w instanceof Inventory) {
+                                wepmap.putAll(getWeapon((Inventory) w));
+                                beltInv = (Inventory) w;
+                                break;
+                            }
                         }
+                        if (beltInv == null) return;
+                    } else {
+                        if (belteq != null && belteq.item.contents instanceof Inventory) {
+                            wepmap.putAll(getWeapon((Inventory) belteq.item.contents));
+                            beltInv = (Inventory) belteq.item.contents;
+                        }
+                        if (beltInv == null) return;
                     }
                 }
 

@@ -638,7 +638,18 @@ public class PBotUtils {
                 for (Widget wdg = window.lchild; wdg != null; wdg = wdg.prev) {
                     if (wdg instanceof Inventory) {
                         ret.add(new PBotInventory((Inventory) wdg));
+                        for (WItem item : wdg.children(WItem.class)) {
+                            if (item.item.contents instanceof Inventory)
+                                ret.add(new PBotInventory((Inventory) item.item.contents));
+                        }
                     }
+                }
+            }
+            Equipory e = ui.gui.getequipory();
+            if (e != null) {
+                for (WItem item : e.slots) {
+                    if (item.item.contents instanceof Inventory)
+                        ret.add(new PBotInventory((Inventory) item.item.contents));
                 }
             }
         }

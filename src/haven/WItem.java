@@ -352,7 +352,8 @@ public class WItem extends Widget implements DTarget2 {
                         }
                     }
                     item.contents.unlink();
-                    contents = cont.add(new Contents(this, item.contents), parentpos(cont, sz.sub(5, 5).sub(Contents.hovermarg)));
+//                    contents = cont.add(new Contents(this, item.contents), parentpos(cont, sz.sub(5, 5).sub(Contents.hovermarg)));
+                    contents = cont.add(new Contents(this, item.contents), ui.mc);
                 }
             }
         } else {
@@ -490,7 +491,9 @@ public class WItem extends Widget implements DTarget2 {
         } else if (btn == 2) {
             if (ui.modmeta)
                 wdgmsg("transfer-identical-eq", this.item);
-            else if (ui.modctrl && ui.modshift) {
+            else if (ui.modctrl && ui.modshift)
+                locked = !locked;
+            else if (ui.modctrl) {
                 String name = ItemInfo.find(ItemInfo.Name.class, item.info()).str.text;
                 if (name.contains("kg of "))
                     name = name.substring(name.indexOf("kg of ") + 6);
@@ -509,9 +512,7 @@ public class WItem extends Widget implements DTarget2 {
             }
             return (true);
         } else if (btn == 3) {
-            if (ui.modctrl && ui.modshift) {
-                locked = !locked;
-            } else if (ui.modmeta && !(parent instanceof Equipory)) {
+             if (ui.modmeta && !(parent instanceof Equipory)) {
                 wdgmsg("transfer-identical-asc", this.item);
             } else
                 item.wdgmsg("iact", c, ui.modflags());
@@ -715,6 +716,7 @@ public class WItem extends Widget implements DTarget2 {
             this.cont = cont;
             this.inv = add(inv, Coord.z);
             this.id = cont.item.contentsid;
+            makeHidable();
             this.tick(0);
         }
 
