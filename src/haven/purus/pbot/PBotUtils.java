@@ -648,7 +648,7 @@ public class PBotUtils {
             Equipory e = ui.gui.getequipory();
             if (e != null) {
                 for (WItem item : e.slots) {
-                    if (item.item.contents instanceof Inventory)
+                    if (item != null && item.item.contents instanceof Inventory)
                         ret.add(new PBotInventory((Inventory) item.item.contents));
                 }
             }

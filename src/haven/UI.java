@@ -254,10 +254,11 @@ public class UI {
     public int next_predicted_id = 2;
 
     public void newwidget(int id, String type, int parent, Object[] pargs, Object... cargs) throws InterruptedException {
-        if (Config.quickbelt && type.equals("wnd") && cargs[1].equals("Belt")) {
-            type = "alt-wnd-belt";
-            beltWndId = id;
-        } else if (type.equals("inv") && pargs[0].toString().equals("study")) {
+        if (Config.quickbelt && type.equals("inv") && pargs.length > 1 && pargs[1].equals("Belt")) {
+            //type = "alt-wnd-belt";
+            beltWndId = parent;
+        }
+        if (type.equals("inv") && pargs[0].toString().equals("study")) {
             type = "inv-study";
         }
 
@@ -313,7 +314,19 @@ public class UI {
                         wdg.tooltip = Text.render("Random name with CTRL").tex();
                     }
                 }
-                pwdg.addchild(wdg, pargs);
+                if (parent == beltWndId) {
+                    Widget.Factory fwnd = Widget.gettype2("alt-wnd-belt");
+                    Widget wnd = fwnd.create(this, pargs);
+                    GameUI gui = root.findchild(GameUI.class);
+                    if (gui != null) {
+                        pwdg = wnd;
+                        wnd.attach(this);
+                        gui.add(wnd);
+                        wnd.add(wdg);
+                        wnd.pack();
+                    }
+                } else
+                    pwdg.addchild(wdg, pargs);
 
                 if (pwdg instanceof Window && gui != null)
                     processWindowContent(parent, gui, (Window) pwdg, wdg);

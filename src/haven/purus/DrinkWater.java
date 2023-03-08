@@ -97,7 +97,7 @@ public class DrinkWater implements Runnable {
             if (drinkFromThis == null) {
                 for (WItem item : e.slots) {
                     if (drinkFromThis != null) break;
-                    if (item.item.contents instanceof Inventory) {
+                    if (item != null && item.item.contents instanceof Inventory) {
                         for (WItem nitem : item.item.contents.children(WItem.class)) {
                             if (canDrinkFrom(nitem)) {
                                 drinkFromThis = nitem;

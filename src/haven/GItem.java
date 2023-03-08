@@ -233,8 +233,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         GSprite spr = this.spr;
         if (!postProcessed) {
             try {
-                dropItMaybe();
-                postProcessed = true;
+                if (dropItMaybe()) postProcessed = true;
             } catch (Exception l) {
                 dev.simpleLog(l.getMessage());
             }
@@ -460,32 +459,41 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         return null;
     }
 
-    private void dropItMaybe() {
+    private boolean dropItMaybe() {
         Resource curs = ui.root.getcurs(Coord.z);
         Resource res = this.resource();
         String name = res.basename();
         String resname = res.name;
-        String invname = ItemInfo.find(ItemInfo.Name.class, info()).str.text;
-        for (Map.Entry<String, Boolean> entry : Config.autodroplist.entrySet()) {
-            if (entry.getValue() && (invname.equals(entry.getKey()) || resname.equals(entry.getKey()))) {
-                drop = true;
+        ItemInfo.Name infoname = ItemInfo.find(ItemInfo.Name.class, info());
+        if (infoname != null) {
+            String invname = infoname.str.text;
+            for (Map.Entry<String, Boolean> entry : Config.autodroplist.entrySet()) {
+                if (entry.getValue() && (invname.equals(entry.getKey()) || resname.equals(entry.getKey()))) {
+                    drop = true;
+                    return (true);
+//                this.wdgmsg("drop", Coord.z);
+                }
+            }
+            if (curs != null && curs.name.equals("gfx/hud/curs/mine")) {
+                if (PBotUtils.getStamina(ui) < 40) {
+                    PBotUtils.drink(ui, false);
+                }
+                if (Config.dropMinedStones && Config.mineablesStone.contains(name) ||
+                        Config.dropMinedOre && Config.mineablesOre.contains(name) ||
+                        Config.dropMinedOrePrecious && Config.mineablesOrePrecious.contains(name) ||
+                        Config.dropMinedCatGold && invname.contains("Cat Gold") ||
+                        Config.dropMinedCrystals && invname.contains("Strange Crystal") ||
+                        Config.dropMinedSeaShells && invname.contains("Petrified Seashell") ||
+                        Config.dropMinedQuarryquartz && invname.contains("quarryquartz")) {
+                    drop = true;
+                    return (true);
+                }
 //                this.wdgmsg("drop", Coord.z);
             }
+        } else {
+            return (false);
         }
-        if (curs != null && curs.name.equals("gfx/hud/curs/mine")) {
-            if (PBotUtils.getStamina(ui) < 40) {
-                PBotUtils.drink(ui, false);
-            }
-            if (Config.dropMinedStones && Config.mineablesStone.contains(name) ||
-                    Config.dropMinedOre && Config.mineablesOre.contains(name) ||
-                    Config.dropMinedOrePrecious && Config.mineablesOrePrecious.contains(name) ||
-                    Config.dropMinedCatGold && invname.contains("Cat Gold") ||
-                    Config.dropMinedCrystals && invname.contains("Strange Crystal") ||
-                    Config.dropMinedSeaShells && invname.contains("Petrified Seashell") ||
-                    Config.dropMinedQuarryquartz && invname.contains("quarryquartz"))
-                drop = true;
-//                this.wdgmsg("drop", Coord.z);
-        }
+        return (true);
     }
 
     public Coord size() {
