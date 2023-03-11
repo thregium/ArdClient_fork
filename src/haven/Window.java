@@ -220,6 +220,10 @@ Window extends MovableWidget implements DTarget {
         this(sz, cap, lg, Coord.z, Coord.z);
     }
 
+    public Window(Coord sz, String cap, final String moveKey, boolean loadPosition, boolean lg) {
+        this(sz, cap, moveKey, loadPosition, lg, Coord.z, Coord.z);
+    }
+
     public Window(Coord sz, String cap, final String moveKey, boolean lg) {
         this(sz, cap, moveKey, lg, Coord.z, Coord.z);
     }

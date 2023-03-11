@@ -2392,40 +2392,47 @@ public class MapFile {
             if (filter.includegrid(grid, info != null)) {
                 lock.writeLock().lock();
                 try {
-                    Grid rgrid = grid.togrid();
-                    rgrid.save(MapFile.this);
-                    if (seg.noff == null) {
+                    skip:
+                    {
+                        Grid rgrid = grid.togrid();
+                        rgrid.save(MapFile.this);
+                        if (seg.noff == null) {
+                            if (info == null) {
+                                rseg = chseg(new Segment(seg.nseg = grid.gid));
+                                seg.noff = Coord.z;
+                                seg.offs.put(seg.nseg, Coord.z);
+                            } else {
+                                rseg = chseg(seg.nseg = info.seg);
+                                if (rseg == null) {
+                                    System.out.println("rseg is null " + seg.nseg);
+                                    break skip;
+                                }
+                                seg.noff = seg.offs.get(info.seg);
+                            }
+                        } else {
+                            if ((info == null) || (info.seg == seg.nseg)) {
+                                rseg = chseg(seg.nseg);
+                                if (rseg == null) {
+                                    System.out.println("rseg is null " + seg.nseg);
+                                    break skip;
+                                }
+                            } else {
+                                if (curseg.id != seg.nseg)
+                                    throw (new AssertionError());
+                                Segment nseg = segments.get(info.seg);
+                                Coord noff = seg.offs.get(info.seg);
+                                Coord soff = seg.noff.sub(noff);
+                                merge(nseg, curseg, soff);
+                                seg.nseg = nseg.id;
+                                seg.noff = noff;
+                                rseg = curseg = nseg;
+                            }
+                        }
+                        Coord nc = grid.sc.add(seg.noff);
                         if (info == null) {
-                            rseg = chseg(new Segment(seg.nseg = grid.gid));
-                            seg.noff = Coord.z;
-                            seg.offs.put(seg.nseg, Coord.z);
-                        } else {
-                            rseg = chseg(seg.nseg = info.seg);
-                            if (rseg == null)
-                                throw (new NullPointerException());
-                            seg.noff = seg.offs.get(info.seg);
+                            rseg.include(rgrid, nc);
+                            gridinfo.put(rgrid.id, new GridInfo(rgrid.id, rseg.id, nc));
                         }
-                    } else {
-                        if ((info == null) || (info.seg == seg.nseg)) {
-                            rseg = chseg(seg.nseg);
-                            if (rseg == null)
-                                throw (new NullPointerException());
-                        } else {
-                            if (curseg.id != seg.nseg)
-                                throw (new AssertionError());
-                            Segment nseg = segments.get(info.seg);
-                            Coord noff = seg.offs.get(info.seg);
-                            Coord soff = seg.noff.sub(noff);
-                            merge(nseg, curseg, soff);
-                            seg.nseg = nseg.id;
-                            seg.noff = noff;
-                            rseg = curseg = nseg;
-                        }
-                    }
-                    Coord nc = grid.sc.add(seg.noff);
-                    if (info == null) {
-                        rseg.include(rgrid, nc);
-                        gridinfo.put(rgrid.id, new GridInfo(rgrid.id, rseg.id, nc));
                     }
                 } finally {
                     lock.writeLock().unlock();

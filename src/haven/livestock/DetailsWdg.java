@@ -114,16 +114,18 @@ public class DetailsWdg extends Widget {
     }
 
     public void delete() {
-        reqdestroy();
-        int y = this.c.y;
-        for (Widget child = parent.lchild; child != null; child = child.prev) {
-            if (child instanceof DetailsWdg && child.c.y > y)
-                child.c.y -= HEIGHT;
+        if (parent != null) {
+            int y = this.c.y;
+            for (Widget child = parent.lchild; child != null; child = child.prev) {
+                if (child instanceof DetailsWdg && child.c.y > y)
+                    child.c.y -= HEIGHT;
+            }
+
+            ((LivestockManager.Panel) parent.parent.parent).delete(animal);
+
+            ((Scrollport.Scrollcont) parent).update();
         }
-
-        ((LivestockManager.Panel) parent.parent.parent).delete(animal);
-
-        ((Scrollport.Scrollcont) parent).update();
+        reqdestroy();
     }
 }
 

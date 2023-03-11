@@ -28,6 +28,7 @@ package haven;
 
 import haven.ItemInfo.AttrCache;
 import haven.automation.WItemDestroyCallback;
+import haven.purus.pbot.PBotWindowAPI;
 import haven.res.ui.tt.Wear;
 import haven.res.ui.tt.q.qbuff.QBuff;
 import haven.resutil.Curiosity;
@@ -60,7 +61,7 @@ public class WItem extends Widget implements DTarget2 {
 
     public static final Color DURABILITY_COLOR = new Color(214, 253, 255);
     public static final Color ARMOR_COLOR = new Color(255, 227, 191);
-    //public static final Color MATCH_COLOR = new Color(255, 32, 255, 255);
+//    public static final Color MATCH_COLOR = new Color(255, 32, 255, 255);
     public static final Color MATCH_COLOR = new Color(0, 255, 0, 255);
     public static final Color[] wearclr = new Color[]{
             new Color(233, 0, 14), new Color(218, 128, 87), new Color(246, 233, 87), new Color(145, 225, 60)
@@ -196,7 +197,7 @@ public class WItem extends Widget implements DTarget2 {
         return (name != null && name.str != null && name.str.text != null) ? name.str.text : "";
     }));
 
-    private synchronized List<ItemInfo> info() {
+    private List<ItemInfo> info() {
         return (item.info());
     }
 
@@ -514,11 +515,16 @@ public class WItem extends Widget implements DTarget2 {
         } else if (btn == 3) {
             if (ui.modflags() == 0 && item.contents != null) {
                 if (contents != null && contentswnd == null) {
+//                    Coord c = Utils.getprefc(String.format("cont-wndc/%s", item.contentsid), null);
                     Coord off = contents.inv.c;
                     contents.inv.unlink();
-                    ContentsWindow wnd = new ContentsWindow(contents.cont, contents.inv);
+                    Window anotherWnd = PBotWindowAPI.getWindow(ui, contents.cont.item.contentsnm);
+                    ContentsWindow wnd = new ContentsWindow(contents.cont, contents.inv, anotherWnd == null || Config.stackwindows);
                     off = off.sub(wnd.xlate(wnd.inv.c, true));
-                    contents.cont.contentswnd = contents.parent.add(wnd, contents.c.add(off));
+                    GameUI gui = getparent(GameUI.class);
+                    Coord toc = contents.c.add(off);
+                    if (!Config.stackwindows && anotherWnd != null && gui != null) toc = gui.optplacement(wnd, toc);
+                    contents.cont.contentswnd = contents.parent.add(wnd, toc);
                     contents.invdest = true;
                     contents.destroy();
                     contents.cont.contents = null;
@@ -723,7 +729,11 @@ public class WItem extends Widget implements DTarget2 {
         private Object id;
 
         public ContentsWindow(WItem cont, Widget inv) {
-            super(Coord.z, cont.item.contentsnm);
+            this(cont, inv, false);
+        }
+
+        public ContentsWindow(WItem cont, Widget inv, boolean loadPosition) {
+            super(Coord.z, cont.item.contentsnm, cont.item.contentsnm, loadPosition, false);
             this.cont = cont;
             this.inv = add(inv, Coord.z);
             this.id = cont.item.contentsid;
