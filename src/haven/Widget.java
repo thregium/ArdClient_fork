@@ -58,6 +58,7 @@ public class Widget {
     public Coord c, sz, oldsz;
     public int z;
     public Widget next, prev, child, lchild, parent;
+    public int childseq;
     public boolean focustab = false, focusctl = false, hasfocus = false, visible = true;
     private boolean attached = false;
     public boolean canfocus = false, autofocus = false;
@@ -285,6 +286,7 @@ public class Widget {
         child.parent = this;
         child.link();
         child.added();
+        childseq++;
         if (attached)
             child.attached();
         if (child.canfocus && child.visible())
@@ -630,7 +632,9 @@ public class Widget {
         rdispose();
     }
 
+    /* XXX: Should be renamed to cremove at this point. */
     public void cdestroy(Widget w) {
+        childseq++;
     }
 
     public int wdgid() {

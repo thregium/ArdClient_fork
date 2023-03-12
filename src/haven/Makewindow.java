@@ -26,7 +26,6 @@
 
 package haven;
 
-import static haven.Inventory.invsq;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -37,6 +36,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.WeakHashMap;
+
+
+import static haven.Inventory.invsq;
 
 public class Makewindow extends Widget {
     Widget obtn, cbtn;
@@ -269,7 +271,8 @@ public class Makewindow extends Widget {
                 for (int a = 1; a < args.length; a++)
                     rcps.add(gui.menu.paginafor(ui.sess.getres((Integer) args[a])));
             }
-            inputs.get(idx).recipes(rcps); ;
+            inputs.get(idx).recipes(rcps);
+            ;
         } else {
             super.uimsg(msg, args);
         }
@@ -582,7 +585,7 @@ public class Makewindow extends Widget {
         }
     }
 
-    public static class MakePrep extends ItemInfo implements GItem.ColorInfo {
+    public static class MakePrep extends ItemInfo implements GItem.ColorInfo, GItem.ContentsInfo {
         private final static Color olcol = new Color(0, 255, 0, 64);
 
         public MakePrep(Owner owner) {
@@ -591,6 +594,11 @@ public class Makewindow extends Widget {
 
         public Color olcol() {
             return (olcol);
+        }
+
+        public void propagate(List<ItemInfo> buf, Owner outer) {
+            if (ItemInfo.find(MakePrep.class, buf) == null)
+                buf.add(new MakePrep(outer));
         }
     }
 }
