@@ -572,36 +572,34 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     private final Object subsync = new Object();
 
     public void showcontwnd(boolean show) {
-        synchronized (subsync) {
-            if (show && (contentswnd == null)) {
-                Widget cont = contparent();
-                Coord wc = null;
-                if (this.contentsid != null)
-                    wc = Utils.getprefc(String.format("cont-wndc/%s", this.contentsid), null);
-                if (wc == null)
-                    wc = cont.rootxlate(ui.mc).add(UI.scale(5, 5));
-                contents.unlink();
-                if (contentswdg != null) {
-                    contentswdg.invdest = true;
-                    contentswdg.reqdestroy();
-                    contentswdg = null;
-                }
-
-                Window anotherWnd = PBotWindowAPI.getWindow(ui, contentsnm);
-                ContentsWindow wnd = new ContentsWindow(this, this.contents, anotherWnd == null || Config.stackwindows);
-
-                GameUI gui = getparent(GameUI.class);
-                if (!Config.stackwindows && anotherWnd != null && gui != null) wc = gui.optplacement(wnd, wc);
-
-                contentswnd = cont.add(wnd, wc);
-                if (this.contentsid != null) {
-                    Utils.setprefb(String.format("cont-wndvis/%s", this.contentsid), true);
-                    Utils.setprefc(String.format("cont-wndc/%s", this.contentsid), wc);
-                }
-            } else if (!show && (contentswnd != null)) {
-                contentswnd.reqdestroy();
-                contentswnd = null;
+        if (show && (contentswnd == null)) {
+            Widget cont = contparent();
+            Coord wc = null;
+            if (this.contentsid != null)
+                wc = Utils.getprefc(String.format("cont-wndc/%s", this.contentsid), null);
+            if (wc == null)
+                wc = cont.rootxlate(ui.mc).add(UI.scale(5, 5));
+            contents.unlink();
+            if (contentswdg != null) {
+                contentswdg.invdest = true;
+                contentswdg.reqdestroy();
+                contentswdg = null;
             }
+
+            Window anotherWnd = PBotWindowAPI.getWindow(ui, contentsnm);
+            ContentsWindow wnd = new ContentsWindow(this, this.contents, anotherWnd == null || Config.stackwindows);
+
+            GameUI gui = getparent(GameUI.class);
+            if (!Config.stackwindows && anotherWnd != null && gui != null) wc = gui.optplacement(wnd, wc);
+
+            contentswnd = cont.add(wnd, wc);
+            if (this.contentsid != null) {
+                Utils.setprefb(String.format("cont-wndvis/%s", this.contentsid), true);
+                Utils.setprefc(String.format("cont-wndc/%s", this.contentsid), wc);
+            }
+        } else if (!show && (contentswnd != null)) {
+            contentswnd.reqdestroy();
+            contentswnd = null;
         }
 
         /*if (item.contentswdg != null && item.contentswnd == null) {
