@@ -1547,9 +1547,9 @@ public class MenuGrid extends Widget {
                     wdgmsg("act", "siegeptr");
                 }
                 if (Config.autowindows.get("Belt").selected) {
-                    WItem l = gui.getequipory().quickslots[5];
-                    if (l != null)
-                        l.item.wdgmsg("iact", Coord.z, -1);
+//                    WItem l = gui.getequipory().quickslots[5];
+//                    if (l != null)
+//                        l.item.wdgmsg("iact", Coord.z, -1);
                 }
                 for (Widget w = gui.chat.lchild; w != null; w = w.prev) {
                     if (w instanceof ChatUI.MultiChat) {
