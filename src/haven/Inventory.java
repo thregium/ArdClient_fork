@@ -202,7 +202,8 @@ public class Inventory extends Widget implements DTarget {
 
     @Override
     public void wdgmsg(Widget sender, String msg, Object... args) {
-        if (msg.equals("drop-identical")) {
+        final boolean check = args.length > 0 && args[0] instanceof GItem;
+        if (check && msg.equals("drop-identical")) {
             Color colorIdentical = null;
             for (WItem item : getIdenticalItems((GItem) args[0], false)) {
                 try {
@@ -224,7 +225,7 @@ public class Inventory extends Widget implements DTarget {
                     System.out.println(e.getMessage());
                 }
             }
-        } else if (msg.startsWith("transfer-identical")) {
+        } else if (check && msg.startsWith("transfer-identical")) {
 //            Window stockpile = ui.gui.getwnd("Stockpile");
 //            Window smelter = ui.gui.getwnd("Ore Smelter");
 //            Window kiln = ui.gui.getwnd("Kiln");
