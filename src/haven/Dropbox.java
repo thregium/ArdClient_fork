@@ -135,6 +135,9 @@ public abstract class Dropbox<T> extends ListWidget<T> {
             dl = new Droplist();
             return (true);
         }
+        if (btn == 3) {
+            change(null);
+        }
         return (true);
     }
 

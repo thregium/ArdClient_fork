@@ -317,4 +317,6 @@ public class resources {
     public static final List<HSliderListboxItem> sfxmenus = new TreeList<>();
 
     public static ObservableMap<String, Boolean> customSendMarks = Utils.loadCustomList(Collections.emptyList(), "CustomSendMarks");
+
+    public static JSONObject areaTasksJson = configuration.loadjson("AreaPickerTasks.json");
 }

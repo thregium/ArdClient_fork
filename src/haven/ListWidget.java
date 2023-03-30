@@ -29,7 +29,7 @@ package haven;
 public abstract class ListWidget<T> extends Widget {
     public final int itemh;
     public T sel;
-    public int selindex;
+    public int selindex = -1;
 
     public ListWidget(Coord sz, int itemh) {
         super(sz);
@@ -55,8 +55,7 @@ public abstract class ListWidget<T> extends Widget {
     }
 
     public void change(T item) {
-        selindex = indexof(item);
-        sel = (selindex != -1) ? item : null;
+        change(indexof(item));
     }
 
     public void change(int index) {

@@ -1,5 +1,6 @@
 package haven.automation;
 
+import haven.Area;
 import haven.Button;
 import haven.CheckListbox;
 import haven.CheckListboxItem;
@@ -10,9 +11,11 @@ import haven.Dropbox;
 import haven.FlowerMenu;
 import haven.GItem;
 import haven.GOut;
+import haven.GameUI;
 import haven.ISBox;
 import haven.Inventory;
 import haven.Label;
+import haven.Pair;
 import haven.ResizableTextEntry;
 import haven.Resource;
 import haven.Scrollbar;
@@ -33,7 +36,10 @@ import haven.purus.pbot.PBotUtils;
 import haven.purus.pbot.PBotWindowAPI;
 import haven.sloth.script.pathfinding.Hitbox;
 import modification.configuration;
+import modification.resources;
 import org.apache.commons.collections4.list.TreeList;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.awt.Color;
 import java.awt.event.KeyEvent;
@@ -42,6 +48,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -72,9 +79,7 @@ public class AreaPicker extends Window implements Runnable {
     private volatile boolean paused = false;
     private final Object pauseLock = new Object();
 
-    public final Coord[]
-            gobarea = new Coord[2],
-            storagearea = new Coord[2];
+    public Area gobarea, storagearea;
     public final List<String>
             areagoblist = new ArrayList<>(),
             flowermenulist = new ArrayList<>(Config.flowermenus.keySet()),
@@ -91,7 +96,7 @@ public class AreaPicker extends Window implements Runnable {
             selecteditemlist = new TreeList<>();
 
 
-    public Button refresh, selectgobbtn, selectedgobbtn, selectedflowerbtn, selectstoragebtn, selectedstoragebtn, selecteditembtn, selecteditemaddbtn, runbtn, stopbtn, pausumebtn;
+    public Button refresh, selectgobbtn, selectedgobbtn, selectedflowerbtn, selectstoragebtn, selectedstoragebtn, selecteditembtn, selecteditemaddbtn, runbtn, stopbtn, pausumebtn, loadbtn, savebtn;
     public Label l1, l2, l3, l4, l5;
     public Label maininfolbl, areagobinfolbl, flowerpetalsinfolbl, areastorageinfolbl, iteminfolbl;
     public Dropbox<String> collecttriggerdbx;
@@ -106,11 +111,13 @@ public class AreaPicker extends Window implements Runnable {
         super(Coord.z, scriptname, scriptname);
     }
 
+    @Override
     public void added() {
         super.added();
 
         maininfolbl = new Label("");
         waitingtimete = new ResizableTextEntry(1000 + "") { //for prof settings
+            @Override
             public boolean type(char c, KeyEvent ev) {
                 if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 || c == '\b') {
                     return (buf.key(ev));
@@ -130,10 +137,12 @@ public class AreaPicker extends Window implements Runnable {
                 change(Color.RED);
             }
 
+            @Override
             public void click() {
                 new Thread(new selectinggobarea(), "Selecting Area").start();
             }
 
+            @Override
             public boolean mousedown(Coord c, int btn) {
                 if (isblocked()) return (true);
                 else return (super.mousedown(c, btn));
@@ -144,6 +153,7 @@ public class AreaPicker extends Window implements Runnable {
                 change(Color.RED);
             }
 
+            @Override
             public void click() {
                 if (selectedgoblist.size() == 0) {
                     debugLogPing("Select area with objects", Color.WHITE);
@@ -151,156 +161,187 @@ public class AreaPicker extends Window implements Runnable {
                     if (!ui.gui.containschild(selectedgobwnd))
                         ui.gui.add(selectedgobwnd, c.add(parent.c));
                     else
-                        selectedgobwnd.reqdestroy();
+                        selectedgobwnd.unlink();
                 }
             }
         };
-        selectedgobwnd = new Window(Coord.z, "Selecting gob") {{
-            WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
-            selectedgoblbox = new CheckListbox(100, 10) {
-                protected void itemclick(CheckListboxItem itm, int button) {
-                    if (!isblocked()) {
-                        super.itemclick(itm, button);
-                        for (CheckListboxItem i : selectedgoblist) {
-                            if (i.name.equals(itm.name)) {
-                                i.selected = itm.selected;
-                                break;
+        selectedgobwnd = new Window(Coord.z, "Selecting gob") {
+            {
+                WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
+                selectedgoblbox = new CheckListbox(100, 10) {
+                    @Override
+                    protected void itemclick(CheckListboxItem itm, int button) {
+                        if (!isblocked()) {
+                            super.itemclick(itm, button);
+                            for (CheckListboxItem i : selectedgoblist) {
+                                if (i.name.equals(itm.name)) {
+                                    i.selected = itm.selected;
+                                    break;
+                                }
                             }
+                            items.sort(listboxsort());
+                            updatelist("gob");
+                            updateinfo("gob");
                         }
-                        items.sort(listboxsort());
-                        updatelist("gob");
-                        updateinfo("gob");
                     }
-                }
 
-                protected void drawitemname(GOut g, CheckListboxItem itm) {
-                    Text t = Text.render(configuration.getShortName(itm.name) + " (" + itm.name.substring(0, itm.name.lastIndexOf('/')) + ")");
-                    Tex T = t.tex();
-                    g.image(T, new Coord(2, 2), t.sz());
-                    T.dispose();
-                }
-            };
-            selectedgobsearch = new ResizableTextEntry(selectedgoblbox.sz.x, "") {
-                public void changed() {
-                    update();
-                }
-
-                public boolean mousedown(Coord mc, int btn) {
-                    if (btn == 3) {
-                        settext("");
+                    @Override
+                    protected void drawitemname(GOut g, CheckListboxItem itm) {
+                        Text t = Text.render(configuration.getShortName(itm.name) + " (" + itm.name.substring(0, itm.name.lastIndexOf('/')) + ")");
+                        Tex T = t.tex();
+                        g.image(T, new Coord(2, 2), t.sz());
+                        T.dispose();
+                    }
+                };
+                selectedgobsearch = new ResizableTextEntry(selectedgoblbox.sz.x, "") {
+                    @Override
+                    public void changed() {
                         update();
-                        return (true);
-                    } else {
-                        return (super.mousedown(mc, btn));
                     }
-                }
 
-                public void update() {
-                    selectedgoblbox.items.clear();
-                    for (CheckListboxItem i : selectedgoblist) {
-                        if (i.name.toLowerCase().contains(text().toLowerCase()))
-                            selectedgoblbox.items.add(i);
+                    @Override
+                    public boolean mousedown(Coord mc, int btn) {
+                        if (btn == 3) {
+                            settext("");
+                            update();
+                            return (true);
+                        } else {
+                            return (super.mousedown(mc, btn));
+                        }
                     }
-                    selectedgoblbox.items.sort(listboxsort());
-                }
-            };
-            wva.add(selectedgoblbox);
-            wva.add(selectedgobsearch);
-            pack();
-        }};
+
+                    public void update() {
+                        selectedgoblbox.items.clear();
+                        for (CheckListboxItem i : selectedgoblist) {
+                            if (i.name.toLowerCase().contains(text().toLowerCase()))
+                                selectedgoblbox.items.add(i);
+                        }
+                        selectedgoblbox.items.sort(listboxsort());
+                    }
+                };
+                wva.add(selectedgoblbox);
+                wva.add(selectedgobsearch);
+                pack();
+            }
+
+            @Override
+            public void reqdestroy() {
+                unlink();
+            }
+        };
         areagobinfolbl = new Label("");
 
         selectedflowerbtn = new Button(50, "Flower list") {
+            @Override
             public void click() {
                 if (!ui.gui.containschild(selectedflowerwnd))
                     ui.gui.add(selectedflowerwnd, c.add(parent.c));
                 else
-                    selectedflowerwnd.reqdestroy();
+                    selectedflowerwnd.unlink();
             }
         };
-        selectedflowerwnd = new Window(Coord.z, "Selecting petals") {{
-            WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
-            flowermenulist.forEach((i) -> selectedflowerlist.add(new CheckListboxItem(i)));
-            ArrayList<String> temp = new ArrayList<>();
-            flowermenulist.forEach((s) -> {
-                String loc = Resource.language.equals("en") ? s : Resource.getLocString(Resource.BUNDLE_FLOWER, s);
-                temp.add(Resource.language.equals("en") ? s : loc.equals(s) ? s : s + " (" + Resource.getLocString(Resource.BUNDLE_FLOWER, s) + ")");
-            });
-            selectedflowerlbox = new CheckListbox(calcWidthString(temp), 10) {
-                protected void itemclick(CheckListboxItem itm, int button) {
-                    if (!isblocked()) {
-                        super.itemclick(itm, button);
-                        for (CheckListboxItem i : selectedflowerlist) {
-                            if (i.name.equals(itm.name)) {
-                                i.selected = itm.selected;
-                                break;
+        selectedflowerwnd = new Window(Coord.z, "Selecting petals") {
+            {
+                WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
+                flowermenulist.forEach((i) -> selectedflowerlist.add(new CheckListboxItem(i)));
+                final List<String> temp = new ArrayList<>();
+                flowermenulist.forEach((s) -> {
+                    String loc = Resource.language.equals("en") ? s : Resource.getLocString(Resource.BUNDLE_FLOWER, s);
+                    temp.add(Resource.language.equals("en") ? s : loc.equals(s) ? s : s + " (" + Resource.getLocString(Resource.BUNDLE_FLOWER, s) + ")");
+                });
+                selectedflowerlbox = new CheckListbox(calcWidthString(temp), 10) {
+                    @Override
+                    protected void itemclick(CheckListboxItem itm, int button) {
+                        if (!isblocked()) {
+                            super.itemclick(itm, button);
+                            for (CheckListboxItem i : selectedflowerlist) {
+                                if (i.name.equals(itm.name)) {
+                                    i.selected = itm.selected;
+                                    break;
+                                }
                             }
+                            items.sort(listboxsort());
+                            updateinfo("flower");
                         }
-                        items.sort(listboxsort());
-                        updateinfo("flower");
                     }
-                }
 
-                protected void drawitemname(GOut g, CheckListboxItem itm) {
-                    String loc = Resource.language.equals("en") ? itm.name : Resource.getLocString(Resource.BUNDLE_FLOWER, itm.name);
-                    Tex t = Text.render(Resource.language.equals("en") ? itm.name : loc.equals(itm.name) ? itm.name : itm.name + " (" + Resource.getLocString(Resource.BUNDLE_FLOWER, itm.name) + ")").tex();
-                    g.image(t, new Coord(2, 2), t.sz());
-                    t.dispose();
-                }
-            };
-            selectedflowerlbox.items.addAll(selectedflowerlist);
-            selectedflowerlbox.items.sort(listboxsort());
-            selectedflowersearch = new ResizableTextEntry(selectedflowerlbox.sz.x, "") {
-                public void changed() {
-                    update();
-                }
-
-                public boolean mousedown(Coord mc, int btn) {
-                    if (btn == 3) {
-                        settext("");
+                    @Override
+                    protected void drawitemname(GOut g, CheckListboxItem itm) {
+                        String loc = Resource.language.equals("en") ? itm.name : Resource.getLocString(Resource.BUNDLE_FLOWER, itm.name);
+                        Tex t = Text.render(Resource.language.equals("en") ? itm.name : loc.equals(itm.name) ? itm.name : itm.name + " (" + Resource.getLocString(Resource.BUNDLE_FLOWER, itm.name) + ")").tex();
+                        g.image(t, new Coord(2, 2), t.sz());
+                        t.dispose();
+                    }
+                };
+                selectedflowerlbox.items.addAll(selectedflowerlist);
+                selectedflowerlbox.items.sort(listboxsort());
+                selectedflowersearch = new ResizableTextEntry(selectedflowerlbox.sz.x, "") {
+                    @Override
+                    public void changed() {
                         update();
-                        return (true);
-                    } else {
-                        return (super.mousedown(mc, btn));
                     }
-                }
 
-                public void update() {
-                    selectedflowerlbox.items.clear();
-                    for (CheckListboxItem i : selectedflowerlist) {
-                        String s = Resource.language.equals("en") ? i.name : i.name + " (" + Resource.getLocString(Resource.BUNDLE_FLOWER, i.name) + ")";
-                        if (s.toLowerCase().contains(text().toLowerCase()))
-                            selectedflowerlbox.items.add(i);
+                    @Override
+                    public boolean mousedown(Coord mc, int btn) {
+                        if (btn == 3) {
+                            settext("");
+                            update();
+                            return (true);
+                        } else {
+                            return (super.mousedown(mc, btn));
+                        }
                     }
-                    selectedflowerlbox.items.sort(listboxsort());
-                }
-            };
-            wva.add(selectedflowerlbox);
-            wva.add(selectedflowersearch);
-            pack();
-        }};
+
+                    public void update() {
+                        selectedflowerlbox.items.clear();
+                        for (CheckListboxItem i : selectedflowerlist) {
+                            String s = Resource.language.equals("en") ? i.name : i.name + " (" + Resource.getLocString(Resource.BUNDLE_FLOWER, i.name) + ")";
+                            if (s.toLowerCase().contains(text().toLowerCase()))
+                                selectedflowerlbox.items.add(i);
+                        }
+                        selectedflowerlbox.items.sort(listboxsort());
+                    }
+                };
+                wva.add(selectedflowerlbox);
+                wva.add(selectedflowersearch);
+                pack();
+            }
+
+            @Override
+            public void reqdestroy() {
+                unlink();
+            }
+        };
         flowerpetalsinfolbl = new Label("");
         updateinfo("flower");
 
         collecttriggerdbx = new Dropbox<String>(10, collecttrigger) {
+            @Override
             protected String listitem(int i) {
                 return collecttrigger.get(i);
             }
 
+            @Override
             protected int listitems() {
                 return collecttrigger.size();
             }
 
+            @Override
             protected void drawitem(GOut g, String item, int i) {
                 g.text(item, Coord.z);
             }
 
-            public void change(String item) {
-                super.change(item);
-                int x = Text.render(item).sz().x;
-                if (sz.x != x + Dropbox.drop.sz().x + 2) resize(new Coord(x + Dropbox.drop.sz().x + 2, sz.y));
+            @Override
+            public void change(int index) {
+                super.change(index);
+                String item = sel;
+                if (item != null) {
+                    int x = Text.render(item).sz().x;
+                    if (sz.x != x + Dropbox.drop.sz().x + 2) resize(new Coord(x + Dropbox.drop.sz().x + 2, sz.y));
+                }
             }
 
+            @Override
             public boolean mousedown(Coord c, int btn) {
                 if (!isblocked()) {
                     super.mousedown(c, btn);
@@ -309,16 +350,19 @@ public class AreaPicker extends Window implements Runnable {
                 return (true);
             }
         };
+        collecttriggerdbx.selindex = -1;
 
         selectstoragebtn = new Button(50, "Select area") {
             {
                 change(Color.RED);
             }
 
+            @Override
             public void click() {
                 new Thread(new selectingstoragearea(), "Selecting Area").start();
             }
 
+            @Override
             public boolean mousedown(Coord c, int btn) {
                 if (isblocked()) return (true);
                 else return (super.mousedown(c, btn));
@@ -329,6 +373,7 @@ public class AreaPicker extends Window implements Runnable {
                 change(Color.RED);
             }
 
+            @Override
             public void click() {
                 if (selectedstoragelist.size() == 0) {
                     debugLogPing("Select area with objects", Color.WHITE);
@@ -336,180 +381,208 @@ public class AreaPicker extends Window implements Runnable {
                     if (!ui.gui.containschild(selectedstoragewnd))
                         ui.gui.add(selectedstoragewnd, c.add(parent.c));
                     else
-                        selectedstoragewnd.reqdestroy();
+                        selectedstoragewnd.unlink();
                 }
             }
         };
-        selectedstoragewnd = new Window(Coord.z, "Selecting storage") {{
-            WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
-            selectedstoragelbox = new CheckListbox(100, 10) {
-                protected void itemclick(CheckListboxItem itm, int button) {
-                    if (!isblocked()) {
-                        super.itemclick(itm, button);
-                        for (CheckListboxItem i : selectedgoblist) {
-                            if (i.name.equals(itm.name)) {
-                                i.selected = itm.selected;
-                                break;
+        selectedstoragewnd = new Window(Coord.z, "Selecting storage") {
+            {
+                WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
+                selectedstoragelbox = new CheckListbox(100, 10) {
+                    @Override
+                    protected void itemclick(CheckListboxItem itm, int button) {
+                        if (!isblocked()) {
+                            super.itemclick(itm, button);
+                            for (CheckListboxItem i : selectedgoblist) {
+                                if (i.name.equals(itm.name)) {
+                                    i.selected = itm.selected;
+                                    break;
+                                }
                             }
+                            items.sort(listboxsort());
+                            updatelist("storage");
+                            updateinfo("storage");
                         }
-                        items.sort(listboxsort());
-                        updatelist("storage");
-                        updateinfo("storage");
                     }
-                }
 
-                protected void drawitemname(GOut g, CheckListboxItem itm) {
-                    Text t = Text.render(configuration.getShortName(itm.name) + " (" + itm.name.substring(0, itm.name.lastIndexOf('/')) + ")");
-                    Tex T = t.tex();
-                    g.image(T, new Coord(2, 2), t.sz());
-                    T.dispose();
-                }
-            };
-            selectedstoragesearch = new ResizableTextEntry(selectedstoragelbox.sz.x, "") {
-                public void changed() {
-                    update();
-                }
-
-                public boolean mousedown(Coord mc, int btn) {
-                    if (btn == 3) {
-                        settext("");
+                    @Override
+                    protected void drawitemname(GOut g, CheckListboxItem itm) {
+                        Text t = Text.render(configuration.getShortName(itm.name) + " (" + itm.name.substring(0, itm.name.lastIndexOf('/')) + ")");
+                        Tex T = t.tex();
+                        g.image(T, new Coord(2, 2), t.sz());
+                        T.dispose();
+                    }
+                };
+                selectedstoragesearch = new ResizableTextEntry(selectedstoragelbox.sz.x, "") {
+                    @Override
+                    public void changed() {
                         update();
-                        return (true);
-                    } else {
-                        return (super.mousedown(mc, btn));
                     }
-                }
 
-                public void update() {
-                    selectedstoragelbox.items.clear();
-                    for (CheckListboxItem i : selectedstoragelist) {
-                        if (i.name.toLowerCase().contains(text().toLowerCase()))
-                            selectedstoragelbox.items.add(i);
+                    @Override
+                    public boolean mousedown(Coord mc, int btn) {
+                        if (btn == 3) {
+                            settext("");
+                            update();
+                            return (true);
+                        } else {
+                            return (super.mousedown(mc, btn));
+                        }
                     }
-                    selectedstoragelbox.items.sort(listboxsort());
-                }
-            };
-            wva.add(selectedstoragelbox);
-            wva.add(selectedstoragesearch);
-            pack();
-        }};
+
+                    public void update() {
+                        selectedstoragelbox.items.clear();
+                        for (CheckListboxItem i : selectedstoragelist) {
+                            if (i.name.toLowerCase().contains(text().toLowerCase()))
+                                selectedstoragelbox.items.add(i);
+                        }
+                        selectedstoragelbox.items.sort(listboxsort());
+                    }
+                };
+                wva.add(selectedstoragelbox);
+                wva.add(selectedstoragesearch);
+                pack();
+            }
+
+            @Override
+            public void reqdestroy() {
+                unlink();
+            }
+        };
         areastorageinfolbl = new Label("");
 
         selecteditembtn = new Button(50, "Item list") {
+            @Override
             public void click() {
                 if (!ui.gui.containschild(selecteditemwnd))
                     ui.gui.add(selecteditemwnd, c.add(parent.c));
                 else
-                    selecteditemwnd.reqdestroy();
+                    selecteditemwnd.unlink();
             }
         };
-        selecteditemwnd = new Window(Coord.z, "Selecting gob") {{
-            WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
-            stringInInvContent().forEach(i -> selecteditemlist.add(new CheckListboxItem(i)));
-            selecteditemlbox = new CheckListbox(100, 10) {
-                protected void itemclick(CheckListboxItem itm, int button) {
-                    if (!isblocked()) {
-                        if (button == 3) {
-                            selecteditemlist.remove(itm);
-                            selecteditemlbox.items.remove(itm);
-                            addeditemlist.remove(itm.name);
-                        } else {
-                            super.itemclick(itm, button);
-                        }
-                        for (CheckListboxItem i : selecteditemlist) {
-                            if (i.name.equals(itm.name)) {
-                                i.selected = itm.selected;
-                                break;
+        selecteditemwnd = new Window(Coord.z, "Selecting gob") {
+            {
+                WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
+                stringInInvContent().forEach(i -> selecteditemlist.add(new CheckListboxItem(i)));
+                selecteditemlbox = new CheckListbox(100, 10) {
+                    @Override
+                    protected void itemclick(CheckListboxItem itm, int button) {
+                        if (!isblocked()) {
+                            if (button == 3) {
+                                selecteditemlist.remove(itm);
+                                selecteditemlbox.items.remove(itm);
+                                addeditemlist.remove(itm.name);
+                            } else {
+                                super.itemclick(itm, button);
                             }
+                            for (CheckListboxItem i : selecteditemlist) {
+                                if (i.name.equals(itm.name)) {
+                                    i.selected = itm.selected;
+                                    break;
+                                }
+                            }
+                            items.sort(listboxsort());
+                            updateinfo("item");
                         }
-                        items.sort(listboxsort());
-                        updateinfo("item");
                     }
-                }
-            };
-            selecteditemlbox.items.addAll(selecteditemlist);
-            selecteditemlbox.items.sort(listboxsort());
-            selecteditemsearch = new ResizableTextEntry(selecteditemlbox.sz.x, "") {
-                public void changed() {
-                    update();
-                }
-
-                public boolean mousedown(Coord mc, int btn) {
-                    if (btn == 3) {
-                        settext("");
+                };
+                selecteditemlbox.items.addAll(selecteditemlist);
+                selecteditemlbox.items.sort(listboxsort());
+                selecteditemsearch = new ResizableTextEntry(selecteditemlbox.sz.x, "") {
+                    @Override
+                    public void changed() {
                         update();
-                        return (true);
-                    } else {
-                        return (super.mousedown(mc, btn));
                     }
-                }
 
-                public void update() {
-                    selecteditemlbox.items.clear();
-                    for (CheckListboxItem i : selecteditemlist) {
-                        if (i.name.toLowerCase().contains(text().toLowerCase()))
-                            selecteditemlbox.items.add(i);
-                    }
-                    selecteditemlbox.items.sort(listboxsort());
-                }
-
-                public void tick(double dt) {
-                    super.tick(dt);
-                    if (!isblocked()) {
-                        updateitemlist();
-                        update();
-                        int w = calcWidthCheckListbox(selecteditemlist);
-                        if (selecteditemlbox.sz.x != w)
-                            selecteditemlbox.resize(w, selectedgoblbox.sz.y);
-                        selecteditemwnd.pack();
-                    }
-                }
-            };
-            selecteditemaddtext = new ResizableTextEntry(selecteditemlbox.sz.x / 2, "") {
-                public boolean mousedown(Coord mc, int btn) {
-                    if (!isblocked()) {
+                    @Override
+                    public boolean mousedown(Coord mc, int btn) {
                         if (btn == 3) {
                             settext("");
+                            update();
                             return (true);
-                        }
-                    }
-                    return (super.mousedown(mc, btn));
-                }
-
-                public boolean type(char c, KeyEvent ev) {
-                    if (!isblocked()) {
-                        if (c == '\n' && !text().equals("")) {
-                            addeditemlist.add(text());
                         } else {
-                            return buf.key(ev);
+                            return (super.mousedown(mc, btn));
                         }
                     }
-                    return (true);
-                }
-            };
-            selecteditemaddbtn = new Button(50, "Add") {
-                public void click() {
-                    if (!isblocked()) {
-                        if (!selecteditemaddtext.text().equals("")) {
-                            addeditemlist.add(selecteditemaddtext.text());
+
+                    public void update() {
+                        selecteditemlbox.items.clear();
+                        for (CheckListboxItem i : selecteditemlist) {
+                            if (i.name.toLowerCase().contains(text().toLowerCase()))
+                                selecteditemlbox.items.add(i);
+                        }
+                        selecteditemlbox.items.sort(listboxsort());
+                    }
+
+                    @Override
+                    public void tick(double dt) {
+                        super.tick(dt);
+                        if (!isblocked()) {
+                            updateitemlist();
+                            update();
+                            int w = calcWidthCheckListbox(selecteditemlist);
+                            if (selecteditemlbox.sz.x != w)
+                                selecteditemlbox.resize(w, selectedgoblbox.sz.y);
+                            selecteditemwnd.pack();
                         }
                     }
-                }
-            };
-            wva.add(selecteditemlbox);
-            wva.add(selecteditemsearch);
-            wva.addRow(selecteditemaddtext, selecteditemaddbtn);
-            pack();
-        }};
+                };
+                selecteditemaddtext = new ResizableTextEntry(selecteditemlbox.sz.x / 2, "") {
+                    @Override
+                    public boolean mousedown(Coord mc, int btn) {
+                        if (!isblocked()) {
+                            if (btn == 3) {
+                                settext("");
+                                return (true);
+                            }
+                        }
+                        return (super.mousedown(mc, btn));
+                    }
+
+                    @Override
+                    public boolean type(char c, KeyEvent ev) {
+                        if (!isblocked()) {
+                            if (c == '\n' && !text().equals("")) {
+                                addeditemlist.add(text());
+                            } else {
+                                return buf.key(ev);
+                            }
+                        }
+                        return (true);
+                    }
+                };
+                selecteditemaddbtn = new Button(50, "Add") {
+                    @Override
+                    public void click() {
+                        if (!isblocked()) {
+                            if (!selecteditemaddtext.text().equals("")) {
+                                addeditemlist.add(selecteditemaddtext.text());
+                            }
+                        }
+                    }
+                };
+                wva.add(selecteditemlbox);
+                wva.add(selecteditemsearch);
+                wva.addRow(selecteditemaddtext, selecteditemaddbtn);
+                pack();
+            }
+
+            @Override
+            public void reqdestroy() {
+                unlink();
+            }
+        };
         iteminfolbl = new Label("");
         updateinfo("item");
 
         runbtn = new Button(50, "Run") {
+            @Override
             public void click() {
                 (runthread = new Thread(AreaPicker.this, "Area Collecting")).start();
             }
         };
         stopbtn = new Button(50, "Stop") {
+            @Override
             public void click() {
                 try {
                     stop();
@@ -518,6 +591,7 @@ public class AreaPicker extends Window implements Runnable {
             }
         };
         pausumebtn = new Button(50, "Pause") {
+            @Override
             public void click() {
                 if (runthread.isAlive()) {
                     if (runthread.isInterrupted()) {
@@ -526,6 +600,295 @@ public class AreaPicker extends Window implements Runnable {
                         pause();
                     }
                 }
+            }
+        };
+
+        loadbtn = new Button(50, "Load") {
+            final List<Pair<Button, Button>> rows = new ArrayList<>();
+
+            private void acceptTask(final String name, final Object task) {
+                if (task instanceof JSONObject) {
+                    JSONObject object = (JSONObject) task;
+
+                    boolean dirty = false;
+
+                    if (object.has("Gobs")) {
+                        final List<String> gobs = new ArrayList<>();
+                        Object obj = object.get("Gobs");
+                        if (obj instanceof JSONArray) {
+                            ((JSONArray) obj).forEach(i -> gobs.add(i.toString()));
+                        } if (obj instanceof List) {
+                            ((List) obj).forEach(i -> gobs.add(i.toString()));
+                        }
+
+                        final List<String> temp = new ArrayList<>();
+                        final List<CheckListboxItem> outch = new ArrayList<>();
+                        gobs.forEach(i -> {
+                            CheckListboxItem ch = selectedgoblist.stream().filter(s -> s.name.equals(i)).findFirst().orElse(null);
+                            if (ch == null) {
+                                ch = new CheckListboxItem(i);
+                                selectedgoblist.add(ch);
+                                outch.add(ch);
+                            }
+                            ch.selected = true;
+                        });
+                        selectedgoblist.stream().map(i -> i.name).forEach(i -> temp.add(configuration.getShortName(i) + " (" + i.substring(0, i.lastIndexOf('/')) + ")"));
+                        selectedgoblbox.items.addAll(outch);
+                        selectedgoblbox.resize(calcWidthString(temp), selectedgoblbox.sz.y);
+                        selectedgobwnd.pack();
+                        selectedgobsearch.settext("");
+                        if (selectedgoblbox.items.size() > 0) selectedgobbtn.change(Color.GREEN);
+                        else selectedgobbtn.change(Color.RED);
+
+                        updatelist("gob");
+                        updateinfo("gob");
+                        dirty = true;
+                    }
+
+                    if (object.has("Flower")) {
+                        final List<String> petals = new ArrayList<>();
+                        Object obj = object.get("Flower");
+                        if (obj instanceof JSONArray) {
+                            ((JSONArray) obj).forEach(i -> petals.add(i.toString()));
+                        } if (obj instanceof List) {
+                            ((List) obj).forEach(i -> petals.add(i.toString()));
+                        }
+
+                        final List<String> temp = new ArrayList<>();
+                        final List<CheckListboxItem> outch = new ArrayList<>();
+
+                        petals.forEach(i -> {
+                            CheckListboxItem ch = selectedflowerlist.stream().filter(s -> s.name.equals(i)).findFirst().orElse(null);
+                            if (ch == null) {
+                                ch = new CheckListboxItem(i);
+                                selectedflowerlist.add(ch);
+                                outch.add(ch);
+                            }
+                            ch.selected = true;
+                        });
+
+                        selectedflowerlist.stream().map(i -> i.name).forEach(s -> {
+                            String loc = Resource.language.equals("en") ? s : Resource.getLocString(Resource.BUNDLE_FLOWER, s);
+                            temp.add(Resource.language.equals("en") ? s : loc.equals(s) ? s : s + " (" + Resource.getLocString(Resource.BUNDLE_FLOWER, s) + ")");
+                        });
+
+                        selectedflowerlbox.items.addAll(outch);
+                        selectedflowerlbox.items.sort(listboxsort());
+                        selectedflowerlbox.resize(calcWidthString(temp), selectedflowerlbox.sz.y);
+                        selectedflowerwnd.pack();
+                        selectedflowersearch.settext("");
+
+                        updateinfo("flower");
+                        dirty = true;
+                    }
+
+                    if (object.has("Type")) {
+                        final int type = object.getInt("Type");
+                        collecttriggerdbx.change(type);
+
+                        if (type == 2 || type == 3) {
+                            if (object.has("Storages")) {
+                                final List<String> storages = new ArrayList<>();
+                                Object obj = object.get("Storages");
+                                if (obj instanceof JSONArray) {
+                                    ((JSONArray) obj).forEach(i -> storages.add(i.toString()));
+                                } if (obj instanceof List) {
+                                    ((List) obj).forEach(i -> storages.add(i.toString()));
+                                }
+
+                                final List<String> temp = new ArrayList<>();
+                                final List<CheckListboxItem> outch = new ArrayList<>();
+                                storages.forEach(i -> {
+                                    CheckListboxItem ch = selectedstoragelist.stream().filter(s -> s.name.equals(i)).findFirst().orElse(null);
+                                    if (ch == null) {
+                                        ch = new CheckListboxItem(i);
+                                        selectedstoragelist.add(ch);
+                                        outch.add(ch);
+                                    }
+                                    ch.selected = true;
+                                });
+                                selectedstoragelist.stream().map(i -> i.name).forEach(i -> temp.add(configuration.getShortName(i) + " (" + i.substring(0, i.lastIndexOf('/')) + ")"));
+                                selectedstoragelbox.items.addAll(outch);
+                                selectedstoragelbox.resize(calcWidthString(temp), selectedstoragelbox.sz.y);
+                                selectedstoragewnd.pack();
+                                selectedstoragesearch.settext("");
+                                if (selectedstoragelbox.items.size() > 0) selectedstoragebtn.change(Color.GREEN);
+                                else selectedstoragebtn.change(Color.RED);
+
+                                updatelist("storage");
+                                updateinfo("storage");
+                                dirty = true;
+                            }
+
+                            if (object.has("Items")) {
+                                final List<String> items = new ArrayList<>();
+                                Object obj = object.get("Items");
+                                if (obj instanceof JSONArray) {
+                                    ((JSONArray) obj).forEach(i -> items.add(i.toString()));
+                                } if (obj instanceof List) {
+                                    ((List) obj).forEach(i -> items.add(i.toString()));
+                                }
+
+                                final List<String> temp = new ArrayList<>();
+                                final List<CheckListboxItem> outch = new ArrayList<>();
+                                items.forEach(i -> {
+                                    CheckListboxItem ch = selecteditemlist.stream().filter(s -> s.name.equals(i)).findFirst().orElse(null);
+                                    if (ch == null) {
+                                        ch = new CheckListboxItem(i);
+                                        selecteditemlist.add(ch);
+                                        outch.add(ch);
+                                    }
+                                    ch.selected = true;
+                                });
+                                selecteditemlist.stream().map(i -> i.name).forEach(i -> temp.add(i)); //XXX
+                                selecteditemlbox.items.addAll(outch);
+                                selecteditemlbox.items.sort(listboxsort());
+                                selecteditemlbox.resize(calcWidthString(temp), selecteditemlbox.sz.y);
+                                selecteditemwnd.pack();
+                                selecteditemsearch.settext("");
+
+                                updateinfo("item");
+                                dirty = true;
+                            }
+                        }
+                    }
+
+                    if (dirty) AreaPicker.this.pack();
+
+                    debugLogPing(String.format("Task %s is loaded", name), Color.GREEN);
+                }
+            }
+
+            private void removeTask(final Window w, final JSONObject object, final String name) {
+                if (object.has(name)) {
+                    object.remove(name);
+                    configuration.savejson("AreaPickerTasks.json", object);
+                }
+                redrawRows(w, object);
+            }
+
+            private void redrawRows(final Window w, final JSONObject object) {
+                rows.forEach(row -> {
+                    row.a.reqdestroy();
+                    row.b.reqdestroy();
+                });
+                rows.clear();
+
+                WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
+                for (String name : object.keySet().stream().sorted(String::compareToIgnoreCase).collect(Collectors.toList())) {
+                    final Button btn = new Button(50, name, () -> acceptTask(name, object.get(name)));
+                    final Button cl = new Button(24, "X", () -> removeTask(w, object, name));
+                    rows.add(new Pair<>(btn, cl));
+                    wva.addRow(btn, cl);
+                }
+
+                w.pack();
+            }
+
+            @Override
+            public void click() {
+                Optional.ofNullable(getparent(GameUI.class)).ifPresent(gui -> {
+                    JSONObject object = resources.areaTasksJson;
+
+                    if (object.length() > 0) {
+                        Window w = new Window(Coord.z, "Area Picker Tasks");
+
+                        redrawRows(w, object);
+
+                        gui.add(w, c.add(parent.c));
+                    } else {
+                        debugLogPing("Tasks not found. Please add first", Color.RED);
+                    }
+                });
+            }
+        };
+        savebtn = new Button(50, "Save") {
+            @Override
+            public void click() {
+                Optional.ofNullable(getparent(GameUI.class)).ifPresent(gui -> {
+                    JSONObject object = resources.areaTasksJson;
+                    Window w = new Window(Coord.z, "New task");
+                    Consumer<String> run = name -> {
+                        JSONObject task = new JSONObject();
+                        if (!selectedgoblist.isEmpty()) {
+                            final List<String> gobs = selectedgoblist.stream().filter(ch -> ch.selected).map(ch -> ch.name).collect(Collectors.toList());
+                            if (!gobs.isEmpty()) task.put("Gobs", gobs);
+                        }
+                        if (!selectedflowerlist.isEmpty()) {
+                            final List<String> petals = selectedflowerlist.stream().filter(ch -> ch.selected).map(ch -> ch.name).collect(Collectors.toList());
+                            if (!petals.isEmpty()) task.put("Flower", petals);
+                        }
+                        final int index = collecttriggerdbx.selindex;
+                        if (index != -1) {
+                            task.put("Type", index);
+
+                            if (index == 2 || index == 3) {
+                                if (!selectedstoragelist.isEmpty()) {
+                                    final List<String> storages = selectedstoragelist.stream().filter(ch -> ch.selected).map(ch -> ch.name).collect(Collectors.toList());
+                                    if (!storages.isEmpty()) task.put("Storages", storages);
+                                }
+
+                                if (!selecteditemlist.isEmpty()) {
+                                    final List<String> items = selecteditemlist.stream().filter(ch -> ch.selected).map(ch -> ch.name).collect(Collectors.toList());
+                                    if (!items.isEmpty()) task.put("Items", items);
+                                }
+                            }
+                        }
+
+                        if (task.length() > 0) {
+                            object.put(name, task);
+                            configuration.savejson("AreaPickerTasks.json", object);
+                            debugLogPing(String.format("Task %s is saved", name), Color.GREEN);
+                            w.close();
+                        } else {
+                            debugLogPing(String.format("Task %s is empty. Not saved", name), Color.RED);
+                        }
+                    };
+                    Consumer<String> check = name -> {
+                        if (object.has(name)) {
+                            Window rw = new Window(Coord.z, "Rewrite task?");
+                            WidgetVerticalAppender wva = new WidgetVerticalAppender(rw);
+                            wva.addRow(new Button(45, "Yes") {
+                                @Override
+                                public void click() {
+                                    run.accept(name);
+                                    rw.close();
+                                }
+                            }, new Button(45, "No") {
+                                @Override
+                                public void click() {
+                                    rw.close();
+                                }
+                            });
+                            rw.pack();
+                            gui.adda(rw, gui.sz.div(2), 0.5, 0.5);
+                        } else {
+                            run.accept(name);
+
+                        }
+                    };
+                    WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
+                    wva.add(new Label("Set task name:"));
+                    final TextEntry value = new TextEntry(150, "") {
+                        @Override
+                        public void activate(String text) {
+                            if (!text.isEmpty()) {
+                                check.accept(text);
+                            }
+                        }
+                    };
+                    wva.addRow(value, new Button(45, "Save") {
+                        @Override
+                        public void click() {
+                            final String text = value.text();
+                            if (!text.isEmpty()) {
+                                check.accept(text);
+                            }
+                        }
+                    });
+                    w.pack();
+                    gui.adda(w, gui.sz.div(2), 0.5, 0.5);
+                });
             }
         };
 
@@ -538,20 +901,24 @@ public class AreaPicker extends Window implements Runnable {
         appender.addRow(l4 = new Label("4. Objects to storage"), selectstoragebtn, selectedstoragebtn, areastorageinfolbl);
         appender.addRow(l5 = new Label("5. Items for storage"), selecteditembtn, iteminfolbl);
 
-        appender.addRow(runbtn, pausumebtn);
+        appender.addRow(runbtn, loadbtn, savebtn);
         add(stopbtn, runbtn.c);
+        add(pausumebtn, loadbtn.c);
         stopbtn.hide();
         pausumebtn.hide();
 
         pack();
     }
 
+    @Override
     public void run() {
         if (checkcollectstate() == -2 || checkcollectstate() == 3) {
             debugLogPing("Select another storage type", Color.WHITE);
             return;
         }
         runbtn.hide();
+        loadbtn.hide();
+        savebtn.hide();
         stopbtn.show();
         pausumebtn.change("Pause");
         pausumebtn.show();
@@ -564,9 +931,11 @@ public class AreaPicker extends Window implements Runnable {
 
         collecting();
 
-        runbtn.show();
         stopbtn.hide();
         pausumebtn.hide();
+        runbtn.show();
+        loadbtn.show();
+        savebtn.show();
         if (ad) Config.autodrink = true;
         if (af) configuration.autoflower = true;
         block(false);
@@ -575,8 +944,8 @@ public class AreaPicker extends Window implements Runnable {
 
     public void collecting() {
         try {
-            List<PBotGob> storages = new ArrayList<>(currentstoragelist);
-            List<PBotGob> objects = new ArrayList<>(currentgoblist);
+            final List<PBotGob> storages = new ArrayList<>(currentstoragelist);
+            final List<PBotGob> objects = new ArrayList<>(currentgoblist);
             byte cr = checkcollectstate();
             for (int p = 1; objects.size() > 0; p++) {
                 pauseCheck();
@@ -617,7 +986,7 @@ public class AreaPicker extends Window implements Runnable {
                         }
                         PBotItem bigitem = getMaxSizeItem(getInvItems(selecteditemlist));
                         if (bigitem != null && PBotUtils.playerInventory(ui).freeSpaceForItem(bigitem) == null) {
-                            storages = storaging(storages);
+                            storaging(storages);
                         }
                     }
                     if (PBotGobAPI.findGobById(ui, pgob.getGobId()) == null) {
@@ -654,7 +1023,7 @@ public class AreaPicker extends Window implements Runnable {
                                         debugLog("hourglass timeout", Color.WHITE);
                                     else if (wr == 2) {
                                         debugLog("hourglass stopped. folding", Color.WHITE);
-                                        storages = storaging(storages);
+                                        storaging(storages);
                                     }
                                 } else {
                                     if (!closeFlowermenu()) {
@@ -711,8 +1080,12 @@ public class AreaPicker extends Window implements Runnable {
         debugLogPing("Finish!", Color.GREEN);
     }
 
-    public List<PBotGob> storaging(List<PBotGob> storages) throws InterruptedException {
-        List<PBotGob> output = new ArrayList<>(storages);
+    public void storaging(final List<PBotGob> storages) throws InterruptedException {
+        final List<PBotGob> output = new ArrayList<>(storages);
+        Runnable finish = () -> {
+            storages.clear();
+            storages.addAll(output);
+        };
         for (int p = 0; p < storages.size(); p++) {
             for (int i = 0; ; i++) {
                 pauseCheck();
@@ -722,7 +1095,7 @@ public class AreaPicker extends Window implements Runnable {
                     break;
                 }
                 mark(storages.get(p));
-                List<Window> ow = invWindows();
+                final List<Window> ow = invWindows();
                 if (pfRightClick(storages.get(p))) {
                     Window w = waitForNewInvWindow(ow);
                     if (w != null) {
@@ -730,7 +1103,7 @@ public class AreaPicker extends Window implements Runnable {
                         ISBox isBox = w.getchild(ISBox.class);
                         if (wi != null) {
                             if (wi.freeSlotsInv() > 0) {
-                                List<PBotItem> items = getInvItems(selecteditemlist);
+                                final List<PBotItem> items = getInvItems(selecteditemlist);
                                 for (PBotItem pitem : items) {
                                     if (!PBotUtils.playerInventory(ui).inv.containschild(pitem.gitem)) continue;
                                     if (wi.freeSlotsInv() == 0) {
@@ -747,7 +1120,8 @@ public class AreaPicker extends Window implements Runnable {
                                 if (getInvItems(selecteditemlist).size() == 0) {
                                     PBotWindowAPI.closeWindow(w);
                                     waitForWindowClose(w);
-                                    return (output);
+                                    finish.run();
+                                    return;
                                 }
                             }
                             if (wi.freeSlotsInv() == 0) {
@@ -758,7 +1132,7 @@ public class AreaPicker extends Window implements Runnable {
                             }
                         } else if (isBox != null) {
                             if (isBox.getfreespace() > 0) {
-                                List<PBotItem> items = getInvItems(selecteditemlist);
+                                final List<PBotItem> items = getInvItems(selecteditemlist);
                                 for (PBotItem pitem : items) {
                                     if (!PBotUtils.playerInventory(ui).inv.containschild(pitem.gitem)) continue;
                                     if (isBox.getfreespace() == 0) {
@@ -775,7 +1149,8 @@ public class AreaPicker extends Window implements Runnable {
                                 if (getInvItems(selecteditemlist).size() == 0) {
                                     PBotWindowAPI.closeWindow(w);
                                     waitForWindowClose(w);
-                                    return (output);
+                                    finish.run();
+                                    return;
                                 }
                             }
                             if (isBox.getfreespace() == 0) {
@@ -792,7 +1167,7 @@ public class AreaPicker extends Window implements Runnable {
                 sleep(1);
             }
         }
-        return (output);
+        finish.run();
     }
 
 
@@ -902,7 +1277,7 @@ public class AreaPicker extends Window implements Runnable {
 
 
     public boolean checkFlowerMenu(PBotGob pgob) throws InterruptedException {
-        ArrayList<String> temp = new ArrayList<>();
+        final List<String> temp = new ArrayList<>();
         for (CheckListboxItem item : selectedflowerlist)
             if (item.selected)
                 temp.add(item.name);
@@ -933,7 +1308,7 @@ public class AreaPicker extends Window implements Runnable {
 
     public boolean choosePetal() throws InterruptedException {
         debugLog("petal choosing...", Color.WHITE);
-        ArrayList<String> temp = new ArrayList<>();
+        final List<String> temp = new ArrayList<>();
         for (CheckListboxItem item : selectedflowerlist)
             if (item.selected)
                 temp.add(item.name);
@@ -1103,10 +1478,10 @@ public class AreaPicker extends Window implements Runnable {
     }
 
 
-    public Window waitForNewInvWindow(List<Window> ows) throws InterruptedException {//FIXME stockpile and barrel
+    public Window waitForNewInvWindow(final List<Window> ows) throws InterruptedException {//FIXME stockpile and barrel
         debugLog("inventory window opening waiting...", Color.WHITE);
         for (int i = 0, sleep = 10; i < waitingtime; i += sleep) {
-            List<Window> iwnds = invWindows();
+            final List<Window> iwnds = invWindows();
             if (ows.size() < iwnds.size()) {
                 for (Window iw : iwnds) {
                     boolean eq = false;
@@ -1143,7 +1518,7 @@ public class AreaPicker extends Window implements Runnable {
     }
 
     public List<Window> invWindows() {
-        List<Window> iwnds = new ArrayList<>();
+        final List<Window> iwnds = new ArrayList<>();
         for (Window w : ui.gui.getchilds(Window.class)) {
             if (w.getchild(Inventory.class) != null || w.getchild(ISBox.class) != null)
                 iwnds.add(w);
@@ -1157,15 +1532,13 @@ public class AreaPicker extends Window implements Runnable {
             maininfolbl.settext(msg, clr);
             System.out.println("AreaPicker: " + msg);
             ui.gui.debuglog.append(msg, clr);
-        } catch (Exception ignore) {
-        }
+        } catch (Exception ignore) {}
     }
 
     public void debugLogPing(String msg, Color clr) {
         try {
             ui.gui.debugmsg(msg, clr);
-        } catch (Exception ignore) {
-        }
+        } catch (Exception ignore) {}
     }
 
 
@@ -1181,20 +1554,25 @@ public class AreaPicker extends Window implements Runnable {
         @Override
         public void run() {
             selectArea();
-            gobarea[0] = PBotUtils.getSelectedAreaA();
-            gobarea[1] = PBotUtils.getSelectedAreaB();
+            gobarea = new Area(PBotUtils.getSelectedAreaA(), PBotUtils.getSelectedAreaB());
 
             areagoblist.clear();
             areagoblist.addAll(stringInArea(gobarea));
 
-            selectedgoblist.clear();
-            selectedgoblbox.items.clear();
-            ArrayList<String> temp = new ArrayList<>();
-            areagoblist.forEach((i) -> {
-                selectedgoblist.add(new CheckListboxItem(i));
-                temp.add(configuration.getShortName(i) + " (" + i.substring(0, i.lastIndexOf('/')) + ")");
+//            selectedgoblist.clear();
+//            selectedgoblbox.items.clear();
+            final List<String> out = selectedgoblist.stream().map(i -> i.name).collect(Collectors.toList());
+            final List<String> temp = new ArrayList<>();
+            final List<CheckListboxItem> outch = new ArrayList<>();
+            areagoblist.forEach(i -> {
+                if (!out.contains(i)) {
+                    CheckListboxItem ch = new CheckListboxItem(i);
+                    selectedgoblist.add(ch);
+                    outch.add(ch);
+                }
             });
-            selectedgoblbox.items.addAll(selectedgoblist);
+            selectedgoblist.stream().map(i -> i.name).forEach(i -> temp.add(configuration.getShortName(i) + " (" + i.substring(0, i.lastIndexOf('/')) + ")"));
+            selectedgoblbox.items.addAll(outch);
             selectedgoblbox.resize(calcWidthString(temp), selectedgoblbox.sz.y);
             selectedgobwnd.pack();
             selectedgobsearch.settext("");
@@ -1213,20 +1591,25 @@ public class AreaPicker extends Window implements Runnable {
         @Override
         public void run() {
             selectArea();
-            storagearea[0] = PBotUtils.getSelectedAreaA();
-            storagearea[1] = PBotUtils.getSelectedAreaB();
+            storagearea = new Area(PBotUtils.getSelectedAreaA(), PBotUtils.getSelectedAreaB());
 
             areastoragelist.clear();
             areastoragelist.addAll(stringInArea(storagearea));
 
-            selectedstoragelist.clear();
-            selectedstoragelbox.items.clear();
-            ArrayList<String> temp = new ArrayList<>();
+//            selectedstoragelist.clear();
+//            selectedstoragelbox.items.clear();
+            final List<String> out = selectedstoragelist.stream().map(i -> i.name).collect(Collectors.toList());
+            final List<String> temp = new ArrayList<>();
+            final List<CheckListboxItem> outch = new ArrayList<>();
             areastoragelist.forEach((i) -> {
-                selectedstoragelist.add(new CheckListboxItem(i));
-                temp.add(configuration.getShortName(i) + " (" + i.substring(0, i.lastIndexOf('/')) + ")");
+                if (!out.contains(i)) {
+                    CheckListboxItem ch = new CheckListboxItem(i);
+                    selectedstoragelist.add(ch);
+                    outch.add(ch);
+                }
             });
-            selectedstoragelbox.items.addAll(selectedstoragelist);
+            selectedstoragelist.stream().map(i -> i.name).forEach(i -> temp.add(configuration.getShortName(i) + " (" + i.substring(0, i.lastIndexOf('/')) + ")"));
+            selectedstoragelbox.items.addAll(outch);
             selectedstoragelbox.resize(calcWidthString(temp), selectedstoragelbox.sz.y);
             selectedstoragewnd.pack();
             selectedstoragesearch.settext("");
@@ -1247,7 +1630,7 @@ public class AreaPicker extends Window implements Runnable {
 
 
     public boolean freeSlots() throws InterruptedException {
-        //botLog("free slots checking...", Color.WHITE);
+//        debugLog("free slots checking...", Color.WHITE);
         boolean free = false;
         int slots = -1;
         while (slots == -1) {
@@ -1269,9 +1652,9 @@ public class AreaPicker extends Window implements Runnable {
             slots = allSlots - takenSlots;
 
             if (slots > 0) free = true;
-            //botLog("free slots checked " + slots, Color.WHITE);
+//            debugLog("free slots checked " + slots, Color.WHITE);
         }
-        //botLog("free slots " + free, Color.WHITE);
+//        debugLog("free slots " + free, Color.WHITE);
         return free;
     }
 
@@ -1287,8 +1670,8 @@ public class AreaPicker extends Window implements Runnable {
         return (false);
     }
 
-    public List<PBotItem> getInvItems(List<CheckListboxItem> clist) {
-        List<String> list = new ArrayList<>();
+    public List<PBotItem> getInvItems(final List<CheckListboxItem> clist) {
+        final List<String> list = new ArrayList<>();
         for (CheckListboxItem i : clist) {
             if (i.selected)
                 list.add(i.name);
@@ -1296,7 +1679,7 @@ public class AreaPicker extends Window implements Runnable {
         return PBotUtils.playerInventory(ui).getInventoryContainsResnames(list);
     }
 
-    public PBotItem getMaxSizeItem(List<PBotItem> list) {
+    public PBotItem getMaxSizeItem(final List<PBotItem> list) {
         PBotItem big = null;
         for (PBotItem i : list) {
             if (i != null) {
@@ -1322,8 +1705,8 @@ public class AreaPicker extends Window implements Runnable {
         return (-2);
     }
 
-    public ArrayList<String> checkflowers() {
-        ArrayList<String> temp = new ArrayList<>();
+    public List<String> checkflowers() {
+        final List<String> temp = new ArrayList<>();
         for (CheckListboxItem item : selectedflowerlist) {
             if (item.selected)
                 temp.add(item.name);
@@ -1331,8 +1714,8 @@ public class AreaPicker extends Window implements Runnable {
         return (temp);
     }
 
-    public ArrayList<String> checkitems() {
-        ArrayList<String> temp = new ArrayList<>();
+    public List<String> checkitems() {
+        final List<String> temp = new ArrayList<>();
         for (CheckListboxItem item : selecteditemlist) {
             if (item.selected)
                 temp.add(item.name);
@@ -1340,9 +1723,9 @@ public class AreaPicker extends Window implements Runnable {
         return (temp);
     }
 
-    public List<String> stringInArea(Coord[] a) {
-        List<PBotGob> gobs = PBotUtils.gobsInArea(ui, a[0], a[1]);
-        List<String> strings = new ArrayList<>();
+    public List<String> stringInArea(final Area a) {
+        final List<PBotGob> gobs = PBotUtils.gobsInArea(ui, a.ul, a.br);
+        final List<String> strings = new ArrayList<>();
 
         for (PBotGob pgob : gobs) {
             if (pgob.getResname() != null && !strings.contains(pgob.getResname()))
@@ -1353,15 +1736,15 @@ public class AreaPicker extends Window implements Runnable {
     }
 
     public List<String> stringInInvContent() {
-        ArrayList<String> strings = new ArrayList<>();
-        ArrayList<PBotInventory> ret = new ArrayList<>();
+        final List<String> strings = new ArrayList<>();
+        final List<PBotInventory> ret = new ArrayList<>();
         for (Widget window = ui.gui.lchild; window != null; window = window.prev)
             if (window instanceof Window && !((Window) window).origcap.equalsIgnoreCase("Belt"))
                 for (Widget wdg = window.lchild; wdg != null; wdg = wdg.prev)
                     if (wdg instanceof Inventory)
                         ret.add(new PBotInventory((Inventory) wdg));
         for (PBotInventory inv : ret) {
-            List<PBotItem> items = inv.getInventoryContents();
+            final List<PBotItem> items = inv.getInventoryContents();
             for (PBotItem ptem : items) {
                 if (ptem.getResname() != null && !strings.contains(ptem.getResname()))
                     strings.add(ptem.getResname());
@@ -1371,7 +1754,7 @@ public class AreaPicker extends Window implements Runnable {
     }
 
     public void updateitemlist() {
-        List<String> items = stringInInvContent();
+        final List<String> items = stringInInvContent();
         for (String s : items) {
             boolean contains = false;
             for (CheckListboxItem i : selecteditemlist) {
@@ -1396,22 +1779,24 @@ public class AreaPicker extends Window implements Runnable {
         }
     }
 
-    public void areainfo(Label lbl, Coord[] area, List<CheckListboxItem> checklist) {
-        StringBuilder sb = new StringBuilder();
-        int x = Math.abs(area[1].x - area[0].x) / 11;
-        int y = Math.abs(area[1].y - area[0].y) / 11;
-        sb.append("Area ").append(x).append("x").append(y);
-        if (!checklist.isEmpty()) {
-            sb.append(" : ");
-            int o = 0;
-            for (CheckListboxItem item : checklist)
-                if (item.selected)
-                    o += currentList(PBotUtils.gobsInArea(ui, area[0], area[1]), item.name).size();
-            sb.append(o).append(" selected objects");
-        }
-        if (lbl != null) {
-            lbl.settext(sb.toString());
-            pack();
+    public void areainfo(Label lbl, final Area area, final List<CheckListboxItem> checklist) {
+        if (area != null) {
+            StringBuilder sb = new StringBuilder();
+            int x = Math.abs(area.br.x - area.ul.x) / 11;
+            int y = Math.abs(area.br.y - area.ul.y) / 11;
+            sb.append("Area ").append(x).append("x").append(y);
+            if (!checklist.isEmpty()) {
+                sb.append(" : ");
+                int o = 0;
+                for (CheckListboxItem item : checklist)
+                    if (item.selected)
+                        o += currentList(PBotUtils.gobsInArea(ui, area.ul, area.br), item.name).size();
+                sb.append(o).append(" selected objects");
+            }
+            if (lbl != null) {
+                lbl.settext(sb.toString());
+                pack();
+            }
         }
     }
 
@@ -1419,9 +1804,11 @@ public class AreaPicker extends Window implements Runnable {
         switch (type) {
             case "gob":
                 areainfo(areagobinfolbl, gobarea, selectedgoblist);
+//                pack();
                 break;
             case "storage":
                 areainfo(areastorageinfolbl, storagearea, selectedstoragelist);
+//                pack();
                 break;
             case "flower":
                 flowerpetalsinfolbl.settext(checkflowers().size() > 0 ? checkflowers().toString() : "[Right Click]");
@@ -1437,31 +1824,35 @@ public class AreaPicker extends Window implements Runnable {
     public void updatelist(String type) {
         if (type.equals("gob")) {
             currentgoblist.clear();
-            for (CheckListboxItem item : selectedgoblist) {
-                if (item.selected) {
-                    currentgoblist.addAll(currentList(PBotUtils.gobsInArea(ui, gobarea[0], gobarea[1]), item.name));
+            if (gobarea != null) {
+                for (CheckListboxItem item : selectedgoblist) {
+                    if (item.selected) {
+                        currentgoblist.addAll(currentList(PBotUtils.gobsInArea(ui, gobarea.ul, gobarea.br), item.name));
 //                    currentgoblist.sort((o1, o2) -> {
 //                        Coord2d pc = PBotGobAPI.player(ui).getRcCoords();
 //                        return Double.compare(o1.getRcCoords().dist(pc), o2.getRcCoords().dist(pc));
 //                    });
+                    }
                 }
             }
         } else if (type.equals("storage")) {
             currentstoragelist.clear();
-            for (CheckListboxItem item : selectedstoragelist) {
-                if (item.selected) {
-                    currentstoragelist.addAll(currentList(PBotUtils.gobsInArea(ui, storagearea[0], storagearea[1]), item.name));
+            if (storagearea != null) {
+                for (CheckListboxItem item : selectedstoragelist) {
+                    if (item.selected) {
+                        currentstoragelist.addAll(currentList(PBotUtils.gobsInArea(ui, storagearea.ul, storagearea.br), item.name));
 //                    currentstoragelist.sort((o1, o2) -> {
 //                        Coord2d pc = PBotGobAPI.player(ui).getRcCoords();
 //                        return Double.compare(o1.getRcCoords().dist(pc), o2.getRcCoords().dist(pc));
 //                    });
+                    }
                 }
             }
         }
     }
 
-    public List<PBotGob> currentList(List<PBotGob> list, String item) {
-        List<PBotGob> total = new ArrayList<>();
+    public List<PBotGob> currentList(final List<PBotGob> list, String item) {
+        final List<PBotGob> total = new ArrayList<>();
         for (PBotGob pgob : list) {
             String s = pgob.getResname();
             if (s != null && s.equals(item))
@@ -1470,7 +1861,7 @@ public class AreaPicker extends Window implements Runnable {
         return total;
     }
 
-    public Coord calcDropboxSize(List<String> list) {
+    public Coord calcDropboxSize(final List<String> list) {
         Optional<Integer> ow = list.stream().map((v) -> Text.render(v).sz().x).collect(Collectors.toList()).stream().reduce(Integer::max);
         int w = Dropbox.drop.sz().x + 5;
         if (ow.isPresent() && list.size() > 0)
@@ -1479,7 +1870,7 @@ public class AreaPicker extends Window implements Runnable {
         return new Coord(w, h);
     }
 
-    public int calcWidthCheckListbox(List<CheckListboxItem> list) {
+    public int calcWidthCheckListbox(final List<CheckListboxItem> list) {
         Optional<Integer> ow = list.stream().map((v) -> Text.render(v.name).sz().x).collect(Collectors.toList()).stream().reduce(Integer::max);
         int w = Scrollbar.sflarp.sz().x + CheckListbox.chk.sz().x + 5;
         if (ow.isPresent() && list.size() > 0)
@@ -1487,7 +1878,7 @@ public class AreaPicker extends Window implements Runnable {
         return (w);
     }
 
-    public int calcWidthString(List<String> list) {
+    public int calcWidthString(final List<String> list) {
         Optional<Integer> ow = list.stream().map((v) -> Text.render(v).sz().x).collect(Collectors.toList()).stream().reduce(Integer::max);
         int w = Scrollbar.sflarp.sz().x + CheckListbox.chk.sz().x + 5;
         if (ow.isPresent() && list.size() > 0)
@@ -1502,7 +1893,7 @@ public class AreaPicker extends Window implements Runnable {
         };
     }
 
-    public PBotGob closestGob(List<PBotGob> list) {
+    public PBotGob closestGob(final List<PBotGob> list) {
         double min = Double.MAX_VALUE;
         PBotGob pgob = null;
         Coord2d pc = PBotGobAPI.player(ui).getRcCoords();
@@ -1553,6 +1944,7 @@ public class AreaPicker extends Window implements Runnable {
         return block;
     }
 
+    @Override
     public void draw(GOut g) {
         if (collecttriggerdbx != null && l4 != null && selectstoragebtn != null && selectedstoragebtn != null && areastorageinfolbl != null && l5 != null && selecteditembtn != null && iteminfolbl != null) {
             byte cr = checkcollectstate();
@@ -1577,6 +1969,7 @@ public class AreaPicker extends Window implements Runnable {
         super.draw(g);
     }
 
+    @Override
     public void destroy() {
         super.destroy();
         try {
@@ -1586,7 +1979,7 @@ public class AreaPicker extends Window implements Runnable {
     }
 
 
-//    public Dropbox<String> dropbox(List<String> list, String type) {
+//    public Dropbox<String> dropbox(final List<String> list, String type) {
 //        Coord size = calcDropboxSize(list);
 //        return new Dropbox<String>(size.x, 10, size.y) {
 //            protected String listitem(int i) {

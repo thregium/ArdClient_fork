@@ -88,13 +88,13 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     }
 
     public interface ColorInfo {
-        public Color olcol();
+        Color olcol();
     }
 
     public interface OverlayInfo<T> {
-        public T overlay();
+        T overlay();
 
-        public void drawoverlay(GOut g, T data);
+        void drawoverlay(GOut g, T data);
     }
 
     public static class InfoOverlay<T> {
@@ -117,24 +117,24 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     }
 
     public interface NumberInfo extends OverlayInfo<Tex> {
-        public int itemnum();
+        int itemnum();
 
-        public default Color numcolor() {
+        default Color numcolor() {
             return (Color.WHITE);
         }
 
-        public default Tex overlay() {
+        default Tex overlay() {
             return (new TexI(GItem.NumberInfo.numrender(itemnum(), numcolor())));
         }
 
-        public default void drawoverlay(GOut g, Tex tex) {
+        default void drawoverlay(GOut g, Tex tex) {
             if (configuration.shownumeric) {
                 Coord btm = configuration.infopos(configuration.numericpos, g.sz, tex.sz());
                 g.image(tex, btm);
             }
         }
 
-        public static BufferedImage numrender(int num, Color col) {
+        static BufferedImage numrender(int num, Color col) {
             if (!Config.largeqfont)
                 return Text.renderstroked(num + "", col, Color.BLACK).img;
             else
@@ -143,7 +143,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     }
 
     public interface MeterInfo {
-        public double meter();
+        double meter();
     }
 
 
@@ -439,8 +439,8 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         }
     }
 
-    public static interface ContentsInfo {
-        public void propagate(List<ItemInfo> buf, ItemInfo.Owner outer);
+    public interface ContentsInfo {
+        void propagate(List<ItemInfo> buf, ItemInfo.Owner outer);
     }
 
     /* XXX: Please remove me some time, some day, when custom clients

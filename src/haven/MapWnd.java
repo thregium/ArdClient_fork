@@ -1440,8 +1440,8 @@ public class MapWnd extends ResizableWnd {
                 mremove = tool.add(new Button(200, "Remove", false) {
                     public void click() {
                         view.file.remove(mark);
-                        change2(null);
                         setfocus(MarkerList.this);
+                        change2(null);
                     }
                 });
                 MapWnd.this.resize(asz);
