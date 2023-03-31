@@ -5970,11 +5970,13 @@ public class OptWnd extends Window {
             @Override
             public void change(String item) {
                 super.change(item);
-                resources.defaultUtilsCustomLoginScreenBg = item;
-                Utils.setpref("custom-login-background", item);
-                LoginScreen.bg = resources.bgCheck();
-                if (ui != null && ui.root != null && ui.root.getchild(LoginScreen.class) != null)
-                    ui.uimsg(1, "bg");
+                if (item != null) {
+                    resources.defaultUtilsCustomLoginScreenBg = item;
+                    Utils.setpref("custom-login-background", item);
+                    LoginScreen.bg = resources.bgCheck();
+                    if (ui != null && ui.root != null && ui.root.getchild(LoginScreen.class) != null)
+                        ui.uimsg(1, "bg");
+                }
             }
 
             @Override

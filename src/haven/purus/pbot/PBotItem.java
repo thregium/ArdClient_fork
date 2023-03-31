@@ -2,12 +2,18 @@ package haven.purus.pbot;
 
 import haven.Coord;
 import haven.GItem;
+import haven.Inventory;
 import haven.ItemInfo;
 import haven.Loading;
 import haven.UI;
 import haven.WItem;
+import haven.Widget;
 import haven.res.ui.tt.q.qbuff.QBuff;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class PBotItem {
@@ -45,6 +51,33 @@ public class PBotItem {
         return null;
     }
 
+    //No matter - stack or inventory contents
+    public boolean isStack() {
+        return (gitem.contents != null);
+    }
+
+    public List<PBotItem> getStackContents() {
+        final List<PBotItem> ret = new ArrayList<>();
+        Widget stack = gitem.contents;
+        if (stack != null) {
+            if (stack instanceof Inventory) {
+                for (WItem w : ((Inventory) stack).wmap.values()) {
+                    ret.add(new PBotItem(w));
+                }
+            } else if (stack.getClass().toString().contains("ItemStack")) {
+                try {
+                    Field fwmap = stack.getClass().getField("wmap");
+                    Map<GItem, WItem> wmap = (Map<GItem, WItem>) fwmap.get(stack);
+                    for (WItem w : wmap.values()) {
+                        ret.add(new PBotItem(w));
+                    }
+                } catch (IllegalAccessException | NoSuchFieldException e) {
+                    throw (new RuntimeException(e));
+                }
+            }
+        }
+        return (ret);
+    }
 
     /**
      * Take the item to hand

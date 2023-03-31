@@ -28,6 +28,7 @@ import haven.purus.ItemClickCallback;
 import haven.purus.pbot.gui.PBotWindow;
 import modification.dev;
 import net.dv8tion.jda.core.entities.TextChannel;
+
 import java.awt.Color;
 import java.io.File;
 import java.lang.reflect.Field;
@@ -39,6 +40,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class PBotUtils {
 
@@ -645,15 +647,22 @@ public class PBotUtils {
                     }
                 }
             }
-            Equipory e = ui.gui.getequipory();
-            if (e != null) {
-                for (WItem item : e.slots) {
-                    if (item != null && item.item.contents instanceof Inventory)
-                        ret.add(new PBotInventory((Inventory) item.item.contents));
-                }
+        }
+        Equipory e = ui.gui.getequipory();
+        if (e != null) {
+            for (WItem item : e.slots) {
+                if (item != null && item.item.contents instanceof Inventory)
+                    ret.add(new PBotInventory((Inventory) item.item.contents));
             }
         }
         return ret;
+    }
+
+    public static List<Widget> getAllStacks(UI ui) {
+        return (PBotUtils.getAllInventories(ui).stream().flatMap(i -> i.getInventoryContents().stream()).
+                map(i -> i.gitem).filter(i -> i.contents != null).map(i -> i.contents).filter(s -> s.getClass().toString().contains("ItemStack")).
+                collect(Collectors.toList())
+        );
     }
 
 //    public static ArrayList<PBotInventory> getAllInventories() {
