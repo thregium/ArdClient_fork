@@ -204,15 +204,15 @@ public class Inventory extends Widget implements DTarget {
     public void wdgmsg(Widget sender, String msg, Object... args) {
         final boolean check = args.length > 0 && args[0] instanceof GItem;
         if (check && msg.equals("drop-identical")) {
+            GItem gitem = (GItem) args[0];
             Color colorIdentical = null;
-            for (WItem item : getIdenticalItems((GItem) args[0], false)) {
+            for (WItem item : getIdenticalItems(gitem, false)) {
                 try {
                     if (Config.dropcolor) {
-                        GItem g = (GItem) args[0];
-                        if (g.quality() != null) {
-                            if (g.quality().color != null) {
+                        if (gitem.quality() != null) {
+                            if (gitem.quality().color != null) {
                                 if (colorIdentical == null) {
-                                    colorIdentical = g.quality().color;
+                                    colorIdentical = gitem.quality().color;
                                 }
                                 if (!item.qq.color.equals(colorIdentical)) {
                                     continue;
@@ -230,37 +230,46 @@ public class Inventory extends Widget implements DTarget {
 //            Window smelter = ui.gui.getwnd("Ore Smelter");
 //            Window kiln = ui.gui.getwnd("Kiln");
 //            if (stockpile == null || smelter != null || kiln != null) {
+            GItem gitem = (GItem) args[0];
             boolean eq = msg.endsWith("eq");
-            List<WItem> items = getIdenticalItems((GItem) args[0], eq);
+            List<WItem> items = getIdenticalItems(gitem, eq);
             if (!eq) {
                 int asc = msg.endsWith("asc") ? 1 : -1;
-                items.sort((a, b) -> {
-                    QBuff aq = a.item.quality();
-                    QBuff bq = b.item.quality();
-                    if (aq == null || bq == null)
-                        return 0;
-                    else if (aq.q == bq.q)
-                        return 0;
-                    else if (aq.q > bq.q)
-                        return asc;
-                    else
-                        return -asc;
-                });
+                try {
+                    items.sort((a, b) -> {
+                        QBuff aq = a.item.quality();
+                        QBuff bq = b.item.quality();
+                        if (aq == null || bq == null) {
+                            if (aq == null && bq == null) return (0);
+                            else if (bq == null) return (asc);
+                            else return (-asc);
+                        } else {
+                            if (aq.q == bq.q) return (0);
+                            else if (aq.q > bq.q) return (asc);
+                            else return (-asc);
+                        }
+                    });
+                } catch (final Exception e) {
+                    e.printStackTrace();
+                }
             }
 
             Color colorIdentical = null;
             for (WItem item : items) {
                 try {
                     if (Config.transfercolor) {
-                        GItem g = (GItem) args[0];
-                        if (g.quality() != null) {
-                            if (g.quality().color != null) {
+                        if (gitem.quality() != null) {
+                            if (gitem.quality().color != null) {
                                 if (colorIdentical == null) {
-                                    colorIdentical = g.quality().color;
+                                    colorIdentical = gitem.quality().color;
                                 }
-                                if (!item.qq.color.equals(colorIdentical)) {
+                                if (item.qq == null || !item.qq.color.equals(colorIdentical)) {
                                     continue;
                                 }
+                            }
+                        } else {
+                            if (item.qq != null) {
+                                continue;
                             }
                         }
                     }
