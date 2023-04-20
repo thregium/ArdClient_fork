@@ -218,15 +218,17 @@ public class Pathfinder extends Thread {
                                 List<Double> plist = new ArrayList<>();
                                 for (int j = 0; j < points.length; j++) {
                                     if (Math.min(points[j].y, points[(j + 1) % points.length].y) <= i && i <= Math.max(points[j].y, points[(j + 1) % points.length].y)) {
-                                        Line l = segmentToLine(points[j], points[(j + 1) % points.length]);
-                                        if (l.isVertical())
-                                            plist.add(l.constant);
-                                        else if (l.isHorizontal()) {
-                                            plist.add(Math.min(points[j].x, points[(j + 1) % points.length].x));
-                                            plist.add(Math.max(points[j].x, points[(j + 1) % points.length].x));
-                                        } else {
-                                            plist.add((l.xAtY(i)));
-                                        }
+                                        try {
+                                            Line l = segmentToLine(points[j], points[(j + 1) % points.length]);
+                                            if (l.isVertical())
+                                                plist.add(l.constant);
+                                            else if (l.isHorizontal()) {
+                                                plist.add(Math.min(points[j].x, points[(j + 1) % points.length].x));
+                                                plist.add(Math.max(points[j].x, points[(j + 1) % points.length].x));
+                                            } else {
+                                                plist.add((l.xAtY(i)));
+                                            }
+                                        } catch (final Throwable ignored) {}
                                     }
                                 }
                                 Collections.sort(plist);
@@ -429,7 +431,7 @@ public class Pathfinder extends Thread {
                     }
                     //	gui.map.wdgmsg("click", gob.sc, mc, clickb, modflags, 0, (int) gob.id, gob.rc.floor(posres), 0, meshid);
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 e.printStackTrace();
             }
             break;
