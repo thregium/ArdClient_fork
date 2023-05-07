@@ -27,45 +27,35 @@
 package haven;
 
 import haven.BuddyWnd.GroupSelector;
-import static haven.MCache.cmaps;
-import static haven.MCache.tilesz;
 import haven.MapFile.Marker;
 import haven.MapFile.PMarker;
 import haven.MapFile.SMarker;
 import haven.MapFileWidget.Locator;
 import haven.MapFileWidget.MapLocator;
 import haven.MapFileWidget.SpecLocator;
-import static haven.OCache.posres;
 import haven.purus.pbot.PBotGob;
 import haven.purus.pbot.PBotGobAPI;
+import haven.purus.pbot.PBotUtils;
 import haven.sloth.gob.Type;
 import haven.sloth.gui.DowseWnd;
 import haven.sloth.gui.ResizableWnd;
 import integrations.mapv4.MappingClient;
 import modification.configuration;
-import java.awt.Color;
-import java.awt.Graphics2D;
+
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static haven.MCache.cmaps;
+import static haven.MCache.tilesz;
 
 public class MapWnd extends ResizableWnd {
     public static final Resource markcurs = Resource.local().loadwait("gfx/hud/curs/flag");
@@ -366,6 +356,8 @@ public class MapWnd extends ResizableWnd {
         }
     }
 
+    private boolean fogA = false;
+
     public class ToolBar extends Widget {
         public ToolBar() {
             super(Coord.z);
@@ -573,8 +565,25 @@ public class MapWnd extends ResizableWnd {
             add(oddigeoloc, geoloc.c.add(geoloc.sz.x + spacer, 0));
             final IButton grid = add(new IButton("gfx/hud/wndmap/btns/grid", "Toggle grid on minimap", MapWnd.this::toggleMapGrid),
                     oddigeoloc.c.add(oddigeoloc.sz.x + spacer, 0));
-            final IButton viewdist = add(new IButton("gfx/hud/wndmap/btns/viewdist", "Toggle view range", MapWnd.this::toggleMapViewDist),
-                    grid.c.add(grid.sz.x + spacer, 0));
+            final IButton viewdist = add(new IButton("gfx/hud/wndmap/btns/viewdist", null, MapWnd.this::toggleMapViewDist) {
+                @Override
+                public boolean mouseup(Coord c, int button) {
+                    if (button == 3) {
+                        if (!configuration.savingFogOfWar) {
+                            if (fogA) fogA = false;
+                            else PBotUtils.sysMsg(ui, "First enable the FogOfWar option in the map settings.");
+                        } else fogA = !fogA;
+                        return (true);
+                    } else {
+                        return (super.mouseup(c, button));
+                    }
+                }
+
+                @Override
+                public Object tooltip(Coord c, Widget prev) {
+                    return (RichText.render("Click - Toggle view range" + "\n" + "Right-Click - Display fog of war", 300).tex());
+                }
+            }, grid.c.add(grid.sz.x + spacer, 0));
             final IButton iconbtn = add(new IButton("gfx/hud/wndmap/btns/lbtn-ico", "Icon settings", () -> {
                 GameUI gui = getparent(GameUI.class);
                 if (gui != null) {
@@ -618,6 +627,19 @@ public class MapWnd extends ResizableWnd {
 
         public void drawgrid(GOut g, Coord ul, DisplayGrid disp) {
             super.drawgrid(g, ul, disp);
+            if (fogA) {
+                try {
+                    Tex img = disp.olfog(ui);
+                    if (img != null) {
+                        final Color color = new Color(configuration.fogOfWarColor, true);
+                        g.chcolor(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+                        g.image(img, ul, cmaps.div(scalef()));
+                        g.chcolor();
+                    }
+                } catch (Loading l) {
+                }
+            }
+
             if (!overlays.isEmpty()) {
                 for (String tag : overlays) {
                     try {
@@ -625,6 +647,7 @@ public class MapWnd extends ResizableWnd {
                         if (img != null) {
                             g.chcolor(255, 255, 255, olalpha);
                             g.image(img, ul, cmaps.div(scalef()));
+                            g.chcolor();
                         }
                     } catch (Loading l) {
                     }
@@ -1037,7 +1060,8 @@ public class MapWnd extends ResizableWnd {
                     checkmarks();
                     lastMarkCheck = System.currentTimeMillis();
                 }
-            } catch (Loading l) {}
+            } catch (Loading l) {
+            }
         }
 
         public Object tooltip(Coord c, Widget prev) {

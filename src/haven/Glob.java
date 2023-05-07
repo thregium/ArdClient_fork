@@ -28,26 +28,26 @@ package haven;
 
 //import haven.sloth.script.pathfinding.GobHitmap;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import haven.res.gfx.fx.floatimg.DamageText;
 import haven.sloth.script.pathfinding.GobHitmap;
 import modification.configuration;
-import java.awt.Color;
+import modification.dev;
+
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Observable;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
+
+import static haven.MCache.tilesz;
 
 public class Glob {
     //TODO: Glob should honestly make the ui, not have the UI attach onto it.
@@ -403,7 +403,8 @@ public class Glob {
     }
 
     private void infoUpdate(AtomicReference<Pair<String, Tex>> t, String text, Supplier<Tex> getter) {
-        if (text != null && (t.get().a == null || !t.get().a.equals(text))) t.set(new Pair<>(text, text.isEmpty() ? null : getter.get()));
+        if (text != null && (t.get().a == null || !t.get().a.equals(text)))
+            t.set(new Pair<>(text, text.isEmpty() ? null : getter.get()));
     }
 
     public void blob(Message msg) {
@@ -595,5 +596,100 @@ public class Glob {
                 cattr(nm, base, comp);
             }
         }
+    }
+
+
+    //Map
+    private static final String mapFileName = "fogofwar";
+    public static final Map<Long, List<Coord>> mapList = loadCustomList();
+    private static final ExecutorService mapUploader = Executors.newSingleThreadExecutor();
+    private static final ScheduledExecutorService mapScheduler = Executors.newSingleThreadScheduledExecutor();
+    private static final AtomicBoolean mapDirty = new AtomicBoolean();
+
+    static {
+        mapScheduler.scheduleWithFixedDelay(() -> mapUploader.submit(() -> {
+            try {
+                if (mapDirty.get()) {
+                    Utils.saveCustomList(mapList, mapFileName);
+                    mapDirty.set(false);
+                }
+            } catch (Exception e) {
+                dev.simpleLog(e);
+            }
+        }), 0, 5, TimeUnit.SECONDS);
+    }
+
+    //loading map
+    public static Map<Long, List<Coord>> loadCustomList() {
+        final String json = Config.loadFile(mapFileName + ".json");
+        final Map<Long, List<Coord>> list = Collections.synchronizedMap(new HashMap<>());
+        if (json != null) {
+            try {
+                Gson gson = (new GsonBuilder()).create();
+                Type collectionType = new TypeToken<HashMap<Long, List<Coord>>>() {
+                }.getType();
+                list.putAll(gson.fromJson(json, collectionType));
+            } catch (Exception ignored) {
+            }
+        }
+        return (list);
+    }
+
+    private Pair<Coord, Coord> lastSQRT = null;
+
+    private double offset(final double s) {
+        int n = 100 * 11;
+        return (s % n < 0 ? s % n + n : s % n);
+    }
+
+    public final List<Long> updatableMap = Collections.synchronizedList(new ArrayList<>());
+
+    public void addFOW(final Coord2d mc) {
+        final Coord gc = Coord.of(Math.floorDiv((int) mc.x, 1100), Math.floorDiv((int) mc.y, 1100));
+        final Coord cc = Coord.of((int) Math.floor(offset(mc.x) / 100.0), (int) Math.floor(offset(mc.y) / 100.0));
+
+        final Pair<Coord, Coord> lastSQRT = this.lastSQRT;
+        if (lastSQRT != null && lastSQRT.a.equals(gc) && lastSQRT.b.equals(cc)) return;
+        this.lastSQRT = new Pair<>(gc, cc);
+
+        final Coord univ = Coord.of(-1, -1);
+
+        mapUploader.submit(() -> {
+            try {
+                boolean dirty = false;
+                for (int x = 0; x < 9; x++) {
+                    for (int y = 0; y < 9; y++) {
+                        final Coord ccc = cc.sub(4, 4).add(x, y);
+                        final MCache.Grid fid;
+                        final Coord fc;
+
+                        if (ccc.x < 0 || ccc.y < 0 || ccc.x > 10 || ccc.y > 10) {
+                            final Coord2d nc = mc.add((x - 4) * 100.0, (y - 4) * 100.0);
+                            fid = map.getgrid(nc.floor(tilesz).div(MCache.cmaps));
+                            fc = Coord.of((int) Math.floor(offset(nc.x) / 100.0), (int) Math.floor(offset(nc.y) / 100.0));
+                        } else {
+                            fid = map.getgrid(mc.floor(tilesz).div(MCache.cmaps));
+                            fc = ccc;
+                        }
+
+                        final List<Coord> points = mapList.computeIfAbsent(fid.id, k -> new ArrayList<>());
+                        if (points.size() >= 121) {
+                            points.clear();
+                            points.add(univ);
+                        } else if (points.stream().noneMatch(c -> c.equals(univ) || c.equals(fc))) {
+                            if (points.size() + 1 >= 121) {
+                                points.clear();
+                                points.add(univ);
+                            } else points.add(fc);
+                            dirty = true;
+                            if (updatableMap.stream().noneMatch(l -> l.equals(fid.id))) updatableMap.add(fid.id);
+                        }
+                    }
+                }
+                if (dirty) mapDirty.set(true);
+            } catch (Exception e) {
+                dev.simpleLog(e);
+            }
+        });
     }
 }

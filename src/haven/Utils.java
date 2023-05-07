@@ -672,9 +672,14 @@ public class Utils {
 
     @SuppressWarnings("SynchronizeOnNonFinalField")
     public static void saveCustomList(ObservableMap<String, Boolean> list, String jsonname) {
+        saveCustomList(list.base, jsonname);
+    }
+
+    @SuppressWarnings("SynchronizeOnNonFinalField")
+    public static void saveCustomList(Map<?, ?> list, String jsonname) {
         synchronized (list) {
             Gson gson = (new GsonBuilder()).create();
-            Config.saveFile(jsonname + ".json", gson.toJson(list.base));
+            Config.saveFile(jsonname + ".json", gson.toJson(list));
         }
     }
 

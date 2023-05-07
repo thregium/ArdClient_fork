@@ -232,15 +232,19 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         }
     }
 
+    private double dropCooldown = Utils.rtime();
+    private static final double dropDelay = 5.0;
+
     public GSprite spr() {
         if (!inited) return (null);
         GSprite spr = this.spr;
-        if (!postProcessed) {
+        if (!postProcessed && Utils.rtime() - dropCooldown > dropDelay) {
             try {
                 if (dropItMaybe()) postProcessed = true;
             } catch (Exception l) {
                 dev.simpleLog(l.getMessage());
             }
+            dropCooldown = Utils.rtime();
         }
         return (spr);
     }

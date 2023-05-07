@@ -26,13 +26,14 @@
 
 package haven;
 
-import static haven.DefSettings.MAPTYPE;
+import com.google.common.util.concurrent.AtomicDouble;
 import haven.Defer.Future;
-import static haven.MCache.cmaps;
 import haven.resutil.Ridges;
 import modification.configuration;
 import modification.resources;
-import java.awt.Color;
+
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.FileNotFoundException;
@@ -52,9 +53,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
 import java.util.function.Function;
+
+import static haven.DefSettings.MAPTYPE;
+import static haven.MCache.cmaps;
 
 public class MapFile {
     private static MapFile instance = null;
@@ -76,7 +83,8 @@ public class MapFile {
         Path mf = Utils.pj(HashDirCache.findbase(), mangle(String.format("seg-%x", loc.seg.id)));
         try {
             Files.deleteIfExists(mf);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         lock.writeLock().unlock();
     }
 
@@ -123,6 +131,7 @@ public class MapFile {
     }
 
     private final List<Pair<String, Object>> sync = new ArrayList<>();
+
     private InputStream sfetch(String ctl, Object... args) throws IOException {
         String name = mangle(String.format(ctl, args));
         final Pair<String, Object> pp;
@@ -774,6 +783,34 @@ public class MapFile {
 //            new Color(0, 255, 0, 32);
 //            new Color(255, 255, 0, 32);
 //            new Color(29, 196, 51, 60);
+        }
+
+        public BufferedImage olrenderfog(long id) {
+            WritableRaster buf = PUtils.imgraster(cmaps);
+
+            final List<Coord> coords = Glob.mapList.get(id);
+            final double size = 100.0 / 11.0;
+
+            final BufferedImage img = PUtils.rasterimg(buf);
+            final Graphics2D g = img.createGraphics();
+            final Shape rect = new Rectangle2D.Double(0, 0, size, size);
+
+            if (coords.stream().anyMatch(c -> c.equals(Coord.of(-1, -1)))) {
+                final Coord cc = Coord.z;
+                g.setColor(Color.WHITE);
+                g.translate(cc.x * size, cc.y * size);
+                g.scale(11.0, 11.0);
+                g.fill(rect);
+                g.translate(-(cc.x * size), -(cc.y * size));
+            } else {
+                for (Coord cc : coords) {
+                    g.setColor(Color.WHITE);
+                    g.translate(cc.x * size, cc.y * size);
+                    g.fill(rect);
+                    g.translate(-(cc.x * size), -(cc.y * size));
+                }
+            }
+            return (img);
         }
 
         public BufferedImage olrender(Coord off, String tag) {
@@ -1768,7 +1805,9 @@ public class MapFile {
         }
 
         private static class TileSort extends TopoSort<String> {
-            TileSort() {super(Hash.eq);}
+            TileSort() {
+                super(Hash.eq);
+            }
 
             protected List<String> pick(Collection<String> from) {
                 List<String> ret = new ArrayList<>(from);
@@ -2107,11 +2146,14 @@ public class MapFile {
     }
 
     public interface ExportStatus {
-        default void grid(int cs, int ns, int cg, int ng) {}
+        default void grid(int cs, int ns, int cg, int ng) {
+        }
 
-        default void info(String text) {}
+        default void info(String text) {
+        }
 
-        default void mark(int cm, int nm) {}
+        default void mark(int cm, int nm) {
+        }
     }
 
     private static final byte[] EXPORT_SIG = "Haven Mapfile 1".getBytes(Utils.ascii);
@@ -2530,7 +2572,8 @@ public class MapFile {
 
         if (error != null) {
             map.sendreqs();
-            error.waitfor(() -> update(map, cgc), w -> {});
+            error.waitfor(() -> update(map, cgc), w -> {
+            });
         } else {
             if (!grids.isEmpty()) {
                 synchronized (procmon) {

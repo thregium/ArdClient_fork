@@ -3158,7 +3158,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     sb.append("Position: ").append(String.format("(%.3f, %.3f, %.3f)", mc.x, mc.y, glob.map.getcz(mc))).append("\n");
                     double ox = offset.applyAsDouble(mc.x);
                     double oy = offset.applyAsDouble(mc.y);
-                    sb.append("Offset: ").append(String.format("(%.3f x %.3f) (%.0f x %.0f)", ox, oy, Math.floor(ox / 11.0), Math.floor(oy / 11.0))).append("\n");
+                    sb.append("Offset: ").append(String.format("(%.3f x %.3f) (%.0f x %.0f) (%.0f x %.0f)", ox, oy, Math.floor(ox / 11.0), Math.floor(oy / 11.0), Math.floor(ox / 100.0), Math.floor(oy / 100.0))).append("\n");
                     updatett(sb.toString());
                 } catch (Exception e) {
                     lasttt = "";

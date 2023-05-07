@@ -879,6 +879,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                         }
                     }
                 }
+
+                if (configuration.savingFogOfWar)
+                    glob.addFOW(c);
             }
             this.a = a;
             if (glob.ui != null) {
@@ -1172,24 +1175,27 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 });
             }
             if (configuration.showtreeberry && (type == Type.TREE || type == Type.BUSH)) {
-                int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
-                if (stage == 16 || stage == 32 || stage == 48) {
-                    rl.prepc(Rendered.eyesort);
+                ResDrawable mb = getattr(ResDrawable.class);
+                if (mb != null) {
+                    int stage = mb.sdt.peekrbuf(0);
+                    if (stage == 16 || stage == 32 || stage == 48) {
+                        rl.prepc(Rendered.eyesort);
 //                    rl.prepc(Rendered.deflt);
 //                    rl.prepc(Rendered.first);
 //                    rl.prepc(Rendered.last);
 //                    rl.prepc(Rendered.postfx);
-                    rl.prepc(Rendered.postpfx);
+                        rl.prepc(Rendered.postpfx);
 //                    rl.prepc(States.vertexcolor);
 //                    rl.prepc(WaterTile.surfmat);
 //                    rl.prepc(Light.vlights); //plights vlights
 //                    rl.prepc(WaterTile.wfog);
-                    rl.prepc(new Material.Colors(
-                            new Color(configuration.showtreeberryamb, true),
-                            new Color(configuration.showtreeberrydif, true),
-                            new Color(configuration.showtreeberryspc, true),
-                            new Color(configuration.showtreeberryemi, true)
-                    ));
+                        rl.prepc(new Material.Colors(
+                                new Color(configuration.showtreeberryamb, true),
+                                new Color(configuration.showtreeberrydif, true),
+                                new Color(configuration.showtreeberryspc, true),
+                                new Color(configuration.showtreeberryemi, true)
+                        ));
+                    }
                 }
             }
             if (Config.showshedstatus && type == Type.SHED) {

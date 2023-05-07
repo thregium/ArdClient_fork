@@ -26,44 +26,23 @@
 
 package haven;
 
-import static haven.MCache.cmaps;
-import haven.MapFile.Grid;
-import haven.MapFile.GridInfo;
-import haven.MapFile.Marker;
-import haven.MapFile.PMarker;
-import haven.MapFile.SMarker;
-import haven.MapFile.Segment;
-import static haven.Text.latin;
+import haven.MapFile.*;
 import integrations.mapv4.MappingClient;
 import modification.configuration;
+
 import javax.imageio.ImageIO;
-import javax.swing.JFileChooser;
+import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.Color;
-import java.awt.Font;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
+import java.util.*;
+
+import static haven.MCache.cmaps;
+import static haven.Text.latin;
 
 public class MapFileWidget extends Widget implements Console.Directory {
     public final MapFile file;
@@ -198,6 +177,9 @@ public class MapFileWidget extends Widget implements Console.Directory {
         private TexI tex = null;
         private final Map<String, Defer.Future<Tex>> olimg_c = new HashMap<>();
 
+        private final Object fogSync = new Object();
+        private Defer.Future<TexI> fogimg = null;
+
         private String[] tiles;
         private final Map<String[], Defer.Future<TexI>> highlightedMap = new HashMap<>();
         private final Map<String[], Boolean> highlightedHas = new HashMap<>();
@@ -228,6 +210,12 @@ public class MapFileWidget extends Widget implements Console.Directory {
                     if (!highlightedMap.isEmpty()) {
                         highlightedMap.forEach((s, d) -> d.cancel());
                         highlightedMap.clear();
+                    }
+                }
+                synchronized (fogSync) {
+                    if (fogimg != null) {
+                        if (!fogimg.done()) fogimg.cancel();
+                        fogimg = null;
                     }
                 }
                 img = Defer.later(() -> new TexI(grid.render(sc.mul(cmaps.div(scalef())))));
@@ -265,6 +253,41 @@ public class MapFileWidget extends Widget implements Console.Directory {
                 }
             }
             return (tret);
+        }
+
+        public Tex olfog(final UI ui) {
+            Tex tret = null;
+            if (tex != null) {
+                if (Glob.mapList.get(cgrid.id) != null) {
+                    synchronized (fogSync) {
+                        if (ui != null && ui.sess != null && ui.sess.alive()) {
+                            Glob glob = ui.sess.glob;
+                            if (glob.updatableMap.stream().anyMatch(l -> l.equals(cgrid.id))) {
+                                clearfog();
+                                glob.updatableMap.remove(cgrid.id);
+                            }
+                        }
+                        Defer.Future<TexI> ret = fogimg;
+                        if (ret == null) fogimg = ret = Defer.later(() -> new TexI(cgrid.olrenderfog(cgrid.id)));
+                        if (ret != null && ret.done()) {
+                            try {
+                                tret = ret.get();
+                            } catch (Exception e) {
+                            }
+                        }
+                    }
+                }
+            }
+            return (tret);
+        }
+
+        public void clearfog() {
+            synchronized (fogSync) {
+                if (fogimg != null) {
+                    if (!fogimg.done()) fogimg.cancel();
+                    fogimg = null;
+                }
+            }
         }
 
         public Tex highlight(String... tileNames) {
@@ -587,7 +610,8 @@ public class MapFileWidget extends Widget implements Console.Directory {
         return (false);
     }
 
-    public void deletemarker(DisplayMarker mark) {}
+    public void deletemarker(DisplayMarker mark) {
+    }
 
     private DisplayMarker markerat(Coord tc) {
         if (markers != null) {
@@ -769,7 +793,8 @@ public class MapFileWidget extends Widget implements Console.Directory {
                     }
                 }
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
         return (true);
     }
 

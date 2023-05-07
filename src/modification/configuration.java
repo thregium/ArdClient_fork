@@ -1396,4 +1396,7 @@ public class configuration {
 
     public static boolean autorunscriptsenable = Utils.getprefb("autorunscriptsenable", false);
     public static final ObservableCollection<String> autorunscripts = new ObservableCollection<>(Utils.loadcollection("autorunscripts"));
+
+    public static boolean savingFogOfWar = Utils.getprefb("fogofwar", false);
+    public static int fogOfWarColor = Utils.getprefi("fogofwarcolor", new Color(255, 255, 0, 100).getRGB());
 }
