@@ -35,11 +35,15 @@ import haven.res.gfx.fx.floatimg.DamageText;
 import haven.sloth.script.pathfinding.GobHitmap;
 import modification.configuration;
 import modification.dev;
+import org.apache.commons.collections4.list.TreeList;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.*;
@@ -600,11 +604,11 @@ public class Glob {
 
 
     //Map
-    private static final String mapFileName = "fogofwar";
-    public static final Map<Long, List<Coord>> mapList = loadCustomList();
+    private static final String mapFileName = "fogofwar.v2";
+    private static final AtomicBoolean mapDirty = new AtomicBoolean();
+    public static final Map<Long, List<Integer>> mapList = loadCustomList();
     private static final ExecutorService mapUploader = Executors.newSingleThreadExecutor();
     private static final ScheduledExecutorService mapScheduler = Executors.newSingleThreadScheduledExecutor();
-    private static final AtomicBoolean mapDirty = new AtomicBoolean();
 
     static {
         mapScheduler.scheduleWithFixedDelay(() -> mapUploader.submit(() -> {
@@ -620,16 +624,61 @@ public class Glob {
     }
 
     //loading map
-    public static Map<Long, List<Coord>> loadCustomList() {
-        final String json = Config.loadFile(mapFileName + ".json");
+    private static Map<Long, List<Coord>> loadOldCustomList() {
+        final String json = Config.loadFile("fogofwar.json");
         final Map<Long, List<Coord>> list = Collections.synchronizedMap(new HashMap<>());
         if (json != null) {
             try {
                 Gson gson = (new GsonBuilder()).create();
-                Type collectionType = new TypeToken<HashMap<Long, List<Coord>>>() {
-                }.getType();
+                Type collectionType = new TypeToken<HashMap<Long, List<Coord>>>() {}.getType();
                 list.putAll(gson.fromJson(json, collectionType));
             } catch (Exception ignored) {
+            }
+        }
+        if (!list.isEmpty()) {
+            try {
+                Files.delete(Paths.get("fogofwar.json"));
+            } catch (IOException ignored) {}
+        }
+        return (list);
+    }
+
+    private static Map<Long, List<Integer>> loadCustomList() {
+        final String json = Config.loadFile(mapFileName + ".json");
+        final Map<Long, List<Integer>> list = Collections.synchronizedMap(new HashMap<>());
+        if (json != null) {
+            try {
+                Gson gson = (new GsonBuilder()).create();
+                Type collectionType = new TypeToken<HashMap<Long, TreeList<Integer>>>() {}.getType();
+                list.putAll(gson.fromJson(json, collectionType));
+            } catch (Exception ignored) {
+            }
+        }
+
+        {//load olds
+            final Map<Long, List<Coord>> olds = loadOldCustomList();
+            if (!olds.isEmpty()) {
+                olds.forEach((l, coords) -> {
+                    for (Coord fc : coords) {
+                        final List<Integer> points = list.computeIfAbsent(l, k -> new TreeList<>());
+                        if (points.contains(-1)) break;
+                        if (fc.equals(Coord.of(-1, -1))) {
+                            points.clear();
+                            points.add(-1);
+                        } else {
+                            final int bit = fc.y * 11 + fc.x;
+
+                            if (!points.contains(bit)) {
+                                if (points.size() + 1 >= 121) {
+                                    points.clear();
+                                    points.add(-1);
+                                    break;
+                                } else points.add(bit);
+                            }
+                        }
+                    }
+                });
+                mapDirty.set(true);
             }
         }
         return (list);
@@ -652,8 +701,6 @@ public class Glob {
         if (lastSQRT != null && lastSQRT.a.equals(gc) && lastSQRT.b.equals(cc)) return;
         this.lastSQRT = new Pair<>(gc, cc);
 
-        final Coord univ = Coord.of(-1, -1);
-
         mapUploader.submit(() -> {
             try {
                 boolean dirty = false;
@@ -672,15 +719,17 @@ public class Glob {
                             fc = ccc;
                         }
 
-                        final List<Coord> points = mapList.computeIfAbsent(fid.id, k -> new ArrayList<>());
+                        final int bit = fc.y * 11 + fc.x;
+
+                        final List<Integer> points = mapList.computeIfAbsent(fid.id, k -> new TreeList<>());
                         if (points.size() >= 121) {
                             points.clear();
-                            points.add(univ);
-                        } else if (points.stream().noneMatch(c -> c.equals(univ) || c.equals(fc))) {
+                            points.add(-1);
+                        } else if (!(points.contains(-1) || points.contains(bit))) {
                             if (points.size() + 1 >= 121) {
                                 points.clear();
-                                points.add(univ);
-                            } else points.add(fc);
+                                points.add(-1);
+                            } else points.add(bit);
                             dirty = true;
                             if (updatableMap.stream().noneMatch(l -> l.equals(fid.id))) updatableMap.add(fid.id);
                         }

@@ -26,13 +26,14 @@
 
 package haven;
 
-import com.google.common.util.concurrent.AtomicDouble;
 import haven.Defer.Future;
 import haven.resutil.Ridges;
 import modification.configuration;
 import modification.resources;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
@@ -44,6 +45,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,11 +55,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Consumer;
-import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 
 import static haven.DefSettings.MAPTYPE;
@@ -788,14 +787,14 @@ public class MapFile {
         public BufferedImage olrenderfog(long id) {
             WritableRaster buf = PUtils.imgraster(cmaps);
 
-            final List<Coord> coords = Glob.mapList.get(id);
+            final List<Integer> coords = Glob.mapList.get(id);
             final double size = 100.0 / 11.0;
 
             final BufferedImage img = PUtils.rasterimg(buf);
             final Graphics2D g = img.createGraphics();
             final Shape rect = new Rectangle2D.Double(0, 0, size, size);
 
-            if (coords.stream().anyMatch(c -> c.equals(Coord.of(-1, -1)))) {
+            if (coords.contains(-1)) {
                 final Coord cc = Coord.z;
                 g.setColor(Color.WHITE);
                 g.translate(cc.x * size, cc.y * size);
@@ -803,11 +802,13 @@ public class MapFile {
                 g.fill(rect);
                 g.translate(-(cc.x * size), -(cc.y * size));
             } else {
-                for (Coord cc : coords) {
+                for (int i : coords) {
+                    final int x = i % 11;
+                    final int y = i / 11;
                     g.setColor(Color.WHITE);
-                    g.translate(cc.x * size, cc.y * size);
+                    g.translate(x * size, y * size);
                     g.fill(rect);
-                    g.translate(-(cc.x * size), -(cc.y * size));
+                    g.translate(-(x * size), -(y * size));
                 }
             }
             return (img);
@@ -1580,7 +1581,9 @@ public class MapFile {
             this.id = id;
         }
 
-        public MapFile file() {return (MapFile.this);}
+        public MapFile file() {
+            return (MapFile.this);
+        }
 
         private class Cached implements Indir<Grid> {
             Grid loaded;
