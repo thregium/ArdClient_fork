@@ -233,7 +233,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     }
 
     private double dropCooldown = Utils.rtime();
-    private static final double dropDelay = 5.0;
+    private static final double dropDelay = 0.25;
 
     public GSprite spr() {
         if (!inited) return (null);
