@@ -1069,13 +1069,13 @@ public class LocalMiniMap extends Widget {
             if (!img.rot)
                 g.image(tex, disp.sc.sub(img.cc.mul(iconZoom)).add(delta), tex.dim.mul(iconZoom));
             else {
-                BufferedImage bi = configuration.rotate(tex.back, (disp.ang + Math.PI / 2) % (2 * Math.PI));
+                Tex bi = new TexI(configuration.rotate(tex.back, (disp.ang + Math.PI / 2) % (2 * Math.PI)));
 //                AffineTransform transform = new AffineTransform();
 //                double angle = (disp.ang + Math.PI / 2) % (2 * Math.PI);
 //                transform.rotate(angle, bi.getWidth() / 2f, bi.getHeight() / 2f);
 //                AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
 //                bi = op.filter(bi, null);
-                g.image(bi, disp.sc.sub(img.cc.mul(iconZoom)).add(delta), new Coord(bi.getWidth(), bi.getHeight()).mul(iconZoom));
+                g.image(bi, disp.sc.sub(img.cc.mul(iconZoom)).add(delta), bi.sz().mul(iconZoom));
             }
         }
         g.chcolor();

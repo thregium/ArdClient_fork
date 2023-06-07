@@ -356,7 +356,8 @@ public class MapWnd extends ResizableWnd {
         }
     }
 
-    private boolean fogA = false;
+    private volatile boolean fogA = false;
+    private volatile boolean fogT = false;
 
     public class ToolBar extends Widget {
         public ToolBar() {
@@ -571,8 +572,27 @@ public class MapWnd extends ResizableWnd {
                     if (button == 3) {
                         if (!configuration.savingFogOfWar) {
                             if (fogA) fogA = false;
+                            if (fogT) fogT = false;
                             else PBotUtils.sysMsg(ui, "First enable the FogOfWar option in the map settings.");
-                        } else fogA = !fogA;
+                        } else {
+                            if (ui.modflags() == UI.MOD_CTRL) fogT = !fogT;
+                            else if (ui.modflags() == UI.MOD_META) {
+                                final Widget parent = MapWnd.this.parent;
+                                if (parent != null) {
+                                    final Window wnd = new Window(Coord.z, "Confirm clear");
+                                    final Button yes = new Button("Yes", () -> {
+                                        ui.sess.glob.clearTemp();
+                                        wnd.reqdestroy();
+                                    });
+                                    final Button no = new Button("No", wnd::reqdestroy);
+                                    final WidgetVerticalAppender wva = new WidgetVerticalAppender(wnd);
+                                    wva.add(new Label("Please confirm a clearing!"));
+                                    wva.addRow(yes, no);
+                                    wnd.pack();
+                                    parent.adda(wnd, parent.sz.div(2), 0.5, 0.5);
+                                }
+                            } else fogA = !fogA;
+                        }
                         return (true);
                     } else {
                         return (super.mouseup(c, button));
@@ -581,7 +601,7 @@ public class MapWnd extends ResizableWnd {
 
                 @Override
                 public Object tooltip(Coord c, Widget prev) {
-                    return (RichText.render("Click - Toggle view range" + "\n" + "Right-Click - Display fog of war", 300).tex());
+                    return (RichText.render("Click - Toggle view range" + "\n" + "Right-Click - Display fog of war" + "\n" + "Ctrl+Right-Click - Display temp fog of war" + "\n" + "Alt+Right-Click - Clear temp fog of war", 300).tex());
                 }
             }, grid.c.add(grid.sz.x + spacer, 0));
             final IButton iconbtn = add(new IButton("gfx/hud/wndmap/btns/lbtn-ico", "Icon settings", () -> {
@@ -632,6 +652,18 @@ public class MapWnd extends ResizableWnd {
                     Tex img = disp.olfog(ui);
                     if (img != null) {
                         final Color color = new Color(configuration.fogOfWarColor, true);
+                        g.chcolor(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+                        g.image(img, ul, cmaps.div(scalef()));
+                        g.chcolor();
+                    }
+                } catch (Loading l) {
+                }
+            }
+            if (fogT) {
+                try {
+                    Tex img = disp.olfogtemp(ui);
+                    if (img != null) {
+                        final Color color = new Color(configuration.fogOfWarColorTemp, true);
                         g.chcolor(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
                         g.image(img, ul, cmaps.div(scalef()));
                         g.chcolor();

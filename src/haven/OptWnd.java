@@ -4200,6 +4200,9 @@ public class OptWnd extends Window {
         appender2.addRow(new CheckBox("Draw fog of war", val -> Utils.setprefb("fogofwar", configuration.savingFogOfWar = val), configuration.savingFogOfWar), new ColorPreview(new Coord(20, 20), new Color(configuration.fogOfWarColor, true), val -> {
             configuration.fogOfWarColor = val.hashCode();
             Utils.setprefi("fogofwarcolor", val.hashCode());
+        }), new ColorPreview(new Coord(20, 20), new Color(configuration.fogOfWarColorTemp, true), val -> {
+            configuration.fogOfWarColor = val.hashCode();
+            Utils.setprefi("fogofwarcolorTemp", val.hashCode());
         }));
 
         appender2.add(new Label(""));

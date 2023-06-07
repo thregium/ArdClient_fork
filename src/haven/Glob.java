@@ -37,16 +37,26 @@ import modification.configuration;
 import modification.dev;
 import org.apache.commons.collections4.list.TreeList;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Type;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Observable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -605,8 +615,11 @@ public class Glob {
 
     //Map
     private static final String mapFileName = "fogofwar.v2";
+    private static final String mapFileNameTemp = "fogofwartemp.v2";
     private static final AtomicBoolean mapDirty = new AtomicBoolean();
-    public static final Map<Long, List<Integer>> mapList = loadCustomList();
+    private static final AtomicBoolean mapDirtyTemp = new AtomicBoolean();
+    public static final Map<Long, List<Integer>> mapList = loadCustomList(mapFileName);
+    public static final Map<Long, List<Integer>> mapListTemp = loadCustomList(mapFileNameTemp);
     private static final ExecutorService mapUploader = Executors.newSingleThreadExecutor();
     private static final ScheduledExecutorService mapScheduler = Executors.newSingleThreadScheduledExecutor();
 
@@ -617,74 +630,33 @@ public class Glob {
                     Utils.saveCustomList(mapList, mapFileName);
                     mapDirty.set(false);
                 }
+                if (mapDirtyTemp.get()) {
+                    Utils.saveCustomList(mapListTemp, mapFileNameTemp);
+                    mapDirtyTemp.set(false);
+                }
             } catch (Exception e) {
                 dev.simpleLog(e);
             }
         }), 0, 5, TimeUnit.SECONDS);
     }
 
-    //loading map
-    private static Map<Long, List<Coord>> loadOldCustomList() {
-        final String json = Config.loadFile("fogofwar.json");
-        final Map<Long, List<Coord>> list = Collections.synchronizedMap(new HashMap<>());
-        if (json != null) {
-            try {
-                Gson gson = (new GsonBuilder()).create();
-                Type collectionType = new TypeToken<HashMap<Long, List<Coord>>>() {}.getType();
-                list.putAll(gson.fromJson(json, collectionType));
-            } catch (Exception ignored) {
-            }
-        }
-        if (!list.isEmpty()) {
-            try {
-                Files.delete(Paths.get("fogofwar.json"));
-            } catch (IOException ignored) {}
-        }
-        return (list);
-    }
-
-    private static Map<Long, List<Integer>> loadCustomList() {
-        final String json = Config.loadFile(mapFileName + ".json");
+    private static Map<Long, List<Integer>> loadCustomList(final String name) {
+        final String json = Config.loadFile(name + ".json");
         final Map<Long, List<Integer>> list = Collections.synchronizedMap(new HashMap<>());
         if (json != null) {
             try {
                 Gson gson = (new GsonBuilder()).create();
-                Type collectionType = new TypeToken<HashMap<Long, TreeList<Integer>>>() {}.getType();
+                Type collectionType = new TypeToken<HashMap<Long, TreeList<Integer>>>() {
+                }.getType();
                 list.putAll(gson.fromJson(json, collectionType));
             } catch (Exception ignored) {
-            }
-        }
-
-        {//load olds
-            final Map<Long, List<Coord>> olds = loadOldCustomList();
-            if (!olds.isEmpty()) {
-                olds.forEach((l, coords) -> {
-                    for (Coord fc : coords) {
-                        final List<Integer> points = list.computeIfAbsent(l, k -> new TreeList<>());
-                        if (points.contains(-1)) break;
-                        if (fc.equals(Coord.of(-1, -1))) {
-                            points.clear();
-                            points.add(-1);
-                        } else {
-                            final int bit = fc.y * 11 + fc.x;
-
-                            if (!points.contains(bit)) {
-                                if (points.size() + 1 >= 121) {
-                                    points.clear();
-                                    points.add(-1);
-                                    break;
-                                } else points.add(bit);
-                            }
-                        }
-                    }
-                });
-                mapDirty.set(true);
             }
         }
         return (list);
     }
 
-    private Pair<Coord, Coord> lastSQRT = null;
+    private volatile Pair<Coord, Coord> lastSQRT = null;
+    private volatile Pair<Coord, Coord> lastSQRTTemp = null;
 
     private double offset(final double s) {
         int n = 100 * 11;
@@ -692,18 +664,54 @@ public class Glob {
     }
 
     public final List<Long> updatableMap = Collections.synchronizedList(new ArrayList<>());
+    public final List<Long> updatableMapTemp = Collections.synchronizedList(new ArrayList<>());
+
+    public void clearTemp() {
+        mapUploader.submit(() -> {
+            final List<Long> temp = new ArrayList<>(mapListTemp.keySet());
+            mapListTemp.clear();
+            Utils.saveCustomList(mapListTemp, mapFileNameTemp);
+            temp.forEach(id -> {
+                if (updatableMapTemp.stream().noneMatch(l -> l.equals(id))) updatableMapTemp.add(id);
+            });
+            lastSQRTTemp = null;
+        });
+    }
+
+    private boolean updateFogMap(final MCache.Grid fid, final int bit, final Map<Long, List<Integer>> map, final List<Long> uList) {
+        boolean dirty = false;
+        final List<Integer> points = map.computeIfAbsent(fid.id, k -> new TreeList<>());
+        if (points.size() >= 121) {
+            points.clear();
+            points.add(-1);
+        } else if (!(points.contains(-1) || points.contains(bit))) {
+            if (points.size() + 1 >= 121) {
+                points.clear();
+                points.add(-1);
+            } else points.add(bit);
+            dirty = true;
+            if (uList.stream().noneMatch(l -> l.equals(fid.id))) uList.add(fid.id);
+        }
+        return (dirty);
+    }
 
     public void addFOW(final Coord2d mc) {
         final Coord gc = Coord.of(Math.floorDiv((int) mc.x, 1100), Math.floorDiv((int) mc.y, 1100));
         final Coord cc = Coord.of((int) Math.floor(offset(mc.x) / 100.0), (int) Math.floor(offset(mc.y) / 100.0));
 
         final Pair<Coord, Coord> lastSQRT = this.lastSQRT;
-        if (lastSQRT != null && lastSQRT.a.equals(gc) && lastSQRT.b.equals(cc)) return;
-        this.lastSQRT = new Pair<>(gc, cc);
+        final boolean updateMap = lastSQRT == null || !lastSQRT.a.equals(gc) || !lastSQRT.b.equals(cc);
+        if (updateMap) this.lastSQRT = new Pair<>(gc, cc);
 
+        final Pair<Coord, Coord> lastSQRTTemp = this.lastSQRTTemp;
+        final boolean updateMapTemp = lastSQRTTemp == null || !lastSQRTTemp.a.equals(gc) || !lastSQRTTemp.b.equals(cc);
+        if (updateMapTemp) this.lastSQRTTemp = new Pair<>(gc, cc);
+
+        if (!updateMap && !updateMapTemp) return;
         mapUploader.submit(() -> {
             try {
                 boolean dirty = false;
+                boolean dirtyTemp = false;
                 for (int x = 0; x < 9; x++) {
                     for (int y = 0; y < 9; y++) {
                         final Coord ccc = cc.sub(4, 4).add(x, y);
@@ -721,21 +729,13 @@ public class Glob {
 
                         final int bit = fc.y * 11 + fc.x;
 
-                        final List<Integer> points = mapList.computeIfAbsent(fid.id, k -> new TreeList<>());
-                        if (points.size() >= 121) {
-                            points.clear();
-                            points.add(-1);
-                        } else if (!(points.contains(-1) || points.contains(bit))) {
-                            if (points.size() + 1 >= 121) {
-                                points.clear();
-                                points.add(-1);
-                            } else points.add(bit);
-                            dirty = true;
-                            if (updatableMap.stream().noneMatch(l -> l.equals(fid.id))) updatableMap.add(fid.id);
-                        }
+                        if (updateMap && updateFogMap(fid, bit, mapList, updatableMap)) dirty = true;
+
+                        if (updateMapTemp && updateFogMap(fid, bit, mapListTemp, updatableMapTemp)) dirtyTemp = true;
                     }
                 }
                 if (dirty) mapDirty.set(true);
+                if (dirtyTemp) mapDirtyTemp.set(true);
             } catch (Exception e) {
                 dev.simpleLog(e);
             }

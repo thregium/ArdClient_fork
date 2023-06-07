@@ -597,18 +597,19 @@ public class Resource implements Serializable {
                     res.error = error;
                 }
             }
-            if (res.error != null && map.size() > 0) {
+            if (res.error != null && !map.isEmpty()) {
                 if (!(res.error instanceof LoadException))
                     throw (res.error);
-                Integer maxVer = map.keySet().stream().max(Comparator.comparingInt(Integer::intValue)).get();
-                Object[] objs = map.get(maxVer);
-                Resource ret = (Resource)objs[1];
-                ret.source = (ResSource)objs[0];
-                if (!(ret.source instanceof JarSource)) {
-                    ret.loadlayers((Message) objs[2]);
-                    res.res = ret;
-                    res.error = null;
-                }
+                map.keySet().stream().max(Comparator.comparingInt(Integer::intValue)).ifPresent(maxVer -> {
+                    Object[] objs = map.get(maxVer);
+                    Resource ret = (Resource)objs[1];
+                    ret.source = (ResSource)objs[0];
+                    if (!(ret.source instanceof JarSource)) {
+                        ret.loadlayers((Message) objs[2]);
+                        res.res = ret;
+                        res.error = null;
+                    }
+                });
             }
             res.done();
         }

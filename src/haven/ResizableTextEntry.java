@@ -21,7 +21,7 @@ public class ResizableTextEntry extends TextEntry {
         Coord size = Text.render(text(), Color.WHITE, fnd).sz();
         int w = text().equals("") ? Math.max(defwidth, addWidth) : Math.max(Math.max(size.x + 12, addWidth), defwidth);
         if (sz.x != w)
-            sz = new Coord(w, mext.getHeight());
+            sz = new Coord(w, mext.sz().y);
         super.draw(g);
     }
 

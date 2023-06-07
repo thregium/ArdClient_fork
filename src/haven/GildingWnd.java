@@ -16,9 +16,9 @@ import static haven.PUtils.convolve;
 public class GildingWnd extends Window {
     private final WItem target;
     private final WItem gild;
-    private BufferedImage igild;
-    private BufferedImage islots;
-    private BufferedImage matches;
+    private Tex igild;
+    private Tex islots;
+    private Tex matches;
     private UI.Grab mg;
     private double min, max, koeff;
 
@@ -37,7 +37,7 @@ public class GildingWnd extends Window {
         Pair<Double, BufferedImage> result = findMatches();
         if (result != null) {
             koeff = result.a;
-            matches = result.b;
+            matches = new TexI(result.b);
         }
 
         List<ItemInfo> gild_infos = gild.gilding.get();
@@ -51,14 +51,14 @@ public class GildingWnd extends Window {
 
         koeff = min + koeff * (max - min);
 
-        igild = ItemInfo.longtip(gild_infos);
-        islots = ItemInfo.longtip(target_infos);
+        igild = new TexI(ItemInfo.longtip(gild_infos));
+        islots = new TexI(ItemInfo.longtip(target_infos));
 
         int itemH = Math.max(target.sz.y, gild.sz.y);
-        int h = Math.max(igild.getHeight(), islots.getHeight()) + itemH;
-        int w = igild.getWidth() + islots.getWidth();
+        int h = Math.max(igild.sz().y, islots.sz().y) + itemH;
+        int w = igild.sz().x + islots.sz().x;
 
-        resize(new Coord(w + 45, h + 100 + (matches != null ? matches.getHeight() : 0)));
+        resize(new Coord(w + 45, h + 100 + (matches != null ? matches.sz().y : 0)));
 
         add(new FWItem(target.item), 10, 5);
         add(new FWItem(gild.item), asz.x - 5 - gild.sz.x, 5);
@@ -143,11 +143,11 @@ public class GildingWnd extends Window {
     public void cdraw(GOut g) {
         int itemH = Math.max(target.sz.y, gild.sz.y);
         g.image(islots, new Coord(5, 10).add(0, itemH));
-        g.image(igild, new Coord(asz.x - 5 - igild.getWidth(), 10).add(0, itemH));
+        g.image(igild, new Coord(asz.x - 5 - igild.sz().x, 10).add(0, itemH));
         if (matches != null) {
-            Coord c1 = new Coord(asz.x / 2, asz.y - matches.getHeight() - 70);
+            Coord c1 = new Coord(asz.x / 2, asz.y - matches.sz().y - 70);
             g.atext("Matching skills:", c1, 0.5, 0.5);
-            g.image(matches, c1.sub(matches.getWidth() / 2, matches.getHeight() / 2).add(0, 18));
+            g.image(matches, c1.sub(matches.sz().x / 2, matches.sz().y / 2).add(0, 18));
         }
         Coord ul = new Coord(0, asz.y - 34);
         Coord sz = new Coord(asz.x, 14);

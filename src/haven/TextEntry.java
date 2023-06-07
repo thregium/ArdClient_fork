@@ -39,13 +39,13 @@ public class TextEntry extends Widget implements ReadLine.Owner {
     public static final Color dirtycol = new Color(255, 232, 209);
     public static final Color selcol = new Color(24, 80, 192);
     public static final Text.Foundry fnd = new Text.Foundry(Text.serif, 12).aa(true);
-    public static final BufferedImage lcap = Theme.img("textedit", 0);
-    public static final BufferedImage mext = Theme.img("textedit", 1);
-    public static final BufferedImage rcap = Theme.img("textedit", 2);
+    public static final Tex lcap = Theme.tex("textedit", 0);
+    public static final Tex mext = Theme.tex("textedit", 1);
+    public static final Tex rcap = Theme.tex("textedit", 2);
     public static final Tex caret = Resource.loadtex("gfx/hud/text/caret");
-    public static final Coord toff = new Coord(lcap.getWidth() - 1, 3);
+    public static final Coord toff = new Coord(lcap.sz().x - 1, 3);
     public static final Coord coff = new Coord(-3, -1);
-    public static final int wmarg = lcap.getWidth() + rcap.getWidth() + 1;
+    public static final int wmarg = lcap.sz().x + rcap.sz().x + 1;
     public boolean dshow = false;
     public ReadLine buf;
     public int sx;
@@ -150,9 +150,9 @@ public class TextEntry extends Widget implements ReadLine.Owner {
         String dtext = dtext();
         tcache = fnd.render(dtext, (dshow && dirty) ? dirtycol : defcol);
 
-        g.drawImage(lcap, 0, 0, null);
-        g.drawImage(mext, lcap.getWidth(), 0, sz.x - lcap.getWidth() - rcap.getWidth(), sz.y, null);
-        g.drawImage(rcap, sz.x - rcap.getWidth(), 0, null);
+        if (lcap instanceof TexI) g.drawImage(((TexI) lcap).back, 0, 0, null);
+        if (mext instanceof TexI) g.drawImage(((TexI) mext).back, lcap.sz().x, 0, sz.x - lcap.sz().x - rcap.sz().x, sz.y, null);
+        if (rcap instanceof TexI) g.drawImage(((TexI) rcap).back, sz.x - rcap.sz().x, 0, null);
 
         g.drawImage(tcache.img, toff.x - sx, toff.y, null);
         g.dispose();
@@ -165,8 +165,8 @@ public class TextEntry extends Widget implements ReadLine.Owner {
         int point = buf.point(), mark = buf.mark();
         g.chcolor(DefSettings.TXBCOL.get());
         g.image(lcap, Coord.z);
-        g.image(mext, Coord.of(lcap.getWidth(), 0), Coord.of(sz.x - lcap.getWidth() - rcap.getWidth(), sz.y));
-        g.image(rcap, Coord.of(sz.x - rcap.getWidth(), 0));
+        g.image(mext, Coord.of(lcap.sz().x, 0), Coord.of(sz.x - lcap.sz().x - rcap.sz().x, sz.y));
+        g.image(rcap, Coord.of(sz.x - rcap.sz().x, 0));
         g.chcolor();
         if (mark >= 0) {
             int px = tcache.advance(point) - sx, mx = tcache.advance(mark) - sx;
@@ -200,7 +200,7 @@ public class TextEntry extends Widget implements ReadLine.Owner {
     private final Consumer<String> onActivate;
 
     public TextEntry(final int w, final String deftext, final Consumer<String> onChange, final Consumer<String> onActivate) {
-        super(new Coord(w, mext.getHeight()));
+        super(new Coord(w, mext.sz().y));
         this.onChange = onChange;
         this.onActivate = onActivate;
         rsettext(deftext);

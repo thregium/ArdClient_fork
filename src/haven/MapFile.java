@@ -784,17 +784,16 @@ public class MapFile {
 //            new Color(29, 196, 51, 60);
         }
 
-        public BufferedImage olrenderfog(long id) {
+        public BufferedImage olrenderfog(final List<Integer> points) {
             WritableRaster buf = PUtils.imgraster(cmaps);
 
-            final List<Integer> coords = Glob.mapList.get(id);
             final double size = 100.0 / 11.0;
 
             final BufferedImage img = PUtils.rasterimg(buf);
             final Graphics2D g = img.createGraphics();
             final Shape rect = new Rectangle2D.Double(0, 0, size, size);
 
-            if (coords.contains(-1)) {
+            if (points.contains(-1)) {
                 final Coord cc = Coord.z;
                 g.setColor(Color.WHITE);
                 g.translate(cc.x * size, cc.y * size);
@@ -802,7 +801,7 @@ public class MapFile {
                 g.fill(rect);
                 g.translate(-(cc.x * size), -(cc.y * size));
             } else {
-                for (int i : coords) {
+                for (int i : points) {
                     final int x = i % 11;
                     final int y = i / 11;
                     g.setColor(Color.WHITE);

@@ -40,6 +40,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static haven.MCache.cmaps;
 import static haven.Text.latin;
@@ -178,7 +180,10 @@ public class MapFileWidget extends Widget implements Console.Directory {
         private final Map<String, Defer.Future<Tex>> olimg_c = new HashMap<>();
 
         private final Object fogSync = new Object();
-        private Defer.Future<TexI> fogimg = null;
+        private final AtomicReference<Defer.Future<TexI>> fogimg = new AtomicReference<>();
+
+        private final Object fogSyncTemp = new Object();
+        private final AtomicReference<Defer.Future<TexI>> fogimgTemp = new AtomicReference<>();
 
         private String[] tiles;
         private final Map<String[], Defer.Future<TexI>> highlightedMap = new HashMap<>();
@@ -212,12 +217,8 @@ public class MapFileWidget extends Widget implements Console.Directory {
                         highlightedMap.clear();
                     }
                 }
-                synchronized (fogSync) {
-                    if (fogimg != null) {
-                        if (!fogimg.done()) fogimg.cancel();
-                        fogimg = null;
-                    }
-                }
+                clearfog(fogSync, fogimg);
+                clearfog(fogSyncTemp, fogimgTemp);
                 img = Defer.later(() -> new TexI(grid.render(sc.mul(cmaps.div(scalef())))));
                 cgrid = grid;
             }
@@ -256,19 +257,30 @@ public class MapFileWidget extends Widget implements Console.Directory {
         }
 
         public Tex olfog(final UI ui) {
+            return (olfog(ui, Glob.mapList, ui.sess.glob.updatableMap, fogSync, fogimg));
+        }
+
+        public Tex olfogtemp(final UI ui) {
+            return (olfog(ui, Glob.mapListTemp, ui.sess.glob.updatableMapTemp, fogSyncTemp, fogimgTemp));
+        }
+
+        public Tex olfog(final UI ui, final Map<Long, List<Integer>> map, final List<Long> updates, final Object sync, final AtomicReference<Defer.Future<TexI>> atomic) {
             Tex tret = null;
             if (tex != null) {
-                if (Glob.mapList.get(cgrid.id) != null) {
-                    synchronized (fogSync) {
+                final List<Integer> points = map.get(cgrid.id);
+                if (points != null) {
+                    synchronized (sync) {
                         if (ui != null && ui.sess != null && ui.sess.alive()) {
-                            Glob glob = ui.sess.glob;
-                            if (glob.updatableMap.stream().anyMatch(l -> l.equals(cgrid.id))) {
-                                clearfog();
-                                glob.updatableMap.remove(cgrid.id);
+                            if (updates.stream().anyMatch(l -> l.equals(cgrid.id))) {
+                                clearfog(sync, atomic);
+                                updates.remove(cgrid.id);
                             }
                         }
-                        Defer.Future<TexI> ret = fogimg;
-                        if (ret == null) fogimg = ret = Defer.later(() -> new TexI(cgrid.olrenderfog(cgrid.id)));
+                        Defer.Future<TexI> ret = atomic.get();
+                        if (ret == null) {
+                            ret = Defer.later(() -> new TexI(cgrid.olrenderfog(points)));
+                            atomic.set(ret);
+                        }
                         if (ret != null && ret.done()) {
                             try {
                                 tret = ret.get();
@@ -281,11 +293,12 @@ public class MapFileWidget extends Widget implements Console.Directory {
             return (tret);
         }
 
-        public void clearfog() {
-            synchronized (fogSync) {
-                if (fogimg != null) {
-                    if (!fogimg.done()) fogimg.cancel();
-                    fogimg = null;
+        public void clearfog(final Object sync, final AtomicReference<Defer.Future<TexI>> atomic) {
+            synchronized (sync) {
+                final Defer.Future<TexI> img_f = atomic.get();
+                if (img_f != null) {
+                    if (!img_f.done()) img_f.cancel();
+                    atomic.set(null);
                 }
             }
         }

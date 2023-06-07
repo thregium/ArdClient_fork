@@ -66,7 +66,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     private QBuff quality;
     public Tex metertex;
     public double studytime = 0.0;
-    public boolean drop = false;
+    public volatile boolean drop = false;
     private double dropTimer = 0;
     public boolean matches = false;
     public boolean sendttupdate = false;
@@ -213,7 +213,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         return (ui.sess.glob);
     }
 
-    protected boolean inited;
+    protected volatile boolean inited;
     protected Loading error;
 
     private void init() {

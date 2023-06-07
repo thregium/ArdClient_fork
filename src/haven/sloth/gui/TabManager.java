@@ -1,14 +1,6 @@
 package haven.sloth.gui;
 
-import haven.Button;
-import haven.Coord;
-import haven.DefSettings;
-import haven.GOut;
-import haven.Tabs;
-import haven.Tex;
-import haven.Theme;
-import haven.Utils;
-import haven.Widget;
+import haven.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,10 +17,12 @@ public class TabManager extends Widget {
     private static class TabButton extends Button {
         public boolean on = false;
         private Coord lc, mc, msz, rc;
+        private Tex tcont;
 
         public TabButton(String text) {
             super(text);
-            sz = new Coord(cont.getWidth() + tabLeft.sz().x + tabMid.sz().x, tabRight.sz().y);
+            this.tcont = new TexI(cont);
+            sz = new Coord(tcont.sz().x + tabLeft.sz().x + tabMid.sz().x, tabRight.sz().y);
             setup();
         }
 
@@ -51,10 +45,10 @@ public class TabManager extends Widget {
                 g.image(tabRightOn, rc);
             }
 
-            Coord tc = sz.sub(Utils.imgsz(cont)).div(2);
+            Coord tc = sz.sub(tcont.sz()).div(2);
             if (a)
                 tc = tc.add(1, 1);
-            g.image(cont, tc);
+            g.image(tcont, tc);
             g.chcolor();
         }
     }

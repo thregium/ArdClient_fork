@@ -26,7 +26,7 @@ public class AttrBonusesWdg extends Widget implements ItemInfo.Owner {
     private WItem[] items;
     private Map<Resource, Integer> bonuses;
     private List<ItemInfo> info = null;
-    private BufferedImage tip = null;
+    private Tex tip = null;
 
     private CharWnd charWnd = null;
 
@@ -60,7 +60,7 @@ public class AttrBonusesWdg extends Widget implements ItemInfo.Owner {
             }
             GOut gtip = g.reclip(bonusc, sz);
             gtip.chcolor(new Color(60, 60, 60, 180));
-            gtip.frect(c, Coord.of(tip.getWidth(), tip.getHeight()));
+            gtip.frect(c, tip.sz());
             gtip.chcolor();
             gtip.image(tip, c);
         }
@@ -70,14 +70,14 @@ public class AttrBonusesWdg extends Widget implements ItemInfo.Owner {
     private void render() {
         try {
             if (info != null && !info.isEmpty()) {
-                tip = ItemInfo.longtip(info);
+                tip = new TexI(ItemInfo.longtip(info));
             } else {
                 tip = null;
             }
 
             if (tip != null)
-                bar.move(Coord.of(tip.getWidth() + bar.sz.x, bar.c.y));
-            int delta = tip != null ? tip.getHeight() : 0;
+                bar.move(Coord.of(tip.sz().x + bar.sz.x, bar.c.y));
+            int delta = tip != null ? tip.sz().y : 0;
             bar.visible = delta > bar.sz.y;
             bar.max = delta - bar.sz.y;
             bar.ch(0);
