@@ -1259,7 +1259,13 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
                 craftwnd.setMakewindow(mkwdg);
             } else {
                 if (makewnd == null) {
-                    makewnd = add(new CraftWindow(), new Coord(400, 200));
+                    makewnd = add(new CraftWindow() {
+                        @Override
+                        public void reqdestroy() {
+                            super.reqdestroy();
+                            makewnd = null;
+                        }
+                    }, new Coord(400, 200));
                 }
                 makewnd.add(child);
                 makewnd.pack();

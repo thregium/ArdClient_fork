@@ -114,7 +114,7 @@ public class PBotWindowAPI {
      * @param window The window to close
      */
     public static void closeWindow(Window window) {
-        window.reqdestroy();
+        window.close();
     }
 
 
