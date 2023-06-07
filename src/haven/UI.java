@@ -520,8 +520,8 @@ public class UI {
     }
 
     public void destroy(Widget wdg) {
-        mousegrab.removeIf(g -> g.wdg.hasparent(wdg));
-        keygrab.removeIf(g -> g.wdg.hasparent(wdg));
+//        mousegrab.removeIf(g -> g.wdg.hasparent(wdg));
+//        keygrab.removeIf(g -> g.wdg.hasparent(wdg));
         if (wdg != null) {
             removeid(wdg);
             wdg.reqdestroy();
