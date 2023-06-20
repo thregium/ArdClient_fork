@@ -28,6 +28,7 @@ package haven;
 
 import haven.purus.pbot.PBotUtils;
 import haven.purus.pbot.PBotWindowAPI;
+import haven.res.ui.tt.keypag.KeyPagina;
 import haven.res.ui.tt.q.qbuff.QBuff;
 import haven.resutil.Curiosity;
 import haven.resutil.FoodInfo;
@@ -298,7 +299,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
             if (img == null) {
                 img = ItemInfo.shorttip(info);
             } else {
-                if (info.stream().anyMatch(i -> i instanceof Curiosity || i.getClass().toString().contains("ISlots") || i instanceof FoodInfo)) {
+                if (info.stream().anyMatch(i -> i instanceof Curiosity || i.getClass().toString().contains("ISlots") || i instanceof FoodInfo || i instanceof KeyPagina)) {
                     UI ui = item.glob().ui.get();
                     if (ui != null && ui.modflags() != UI.MOD_SHIFT) {
                         img = ItemInfo.catimgs_center(5, img, RichText.render("[Shift for details]", new Color(150, 150, 150)).img);

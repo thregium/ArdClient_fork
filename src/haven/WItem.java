@@ -30,6 +30,7 @@ import haven.ItemInfo.AttrCache;
 import haven.automation.WItemDestroyCallback;
 import haven.purus.pbot.PBotWindowAPI;
 import haven.res.ui.tt.Wear;
+import haven.res.ui.tt.keypag.KeyPagina;
 import haven.res.ui.tt.q.qbuff.QBuff;
 import haven.resutil.Curiosity;
 import haven.resutil.FoodInfo;
@@ -125,7 +126,7 @@ public class WItem extends Widget implements DTarget2 {
     }
 
     private static BufferedImage shiftTooltip(List<ItemInfo> info, BufferedImage img) {
-        if (info.stream().anyMatch(i -> i instanceof Curiosity || i.getClass().toString().contains("ISlots") || i instanceof FoodInfo)) {
+        if (info.stream().anyMatch(i -> i instanceof Curiosity || i.getClass().toString().contains("ISlots") || i instanceof FoodInfo || i instanceof KeyPagina)) {
             img = ItemInfo.catimgs_center(5, img, RichText.render("[Shift for details]", new Color(150, 150, 150)).img);
         }
         return (img);
