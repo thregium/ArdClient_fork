@@ -1400,4 +1400,8 @@ public class configuration {
     public static boolean savingFogOfWar = Utils.getprefb("fogofwar", false);
     public static int fogOfWarColor = Utils.getprefi("fogofwarcolor", new Color(255, 255, 0, 100).getRGB());
     public static int fogOfWarColorTemp = Utils.getprefi("fogofwarcolorTemp", new Color(0, 255, 0, 100).getRGB());
+
+    public static boolean openStacksOnAlt = Utils.getprefb("altstacks", false);
+
+    public static final Map<String, Long> treesMap = Collections.synchronizedMap(new HashMap<>());
 }

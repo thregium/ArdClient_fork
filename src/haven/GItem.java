@@ -30,11 +30,16 @@ import haven.purus.pbot.PBotUtils;
 import haven.purus.pbot.PBotWindowAPI;
 import haven.res.ui.tt.keypag.KeyPagina;
 import haven.res.ui.tt.q.qbuff.QBuff;
+import haven.res.ui.tt.q.quality.Quality;
 import haven.resutil.Curiosity;
 import haven.resutil.FoodInfo;
 import integrations.food.FoodService;
+import modification.configuration;
+import modification.dev;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -42,9 +47,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import modification.configuration;
-import modification.dev;
-
 
 import static haven.Text.num10Fnd;
 import static haven.Text.num12boldFnd;
@@ -229,7 +231,8 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
             inited = true;
         } catch (Loading l) {
             error = l;
-            l.waitfor(this::waitforinit, waiting -> {});
+            l.waitfor(this::waitforinit, waiting -> {
+            });
         }
     }
 
@@ -313,12 +316,38 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         }
     }
 
-    public List<ItemInfo> info() {
+    public synchronized List<ItemInfo> info() {
         if (info == null) {
             info = ItemInfo.buildinfo(this, rawinfo);
             Resource.Pagina pg = res.get().layer(Resource.pagina);
             if (pg != null)
                 info.add(new ItemInfo.Pagina(this, pg.text));
+            if (contents != null) {
+                Widget stack = contents;
+                List<WItem> ret = new ArrayList<>();
+                if (stack instanceof Inventory) {
+                    ret.addAll(((Inventory) stack).wmap.values());
+                } else if (stack.getClass().toString().contains("ItemStack")) {
+                    try {
+                        Field fwmap = stack.getClass().getField("wmap");
+                        Map<GItem, WItem> wmap = (Map<GItem, WItem>) fwmap.get(stack);
+                        ret.addAll(wmap.values());
+                    } catch (IllegalAccessException | NoSuchFieldException e) {
+                        throw (new RuntimeException(e));
+                    }
+                }
+                int amount = 0;
+                double sum = 0;
+                for (WItem w : ret) {
+                    QBuff q = w.item.quality();
+                    if (q != null) {
+                        amount++;
+                        sum += q.q;
+                    }
+                }
+                if (amount > 0)
+                    info.add(new Quality(this, sum / amount));
+            }
             try {
                 // getres() can throw Loading, ignore it
                 FoodService.checkFood(info, getres());
@@ -433,6 +462,34 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
             contentsid = null;
             if (args.length > 2)
                 contentsid = args[2];
+            synchronized (this) {
+                if (info != null && !info.isEmpty()) {
+                    Widget stack = contents;
+                    List<WItem> ret = new ArrayList<>();
+                    if (stack instanceof Inventory) {
+                        ret.addAll(((Inventory) stack).wmap.values());
+                    } else if (stack.getClass().toString().contains("ItemStack")) {
+                        try {
+                            Field fwmap = stack.getClass().getField("wmap");
+                            Map<GItem, WItem> wmap = (Map<GItem, WItem>) fwmap.get(stack);
+                            ret.addAll(wmap.values());
+                        } catch (IllegalAccessException | NoSuchFieldException e) {
+                            throw (new RuntimeException(e));
+                        }
+                    }
+                    int amount = 0;
+                    double sum = 0;
+                    for (WItem w : ret) {
+                        QBuff q = w.item.quality();
+                        if (q != null) {
+                            amount++;
+                            sum += q.q;
+                        }
+                    }
+                    if (amount > 0)
+                        info.add(new Quality(this, sum / amount));
+                }
+            }
         }
     }
 
@@ -545,22 +602,47 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
             }
             lcont = this.contents;
         }
-        if (hovering != null) {
+        if (!configuration.openStacksOnAlt) {
+            if (hovering != null) {
+                if (contentswdg == null) {
+                    if ((this.contents != null) && (contentswnd == null)) {
+                        Widget cont = contparent();
+                        if (!configuration.openStacksOnAlt) {
+                            ckparent:
+                            for (Widget prev : cont.children()) {
+                                if (prev instanceof Contents) {
+                                    for (Widget p = hovering; p != null; p = p.parent) {
+                                        if (p == prev)
+                                            break ckparent;
+                                        if (p instanceof Contents)
+                                            break;
+                                    }
+                                    return;
+                                }
+                            }
+                        }
+                        this.contents.unlink();
+                        contentswdg = cont.add(new Contents(this, this.contents), ui.mc); //hovering.parentpos(cont, hovering.sz.sub(UI.scale(5, 5)).sub(Contents.hovermarg))
+                    }
+                }
+            } else {
+                if (configuration.openStacksOnAlt) {
+                    if ((contentswdg != null) && !contentswdg.hovering && !contentswdg.hasmore()) {
+                        contentswdg.reqdestroy();
+                        contentswdg = null;
+                    }
+                }
+            }
+            this.hovering = null;
+        }
+    }
+
+    public void createHovering(Widget hovering) {
+        this.hovering = this.hovering == null ? hovering : null;
+        if (this.hovering != null) {
             if (contentswdg == null) {
                 if ((this.contents != null) && (contentswnd == null)) {
                     Widget cont = contparent();
-                    ckparent:
-                    for (Widget prev : cont.children()) {
-                        if (prev instanceof Contents) {
-                            for (Widget p = hovering; p != null; p = p.parent) {
-                                if (p == prev)
-                                    break ckparent;
-                                if (p instanceof Contents)
-                                    break;
-                            }
-                            return;
-                        }
-                    }
                     this.contents.unlink();
                     contentswdg = cont.add(new Contents(this, this.contents), ui.mc); //hovering.parentpos(cont, hovering.sz.sub(UI.scale(5, 5)).sub(Contents.hovermarg))
                 }
@@ -571,10 +653,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
                 contentswdg = null;
             }
         }
-        hovering = null;
     }
-
-    private final Object subsync = new Object();
 
     public void showcontwnd(boolean show) {
         if (show && (contentswnd == null)) {

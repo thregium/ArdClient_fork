@@ -8,7 +8,6 @@ import haven.GameUI;
 import haven.Gob;
 import haven.Indir;
 import haven.Loading;
-import static haven.OCache.posres;
 import haven.Resource;
 import haven.States;
 import haven.Tex;
@@ -19,9 +18,12 @@ import haven.Widget;
 import haven.purus.pbot.PBotUtils;
 import haven.sloth.script.PointerData;
 import modification.configuration;
+
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import java.awt.Color;
+
+import static haven.OCache.posres;
 
 public class Pointer extends Widget {
     public static final States.ColState col = new States.ColState(241, 227, 157, 255);
@@ -210,8 +212,14 @@ public class Pointer extends Widget {
                 }
                 if (args[1] == null)
                     gobid = -1L;
-                else
+                else {
                     gobid = Utils.uint32((Integer) args[1]);
+
+                    String name = ((Text.Line) this.tooltip).text;
+                    if (name != null) {
+                        configuration.treesMap.put(name, gobid);
+                    }
+                }
                 break;
             case "icon":
                 int iconid = (Integer) args[0];

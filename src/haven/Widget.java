@@ -970,8 +970,9 @@ public class Widget {
             if (!wdg.visible)
                 continue;
             Coord cc = xlate(wdg.c, true);
-            if (c.isect(cc, wdg.sz) && wdg.mousehover(c.add(cc.inv())))
+            if (c.isect(cc, wdg.sz) && wdg.mousehover(c.add(cc.inv()))) {
                 return (true);
+            }
         }
         return (false);
     }

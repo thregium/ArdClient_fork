@@ -29,6 +29,7 @@ package haven;
 import haven.overlays.OverlayData;
 import haven.overlays.TextOverlay;
 import haven.overlays.newPlantStageSprite;
+import haven.purus.gobText;
 import haven.res.gfx.fx.floatimg.DamageText;
 import haven.res.lib.tree.Tree;
 import haven.res.lib.vmat.Materials;
@@ -56,6 +57,7 @@ import haven.sloth.script.pathfinding.Hitbox;
 import integrations.mapv4.MappingClient;
 import modification.configuration;
 import modification.resources;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,7 +65,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +87,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     private static final Material.Colors dframeDone = new Material.Colors(new Color(255, 0, 0, 200));
     private static final AtomicReference<GLState> storagefullcolormaterial = new AtomicReference(new Material.Colors(getFullStorageColor()));
     private static final AtomicReference<GLState> storageemptycolormaterial = new AtomicReference(new Material.Colors(getEmptyStorageColor()));
+    private static final AtomicReference<GLState> barrelemptycolormaterial = new AtomicReference(new Material.Colors(getEmptyBarrelColor()));
     private static final AtomicReference<GLState> storagehalfcolormaterial = new AtomicReference(new Material.Colors(getHalfStorageColor()));
     private static final Material.Colors dframeWater = new Material.Colors(new Color(0, 0, 255, 200));
     private static final Material.Colors dframeBark = new Material.Colors(new Color(165, 42, 42, 200));
@@ -460,9 +462,11 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                             } catch (Loading l) {
                                 if (res != null) {
                                     Resource finalRes = res;
-                                    l.waitfor(() -> setattr(new GobIcon(Gob.this, finalRes.indir())), waiting -> {});
+                                    l.waitfor(() -> setattr(new GobIcon(Gob.this, finalRes.indir())), waiting -> {
+                                    });
                                 }
-                            } catch (Exception ignored) {}
+                            } catch (Exception ignored) {
+                            }
                         }
                     }, null);
                 }
@@ -791,6 +795,16 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         addol(new Overlay(-1, res, sdt));
     }
 
+    public boolean hasOverlay(Class<?> cl) {
+        synchronized (ols) {
+            for (Overlay ol : ols) {
+                if (cl.isInstance(ol) || cl.isInstance(ol.spr))
+                    return (true);
+            }
+        }
+        return (false);
+    }
+
     public void remol(Overlay ol) {
         synchronized (ols) {
             ols.remove(ol);
@@ -1086,6 +1100,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     public void draw(GOut g) {
     }
 
+    private gobText barreltext;
+    private gobText treetext;
+
     public boolean setup(RenderList rl) {
         loc.tick();
         final Hidden hid = getattr(Hidden.class);
@@ -1128,6 +1145,33 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     }
                     rl.add(ol, null);
                 }
+                if (Config.showbarrelstatus && name().matches("gfx/terobjs/barrel") && !ols.isEmpty()) {
+                    String text = null;
+                    for (Overlay ol : ols) {
+                        String olname = ol.name();
+                        if (olname.matches("gfx/terobjs/barrel-.*")) {
+                            text = olname.substring(olname.lastIndexOf("-") + 1);
+                            break;
+                        }
+                    }
+                    if (text != null) {
+                        if (barreltext == null) barreltext = new gobText(this, text, Color.GREEN, 50);
+                        rl.add(barreltext, null);
+                    }
+                }
+                for (Map.Entry<String, Long> entry : configuration.treesMap.entrySet()) {
+                    if (entry.getValue() == id) {
+                        String text = entry.getKey();
+                        if (text != null) {
+                            if (treetext == null) treetext = new gobText(this, text, Color.ORANGE, 50);
+                            rl.add(treetext, null);
+                        }
+                        if (!hasOverlay(PartyMemberOutline.class))
+                            addol(new PartyMemberOutline(this, Color.ORANGE));
+                        break;
+                    }
+                }
+                if ((!Config.showbarrelstatus || ols.isEmpty()) && barreltext != null) barreltext = null;
                 for (Overlay ol : ols) {
                     if (ol.spr instanceof Overlay.SetupMod)
                         ((Overlay.SetupMod) ol.spr).setupmain(rl);
@@ -1207,6 +1251,11 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     rl.prepc(storageemptycolormaterial.get());
                 //while open : empty == 1, 1 item to half items = 5, half full = 13, full 29
                 //while closed : empty = 2, 1 item to half items = 6, half full= 14, full 30
+            }
+
+            if (Config.showbarrelstatus && name().matches("gfx/terobjs/barrel")) {
+                if (ols.isEmpty())
+                    rl.prepc(barrelemptycolormaterial.get());
             }
 
             if (MapView.markedGobs.contains(id))
@@ -1726,6 +1775,11 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         storageemptycolormaterial.set(new Material.Colors(color));
     }
 
+    public static void setEmptyBarrelColor(final Color color) {
+        Utils.setprefi("barrelemptycolor", color.getRGB());
+        barrelemptycolormaterial.set(new Material.Colors(color));
+    }
+
     public static void setHalfStorageColor(final Color color) {
         Utils.setprefi("storagehalfcolor", color.getRGB());
         storagehalfcolormaterial.set(new Material.Colors(color));
@@ -1737,6 +1791,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 
     public static Color getEmptyStorageColor() {
         return (new Color(Utils.getprefi("storageemptycolor", new Color(0, 255, 0, 230).getRGB()), true));
+    }
+
+    public static Color getEmptyBarrelColor() {
+        return (new Color(Utils.getprefi("barrelemptycolor", new Color(0, 255, 0, 230).getRGB()), true));
     }
 
     public static Color getHalfStorageColor() {

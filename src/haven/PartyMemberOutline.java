@@ -13,7 +13,7 @@ public class PartyMemberOutline extends Sprite {
     private Coord2d lc;
 
 
-    protected PartyMemberOutline(Owner owner, Color color) {
+    public PartyMemberOutline(Owner owner, Color color) {
         super(owner, null);
         float rad = 50 / 10.0F;
         int i = Math.max(24, (int) (Math.PI * 2 * rad / 11.0D));
