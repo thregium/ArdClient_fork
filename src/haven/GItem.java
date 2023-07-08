@@ -620,7 +620,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
                             }
                         }
                         this.contents.unlink();
-                        contentswdg = cont.add(new Contents(this, this.contents), ui.mc); //hovering.parentpos(cont, hovering.sz.sub(UI.scale(5, 5)).sub(Contents.hovermarg))
+                        contentswdg = cont.add(new Contents(this, this.contents), ui.mc.add(1, 1)); //hovering.parentpos(cont, hovering.sz.sub(UI.scale(5, 5)).sub(Contents.hovermarg))
                     }
                 }
             } else {
@@ -640,7 +640,8 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
                 if ((this.contents != null) && (contentswnd == null)) {
                     Widget cont = contparent();
                     this.contents.unlink();
-                    contentswdg = cont.add(new Contents(this, this.contents), ui.mc); //hovering.parentpos(cont, hovering.sz.sub(UI.scale(5, 5)).sub(Contents.hovermarg))
+                    contentswdg = cont.add(new Contents(this, this.contents), ui.mc.add(1, 1)); //hovering.parentpos(cont, hovering.sz.sub(UI.scale(5, 5)).sub(Contents.hovermarg))
+                    contentswdg.hovering = true;
                 }
             }
         } else {
@@ -732,12 +733,14 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
             }
             obox.draw(g, hovermarg, sz.sub(hovermarg));
             super.draw(g);
+            g.line(Coord.z, Coord.z.add(sz.x / 2, 0), 1);
+            g.line(Coord.z, Coord.z.add(0, sz.y / 2), 1);
         }
 
         public void tick(double dt) {
             super.tick(dt);
             resize(inv.c.add(inv.sz).add(obox.btloff()));
-            hovering = false;
+            if (!configuration.openStacksOnAlt) hovering = false;
         }
 
         public void destroy() {
@@ -808,7 +811,13 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
 
         public boolean mousehover(Coord c) {
             super.mousehover(c);
-            hovering = true;
+            int mods = ui.modflags();
+            if (!configuration.openStacksOnAlt) {
+                hovering = true;
+            } else if (mods == UI.MOD_META) {
+                hovering = false;
+                cont.createHovering(null);
+            }
             return (true);
         }
     }

@@ -975,6 +975,7 @@ public class OptWnd extends Window {
         });
         appender.addRow(new CheckBox("Highlight empty/full storages", val -> Utils.setprefb("showcupboardstatus", Config.showcupboardstatus = val), Config.showcupboardstatus), new ColorPreview(new Coord(20, 20), Gob.getEmptyStorageColor(), Gob::setEmptyStorageColor), new ColorPreview(new Coord(20, 20), Gob.getFullStorageColor(), Gob::setFullStorageColor));
         appender.addRow(new CheckBox("Highlight empty barrels", val -> Utils.setprefb("showbarrelstatus", Config.showbarrelstatus = val), Config.showbarrelstatus), new ColorPreview(new Coord(20, 20), Gob.getEmptyStorageColor(), Gob::setEmptyStorageColor));
+        appender.addRow(new CheckBox("Show barrel content text over barrel", val -> Utils.setprefb("showbarreltext", Config.showbarreltext = val), Config.showbarreltext));
         appender.addRow(new CheckBox("Highlight partially full storages", val -> Utils.setprefb("showpartialstoragestatus", Config.showpartialstoragestatus = val), Config.showpartialstoragestatus), new ColorPreview(new Coord(20, 20), Gob.getHalfStorageColor(), Gob::setHalfStorageColor));
         appender.add(new CheckBox("Highlight sheds based on amount of contents", val -> Utils.setprefb("showshedstatus", Config.showshedstatus = val), Config.showshedstatus));
         appender.addRow(new CheckBox("Highlight empty/full cheese racks.", val -> Utils.setprefb("showrackstatus", Config.showrackstatus = val), Config.showrackstatus), new ColorPreview(Coord.of(16, 16), CHEESERACKEMPTYCOLOR.get(), val -> {
@@ -3467,7 +3468,7 @@ public class OptWnd extends Window {
             configuration.focusrectanglecolor = val.hashCode();
             Utils.setprefi("focusrectanglecolor", val.hashCode());
         }));
-        appender.add(new CheckBox("Open stack with hover on alt", val -> Utils.setprefb("altstacks", configuration.openStacksOnAlt = val), configuration.openStacksOnAlt));
+        appender.add(new CheckBox("Open stack with alt on hover (Close with alt on hover widget)", val -> Utils.setprefb("altstacks", configuration.openStacksOnAlt = val), configuration.openStacksOnAlt));
 
         appender.add(new Label("Pathfinder"));
         final String[] tiers = {"Perfect", "Medium", "Fastest"};

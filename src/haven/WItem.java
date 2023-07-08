@@ -500,15 +500,12 @@ public class WItem extends Widget implements DTarget2 {
         return (true);
     }
 
-    int lastmod = 0;
     public boolean mousehover(Coord c) {
-        int lastmod = this.lastmod;
         int mods = ui.modflags();
-        this.lastmod = mods;
         if (item.contents != null) {
             if (!configuration.openStacksOnAlt) {
                 item.hovering = this;
-            } else if (mods == UI.MOD_META && lastmod != mods) {
+            } else if (mods == UI.MOD_META) {
                 item.createHovering(this);
             }
             return (true);

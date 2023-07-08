@@ -1145,7 +1145,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     }
                     rl.add(ol, null);
                 }
-                if (Config.showbarrelstatus && name().matches("gfx/terobjs/barrel") && !ols.isEmpty()) {
+                if (Config.showbarreltext && name().matches("gfx/terobjs/barrel") && !ols.isEmpty()) {
                     String text = null;
                     for (Overlay ol : ols) {
                         String olname = ol.name();
@@ -1171,7 +1171,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                         break;
                     }
                 }
-                if ((!Config.showbarrelstatus || ols.isEmpty()) && barreltext != null) barreltext = null;
+                if ((!Config.showbarreltext || ols.isEmpty()) && barreltext != null) barreltext = null;
                 for (Overlay ol : ols) {
                     if (ol.spr instanceof Overlay.SetupMod)
                         ((Overlay.SetupMod) ol.spr).setupmain(rl);

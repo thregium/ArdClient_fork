@@ -8,7 +8,7 @@ import haven.UI;
 import java.awt.image.BufferedImage;
 
 public class KeyPagina extends ItemInfo.Pagina {
-    private static final String DEF_SHORT = "STACK";
+    private static final String DEF_SHORT = "";
     public KeyPagina(final Owner owner, final String text) {
         super(owner, text);
     }
