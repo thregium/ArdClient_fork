@@ -607,18 +607,16 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
                 if (contentswdg == null) {
                     if ((this.contents != null) && (contentswnd == null)) {
                         Widget cont = contparent();
-                        if (!configuration.openStacksOnAlt) {
-                            ckparent:
-                            for (Widget prev : cont.children()) {
-                                if (prev instanceof Contents) {
-                                    for (Widget p = hovering; p != null; p = p.parent) {
-                                        if (p == prev)
-                                            break ckparent;
-                                        if (p instanceof Contents)
-                                            break;
-                                    }
-                                    return;
+                        ckparent:
+                        for (Widget prev : cont.children()) {
+                            if (prev instanceof Contents) {
+                                for (Widget p = hovering; p != null; p = p.parent) {
+                                    if (p == prev)
+                                        break ckparent;
+                                    if (p instanceof Contents)
+                                        break;
                                 }
+                                return;
                             }
                         }
                         this.contents.unlink();
@@ -626,11 +624,9 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
                     }
                 }
             } else {
-                if (configuration.openStacksOnAlt) {
-                    if ((contentswdg != null) && !contentswdg.hovering && !contentswdg.hasmore()) {
-                        contentswdg.reqdestroy();
-                        contentswdg = null;
-                    }
+                if ((contentswdg != null) && !contentswdg.hovering && !contentswdg.hasmore()) {
+                    contentswdg.reqdestroy();
+                    contentswdg = null;
                 }
             }
             this.hovering = null;
