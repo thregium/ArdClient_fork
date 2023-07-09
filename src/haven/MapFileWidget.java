@@ -405,7 +405,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
                     g.aimage(itex, c, 0.5, 0.5);
 
                     if (Config.mapdrawquests) {
-                        if (sm.res != null && (sm.res.name.startsWith("gfx/invobjs/small") || sm.res.name.contains("thingwall"))) {
+                        if (sm.res != null && (sm.res.name.startsWith("gfx/invobjs/small") || sm.res.name.contains("thingwall") || sm.res.name.contains("gfx/terobjs/mm/gianttoad"))) {
 //                            Tex tex = Text.renderstroked(sm.nm, Color.white, Color.BLACK, fnd).tex();
                             Tex ttex = getCachedTextTex(sm.nm);
                             if (ttex != null) {

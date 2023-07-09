@@ -27,16 +27,17 @@
 package haven;
 
 import haven.res.gfx.terobjs.barterarea.BarterArea;
+import haven.res.gfx.terobjs.dng.powersplit.PowerSprite;
 import haven.res.gfx.terobjs.road.routeindicator.Route;
 import modification.Bed;
 import modification.Decal;
 import modification.Fixedplob;
 import modification.dev;
+
 import java.lang.reflect.Constructor;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Function;
 
 public abstract class Sprite implements Rendered {
     public static final int GOB_HEALTH_ID = -1001;
@@ -94,7 +95,9 @@ public abstract class Sprite implements Rendered {
     }
 
     public static class FactMaker extends Resource.PublishedCode.Instancer.Chain<Factory> {
-        public FactMaker() {super(Factory.class);}
+        public FactMaker() {
+            super(Factory.class);
+        }
 
         {
             add(new Direct<>(Factory.class));
@@ -158,6 +161,9 @@ public abstract class Sprite implements Rendered {
             return (new FakeSprite(owner, res, sdt));
         }
         try {
+            if (res.name.equals("gfx/terobjs/dng/powermonolith")) {
+                return (PowerSprite.mksprite(owner, res, sdt));
+            }
             if (res.name.equals("gfx/terobjs/barterarea")) {
                 return (new BarterArea(owner, res, sdt));
             }
@@ -203,13 +209,17 @@ public abstract class Sprite implements Rendered {
 //        throw (new ResourceException("Does not know how to draw resource " + res.name, res));
     }
 
-    public void draw(GOut g) {}
+    public void draw(GOut g) {
+    }
 
     public abstract boolean setup(RenderList d);
 
-    public boolean tick(int dt) {return (false);}
+    public boolean tick(int dt) {
+        return (false);
+    }
 
-    public void dispose() {}
+    public void dispose() {
+    }
 
 
     public static class FakeSprite extends Sprite {
