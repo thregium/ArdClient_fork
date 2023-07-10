@@ -38,11 +38,12 @@ import static haven.glsl.Type.VEC4;
 
 public class Tex2D {
     public static final Uniform tex2d = new Uniform(Type.SAMPLER2D);
+    public static final Attribute texc = new Attribute(VEC2, "ctexc");
     public Varying.Interpol ipol = Varying.Interpol.NORMAL;
 
     public static final AutoVarying rtexcoord = new AutoVarying(VEC2, "s_tex2d") {
         protected Expression root(VertexContext vctx) {
-            return (pick(vctx.gl_MultiTexCoord[0].ref(), "st"));
+            return (pick(VertexContext.gl_MultiTexCoord[0].ref(), "st"));
         }
 
         protected Interpol ipol(Context ctx) {

@@ -81,15 +81,11 @@ public class AlphaTex extends GLState {
     };
 
     private static Value value(FragmentContext fctx) {
-        return (fctx.uniform.ext(ctex, new ValBlock.Factory() {
-            public Value make(ValBlock vals) {
-                return (vals.new Value(VEC4) {
-                    public Expression root() {
-                        return (texture2D(ctex.ref(), fc.ref()));
-                    }
-                });
+        return (fctx.uniform.ext(ctex, vals -> (vals.new Value(VEC4) {
+            public Expression root() {
+                return (texture2D(ctex.ref(), fc.ref()));
             }
-        }));
+        })));
     }
 
     private static final ShaderMacro main = prog -> {
