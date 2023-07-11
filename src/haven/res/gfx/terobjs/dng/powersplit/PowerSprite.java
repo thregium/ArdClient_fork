@@ -1,13 +1,19 @@
 package haven.res.gfx.terobjs.dng.powersplit;
 
+import haven.Coord;
 import haven.FastMesh;
+import haven.GLState;
 import haven.GOut;
+import haven.Location;
 import haven.Material;
+import haven.Matrix4f;
 import haven.Message;
+import haven.PView;
 import haven.RenderList;
 import haven.Rendered;
 import haven.Resource;
 import haven.SkelSprite;
+import haven.States;
 
 @haven.FromResource(name = "gfx/terobjs/dng/powersplit", version = 18, override = true)
 public class PowerSprite extends SkelSprite {
@@ -38,8 +44,8 @@ public class PowerSprite extends SkelSprite {
     @Override
     public boolean setup(RenderList rl) {
         super.setup(rl);
-        rl.add(top, null);
-        rl.add(bot, null);
+//        rl.add(top, null);
+        rl.add(bot, bot.scale);
         return (false);
     }
 }

@@ -27,13 +27,10 @@
 package haven;
 
 
-import static haven.DefSettings.*;
 import haven.purus.pathfinder.Pathfinder;
 import haven.purus.pbot.PBotDiscord;
 import haven.purus.pbot.PBotScriptlist;
 import haven.purus.pbot.PBotUtils;
-import haven.res.gfx.fx.msrad.MSRad;
-import haven.resutil.BPRadSprite;
 import haven.resutil.FoodInfo;
 import haven.resutil.WaterTile;
 import haven.sloth.gfx.GobSpeedSprite;
@@ -50,6 +47,7 @@ import modification.resources;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.awt.Color;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
@@ -84,6 +82,58 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static haven.DefSettings.ALLWATERCOL;
+import static haven.DefSettings.AMBERMENU;
+import static haven.DefSettings.ANIMALPATHCOL;
+import static haven.DefSettings.BTNCOL;
+import static haven.DefSettings.BUGGEDMENU;
+import static haven.DefSettings.CHEESERACKEMPTYCOLOR;
+import static haven.DefSettings.CHEESERACKFULLCOLOR;
+import static haven.DefSettings.CHEESERACKMISSINGCOLOR;
+import static haven.DefSettings.CLOSEFORMENU;
+import static haven.DefSettings.DARKMODE;
+import static haven.DefSettings.DEBUG;
+import static haven.DefSettings.DEEPWATERCOL;
+import static haven.DefSettings.DRAWGRIDRADIUS;
+import static haven.DefSettings.ERRORTEXTCOLOR;
+import static haven.DefSettings.GARDENPOTDONECOLOR;
+import static haven.DefSettings.GOBPATHCOL;
+import static haven.DefSettings.GUIDESCOLOR;
+import static haven.DefSettings.HIDDENCOLOR;
+import static haven.DefSettings.HITBOXCOLOR;
+import static haven.DefSettings.HUDTHEME;
+import static haven.DefSettings.KEEPGOBS;
+import static haven.DefSettings.KEEPGRIDS;
+import static haven.DefSettings.LIMITPATHFINDING;
+import static haven.DefSettings.MAPTYPE;
+import static haven.DefSettings.MINIMAPTYPE;
+import static haven.DefSettings.NVAMBIENTCOL;
+import static haven.DefSettings.NVDIFFUSECOL;
+import static haven.DefSettings.NVSPECCOC;
+import static haven.DefSettings.OCEANWATERCOL;
+import static haven.DefSettings.PATHFINDINGTIER;
+import static haven.DefSettings.PLAYERPATHCOL;
+import static haven.DefSettings.RESEARCHUNTILGOAL;
+import static haven.DefSettings.SHALLOWOCEANWATERCOL;
+import static haven.DefSettings.SHALLOWWATERCOL;
+import static haven.DefSettings.SHOWANIMALPATH;
+import static haven.DefSettings.SHOWFKBELT;
+import static haven.DefSettings.SHOWGOBPATH;
+import static haven.DefSettings.SHOWGOBS;
+import static haven.DefSettings.SHOWHALO;
+import static haven.DefSettings.SHOWHALOONHEARTH;
+import static haven.DefSettings.SHOWMAP;
+import static haven.DefSettings.SHOWNBELT;
+import static haven.DefSettings.SHOWNPBELT;
+import static haven.DefSettings.SHOWPLAYERPATH;
+import static haven.DefSettings.SLIDERCOL;
+import static haven.DefSettings.SYMMETRICOUTLINES;
+import static haven.DefSettings.THEMES;
+import static haven.DefSettings.TXBCOL;
+import static haven.DefSettings.WATERCOL;
+import static haven.DefSettings.WIREFRAMEMODE;
+import static haven.DefSettings.WNDCOL;
 
 
 public class OptWnd extends Window {
@@ -3401,12 +3451,12 @@ public class OptWnd extends Window {
                         Utils.setprefi("blizzarddensity", configuration.blizzarddensity);
 
                         if (configuration.blizzardoverlay && ui != null && ui.gui != null && ui.sess != null && ui.sess.glob != null && ui.sess.glob.oc != null) {
-                                OCache oc = ui.sess.glob.oc;
+                            OCache oc = ui.sess.glob.oc;
 
-                                if (configuration.getCurrentsnow(oc) < val)
-                                    configuration.addsnow(oc);
-                                else
-                                    configuration.deleteSnow(oc);
+                            if (configuration.getCurrentsnow(oc) < val)
+                                configuration.addsnow(oc);
+                            else
+                                configuration.deleteSnow(oc);
                         }
                     }
 
@@ -3862,7 +3912,9 @@ public class OptWnd extends Window {
                         return;
                     }
                 }
-                {itm.selected = !itm.selected;}
+                {
+                    itm.selected = !itm.selected;
+                }
             }
 
             protected void drawitemname(GOut g, CheckListboxItem itm) {
@@ -6620,7 +6672,8 @@ public class OptWnd extends Window {
             List<Path> listFiles = new ArrayList<>();
             try (Stream<Path> s = Files.list(file)) {
                 listFiles.addAll(s.filter(p -> p.toString().toLowerCase().endsWith(".0")).collect(Collectors.toList()));
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
             List<Path> files = new ArrayList<>();
             boolean success = false;
             if (listFiles != null)

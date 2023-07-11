@@ -1,7 +1,11 @@
 package haven.res.gfx.terobjs.dng.powersplit;
 
 import haven.Coord;
+import haven.Coord3f;
+import haven.GLState;
 import haven.GOut;
+import haven.Location;
+import haven.Matrix4f;
 import haven.PView;
 import haven.RenderList;
 import haven.Rendered;
@@ -30,18 +34,29 @@ public class PowerSplit implements Rendered {
     public PowerSplit(Rendered r, boolean top) {
         this.r = r;
         this.top = top;
+        scale = Location.scale(1, 1, 1);
     }
 
     DrawState state = new DrawState();
+    Location scale;
 
+    public static volatile float XLATEZ = 6f;
+    public static volatile float SCALEZ = 0.9f;
     public boolean setup(RenderList rl) {
-        rl.prepo(state);
+//        rl.prepo(state);
         rl.add(r, null);
         return (false);
     }
 
     public void update(float a) {
         this.a = a;
+//        scale = Location.scale(1, 1, (1 - a) + (a * 0.32f));//(1 - a) * 1.5f
+        scale = new Location(new Matrix4f(
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, a, XLATEZ * (1 - a),
+                0, 0, 0, 1
+        ));
 //        state = new DrawState(a);
 //        for (Rendered slot : slots)
 //            slot.ostate(st);
@@ -63,19 +78,6 @@ public class PowerSplit implements Rendered {
     class DrawState extends States.AdHoc {
         DrawState() {
             super(top ? topsh : botsh);
-        }
-
-        @Override
-        public void apply(GOut g) {
-            super.apply(g);
-            reapply(g);
-        }
-
-        @Override
-        public void reapply(GOut g) {
-            super.reapply(g);
-            if (a < 1)
-                g.gl.glUniform1f(g.st.prog.uniform(deg), a);
         }
     }
 }
