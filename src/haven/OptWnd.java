@@ -974,7 +974,7 @@ public class OptWnd extends Window {
             }
         });
         appender.addRow(new CheckBox("Highlight empty/full storages", val -> Utils.setprefb("showcupboardstatus", Config.showcupboardstatus = val), Config.showcupboardstatus), new ColorPreview(new Coord(20, 20), Gob.getEmptyStorageColor(), Gob::setEmptyStorageColor), new ColorPreview(new Coord(20, 20), Gob.getFullStorageColor(), Gob::setFullStorageColor));
-        appender.addRow(new CheckBox("Highlight empty barrels", val -> Utils.setprefb("showbarrelstatus", Config.showbarrelstatus = val), Config.showbarrelstatus), new ColorPreview(new Coord(20, 20), Gob.getEmptyStorageColor(), Gob::setEmptyStorageColor));
+        appender.addRow(new CheckBox("Highlight empty barrels", val -> Utils.setprefb("showbarrelstatus", Config.showbarrelstatus = val), Config.showbarrelstatus), new ColorPreview(new Coord(20, 20), Gob.getEmptyBarrelColor(), Gob::setEmptyBarrelColor));
         appender.addRow(new CheckBox("Show barrel content text over barrel", val -> Utils.setprefb("showbarreltext", Config.showbarreltext = val), Config.showbarreltext));
         appender.addRow(new CheckBox("Highlight partially full storages", val -> Utils.setprefb("showpartialstoragestatus", Config.showpartialstoragestatus = val), Config.showpartialstoragestatus), new ColorPreview(new Coord(20, 20), Gob.getHalfStorageColor(), Gob::setHalfStorageColor));
         appender.add(new CheckBox("Highlight sheds based on amount of contents", val -> Utils.setprefb("showshedstatus", Config.showshedstatus = val), Config.showshedstatus));
@@ -992,6 +992,29 @@ public class OptWnd extends Window {
         appender.addRow(new CheckBox("Highlight finished garden pots.", val -> Utils.setprefb("highlightpots", Config.highlightpots = val), Config.highlightpots), new ColorPreview(Coord.of(16, 16), GARDENPOTDONECOLOR.get(), val -> {
             GARDENPOTDONECOLOR.set(val);
             Gob.potDOne = new Material.Colors(val);
+        }));
+        appender.addRow(new CheckBox("Show trough status", val -> Utils.setprefb("showtroughstatus", configuration.showtroughstatus = val), configuration.showtroughstatus), new ColorPreview(new Coord(20, 20), Gob.getEmptyTroughColor(), Gob::setEmptyTroughColor), new ColorPreview(new Coord(20, 20), Gob.getHalfTroughColor(), Gob::setHalfTroughColor), new ColorPreview(new Coord(20, 20), Gob.getFullTroughColor(), Gob::setFullTroughColor));
+        appender.addRow(new CheckBox("Show beehive status", val -> Utils.setprefb("showbeehivestatus", configuration.showbeehivestatus = val), configuration.showbeehivestatus), new ColorPreview(new Coord(20, 20), Gob.getFullBeehiveColor(), Gob::setFullBeehiveColor));
+        appender.addRow(new CheckBox("Show tree berry status", val -> Utils.setprefb("showtreeberry", configuration.showtreeberry = val), configuration.showtreeberry), new ColorPreview(new Coord(20, 20), new Color(configuration.showtreeberryamb, true), val -> {
+            configuration.showtreeberryamb = val.hashCode();
+            Utils.setprefi("showtreeberryamb", val.hashCode());
+        }), new ColorPreview(new Coord(20, 20), new Color(configuration.showtreeberrydif, true), val -> {
+            configuration.showtreeberrydif = val.hashCode();
+            Utils.setprefi("showtreeberrydif", val.hashCode());
+        }), new ColorPreview(new Coord(20, 20), new Color(configuration.showtreeberryspc, true), val -> {
+            configuration.showtreeberryspc = val.hashCode();
+            Utils.setprefi("showtreeberryspc", val.hashCode());
+        }), new ColorPreview(new Coord(20, 20), new Color(configuration.showtreeberryemi, true), val -> {
+            configuration.showtreeberryemi = val.hashCode();
+            Utils.setprefi("showtreeberryemi", val.hashCode());
+        }));
+        appender.addRow(new CheckBox("Show player distance border (CTRL+SHIFT+B)", val -> Utils.setprefb("playerbordersprite", configuration.playerbordersprite = val), configuration.playerbordersprite), new ColorPreview(new Coord(20, 20), new Color(configuration.playerbordercolor, true), val -> {
+            configuration.playerbordercolor = val.hashCode();
+            Utils.setprefi("playerbordercolor", val.hashCode());
+        }));
+        appender.addRow(new CheckBox("Show player distance box (CTRL+SHIFT+B)", val -> Utils.setprefb("playerboxsprite", configuration.playerboxsprite = val), configuration.playerboxsprite), new ColorPreview(new Coord(20, 20), new Color(configuration.playerboxcolor, true), val -> {
+            configuration.playerboxcolor = val.hashCode();
+            Utils.setprefi("playerboxcolor", val.hashCode());
         }));
         appender.add(new CheckBox("Draw circles around party members.") {
             {
@@ -3114,59 +3137,6 @@ public class OptWnd extends Window {
         CheckBox mineboulderchk = new CheckBox("Chip boulders while mine cursor", v -> Utils.setprefb("bouldersmine", configuration.bouldersmine = v), configuration.bouldersmine);
         mineboulderchk.setcolor(Color.ORANGE);
         appender.add(mineboulderchk);
-        appender.add(new CheckBox("Show trough status") {
-            {
-                a = configuration.showtroughstatus;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("showtroughstatus", val);
-                configuration.showtroughstatus = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Show beehive status") {
-            {
-                a = configuration.showbeehivestatus;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("showbeehivestatus", val);
-                configuration.showbeehivestatus = val;
-                a = val;
-            }
-        });
-        appender.addRow(new CheckBox("Show tree berry status") {
-            {
-                a = configuration.showtreeberry;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("showtreeberry", val);
-                configuration.showtreeberry = val;
-                a = val;
-            }
-        }, new ColorPreview(new Coord(20, 20), new Color(configuration.showtreeberryamb, true), val -> {
-            configuration.showtreeberryamb = val.hashCode();
-            Utils.setprefi("showtreeberryamb", val.hashCode());
-        }), new ColorPreview(new Coord(20, 20), new Color(configuration.showtreeberrydif, true), val -> {
-            configuration.showtreeberrydif = val.hashCode();
-            Utils.setprefi("showtreeberrydif", val.hashCode());
-        }), new ColorPreview(new Coord(20, 20), new Color(configuration.showtreeberryspc, true), val -> {
-            configuration.showtreeberryspc = val.hashCode();
-            Utils.setprefi("showtreeberryspc", val.hashCode());
-        }), new ColorPreview(new Coord(20, 20), new Color(configuration.showtreeberryemi, true), val -> {
-            configuration.showtreeberryemi = val.hashCode();
-            Utils.setprefi("showtreeberryemi", val.hashCode());
-        }));
-        appender.addRow(new CheckBox("Show player distance border", val -> Utils.setprefb("playerbordersprite", configuration.playerbordersprite = val), configuration.playerbordersprite), new ColorPreview(new Coord(20, 20), new Color(configuration.playerbordercolor, true), val -> {
-            configuration.playerbordercolor = val.hashCode();
-            Utils.setprefi("playerbordercolor", val.hashCode());
-        }));
-        appender.addRow(new CheckBox("Show player distance box", val -> Utils.setprefb("playerboxsprite", configuration.playerboxsprite = val), configuration.playerboxsprite), new ColorPreview(new Coord(20, 20), new Color(configuration.playerboxcolor, true), val -> {
-            configuration.playerboxcolor = val.hashCode();
-            Utils.setprefi("playerboxcolor", val.hashCode());
-        }));
         appender.addRow(new CheckBox("Resizable World") {
             {
                 a = configuration.resizableworld;

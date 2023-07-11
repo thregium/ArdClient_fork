@@ -85,10 +85,14 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     public static Material.Colors cRackMissing = new Material.Colors(DefSettings.CHEESERACKMISSINGCOLOR.get());
     private static final Material.Colors coopMissing = new Material.Colors(new Color(255, 0, 255, 255));
     private static final Material.Colors dframeDone = new Material.Colors(new Color(255, 0, 0, 200));
-    private static final AtomicReference<GLState> storagefullcolormaterial = new AtomicReference(new Material.Colors(getFullStorageColor()));
-    private static final AtomicReference<GLState> storageemptycolormaterial = new AtomicReference(new Material.Colors(getEmptyStorageColor()));
-    private static final AtomicReference<GLState> barrelemptycolormaterial = new AtomicReference(new Material.Colors(getEmptyBarrelColor()));
-    private static final AtomicReference<GLState> storagehalfcolormaterial = new AtomicReference(new Material.Colors(getHalfStorageColor()));
+    private static final AtomicReference<GLState> storagefullcolormaterial = new AtomicReference<>(new Material.Colors(getFullStorageColor()));
+    private static final AtomicReference<GLState> storageemptycolormaterial = new AtomicReference<>(new Material.Colors(getEmptyStorageColor()));
+    private static final AtomicReference<GLState> storagehalfcolormaterial = new AtomicReference<>(new Material.Colors(getHalfStorageColor()));
+    private static final AtomicReference<GLState> barrelemptycolormaterial = new AtomicReference<>(new Material.Colors(getEmptyBarrelColor()));
+    private static final AtomicReference<GLState> troughemptycolormaterial = new AtomicReference<>(new Material.Colors(getEmptyTroughColor()));
+    private static final AtomicReference<GLState> troughhalfcolormaterial = new AtomicReference<>(new Material.Colors(getHalfTroughColor()));
+    private static final AtomicReference<GLState> troughfullcolormaterial = new AtomicReference<>(new Material.Colors(getFullTroughColor()));
+    private static final AtomicReference<GLState> beehivefullcolormaterial = new AtomicReference<>(new Material.Colors(getFullBeehiveColor()));
     private static final Material.Colors dframeWater = new Material.Colors(new Color(0, 0, 255, 200));
     private static final Material.Colors dframeBark = new Material.Colors(new Color(165, 42, 42, 200));
     public static Material.Colors potDOne = new Material.Colors(DefSettings.GARDENPOTDONECOLOR.get());
@@ -1321,16 +1325,18 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
 
                 if (stage == 1)
-                    rl.prepc(coopMissing);
+                    rl.prepc(troughhalfcolormaterial.get());
                 if (stage == 0)
-                    rl.prepc(cRackFull);
+                    rl.prepc(troughemptycolormaterial.get());
+                if (stage == 7)
+                    rl.prepc(troughfullcolormaterial.get());
             }
 
             if (configuration.showbeehivestatus && type == Type.BEEHIVE) {
                 int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
 
                 if (stage == 5 || stage == 6 || stage == 7 || stage == 9 || stage == 15)
-                    rl.prepc(cRackFull);
+                    rl.prepc(beehivefullcolormaterial.get());
             }
 
             if (OverlayData.isHighlighted(name())) {
@@ -1775,14 +1781,34 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         storageemptycolormaterial.set(new Material.Colors(color));
     }
 
+    public static void setHalfStorageColor(final Color color) {
+        Utils.setprefi("storagehalfcolor", color.getRGB());
+        storagehalfcolormaterial.set(new Material.Colors(color));
+    }
+
     public static void setEmptyBarrelColor(final Color color) {
         Utils.setprefi("barrelemptycolor", color.getRGB());
         barrelemptycolormaterial.set(new Material.Colors(color));
     }
 
-    public static void setHalfStorageColor(final Color color) {
-        Utils.setprefi("storagehalfcolor", color.getRGB());
-        storagehalfcolormaterial.set(new Material.Colors(color));
+    public static void setEmptyTroughColor(final Color color) {
+        Utils.setprefi("troughemptycolor", color.getRGB());
+        troughemptycolormaterial.set(new Material.Colors(color));
+    }
+
+    public static void setHalfTroughColor(final Color color) {
+        Utils.setprefi("troughhalfcolor", color.getRGB());
+        troughhalfcolormaterial.set(new Material.Colors(color));
+    }
+
+    public static void setFullTroughColor(final Color color) {
+        Utils.setprefi("troughfullcolor", color.getRGB());
+        troughfullcolormaterial.set(new Material.Colors(color));
+    }
+
+    public static void setFullBeehiveColor(final Color color) {
+        Utils.setprefi("beehivefullcolor", color.getRGB());
+        beehivefullcolormaterial.set(new Material.Colors(color));
     }
 
     public static Color getFullStorageColor() {
@@ -1799,6 +1825,22 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 
     public static Color getHalfStorageColor() {
         return (new Color(Utils.getprefi("storagehalfcolor", new Color(255, 255, 0, 230).getRGB()), true));
+    }
+
+    public static Color getEmptyTroughColor() {
+        return (new Color(Utils.getprefi("troughemptycolor", new Color(255, 0, 0, 230).getRGB()), true));
+    }
+
+    public static Color getHalfTroughColor() {
+        return (new Color(Utils.getprefi("troughhalfcolor", new Color(255, 0, 255, 230).getRGB()), true));
+    }
+
+    public static Color getFullTroughColor() {
+        return (new Color(Utils.getprefi("troughfullcolor", new Color(0, 255, 0, 230).getRGB()), true));
+    }
+
+    public static Color getFullBeehiveColor() {
+        return (new Color(Utils.getprefi("beehivefullcolor", new Color(0, 255, 0, 230).getRGB()), true));
     }
 
     private static final List<StorageMaterial> storageMaterialList = new ArrayList<>();

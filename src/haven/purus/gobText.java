@@ -7,11 +7,13 @@ import haven.GOut;
 import haven.Gob;
 import haven.Location;
 import haven.Matrix4f;
+import haven.PUtils;
 import haven.PView;
 import haven.Projection;
 import haven.RenderList;
 import haven.Sprite;
 import haven.Tex;
+import haven.TexI;
 import haven.Text;
 
 import java.awt.Color;
@@ -59,9 +61,10 @@ public class gobText extends Sprite {
         return true;
     }
 
+    static Text.Foundry tf = new Text.Foundry(Text.sans).aa(true);
+
     public void update(String text) {
-        String str = text;
-        tex = Text.render(text, color).tex();
+        tex = new TexI(PUtils.rasterimg(PUtils.blurmask2(tf.render(text, color).img.getRaster(), 1, 1, Color.DARK_GRAY)));
     }
 
     public Object staticp() {
