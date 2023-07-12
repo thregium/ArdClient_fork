@@ -27,6 +27,7 @@
 package haven;
 
 import haven.res.gfx.terobjs.barterarea.BarterArea;
+import haven.res.gfx.terobjs.dng.beedungeon.Beehive;
 import haven.res.gfx.terobjs.dng.powersplit.PowerSprite;
 import haven.res.gfx.terobjs.road.routeindicator.Route;
 import modification.Bed;
@@ -161,31 +162,26 @@ public abstract class Sprite implements Rendered {
             return (new FakeSprite(owner, res, sdt));
         }
         try {
-            if (res.name.equals("gfx/terobjs/dng/powermonolith")) {
+            if (res.name.equals("gfx/terobjs/dng/beedungeon")) {
+                return (Beehive.mksprite(owner, res, sdt));
+            } else if (res.name.equals("gfx/terobjs/dng/powermonolith")) {
                 return (PowerSprite.mksprite(owner, res, sdt));
-            }
-            if (res.name.equals("gfx/terobjs/barterarea")) {
+            } else if (res.name.equals("gfx/terobjs/barterarea")) {
                 return (new BarterArea(owner, res, sdt));
-            }
-            if (res.name.equals("gfx/terobjs/road/routeindicator")) {
+            } else if (res.name.equals("gfx/terobjs/road/routeindicator")) {
                 return (new Route(owner, res, sdt));
-            }
-            if (res.name.equals("gfx/terobjs/coronationstone")) {
+            } else if (res.name.equals("gfx/terobjs/coronationstone")) {
                 Factory f = new modification.Corostone();
                 return (f.create(owner, res, sdt));
-            }
-            if (res.name.equals("gfx/terobjs/thingwall")) {
+            } else if (res.name.equals("gfx/terobjs/thingwall")) {
                 Factory f = new modification.Thingwall();
                 return (f.create(owner, res, sdt));
-            }
-            if (res.name.startsWith("gfx/terobjs/items/decal-") || res.name.startsWith("gfx/terobjs/items/parchment-decal")) {
+            } else if (res.name.startsWith("gfx/terobjs/items/decal-") || res.name.startsWith("gfx/terobjs/items/parchment-decal")) {
                 Factory f = new Decal();
                 return (f.create(owner, res, sdt));
-            }
-            if (res.name.equals("ui/plob-fdir")) {
+            } else if (res.name.equals("ui/plob-fdir")) {
                 return (new Fixedplob(owner, res, sdt));
-            }
-            if (res.name.equals("gfx/terobjs/furn/bed-sturdy")) {
+            } else if (res.name.equals("gfx/terobjs/furn/bed-sturdy")) {
                 Factory f = new Bed();
                 return (f.create(owner, res, sdt));
             }
