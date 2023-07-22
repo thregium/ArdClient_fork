@@ -243,7 +243,7 @@ public class Config {
     public static boolean showrackstatus = Utils.getprefb("showrackstatus", true);
     public static boolean showcupboardstatus = Utils.getprefb("showcupboardstatus", true);
     public static boolean showbarrelstatus = Utils.getprefb("showbarrelstatus", true);
-    public static boolean showbarreltext = Utils.getprefb("showbarreltext", true);
+    public static boolean showbarreltext = Utils.getprefb("showbarreltext", false);
     public static boolean showpartialstoragestatus = Utils.getprefb("showpartialstoragestatus", false);
     public static boolean showshedstatus = Utils.getprefb("showshedstatus", true);
     public static boolean enableorthofullzoom = Utils.getprefb("enableorthofullzoom", false);

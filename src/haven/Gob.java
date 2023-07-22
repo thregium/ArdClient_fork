@@ -1160,8 +1160,24 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     }
                     if (text != null) {
                         if (barreltext == null) barreltext = new gobText(this, text, Color.GREEN, 50);
+                        else barreltext.update(text);
                         rl.add(barreltext, null);
+                    } else {
+                        if (barreltext != null) barreltext = null;
                     }
+                } else {
+                    if (barreltext != null) barreltext = null;
+                }
+                if (Config.showbarrelstatus && name().matches("gfx/terobjs/barrel")) {
+                    boolean ret = true;
+                    for (Overlay ol : ols) {
+                        String olname = ol.name();
+                        if (olname.matches("gfx/terobjs/barrel-.*")) {
+                            ret = false;
+                            break;
+                        }
+                    }
+                    if (ret) rl.prepc(barrelemptycolormaterial.get());
                 }
                 for (Map.Entry<String, Long> entry : configuration.treesMap.entrySet()) {
                     if (entry.getValue() == id) {
@@ -1255,11 +1271,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     rl.prepc(storageemptycolormaterial.get());
                 //while open : empty == 1, 1 item to half items = 5, half full = 13, full 29
                 //while closed : empty = 2, 1 item to half items = 6, half full= 14, full 30
-            }
-
-            if (Config.showbarrelstatus && name().matches("gfx/terobjs/barrel")) {
-                if (ols.isEmpty())
-                    rl.prepc(barrelemptycolormaterial.get());
             }
 
             if (MapView.markedGobs.contains(id))

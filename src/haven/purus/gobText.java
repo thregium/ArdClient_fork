@@ -17,10 +17,12 @@ import haven.TexI;
 import haven.Text;
 
 import java.awt.Color;
+import java.util.Objects;
 
 public class gobText extends Sprite {
     // Text custom text above gob
 
+    private String text;
     private Tex tex;
     private static Matrix4f mv = new Matrix4f();
     private Projection proj;
@@ -64,7 +66,10 @@ public class gobText extends Sprite {
     static Text.Foundry tf = new Text.Foundry(Text.sans).aa(true);
 
     public void update(String text) {
-        tex = new TexI(PUtils.rasterimg(PUtils.blurmask2(tf.render(text, color).img.getRaster(), 1, 1, Color.DARK_GRAY)));
+        if (!Objects.equals(this.text, text)) {
+            this.text = text;
+            tex = new TexI(PUtils.rasterimg(PUtils.blurmask2(tf.render(text, color).img.getRaster(), 1, 1, Color.DARK_GRAY)));
+        }
     }
 
     public Object staticp() {
