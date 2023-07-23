@@ -57,7 +57,7 @@ public class RectSprite extends Sprite {
             float x = l + ((r - l) * i) / (xn - 1);
             I = i;
             v = I * 3;
-            pa.put(v + 0, x).put(v + 1, -u).put(v + 2, 10);
+            pa.put(v + 0, x).put(v + 1, -u).put(v + 2, 0.5f);
             pa.put(v + N + 0, x).put(v + N + 1, -u).put(v + N + 2, -10);
             na.put(v + 0, 0).put(v + 1, 1).put(v + 2, 0);
             na.put(v + N + 0, 0).put(v + N + 1, 1).put(v + N + 2, 0);
@@ -68,7 +68,7 @@ public class RectSprite extends Sprite {
             }
             I = i + hn;
             v = I * 3;
-            pa.put(v + 0, x).put(v + 1, -b).put(v + 2, 10);
+            pa.put(v + 0, x).put(v + 1, -b).put(v + 2, 0.5f);
             pa.put(v + N + 0, x).put(v + N + 1, -b).put(v + N + 2, -10);
             na.put(v + 0, 0).put(v + 1, -1).put(v + 2, 0);
             na.put(v + N + 0, 0).put(v + N + 1, -1).put(v + N + 2, 0);
@@ -82,7 +82,7 @@ public class RectSprite extends Sprite {
             float y = u + ((b - u) * i) / (yn - 1);
             I = i + xn;
             v = I * 3;
-            pa.put(v + 0, r).put(v + 1, -y).put(v + 2, 10);
+            pa.put(v + 0, r).put(v + 1, -y).put(v + 2, 0.5f);
             pa.put(v + N + 0, r).put(v + N + 1, -y).put(v + N + 2, -10);
             na.put(v + 0, 1).put(v + 1, 0).put(v + 2, 0);
             na.put(v + N + 0, 1).put(v + N + 1, 0).put(v + N + 2, 0);
@@ -93,7 +93,7 @@ public class RectSprite extends Sprite {
             }
             I = i + xn + hn;
             v = I * 3;
-            pa.put(v + 0, l).put(v + 1, -y).put(v + 2, 10);
+            pa.put(v + 0, l).put(v + 1, -y).put(v + 2, 0.5f);
             pa.put(v + N + 0, l).put(v + N + 1, -y).put(v + N + 2, -10);
             na.put(v + 0, -1).put(v + 1, 0).put(v + 2, 0);
             na.put(v + N + 0, -1).put(v + N + 1, 0).put(v + N + 2, 0);
@@ -118,8 +118,8 @@ public class RectSprite extends Sprite {
             pos = Location.xlate(new Coord3f((float) rc.x, -(float) rc.y, Config.disableelev ? 0 : rz));
             for (int i = 0; i < p; i++) {
                 float z = Config.disableelev ? 0 : (float) glob.map.getcz(rc.x + pa.get(i * 3), rc.y - pa.get(i * 3 + 1)) - rz;
-                pa.put(i * 3 + 2, z + 10);
-                pa.put((p + i) * 3 + 2, z - 10);
+                pa.put(i * 3 + 2, z + 0.5f);
+                pa.put((p + i) * 3 + 2, z - 0.5f);
             }
         } catch (Loading e) {
         }

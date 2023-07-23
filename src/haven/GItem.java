@@ -325,9 +325,9 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
             if (contents != null) {
                 Widget stack = contents;
                 List<WItem> ret = new ArrayList<>();
-                if (stack instanceof Inventory) {
+                /*if (stack instanceof Inventory) {
                     ret.addAll(((Inventory) stack).wmap.values());
-                } else if (stack.getClass().toString().contains("ItemStack")) {
+                } else */if (stack.getClass().toString().contains("ItemStack")) {
                     try {
                         Field fwmap = stack.getClass().getField("wmap");
                         Map<GItem, WItem> wmap = (Map<GItem, WItem>) fwmap.get(stack);
@@ -466,9 +466,9 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
                 if (info != null && !info.isEmpty()) {
                     Widget stack = contents;
                     List<WItem> ret = new ArrayList<>();
-                    if (stack instanceof Inventory) {
+                    /*if (stack instanceof Inventory) {
                         ret.addAll(((Inventory) stack).wmap.values());
-                    } else if (stack.getClass().toString().contains("ItemStack")) {
+                    } else*/ if (stack.getClass().toString().contains("ItemStack")) {
                         try {
                             Field fwmap = stack.getClass().getField("wmap");
                             Map<GItem, WItem> wmap = (Map<GItem, WItem>) fwmap.get(stack);

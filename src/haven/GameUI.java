@@ -1981,6 +1981,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             msg("Animal Radius " + (val ? "on" : "off"), Color.white);
         }, Config.showanimalrad), new ColorPreview(Coord.of(16), ANIMALDANGERCOLOR.get(), val -> {
             BPRadSprite.smatDanger = new States.ColState(val);
+            ANIMALDANGERCOLOR.set(val);
             if (ui.gui.map != null) ui.gui.map.refreshGobsAll();
         }, "Dangerous animal radius color"));
         wva.addRow(new CheckBox("Double animal radius size", val -> {
@@ -1992,6 +1993,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             msg("Mine support " + (val ? "on" : "off"), Color.white);
         }, Config.showminerad), new ColorPreview(Coord.of(16), SUPPORTDANGERCOLOR.get(), val -> {
             BPRadSprite.smatSupports = new States.ColState(val);
+            SUPPORTDANGERCOLOR.set(val);
             if (map != null) map.refreshGobsAll();
         }, "Radius mine radius color"), new ColorPreview(Coord.of(16), MSRad.getColor1(), MSRad::changeColor1, "Vanilla mine radius first color"), new ColorPreview(Coord.of(16), MSRad.getColor2(), MSRad::changeColor2, "Vanilla mine radius second color"));
         wva.addRow(new CheckBox("Show Trough Radius", val -> {
@@ -1999,6 +2001,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             msg("Troughs " + (val ? "on" : "off"), Color.white);
         }, Config.showTroughrad), new ColorPreview(Coord.of(16), TROUGHCOLOR.get(), val -> {
             BPRadSprite.smatTrough = new States.ColState(val);
+            TROUGHCOLOR.set(val);
             if (map != null) map.refreshGobsAll();
         }));
         wva.addRow(new CheckBox("Show Beehive Radius", val -> {
@@ -2006,6 +2009,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             msg("Beehives " + (val ? "on" : "off"), Color.white);
         }, Config.showBeehiverad), new ColorPreview(Coord.of(16), BEEHIVECOLOR.get(), val -> {
             BPRadSprite.smatBeehive = new States.ColState(val);
+            BEEHIVECOLOR.set(val);
             if (map != null) map.refreshGobsAll();
         }));
         wva.addRow(new CheckBox("Show Mound Bed Radius", val -> {
@@ -2013,6 +2017,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             msg("Mound Beds " + (val ? "on" : "off"), Color.white);
         }, Config.showMoundbedrad), new ColorPreview(Coord.of(16), MOUNDBEDCOLOR.get(), val -> {
             BPRadSprite.smatMoundbed = new States.ColState(val);
+            MOUNDBEDCOLOR.set(val);
             if (map != null) map.refreshGobsAll();
         }));
         wva.addRow(new CheckBox("Show Barter Hand Radius", val -> {
@@ -2020,6 +2025,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             msg("Barter Hands " + (val ? "on" : "off"), Color.white);
         }, Config.showBarterrad), new ColorPreview(Coord.of(16), BARTERCOLOR.get(), val -> {
             BPRadSprite.smatBarter = new States.ColState(val);
+            BARTERCOLOR.set(val);
             if (map != null) map.refreshGobsAll();
         }));
         w.pack();

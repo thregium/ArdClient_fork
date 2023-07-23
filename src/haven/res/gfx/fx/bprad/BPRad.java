@@ -45,7 +45,7 @@ public class BPRad extends Sprite {
         for (int i = 0; i < n; i++) {
             float s = (float) Math.sin(2 * Math.PI * i / n);
             float c = (float) Math.cos(2 * Math.PI * i / n);
-            posb.put(i * 3 + 0, c * r).put(i * 3 + 1, s * r).put(i * 3 + 2, 10);
+            posb.put(i * 3 + 0, c * r).put(i * 3 + 1, s * r).put(i * 3 + 2, 0.5f);
             posb.put((n + i) * 3 + 0, c * r).put((n + i) * 3 + 1, s * r).put((n + i) * 3 + 2, -10);
             nrmb.put(i * 3 + 0, c).put(i * 3 + 1, s).put(i * 3 + 2, 0);
             nrmb.put((n + i) * 3 + 0, c).put((n + i) * 3 + 1, s).put((n + i) * 3 + 2, 0);
@@ -70,8 +70,8 @@ public class BPRad extends Sprite {
             float bz = (float) glob.map.getcz(c.x, c.y);
             for (int i = 0; i < n; i++) {
                 float z = (float) glob.map.getcz(c.x + posb.get(i * 3), c.y - posb.get(i * 3 + 1)) - bz;
-                posb.put(i * 3 + 2, z + 10);
-                posb.put((n + i) * 3 + 2, z - 10);
+                posb.put(i * 3 + 2, z + 0.5f);
+                posb.put((n + i) * 3 + 2, z - 0.5f);
             }
         } catch (Loading e) {
         }
