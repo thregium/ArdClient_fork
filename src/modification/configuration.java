@@ -175,6 +175,7 @@ public class configuration {
     public static int playerbordercolor = Utils.getprefi("playerbordercolor", new Color(192, 0, 0, 128).hashCode());
     public static boolean playerboxsprite = Utils.getprefb("playerbordersprite", false);
     public static int playerboxcolor = Utils.getprefi("playerboxcolor", new Color(192, 0, 0, 128).hashCode());
+    public static float radiusheight = Utils.getpreff("radiusheight", 0.5f);
     public static int showtreeberryamb = Utils.getprefi("showtreeberryamb", Color.WHITE.hashCode());
     public static int showtreeberrydif = Utils.getprefi("showtreeberrydif", Color.BLUE.hashCode());
     public static int showtreeberryspc = Utils.getprefi("showtreeberryspc", Color.RED.hashCode());

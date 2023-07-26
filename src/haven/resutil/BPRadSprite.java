@@ -18,11 +18,13 @@ import haven.States.ColState;
 import haven.Utils;
 import haven.VertexBuf.NormalArray;
 import haven.VertexBuf.VertexArray;
+import modification.configuration;
 
 import javax.media.opengl.GL;
 import java.awt.Color;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.Objects;
 
 public class BPRadSprite extends Sprite {
     public static int getId(String name) {
@@ -43,11 +45,13 @@ public class BPRadSprite extends Sprite {
     final NormalArray nrma;
     final ShortBuffer sidx;
     private Coord2d lc;
+    float height;
 
     public BPRadSprite(Owner owner, float rad, float basez, GLState smat) {
         super(owner, null);
 
         this.smat = smat;
+        this.height = configuration.radiusheight;
 
         int per = Math.max(24, (int) (2 * Math.PI * rad / 11.0));
         FloatBuffer pa = Utils.mkfbuf(per * 3 * 2);
@@ -57,7 +61,7 @@ public class BPRadSprite extends Sprite {
         for (int i = 0; i < per; i++) {
             float s = (float) Math.sin(2 * Math.PI * i / per);
             float c = (float) Math.cos(2 * Math.PI * i / per);
-            pa.put(i * 3 + 0, c * rad).put(i * 3 + 1, s * rad).put(i * 3 + 2, 0.5f);
+            pa.put(i * 3 + 0, c * rad).put(i * 3 + 1, s * rad).put(i * 3 + 2, height);
             pa.put((per + i) * 3 + 0, c * rad).put((per + i) * 3 + 1, s * rad).put((per + i) * 3 + 2, basez);
             na.put(i * 3 + 0, c).put(i * 3 + 1, s).put(i * 3 + 2, 0.0F);
             na.put((per + i) * 3 + 0, c).put((per + i) * 3 + 1, s).put((per + i) * 3 + 2, 0.0F);
@@ -79,8 +83,8 @@ public class BPRadSprite extends Sprite {
 
             for (int i = 0; i < p; i++) {
                 float z = Config.disableelev ? 0 : (float) glob.map.getcz(rc.x + pa.get(i * 3), rc.y - pa.get(i * 3 + 1)) - rz;
-                pa.put(i * 3 + 2, z + 0.5f);
-                pa.put((p + i) * 3 + 2, z - 0.5f);
+                pa.put(i * 3 + 2, z + height);
+                pa.put((p + i) * 3 + 2, z - height);
             }
         } catch (Loading e) {
         }
@@ -88,9 +92,10 @@ public class BPRadSprite extends Sprite {
 
     public boolean tick(int dt) {
         Coord2d rc = ((Gob) owner).rc;
-        if (lc == null || !lc.equals(rc)) {
+        if (lc == null || !lc.equals(rc) || height != configuration.radiusheight) {
             setz(this.owner.context(Glob.class), rc);
-            lc = rc;
+            if (!Objects.equals(lc, rc)) lc = rc;
+            if (height != configuration.radiusheight) height = configuration.radiusheight;
         }
 
         return false;

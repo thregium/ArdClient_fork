@@ -4,6 +4,7 @@ import haven.Coord2d;
 import haven.GLState;
 import haven.GOut;
 import haven.Glob;
+import haven.Gob;
 import haven.Loading;
 import haven.Location;
 import haven.Material;
@@ -15,9 +16,12 @@ import haven.Sprite;
 import haven.States;
 import haven.Utils;
 import haven.VertexBuf;
+import modification.configuration;
+
 import java.awt.Color;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.Objects;
 import javax.media.opengl.GL;
 
 public class BPRad extends Sprite {
@@ -29,6 +33,7 @@ public class BPRad extends Sprite {
     final ShortBuffer eidx;
     float[] barda;
     private Coord2d lc;
+    float height;
 
     public BPRad(Owner owner, Resource res, Message sdt) {
         this(owner, res, Utils.hfdec((short) sdt.int16()) * 11);
@@ -36,6 +41,7 @@ public class BPRad extends Sprite {
 
     public BPRad(Owner owner, Resource res, float r) {
         super(owner, res);
+        this.height = configuration.radiusheight;
         int n = Math.max(24, (int) (2 * Math.PI * r / 11.0));
         FloatBuffer posb = Utils.wfbuf(n * 3 * 2);
         FloatBuffer nrmb = Utils.wfbuf(n * 3 * 2);
@@ -45,7 +51,7 @@ public class BPRad extends Sprite {
         for (int i = 0; i < n; i++) {
             float s = (float) Math.sin(2 * Math.PI * i / n);
             float c = (float) Math.cos(2 * Math.PI * i / n);
-            posb.put(i * 3 + 0, c * r).put(i * 3 + 1, s * r).put(i * 3 + 2, 0.5f);
+            posb.put(i * 3 + 0, c * r).put(i * 3 + 1, s * r).put(i * 3 + 2, height);
             posb.put((n + i) * 3 + 0, c * r).put((n + i) * 3 + 1, s * r).put((n + i) * 3 + 2, -10);
             nrmb.put(i * 3 + 0, c).put(i * 3 + 1, s).put(i * 3 + 2, 0);
             nrmb.put((n + i) * 3 + 0, c).put((n + i) * 3 + 1, s).put((n + i) * 3 + 2, 0);
@@ -70,8 +76,8 @@ public class BPRad extends Sprite {
             float bz = (float) glob.map.getcz(c.x, c.y);
             for (int i = 0; i < n; i++) {
                 float z = (float) glob.map.getcz(c.x + posb.get(i * 3), c.y - posb.get(i * 3 + 1)) - bz;
-                posb.put(i * 3 + 2, z + 0.5f);
-                posb.put((n + i) * 3 + 2, z - 0.5f);
+                posb.put(i * 3 + 2, z + height);
+                posb.put((n + i) * 3 + 2, z - height);
             }
         } catch (Loading e) {
         }
@@ -91,6 +97,17 @@ public class BPRad extends Sprite {
         g.gl.glDrawElements(2, this.eidx.capacity(), GL.GL_UNSIGNED_SHORT, this.eidx);
         this.posa.unbind(g);
         this.nrma.unbind(g);
+    }
+
+    public boolean tick(int dt) {
+        Coord2d rc = ((Gob) owner).rc;
+        if (lc == null || !lc.equals(rc) || height != configuration.radiusheight) {
+            setz(this.owner.context(Glob.class), rc);
+            if (!Objects.equals(lc, rc)) lc = rc;
+            if (height != configuration.radiusheight) height = configuration.radiusheight;
+        }
+
+        return false;
     }
 
     public boolean setup(RenderList rl) {

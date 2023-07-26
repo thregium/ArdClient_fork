@@ -2028,6 +2028,27 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             BARTERCOLOR.set(val);
             if (map != null) map.refreshGobsAll();
         }));
+        wva.addRow(new CheckBox("Show player distance border", val -> Utils.setprefb("playerbordersprite", configuration.playerbordersprite = val), configuration.playerbordersprite), new ColorPreview(new Coord(20, 20), new Color(configuration.playerbordercolor, true), val -> {
+            configuration.playerbordercolor = val.hashCode();
+            Utils.setprefi("playerbordercolor", val.hashCode());
+        }));
+        wva.addRow(new CheckBox("Show player distance box", val -> Utils.setprefb("playerboxsprite", configuration.playerboxsprite = val), configuration.playerboxsprite), new ColorPreview(new Coord(20, 20), new Color(configuration.playerboxcolor, true), val -> {
+            configuration.playerboxcolor = val.hashCode();
+            Utils.setprefi("playerboxcolor", val.hashCode());
+        }));
+        Label text = new Label(configuration.radiusheight + "");
+        wva.addRow(new Label("Height:"), new HSlider(100, 0, 5000, (int) (configuration.radiusheight * 100f)) {
+            @Override
+            public void changed() {
+                Utils.setpreff("radiusheight", configuration.radiusheight = val / 100f);
+                text.settext(configuration.radiusheight + "");
+            }
+
+            @Override
+            public Object tooltip(final Coord c, final Widget prev) {
+                return (configuration.radiusheight + "");
+            }
+        }, text);
         w.pack();
 
         adda(w, sz.div(2), 0.5, 0.5);

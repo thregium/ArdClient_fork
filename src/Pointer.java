@@ -156,6 +156,7 @@ public class Pointer extends Widget {
         this.lc = null;
         if (tc == null)
             return;
+        Coord2d tc = this.tc;
 
         if (ui.gui != null && ui.gui.map != null) {
             Gob questgob = this.gobid < 0L ? null : this.ui.sess.glob.oc.getgob(this.gobid);
@@ -174,7 +175,7 @@ public class Pointer extends Widget {
                     return;
                 }
             } else {
-                gobsc = ui.gui.map.screenxf(this.tc);
+                gobsc = ui.gui.map.screenxf(tc);
                 gobrc = tc;
             }
 

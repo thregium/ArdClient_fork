@@ -1058,14 +1058,6 @@ public class OptWnd extends Window {
             configuration.showtreeberryemi = val.hashCode();
             Utils.setprefi("showtreeberryemi", val.hashCode());
         }));
-        appender.addRow(new CheckBox("Show player distance border (CTRL+SHIFT+B)", val -> Utils.setprefb("playerbordersprite", configuration.playerbordersprite = val), configuration.playerbordersprite), new ColorPreview(new Coord(20, 20), new Color(configuration.playerbordercolor, true), val -> {
-            configuration.playerbordercolor = val.hashCode();
-            Utils.setprefi("playerbordercolor", val.hashCode());
-        }));
-        appender.addRow(new CheckBox("Show player distance box (CTRL+SHIFT+B)", val -> Utils.setprefb("playerboxsprite", configuration.playerboxsprite = val), configuration.playerboxsprite), new ColorPreview(new Coord(20, 20), new Color(configuration.playerboxcolor, true), val -> {
-            configuration.playerboxcolor = val.hashCode();
-            Utils.setprefi("playerboxcolor", val.hashCode());
-        }));
         appender.add(new CheckBox("Draw circles around party members.") {
             {
                 a = Config.partycircles;
