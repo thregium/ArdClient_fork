@@ -8,7 +8,7 @@
         <mkdir dir="build"/>
         <mkdir dir="build/lib"/>
         <mkdir dir="build/classes"/>
-        <available property="has-res-jar" file="build/hafen-res.jar"/>
+<!--        <available property="has-res-jar" file="build/hafen-res.jar"/>-->
         <available property="has-buildinfo" file="build/classes/buildinfo"/>
         <available property="unpacked-lib" file="build/classes-lib"/>
     </target>
@@ -149,7 +149,7 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar luaj-jse-3
         </copy>
     </target>
 
-    <target name="jars" depends="build-env, jar, res-jar, l10n-jar, custom-jar, scripts, modification, bin">
+    <target name="jars" depends="build-env, jar, l10n-jar, custom-jar, scripts, modification, bin">
         <copy todir="build">
             <fileset dir="lib">
                 <include name="jogl.jar"/>
