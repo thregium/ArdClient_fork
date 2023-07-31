@@ -93,7 +93,7 @@ public class Curiosity extends ItemInfo.Tip {
             imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Mental weight") + ": $col[255,128,255]{%d}", mw), 0).img);
         if (enc > 0)
             imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Experience cost") + ": $col[255,255,128]{%d}", enc), 0).img);
-        if (size > 0)
+        if (size > 1)
             imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Size") + ": $col[128,255,255]{%d}", size), 0).img);
         if (time > 0)
             imgs.add(RichText.render(timefmt(extended), 0).img);
@@ -110,6 +110,8 @@ public class Curiosity extends ItemInfo.Tip {
         double lps = 0;
         double lphs = 0;
         double rlphs = 0;
+        double lphws = 0;
+        double rlphws = 0;
 
         if (extended) {
             if (time > 0) {
@@ -134,13 +136,19 @@ public class Curiosity extends ItemInfo.Tip {
                 }
             }
             if (size > 0) {
-                if (exp > 0) lps = 1d * exp / size;
-                if (lph > 0) {
-                    lphs = lph / size;
-                    rlphs = rlph / size;
+                if (size > 1) {
+                    if (exp > 0) lps = 1d * exp / size;
+                    if (lph > 0) {
+                        lphs = lph / size;
+                        rlphs = rlph / size;
+                    }
+                }
+                if (lphw > 0) {
+                    lphws = lphw / size;
+                    rlphws = rlphw / size;
                 }
             }
-            if (lph > 0 || lpw > 0 || lphw > 0 || lpexp > 0 || lphexp > 0 || lps > 0 || lphs > 0) {
+            if (lph > 0 || lpw > 0 || lphw > 0 || lpexp > 0 || lphexp > 0 || lps > 0 || lphs > 0 || lphws > 0) {
                 imgs.sz.y += 3;
                 if (lph > 0)
                     imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/Time") + ": $col[128,128,255]{%s (~%s RL)}", f.format(lph), f.format(rlph)), 0).img);
@@ -156,6 +164,8 @@ public class Curiosity extends ItemInfo.Tip {
                     imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/Size") + ": $col[128,255,255]{%s}", f.format(lps)), 0).img);
                 if (lphs > 0)
                     imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/Time/Size") + ": $col[128,255,255]{%s (~%s RL)}", f.format(lphs), f.format(rlphs)), 0).img);
+                if (lphws > 0)
+                    imgs.add(RichText.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "LP/Time/Weight/Size") + ": $col[255,0,128]{%s (~%s RL)}", f.format(lphws), f.format(rlphws)), 0).img);
             }
         }
         return (imgs.compose());

@@ -47,6 +47,8 @@ import java.util.stream.Collectors;
 
 import static haven.CharWnd.attrf;
 import static haven.Inventory.invsq;
+import static haven.PUtils.blurmask2;
+import static haven.PUtils.rasterimg;
 import static haven.Window.wbox;
 
 public class FightWnd extends Widget {
@@ -142,7 +144,8 @@ public class FightWnd extends Widget {
         public final Indir<Resource> res;
         private final int id;
         public int a, u;
-        private Text rnm, ru, ra;
+        private String name;
+        private Tex rnm, ru, ra;
         private Tex ri;
 
         public Action(Indir<Resource> res, int id, int a, int u) {
@@ -250,7 +253,7 @@ public class FightWnd extends Widget {
         int u = 0;
         for (Action act : acts)
             u += act.u;
-        count = Text.num12boldFnd.render(String.format("= %d/%d", u, maxact), (u > maxact) ? Color.RED : Color.WHITE).tex();
+        count = stroke(Text.num12boldFnd.render(String.format("= %d/%d", u, maxact), (u > maxact) ? Color.RED : Color.WHITE));
     }
 
     public static class ImageInfoBox extends Widget {
@@ -322,6 +325,10 @@ public class FightWnd extends Widget {
             Resource.loadtex("gfx/hud/buttons/addd")};
     private static final Tex[] sub = {Resource.loadtex("gfx/hud/buttons/subu"),
             Resource.loadtex("gfx/hud/buttons/subd")};
+
+    private Tex stroke(Text text) {
+        return (new TexI(rasterimg(blurmask2(text.img.getRaster(), 1, 1, Color.BLACK))));
+    }
 
     public class Actions extends Listbox<Action> implements DTarget {
         private boolean loading = false;
@@ -404,7 +411,7 @@ public class FightWnd extends Widget {
             g.frect(Coord.z, g.sz);
             g.chcolor();
             if (act.ru == null)
-                act.ru = attrf.render(String.format("%d/%d", act.u, act.a));
+                act.ru = stroke(attrf.render(String.format("%d/%d", act.u, act.a)));
 
             try {
                 if (act.ri == null)
@@ -414,12 +421,12 @@ public class FightWnd extends Widget {
                 g.image(WItem.missing.layer(Resource.imgc).tex(), Coord.z, new Coord(itemh, itemh));
             }
             int ty = (itemh - act.rnm.sz().y) / 2;
-            g.image(act.rnm.tex(), new Coord(itemh + UI.scale(2), ty));
+            g.image(act.rnm, new Coord(itemh + UI.scale(2), ty));
 
             if (act.ra == null)
-                act.ra = Text.num12boldFnd.render(String.valueOf(act.a));
-            g.aimage(act.ra.tex(), new Coord(sz.x - UI.scale(15), ty), 1.0, 0.0);
-            g.aimage(act.ru.tex(), new Coord(sz.x - UI.scale(45), ty), 1.0, 0.0);
+                act.ra = stroke(Text.num12boldFnd.render(String.valueOf(act.a)));
+            g.aimage(act.ra, new Coord(sz.x - UI.scale(15), ty), 1.0, 0.0);
+            g.aimage(act.ru, new Coord(sz.x - UI.scale(45), ty), 1.0, 0.0);
             g.aimage(add[da == idx ? 1 : 0], new Coord(sz.x - UI.scale(10), itemh / 2), 1.0, 0.5);
             g.aimage(sub[ds == idx ? 1 : 0], new Coord(sz.x - UI.scale(25), itemh / 2), 1.0, 0.5);
         }
@@ -448,16 +455,18 @@ public class FightWnd extends Widget {
                 for (Action act : acts) {
                     try {
                         Resource res = act.res.get();
-                        act.rnm = attrf.render(res.layer(Resource.tooltip).t);
+                        act.name = res.layer(Resource.tooltip).t;
+                        act.rnm = stroke(attrf.render(act.name));
                     } catch (Loading l) {
-                        act.rnm = attrf.render("...");
+                        act.name = "...";
+                        act.rnm = attrf.render(act.name).tex();
                         loading = true;
                     }
                 }
 
                 Collections.sort(acts, new Comparator<Action>() {
                     public int compare(Action a, Action b) {
-                        int ret = a.rnm.text.compareTo(b.rnm.text);
+                        int ret = a.name.compareTo(b.name);
                         return (ret);
                     }
                 });
@@ -699,9 +708,9 @@ public class FightWnd extends Widget {
                         g.image(act.res.get().layer(Resource.imgc).tex(), ic);
 
                         if (act.ru == null)
-                            act.ru = Text.num12boldFnd.render(String.format("%d/%d", act.u, act.a));
+                            act.ru = stroke(Text.num12boldFnd.render(String.format("%d/%d", act.u, act.a)));
 
-                        g.image(act.ru.tex(), c.add(invsq.sz().x / 2 - act.ru.sz().x / 2, pcy));
+                        g.image(act.ru, c.add(invsq.sz().x / 2 - act.ru.sz().x / 2, pcy));
                         g.chcolor();
 
                         g.image(sub[subp == i ? 1 : 0], c.add(subOffX, subOffY));

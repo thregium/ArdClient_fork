@@ -54,8 +54,9 @@ public class KinInfo extends GAttrib {
         if (rnm == null) {
             boolean hv = (type & 2) != 0;
             BufferedImage nm = null;
-            if (name.length() > 0)
-                nm = Utils.outline2(nfnd.render(name, BuddyWnd.gc[group]).img, Utils.contrast(BuddyWnd.gc[group]));
+            if (!name.isEmpty())
+                nm = PUtils.rasterimg(PUtils.blurmask2(nfnd.render(name, BuddyWnd.gc[group]).img.getRaster(), 1, 1, Utils.contrast(BuddyWnd.gc[group])));
+//                nm = Utils.outline2(nfnd.render(name, BuddyWnd.gc[group]).img, Utils.contrast(BuddyWnd.gc[group]));
             int w = 0, h = 0;
             if (nm != null) {
                 w += nm.getWidth();

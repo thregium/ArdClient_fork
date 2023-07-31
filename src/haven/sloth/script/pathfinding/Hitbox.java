@@ -5,6 +5,7 @@ import haven.Coord;
 import haven.Coord2d;
 import haven.Gob;
 import haven.Indir;
+import haven.Loading;
 import haven.MessageBuf;
 import haven.RenderLink;
 import haven.ResDrawable;

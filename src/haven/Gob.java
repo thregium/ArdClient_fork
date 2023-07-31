@@ -810,6 +810,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     }
 
     public void remol(Overlay ol) {
+        if (ol == null) return;
         synchronized (ols) {
             ols.remove(ol);
         }
@@ -1212,9 +1213,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                         0, 0, scale, 0,
                         0, 0, 0, 1)));
             }
-            final GobHealth hlt = getattr(GobHealth.class);
-            if (hlt != null)
-                rl.prepc(hlt.getfx());
+//            final GobHealth hlt = getattr(GobHealth.class);
+//            if (hlt != null)
+//                rl.prepc(hlt.getfx());
 
             final GobQuality qlty = getattr(GobQuality.class);
             if (qlty != null)
@@ -1408,14 +1409,13 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             try {
                 if (d != null) {
                     if (!(hid != null && Config.hideuniquegobs)) {
-                        int olid = "overlay_hitbox_solid_id".hashCode();
-                        Overlay ol = findol(olid);
+                        Overlay ol = findol(GobHitbox.olid_solid);
                         if (Config.hidegobs && ((type == Type.TREE && Config.hideTrees) || (type == Type.BUSH && Config.hideBushes) || (type == Type.BOULDER && Config.hideboulders))) {
                             if (Config.showoverlay) {
                                 if (ol == null) {
                                     GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
                                     if (bbox != null)
-                                        addol(new Overlay(olid, new GobHitbox(this, bbox, true)));
+                                        addol(new Overlay(GobHitbox.olid_solid, new GobHitbox(this, bbox, true)));
                                 }
                             } else if (ol != null)
                                 remol(ol);
@@ -1455,13 +1455,12 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 //TODO: This is a weird issue that can pop up on startup, need to look into it
                 return false;
             }
-            int hitboxOlId = "overlay_hitbox_id".hashCode();
-            Overlay hitboxOl = findol(hitboxOlId);
+            Overlay hitboxOl = findol(GobHitbox.olid);
             if (Config.showboundingboxes) {
                 if (hitboxOl == null) {
                     GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
                     if (bbox != null) {
-                        addol(new Overlay(hitboxOlId, new GobHitbox(this, bbox, false)));
+                        addol(new Overlay(GobHitbox.olid, new GobHitbox(this, bbox, false)));
                     }
                 }
             } else if (hitboxOl != null) {

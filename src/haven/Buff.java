@@ -291,6 +291,7 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
                 Coord ccc = img.sz().div(2);
                 g.prect(imgoff.add(ccc), ccc.inv(), img.sz().sub(ccc), Math.PI * 2 * m);
                 g.chcolor(255, 255, 255, a);
+                g.atextstroked(Utils.odformat2((1 - cmeter) * 100, 2), Coord.of(sz.div(2).x, 0), 0.5, 0, Color.WHITE, Color.BLACK, Button.tf);
             }
         } catch (Loading e) {
         }
@@ -301,7 +302,8 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
             g.chcolor(new Color(64, 64, 64, 215));
             g.frect(c, c.add(tsz.x, 0), c.add(tsz), c.add(0, tsz.y));
             g.chcolor();
-            FastText.aprintf(g, sz.div(2), 0.5, 0.5, "%d", this.ameter);
+            FastText.aprintf(g, sz.div(2), 0.5, 0.5, "%s", this.ameter);
+//            g.atextstroked(Utils.odformat2(this.ameter, 2), Coord.of(sz.div(2).x, sz.y - 7), 0.5, 1, Color.WHITE, Color.BLACK, Button.tf);
         }
     }
 

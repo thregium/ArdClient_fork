@@ -357,11 +357,11 @@ public class CharWnd extends Window {
                     ItemSpec spec = new ItemSpec(OwnerContext.uictx.curry(ui), t, null);
                     BufferedImage img = spec.image();
                     String nm = spec.name();
-                    Text rnm = elf.render(nm);
+                    TexI rnm = stroke(elf.render(nm));
                     BufferedImage buf = TexI.mkbuf(new Coord(elh + 5 + rnm.sz().x, elh));
                     Graphics g = buf.getGraphics();
                     g.drawImage(convolvedown(img, new Coord(elh, elh), tflt), 0, 0, null);
-                    g.drawImage(rnm.img, elh + 5, ((elh - rnm.sz().y) / 2) + 1, null);
+                    g.drawImage(rnm.back, elh + 5, ((elh - rnm.sz().y) / 2) + 1, null);
                     g.dispose();
                     tt = new TexI(buf);
                 }
@@ -371,7 +371,7 @@ public class CharWnd extends Window {
             public Tex at() {
                 if (at == null) {
                     Color c = (a > 1.0) ? buffed : Utils.blendcol(none, full, a);
-                    at = elf.render(String.format("%d%%", Math.max((int)Math.round((1.0 - a) * 100), 1)), c).tex();
+                    at = stroke(elf.render(String.format("%d%%", Math.max((int)Math.round((1.0 - a) * 100), 1)), c));
                 }
                 return (at);
             }
@@ -486,13 +486,13 @@ public class CharWnd extends Window {
 
     public class Attr extends Widget {
         public final String nm;
-        public final Text rnm;
+        public final Tex rnm;
         public final Glob.CAttr attr;
         public final Tex img;
         public final Color bg;
         public final Resource res;
         private double lvlt = 0.0;
-        private Text ct;
+        private Tex ct;
         private int cbv = -1, ccv = -1;
 
         private Attr(Glob glob, String attr, Color bg) {
@@ -500,7 +500,7 @@ public class CharWnd extends Window {
             res = Resource.local().loadwait("gfx/hud/chr/" + attr);
             this.nm = attr;
             this.img = res.layer(Resource.imgc).tex();
-            this.rnm = attrf.render(res.layer(Resource.tooltip).t);
+            this.rnm = stroke(attrf.render(res.layer(Resource.tooltip).t));
             this.attr = glob.getcattr(attr);
             this.bg = bg;
         }
@@ -519,7 +519,7 @@ public class CharWnd extends Window {
                 } else {
                     tooltip = null;
                 }
-                ct = attrf.render(Integer.toString(ccv), c);
+                ct = stroke(attrf.render(Integer.toString(ccv), c));
             }
             if ((lvlt > 0.0) && ((lvlt -= dt) < 0))
                 lvlt = 0.0;
@@ -534,20 +534,20 @@ public class CharWnd extends Window {
             g.chcolor();
             Coord cn = new Coord(0, sz.y / 2);
             g.aimage(img, cn.add(5, 0), 0, 0.5);
-            g.aimage(rnm.tex(), cn.add(img.sz().x + 10, 1), 0, 0.5);
+            g.aimage(rnm, cn.add(img.sz().x + 10, 1), 0, 0.5);
 
             cbv = attr.base;
             ccv = attr.comp;
             if (ccv > cbv) {
-                Text buffed = attrf.render(Integer.toString(ccv), buff);
-                g.aimage(buffed.tex(), cn.add(sz.x - 7, 1), 1, 0.5);
+                Tex buffed = stroke(attrf.render(Integer.toString(ccv), buff));
+                g.aimage(buffed, cn.add(sz.x - 7, 1), 1, 0.5);
             } else if (ccv < cbv) {
-                Text debuffed = attrf.render(Integer.toString(ccv), debuff);
-                g.aimage(debuffed.tex(), cn.add(sz.x - 7, 1), 1, 0.5);
+                Tex debuffed = stroke(attrf.render(Integer.toString(ccv), debuff));
+                g.aimage(debuffed, cn.add(sz.x - 7, 1), 1, 0.5);
             }
 
-            Text base = attrf.render(Integer.toString(cbv), Color.WHITE);
-            g.aimage(base.tex(), cn.add(sz.x - 50, 1), 1, 0.5);
+            Tex base = stroke(attrf.render(Integer.toString(cbv), Color.WHITE));
+            g.aimage(base, cn.add(sz.x - 50, 1), 1, 0.5);
         }
 
         public void lvlup() {
@@ -557,13 +557,13 @@ public class CharWnd extends Window {
 
     public class SAttr extends Widget {
         public final String nm;
-        public final Text rnm;
+        public final Tex rnm;
         public final Glob.CAttr attr;
         public final Tex img;
         public final Color bg;
         public final Resource res;
         public int tbv, tcv, cost;
-        private Text ct;
+        private Tex ct;
         private int cbv, ccv;
 
         private SAttr(Glob glob, String attr, Color bg) {
@@ -571,7 +571,7 @@ public class CharWnd extends Window {
             res = Resource.local().loadwait("gfx/hud/chr/" + attr);
             this.nm = attr;
             this.img = res.layer(Resource.imgc).tex();
-            this.rnm = attrf.render(res.layer(Resource.tooltip).t);
+            this.rnm = stroke(attrf.render(res.layer(Resource.tooltip).t));
             this.attr = glob.getcattr(attr);//glob.cattr.get(attr);
             this.bg = bg;
             adda(new IButton("gfx/hud/buttons/add", "u", "d", null) {
@@ -611,7 +611,7 @@ public class CharWnd extends Window {
                 }
                 if (tcv > ccv)
                     c = tbuff;
-                ct = attrf.render(Integer.toString(tcv), c);
+                ct = stroke(attrf.render(Integer.toString(tcv), c));
                 cbv = tcv;
             }
         }
@@ -623,41 +623,41 @@ public class CharWnd extends Window {
             super.draw(g);
             Coord cn = new Coord(0, sz.y / 2);
             g.aimage(img, cn.add(5, 0), 0, 0.5);
-            g.aimage(rnm.tex(), cn.add(img.sz().x + 10, 1), 0, 0.5);
+            g.aimage(rnm, cn.add(img.sz().x + 10, 1), 0, 0.5);
             if (!Config.splitskills) {
-                g.aimage(ct.tex(), cn.add(sz.x - 40, 1), 1, 0.5);
+                g.aimage(ct, cn.add(sz.x - 40, 1), 1, 0.5);
             } else {
                 cbv = attr.base;
                 ccv = attr.comp;
 
 //                ccv + " " + tbv + " " + cbv    260 205 200
                 if (ccv > cbv) {
-                    Text buffed;
+                    Tex buffed;
                     if (tbv > cbv) {
 //                        buffed = attrf.render(Integer.toString(tbv + (ccv - cbv)), tbuff);
-                        buffed = attrf.render(Integer.toString(ccv + (tbv - cbv)), tbuff);
+                        buffed = stroke(attrf.render(Integer.toString(ccv + (tbv - cbv)), tbuff));
                     } else {
-                        buffed = attrf.render(Integer.toString(ccv), buff);
+                        buffed = stroke(attrf.render(Integer.toString(ccv), buff));
                     }
-                    g.aimage(buffed.tex(), cn.add(sz.x - 35, 1), 1, 0.5);
+                    g.aimage(buffed, cn.add(sz.x - 35, 1), 1, 0.5);
                 } else if (ccv < cbv) {
                     if (tbv > cbv) {
 //                        Text buffed = attrf.render(Integer.toString(tbv + (cbv - ccv)), tbuff);
-                        Text buffed = attrf.render(Integer.toString(ccv + (tbv - cbv)), tbuff);
-                        g.aimage(buffed.tex(), cn.add(sz.x - 35, 1), 1, 0.5);
+                        Tex buffed = stroke(attrf.render(Integer.toString(ccv + (tbv - cbv)), tbuff));
+                        g.aimage(buffed, cn.add(sz.x - 35, 1), 1, 0.5);
                     } else {
-                        Text debuffed = attrf.render(Integer.toString(ccv), debuff);
-                        g.aimage(debuffed.tex(), cn.add(sz.x - 35, 1), 1, 0.5);
+                        Tex debuffed = stroke(attrf.render(Integer.toString(ccv), debuff));
+                        g.aimage(debuffed, cn.add(sz.x - 35, 1), 1, 0.5);
                     }
                 }
 
-                Text base;
+                Tex base;
                 if (tbv > cbv) {
-                    base = attrf.render(Integer.toString(tbv), tbuff);
+                    base = stroke(attrf.render(Integer.toString(tbv), tbuff));
                 } else {
-                    base = attrf.render(Integer.toString(cbv), Color.WHITE);
+                    base = stroke(attrf.render(Integer.toString(cbv), Color.WHITE));
                 }
-                g.aimage(base.tex(), cn.add(sz.x - 65, 1), 1, 0.5);
+                g.aimage(base, cn.add(sz.x - 65, 1), 1, 0.5);
             }
         }
 
@@ -687,6 +687,10 @@ public class CharWnd extends Window {
             adj(-b);
             return (true);
         }
+    }
+
+    private static TexI stroke(Text text) {
+        return (new TexI(rasterimg(blurmask2(text.img.getRaster(), 1, 1, Color.BLACK))));
     }
 
     public static class RLabel extends Label {
@@ -1022,16 +1026,14 @@ public class CharWnd extends Window {
         private String sortkey = "\uffff";
         private Tex small;
         private int namew;
-        private final Text.UText<?> rnm = new Text.UText<String>(attrf) {
-            public String value() {
-                try {
-                    return (res.get().layer(Resource.tooltip).t);
-                } catch (Loading l) {
-                    return ("...");
-                }
+        private final Text.UTex<?> rnm = new Text.UTex<>(() -> {
+            try {
+                return (res.get().layer(Resource.tooltip).t);
+            } catch (Loading l) {
+                return ("...");
             }
-
-            public Text render(String text) {
+        }, s -> stroke(attrf.render(s)));
+            /*public Text render(String text) {
                 Text.Foundry fnd = (Text.Foundry) this.fnd;
                 Text.Line full = fnd.render(text);
                 if (full.sz().x <= namew)
@@ -1042,7 +1044,7 @@ public class CharWnd extends Window {
                         return (fnd.render(text.substring(0, i) + "..."));
                 }
                 return (full);
-            }
+            }*/
 
 	    /*
 	    public Text render(String text) {
@@ -1055,12 +1057,8 @@ public class CharWnd extends Window {
 		return(ret);
 	    }
 	    */
-        };
-        private final Text.UText<?> rqd = new Text.UText<Object>(attrf) {
-            public Object value() {
-                return (qdata);
-            }
-        };
+//        };
+        private final Text.UTex<?> rqd = new Text.UTex<>(() -> qdata, s -> stroke(attrf.render(s.toString())));
 
         private Wound(int id, Indir<Resource> res, Object qdata, int parentid) {
             this.id = id;
@@ -1136,15 +1134,13 @@ public class CharWnd extends Window {
         public int done;
         public int mtime;
         private Tex small;
-        private final Text.UText<?> rnm = new Text.UText<String>(attrf) {
-            public String value() {
-                try {
-                    return (title());
-                } catch (Loading l) {
-                    return ("...");
-                }
+        private final Text.UTex<?> rnm = new Text.UTex<>(() -> {
+            try {
+                return (title());
+            } catch (Loading l) {
+                return ("...");
             }
-        };
+        }, s -> stroke(attrf.render(s)));
 
         private Quest(int id, Indir<Resource> res, String title, int done, int mtime) {
             this.id = id;
@@ -1955,10 +1951,10 @@ public class CharWnd extends Window {
                 g.image(WItem.missing.layer(Resource.imgc).tex(), new Coord(x, 0), new Coord(itemh, itemh));
                 x += itemh + margin1;
             }
-            g.aimage(w.rnm.get().tex(), new Coord(x, itemh / 2), 0, 0.5);
-            Text qd = w.rqd.get();
+            g.aimage(w.rnm.get(), new Coord(x, itemh / 2), 0, 0.5);
+            Tex qd = w.rqd.get();
             if (qd != null)
-                g.aimage(qd.tex(), new Coord(sz.x - 15, itemh / 2), 1.0, 0.5);
+                g.aimage(qd, new Coord(sz.x - 15, itemh / 2), 1.0, 0.5);
         }
 
         protected void itemclick(Wound item, int button) {
@@ -2058,7 +2054,7 @@ public class CharWnd extends Window {
             }
             if (q.done == Quest.QST_DISABLED)
                 g.chcolor(255, 128, 0, 255);
-            g.aimage(q.rnm.get().tex(), new Coord(itemh + margin1, itemh / 2), 0, 0.5);
+            g.aimage(q.rnm.get(), new Coord(itemh + margin1, itemh / 2), 0, 0.5);
             g.chcolor();
         }
 

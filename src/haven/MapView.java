@@ -3152,8 +3152,8 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     final String name = tiler.getClass().getSimpleName();
                     StringBuilder sb = new StringBuilder();
                     sb.append("Tile: ").append(res.name).append("[").append(tile_id).append("] of type ").append(name).append("\n");
-                    if (tiler instanceof TerrainTile.RidgeTile)
-                        sb.append("BreakZ: ").append(((TerrainTile.RidgeTile) tiler).breakz()).append("\n");
+//                    if (tiler instanceof TerrainTile.RidgeTile)
+//                        sb.append("BreakZ: ").append(((TerrainTile.RidgeTile) tiler).breakz()).append("\n");
                     sb.append("GridID: ").append(grid.id).append("\n");
                     sb.append("Position: ").append(String.format("(%.3f, %.3f, %.3f)", mc.x, mc.y, glob.map.getcz(mc))).append("\n");
                     double ox = offset.applyAsDouble(mc.x);

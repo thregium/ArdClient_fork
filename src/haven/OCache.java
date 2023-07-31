@@ -33,6 +33,7 @@ import haven.purus.pbot.PBotUtils;
 import haven.sloth.gob.HeldBy;
 import haven.sloth.gob.Hidden;
 import haven.sloth.gob.Holding;
+import haven.sloth.script.pathfinding.Hitbox;
 import modification.configuration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -276,6 +277,8 @@ public class OCache implements Iterable<Gob> {
             g.updsdt();
         } else if ((d == null) || (d.res != res) || !d.sdt.equals(sdt)) {
             g.setattr(new ResDrawable(g, res, sdt));
+            g.remol(g.findol(GobHitbox.olid_solid));
+            g.remol(g.findol(GobHitbox.olid));
         }
         changed(g);
     }
@@ -367,6 +370,8 @@ public class OCache implements Iterable<Gob> {
         if ((cmp == null) || !cmp.base.equals(base)) {
             cmp = new Composite(g, base);
             g.setattr(cmp);
+            g.remol(g.findol(GobHitbox.olid_solid));
+            g.remol(g.findol(GobHitbox.olid));
         }
         changed(g);
     }

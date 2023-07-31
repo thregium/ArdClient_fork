@@ -978,6 +978,8 @@ Window extends MovableWidget implements DTarget {
                 }
             };
             list.put("Sort", run);
+//            list.put("Stack", () -> {});
+//            list.put("Unstack", () -> {});
         }
         if (!list.isEmpty()) {
             String[] options = new String[list.size()];

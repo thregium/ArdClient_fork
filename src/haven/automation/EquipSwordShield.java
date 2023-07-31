@@ -158,8 +158,8 @@ public class EquipSwordShield implements Runnable {
                     } catch (InterruptedException ie) {
                         return;
                     }
-
                 }
+                PBotUtils.sleep(250);
 
 
                 GItem hand = PBotUtils.getGItemAtHand(gui.ui);

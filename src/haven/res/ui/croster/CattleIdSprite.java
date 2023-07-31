@@ -21,6 +21,9 @@ import haven.Utils;
 
 import java.awt.Color;
 
+import static haven.PUtils.blurmask2;
+import static haven.PUtils.rasterimg;
+
 public class CattleIdSprite extends Sprite {
     public static int id = -777666;
     public int val;
@@ -110,7 +113,8 @@ public class CattleIdSprite extends Sprite {
         String name = (entry != null) ? entry.name : null;
         if ((name != null) && ((rnm == null) || !name.equals(lnm) || (grp != lgrp))) {
             Color col = BuddyWnd.gc[grp];
-            rnm = new TexI(Utils.outline2(Text.render(name, col).img, Utils.contrast(col)));
+//            rnm = new TexI(Utils.outline2(Text.render(name, col).img, Utils.contrast(col)));
+            rnm = new TexI(rasterimg(blurmask2(Text.render(name, col).img.getRaster(), 1, 1, Utils.contrast(col))));
             lnm = name;
             lgrp = grp;
         }

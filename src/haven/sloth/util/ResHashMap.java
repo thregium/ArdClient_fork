@@ -16,6 +16,10 @@ public class ResHashMap<E> {
         map.put(key, value);
     }
 
+    public E remove(final String key) {
+        return (map.remove(key));
+    }
+
     public Optional<E> get(String key) {
         if (key != null && !key.equals("")) {
             do {

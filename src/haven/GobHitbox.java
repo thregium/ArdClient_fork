@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class GobHitbox extends Sprite {
+    public static final int olid_solid = "overlay_hitbox_solid_id".hashCode();
+    public static final int olid = "overlay_hitbox_id".hashCode();
     public static States.ColState fillclrstate = new States.ColState(DefSettings.HIDDENCOLOR.get());
     public static States.ColState bbclrstate = new States.ColState(DefSettings.HITBOXCOLOR.get());
     private BBox[] b;

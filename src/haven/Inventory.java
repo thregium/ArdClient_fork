@@ -26,18 +26,24 @@
 
 package haven;
 
+import haven.purus.pbot.PBotInventory;
+import haven.purus.pbot.PBotItem;
 import haven.purus.pbot.PBotUtils;
 import haven.res.ui.tt.q.qbuff.QBuff;
 import modification.configuration;
+
 import java.awt.Color;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Inventory extends Widget implements DTarget {
     public static final Coord sqsz = UI.scale(new Coord(33, 33));
@@ -521,6 +527,56 @@ public class Inventory extends Widget implements DTarget {
 
     public static Coord sqoff(Coord c) {
         return c.mul(invsq.sz());
+    }
+
+    public void stack() {
+        Set<String> ignore = new HashSet<>();
+        PBotInventory inv = new PBotInventory(this);
+        while (true) {
+            try {
+                List<PBotItem> items = inv.getInventoryContents().stream().filter(p -> !p.isStack()).filter(p -> !ignore.contains(p.getResname())).collect(Collectors.toList());
+                if (!items.isEmpty()) {
+                    PBotItem item = items.get(0);
+                    String name = item.getResname();
+                    List<PBotItem> resItems = inv.getInventoryItemsByResnames(name).stream().filter(p -> !p.isStack()).filter(p -> !p.coord().equals(item.coord())).collect(Collectors.toList());
+                    if (!resItems.isEmpty()) {
+                        if (item.takeItem(10)) {
+                            PBotUtils.sleep(250);
+                            resItems.get(0).itemact(3);
+                            if (!waitHandOut(250)) {
+                                if (!inv.dropItemToInventory(item.coord(), 250)) {
+                                    PBotUtils.sysMsg(ui, "Stack broken");
+                                }
+                            }
+                        }
+                    }
+                    ignore.add(name);
+                } else break;
+            } catch (Loading l) {}
+            PBotUtils.sleep(50);
+        }
+        PBotUtils.sysMsg(ui, "Stack resolved");
+    }
+
+    public void unstack() {
+        PBotInventory inv = new PBotInventory(this);
+        while (true) {
+            try {
+                List<PBotItem> stacks = inv.getInventoryContents().stream().filter(p -> p.isStack()).collect(Collectors.toList());
+                if (!stacks.isEmpty()) {
+                    PBotItem stack = stacks.get(0);
+                    if (inv.freeSpaceForItem(stack) != null) {
+                        stack.activateItem();
+                    } else break;
+                } else break;
+            } catch (Loading l) {}
+            PBotUtils.sleep(50);
+        }
+    }
+
+    private boolean waitHandOut(int time) {
+        for (int i = 0; i < time && PBotUtils.getItemAtHand(ui) != null; i += 25) PBotUtils.sleep(25);
+        return (PBotUtils.getItemAtHand(ui) == null);
     }
 
     /**

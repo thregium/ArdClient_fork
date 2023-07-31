@@ -36,6 +36,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class Text {
     // Following block of fonts and foundries should not be removed even if unused,
@@ -404,6 +406,33 @@ public class Text {
 
         public static UText forfield(Object obj, String fn) {
             return (forfield(std, obj, fn));
+        }
+    }
+
+    public static class UTex<T> implements Indir<Tex> {
+        public final Supplier<T> value;
+        public final Function<T, Tex> conv;
+        private Tex cur = null;
+        private T cv = null;
+
+        public UTex(Supplier<T> value, Function<T, Tex> conv) {
+            this.value = value;
+            this.conv = conv;
+        }
+
+        protected String text(T value) {
+            return (String.valueOf(value));
+        }
+
+        protected Tex render(T text) {
+            return (conv.apply(text));
+        }
+
+        public Tex get() {
+            T value = this.value.get();
+            if (!Utils.eq(value, cv))
+                cur = render(cv = value);
+            return (cur);
         }
     }
 
