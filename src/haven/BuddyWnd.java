@@ -647,7 +647,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         public Text rname() {
             if ((rname == null) || !rname.text.equals(name)) {
                 String str = name + (configuration.kinid ? (" (" + id + ")") : "");
-                rname = Text.create(str, PUtils.strokeImg(Text.render(name + (str))));
+                rname = Text.create(str, PUtils.strokeImg(Text.render(str)));
             }
             return (rname);
         }
