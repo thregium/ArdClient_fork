@@ -521,4 +521,8 @@ public class Text {
         }
         return font;
     }
+
+    public static Text create(String text, BufferedImage img) {
+        return (new Text(text, img));
+    }
 }

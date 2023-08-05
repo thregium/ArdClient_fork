@@ -26,42 +26,11 @@ public class StudyWnd extends GameUI.Hidewnd {
         public Widget study;
         public int texp, tw, tenc;
         public double tlph;
-        private final Text.UText<?> texpt = new Text.UText<Integer>(Text.std) {
-            public Integer value() {
-                return (texp);
-            }
-
-            public String text(Integer v) {
-                return (Utils.thformat(v));
-            }
-        };
-        private final Text.UText<?> twt = new Text.UText<String>(Text.std) {
-            public String value() {
-                return (tw + "/" + ui.sess.glob.getcattr("int").comp);
-            }
-        };
-        private final Text.UText<?> tenct = new Text.UText<Integer>(Text.std) {
-            public Integer value() {
-                return (tenc);
-            }
-
-            public String text(Integer v) {
-                return (Integer.toString(tenc));
-            }
-        };
-        private final Text.UText<?> tlphr = new Text.UText<Double>(Text.std) {
-            DecimalFormat f = new DecimalFormat("##.##");
-
-            @Override
-            public Double value() {
-                return (tlph);
-            }
-
-            @Override
-            public String text(Double v) {
-                return (String.format("%s (%s)", f.format(tlph), f.format(tlph * ui.sess.glob.getTimeFac())));
-            }
-        };
+        private final Text.UTex<?> texpt = new Text.UTex<>(() -> texp, s -> PUtils.strokeTex(Text.std.render(Utils.thformat(s))));
+        private final Text.UTex<?> twt = new Text.UTex<>(() -> tw + "/" + ui.sess.glob.getcattr("int").comp, s -> PUtils.strokeTex(Text.std.render(s)));
+        private final Text.UTex<?> tenct = new Text.UTex<>(() -> tenc, s -> PUtils.strokeTex(Text.std.render(Integer.toString(s))));
+        private final DecimalFormat f = new DecimalFormat("##.##");
+        private final Text.UTex<?> tlphr = new Text.UTex<>(() -> tlph, s -> PUtils.strokeTex(Text.std.render(String.format("%s (%s)", f.format(tlph), f.format(tlph * ui.sess.glob.getTimeFac())))));
 
         private StudyInfo(Coord sz, Widget study) {
             super(sz);
@@ -97,13 +66,13 @@ public class StudyWnd extends GameUI.Hidewnd {
             upd();
             super.draw(g);
             g.chcolor(255, 192, 255, 255);
-            g.aimage(twt.get().tex(), new Coord(sz.x - 4, 2), 1.0, 0.0);
+            g.aimage(twt.get(), new Coord(sz.x - 4, 2), 1.0, 0.0);
             g.chcolor(255, 255, 192, 255);
-            g.aimage(tenct.get().tex(), new Coord(sz.x - 4, 18), 1.0, 0.0);
+            g.aimage(tenct.get(), new Coord(sz.x - 4, 18), 1.0, 0.0);
             g.chcolor(192, 192, 255, 255);
-            g.aimage(texpt.get().tex(), new Coord(sz.x - 4, 34), 1.0, 0.0);
+            g.aimage(texpt.get(), new Coord(sz.x - 4, 34), 1.0, 0.0);
             g.chcolor(192, 192, 255, 255);
-            g.aimage(tlphr.get().tex(), new Coord(sz.x - 4, 50), 1.0, 0.0);
+            g.aimage(tlphr.get(), new Coord(sz.x - 4, 50), 1.0, 0.0);
         }
     }
 }

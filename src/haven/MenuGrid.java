@@ -214,16 +214,19 @@ public class MenuGrid extends Widget {
         public BufferedImage rendertt(boolean withpg) {
             Resource.AButton ad = res.layer(Resource.action);
             Resource.Pagina pg = res.layer(Resource.pagina);
-            String tt = ad.name;
-            int pos = tt.toUpperCase().indexOf(Character.toUpperCase(ad.hk));
-            if (pos >= 0)
-                tt = tt.substring(0, pos) + "$b{$col[255,128,0]{" + tt.charAt(pos) + "}}" + tt.substring(pos + 1);
-            else if (ad.hk != 0)
-                tt += " [" + ad.hk + "]";
+            String tt = "...";
+            if (ad != null) {
+                tt = ad.name;
+                int pos = tt.toUpperCase().indexOf(Character.toUpperCase(ad.hk));
+                if (pos >= 0)
+                    tt = tt.substring(0, pos) + "$b{$col[255,128,0]{" + tt.charAt(pos) + "}}" + tt.substring(pos + 1);
+                else if (ad.hk != 0)
+                    tt += " [" + ad.hk + "]";
+            }
             BufferedImage ret = ttfnd.render(tt, 300).img;
             if (withpg) {
                 List<ItemInfo> info = info();
-                info.removeIf(el -> el instanceof ItemInfo.Name);
+                info.removeIf(ItemInfo.Name.class::isInstance);
                 if (!info.isEmpty())
                     ret = ItemInfo.catimgs(0, ret, ItemInfo.longtip(info));
                 if (pg != null)

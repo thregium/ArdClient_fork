@@ -1,6 +1,7 @@
 package haven;
 
 import haven.purus.pbot.PBotUtils;
+import haven.res.ui.tt.slot.Slotted;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -40,7 +41,7 @@ public class GildingWnd extends Window {
             matches = new TexI(result.b);
         }
 
-        List<ItemInfo> gild_infos = gild.gilding.get();
+        List<Slotted> gild_infos = gild.gilding.get();
         List<ItemInfo> target_infos = target.slots.get();
 
         ItemInfo gild_info = gild_infos.get(0);
@@ -186,7 +187,7 @@ public class GildingWnd extends Window {
 
     public static boolean processGilding(UI ui, WItem target, WItem gild) {
         boolean result = false;
-        List<ItemInfo> gilding = gild.gilding.get();
+        List<Slotted> gilding = gild.gilding.get();
         List<ItemInfo> slots = target.slots.get();
         if (gilding != null && !gilding.isEmpty() && slots != null && !slots.isEmpty()) {
             boolean isRing = target.name.get().contains("Ring");

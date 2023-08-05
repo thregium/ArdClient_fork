@@ -7,6 +7,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import haven.MenuGrid.Pagina;
+import haven.res.ui.tt.slot.Slotted;
 import haven.resutil.Curiosity;
 import haven.resutil.FoodInfo;
 
@@ -67,8 +68,8 @@ public class ItemData {
                 gast = new GastronomyData(ii, q);
             } else if ("ISlots".equals(className)) {
                 slots = SlotsData.make(ii);
-            } else if ("Slotted".equals(className)) {
-                gilding = SlottedData.make(ii, q);
+            } else if (ii instanceof Slotted) {
+                gilding = SlottedData.make((Slotted) ii, q);
             }
 
             Pair<Integer, Integer> a = ItemInfo.getArmor(info);
@@ -414,16 +415,16 @@ public class ItemData {
         }
 
 
-        public static SlottedData make(ItemInfo info, QualityList q) {
+        public static SlottedData make(Slotted info, QualityList q) {
             if (info != null) {
-                double pmin = Reflect.getFieldValueDouble(info, "pmin");
-                double pmax = Reflect.getFieldValueDouble(info, "pmax");
-                Resource[] attrres = (Resource[]) Reflect.getFieldValue(info, "attrs");
-                Object sub = Reflect.getFieldValue(info, "sub");
+                double pmin = info.pmin;
+                double pmax = info.pmax;
+                Resource[] attrres = info.attrs;
+                List<ItemInfo> sub = info.sub;
                 List<ItemInfo> bonusInfos;
-                if (sub instanceof List) {
+                if (sub != null) {
                     //noinspection unchecked
-                    bonusInfos = (List<ItemInfo>) sub;
+                    bonusInfos = sub;
                 } else {
                     bonusInfos = new ArrayList<>();
                 }

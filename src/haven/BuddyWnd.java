@@ -49,6 +49,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static haven.PUtils.blurmask2;
+import static haven.PUtils.rasterimg;
+
 public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
     public static final int width = UI.scale(263);
     public static final int height = UI.scale(380);
@@ -367,7 +370,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
             synchronized (buddies) {
                 buddies.add(b);
                 idmap.put(b.id, b);
-                Collections.sort(buddies, bcmp);
+                buddies.sort(bcmp);
             }
             serial++;
         } else if (msg == "rm") {
@@ -642,8 +645,10 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         }
 
         public Text rname() {
-            if ((rname == null) || !rname.text.equals(name))
-                rname = Text.render(name + (configuration.kinid ? (" (" + id + ")") : ""));
+            if ((rname == null) || !rname.text.equals(name)) {
+                String str = name + (configuration.kinid ? (" (" + id + ")") : "");
+                rname = Text.create(str, PUtils.strokeImg(Text.render(name + (str))));
+            }
             return (rname);
         }
 

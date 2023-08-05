@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pagina> {
     private static final int WIDTH = 200;
@@ -20,6 +21,7 @@ public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pa
         super(Coord.z, caption, caption);
         setcanfocus(true);
         setfocusctl(true);
+        addBtn_base("gfx/hud/helpbtn", "Show Filter Help", () -> ItemFilter.showHelp(ui, ItemFilter.FILTER_HELP));
         entry = add(new TextEntry(WIDTH, "") {
             public void activate(String text) {
                 if (list.sel != null)
@@ -107,9 +109,20 @@ public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pa
 
     private void refilter() {
         list.clear();
-        for (MenuGrid.Pagina p : all) {
+        /*for (MenuGrid.Pagina p : all) {
             if (p.res.get().layer(Resource.action).name.toLowerCase().contains(entry.text().toLowerCase()))
                 list.add(p);
+        }*/
+
+        String filter = entry.text().toLowerCase();
+        ItemFilter itemFilter = ItemFilter.create(filter);
+        synchronized (all) {
+            List<MenuGrid.Pagina> filtered = all.stream().filter(p -> {
+                    Resource res = p.res.get();
+                    String name = res.layer(Resource.action).name.toLowerCase();
+                    return (name.contains(filter) || itemFilter.matches(p, ui.sess));
+            }).collect(Collectors.toList());
+            filtered.forEach(list::add);
         }
         list.sort(new ItemComparator());
         if (list.listitems() > 0) {

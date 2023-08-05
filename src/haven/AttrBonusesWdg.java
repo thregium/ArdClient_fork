@@ -32,7 +32,7 @@ public class AttrBonusesWdg extends Widget implements ItemInfo.Owner {
 
     public AttrBonusesWdg(Coord sz) {
         super(sz);
-        add(new Label("Equipment bonuses:", Text.std, Color.BLACK));
+        add(new Label("Equipment bonuses:", Text.std));
         bar = adda(new Scrollbar(sz.y - bonusc.y, 0, 0), sz.x, bonusc.y, 1, 0);
     }
 

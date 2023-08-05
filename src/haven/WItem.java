@@ -32,6 +32,7 @@ import haven.purus.pbot.PBotWindowAPI;
 import haven.res.ui.tt.Wear;
 import haven.res.ui.tt.keypag.KeyPagina;
 import haven.res.ui.tt.q.qbuff.QBuff;
+import haven.res.ui.tt.slot.Slotted;
 import haven.resutil.Curiosity;
 import haven.resutil.FoodInfo;
 import java.awt.Color;
@@ -176,7 +177,7 @@ public class WItem extends Widget implements DTarget2 {
         }
     }
 
-    public final AttrCache<List<ItemInfo>> gilding = new AttrCache<List<ItemInfo>>(this::info, AttrCache.cache(info -> ItemInfo.findall("Slotted", info)));
+    public final AttrCache<List<Slotted>> gilding = new AttrCache<>(this::info, AttrCache.cache(info -> ItemInfo.findall(Slotted.class, info)));
 
     public final AttrCache<List<ItemInfo>> slots = new AttrCache<List<ItemInfo>>(this::info, AttrCache.cache(info -> ItemInfo.findall("ISlots", info)));
 

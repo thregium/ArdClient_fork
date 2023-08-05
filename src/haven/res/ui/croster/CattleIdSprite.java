@@ -10,19 +10,15 @@ import haven.GOut;
 import haven.Location;
 import haven.MapView;
 import haven.Matrix4f;
+import haven.PUtils;
 import haven.PView;
 import haven.Projection;
 import haven.RenderList;
 import haven.Sprite;
 import haven.Tex;
-import haven.TexI;
 import haven.Text;
-import haven.Utils;
 
 import java.awt.Color;
-
-import static haven.PUtils.blurmask2;
-import static haven.PUtils.rasterimg;
 
 public class CattleIdSprite extends Sprite {
     public static int id = -777666;
@@ -114,7 +110,7 @@ public class CattleIdSprite extends Sprite {
         if ((name != null) && ((rnm == null) || !name.equals(lnm) || (grp != lgrp))) {
             Color col = BuddyWnd.gc[grp];
 //            rnm = new TexI(Utils.outline2(Text.render(name, col).img, Utils.contrast(col)));
-            rnm = new TexI(rasterimg(blurmask2(Text.render(name, col).img.getRaster(), 1, 1, Utils.contrast(col))));
+            rnm = PUtils.strokeTex(Text.render(name, col));
             lnm = name;
             lgrp = grp;
         }

@@ -52,7 +52,8 @@ public class CheckBox extends Widget {
     }
 
     public CheckBox(String lbl, boolean lg, final Consumer<Boolean> onChange) {
-        this.lbl = Text.std.render(Resource.getLocString(Resource.BUNDLE_LABEL, defstr = lbl), clr);
+        defstr = lbl;
+        this.lbl = Text.create(defstr, PUtils.strokeImg(Text.std.render(Resource.getLocString(Resource.BUNDLE_LABEL, defstr), clr)));
         if (lg) {
             type = "chkbox/large";
         } else {
@@ -90,7 +91,7 @@ public class CheckBox extends Widget {
 
     public void setcolor(Color clr) {
         this.clr = clr;
-        lbl = Text.std.render(Resource.getLocString(Resource.BUNDLE_LABEL, defstr), clr);
+        lbl = Text.create(defstr, PUtils.strokeImg(Text.std.render(Resource.getLocString(Resource.BUNDLE_LABEL, defstr), clr)));
     }
 
     public void click() {

@@ -52,14 +52,16 @@ public class Label extends Widget {
     public Label(String text, int w, Text.Foundry f) {
         super(Coord.z);
         this.f = f;
-        this.text = f.renderwrap(texts = Resource.getLocString(Resource.BUNDLE_LABEL, text), this.col, w);
+        this.texts = Resource.getLocString(Resource.BUNDLE_LABEL, text);
+        this.text = Text.create(texts, PUtils.strokeImg(f.renderwrap(texts, this.col, w)));
         sz = this.text.sz();
     }
 
     public Label(String text, Text.Foundry f) {
         super(Coord.z);
         this.f = f;
-        this.text = f.render(texts = Resource.getLocString(Resource.BUNDLE_LABEL, text), this.col);
+        this.texts = Resource.getLocString(Resource.BUNDLE_LABEL, text);
+        this.text = Text.create(texts, PUtils.strokeImg(f.render(texts, this.col)));
         sz = this.text.sz();
     }
 
@@ -67,7 +69,8 @@ public class Label extends Widget {
         super(Coord.z);
         this.col = col;
         this.f = f;
-        this.text = f.render(texts = text, this.col); // used only for numbers and symbols. hence no localization.
+        texts = text;
+        this.text = Text.create(texts, PUtils.strokeImg(f.render(texts, this.col))); // used only for numbers and symbols. hence no localization.
         sz = this.text.sz();
     }
 
@@ -91,7 +94,8 @@ public class Label extends Widget {
                 t = Resource.getLocString(Resource.BUNDLE_LABEL, text);
             }
         }
-        this.text = f.render(texts = t, col);
+        texts = t;
+        this.text = Text.create(texts, PUtils.strokeImg(f.render(texts, this.col)));
         sz = this.text.sz();
     }
 
@@ -108,7 +112,7 @@ public class Label extends Widget {
 
     public void setcolor(Color color) {
         col = color;
-        this.text = f.render(texts, col);
+        this.text = Text.create(texts, PUtils.strokeImg(f.render(texts, this.col)));
         sz = this.text.sz();
     }
 

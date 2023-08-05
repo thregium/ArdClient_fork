@@ -548,8 +548,8 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
 
     public void toggleGridLines() {
         int sum = (Config.showgridlines ? 1 : 0) + (configuration.showaccgridlines ? 1 : 0);
-        Utils.setprefb("showgridlines", Config.showgridlines = (sum == 0 || sum == 1));
-        Utils.setprefb("showaccgridlines", configuration.showaccgridlines = sum == 1);
+        Utils.setprefb("showgridlines", Config.showgridlines = Config.slothgrid ? !Config.showgridlines : sum == 0 || sum == 1);
+        Utils.setprefb("showaccgridlines", configuration.showaccgridlines = !Config.slothgrid && sum == 1);
         if (map != null)
             map.togglegrid();
     }

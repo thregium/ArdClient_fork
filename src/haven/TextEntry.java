@@ -148,7 +148,8 @@ public class TextEntry extends Widget implements ReadLine.Owner {
     public void draw(BufferedImage img) {
         Graphics g = img.getGraphics();
         String dtext = dtext();
-        tcache = fnd.render(dtext, (dshow && dirty) ? dirtycol : defcol);
+        Color col = (dshow && dirty) ? dirtycol : defcol;
+        tcache = fnd.renderstroked(dtext, col, Color.BLACK);
 
         if (lcap instanceof TexI) g.drawImage(((TexI) lcap).back, 0, 0, null);
         if (mext instanceof TexI) g.drawImage(((TexI) mext).back, lcap.sz().x, 0, sz.x - lcap.sz().x - rcap.sz().x, sz.y, null);

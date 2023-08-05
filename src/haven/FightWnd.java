@@ -253,7 +253,7 @@ public class FightWnd extends Widget {
         int u = 0;
         for (Action act : acts)
             u += act.u;
-        count = stroke(Text.num12boldFnd.render(String.format("= %d/%d", u, maxact), (u > maxact) ? Color.RED : Color.WHITE));
+        count = PUtils.strokeTex(Text.num12boldFnd.render(String.format("= %d/%d", u, maxact), (u > maxact) ? Color.RED : Color.WHITE));
     }
 
     public static class ImageInfoBox extends Widget {
@@ -325,10 +325,6 @@ public class FightWnd extends Widget {
             Resource.loadtex("gfx/hud/buttons/addd")};
     private static final Tex[] sub = {Resource.loadtex("gfx/hud/buttons/subu"),
             Resource.loadtex("gfx/hud/buttons/subd")};
-
-    private Tex stroke(Text text) {
-        return (new TexI(rasterimg(blurmask2(text.img.getRaster(), 1, 1, Color.BLACK))));
-    }
 
     public class Actions extends Listbox<Action> implements DTarget {
         private boolean loading = false;
@@ -411,7 +407,7 @@ public class FightWnd extends Widget {
             g.frect(Coord.z, g.sz);
             g.chcolor();
             if (act.ru == null)
-                act.ru = stroke(attrf.render(String.format("%d/%d", act.u, act.a)));
+                act.ru = PUtils.strokeTex(attrf.render(String.format("%d/%d", act.u, act.a)));
 
             try {
                 if (act.ri == null)
@@ -424,7 +420,7 @@ public class FightWnd extends Widget {
             g.image(act.rnm, new Coord(itemh + UI.scale(2), ty));
 
             if (act.ra == null)
-                act.ra = stroke(Text.num12boldFnd.render(String.valueOf(act.a)));
+                act.ra = PUtils.strokeTex(Text.num12boldFnd.render(String.valueOf(act.a)));
             g.aimage(act.ra, new Coord(sz.x - UI.scale(15), ty), 1.0, 0.0);
             g.aimage(act.ru, new Coord(sz.x - UI.scale(45), ty), 1.0, 0.0);
             g.aimage(add[da == idx ? 1 : 0], new Coord(sz.x - UI.scale(10), itemh / 2), 1.0, 0.5);
@@ -456,7 +452,7 @@ public class FightWnd extends Widget {
                     try {
                         Resource res = act.res.get();
                         act.name = res.layer(Resource.tooltip).t;
-                        act.rnm = stroke(attrf.render(act.name));
+                        act.rnm = PUtils.strokeTex(attrf.render(act.name));
                     } catch (Loading l) {
                         act.name = "...";
                         act.rnm = attrf.render(act.name).tex();
@@ -708,7 +704,7 @@ public class FightWnd extends Widget {
                         g.image(act.res.get().layer(Resource.imgc).tex(), ic);
 
                         if (act.ru == null)
-                            act.ru = stroke(Text.num12boldFnd.render(String.format("%d/%d", act.u, act.a)));
+                            act.ru = PUtils.strokeTex(Text.num12boldFnd.render(String.format("%d/%d", act.u, act.a)));
 
                         g.image(act.ru, c.add(invsq.sz().x / 2 - act.ru.sz().x / 2, pcy));
                         g.chcolor();

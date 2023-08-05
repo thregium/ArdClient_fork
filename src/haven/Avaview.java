@@ -27,6 +27,7 @@
 package haven;
 
 import haven.Composited.Desc;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -277,10 +278,14 @@ public class Avaview extends PView {
                 cam = makecam(base, comp, camnm);
                 updposes();
             }
-            if (d.mod != this.cmod)
-                comp.chmod(this.cmod = d.mod);
-            if (d.equ != this.cequ)
-                comp.chequ(this.cequ = d.equ);
+            if (d.mod != this.cmod) {
+                comp.chmod(d.mod);
+                this.cmod = d.mod;
+            }
+            if (d.equ != this.cequ) {
+                comp.chequ(d.equ);
+                this.cequ = d.equ;
+            }
         }
     }
 

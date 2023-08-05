@@ -49,7 +49,7 @@ public class Makewindow extends Widget {
     public List<Input> inputs = Collections.emptyList();
     public List<SpecWidget> outputs = Collections.emptyList();
     public List<Indir<Resource>> qmod = Collections.emptyList();
-    public List<Indir<Resource>> tools = new ArrayList<>();
+    public List<Indir<Resource>> tools = Collections.synchronizedList(new ArrayList<>());
     public int xoff = UI.scale(45), qmy = UI.scale(38), outy = UI.scale(65);
     public static final Text.Foundry nmf = new Text.Foundry(Text.serif, 20).aa(true);
     private long qModProduct = -1;

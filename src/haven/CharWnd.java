@@ -47,6 +47,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 import static haven.PUtils.blurmask2;
@@ -357,7 +358,7 @@ public class CharWnd extends Window {
                     ItemSpec spec = new ItemSpec(OwnerContext.uictx.curry(ui), t, null);
                     BufferedImage img = spec.image();
                     String nm = spec.name();
-                    TexI rnm = stroke(elf.render(nm));
+                    TexI rnm = PUtils.strokeTex(elf.render(nm));
                     BufferedImage buf = TexI.mkbuf(new Coord(elh + 5 + rnm.sz().x, elh));
                     Graphics g = buf.getGraphics();
                     g.drawImage(convolvedown(img, new Coord(elh, elh), tflt), 0, 0, null);
@@ -371,7 +372,7 @@ public class CharWnd extends Window {
             public Tex at() {
                 if (at == null) {
                     Color c = (a > 1.0) ? buffed : Utils.blendcol(none, full, a);
-                    at = stroke(elf.render(String.format("%d%%", Math.max((int)Math.round((1.0 - a) * 100), 1)), c));
+                    at = PUtils.strokeTex(elf.render(String.format("%d%%", Math.max((int)Math.round((1.0 - a) * 100), 1)), c));
                 }
                 return (at);
             }
@@ -500,7 +501,7 @@ public class CharWnd extends Window {
             res = Resource.local().loadwait("gfx/hud/chr/" + attr);
             this.nm = attr;
             this.img = res.layer(Resource.imgc).tex();
-            this.rnm = stroke(attrf.render(res.layer(Resource.tooltip).t));
+            this.rnm = PUtils.strokeTex(attrf.render(res.layer(Resource.tooltip).t));
             this.attr = glob.getcattr(attr);
             this.bg = bg;
         }
@@ -519,7 +520,7 @@ public class CharWnd extends Window {
                 } else {
                     tooltip = null;
                 }
-                ct = stroke(attrf.render(Integer.toString(ccv), c));
+                ct = PUtils.strokeTex(attrf.render(Integer.toString(ccv), c));
             }
             if ((lvlt > 0.0) && ((lvlt -= dt) < 0))
                 lvlt = 0.0;
@@ -539,14 +540,14 @@ public class CharWnd extends Window {
             cbv = attr.base;
             ccv = attr.comp;
             if (ccv > cbv) {
-                Tex buffed = stroke(attrf.render(Integer.toString(ccv), buff));
+                Tex buffed = PUtils.strokeTex(attrf.render(Integer.toString(ccv), buff));
                 g.aimage(buffed, cn.add(sz.x - 7, 1), 1, 0.5);
             } else if (ccv < cbv) {
-                Tex debuffed = stroke(attrf.render(Integer.toString(ccv), debuff));
+                Tex debuffed = PUtils.strokeTex(attrf.render(Integer.toString(ccv), debuff));
                 g.aimage(debuffed, cn.add(sz.x - 7, 1), 1, 0.5);
             }
 
-            Tex base = stroke(attrf.render(Integer.toString(cbv), Color.WHITE));
+            Tex base = PUtils.strokeTex(attrf.render(Integer.toString(cbv), Color.WHITE));
             g.aimage(base, cn.add(sz.x - 50, 1), 1, 0.5);
         }
 
@@ -571,7 +572,7 @@ public class CharWnd extends Window {
             res = Resource.local().loadwait("gfx/hud/chr/" + attr);
             this.nm = attr;
             this.img = res.layer(Resource.imgc).tex();
-            this.rnm = stroke(attrf.render(res.layer(Resource.tooltip).t));
+            this.rnm = PUtils.strokeTex(attrf.render(res.layer(Resource.tooltip).t));
             this.attr = glob.getcattr(attr);//glob.cattr.get(attr);
             this.bg = bg;
             adda(new IButton("gfx/hud/buttons/add", "u", "d", null) {
@@ -611,7 +612,7 @@ public class CharWnd extends Window {
                 }
                 if (tcv > ccv)
                     c = tbuff;
-                ct = stroke(attrf.render(Integer.toString(tcv), c));
+                ct = PUtils.strokeTex(attrf.render(Integer.toString(tcv), c));
                 cbv = tcv;
             }
         }
@@ -635,27 +636,27 @@ public class CharWnd extends Window {
                     Tex buffed;
                     if (tbv > cbv) {
 //                        buffed = attrf.render(Integer.toString(tbv + (ccv - cbv)), tbuff);
-                        buffed = stroke(attrf.render(Integer.toString(ccv + (tbv - cbv)), tbuff));
+                        buffed = PUtils.strokeTex(attrf.render(Integer.toString(ccv + (tbv - cbv)), tbuff));
                     } else {
-                        buffed = stroke(attrf.render(Integer.toString(ccv), buff));
+                        buffed = PUtils.strokeTex(attrf.render(Integer.toString(ccv), buff));
                     }
                     g.aimage(buffed, cn.add(sz.x - 35, 1), 1, 0.5);
                 } else if (ccv < cbv) {
                     if (tbv > cbv) {
 //                        Text buffed = attrf.render(Integer.toString(tbv + (cbv - ccv)), tbuff);
-                        Tex buffed = stroke(attrf.render(Integer.toString(ccv + (tbv - cbv)), tbuff));
+                        Tex buffed = PUtils.strokeTex(attrf.render(Integer.toString(ccv + (tbv - cbv)), tbuff));
                         g.aimage(buffed, cn.add(sz.x - 35, 1), 1, 0.5);
                     } else {
-                        Tex debuffed = stroke(attrf.render(Integer.toString(ccv), debuff));
+                        Tex debuffed = PUtils.strokeTex(attrf.render(Integer.toString(ccv), debuff));
                         g.aimage(debuffed, cn.add(sz.x - 35, 1), 1, 0.5);
                     }
                 }
 
                 Tex base;
                 if (tbv > cbv) {
-                    base = stroke(attrf.render(Integer.toString(tbv), tbuff));
+                    base = PUtils.strokeTex(attrf.render(Integer.toString(tbv), tbuff));
                 } else {
-                    base = stroke(attrf.render(Integer.toString(cbv), Color.WHITE));
+                    base = PUtils.strokeTex(attrf.render(Integer.toString(cbv), Color.WHITE));
                 }
                 g.aimage(base, cn.add(sz.x - 65, 1), 1, 0.5);
             }
@@ -687,10 +688,6 @@ public class CharWnd extends Window {
             adj(-b);
             return (true);
         }
-    }
-
-    private static TexI stroke(Text text) {
-        return (new TexI(rasterimg(blurmask2(text.img.getRaster(), 1, 1, Color.BLACK))));
     }
 
     public static class RLabel extends Label {
@@ -771,40 +768,11 @@ public class CharWnd extends Window {
         public Widget study;
         public int texp, tw, tenc;
         public double tlph;
-        private final Text.UText<?> texpt = new Text.UText<Integer>(numfnd) {
-            public Integer value() {
-                return (texp);
-            }
-
-            public String text(Integer v) {
-                return (Utils.thformat(v));
-            }
-        };
-        private final Text.UText<?> twt = new Text.UText<String>(numfnd) {
-            public String value() {return(tw + "/" + ui.sess.glob.getcattr("int").comp);}
-        };
-        private final Text.UText<?> tenct = new Text.UText<Integer>(numfnd) {
-            public Integer value() {
-                return (tenc);
-            }
-
-            public String text(Integer v) {
-                return (Integer.toString(tenc));
-            }
-        };
-        private final Text.UText<?> tlpht = new Text.UText<Double>(Text.std) {
-            DecimalFormat f = new DecimalFormat("##.##");
-
-            @Override
-            public Double value() {
-                return (tlph);
-            }
-
-            @Override
-            public String text(Double v) {
-                return (String.format("%s (%s)", f.format(tlph), f.format(tlph * ui.sess.glob.getTimeFac())));
-            }
-        };
+        private final Text.UTex<?> texpt = new Text.UTex<>(() -> texp, s -> PUtils.strokeTex(numfnd.render(Utils.thformat(s))));
+        private final Text.UTex<?> twt = new Text.UTex<>(() -> tw + "/" + ui.sess.glob.getcattr("int").comp, s -> PUtils.strokeTex(numfnd.render(s)));
+        private final Text.UTex<?> tenct = new Text.UTex<>(() -> tenc, s -> PUtils.strokeTex(numfnd.render(Integer.toString(tenc))));
+        private final DecimalFormat f = new DecimalFormat("##.##");
+        private final Text.UTex<?> tlpht = new Text.UTex<>(() -> tlph, s -> PUtils.strokeTex(Text.std.render(String.format("%s (%s)", f.format(tlph), f.format(tlph * ui.sess.glob.getTimeFac())))));
 
         private StudyInfo(Coord sz, Widget study) {
             super(sz);
@@ -846,13 +814,13 @@ public class CharWnd extends Window {
             upd();
             super.draw(g);
             g.chcolor(255, 192, 255, 255);
-            g.aimage(twt.get().tex(), new Coord(sz.x - 4, 17), 1.0, 0.0);
+            g.aimage(twt.get(), new Coord(sz.x - 4, 17), 1.0, 0.0);
             g.chcolor(255, 255, 192, 255);
-            g.aimage(tenct.get().tex(), new Coord(sz.x - 4, 47), 1.0, 0.0);
+            g.aimage(tenct.get(), new Coord(sz.x - 4, 47), 1.0, 0.0);
             g.chcolor(192, 192, 255, 255);
-            g.aimage(texpt.get().tex(), sz.add(-4, -15), 1.0, 0.0);
+            g.aimage(texpt.get(), sz.add(-4, -15), 1.0, 0.0);
             g.chcolor(192, 192, 255, 255);
-            g.aimage(tlpht.get().tex(), sz.add(-4, -49), 1.0, 0.0);
+            g.aimage(tlpht.get(), sz.add(-4, -49), 1.0, 0.0);
         }
     }
 
@@ -1032,7 +1000,7 @@ public class CharWnd extends Window {
             } catch (Loading l) {
                 return ("...");
             }
-        }, s -> stroke(attrf.render(s)));
+        }, s -> PUtils.strokeTex(attrf.render(s)));
             /*public Text render(String text) {
                 Text.Foundry fnd = (Text.Foundry) this.fnd;
                 Text.Line full = fnd.render(text);
@@ -1058,7 +1026,7 @@ public class CharWnd extends Window {
 	    }
 	    */
 //        };
-        private final Text.UTex<?> rqd = new Text.UTex<>(() -> qdata, s -> stroke(attrf.render(s.toString())));
+        private final Text.UTex<?> rqd = new Text.UTex<>(() -> qdata, s -> PUtils.strokeTex(attrf.render(Objects.toString(s))));
 
         private Wound(int id, Indir<Resource> res, Object qdata, int parentid) {
             this.id = id;
@@ -1140,7 +1108,7 @@ public class CharWnd extends Window {
             } catch (Loading l) {
                 return ("...");
             }
-        }, s -> stroke(attrf.render(s)));
+        }, s -> PUtils.strokeTex(attrf.render(s)));
 
         private Quest(int id, Indir<Resource> res, String title, int done, int mtime) {
             this.id = id;

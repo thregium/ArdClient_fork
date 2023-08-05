@@ -813,8 +813,10 @@ Window extends MovableWidget implements DTarget {
         if (button == 4 || button == 5) //ignore these because why allow every mousedown to move the window?
             return false;
         if (super.mousedown(c, button)) {
-            parent.setfocus(this);
-            raise();
+            if (parent != null) {
+                parent.setfocus(this);
+                raise();
+            }
             return (true);
         }
         if ((button == 1 && ui.modflags() != 0) || (button == 3 && ui.modflags() != UI.MOD_META)) { //miss click

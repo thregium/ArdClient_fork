@@ -26,9 +26,11 @@
 
 package haven;
 
+import haven.res.lib.tspec.Spec;
 import haven.res.ui.tt.ArmorFactory;
 import haven.res.ui.tt.WearFactory;
 import haven.res.ui.tt.attrmod.AttrMod;
+import haven.res.ui.tt.slot.Slotted;
 import haven.res.ui.tt.wpn.Damage;
 import modification.dev;
 import java.awt.Color;
@@ -433,7 +435,7 @@ public abstract class ItemInfo {
         return (ret);
     }
 
-    public static BufferedImage longtip(List<ItemInfo> info) {
+    public static BufferedImage longtip(List<? extends ItemInfo> info) {
         Layout l = new Layout();
         synchronized (Collections.unmodifiableList(info)) {
             for (ItemInfo ii : info) {
@@ -448,7 +450,7 @@ public abstract class ItemInfo {
         return (l.render());
     }
 
-    public static BufferedImage shorttip(List<ItemInfo> info) {
+    public static BufferedImage shorttip(List<? extends ItemInfo> info) {
         Layout l = new Layout();
         synchronized (Collections.unmodifiableList(info)) {
             for (ItemInfo ii : info) {
@@ -459,7 +461,7 @@ public abstract class ItemInfo {
                 }
             }
         }
-        if (l.tips.size() < 1)
+        if (l.tips.isEmpty())
             return (emptyTooltip);
         return (l.render());
     }
@@ -472,7 +474,7 @@ public abstract class ItemInfo {
         return (null);
     }
 
-    public static <T> List<T> findall(Class<T> cl, List<ItemInfo> il) {
+    public static <T extends ItemInfo> List<T> findall(Class<T> cl, List<ItemInfo> il) {
         List<T> ret = new LinkedList<>();
         for (ItemInfo inf : il) {
             if (cl.isInstance(inf))
@@ -631,17 +633,21 @@ public abstract class ItemInfo {
     @SuppressWarnings("unchecked")
     public static Map<Resource, Integer> getBonuses(List<ItemInfo> infos) {
         List<ItemInfo> slotInfos = ItemInfo.findall("ISlots", infos);
-        List<ItemInfo> gilding = ItemInfo.findall("Slotted", infos);
+        List<Slotted> gilding = ItemInfo.findall(Slotted.class, infos);
         Map<Resource, Integer> bonuses = new HashMap<>();
         try {
             for (ItemInfo islots : slotInfos) {
+                Resource[] attrs = (Resource[]) Reflect.getFieldValue(islots, "attrs");
+                if (attrs != null) for (Resource attr : attrs) {
+                    if (!bonuses.containsKey(attr)) bonuses.put(attr, 0);
+                }
                 List<Object> slots = (List<Object>) Reflect.getFieldValue(islots, "s");
                 for (Object slot : slots) {
-                    parseAttrMods(bonuses, (List) Reflect.getFieldValue(slot, "info"));
+                    parseAttrMods(bonuses, (List<ItemInfo>) Reflect.getFieldValue(slot, "info"));
                 }
             }
-            for (ItemInfo info : gilding) {
-                List<Object> slots = (List<Object>) Reflect.getFieldValue(info, "sub");
+            for (Slotted info : gilding) {
+                List<ItemInfo> slots = info.sub;
                 parseAttrMods(bonuses, slots);
             }
             parseAttrMods(bonuses, ItemInfo.findall(AttrMod.class, infos));
@@ -653,6 +659,24 @@ public abstract class ItemInfo {
             bonuses.put(armor_soft, wear.b);
         }
         return bonuses;
+    }
+
+    public static Map<Resource, Integer> getInputs(List<ItemInfo> infos) {
+        List<ItemInfo> inputInfos = ItemInfo.findall("Inputs", infos);
+        Map<Resource, Integer> inputs = new HashMap<>();
+        try {
+            for (ItemInfo islots : inputInfos) {
+                Object[] slots = (Object[]) Reflect.getFieldValue(islots, "inputs");
+                for (Object slot : slots) {
+                    Spec spec = (Spec) Reflect.getFieldValue(slot, "spec");
+                    int num = Reflect.getFieldValueInt(slot, "num");
+                    inputs.put(spec.getres(), num);
+                }
+            }
+        } catch (Exception ignored) {
+        }
+
+        return inputs;
     }
 
 

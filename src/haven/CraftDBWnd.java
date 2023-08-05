@@ -759,6 +759,47 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<P
                 g.image(tex, Coord.z);
             }
         }
+
+        private Recipe curttp = null;
+        private boolean curttl = false;
+        private Tex curtt = null;
+        private double hoverstart;
+
+        @Override
+        protected Object itemtooltip(final Coord c, final Recipe item) {
+            if (item == null) return (null);
+            MenuGrid.PagButton pag = item.p.button();
+            double now = Utils.rtime();
+            if (pag != null) {
+                boolean ttl = (now - hoverstart) > 0.5;
+                if ((item != curttp) || (ttl != curttl)) {
+                    try {
+                        BufferedImage ti = pag.rendertt(ttl);
+                        curtt = (ti == null) ? null : new TexI(ti);
+                    } catch (Loading l) {
+                        return ("...");
+                    }
+                    curttp = item;
+                    curttl = ttl;
+                }
+                return (curtt);
+            } else {
+                hoverstart = now;
+                return (super.itemtooltip(c, item));
+            }
+        }
+
+        @Override
+        public Object tooltip(Coord c, Widget prev) {
+            final Recipe item = itemat(c);
+            if (item != null) {
+                if (prev != this)
+                    hoverstart = Utils.rtime();
+                return itemtooltip(new Coord(c.x, c.y % itemh), item);
+            } else {
+                return super.tooltip(c, prev);
+            }
+        }
     }
 
     private static class ItemComparator implements Comparator<Pagina> {

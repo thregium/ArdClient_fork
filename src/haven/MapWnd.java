@@ -1312,11 +1312,11 @@ public class MapWnd extends ResizableWnd {
     }
 
     public void selectMarker(String name) {
-        if (markers != null && markers.size() > 0) {
+        if (markers != null && !markers.isEmpty()) {
             for (Marker marker : markers) {
                 if (marker.nm.equals(name)) {
-                    tool.list.change2(marker);
-                    view.center(new SpecLocator(marker.seg, marker.tc));
+                    tool.list.change(marker);
+//                    view.center(new SpecLocator(marker.seg, marker.tc));
                 }
             }
         }

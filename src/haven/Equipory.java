@@ -362,7 +362,7 @@ public class Equipory extends Widget implements DTarget {
                         }
                     }
                 }
-                armorclass = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Armor Class: ") + h + "/" + s, Color.BLACK, acf).tex();
+                armorclass = PUtils.strokeTex(acf.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Armor Class: ") + h + "/" + s));
             } catch (Exception e) { // fail silently
             }
         }
@@ -381,7 +381,7 @@ public class Equipory extends Widget implements DTarget {
                     if (attr.attr.nm.contains("exp"))
                         s = attr.attr.comp;
                 x = h * s;
-                percexp = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Perc*Exp: ") + x, Color.BLACK, acf).tex();
+                percexp = PUtils.strokeTex(acf.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Perc*Exp: ") + x));
             } catch (Exception e) { // fail silently
             }
         }
@@ -400,7 +400,7 @@ public class Equipory extends Widget implements DTarget {
                     if (attr.attr.nm.contains("ste"))
                         s = attr.attr.comp;
                 x = h * s;
-                intste = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Int*Ste: ") + x, Color.BLACK, acf).tex();
+                intste = PUtils.strokeTex(acf.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Int*Ste: ") + x));
             } catch (Exception e) { // fail silently
             }
         }
