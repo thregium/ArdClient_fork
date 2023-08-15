@@ -332,8 +332,9 @@ public class WItem extends Widget implements DTarget2 {
         if (spr != null) {
             Coord sz = spr.sz();
             g.defstate();
-            if (olcol.get() != null)
-                g.usestate(new ColorMask(olcol.get()));
+            Color c = olcol.get();
+            if (c != null)
+                g.usestate(new ColorMask(c));
             if (item.matches) {
                 g.chcolor(MATCH_COLOR);
                 g.rect(Coord.z, sz);

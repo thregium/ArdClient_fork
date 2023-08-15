@@ -189,8 +189,8 @@ public class SeedCropFarmer extends Window implements Runnable {
                             }
                             List<PBotItem> pumpkinlist = PBotUtils.getInventoryItemsByName(ui.gui.maininv, "gfx/invobjs/pumpkin");
                             PBotItem invpumpkin = pumpkinlist.get(0);
-                            invpumpkin.witem.wdgmsg("iact", Coord.z, -1);
                             FlowerMenu.setNextSelection("Slice");
+                            invpumpkin.activateItem(0);
                             int retryslice = 0;
                             lblProg2.settext("Slicing");
                             while (ui.gui.maininv.getItemsPartial("seeds").size() == 0) {
@@ -200,8 +200,8 @@ public class SeedCropFarmer extends Window implements Runnable {
                                 if (retryslice > 50) {
                                     lblProg2.settext("Retry Slicing");
                                     retryslice = 0;
-                                    invpumpkin.witem.wdgmsg("iact", Coord.z, -1);
                                     FlowerMenu.setNextSelection("Slice");
+                                    invpumpkin.activateItem(0);
                                 }
                                 PBotUtils.sleep(50);
                             }

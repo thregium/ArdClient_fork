@@ -47,6 +47,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static haven.Text.num10Fnd;
 import static haven.Text.num12boldFnd;
@@ -74,7 +75,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     public boolean matches = false;
     public boolean sendttupdate = false;
     private long filtered = 0;
-    private boolean postProcessed = false;
+    private final AtomicBoolean postProcessed = new AtomicBoolean();
 
     public static void setFilter(ItemFilter filter) {
         GItem.filter = filter;
@@ -238,15 +239,20 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
 
     private double dropCooldown = Utils.rtime();
     private static final double dropDelay = 0.25;
+    private int waitCounter;
 
     public GSprite spr() {
         if (!inited) return (null);
         GSprite spr = this.spr;
-        if (!postProcessed && Utils.rtime() - dropCooldown > dropDelay) {
+        if (!postProcessed.get() && Utils.rtime() - dropCooldown > dropDelay) {
             try {
-                if (dropItMaybe()) postProcessed = true;
+                if (dropItMaybe()) postProcessed.set(true);
             } catch (Exception l) {
                 dev.simpleLog(l.getMessage());
+                if (waitCounter++ > 10) {
+                    postProcessed.set(true);
+                    waitCounter = 0;
+                }
             }
             dropCooldown = Utils.rtime();
         }

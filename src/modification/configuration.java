@@ -268,6 +268,12 @@ public class configuration {
     public static int outlinecolor = Utils.getprefi("outlinecolor", Color.BLACK.hashCode());
     public static int outlineh = Utils.getprefi("outlineh", 1);
 
+    public static boolean showgobsoldfags = Utils.getprefb("showgobsoldfags", true);
+    public static boolean showgobssemifags = Utils.getprefb("showgobssemifags", true);
+    public static boolean showgobssemistat = Utils.getprefb("showgobssemistat", true);
+    public static boolean showgobsnewfags = Utils.getprefb("showgobsnewfags", true);
+    public static boolean showgobsdynamic = Utils.getprefb("showgobsdynamic", true);
+
     public static boolean disablepavingoutlineonmap = Utils.getprefb("disablepavingoutlineonmap", false);
 
     public static boolean nocursor = Utils.getprefb("nocursor", false);

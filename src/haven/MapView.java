@@ -26,21 +26,8 @@
 
 package haven;
 
-import static haven.DefSettings.DARKMODE;
-import static haven.DefSettings.DRAWGRIDRADIUS;
-import static haven.DefSettings.NIGHTVISION;
-import static haven.DefSettings.NVAMBIENTCOL;
-import static haven.DefSettings.NVDIFFUSECOL;
-import static haven.DefSettings.NVSPECCOC;
-import static haven.DefSettings.SHOWKCLAIM;
-import static haven.DefSettings.SHOWPCLAIM;
-import static haven.DefSettings.SHOWVCLAIM;
-import static haven.DefSettings.SYMMETRICOUTLINES;
 import haven.GLProgram.VarID;
-import static haven.Gob.createBPRadSprite;
 import haven.MCache.OverlayInfo;
-import static haven.MCache.tilesz;
-import static haven.OCache.posres;
 import haven.automation.AreaSelectCallback;
 import haven.automation.CoalToSmelters;
 import haven.automation.FlaxBot;
@@ -61,7 +48,6 @@ import haven.purus.Farmer;
 import haven.purus.pbot.PBotCharacterAPI;
 import haven.purus.pbot.PBotUtils;
 import haven.resutil.BPRadSprite;
-import haven.resutil.TerrainTile;
 import haven.sloth.gob.Alerted;
 import haven.sloth.gob.Deleted;
 import haven.sloth.gob.Hidden;
@@ -76,6 +62,7 @@ import modification.CustomFakeGrid;
 import modification.configuration;
 import modification.dev;
 import modification.resources;
+
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import java.awt.Color;
@@ -108,6 +95,20 @@ import java.util.function.Consumer;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import static haven.DefSettings.DARKMODE;
+import static haven.DefSettings.DRAWGRIDRADIUS;
+import static haven.DefSettings.NIGHTVISION;
+import static haven.DefSettings.NVAMBIENTCOL;
+import static haven.DefSettings.NVDIFFUSECOL;
+import static haven.DefSettings.NVSPECCOC;
+import static haven.DefSettings.SHOWKCLAIM;
+import static haven.DefSettings.SHOWPCLAIM;
+import static haven.DefSettings.SHOWVCLAIM;
+import static haven.DefSettings.SYMMETRICOUTLINES;
+import static haven.Gob.createBPRadSprite;
+import static haven.MCache.tilesz;
+import static haven.OCache.posres;
 
 public class MapView extends PView implements DTarget, Console.Directory, PFListener {
     public long plgobid;
@@ -1335,14 +1336,25 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         public void draw(GOut g) {
         }
 
+        private void setupSet(RenderList rl, GobSet set) {
+            if (
+                    (!configuration.showgobsoldfags && set == oldfags)
+                    || (!configuration.showgobssemifags && set == semifags)
+                    || (!configuration.showgobssemistat && set == semistat)
+                    || (!configuration.showgobsnewfags && set == newfags)
+                    || (!configuration.showgobsdynamic && set == dynamic)
+            ) return;
+            try {
+                rl.add(set, null);
+            } catch (Exception e) {
+                dev.simpleLog(e);
+            }
+        }
+
         public boolean setup(RenderList rl) {
             update();
             for (GobSet set : all) {
-                try {
-                    rl.add(set, null);
-                } catch (Exception e) {
-                    dev.simpleLog(e);
-                }
+                setupSet(rl, set);
             }
             ticks++;
             return (false);
@@ -3292,11 +3304,35 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     public boolean keydown(KeyEvent ev) {
         Loader.Future<Plob> placing_l = this.placing;
         if ((placing_l != null) && (placing_l.done())) {
+            int keyCode = ev.getKeyCode();
             Plob placing = placing_l.get();
-            if ((ev.getKeyCode() == KeyEvent.VK_LEFT) && placing.adjust.rotate(placing, -1, ui.modflags()))
+            if (ui.modflags() == UI.MOD_SHIFT) {
+                if (keyCode == KeyEvent.VK_LEFT && placing.adjust.rotate(placing, -1, ui.modflags())) return (true);
+                if (keyCode == KeyEvent.VK_RIGHT && placing.adjust.rotate(placing, 1, ui.modflags())) return (true);
+            }
+
+            if (ui.modflags() == 0 && (keyCode == KeyEvent.VK_UP || keyCode == KeyEvent.VK_DOWN || keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_RIGHT)) {
+                Coord2d gran = (plobpgran == 0) ? tilesz : new Coord2d(1.0 / plobpgran, 1.0 / plobpgran).mul(tilesz);
+//                plob.rc = mc.floor(tilesz).mul(tilesz).add(tilesz.div(2));
+                if (gran != null) {
+                    Coord2d pc = placing.rc.add(gran.div(2)).floor(gran).mul(gran);
+//                    UnaryOperator<Coord2d> pl = c -> pc.add(gran.div(2)).floor(gran).mul(gran);
+                    if (keyCode == KeyEvent.VK_UP) {
+                        placing.rc = pc.sub(0, gran.y);
+                    } else if (keyCode == KeyEvent.VK_DOWN) {
+                        placing.rc = pc.add(0, gran.y);
+                    } else if (keyCode == KeyEvent.VK_LEFT) {
+                        placing.rc = pc.sub(gran.x, 0);
+                    } else if (keyCode == KeyEvent.VK_RIGHT) {
+                        placing.rc = pc.add(gran.x, 0);
+                    }
+                }
                 return (true);
-            if ((ev.getKeyCode() == KeyEvent.VK_RIGHT) && placing.adjust.rotate(placing, 1, ui.modflags()))
+            }
+            if (ev.getKeyCode() == KeyEvent.VK_ENTER) {
+                wdgmsg("place", placing.rc.floor(posres), (int) Math.round(placing.a * 32768 / Math.PI), 1, ui.modflags());
                 return (true);
+            }
         }
         if (camera.keydown(ev))
             return (true);
@@ -3314,9 +3350,13 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     public Object tooltip(Coord c, Widget prev) {
+        Loader.Future<Plob> placing_l = this.placing;
         if (selection != null) {
             if (selection.tt != null)
                 return (selection.tt);
+        } else if ((placing_l != null) && (placing_l.done())) {
+            Plob placing = placing_l.get();
+            return placing.rc + "";
         } else if (tt != null && ui.modshift) {
             return tt;
         } else if (tooltip != null && ui.modshift) {

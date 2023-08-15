@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class PBotScriptlistItem extends Widget implements Comparable<PBotScriptlistItem> {
     private String name;
@@ -70,6 +71,11 @@ public class PBotScriptlistItem extends Widget implements Comparable<PBotScriptl
             clr = Color.ORANGE;
         else if (isFolder)
             clr = Color.YELLOW;
+        else {
+            Path parent = scriptFile.getParent();
+            if (parent != null && !Objects.equals(parent, PBotScriptlist.defPath))
+                name = String.format("%s (%s)", name, parent.getFileName().toString());
+        }
         this.nameTex = Text.render(name, clr).tex();
     }
 

@@ -146,6 +146,10 @@ public class PBotItem {
         gitem.wdgmsg("iact", Coord.z, 3);
     }
 
+    public void activateItem(int mod) {
+        gitem.wdgmsg("iact", Coord.z, mod);
+    }
+
     /**
      * Itemact
      *

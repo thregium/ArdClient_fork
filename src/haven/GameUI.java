@@ -1364,7 +1364,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         Coord hgc = new Coord(sz.x / 2, (sz.y * 4) / 10);
         g.aimage(curprog, hgc, 0.5, 0.5);
         if (Config.showprogressperc)
-            g.atextstroked((int) (prog * 100) + "%", hgc, 0.5, 2.5, Color.WHITE, Color.BLACK, Text.num12boldFnd);
+            g.atextstroked(Utils.odformat2(prog * 100, 2) + "%", hgc, 0.5, 2.5, Color.WHITE, Color.BLACK, Text.num12boldFnd);
     }
 
     @Override
@@ -1916,10 +1916,13 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
     public void toggleSearch() {
         KeyBind k = KeyBinder.get(TOGGLE_SEARCH);
         if (menuSearch.show(!menuSearch.visible())) {
-            menuSearch.raise();
-            fitwdg(menuSearch);
-            if (k.mods == 4)
-                menuSearch.ignoreinit = true;
+            if (menuSearch.visible()) {
+                menuSearch.raise();
+                fitwdg(menuSearch);
+                ui.root.setfocus(menuSearch);
+                if (k.mods == 4)
+                    menuSearch.ignoreinit = true;
+            }
         }
     }
 

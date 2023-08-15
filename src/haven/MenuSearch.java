@@ -117,12 +117,22 @@ public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pa
         String filter = entry.text().toLowerCase();
         ItemFilter itemFilter = ItemFilter.create(filter);
         synchronized (all) {
-            List<MenuGrid.Pagina> filtered = all.stream().filter(p -> {
-                    Resource res = p.res.get();
-                    String name = res.layer(Resource.action).name.toLowerCase();
-                    return (name.contains(filter) || itemFilter.matches(p, ui.sess));
-            }).collect(Collectors.toList());
-            filtered.forEach(list::add);
+            if (filter.startsWith("new:")) {
+                all.stream().filter(p -> p.newp != 0).forEach(list::add);
+            }
+            if (list.listitems() == 0) {
+                List<MenuGrid.Pagina> filtered = all.stream().filter(p -> {
+                    String name = p.act().name.toLowerCase();
+                    Indir<Resource> parent = p.act().parent;
+                    String par = "";
+                    if (parent != null) {
+                        MenuGrid.Pagina pp = p.scm.paginafor(parent);
+                        par = pp.act().name.toLowerCase();
+                    }
+                    return (par.contains(filter) || name.contains(filter) || itemFilter.matches(p, ui.sess));
+                }).collect(Collectors.toList());
+                filtered.forEach(list::add);
+            }
         }
         list.sort(new ItemComparator());
         if (list.listitems() > 0) {

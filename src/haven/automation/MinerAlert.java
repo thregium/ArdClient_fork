@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MinerAlert extends Window {
-    private int countiron, countgold, countsilver, countcopper, counttin, countbasaslt, countcinnabar, countdolomite, countfeldspar, countflint, countgneiss, countgranite, counthornblende;
+    private int countiron, countgold, countsilver, countcopper, counttin, countlead, countleadglance, countbasaslt, countcinnabar, countdolomite, countfeldspar, countflint, countgneiss, countgranite, counthornblende;
     private int countlimestone, countmarble, countporphyry, countquartz, countsandstone, countschist;
     private int countcassiterite, countchalcopyrite, countmalachite, countilmenite, countlimonite, counthematite, countmagnetite, countgalena, countargentite;
     private int countpetzite, countsylvanite, countnagyagite, counthornsilver, countslimes, countslimestotal;
@@ -43,7 +43,7 @@ public class MinerAlert extends Window {
     public static int delay = 5000, maxmarks = 50;
     public Gob gob;
     private Button runbtn, stopbtn, mutebtn;
-    private final Label labelcountiron, labelcountgold, labelcountcinnabar, labelcountsilver, labelcounttin, labelcountcopper, labelcountmagnetite, labelcounthematite, labelcountslimes, labelcountslimestotal;
+    private final Label labelcountiron, labelcountgold, labelcountcinnabar, labelcountsilver, labelcounttin, labelcountlead, labelcountcopper, labelcountmagnetite, labelcounthematite, labelcountslimes, labelcountslimestotal;
     private static final Text.Foundry infof = new Text.Foundry(Text.sans, 10).aa(true);
     private double lasterror = 0;
     public List<Gob> slimecount = new ArrayList<>();
@@ -54,7 +54,7 @@ public class MinerAlert extends Window {
     private CheckBox SupportsQuarter, SupportsHalf, MarkTiles;// quarter is 25% damage, half is 50% damage
     private List<String> reslist = Arrays.asList("gfx/tiles/rocks/cassiterite", "gfx/tiles/rocks/chalcopyrite", "gfx/tiles/rocks/malachite", "gfx/tiles/rocks/ilmenite", "gfx/tiles/rocks/limonite",
             "gfx/tiles/rocks/hematite", "gfx/tiles/rocks/magnetite", "gfx/tiles/rocks/galena", "gfx/tiles/rocks/argentite", "gfx/tiles/rocks/hornsilver", "gfx/tiles/rocks/petzite", "gfx/tiles/rocks/sylvanite",
-            "gfx/tiles/rocks/nagyagite", "gfx/tiles/rocks/cinnabar");
+            "gfx/tiles/rocks/nagyagite", "gfx/tiles/rocks/cinnabar", "gfx/tiles/rocks/leadglance");
 
     private final HashMap<String, String> smeltchance = new HashMap<String, String>(15) {{
         put("cassiterite", "30% Tin");
@@ -101,6 +101,11 @@ public class MinerAlert extends Window {
         add(labeltin, new Coord(10, yvalue2 += 20));
         labelcounttin = new Label("0", Text.num12boldFnd, Color.WHITE);
         add(labelcounttin, new Coord(65, yvalue += 20));
+
+        final Label labellead = new Label("Number of Lead tiles visible.", infof);
+        add(labellead, new Coord(10, yvalue2 += 20));
+        labelcountlead = new Label("0", Text.num12boldFnd, Color.WHITE);
+        add(labelcountlead, new Coord(65, yvalue += 20));
 
         final Label labelcopper = new Label("Number of Copper tiles visible.", infof);
         add(labelcopper, new Coord(10, yvalue2 += 20));
@@ -292,6 +297,10 @@ public class MinerAlert extends Window {
                                 });
                             }
 
+                            if (name.equals("gfx/tiles/rocks/leadglance")) {
+                                countlead++;
+                                countleadglance++;
+                            }
                             if (name.equals("gfx/tiles/rocks/cassiterite")) {
                                 counttin = counttin + 1;
                                 countcassiterite = countcassiterite + 1;
@@ -354,6 +363,7 @@ public class MinerAlert extends Window {
                     labelcountiron.settext(countiron + "");
                     labelcountcopper.settext(countcopper + "");
                     labelcounttin.settext(counttin + "");
+                    labelcountlead.settext(countlead + "");
                     labelcountgold.settext(countgold + "");
                     labelcountsilver.settext(countsilver + "");
                     labelcountmagnetite.settext(countmagnetite + "");

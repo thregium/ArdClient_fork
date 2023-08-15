@@ -489,7 +489,7 @@ public class Config {
             "jasper",
             "greenschist",
             "pegmatite",
-            "ilmenite",
+//            "ilmenite",
             "rhyolite",
             "pumice",
             "sunstone",
@@ -500,6 +500,7 @@ public class Config {
 
     public final static Set<String> mineablesOre = new HashSet<String>(Arrays.asList(
             "cassiterite",
+            "leadglance",
             "chalcopyrite",
             "malachite",
             "ilmenite",

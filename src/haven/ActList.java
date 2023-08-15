@@ -66,7 +66,7 @@ public class ActList extends Listbox<ActList.ActItem> {
     @Override
     protected void drawitem(GOut g, ActItem item, int i) {
         g.image(item.icon, Coord.z);
-        g.aimage(RichText.render(item.name.text, -1).tex(), new Coord(itemh + 5, itemh / 2), 0, 0.5);
+        g.aimage(item.name.tex(), new Coord(itemh + 5, itemh / 2), 0, 0.5);
     }
 
     public class ActItem {
@@ -77,7 +77,18 @@ public class ActList extends Listbox<ActList.ActItem> {
         private ActItem(MenuGrid.Pagina pagina) {
             this.pagina = pagina;
             //Text.render(res.layer(Resource.action).name).tex();
-            this.name = Text.render(this.pagina.act().name);
+            MenuGrid menu = pagina.scm;
+            Resource.AButton ad = pagina.act();
+            Indir<Resource> parent = pagina.act().parent;
+            String ret;
+            if (parent != null) {
+                MenuGrid.Pagina pp = pagina.scm.paginafor(parent);
+                ret = String.format("%s (%s)", ad.name, pp.act().name);
+            } else {
+                ret = ad.name;
+            }
+            this.name = RichText.render(ret, -1);
+            //  this.name = Text.render(this.pagina.act().name);
             //  this.name = font.render(this.pagina.act().name);
             this.icon = new TexI(PUtils.convolvedown(pagina.res.get().layer(Resource.imgc).img,
                     new Coord(itemh, itemh), CharWnd.iconfilter));

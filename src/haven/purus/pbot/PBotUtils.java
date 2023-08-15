@@ -15,7 +15,6 @@ import haven.Loading;
 import haven.MCache;
 import haven.Makewindow;
 import haven.MapView;
-import static haven.OCache.posres;
 import haven.Resource;
 import haven.Speedget;
 import haven.UI;
@@ -35,12 +34,16 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static haven.OCache.posres;
 
 public class PBotUtils {
 
@@ -641,7 +644,7 @@ public class PBotUtils {
                     if (wdg instanceof Inventory) {
                         ret.add(new PBotInventory((Inventory) wdg));
                         for (WItem item : wdg.children(WItem.class)) {
-                            if (item.item.contents instanceof Inventory)
+                            if (item.item.contents instanceof Inventory && item.item.contentswnd == null)
                                 ret.add(new PBotInventory((Inventory) item.item.contents));
                         }
                     }
@@ -651,7 +654,26 @@ public class PBotUtils {
         Equipory e = ui.gui.getequipory();
         if (e != null) {
             for (WItem item : e.slots) {
-                if (item != null && item.item.contents instanceof Inventory)
+                if (item != null && item.item.contents instanceof Inventory && item.item.contentswnd == null)
+                    ret.add(new PBotInventory((Inventory) item.item.contents));
+            }
+        }
+        return ret;
+    }
+
+    public static Set<PBotInventory> getAllInventoriesFull(UI ui) {
+        Set<PBotInventory> ret = new HashSet<>();
+        for (Inventory wdg : ui.root.children(Inventory.class)) {
+            ret.add(new PBotInventory((Inventory) wdg));
+            for (WItem item : wdg.children(WItem.class)) {
+                if (item.item.contents instanceof Inventory && item.item.contentswnd == null)
+                    ret.add(new PBotInventory((Inventory) item.item.contents));
+            }
+        }
+        Equipory e = ui.gui.getequipory();
+        if (e != null) {
+            for (WItem item : e.slots) {
+                if (item != null && item.item.contents instanceof Inventory && item.item.contentswnd == null)
                     ret.add(new PBotInventory((Inventory) item.item.contents));
             }
         }

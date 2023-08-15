@@ -123,11 +123,11 @@ public class ItemFilter {
 
     }
 
-    final public boolean matches(ItemData data, Session sess) {
+    public final boolean matches(ItemData data, Session sess) {
         return data != null && matches(data.iteminfo(sess));
     }
 
-    final public boolean matches(MenuGrid.Pagina pagina, Session sess) {
+    public final boolean matches(MenuGrid.Pagina pagina, Session sess) {
         List<ItemInfo> infos = pagina.info();
         if (infos == null || infos.isEmpty()) {
             return matches(ItemData.get(pagina), sess);
@@ -217,6 +217,7 @@ public class ItemFilter {
                     case "attr":
                         filter = new Attribute(text, sign, value, opt);
                         break;
+                    case "ing":
                     case "from":
                         filter = new Inputs(text, sign, value, opt);
                         break;

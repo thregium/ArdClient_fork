@@ -986,7 +986,9 @@ public class AreaPicker extends Window implements Runnable {
                         }
                         PBotItem bigitem = getMaxSizeItem(getInvItems(selecteditemlist));
                         if (bigitem != null && PBotUtils.playerInventory(ui).freeSpaceForItem(bigitem) == null) {
+                            if (PBotUtils.getItemAtHand(ui) != null) PBotUtils.dropItemFromHand(ui, 0, 1000);
                             storaging(storages);
+                            break;
                         }
                     }
                     if (PBotGobAPI.findGobById(ui, pgob.getGobId()) == null) {
@@ -1043,7 +1045,7 @@ public class AreaPicker extends Window implements Runnable {
                         objects.remove(pgob);
                         break;
                     }
-                    sleep(1);
+                    sleep(250);
                 }
             }
 
@@ -1097,6 +1099,7 @@ public class AreaPicker extends Window implements Runnable {
                 mark(storages.get(p));
                 final List<Window> ow = invWindows();
                 if (pfRightClick(storages.get(p))) {
+                    if (PBotUtils.getItemAtHand(ui) != null) PBotUtils.dropItemFromHand(ui, 0, 1000);
                     Window w = waitForNewInvWindow(ow);
                     if (w != null) {
                         PBotInventory wi = PBotWindowAPI.getInventory(w);

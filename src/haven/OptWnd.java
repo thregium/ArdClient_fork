@@ -3910,7 +3910,22 @@ public class OptWnd extends Window {
             }
 
             protected void drawitemname(GOut g, CheckListboxItem itm) {
-                Text t = Text.render(configuration.getShortName(itm.name));
+                String[] names = itm.name.split("/");
+                String text;
+                if (names.length > 0) {
+                    if (names.length > 1) {
+                        String n1 = names[names.length - 1];
+                        String n2 = names[names.length - 2];
+                        text = String.format("%s (%s)", n1.length() > 1 ? n1.substring(0, 1).toUpperCase() + n1.substring(1) : n1, n2.length() > 1 ? n2.substring(0, 1).toUpperCase() + n2.substring(1) : n2);
+                    } else {
+                        String n1 = names[0];
+                        text = String.format("%s", n1.length() > 1 ? n1.substring(0, 1).toUpperCase() + n1.substring(1) : n1);
+                    }
+                } else {
+                    String n1 = itm.name;
+                    text = String.format("%s", n1.length() > 1 ? n1.substring(0, 1).toUpperCase() + n1.substring(1) : n1);
+                }
+                Text t = Text.render(text);
                 Tex T = t.tex();
                 g.image(T, new Coord(2, 2), t.sz());
                 T.dispose();
@@ -6464,7 +6479,13 @@ public class OptWnd extends Window {
                     }
                 }));
                 appender.add(new IndirCheckBox("Show Map", SHOWMAP));
-                appender.add(new IndirCheckBox("Show Gobs", SHOWGOBS));
+                appender.addRow(new IndirCheckBox("Show Gobs", SHOWGOBS),
+                        new CheckBox("oldfags", v -> Utils.setprefb("showgobsoldfags", configuration.showgobsoldfags = v), configuration.showgobsoldfags),
+                        new CheckBox("semifags", v -> Utils.setprefb("showgobssemifags", configuration.showgobssemifags = v), configuration.showgobssemifags),
+                        new CheckBox("semistat", v -> Utils.setprefb("showgobssemistat", configuration.showgobssemistat = v), configuration.showgobssemistat),
+                        new CheckBox("newfags", v -> Utils.setprefb("showgobsnewfags", configuration.showgobsnewfags = v), configuration.showgobsnewfags),
+                        new CheckBox("dynamic", v -> Utils.setprefb("showgobsdynamic", configuration.showgobsdynamic = v), configuration.showgobsdynamic)
+                        );
                 appender.add(new CheckBox("Disable biome tile transitions") {
                     {
                         a = Config.disabletiletrans;
