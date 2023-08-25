@@ -1,5 +1,6 @@
 package haven.purus.pbot;
 
+import haven.Debug;
 import haven.UI;
 import modification.configuration;
 
@@ -22,7 +23,7 @@ public class PBotError {
             PBotUtils.debugMsg(ui, "PBot error occurred!! Writing it into a file called: " + output.getPath(), Color.RED);
             PrintWriter pw = new PrintWriter(Files.newBufferedWriter(output.toPath(), StandardOpenOption.WRITE));
             e.printStackTrace(pw);
-            e.printStackTrace(ui.cons.out);
+            Debug.printStackTrace(e);
             pw.flush();
             e.printStackTrace();
         } catch (Exception e1) {

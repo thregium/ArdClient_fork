@@ -798,6 +798,7 @@ public class UI {
         audio.clear();
         removeid(root);
         if (cons.out != null) {
+            Debug.remove(cons.out);
             cons.out.close();
             cons.out = null;
         }

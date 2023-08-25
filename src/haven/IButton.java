@@ -41,7 +41,7 @@ public class IButton extends SIWidget {
     @RName("ibtn")
     public static class $_ implements Factory {
         public Widget create(UI ui, Object[] args) {
-            return (new IButton(Resource.loadimg((String) args[0]), Resource.loadimg((String) args[1])));
+            return (new IButton(load((String) args[0]), load((String) args[1])));
         }
     }
 
@@ -66,19 +66,19 @@ public class IButton extends SIWidget {
     }
 
     public IButton(String base, String up, String down, String hover, final Runnable action) {
-        this(Resource.loadimg(base + up), Resource.loadimg(base + down), Resource.loadimg(base + (hover == null ? up : hover)), action);
+        this(load(base + up), load(base + down), load(base + (hover == null ? up : hover)), action);
     }
 
     public IButton(String base, String up, String down, String hover) {
-        this(Resource.loadimg(base + up), Resource.loadimg(base + down), Resource.loadimg(base + (hover == null ? up : hover)));
+        this(load(base + up), load(base + down), load(base + (hover == null ? up : hover)));
     }
 
     public IButton(final String res, final Runnable action) {
-        this(Resource.loadimg(res, 0), Resource.loadimg(res, 1), Resource.loadimg(res, 2), action);
+        this(load(res, 0), load(res, 1), load(res, 2), action);
     }
 
     public IButton(final String res, final String tooltip, final Runnable action) {
-        this(Resource.loadimg(res, 0), Resource.loadimg(res, 1), Resource.loadimg(res, 2), action);
+        this(load(res, 0), load(res, 1), load(res, 2), action);
         this.tooltip = tooltip;
     }
 
@@ -171,5 +171,13 @@ public class IButton extends SIWidget {
         if (!checkhit(c))
             return (null);
         return (super.tooltip(c, prev));
+    }
+
+    private static BufferedImage load(String str) {
+        return (Resource.remote().loadwait(str).layer(Resource.imgc).img);
+    }
+
+    private static BufferedImage load(String str, int id) {
+        return (Resource.remote().loadwait(str).layer(Resource.imgc, id).img);
     }
 }

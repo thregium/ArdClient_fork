@@ -980,6 +980,7 @@ Window extends MovableWidget implements DTarget {
                 }
             };
             list.put("Sort", run);
+            list.put("Open Stacks", () -> invs.forEach(Inventory::openStacks));
 //            list.put("Stack", () -> {});
 //            list.put("Unstack", () -> {});
         }

@@ -2,9 +2,8 @@ package haven;
 
 import java.awt.Color;
 
-
 public class GobQualitySprite extends Sprite {
-    private static Tex hlt0 = Text.renderstroked("0", new Color(255, 227, 168), Color.BLACK, Text.num12boldFnd).tex();
+    private static Tex qimg = Resource.remote().loadwait("ui/tt/q/quality").layer(Resource.imgc, 0).tex();
     public int val;
     private Tex tex;
     private static Matrix4f mv = new Matrix4f();
@@ -21,9 +20,12 @@ public class GobQualitySprite extends Sprite {
     public void draw(GOut g) {
         float[] c = mv.load(camp.fin(Matrix4f.id)).mul1(loc.fin(Matrix4f.id)).homoc();
         Coord sc = proj.get2dCoord(c, wndsz);
-        sc.x -= tex.sz().x / 2;
-        sc.y -= 40;
-        g.image(tex, sc);
+        if (tex != null) {
+            sc.x -= (qimg.sz().x + tex.sz().x) / 2;
+            sc.y -= 40;
+            g.image(qimg, sc.add(0, Math.max(qimg.sz().y, tex.sz().y) / 2 - qimg.sz().y / 2));
+            g.image(tex, sc.add(qimg.sz().x, Math.max(qimg.sz().y, tex.sz().y) / 2 - tex.sz().y / 2));
+        }
     }
 
     public boolean setup(RenderList rl) {
@@ -33,13 +35,12 @@ public class GobQualitySprite extends Sprite {
         wndsz = buf.get(PView.wnd).sz();
         loc = buf.get(PView.loc);
         camp = buf.get(PView.cam);
-        hlt0 = Text.renderstroked(String.valueOf(val), new Color(255, 227, 168), Color.BLACK, Text.num12boldFnd).tex();
+        //hlt0 = PUtils.strokeTex(Text.render(val + "", new Color(255, 227, 168)));
         return true;
     }
 
     public void update(int val) {
         this.val = val;
-        hlt0 = Text.renderstroked("Quality " + String.valueOf(val), new Color(255, 227, 168), Color.BLACK, Text.num12boldFnd).tex();
-        tex = hlt0;
+        tex = PUtils.strokeTex(Text.num12boldFnd.render(val + "", new Color(255, 227, 168)));
     }
 }

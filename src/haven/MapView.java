@@ -3065,10 +3065,12 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             } catch (Exception e) {
             }//ignore exceptions here, possible to cause a crash if you change camera WHILE dragging the camera. Why you'd do this, I have no idea, but pls dont crash from it.
         } else if ((placing_l != null && placing_l.done()) || fakeGob != null) {
-            Plob placing = placing_l.get();
-            if (placing != null) {
-                if ((placing.lastmc == null) || !placing.lastmc.equals(c)) {
-                    delay(placing.new Adjust(c, ui.modflags()));
+            if (placing_l != null && placing_l.done()) {
+                Plob placing = placing_l.get();
+                if (placing != null) {
+                    if ((placing.lastmc == null) || !placing.lastmc.equals(c)) {
+                        delay(placing.new Adjust(c, ui.modflags()));
+                    }
                 }
             }
             if (fakeGob != null) {
@@ -3356,7 +3358,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 return (selection.tt);
         } else if ((placing_l != null) && (placing_l.done())) {
             Plob placing = placing_l.get();
-            return placing.rc + "";
+            return "Place: " + new Coord2d((placing.rc.x % tilesz.x + tilesz.x) % tilesz.x, (placing.rc.y % tilesz.y + tilesz.y) % tilesz.y) + "\n" +  "Angle: " + Math.toDegrees(placing.a);
         } else if (tt != null && ui.modshift) {
             return tt;
         } else if (tooltip != null && ui.modshift) {
@@ -3628,7 +3630,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             Loading l = lastload;
             if (l == null)
                 throw (new Exception("Not loading"));
-            l.printStackTrace(cons.out);
+            Debug.printStackTrace(l);
         });
         Console.setscmd("clickdb", (cons, args) -> clickdb = Utils.parsebool(args[1], false));
     }

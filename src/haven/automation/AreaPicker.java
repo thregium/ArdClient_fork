@@ -15,13 +15,13 @@ import haven.GameUI;
 import haven.ISBox;
 import haven.Inventory;
 import haven.Label;
-import haven.Pair;
 import haven.ResizableTextEntry;
 import haven.Resource;
 import haven.Scrollbar;
 import haven.Tex;
 import haven.Text;
 import haven.TextEntry;
+import haven.Trinity;
 import haven.WItem;
 import haven.Widget;
 import haven.WidgetVerticalAppender;
@@ -42,6 +42,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.awt.Color;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,6 +61,8 @@ import java.util.stream.Collectors;
  * Endless = time
  * Professional options (drink . dead option . wait time . retry .)
  * Stop btn, pause btn
+ * Storages like barrel
+ * Action like destroy
  * <p>
  * Main Info + Refresh Button (FlowerMenu)
  * 1. Select area and select gobs . add option check once (not until it disappears) . moving objects? . automilk?
@@ -70,8 +76,8 @@ import java.util.stream.Collectors;
  */
 
 public class AreaPicker extends Window implements Runnable {
-    public final static String scriptname = "Area Picker";
-    public final static String[] collectstates = new String[]{"Inventory", "Drop out of hand", "Storage", "Create Stockpiles (WIP)"};
+    public static final String scriptname = "Area Picker";
+    public static final String[] collectstates = new String[]{"Inventory", "Drop out of hand", "Storage", "Create Stockpiles (WIP)"};
     public final WidgetVerticalAppender appender = new WidgetVerticalAppender(this);
     public Thread runthread;
     public boolean block = false;
@@ -96,7 +102,7 @@ public class AreaPicker extends Window implements Runnable {
             selecteditemlist = new TreeList<>();
 
 
-    public Button refresh, selectgobbtn, selectedgobbtn, selectedflowerbtn, selectstoragebtn, selectedstoragebtn, selecteditembtn, selecteditemaddbtn, runbtn, stopbtn, pausumebtn, loadbtn, savebtn;
+    public Button refresh, selectgobbtn, selectedgobbtn, selectedflowerbtn, selectstoragebtn, selectedstoragebtn, selecteditembtn, selecteditemaddbtn, runbtn, stopbtn, pausumebtn, loadbtn, savebtn, exportbtn, importbtn;
     public Label l1, l2, l3, l4, l5;
     public Label maininfolbl, areagobinfolbl, flowerpetalsinfolbl, areastorageinfolbl, iteminfolbl;
     public Dropbox<String> collecttriggerdbx;
@@ -604,158 +610,20 @@ public class AreaPicker extends Window implements Runnable {
         };
 
         loadbtn = new Button(50, "Load") {
-            final List<Pair<Button, Button>> rows = new ArrayList<>();
+            final List<Trinity<Button, Button, Button>> rows = new ArrayList<>();
 
             private void acceptTask(final String name, final Object task) {
                 if (task instanceof JSONObject) {
-                    JSONObject object = (JSONObject) task;
+                    try {
+                        JSONObject object = (JSONObject) task;
 
-                    boolean dirty = false;
+                        if (taskFromObject(object)) AreaPicker.this.pack();
 
-                    if (object.has("Gobs")) {
-                        final List<String> gobs = new ArrayList<>();
-                        Object obj = object.get("Gobs");
-                        if (obj instanceof JSONArray) {
-                            ((JSONArray) obj).forEach(i -> gobs.add(i.toString()));
-                        } if (obj instanceof List) {
-                            ((List) obj).forEach(i -> gobs.add(i.toString()));
-                        }
-
-                        final List<String> temp = new ArrayList<>();
-                        final List<CheckListboxItem> outch = new ArrayList<>();
-                        gobs.forEach(i -> {
-                            CheckListboxItem ch = selectedgoblist.stream().filter(s -> s.name.equals(i)).findFirst().orElse(null);
-                            if (ch == null) {
-                                ch = new CheckListboxItem(i);
-                                selectedgoblist.add(ch);
-                                outch.add(ch);
-                            }
-                            ch.selected = true;
-                        });
-                        selectedgoblist.stream().map(i -> i.name).forEach(i -> temp.add(configuration.getShortName(i) + " (" + i.substring(0, i.lastIndexOf('/')) + ")"));
-                        selectedgoblbox.items.addAll(outch);
-                        selectedgoblbox.resize(calcWidthString(temp), selectedgoblbox.sz.y);
-                        selectedgobwnd.pack();
-                        selectedgobsearch.settext("");
-                        if (selectedgoblbox.items.size() > 0) selectedgobbtn.change(Color.GREEN);
-                        else selectedgobbtn.change(Color.RED);
-
-                        updatelist("gob");
-                        updateinfo("gob");
-                        dirty = true;
+                        debugLogPing(String.format("Task %s is loaded", name), Color.GREEN);
+                    } catch (Exception e) {
+                        debugLogPing(String.format("Error while loading", name), Color.GREEN);
+                        e.printStackTrace();
                     }
-
-                    if (object.has("Flower")) {
-                        final List<String> petals = new ArrayList<>();
-                        Object obj = object.get("Flower");
-                        if (obj instanceof JSONArray) {
-                            ((JSONArray) obj).forEach(i -> petals.add(i.toString()));
-                        } if (obj instanceof List) {
-                            ((List) obj).forEach(i -> petals.add(i.toString()));
-                        }
-
-                        final List<String> temp = new ArrayList<>();
-                        final List<CheckListboxItem> outch = new ArrayList<>();
-
-                        petals.forEach(i -> {
-                            CheckListboxItem ch = selectedflowerlist.stream().filter(s -> s.name.equals(i)).findFirst().orElse(null);
-                            if (ch == null) {
-                                ch = new CheckListboxItem(i);
-                                selectedflowerlist.add(ch);
-                                outch.add(ch);
-                            }
-                            ch.selected = true;
-                        });
-
-                        selectedflowerlist.stream().map(i -> i.name).forEach(s -> {
-                            String loc = Resource.language.equals("en") ? s : Resource.getLocString(Resource.BUNDLE_FLOWER, s);
-                            temp.add(Resource.language.equals("en") ? s : loc.equals(s) ? s : s + " (" + Resource.getLocString(Resource.BUNDLE_FLOWER, s) + ")");
-                        });
-
-                        selectedflowerlbox.items.addAll(outch);
-                        selectedflowerlbox.items.sort(listboxsort());
-                        selectedflowerlbox.resize(calcWidthString(temp), selectedflowerlbox.sz.y);
-                        selectedflowerwnd.pack();
-                        selectedflowersearch.settext("");
-
-                        updateinfo("flower");
-                        dirty = true;
-                    }
-
-                    if (object.has("Type")) {
-                        final int type = object.getInt("Type");
-                        collecttriggerdbx.change(type);
-
-                        if (type == 2 || type == 3) {
-                            if (object.has("Storages")) {
-                                final List<String> storages = new ArrayList<>();
-                                Object obj = object.get("Storages");
-                                if (obj instanceof JSONArray) {
-                                    ((JSONArray) obj).forEach(i -> storages.add(i.toString()));
-                                } if (obj instanceof List) {
-                                    ((List) obj).forEach(i -> storages.add(i.toString()));
-                                }
-
-                                final List<String> temp = new ArrayList<>();
-                                final List<CheckListboxItem> outch = new ArrayList<>();
-                                storages.forEach(i -> {
-                                    CheckListboxItem ch = selectedstoragelist.stream().filter(s -> s.name.equals(i)).findFirst().orElse(null);
-                                    if (ch == null) {
-                                        ch = new CheckListboxItem(i);
-                                        selectedstoragelist.add(ch);
-                                        outch.add(ch);
-                                    }
-                                    ch.selected = true;
-                                });
-                                selectedstoragelist.stream().map(i -> i.name).forEach(i -> temp.add(configuration.getShortName(i) + " (" + i.substring(0, i.lastIndexOf('/')) + ")"));
-                                selectedstoragelbox.items.addAll(outch);
-                                selectedstoragelbox.resize(calcWidthString(temp), selectedstoragelbox.sz.y);
-                                selectedstoragewnd.pack();
-                                selectedstoragesearch.settext("");
-                                if (selectedstoragelbox.items.size() > 0) selectedstoragebtn.change(Color.GREEN);
-                                else selectedstoragebtn.change(Color.RED);
-
-                                updatelist("storage");
-                                updateinfo("storage");
-                                dirty = true;
-                            }
-
-                            if (object.has("Items")) {
-                                final List<String> items = new ArrayList<>();
-                                Object obj = object.get("Items");
-                                if (obj instanceof JSONArray) {
-                                    ((JSONArray) obj).forEach(i -> items.add(i.toString()));
-                                } if (obj instanceof List) {
-                                    ((List) obj).forEach(i -> items.add(i.toString()));
-                                }
-
-                                final List<String> temp = new ArrayList<>();
-                                final List<CheckListboxItem> outch = new ArrayList<>();
-                                items.forEach(i -> {
-                                    CheckListboxItem ch = selecteditemlist.stream().filter(s -> s.name.equals(i)).findFirst().orElse(null);
-                                    if (ch == null) {
-                                        ch = new CheckListboxItem(i);
-                                        selecteditemlist.add(ch);
-                                        outch.add(ch);
-                                    }
-                                    ch.selected = true;
-                                });
-                                selecteditemlist.stream().map(i -> i.name).forEach(i -> temp.add(i)); //XXX
-                                selecteditemlbox.items.addAll(outch);
-                                selecteditemlbox.items.sort(listboxsort());
-                                selecteditemlbox.resize(calcWidthString(temp), selecteditemlbox.sz.y);
-                                selecteditemwnd.pack();
-                                selecteditemsearch.settext("");
-
-                                updateinfo("item");
-                                dirty = true;
-                            }
-                        }
-                    }
-
-                    if (dirty) AreaPicker.this.pack();
-
-                    debugLogPing(String.format("Task %s is loaded", name), Color.GREEN);
                 }
             }
 
@@ -767,10 +635,29 @@ public class AreaPicker extends Window implements Runnable {
                 redrawRows(w, object);
             }
 
+            private void exportTask(final String name, final Object task) {
+                if (task instanceof JSONObject) {
+                    try {
+                        JSONObject object = (JSONObject) task;
+
+                        Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+                        cb.setContents(new StringSelection(object.toString()), null);
+
+                        if (taskFromObject(object)) AreaPicker.this.pack();
+
+                        debugLogPing(String.format("Task %s is exported to clipboard", name), Color.GREEN);
+                    } catch (Exception e) {
+                        debugLogPing(String.format("Error %s while exporting", name), Color.GREEN);
+                        e.printStackTrace();
+                    }
+                }
+            }
+
             private void redrawRows(final Window w, final JSONObject object) {
                 rows.forEach(row -> {
                     row.a.reqdestroy();
                     row.b.reqdestroy();
+                    row.c.reqdestroy();
                 });
                 rows.clear();
 
@@ -778,8 +665,10 @@ public class AreaPicker extends Window implements Runnable {
                 for (String name : object.keySet().stream().sorted(String::compareToIgnoreCase).collect(Collectors.toList())) {
                     final Button btn = new Button(50, name, () -> acceptTask(name, object.get(name)));
                     final Button cl = new Button(24, "X", () -> removeTask(w, object, name));
-                    rows.add(new Pair<>(btn, cl));
-                    wva.addRow(btn, cl);
+                    final Button exp = new Button(24, "Export", () -> exportTask(name, object.get(name)));
+                    exp.settip("Export task to clipboard");
+                    rows.add(new Trinity<>(btn, cl, exp));
+                    wva.addRow(btn, cl, exp);
                 }
 
                 w.pack();
@@ -808,33 +697,9 @@ public class AreaPicker extends Window implements Runnable {
                 Optional.ofNullable(getparent(GameUI.class)).ifPresent(gui -> {
                     JSONObject object = resources.areaTasksJson;
                     Window w = new Window(Coord.z, "New task");
+
                     Consumer<String> run = name -> {
-                        JSONObject task = new JSONObject();
-                        if (!selectedgoblist.isEmpty()) {
-                            final List<String> gobs = selectedgoblist.stream().filter(ch -> ch.selected).map(ch -> ch.name).collect(Collectors.toList());
-                            if (!gobs.isEmpty()) task.put("Gobs", gobs);
-                        }
-                        if (!selectedflowerlist.isEmpty()) {
-                            final List<String> petals = selectedflowerlist.stream().filter(ch -> ch.selected).map(ch -> ch.name).collect(Collectors.toList());
-                            if (!petals.isEmpty()) task.put("Flower", petals);
-                        }
-                        final int index = collecttriggerdbx.selindex;
-                        if (index != -1) {
-                            task.put("Type", index);
-
-                            if (index == 2 || index == 3) {
-                                if (!selectedstoragelist.isEmpty()) {
-                                    final List<String> storages = selectedstoragelist.stream().filter(ch -> ch.selected).map(ch -> ch.name).collect(Collectors.toList());
-                                    if (!storages.isEmpty()) task.put("Storages", storages);
-                                }
-
-                                if (!selecteditemlist.isEmpty()) {
-                                    final List<String> items = selecteditemlist.stream().filter(ch -> ch.selected).map(ch -> ch.name).collect(Collectors.toList());
-                                    if (!items.isEmpty()) task.put("Items", items);
-                                }
-                            }
-                        }
-
+                        JSONObject task = taskToObject();
                         if (task.length() > 0) {
                             object.put(name, task);
                             configuration.savejson("AreaPickerTasks.json", object);
@@ -844,6 +709,7 @@ public class AreaPicker extends Window implements Runnable {
                             debugLogPing(String.format("Task %s is empty. Not saved", name), Color.RED);
                         }
                     };
+
                     Consumer<String> check = name -> {
                         if (object.has(name)) {
                             Window rw = new Window(Coord.z, "Rewrite task?");
@@ -864,7 +730,6 @@ public class AreaPicker extends Window implements Runnable {
                             gui.adda(rw, gui.sz.div(2), 0.5, 0.5);
                         } else {
                             run.accept(name);
-
                         }
                     };
                     WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
@@ -891,6 +756,27 @@ public class AreaPicker extends Window implements Runnable {
                 });
             }
         };
+        exportbtn = new Button(50, "Export", () -> {
+            try {
+                Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+                cb.setContents(new StringSelection(taskToObject().toString()), null);
+                debugLogPing(String.format("Task is exported to clipboard"), Color.GREEN);
+            } catch (Exception e) {
+                debugLogPing(String.format("Error while exporting"), Color.GREEN);
+                e.printStackTrace();
+            }
+        });
+        exportbtn.settip("Export task to clipboard");
+        importbtn = new Button(50, "Import", () -> {
+            try {
+                if (taskFromObject(new JSONObject((String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor)))) AreaPicker.this.pack();
+                debugLogPing(String.format("Task is imported from clipboard"), Color.GREEN);
+            } catch (Exception e) {
+                debugLogPing(String.format("Error while importing"), Color.GREEN);
+                e.printStackTrace();
+            }
+        });
+        importbtn.settip("Import task from clipboard");
 
         appender.setHorizontalMargin(5);
         appender.setVerticalMargin(2);
@@ -901,13 +787,191 @@ public class AreaPicker extends Window implements Runnable {
         appender.addRow(l4 = new Label("4. Objects to storage"), selectstoragebtn, selectedstoragebtn, areastorageinfolbl);
         appender.addRow(l5 = new Label("5. Items for storage"), selecteditembtn, iteminfolbl);
 
-        appender.addRow(runbtn, loadbtn, savebtn);
+        appender.addRow(runbtn, loadbtn, savebtn, exportbtn, importbtn);
         add(stopbtn, runbtn.c);
         add(pausumebtn, loadbtn.c);
         stopbtn.hide();
         pausumebtn.hide();
 
         pack();
+    }
+
+    private JSONObject taskToObject() {
+        JSONObject task = new JSONObject();
+        if (!selectedgoblist.isEmpty()) {
+            final List<String> gobs = selectedgoblist.stream().filter(ch -> ch.selected).map(ch -> ch.name).collect(Collectors.toList());
+            if (!gobs.isEmpty()) task.put("Gobs", gobs);
+        }
+        if (!selectedflowerlist.isEmpty()) {
+            final List<String> petals = selectedflowerlist.stream().filter(ch -> ch.selected).map(ch -> ch.name).collect(Collectors.toList());
+            if (!petals.isEmpty()) task.put("Flower", petals);
+        }
+        final int index = collecttriggerdbx.selindex;
+        if (index != -1) {
+            task.put("Type", index);
+
+            if (index == 2 || index == 3) {
+                if (!selectedstoragelist.isEmpty()) {
+                    final List<String> storages = selectedstoragelist.stream().filter(ch -> ch.selected).map(ch -> ch.name).collect(Collectors.toList());
+                    if (!storages.isEmpty()) task.put("Storages", storages);
+                }
+
+                if (!selecteditemlist.isEmpty()) {
+                    final List<String> items = selecteditemlist.stream().filter(ch -> ch.selected).map(ch -> ch.name).collect(Collectors.toList());
+                    if (!items.isEmpty()) task.put("Items", items);
+                }
+            }
+        }
+
+        return (task);
+    }
+
+    private boolean taskFromObject(JSONObject object) {
+        boolean dirty = false;
+
+        if (object.has("Gobs")) {
+            final List<String> gobs = new ArrayList<>();
+            Object obj = object.get("Gobs");
+            if (obj instanceof JSONArray) {
+                ((JSONArray) obj).forEach(i -> gobs.add(i.toString()));
+            } if (obj instanceof List) {
+                ((List) obj).forEach(i -> gobs.add(i.toString()));
+            }
+
+            selectedgoblbox.items.forEach(i -> i.selected = false);
+            final List<String> temp = new ArrayList<>();
+            final List<CheckListboxItem> outch = new ArrayList<>();
+            gobs.forEach(i -> {
+                CheckListboxItem ch = selectedgoblist.stream().filter(s -> s.name.equals(i)).findFirst().orElse(null);
+                if (ch == null) {
+                    ch = new CheckListboxItem(i);
+                    selectedgoblist.add(ch);
+                    outch.add(ch);
+                }
+                ch.selected = true;
+            });
+            selectedgoblist.stream().map(i -> i.name).forEach(i -> temp.add(configuration.getShortName(i) + " (" + i.substring(0, i.lastIndexOf('/')) + ")"));
+            selectedgoblbox.items.addAll(outch);
+            selectedgoblbox.resize(calcWidthString(temp), selectedgoblbox.sz.y);
+            selectedgobwnd.pack();
+            selectedgobsearch.settext("");
+            if (selectedgoblbox.items.size() > 0) selectedgobbtn.change(Color.GREEN);
+            else selectedgobbtn.change(Color.RED);
+
+            updatelist("gob");
+            updateinfo("gob");
+            dirty = true;
+        }
+
+        if (object.has("Flower")) {
+            final List<String> petals = new ArrayList<>();
+            Object obj = object.get("Flower");
+            if (obj instanceof JSONArray) {
+                ((JSONArray) obj).forEach(i -> petals.add(i.toString()));
+            } if (obj instanceof List) {
+                ((List) obj).forEach(i -> petals.add(i.toString()));
+            }
+
+            selectedflowerlbox.items.forEach(i -> i.selected = false);
+            final List<String> temp = new ArrayList<>();
+            final List<CheckListboxItem> outch = new ArrayList<>();
+            petals.forEach(i -> {
+                CheckListboxItem ch = selectedflowerlist.stream().filter(s -> s.name.equals(i)).findFirst().orElse(null);
+                if (ch == null) {
+                    ch = new CheckListboxItem(i);
+                    selectedflowerlist.add(ch);
+                    outch.add(ch);
+                }
+                ch.selected = true;
+            });
+            selectedflowerlist.stream().map(i -> i.name).forEach(s -> {
+                String loc = Resource.language.equals("en") ? s : Resource.getLocString(Resource.BUNDLE_FLOWER, s);
+                temp.add(Resource.language.equals("en") ? s : loc.equals(s) ? s : s + " (" + Resource.getLocString(Resource.BUNDLE_FLOWER, s) + ")");
+            });
+            selectedflowerlbox.items.addAll(outch);
+            selectedflowerlbox.items.sort(listboxsort());
+            selectedflowerlbox.resize(calcWidthString(temp), selectedflowerlbox.sz.y);
+            selectedflowerwnd.pack();
+            selectedflowersearch.settext("");
+
+            updateinfo("flower");
+            dirty = true;
+        }
+
+        if (object.has("Type")) {
+            final int type = object.getInt("Type");
+            collecttriggerdbx.change(type);
+
+            if (type == 2 || type == 3) {
+                if (object.has("Storages")) {
+                    final List<String> storages = new ArrayList<>();
+                    Object obj = object.get("Storages");
+                    if (obj instanceof JSONArray) {
+                        ((JSONArray) obj).forEach(i -> storages.add(i.toString()));
+                    } if (obj instanceof List) {
+                        ((List) obj).forEach(i -> storages.add(i.toString()));
+                    }
+
+                    selectedstoragelbox.items.forEach(i -> i.selected = false);
+                    final List<String> temp = new ArrayList<>();
+                    final List<CheckListboxItem> outch = new ArrayList<>();
+                    storages.forEach(i -> {
+                        CheckListboxItem ch = selectedstoragelist.stream().filter(s -> s.name.equals(i)).findFirst().orElse(null);
+                        if (ch == null) {
+                            ch = new CheckListboxItem(i);
+                            selectedstoragelist.add(ch);
+                            outch.add(ch);
+                        }
+                        ch.selected = true;
+                    });
+                    selectedstoragelist.stream().map(i -> i.name).forEach(i -> temp.add(configuration.getShortName(i) + " (" + i.substring(0, i.lastIndexOf('/')) + ")"));
+                    selectedstoragelbox.items.addAll(outch);
+                    selectedstoragelbox.resize(calcWidthString(temp), selectedstoragelbox.sz.y);
+                    selectedstoragewnd.pack();
+                    selectedstoragesearch.settext("");
+                    if (selectedstoragelbox.items.size() > 0) selectedstoragebtn.change(Color.GREEN);
+                    else selectedstoragebtn.change(Color.RED);
+
+                    updatelist("storage");
+                    updateinfo("storage");
+                    dirty = true;
+                }
+
+                if (object.has("Items")) {
+                    final List<String> items = new ArrayList<>();
+                    Object obj = object.get("Items");
+                    if (obj instanceof JSONArray) {
+                        ((JSONArray) obj).forEach(i -> items.add(i.toString()));
+                    } if (obj instanceof List) {
+                        ((List) obj).forEach(i -> items.add(i.toString()));
+                    }
+
+                    selecteditemlbox.items.forEach(i -> i.selected = false);
+                    final List<String> temp = new ArrayList<>();
+                    final List<CheckListboxItem> outch = new ArrayList<>();
+                    items.forEach(i -> {
+                        CheckListboxItem ch = selecteditemlist.stream().filter(s -> s.name.equals(i)).findFirst().orElse(null);
+                        if (ch == null) {
+                            ch = new CheckListboxItem(i);
+                            selecteditemlist.add(ch);
+                            outch.add(ch);
+                        }
+                        ch.selected = true;
+                    });
+                    selecteditemlist.stream().map(i -> i.name).forEach(i -> temp.add(i)); //XXX
+                    selecteditemlbox.items.addAll(outch);
+                    selecteditemlbox.items.sort(listboxsort());
+                    selecteditemlbox.resize(calcWidthString(temp), selecteditemlbox.sz.y);
+                    selecteditemwnd.pack();
+                    selecteditemsearch.settext("");
+
+                    updateinfo("item");
+                    dirty = true;
+                }
+            }
+        }
+
+        return (dirty);
     }
 
     @Override
@@ -919,6 +983,8 @@ public class AreaPicker extends Window implements Runnable {
         runbtn.hide();
         loadbtn.hide();
         savebtn.hide();
+        exportbtn.hide();
+        importbtn.hide();
         stopbtn.show();
         pausumebtn.change("Pause");
         pausumebtn.show();
@@ -936,6 +1002,8 @@ public class AreaPicker extends Window implements Runnable {
         runbtn.show();
         loadbtn.show();
         savebtn.show();
+        exportbtn.show();
+        importbtn.show();
         if (ad) Config.autodrink = true;
         if (af) configuration.autoflower = true;
         block(false);
@@ -1924,9 +1992,9 @@ public class AreaPicker extends Window implements Runnable {
     }
 
     public void pauseCheck() throws InterruptedException {
-        if (paused) {
-            synchronized (pauseLock) {
-                pauseLock.wait();
+        synchronized (pauseLock) {
+            if (paused) {
+                pauseLock.wait(1000);
             }
         }
     }

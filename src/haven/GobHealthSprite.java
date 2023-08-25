@@ -4,9 +4,9 @@ import java.awt.Color;
 
 
 public class GobHealthSprite extends Sprite {
-    private static final Tex hlt0 = Text.renderstroked("25%", new Color(255, 0, 0), Color.BLACK, Text.num13boldFnd).tex();
-    private static final Tex hlt1 = Text.renderstroked("50%", new Color(255, 100, 0), Color.BLACK, Text.num13boldFnd).tex();
-    private static final Tex hlt2 = Text.renderstroked("75%", new Color(255, 255, 0), Color.BLACK, Text.num13boldFnd).tex();
+    private static final Tex hlt0 = PUtils.strokeTex(Text.num12Fnd.render("1/4", new Color(255, 0, 0)));
+    private static final Tex hlt1 = PUtils.strokeTex(Text.num12Fnd.render("2/4", new Color(255, 128, 0)));
+    private static final Tex hlt2 = PUtils.strokeTex(Text.num12Fnd.render("3/4", new Color(255, 255, 0)));
     public int val;
     private Tex tex;
     private static Matrix4f mv = new Matrix4f();

@@ -347,7 +347,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
         private Coord cc;
 
         static {
-            Resource flag = Resource.local().loadwait("gfx/hud/mmap/flag");
+            Resource flag = Resource.remote().loadwait("gfx/hud/mmap/flag");
             flagbg = flag.layer(Resource.imgc, 1);
             flagfg = flag.layer(Resource.imgc, 0);
             flagcc = flag.layer(Resource.negc).cc;
@@ -958,7 +958,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
                     file.export(errors, v, out, MapFile.ExportFilter.all, prog);
                 }
             } catch (IOException e) {
-                e.printStackTrace(ui.cons.out);
+                Debug.printStackTrace(e);
                 gui.error("Unexpected error occurred when exporting map.");
             } catch (InterruptedException e) {
             }
@@ -993,8 +993,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
                 }
             } catch (InterruptedException e) {
             } catch (Exception e) {
-                e.printStackTrace(ui.cons.out);
-                e.printStackTrace();
+                Debug.printStackTrace(e);
                 gui.error("Could not import map: " + e.getMessage());
             }
         }, "Mapfile importer");

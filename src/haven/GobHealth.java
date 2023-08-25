@@ -35,9 +35,9 @@ import static haven.Gob.SEMISTATIC;
  */
 public class GobHealth extends GAttrib {
     private static final Tex[] gobhp = new Tex[]{
-            Text.renderstroked("25%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex(),
-            Text.renderstroked("50%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex(),
-            Text.renderstroked("75%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex()
+            PUtils.strokeTex(Gob.gobhpf.render("1/4", Color.WHITE)),
+            PUtils.strokeTex(Gob.gobhpf.render("2/4", Color.WHITE)),
+            PUtils.strokeTex(Gob.gobhpf.render("3/4", Color.WHITE))
     };
     public int hp;
     Material.Colors fx;

@@ -29,7 +29,7 @@ public class FepMeter extends IMeter {
     public void tick(double dt) {
         super.tick(dt);
         double sum = food.els.stream().mapToDouble(el -> el.a).sum();
-        meterinfo = String.format("%s/%s", Utils.odformat2(sum, 2), Utils.odformat(food.cap, 2));
+        updatemeterinfo(String.format("%s/%s", Utils.odformat2(sum, 2), Utils.odformat(food.cap, 2)));
     }
 
     @Override

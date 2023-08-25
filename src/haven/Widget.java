@@ -229,7 +229,7 @@ public class Widget {
 //                ver = Integer.parseInt(name.substring(p + 1));
                 name = name.substring(0, p);
             }
-            Indir<Resource> res = Resource.local().load(name, ver, 10);
+            Indir<Resource> res = Resource.remote().load(name, ver, 10);
             return (Loading.waitforint(() -> res.get().getcode(Factory.class, true)));
         }
     }
@@ -842,13 +842,11 @@ public class Widget {
                     errorWdgs.add(new ErrorWidget(finalWdg, strErr));
                     if (ui != null)
                         PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
-                    if (ui != null && ui.cons != null && ui.cons.out != null) e.printStackTrace(ui.cons.out);
-                    else e.printStackTrace(System.err);
+                    Debug.printStackTrace(e);
                 } else if (errorWdgs.stream().anyMatch(w -> w.errWdg.equals(finalWdg) && w.repeat())) {
                     if (ui != null)
                         PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
-                    if (ui != null && ui.cons != null && ui.cons.out != null) e.printStackTrace(ui.cons.out);
-                    else e.printStackTrace(System.err);
+                    Debug.printStackTrace(e);
                 }
             }
         }
@@ -883,13 +881,11 @@ public class Widget {
                     errorWdgs.add(new ErrorWidget(finalWdg, strErr));
                     if (ui != null)
                         PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
-                    if (ui != null && ui.cons != null) e.printStackTrace(ui.cons.out);
-                    else e.printStackTrace(System.err);
+                    Debug.printStackTrace(e);
                 } else if (errorWdgs.stream().anyMatch(w -> w.errWdg.equals(finalWdg) && w.repeat())) {
                     if (ui != null)
                         PBotUtils.sysMsg(ui, strErr + " Look at debug channel. Please contact the developer!");
-                    if (ui != null && ui.cons != null) e.printStackTrace(ui.cons.out);
-                    else e.printStackTrace(System.err);
+                    Debug.printStackTrace(e);
                 }
             }
             if (configuration.focusrectangle) {

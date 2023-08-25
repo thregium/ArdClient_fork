@@ -90,12 +90,12 @@ public class configuration {
     public static boolean sqlitecache = Utils.getprefb("sqlitecache", false);
 
     public static String tittleCheck(Session sess) {
-        String name, title;
+        String name = "", title;
 
-        if (sess == null)
+        /*if (sess == null)
             name = "";
         else
-            name = sess.username + " \u2013 ";
+            name = sess.username + " \u2013 ";*/
 
         if (configuration.customTitleBoolean)
             title = configuration.defaultUtilsCustomTitle;
@@ -175,6 +175,8 @@ public class configuration {
     public static int playerbordercolor = Utils.getprefi("playerbordercolor", new Color(192, 0, 0, 128).hashCode());
     public static boolean playerboxsprite = Utils.getprefb("playerbordersprite", false);
     public static int playerboxcolor = Utils.getprefi("playerboxcolor", new Color(192, 0, 0, 128).hashCode());
+    public static boolean gridboxsprite = Utils.getprefb("gridboxsprite", false);
+    public static int gridboxcolor = Utils.getprefi("gridboxcolor", new Color(192, 0, 0, 128).hashCode());
     public static float radiusheight = Utils.getpreff("radiusheight", 0.5f);
     public static int showtreeberryamb = Utils.getprefi("showtreeberryamb", Color.WHITE.hashCode());
     public static int showtreeberrydif = Utils.getprefi("showtreeberrydif", Color.BLUE.hashCode());

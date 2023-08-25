@@ -37,14 +37,13 @@ import java.util.Map;
 import java.util.Random;
 import java.util.WeakHashMap;
 
-
 import static haven.Inventory.invsq;
 
 public class Makewindow extends Widget {
     Widget obtn, cbtn;
-    public static final Text qmodl = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Quality:"));
-    public static final Text tooll = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Tools:"));
-    private static final Tex softcapl = Text.render("Softcap:").tex();
+    public static final Tex qmodl = PUtils.strokeTex(Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Quality:")));
+    public static final Tex tooll = PUtils.strokeTex(Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Tools:")));
+    private static final Tex softcapl = PUtils.strokeTex(Text.render("Softcap:"));
     private Tex softcap;
     public List<Input> inputs = Collections.emptyList();
     public List<SpecWidget> outputs = Collections.emptyList();
@@ -114,26 +113,17 @@ public class Makewindow extends Widget {
 
         public BufferedImage shorttip() {
             List<ItemInfo> info = info();
-            if (info.isEmpty()) {
-                Resource.Tooltip tt = res.get().layer(Resource.tooltip);
-                if (tt == null)
-                    return (null);
-                return (Text.render(tt.t).img);
-            }
-            return (ItemInfo.shorttip(info()));
+            BufferedImage img = null;
+            if (!info.isEmpty())
+                img = ItemInfo.shorttip(info);
+            return (img);
         }
 
         public BufferedImage longtip() {
             List<ItemInfo> info = info();
-            BufferedImage img;
-            if (info.isEmpty()) {
-                Resource.Tooltip tt = res.get().layer(Resource.tooltip);
-                if (tt == null)
-                    return (null);
-                img = Text.render(tt.t).img;
-            } else {
+            BufferedImage img = null;
+            if (!info.isEmpty())
                 img = ItemInfo.longtip(info);
-            }
             Resource.Pagina pg = res.get().layer(Resource.pagina);
             if (pg != null)
                 img = ItemInfo.catimgs(0, img, RichText.render("\n" + pg.text, 200).img);
@@ -162,8 +152,12 @@ public class Makewindow extends Widget {
         }
 
         public List<ItemInfo> info() {
-            if (info == null)
+            if (info == null) {
+                Object[] rawinfo = this.rawinfo;
+                if (rawinfo == null || rawinfo.length == 0)
+                    rawinfo = new Object[]{Loading.waitfor(Resource.remote().load("ui/tt/defn")),};
                 info = ItemInfo.buildinfo(this, rawinfo);
+            }
             return (info);
         }
 
@@ -318,7 +312,7 @@ public class Makewindow extends Widget {
             } else {
                 hoverstart = now;
             }
-            if (now - hoverstart >= 1.0) {
+            if (now - hoverstart < 1.0) {
                 if (stip == null) {
                     BufferedImage tip = spec.shorttip();
                     Tex tt = (tip == null) ? null : new TexI(tip);
@@ -379,7 +373,7 @@ public class Makewindow extends Widget {
 
                             public void choice(MenuGrid.PagButton btn) {
                                 if (btn != null)
-                                    btn.use(new MenuGrid.Interaction(1, ui.modflags()));
+                                    btn.pag.scm.use(btn,false);
                                 destroy();
                             }
                         }.addat(this, cc.add(UI.scale(5, 5))).tick(dt);
@@ -400,7 +394,7 @@ public class Makewindow extends Widget {
         {
             int x = 0;
             if (!qmod.isEmpty()) {
-                g.aimage(qmodl.tex(), new Coord(x, qmy + (qmodsz.y / 2)), 0, 0.5);
+                g.aimage(qmodl, new Coord(x, qmy + (qmodsz.y / 2)), 0, 0.5);
                 x += qmodl.sz().x + UI.scale(5);
                 x = Math.max(x, xoff);
                 qmx = x;
@@ -443,15 +437,15 @@ public class Makewindow extends Widget {
                 }
                 x += UI.scale(25);
 
-                if (Config.showcraftcap && qmodValues.size() > 0) {
+                if (Config.showcraftcap && !qmodValues.isEmpty()) {
                     long product = 1;
                     for (long cap : qmodValues)
                         product *= cap;
 
                     if (product != qModProduct) {
                         qModProduct = product;
-                        softcap = Text.renderstroked("" + (int) Math.pow(product, 1.0 / qmodValues.size()),
-                                Color.WHITE, Color.BLACK, Text.num12boldFnd).tex();
+                        softcap = PUtils.strokeTex(Text.num12boldFnd.render("" + (int) Math.pow(product, 1.0 / qmodValues.size()),
+                                Color.WHITE));
                     }
 
                     Coord sz = softcap.sz();
@@ -462,7 +456,7 @@ public class Makewindow extends Widget {
             }
 
             if (!tools.isEmpty()) {
-                g.aimage(tooll.tex(), new Coord(x, qmy + (qmodsz.y / 2)), 0, 0.5);
+                g.aimage(tooll, new Coord(x, qmy + (qmodsz.y / 2)), 0, 0.5);
                 x += tooll.sz().x + UI.scale(5);
                 x = Math.max(x, xoff);
                 toolx = x;

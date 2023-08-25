@@ -233,7 +233,7 @@ public class Session implements Resource.Resolver {
     }
 
     private int cacheres(String resname) {
-        return cacheres(Resource.local().loadwait(resname));
+        return cacheres(Resource.remote().loadwait(resname));
     }
 
     private int cacheres(Resource res) {

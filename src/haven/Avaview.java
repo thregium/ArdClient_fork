@@ -36,7 +36,7 @@ import java.util.Random;
 
 public class Avaview extends PView {
     private static final String plkey = "PlayerAvaview";
-    public static final Tex missing = Resource.loadtex("gfx/hud/equip/missing");
+    public static final Tex missing = Resource.remote().loadwait("gfx/hud/equip/missing").layer(Resource.imgc).tex();
     public static final Coord dasz = missing.sz();
     public Color color = Color.WHITE;
     public FColor clearcolor = FColor.BLACK;

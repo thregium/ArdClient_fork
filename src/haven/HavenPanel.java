@@ -527,7 +527,7 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
                     tt = (Tex) o;
             } else if (tooltip instanceof String) {
                 if (((String) tooltip).length() > 0)
-                    tt = (Text.render((String) tooltip)).tex();
+                    tt = RichText.render((String) tooltip, -1).tex();
             } else if (tooltip instanceof BufferedImage) {
                 tt = new TexI((BufferedImage) tooltip);
             }

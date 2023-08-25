@@ -176,7 +176,7 @@ public class Config {
     public static double sfxwhistlevol = Utils.getprefd("sfxwhistlevol", 1.0);
     public static double sfxdingvol = Utils.getprefd("sfxdingvol", 1.0);
     public static boolean showcraftcap = Utils.getprefb("showcraftcap", true);
-    public static boolean showgobhp = Utils.getprefb("showgobhp", false);
+    public static boolean showgobhp = Utils.getprefb("showgobhp", true);
     public static boolean showgobquality = Utils.getprefb("showgobquality", true);
     public static boolean showplantgrowstage = Utils.getprefb("showplantgrowstage", false);
     public static boolean showfreshcropstage = Utils.getprefb("showfreshcropstage", false);

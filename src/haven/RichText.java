@@ -400,7 +400,7 @@ public class RichText extends Text {
         }
 
         public Parser(Map<? extends Attribute, ?> defattrs) {
-            this(Resource.local(), defattrs);
+            this(Resource.remote(), defattrs);
         }
 
         public Parser(Resource.Pool respool, Object... attrs) {
@@ -408,7 +408,7 @@ public class RichText extends Text {
         }
 
         public Parser(Object... attrs) {
-            this(Resource.local(), attrs);
+            this(Resource.remote(), attrs);
         }
 
         public static class PState {
@@ -810,7 +810,7 @@ public class RichText extends Text {
             }
             Foundry fnd = new Foundry();
             fnd.aa = aa;
-            Resource res = Resource.local().loadwait(opt.rest[0]);
+            Resource res = Resource.remote().loadwait(opt.rest[0]);
             Resource.Pagina p = res.layer(Resource.pagina);
             if (p == null)
                 throw (new Exception("No pagina in " + res + ", loaded from " + res.source));

@@ -205,6 +205,7 @@ public class dev {
     }
 
     public static void checkFileVersion(String resname, int curver) {
+        if (true) return;
         try {
             Resource res = Resource.remote().loadwait(resname);
 

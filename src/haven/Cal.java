@@ -26,22 +26,24 @@
 
 package haven;
 
+import java.awt.Color;
+
 import static java.lang.Math.PI;
 
 public class Cal extends Widget {
     public static final double hbr = 20;
-    static final Tex bg = Resource.loadtex("gfx/hud/calendar/glass");
+    static final Tex bg = Resource.remote().loadwait("gfx/hud/calendar/glass").layer(Resource.imgc).tex();
     static final Tex[] dlnd = new Tex[4];
     static final Tex[] nlnd = new Tex[4];
-    static final Resource.Image dsky = Resource.loadrimg("gfx/hud/calendar/daysky");
-    static final Resource.Image nsky = Resource.loadrimg("gfx/hud/calendar/nightsky");
-    static final Resource.Anim sun = Resource.local().loadwait("gfx/hud/calendar/sun").layer(Resource.animc);
-    static final Resource.Anim moon = Resource.local().loadwait("gfx/hud/calendar/moon").layer(Resource.animc);
+    static final Resource.Image dsky = Resource.remote().loadwait("gfx/hud/calendar/daysky").layer(Resource.imgc);
+    static final Resource.Image nsky = Resource.remote().loadwait("gfx/hud/calendar/nightsky").layer(Resource.imgc);
+    static final Resource.Anim sun = Resource.remote().loadwait("gfx/hud/calendar/sun").layer(Resource.animc);
+    static final Resource.Anim moon = Resource.remote().loadwait("gfx/hud/calendar/moon").layer(Resource.animc);
 
     static {
         for (int i = 0; i < dlnd.length; i++) {
-            dlnd[i] = Resource.loadtex(String.format("gfx/hud/calendar/dayscape-%d", i));
-            nlnd[i] = Resource.loadtex(String.format("gfx/hud/calendar/nightscape-%d", i));
+            dlnd[i] = Resource.remote().loadwait(String.format("gfx/hud/calendar/dayscape-%d", i)).layer(Resource.imgc).tex();
+            nlnd[i] = Resource.remote().loadwait(String.format("gfx/hud/calendar/nightscape-%d", i)).layer(Resource.imgc).tex();
         }
     }
 
@@ -64,8 +66,10 @@ public class Cal extends Widget {
         g.image(moon, mc);
         g.chcolor();
         g.image(sun, sc);
+        g.chcolor(255, 255, 255, 150);
         g.image((a.night ? nlnd : dlnd)[a.is], Coord.z);
         g.image(bg, Coord.z);
+        g.chcolor();
     }
 
     public boolean checkhit(Coord c) {

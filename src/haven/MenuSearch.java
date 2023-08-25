@@ -31,7 +31,7 @@ public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pa
 
             protected void changed() {
                 super.changed();
-                refilter();
+                dirty = true;
             }
 
             public boolean type(char c, KeyEvent ev) {
@@ -107,7 +107,23 @@ public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pa
             ui.gui.menu.paginae.removeListener(this);
     }
 
+    private boolean dirty = false;
+
+    @Override
+    public void tick(final double dt) {
+        super.tick(dt);
+        if (dirty) {
+            dirty = false;
+            try {
+                refilter();
+            } catch (Loading l) {
+                dirty = true;
+            }
+        }
+    }
+
     private void refilter() {
+        list.sb.reset();
         list.clear();
         /*for (MenuGrid.Pagina p : all) {
             if (p.res.get().layer(Resource.action).name.toLowerCase().contains(entry.text().toLowerCase()))
@@ -149,19 +165,19 @@ public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pa
     public void init(Collection<MenuGrid.Pagina> base) {
         for (final MenuGrid.Pagina pag : base) {
             all.add(pag);
-            if (isIncluded(pag)) {
+            /*if (isIncluded(pag)) {
                 list.add(pag);
-            }
+            }*/
         }
-        refilter();
+        dirty = true;
     }
 
     @Override
     public void added(MenuGrid.Pagina item) {
         all.add(item);
-        if (isIncluded(item)) {
+        /*if (isIncluded(item)) {
             list.add(item);
-        }
+        }*/
     }
 
     @Override
@@ -171,9 +187,9 @@ public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pa
     @Override
     public void remove(MenuGrid.Pagina item) {
         all.remove(item);
-        if (isIncluded(item)) {
+        /*if (isIncluded(item)) {
             list.remove(item);
-        }
+        }*/
     }
 
     private class ItemComparator implements Comparator<ActList.ActItem> {

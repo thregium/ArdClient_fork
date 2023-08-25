@@ -365,7 +365,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
                         if (configuration.customTitleBoolean)
                             setTitle(configuration.tittleCheck(sess));
                         else
-                            setTitle(sess.username + " \u2013 " + TITLE);
+                            setTitle(/*sess.username + " \u2013 " + */TITLE);
                     }
                     sess = fun.run(lui);
                     lui.root.reqdestroy();
@@ -395,12 +395,12 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
             Resource.setcache(cache);
         if (Config.resurl != null)
             Resource.addurl(Config.resurl);
-        if (cache != null) {
+        /*if (cache != null) {
             try {
                 Resource.loadlist(Resource.remote(), cache.fetch("tmp/allused"), -10);
             } catch (IOException e) {
             }
-        }
+        }*/
         if (!Config.nopreload) {
             try {
                 InputStream pls;

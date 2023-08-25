@@ -54,10 +54,12 @@ public class Text {
     public static final Foundry num8Fnd;
     public static final Foundry num10Fnd;
     public static final Foundry num11Fnd;
+    public static final Foundry num12Fnd;
     public static final Foundry num12boldFnd;
     public static final Foundry num13boldFnd;
     public static final Foundry num14boldFnd;
     public static final Foundry num20Fnd;
+    public static final Foundry num20boldFnd;
     public static final Foundry delfnd;
     public static final Foundry delfnd2;
     public static final Foundry slotFnd;
@@ -138,16 +140,18 @@ public class Text {
         dfont = sans = new Font(Text.cfg.font.get("sans"), Font.PLAIN, 12);
         serif = new Font(Text.cfg.font.get("serif"), Font.PLAIN, 12);
         mono = new Font("Monospace", Font.PLAIN, 12);
-        fraktur = Resource.local().loadwait("ui/fraktur").layer(Resource.Font.class).font;
+        fraktur = Resource.remote().loadwait("ui/fraktur").layer(Resource.Font.class).font;
         num20Fnd = new Foundry(serif, 20);
 
         latin = new Font("Dialog", Font.PLAIN, 10);
         num8Fnd = new Text.Foundry(latin, 8);
         num10Fnd = new Foundry(latin);
         num11Fnd = new Text.Foundry(latin, 11);
+        num12Fnd = new Text.Foundry(latin, 12);
         num12boldFnd = new Text.Foundry(latin.deriveFont(Font.BOLD), 12).aa(true);
         num13boldFnd = new Text.Foundry(latin.deriveFont(Font.BOLD), 12).aa(true);
         num14boldFnd = new Text.Foundry(latin.deriveFont(Font.BOLD), 14).aa(true);
+        num20boldFnd = new Text.Foundry(latin.deriveFont(Font.BOLD), 20).aa(true);
 
         delfnd = new Text.Foundry(latin.deriveFont(Font.BOLD), 16);
         delfnd2 = new Text.Foundry(serif.deriveFont(Font.BOLD), 18);

@@ -128,6 +128,10 @@ public class Scrollbar extends Widget {
         }
     }
 
+    public void reset() {
+        ch(min);
+    }
+
     public void resize(int h) {
         super.resize(new Coord(sflarp.sz().x, h));
     }

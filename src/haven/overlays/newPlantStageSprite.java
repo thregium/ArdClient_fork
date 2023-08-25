@@ -7,6 +7,7 @@ import haven.GLState;
 import haven.GOut;
 import haven.Location;
 import haven.Matrix4f;
+import haven.PUtils;
 import haven.PView;
 import haven.Projection;
 import haven.RenderList;
@@ -31,27 +32,27 @@ public class newPlantStageSprite extends Sprite {
 
     public static Map<String, Tex> cachedTex = new HashMap<>();
 
-    public static Tex getCachedTex(String text, Color color, Color bgcol) {
+    public static Tex getCachedTex(String text, Color color) {
         JSONObject jo = new JSONObject();
         jo.put("name", text);
         jo.put("col", color.hashCode());
-        jo.put("border", bgcol.hashCode());
+//        jo.put("border", bgcol.hashCode());
 
         Tex tex = cachedTex.get(jo.toString());
         if (tex == null) {
-            tex = Text.renderstroked(text, color, bgcol, Text.num12boldFnd).tex();
+            tex = PUtils.strokeTex(Text.num11Fnd.render(text, color));
             cachedTex.put(jo.toString(), tex);
         }
         return (tex);
     }
 
     Tex stg(int stg, int stgmax, Color clr) {
-        return getCachedTex(String.format("%d/%d", stg, stgmax), clr, Color.BLACK);
+        return getCachedTex(String.format("%d/%d", stg, stgmax), clr);
     }
 
-    Tex stg(int stg, int stgmax, Color clr, Color border) {
-        return getCachedTex(String.format("%d/%d", stg, stgmax), clr, border);
-    }
+//    Tex stg(int stg, int stgmax, Color clr, Color border) {
+//        return getCachedTex(String.format("%d/%d", stg, stgmax), clr, border);
+//    }
 
     public newPlantStageSprite(int stg, int stgmax, boolean multistg, boolean offsetmultisg) {
         super(null, null);
@@ -92,7 +93,7 @@ public class newPlantStageSprite extends Sprite {
         else if (offsetmultisg && stg == stgmax - 2)
             tex = stg(truestg, truestgmax, new Color(255, 100, 50));
         else if (stg == stgmax)
-            tex = stg(truestg, truestgmax, Color.green, Color.gray);
+            tex = stg(truestg, truestgmax, Color.green);
         else {
             if (Config.showfreshcropstage)
                 tex = stg(truestg, truestgmax, Color.red);

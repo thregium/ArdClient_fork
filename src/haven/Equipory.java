@@ -39,7 +39,7 @@ import static haven.DefSettings.SYMMETRICOUTLINES;
 import static haven.Inventory.invsq;
 
 public class Equipory extends Widget implements DTarget {
-    private static final Tex bg = Resource.loadtex("gfx/hud/equip/bg");
+    private static final Tex bg = Resource.remote().loadwait("gfx/hud/equip/bg").layer(Resource.imgc).tex();
     private static final int rx = invsq.sz().x + bg.sz().x;
     private static final int yo = Inventory.sqsz.y;
     private static final int acx = invsq.sz().x + bg.sz().x / 2;
@@ -82,7 +82,7 @@ public class Equipory extends Widget implements DTarget {
                 isz.y = ec.y + invsq.sz().y;
         }
         for (int i = 0; i < ebgs.length; i++) {
-            Resource bgres = Resource.local().loadwait("gfx/hud/equip/ep" + i);
+            Resource bgres = Resource.remote().loadwait("gfx/hud/equip/ep" + i);
             Resource.Image img = bgres.layer(Resource.imgc);
             if (img != null) {
                 ebgs[i] = bgres.layer(Resource.imgc).tex();

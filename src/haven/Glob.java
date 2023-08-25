@@ -101,11 +101,11 @@ public class Glob {
     public String rservertime;
     public String bservertime;
     public final List<String> weatherinfo = Collections.synchronizedList(new ArrayList<>());
-    public final AtomicReference<Pair<String, Tex>> mservertimetex = new AtomicReference<>(new Pair<>(null, null));
-    public final AtomicReference<Pair<String, Tex>> lservertimetex = new AtomicReference<>(new Pair<>(null, null));
-    public final AtomicReference<Pair<String, Tex>> rservertimetex = new AtomicReference<>(new Pair<>(null, null));
-    public final AtomicReference<Pair<String, Tex>> bservertimetex = new AtomicReference<>(new Pair<>(null, null));
-    public final AtomicReference<Pair<String, Tex>> weathertimetex = new AtomicReference<>(new Pair<>(null, null));
+    public final AtomicReference<Text> mservertimetex = new AtomicReference<>(null);
+    public final AtomicReference<Text> lservertimetex = new AtomicReference<>(null);
+    public final AtomicReference<Text> rservertimetex = new AtomicReference<>(null);
+    public final AtomicReference<Text> bservertimetex = new AtomicReference<>(null);
+    public final AtomicReference<Text> weathertimetex = new AtomicReference<>(null);
     public boolean night = false; //true is night
     public final Map<Long, DamageText.Numbers> gobmap = new ConcurrentHashMap<>();
 
@@ -371,7 +371,7 @@ public class Glob {
             phaseOfMoon = mPhaseNames[mp] + " Moon";
         }
 
-        mservertime = Resource.getLocString(Resource.BUNDLE_LABEL, "Day") + String.format(" %d, %02d:%02d:%02d", day, hours, mins, seconds);
+        mservertime = Resource.getLocString(Resource.BUNDLE_LABEL, "Day") + String.format(" %d, %02d:%02d:%02d", day, hours, mins, seconds) + (night ? ", Night" : ", Day");
         lservertime = String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "%s"), dayOfMonth);
         rservertime = Resource.getLocString(Resource.BUNDLE_LABEL, phaseOfMoon);
         if (secintoday >= dewyladysmantletimemin && secintoday <= dewyladysmantletimemax)
@@ -408,17 +408,18 @@ public class Glob {
                 tempw = new ArrayList<>(weatherinfo);
             }
 
-            infoUpdate(weathertimetex, String.join("", tempw.toArray(new String[0])), () -> new TexI(ItemInfo.catimgs(0, true, tempw.stream().map(in -> Text.renderstroked(in).img).toArray(BufferedImage[]::new))));
+            String text = String.join("", tempw.toArray(new String[0]));
+            infoUpdate(weathertimetex, text, () -> Text.create(text, ItemInfo.catimgs(0, true, tempw.stream().map(in -> Text.renderstroked(in).img).toArray(BufferedImage[]::new))));
         }
     }
 
-    private void infoUpdate(AtomicReference<Pair<String, Tex>> t, String text) {
-        infoUpdate(t, text, () -> Text.renderstroked(text).tex());
+    private void infoUpdate(AtomicReference<Text> t, String text) {
+        infoUpdate(t, text, () -> Text.renderstroked(text));
     }
 
-    private void infoUpdate(AtomicReference<Pair<String, Tex>> t, String text, Supplier<Tex> getter) {
-        if (text != null && (t.get().a == null || !t.get().a.equals(text)))
-            t.set(new Pair<>(text, text.isEmpty() ? null : getter.get()));
+    private void infoUpdate(AtomicReference<Text> t, String text, Supplier<Text> getter) {
+        if (text != null && (t.get() == null || !t.get().text.equals(text)))
+            t.set(text.isEmpty() ? null : getter.get());
     }
 
     public void blob(Message msg) {
@@ -442,6 +443,7 @@ public class Glob {
                 double ym = (n < a.length) ? ((Number) a[n++]).doubleValue() : 0.5;
                 double md = (n < a.length) ? ((Number) a[n++]).doubleValue() : 0.5;
                 ast = new Astronomy(dt, mp, yt, night, mc, is, sp, sd, years, ym, md);
+                dev.simpleLog(String.format("Glob Astronomy: day:%s month:%s year:%s night:%s mc:%s season:%s sp:%s sd:%s years:%s ym:%s md:%s", dt, mp, yt, night, mc, is, sp, sd, years, ym, md));
             } else if (t == "light") {
                 synchronized (this) {
                     tlightamb = (Color) a[n++];

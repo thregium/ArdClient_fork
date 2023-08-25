@@ -897,4 +897,13 @@ public class Inventory extends Widget implements DTarget {
             return Objects.hash(wItem);
         }
     }
+
+    public void openStacks() {
+        for (Widget wdg = child; wdg != null; wdg = wdg.next) {
+            if (wdg instanceof WItem) {
+                WItem w = (WItem) wdg;
+                if (w.item.contents != null) w.item.showcontwnd(true);
+            }
+        }
+    }
 }

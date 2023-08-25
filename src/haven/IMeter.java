@@ -36,16 +36,16 @@ import java.util.regex.Pattern;
 
 public class IMeter extends MovableWidget {
     private static final Resource ponysfx = Resource.local().loadwait("sfx/alarmpony");
-    private static final Pattern hppat = Pattern.compile("Health: ([0-9]+)/([0-9]+)/([0-9]+)");
-    private static final Pattern stampat = Pattern.compile("Stamina: ([0-9]+)");
-    private static final Pattern energypat = Pattern.compile("Energy: ([0-9]+)");
+    private static final Pattern hppat = Pattern.compile("Health: (\\d+)/(\\d+)/(\\d+)");
+    private static final Pattern stampat = Pattern.compile("Stamina: (\\d+)");
+    private static final Pattern energypat = Pattern.compile("Energy: (\\d+)");
     static Coord off = new Coord(22, 7);
     static Coord fsz = new Coord(101, 24);
     static Coord msz = new Coord(75, 10);
     Indir<Resource> bg;
     List<Meter> meters;
     private boolean ponyalarm = true;
-    String meterinfo = "";
+    Text meterinfo = null;
 
     @RName("im")
     public static class $_ implements Factory {
@@ -112,7 +112,9 @@ public class IMeter extends MovableWidget {
         drawMeters(g);
         g.chcolor();
         if (Config.showmetertext) {
-            if (!meterinfo.isEmpty()) g.atextstroked(meterinfo, sz.div(2).add(10 * this.scale, -1 * this.scale), 0.5, 0.5, Color.WHITE, Color.BLACK, new Text.Foundry(Text.latin, (int) (10 * this.scale)));
+            Text meterinfo = this.meterinfo;
+            if (meterinfo != null)
+                g.aimage(meterinfo.tex(), sz.div(2).add(10 * this.scale, -1 * this.scale), 0.5, 0.5);
         }
         try {
             g.image(tex(), Coord.z);
@@ -146,34 +148,49 @@ public class IMeter extends MovableWidget {
             if (msg.equals("tip")) {
                 final String tt = (String) args[0];
                 Matcher matcher = hppat.matcher(tt);
+                String meterinfo = null;
                 if (matcher.find()) {
                     ui.sess.details.shp = Integer.parseInt(matcher.group(1));
                     ui.sess.details.hhp = Integer.parseInt(matcher.group(2));
                     ui.sess.details.mhp = Integer.parseInt(matcher.group(3));
+                    if (ui.sess.details.shp < ui.sess.details.hhp && ui.sess.details.hhp < ui.sess.details.mhp)
+                        meterinfo = ui.sess.details.shp + "/" + ui.sess.details.hhp + "/" + ui.sess.details.mhp;
+                    else if ((ui.sess.details.shp < ui.sess.details.hhp && ui.sess.details.hhp == ui.sess.details.mhp) || (ui.sess.details.shp == ui.sess.details.hhp && ui.sess.details.hhp < ui.sess.details.mhp))
+                        meterinfo = ui.sess.details.shp + "/" + ui.sess.details.mhp;
+                    else if (ui.sess.details.shp == ui.sess.details.hhp && ui.sess.details.hhp == ui.sess.details.mhp)
+                        meterinfo = ui.sess.details.mhp + "";
                 } else {
                     matcher = stampat.matcher(tt);
                     if (matcher.find()) {
                         ui.sess.details.stam = Integer.parseInt(matcher.group(1));
+                        meterinfo = ui.sess.details.stam + "%";
                     } else {
                         matcher = energypat.matcher(tt);
                         if (matcher.find()) {
                             ui.sess.details.energy = Integer.parseInt(matcher.group(1));
+                            meterinfo = ui.sess.details.energy + "%";
+                        } else {
+                            meterinfo = tt;
+                            if (meterinfo.contains("ow")) {
+                                meterinfo = tt.split(" ")[2];
+                            } else {
+                                meterinfo = tt.split(" ")[1];
+                            }
+                            if (meterinfo.contains("/")) {
+                                String[] hps = meterinfo.split("/");
+                                meterinfo = hps[0] + "/" + hps[hps.length - 1];
+                            }
                         }
                     }
                 }
-                meterinfo = tt;
-                if (meterinfo.contains("ow")) {
-                    meterinfo = args[0].toString().split(" ")[2];
-                } else {
-                    meterinfo = args[0].toString().split(" ")[1];
-                }
-                if (meterinfo.contains("/")) {
-                    String[] hps = meterinfo.split("/");
-                    meterinfo = hps[0] + "/" + hps[hps.length - 1];
-                }
+                if (meterinfo == null)
+                    meterinfo = tt;
+                updatemeterinfo(meterinfo);
             }
         }
     }
+
+    private static final Text.Foundry fnd = new Text.Foundry(Text.latin);
 
     public boolean mousewheel(Coord coord, int amount) {
         if (ui.modflags() == (UI.MOD_CTRL | UI.MOD_META)) {
@@ -183,8 +200,19 @@ public class IMeter extends MovableWidget {
 
             resize(fsz.mul(this.scale));
             move(c.sub(sz.sub(fsz.mul(lastscale)).div(2)));
+            Text meterinfo = this.meterinfo;
+            if (meterinfo != null)
+                updatemeterinfo(meterinfo.text);
             return (true);
         }
         return (super.mousewheel(c, amount));
+    }
+
+    protected void updatemeterinfo(String str) {
+        if (str == null || str.isEmpty()) return;
+        Text meterinfo = this.meterinfo;
+        if (meterinfo == null || !meterinfo.text.equals(str)) {
+            this.meterinfo = Text.create(str, PUtils.strokeImg(new Text.Foundry(Text.latin, (int) (10 * this.scale)).render(str)));
+        }
     }
 }

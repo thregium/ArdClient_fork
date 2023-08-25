@@ -14,6 +14,7 @@ import haven.Label;
 import haven.Loading;
 import haven.Message;
 import haven.MessageBuf;
+import haven.PUtils;
 import haven.ResData;
 import haven.Resource;
 import haven.Resource.Pagina;
@@ -40,8 +41,8 @@ import static haven.Inventory.sqsz;
 
 // ui/barterstand
 public class Shopbox extends Widget implements SpriteOwner, Owner {
-    public static final Text any = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Any"));
-    public static final Text qlbl = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Quality:"));
+    public static final Tex any = PUtils.strokeTex(Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Any")));
+    public static final Tex qlbl = PUtils.strokeTex(Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Quality:")));
     public static final Tex bg = Resource.loadtex("ui/shopbox");
     public static final Coord itemc = new Coord(5, 5);
     public static final Coord buyc = new Coord(5, 43);
@@ -53,14 +54,14 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
     public static final Coord bpipec = new Coord(280, 66);
     public ResData res;
     public Spec price;
-    public Text num;
+    public Tex num;
     public int pnum;
     public int pq;
-    private Text pnumt;
-    private Text pqt;
+    private Tex pnumt;
+    private Tex pqt;
     private GSprite spr;
     private Object[] info = new Object[0];
-    private Text quality;
+    private Tex quality;
     private Button spipe;
     private Button bpipe;
     private Button bbtn, bbtn100;
@@ -122,12 +123,12 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
                 }
 
                 if (num != null) {
-                    g.aimage(num.tex(), itemc.add(invsq.sz()).add(5, 0), 0, 2.3);
+                    g.aimage(num, itemc.add(invsq.sz()).add(5, 0), 0, 2.3);
                 }
 
                 if (quality != null) {
-                    g.aimage(qlbl.tex(), itemc.add(invsq.sz()).add(5, 0), 0, 1);
-                    g.aimage(quality.tex(), itemc.add(invsq.sz()).add(8 + qlbl.tex().sz().x, 0), 0, 1);
+                    g.aimage(qlbl, itemc.add(invsq.sz()).add(5, 0), 0, 1);
+                    g.aimage(quality, itemc.add(invsq.sz()).add(8 + qlbl.sz().x, 0), 0, 1);
                 }
             }
         }
@@ -144,12 +145,12 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
             }
 
             if (!admin && pnumt != null) {
-                g.aimage(pnumt.tex(), pricec.add(invsq.sz()), 0, 1);
+                g.aimage(pnumt, pricec.add(invsq.sz()), 0, 1);
             }
 
             if (!admin && pqt != null) {
-                g.aimage(qlbl.tex(), qualc, 0, 1);
-                g.aimage(pqt.tex(), qualc.add(qlbl.tex().sz().x + 4, 0), 0, 1);
+                g.aimage(qlbl, qualc, 0, 1);
+                g.aimage(pqt, qualc.add(qlbl.sz().x + 4, 0), 0, 1);
             }
         }
 
@@ -161,7 +162,7 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
             cinfo = ItemInfo.buildinfo(this, info);
             QBuff qb = quality();
             if (qb != null)
-                quality = Text.render((int) qb.q + "");
+                quality = PUtils.strokeTex(Text.render((int) qb.q + ""));
         }
         return (cinfo);
     }
@@ -252,7 +253,7 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
 
     private static Integer parsenum(TextEntry e) {
         try {
-            if (e.buf.line().equals(""))
+            if (e.buf.line().isEmpty())
                 return (0);
             return (Integer.parseInt(e.buf.line()));
         } catch (NumberFormatException exc) {
@@ -340,10 +341,10 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
 
     }
 
-    private static Text rnum(String fmt, int n) {
+    private static Tex rnum(String fmt, int n) {
         if (n < 1)
             return (null);
-        return (Text.render(String.format(fmt, n)));
+        return (PUtils.strokeTex(Text.render(String.format(fmt, n))));
     }
 
     public void uimsg(String name, Object... args) {
@@ -365,7 +366,7 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
             fulltip = null;
         } else if (name == "n") {
             int num = (Integer) args[0];
-            this.num = Text.render(String.format("%d left", num));
+            this.num = PUtils.strokeTex(Text.render(String.format("%d left", num)));
         } else if (name == "price") {
             int a = 0;
             if (args[a] == null) {

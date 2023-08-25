@@ -462,7 +462,7 @@ public class Resource implements Serializable {
     }
 
     public static class Pool {
-        public int nloaders = 2;
+        public int nloaders = 16;
         private final Collection<Loader> loaders = new LinkedList<>();
         private final List<ResSource> sources = new LinkedList<>();
         private final Map<String, Resource> cache = new CacheMap<>();
@@ -1482,7 +1482,7 @@ public class Resource implements Serializable {
                     try {
                         n = pool.load(pr);
                     } catch (Exception ex) {
-                        n = Resource.local().load("gfx/invobjs/missing");
+                        n = Resource.remote().load("gfx/invobjs/missing");
                     }
                 }
                 parent = n;
@@ -2275,15 +2275,15 @@ public class Resource implements Serializable {
     }
 
     public static Image loadrimg(String name) {
-        return (local().loadwait(name).layer(imgc));
+        return (remote().loadwait(name).layer(imgc));
     }
 
     public static BufferedImage loadimg(String name) {
-        return (local().loadwait(name).layer(imgc).scaled());
+        return (remote().loadwait(name).layer(imgc).scaled());
     }
 
     public static BufferedImage loadimg(final String name, final int id) {
-        final Resource res = local().loadwait(name);
+        final Resource res = remote().loadwait(name);
         final Collection<Image> imgs = res.layers(imgc);
         for (Image img : imgs) {
             if (img.id == id) {
@@ -2294,11 +2294,11 @@ public class Resource implements Serializable {
     }
 
     public static BufferedImage loadsimg(String name) {
-        return (local().loadwait(name).layer(imgc).scaled());
+        return (remote().loadwait(name).layer(imgc).scaled());
     }
 
     public static Tex loadtex(final String name, final int id) {
-        final Resource res = local().loadwait(name);
+        final Resource res = remote().loadwait(name);
         final Collection<Image> imgs = res.layers(imgc);
         for (Image img : imgs) {
             if (img.id == id) {
@@ -2309,11 +2309,11 @@ public class Resource implements Serializable {
     }
 
     public static Tex loadtex(String name) {
-        return (local().loadwait(name).layer(imgc).tex());
+        return (remote().loadwait(name).layer(imgc).tex());
     }
 
     public static Tex loadtex(Resource res) {
-        return (local().loadwaited(res).layer(imgc).tex());
+        return (remote().loadwaited(res).layer(imgc).tex());
     }
 
     public String toString() {
@@ -2670,10 +2670,11 @@ public class Resource implements Serializable {
             super(null, "f:" + name, -1, ver);
             this.realName = name;
 
-            layers.add(Resource.local().loadwait("gfx/invobjs/missing").layer(imgc));
+            layers.add(Resource.remote().loadwait("gfx/invobjs/missing").layer(imgc));
             MessageBuf tooltip = new MessageBuf();
             tooltip.addstring("f:" + realName);
             layers.add(new Tooltip(new MessageBuf(tooltip.wbuf)));
+            dev.simpleLog("Fake resource: " + name + " v" + ver);
         }
 
         public FakeResource(Resource res) {

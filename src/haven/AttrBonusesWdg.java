@@ -117,6 +117,7 @@ public class AttrBonusesWdg extends Widget implements ItemInfo.Owner {
                     .map(ItemInfo::getBonuses)
                     .map(Map::entrySet)
                     .flatMap(Collection::stream)
+                    .filter(e -> e.getValue() > 0)
                     .collect(
                             Collectors.toMap(
                                     Entry::getKey,

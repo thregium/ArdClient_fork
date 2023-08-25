@@ -53,7 +53,7 @@ public abstract class ConsoleHost extends Widget implements ReadLine.Owner {
             String msg = e.getMessage();
             if (msg == null)
                 msg = e.toString();
-            ui.cons.out.println(msg);
+            Debug.println(msg);
             error(msg);
         }
         cancelcmd();

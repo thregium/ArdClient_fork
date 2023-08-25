@@ -637,7 +637,7 @@ public class Fightsess extends Widget {
         pho = (int) (pl.sczu.mul(20f).y) - 20;
     }
 
-    private static final Resource tgtfx = Resource.local().loadwait("gfx/hud/combat/trgtarw");
+    private static final Resource tgtfx = Resource.remote().loadwait("gfx/hud/combat/trgtarw");
     private final Map<Pair<Long, Resource>, Sprite> cfx = new CacheMap<Pair<Long, Resource>, Sprite>();
     private final Collection<Sprite> curfx = new ArrayList<Sprite>();
 

@@ -5,7 +5,8 @@ import java.awt.Color;
 
 public class TreeStageSprite extends Sprite {
     private static final Tex[] treestg = new Tex[100];
-    private static final Color stagecolor = new Color(120, 255, 255);
+    private static final Color stagecolor = new Color(115, 255, 25);
+    private static final Tex growth = Resource.local().loadwait("gfx/hud/rosters/growth").layer(Resource.imgc).tex();
     public int val;
     private Tex tex;
     private static Matrix4f mv = new Matrix4f();
@@ -16,7 +17,7 @@ public class TreeStageSprite extends Sprite {
 
     static {
         for (int i = 0; i < 100; i++) {
-            treestg[i] = Text.renderstroked(i + "", stagecolor, Color.BLACK, Text.num12boldFnd).tex();
+            treestg[i] = PUtils.strokeTex(Text.num12boldFnd.render(i + "%", stagecolor));
         }
     }
 
@@ -28,10 +29,12 @@ public class TreeStageSprite extends Sprite {
     public void draw(GOut g) {
         float[] c = mv.load(camp.fin(Matrix4f.id)).mul1(loc.fin(Matrix4f.id)).homoc();
         Coord sc = proj.get2dCoord(c, wndsz);
-        sc.x -= 8;
-        sc.y -= 10;
-        if (tex != null)
-            g.image(tex, sc);
+        if (tex != null) {
+            sc.x -= (growth.sz().x + tex.sz().x) / 2;;
+            sc.y -= 10;
+            g.image(growth, sc.add(0, Math.max(growth.sz().y, tex.sz().y) / 2 - growth.sz().y / 2));
+            g.image(tex, sc.add(growth.sz().x, Math.max(growth.sz().y, tex.sz().y) / 2 - tex.sz().y / 2));
+        }
     }
 
     public boolean setup(RenderList rl) {

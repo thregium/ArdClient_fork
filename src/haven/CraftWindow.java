@@ -23,7 +23,7 @@ public class CraftWindow extends GameUI.Hidewnd {
                 Pagina lastCraft = ui.gui.menu.lastCraft;
                 Pagina pagina = button.tag;
                 if (pagina != lastCraft) {
-                    pagina.button().use();
+                    pagina.scm.use(pagina.button(), false);
                 }
                 ui.gui.menu.lastCraft = null;
             }

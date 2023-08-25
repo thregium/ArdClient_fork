@@ -232,7 +232,7 @@ public class BeltWnd extends MovableWidget {
                 }
             } else if (pag != null) {
                 MenuGrid.Interaction iact = new MenuGrid.Interaction(1, ui.modflags());
-                pag.use(iact);
+                pag.scm.use(pag.button(), iact, false);
             } else if (script != null) {
                 script.runScript();
             }

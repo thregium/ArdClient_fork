@@ -58,7 +58,7 @@ import static haven.MCache.cmaps;
 import static haven.MCache.tilesz;
 
 public class MapWnd extends ResizableWnd {
-    public static final Resource markcurs = Resource.local().loadwait("gfx/hud/curs/flag");
+    public static final Resource markcurs = Resource.remote().loadwait("gfx/hud/curs/flag");
     public static final Tex party = Resource.loadtex("custom/mm/pl/party");
     private static final Tex gridblue = Resource.loadtex("gfx/hud/mmap/gridblue");
 

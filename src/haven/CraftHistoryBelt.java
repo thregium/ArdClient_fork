@@ -76,7 +76,7 @@ public class CraftHistoryBelt extends MovableWidget {
 
     public void act(MenuGrid.Pagina act) {
         if (ui.gui != null) {
-            ui.gui.menu.use(act.button(), new MenuGrid.Interaction(),false);
+            ui.gui.menu.use(act.button(), false);
         }
     }
 
@@ -101,13 +101,18 @@ public class CraftHistoryBelt extends MovableWidget {
 //    }
 
     public void push(MenuGrid.Pagina pagina) {
-        for (MenuGrid.Pagina p : belt) {
-            if (p == pagina)
-                return;
+        int idx = SIZE - 1;
+        for (int i = 0; i < belt.length; i++) {
+            if (belt[i] == pagina) {
+                idx = i;
+                break;
+            }
         }
-        for (int i = SIZE - 2; i >= 0; i--)
-            belt[i + 1] = belt[i];
-        belt[0] = pagina;
+        if (idx != 0) {
+            for (int i = idx - 1; i >= 0; i--)
+                belt[i + 1] = belt[i];
+            belt[0] = pagina;
+        }
     }
 
     @Override

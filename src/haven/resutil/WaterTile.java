@@ -36,7 +36,6 @@ import haven.GOut;
 import haven.Glob;
 import haven.HavenPanel;
 import haven.Light;
-import haven.Loading;
 import haven.MCache;
 import haven.MapMesh;
 import haven.MapMesh.Scan;
@@ -231,8 +230,8 @@ public class WaterTile extends Tiler {
         }
     }
 
-    static final TexCube sky = new TexCube(Resource.loadimg("gfx/tiles/skycube"));
-    static final TexI nrm = (TexI) Resource.loadtex("gfx/tiles/wn");
+    static final TexCube sky = new TexCube(Resource.remote().loadwait("gfx/tiles/skycube").layer(Resource.imgc).img);
+    static final TexI nrm = (TexI) Resource.remote().loadwait("gfx/tiles/wn").layer(Resource.imgc).tex();
 
     static {
         nrm.mipmap();

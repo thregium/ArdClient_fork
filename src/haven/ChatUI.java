@@ -1588,7 +1588,7 @@ public class ChatUI extends Widget {
         super.draw(g);
     }
 
-    public static final Resource notifsfx = Resource.local().loadwait("sfx/hud/chat");
+    public static final Resource notifsfx = Resource.remote().loadwait("sfx/hud/chat");
 
     public void notify(Channel chan, Channel.Message msg) {
         synchronized (notifs) {

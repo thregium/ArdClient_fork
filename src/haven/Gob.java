@@ -435,7 +435,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     type = Type.LOG;
 
                 String customIcon = null;
-                if (type == Type.TREE || type == Type.BUSH || type == Type.STUMP || type == Type.LOG) {
+                if ((type == Type.TREE || type == Type.BUSH || type == Type.STUMP || type == Type.LOG) && (!name.matches(".*trees/old(stump|trunk)"))) {
                     String fistname1 = name.substring(0, name.lastIndexOf('/'));
                     String fistname = fistname1.substring(0, fistname1.lastIndexOf('/'));
                     String lastname = name.replace(fistname, "");
@@ -1574,8 +1574,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             if (name().equals("gfx/borka/body") && isplayer()) {
                 int borderhash = Arrays.hashCode("playerborder".getBytes());
                 int boxhash = Arrays.hashCode("playerbox".getBytes());
+                int gridhash = Arrays.hashCode("gridbox".getBytes());
                 Overlay border = findol(borderhash);
                 Overlay box = findol(boxhash);
+                Overlay grid = findol(gridhash);
                 if (border == null && configuration.playerbordersprite)
                     addol(new Overlay(borderhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(9)), () -> new Color(configuration.playerbordercolor, true), new Coord2d(MCache.cmaps))));
                 if (border != null && !configuration.playerbordersprite)
@@ -1584,6 +1586,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     addol(new Overlay(boxhash, new RectSprite(this, new Coord2d(MCache.cmaps), () -> new Color(configuration.playerboxcolor, true), new Coord2d(MCache.cmaps))));
                 if (box != null && !configuration.playerboxsprite)
                     remol(box);
+                if (grid == null && configuration.gridboxsprite)
+                    addol(new Overlay(gridhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(11)), () -> new Color(configuration.gridboxcolor, true), new Coord2d(MCache.cmaps.mul(11)))));
+                if (grid != null && !configuration.gridboxsprite)
+                    remol(grid);
             }
         }
 

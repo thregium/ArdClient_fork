@@ -498,7 +498,7 @@ public class CharWnd extends Window {
 
         private Attr(Glob glob, String attr, Color bg) {
             super(new Coord(attrw, attrf.height() + 2));
-            res = Resource.local().loadwait("gfx/hud/chr/" + attr);
+            res = Resource.remote().loadwait("gfx/hud/chr/" + attr);
             this.nm = attr;
             this.img = res.layer(Resource.imgc).tex();
             this.rnm = PUtils.strokeTex(attrf.render(res.layer(Resource.tooltip).t));
@@ -569,7 +569,7 @@ public class CharWnd extends Window {
 
         private SAttr(Glob glob, String attr, Color bg) {
             super(new Coord(attrw, attrf.height() + 2));
-            res = Resource.local().loadwait("gfx/hud/chr/" + attr);
+            res = Resource.remote().loadwait("gfx/hud/chr/" + attr);
             this.nm = attr;
             this.img = res.layer(Resource.imgc).tex();
             this.rnm = PUtils.strokeTex(attrf.render(res.layer(Resource.tooltip).t));
@@ -2087,7 +2087,7 @@ public class CharWnd extends Window {
     }
 
     public static <T extends Widget> T settip(T wdg, String resnm) {
-        wdg.tooltip = new Widget.PaginaTip(new Resource.Spec(Resource.local(), resnm));
+        wdg.tooltip = new Widget.PaginaTip(new Resource.Spec(Resource.remote(), resnm));
         return (wdg);
     }
 

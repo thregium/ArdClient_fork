@@ -33,6 +33,7 @@ import haven.automation.Traverse;
 import haven.overlays.OverlayManager;
 import haven.purus.DrinkWater;
 import haven.purus.ItemClickCallback;
+import haven.purus.PetalClickCallback;
 import haven.purus.pbot.PBotScriptlist;
 import haven.purus.pbot.PBotScriptlistOld;
 import haven.purus.pbot.PBotUtils;
@@ -161,6 +162,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
     public StudyWnd studywnd;
     public haven.livestock.LivestockManager livestockwnd;
     public ItemClickCallback itemClickCallback;
+    public PetalClickCallback petalClickCallback;
     public boolean drinkingWater, lastDrinkingSucessful;
     public CraftWindow makewnd;
     public BeltWnd fbelt, nbelt, npbelt;
@@ -252,34 +254,30 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
                 if (c.x != umpanel.c.x - 360)
                     c.x = umpanel.c.x - 360;
                 if (Config.showservertime) {
-                    Tex mtime = ui.sess.glob.mservertimetex.get().b;
-                    Tex ltime = ui.sess.glob.lservertimetex.get().b;
-                    ;
-                    Tex rtime = ui.sess.glob.rservertimetex.get().b;
-                    ;
-                    Tex btime = ui.sess.glob.bservertimetex.get().b;
-                    ;
-                    Tex winfo = ui.sess.glob.weathertimetex.get().b;
-                    ;
+                    Text mtime = ui.sess.glob.mservertimetex.get();
+                    Text ltime = ui.sess.glob.lservertimetex.get();
+                    Text rtime = ui.sess.glob.rservertimetex.get();
+                    Text btime = ui.sess.glob.bservertimetex.get();
+                    Text winfo = ui.sess.glob.weathertimetex.get();
                     int y = 10;
                     if (mtime != null) {
-                        g.aimage(mtime, new Coord(sz.x - 5, y), 1, 0);
+                        g.aimage(mtime.tex(), new Coord(sz.x - 5, y), 1, 0);
                         y += mtime.sz().y;
                     }
                     if (ltime != null) {
-                        g.aimage(ltime, new Coord(sz.x - 5, y), 1, 0);
+                        g.aimage(ltime.tex(), new Coord(sz.x - 5, y), 1, 0);
                         y += ltime.sz().y;
                     }
                     if (rtime != null) {
-                        g.aimage(rtime, new Coord(sz.x - 5, y), 1, 0);
+                        g.aimage(rtime.tex(), new Coord(sz.x - 5, y), 1, 0);
                         y += rtime.sz().y;
                     }
                     if (btime != null) {
-                        g.aimage(btime, new Coord(sz.x - 5, y), 1, 0);
+                        g.aimage(btime.tex(), new Coord(sz.x - 5, y), 1, 0);
                         y += btime.sz().y;
                     }
                     if (configuration.showweatherinfo && winfo != null) {
-                        g.aimage(winfo, new Coord(sz.x - 5, y), 1, 0);
+                        g.aimage(winfo.tex(), new Coord(sz.x - 5, y), 1, 0);
                         y += winfo.sz().y;
                     }
                     if (sz.y != y) resize(sz.x, y);
@@ -332,7 +330,8 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             public void flush() {
             }
         });
-        Debug.log = ui.cons.out;
+//        Debug.log = ui.cons.out;
+        Debug.add(ui.cons.out);
         buffs = add(new Bufflist(), new Coord(95, 85));
         quickslots = new QuickSlotsWdg();
         newquickslots = new modification.newQuickSlotsWdg();
@@ -446,6 +445,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
 
     @Override
     public void destroy() {
+        Debug.remove(ui.cons.out);
         if (statuswindow != null) {//seems to be a bug that occasionally keeps the status window thread alive.
             statuswindow.reqdestroy();
         }
@@ -1344,7 +1344,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         cmeters.remove(w);
     }
 
-    private static final Resource.Anim progt = Resource.local().loadwait("gfx/hud/prog").layer(Resource.animc);
+    private static final Resource.Anim progt = Resource.remote().loadwait("gfx/hud/prog").layer(Resource.animc);
     private Tex curprog = null;
     private int curprogf, curprogb;
 
@@ -2039,6 +2039,10 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             configuration.playerboxcolor = val.hashCode();
             Utils.setprefi("playerboxcolor", val.hashCode());
         }));
+        wva.addRow(new CheckBox("Show grid box", val -> Utils.setprefb("gridboxsprite", configuration.gridboxsprite = val), configuration.gridboxsprite), new ColorPreview(new Coord(20, 20), new Color(configuration.gridboxcolor, true), val -> {
+            configuration.gridboxcolor = val.hashCode();
+            Utils.setprefi("gridboxcolor", val.hashCode());
+        }));
         Label text = new Label(configuration.radiusheight + "");
         wva.addRow(new Label("Height:"), new HSlider(100, 0, 5000, (int) (configuration.radiusheight * 100f)) {
             @Override
@@ -2338,8 +2342,8 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         debugmsg(msg, color, color);
     }
 
-    private static final Resource errsfx = Resource.local().loadwait("sfx/error");
-    private static final Resource msgsfx = Resource.local().loadwait("sfx/msg");
+    private static final Resource errsfx = Resource.remote().loadwait("sfx/error");
+    private static final Resource msgsfx = Resource.remote().loadwait("sfx/msg");
 
     private double lasterrsfx = 0;
 
@@ -2508,8 +2512,8 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         });
         cmdmap.put("tool", (cons, args) -> add(gettype(args[1]).create(ui, new Object[0]), 200, 200));
         cmdmap.put("help", (cons, args) -> {
-            cons.out.println("Available console commands:");
-            cons.findcmds().forEach((s, cmd) -> cons.out.println(s));
+            Debug.println("Available console commands:");
+            cons.findcmds().forEach((s, cmd) -> Debug.println(s));
         });
         cmdmap.put("savemap", (cons, args) -> {
             new Thread(() -> mapfile.view.dumpTiles(), "MapDumper").start();
@@ -2526,6 +2530,14 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
 
     public void unregisterItemCallback() {
         this.itemClickCallback = null;
+    }
+
+    public void registerPetalCallback(PetalClickCallback petalClickCallback) {
+        this.petalClickCallback = petalClickCallback;
+    }
+
+    public void unregisterPetalCallback() {
+        this.petalClickCallback = null;
     }
 
     @Override
