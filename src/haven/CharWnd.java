@@ -534,8 +534,8 @@ public class CharWnd extends Window {
             g.frect(Coord.z, sz);
             g.chcolor();
             Coord cn = new Coord(0, sz.y / 2);
-            g.aimage(img, cn.add(5, 0), 0, 0.5);
-            g.aimage(rnm, cn.add(img.sz().x + 10, 1), 0, 0.5);
+            g.aimage(img, cn.add(5, 0), Coord.of(20), 0, 0.5);
+            g.aimage(rnm, cn.add(20 + 10, 1), 0, 0.5);
 
             cbv = attr.base;
             ccv = attr.comp;
@@ -623,8 +623,8 @@ public class CharWnd extends Window {
             g.chcolor();
             super.draw(g);
             Coord cn = new Coord(0, sz.y / 2);
-            g.aimage(img, cn.add(5, 0), 0, 0.5);
-            g.aimage(rnm, cn.add(img.sz().x + 10, 1), 0, 0.5);
+            g.aimage(img, cn.add(5, 0), Coord.of(20), 0, 0.5);
+            g.aimage(rnm, cn.add(20 + 10, 1), 0, 0.5);
             if (!Config.splitskills) {
                 g.aimage(ct, cn.add(sz.x - 40, 1), 1, 0.5);
             } else {

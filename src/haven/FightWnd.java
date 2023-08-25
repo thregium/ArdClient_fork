@@ -43,12 +43,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static haven.CharWnd.attrf;
 import static haven.Inventory.invsq;
-import static haven.PUtils.blurmask2;
-import static haven.PUtils.rasterimg;
 import static haven.Window.wbox;
 
 public class FightWnd extends Widget {
@@ -229,6 +228,8 @@ public class FightWnd extends Widget {
             return (icon);
         }
 
+        private Pattern ezFix = Pattern.compile("(.*\\$img\\[)([A-Za-z\\/^\\,^\\=]+)(.*)");
+
         public BufferedImage renderinfo(int width) {
             ItemInfo.Layout l = new ItemInfo.Layout();
             l.width = width;
@@ -243,8 +244,10 @@ public class FightWnd extends Widget {
                 }
             }
             Resource.Pagina pag = res.get().layer(Resource.pagina);
-            if (pag != null)
-                l.add(new ItemInfo.Pagina(this, pag.text));
+            if (pag != null) {
+                String text = ezFix.matcher(pag.text).find() ? pag.text.replaceAll(ezFix.pattern(), "$1" + "$2" + ",h=1ln" + "$3") : pag.text;
+                l.add(new ItemInfo.Pagina(this, text));
+            }
             return (l.render());
         }
     }

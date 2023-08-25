@@ -155,7 +155,7 @@ public class Makewindow extends Widget {
             if (info == null) {
                 Object[] rawinfo = this.rawinfo;
                 if (rawinfo == null || rawinfo.length == 0)
-                    rawinfo = new Object[]{Loading.waitfor(Resource.remote().load("ui/tt/defn")),};
+                    rawinfo = new Object[]{new Object[]{Resource.remote().load("ui/tt/defn")}};
                 info = ItemInfo.buildinfo(this, rawinfo);
             }
             return (info);

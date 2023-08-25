@@ -398,8 +398,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
         /*if (cache != null) {
             try {
                 Resource.loadlist(Resource.remote(), cache.fetch("tmp/allused"), -10);
-            } catch (IOException e) {
-            }
+            } catch (IOException e) {}
         }*/
         if (!Config.nopreload) {
             try {

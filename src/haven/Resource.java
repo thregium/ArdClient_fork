@@ -1113,7 +1113,7 @@ public class Resource implements Serializable {
         public final boolean nooff;
         public final int id;
         public final Map<String, byte[]> kvdata;
-        private float scale = 1;
+        public float scale = 1;
         private int gay = -1;
         public Coord sz, o, so, rawtsz, tsz, ssz;
 

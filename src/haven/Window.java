@@ -970,7 +970,7 @@ Window extends MovableWidget implements DTarget {
      */
 
     public boolean showSpecialMenu() {
-        Map<String, Runnable> list = new HashMap<>();
+        List<Pair<String, Runnable>> list = new ArrayList<>();
 
         Set<Inventory> invs = children(Inventory.class);
         if (!invs.isEmpty()) {
@@ -979,22 +979,23 @@ Window extends MovableWidget implements DTarget {
                     ui.root.add(inv.sortingWindow(), inv.parentpos(ui.root));
                 }
             };
-            list.put("Sort", run);
-            list.put("Open Stacks", () -> invs.forEach(Inventory::openStacks));
+            list.add(new Pair<>("Sort", run));
+            list.add(new Pair<>("Open Stacks", () -> invs.forEach(Inventory::openStacks)));
+            list.add(new Pair<>("Close Stacks", () -> invs.forEach(Inventory::closeStacks)));
 //            list.put("Stack", () -> {});
 //            list.put("Unstack", () -> {});
         }
         if (!list.isEmpty()) {
             String[] options = new String[list.size()];
-            Iterator<Map.Entry<String, Runnable>> it = list.entrySet().iterator();
+            Iterator<Pair<String, Runnable>> it = list.iterator();
             for (int i = 0; i < options.length; i++) {
-                options[i] = it.next().getKey();
+                options[i] = it.next().a;
             }
             Consumer<Integer> callback = selection -> {
                 if (selection == -1)
                     return;
-                Iterator<Map.Entry<String, Runnable>> iterator = list.entrySet().iterator();
-                Map.Entry<String, Runnable> entry = iterator.next();
+                Iterator<Pair<String, Runnable>> iterator = list.iterator();
+                Pair<String, Runnable> entry = iterator.next();
                 for (int i = 0; i < selection; i++) {
                     if (iterator.hasNext())
                         entry = iterator.next();
@@ -1002,7 +1003,7 @@ Window extends MovableWidget implements DTarget {
                         return;
                 }
                 try {
-                    entry.getValue().run();
+                    entry.b.run();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

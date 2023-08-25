@@ -123,6 +123,7 @@ public class RichText extends Text {
         public int h = -1;
         public double lh = -1, bh = -1;
         public Map<? extends Attribute, ?> attrs;
+        public float imgscale = 1.0f;
         private Coord sz = null;
 
         public Image(BufferedImage img) {
@@ -133,6 +134,7 @@ public class RichText extends Text {
             for (Resource.Image img : res.layers(Resource.imgc)) {
                 if (img.id == id) {
                     this.img = img.img;
+                    this.imgscale = img.scale;
                     break;
                 }
             }
@@ -149,7 +151,7 @@ public class RichText extends Text {
 
         public void prepare(RState rs) {
             super.prepare(rs);
-            sz = UI.scale(img.getWidth(), img.getHeight());
+            sz = Coord.of(Math.round(UI.scale(img.getWidth() / imgscale)), Math.round(UI.scale(img.getHeight() / imgscale)));
             if (lh >= 0) {
                 h = (int) Math.round(lh * lm().getHeight());
             } else if (bh >= 0) {
@@ -157,6 +159,7 @@ public class RichText extends Text {
             }
             if (h >= 0)
                 sz = new Coord((img.getWidth() * h) / img.getHeight(), h);
+
         }
 
         public int width() {
@@ -172,7 +175,7 @@ public class RichText extends Text {
         }
 
         public void render(Graphics2D g) {
-            g.drawImage(img, x, y, null);
+            g.drawImage(PUtils.uiscale(img, sz), x, y, null);
         }
     }
 

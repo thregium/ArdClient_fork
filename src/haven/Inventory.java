@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class Inventory extends Widget implements DTarget {
@@ -649,12 +650,22 @@ public class Inventory extends Widget implements DTarget {
     public void sort(String s) { //string with q n r
         PBotUtils.sysMsg(ui, "Sorting! Please don't move!");
         List<InvItem> items = new ArrayList<>();
+        List<Integer> ignoreSlots = new ArrayList<>();
+        Coord c1 = Coord.of(1);
         for (Widget wdg = child; wdg != null; wdg = wdg.next) {
             if (wdg instanceof WItem) {
                 InvItem item = new InvItem((WItem) wdg);
-                if (!item.getSize().equals(new Coord(1, 1))) {
-                    PBotUtils.sysMsg(ui, "Not support large items! " + item.getName());
-                    return;
+                Coord sz = item.getSize();
+                if (!sz.equals(c1)) {
+                    Coord slot = item.getSlot();
+                    for (int y = 0; y < sz.y; y++) {
+                        for (int x = 0; x < sz.x; x++) {
+                            ignoreSlots.add(coordToSloti(slot.add(x, y)));
+                        }
+                    }
+//                    PBotUtils.sysMsg(ui, "Not support large items! " + item.getName());
+//                    return;
+                    continue;
                 }
                 items.add(item);
             }
@@ -689,14 +700,16 @@ public class Inventory extends Widget implements DTarget {
         for (int i = 0; i < items.size(); i++) {
             InvItem invItem = items.get(i);
             InvItem iItem = getItem(invItem.getSlot());
-            if (invItem.equals(iItem) && invItem.getSloti() != i) {
+            AtomicInteger targetSloti = new AtomicInteger(i);
+            ignoreSlots.stream().filter(sl -> sl <= targetSloti.get()).forEach(sl -> targetSloti.getAndIncrement());
+            if (invItem.equals(iItem) && invItem.getSloti() != targetSloti.get()) {
                 if (invItem.take() == null)
                     break;
-                InvItem item = getItem(slotiToCoord(i));
-                if (!drop(slotiToCoord(i)))
+                InvItem item = getItem(slotiToCoord(targetSloti.get()));
+                if (!drop(slotiToCoord(targetSloti.get())))
                     break;
                 while (item != null && ui.gui.vhand != null) {
-                    Integer in = getInt(items, item);
+                    Integer in = getInt(items, item, ignoreSlots);
                     if (in == null)
                         break;
                     item = getItem(slotiToCoord(in));
@@ -708,10 +721,13 @@ public class Inventory extends Widget implements DTarget {
         PBotUtils.sysMsg(ui, "Sorting finished!");
     }
 
-    public Integer getInt(List<InvItem> items, InvItem item) {
+    public Integer getInt(List<InvItem> items, InvItem item, List<Integer> ignoreSlots) {
         for (int i = 0; i < items.size(); i++)
-            if (items.get(i).equals(item))
-                return (i);
+            if (items.get(i).equals(item)) {
+                AtomicInteger targetSloti = new AtomicInteger(i);
+                ignoreSlots.stream().filter(sl -> sl <= targetSloti.get()).forEach(sl -> targetSloti.getAndIncrement());
+                return (targetSloti.get());
+            }
         return (null);
     }
 
@@ -754,6 +770,21 @@ public class Inventory extends Widget implements DTarget {
         }
         return (null);
     }
+
+    public Integer coordToSloti(Coord slot) {
+            Coord c = new Coord();
+            int mo = 0;
+            int max = 0;
+            for (c.y = 0; c.y < isz.y; c.y++) {
+                for (c.x = 0; c.x < isz.x; c.x++) {
+                    if (sqmask == null || !sqmask[mo++]) {
+                        if (slot.x == c.x && slot.y == c.y) return (max);
+                        else max++;
+                    }
+                }
+            }
+            return (null);
+        }
 
     public class InvItem {
         private final WItem wItem;
@@ -822,7 +853,7 @@ public class Inventory extends Widget implements DTarget {
 
         public Integer getSloti() {
             if (this.sloti == null) {
-                this.sloti = slotToInt(getSlot());
+                this.sloti = coordToSloti(getSlot());
             }
             return (this.sloti);
         }
@@ -853,21 +884,6 @@ public class Inventory extends Widget implements DTarget {
                     break;
             }
             return (ui.gui.vhand);
-        }
-
-        public Integer slotToInt(Coord slot) {
-            Coord c = new Coord();
-            int mo = 0;
-            int max = 0;
-            for (c.y = 0; c.y < isz.y; c.y++) {
-                for (c.x = 0; c.x < isz.x; c.x++) {
-                    if (sqmask == null || !sqmask[mo++]) {
-                        if (slot.x == c.x && slot.y == c.y) return (max);
-                        else max++;
-                    }
-                }
-            }
-            return (null);
         }
 
         @Override
@@ -903,6 +919,15 @@ public class Inventory extends Widget implements DTarget {
             if (wdg instanceof WItem) {
                 WItem w = (WItem) wdg;
                 if (w.item.contents != null) w.item.showcontwnd(true);
+            }
+        }
+    }
+
+    public void closeStacks() {
+        for (Widget wdg = child; wdg != null; wdg = wdg.next) {
+            if (wdg instanceof WItem) {
+                WItem w = (WItem) wdg;
+                if (w.item.contents != null) w.item.showcontwnd(false);
             }
         }
     }

@@ -59,37 +59,41 @@ public class FlowerPicker implements Runnable, ItemClickCallback, WItemDestroyCa
                 }
             }
         }
-        FlowerMenu.Petal petal = null;
+        FlowerMenu.Petal target = null;
         for (WItem itm : itmList) {
+            if (PBotUtils.petalExists(gui.ui)) PBotUtils.closeFlowermenu(gui.ui, 500);
             if (itm.parent != null && ((Inventory) itm.parent).wmap.containsKey(itm.item)) {
-                itm.item.wdgmsg("iact", itm.c, 0);
-                for (int retries = 0, time = 500, sleep = 5; gui.ui.root.findchild(FlowerMenu.class) == null && retries < time / sleep; retries++) {
-                    PBotUtils.sleep(5);
-                }
-//                itm.registerDestroyCallback(this);
-//                itemDestroyed = false;
-                    FlowerMenu menu = gui.ui.root.findchild(FlowerMenu.class);
-                    if (menu != null) {
+                if (target == null) {
+                    itm.item.wdgmsg("iact", itm.c, 0);
+                    if (PBotUtils.waitForFlowerMenu(gui.ui, 500)) {
                         gui.registerPetalCallback(this);
                         PBotUtils.debugMsg(gui.ui, "Choose your petal");
-                        if (petal == null) {
-                            for (int retries = 0, time = 5000, sleep = 5; retries < time / sleep; retries++) {
-                                FlowerMenu.Petal petal1 = this.petal;
-                                if (petal1 != null) {
-                                    petal = petal1;
-                                    break;
-                                }
-                                PBotUtils.sleep(sleep);
+                        for (int retries = 0, time = 5000, sleep = 5; retries < time / sleep; retries++) {
+                            FlowerMenu.Petal petal1 = this.petal;
+                            if (petal1 != null) {
+                                target = petal1;
+                                break;
                             }
+                            PBotUtils.sleep(sleep);
                         }
                         if (petal == null) {
                             break;
                         }
-                        menu.choose(petal);
-                        menu.destroy();
                     } else {
                         continue;
                     }
+                }
+                if (target != null) {
+//                    FlowerMenu.setNextSelection(target.name);
+                    itm.item.wdgmsg("iact", itm.c, 0);
+                    if (PBotUtils.waitForFlowerMenu(gui.ui, 500)) {
+                        if (PBotUtils.choosePetal(gui.ui, target.name)) {
+                            PBotUtils.waitFlowermenuClose(gui.ui, 500);
+                        } else {
+                            PBotUtils.closeFlowermenu(gui.ui, 500);
+                        }
+                    }
+                }
             }
         }
         if (petal == null) {
