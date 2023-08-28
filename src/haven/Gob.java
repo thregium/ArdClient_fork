@@ -1143,25 +1143,29 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 }
             }
             synchronized (ols) {
+                String barrelText = null;
+                boolean barrelRet = true;
                 for (Overlay ol : ols) {
-                    if (ol.name().matches("gfx/terobjs/trees/yulestar-.*")) {
+                    String olname = ol.name();
+                    if (olname.matches("gfx/terobjs/trees/yulestar-.*")) {
                         if (ol.spr == null || ol.spr.res == null || ol.spr.res.name.matches("gfx/terobjs/trees/yulestar-.*"))
                             ol.spr = Sprite.create(this, Resource.remote().loadwait("gfx/terobjs/items/yulestar"), ol.sdt);
                     }
+                    if (name().matches("gfx/terobjs/barrel")) {
+                        if (Config.showbarreltext && barrelText == null && olname.matches("gfx/terobjs/barrel-.*")) {
+                            barrelText = olname.substring(olname.lastIndexOf("-") + 1);
+                        }
+                        if (Config.showbarrelstatus && barrelRet && olname.matches("gfx/terobjs/barrel-.*")) {
+                            barrelRet = false;
+                        }
+                    }
+
                     rl.add(ol, null);
                 }
                 if (Config.showbarreltext && name().matches("gfx/terobjs/barrel") && !ols.isEmpty()) {
-                    String text = null;
-                    for (Overlay ol : ols) {
-                        String olname = ol.name();
-                        if (olname.matches("gfx/terobjs/barrel-.*")) {
-                            text = olname.substring(olname.lastIndexOf("-") + 1);
-                            break;
-                        }
-                    }
-                    if (text != null) {
-                        if (barreltext == null) barreltext = new gobText(this, text, Color.GREEN, 50);
-                        else barreltext.update(text);
+                    if (barrelText != null) {
+                        if (barreltext == null) barreltext = new gobText(this, barrelText, Color.GREEN, 50);
+                        else barreltext.update(barrelText);
                         rl.add(barreltext, null);
                     } else {
                         if (barreltext != null) barreltext = null;
@@ -1170,15 +1174,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     if (barreltext != null) barreltext = null;
                 }
                 if (Config.showbarrelstatus && name().matches("gfx/terobjs/barrel")) {
-                    boolean ret = true;
-                    for (Overlay ol : ols) {
-                        String olname = ol.name();
-                        if (olname.matches("gfx/terobjs/barrel-.*")) {
-                            ret = false;
-                            break;
-                        }
-                    }
-                    if (ret) rl.prepc(barrelemptycolormaterial.get());
+                    if (barrelRet) rl.prepc(barrelemptycolormaterial.get());
                 }
                 for (Map.Entry<String, Long> entry : configuration.treesMap.entrySet()) {
                     if (entry.getValue() == id) {
@@ -1217,9 +1213,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 //            if (hlt != null)
 //                rl.prepc(hlt.getfx());
 
-            final GobQuality qlty = getattr(GobQuality.class);
-            if (qlty != null)
-                rl.prepc(qlty.getfx());
+//            final GobQuality qlty = getattr(GobQuality.class);
+//            if (qlty != null)
+//                rl.prepc(qlty.getfx());
 
             if (Config.showrackstatus && type == Type.CHEESERACK) {
                 final List<Overlay> eqOls = new ArrayList<>();
@@ -1413,9 +1409,11 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                         if (Config.hidegobs && ((type == Type.TREE && Config.hideTrees) || (type == Type.BUSH && Config.hideBushes) || (type == Type.BOULDER && Config.hideboulders))) {
                             if (Config.showoverlay) {
                                 if (ol == null) {
-                                    GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
-                                    if (bbox != null)
-                                        addol(new Overlay(GobHitbox.olid_solid, new GobHitbox(this, bbox, true)));
+                                    try {
+                                        GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
+                                        if (bbox != null)
+                                            addol(new Overlay(GobHitbox.olid_solid, new GobHitbox(this, bbox, true)));
+                                    } catch (Loading l) {}
                                 }
                             } else if (ol != null)
                                 remol(ol);
@@ -1458,10 +1456,12 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             Overlay hitboxOl = findol(GobHitbox.olid);
             if (Config.showboundingboxes) {
                 if (hitboxOl == null) {
-                    GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
-                    if (bbox != null) {
-                        addol(new Overlay(GobHitbox.olid, new GobHitbox(this, bbox, false)));
-                    }
+                    try {
+                        GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
+                        if (bbox != null) {
+                            addol(new Overlay(GobHitbox.olid, new GobHitbox(this, bbox, false)));
+                        }
+                    } catch (Loading l) {}
                 }
             } else if (hitboxOl != null) {
                 remol(hitboxOl);

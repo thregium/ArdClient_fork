@@ -34,11 +34,6 @@ import static haven.Gob.SEMISTATIC;
  * TODO: Think of a way to represent the stage in 3D to avoid static/semistatic mess.
  */
 public class GobQuality extends GAttrib {
-    private static final Tex[] gobhp = new Tex[]{
-            Text.renderstroked("25%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex(),
-            Text.renderstroked("50%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex(),
-            Text.renderstroked("75%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex()
-    };
     public static final Text.Foundry nfnd = new Text.Foundry(Text.dfont, Text.cfg.charName);
     private static Tex gobquality = Text.renderstroked("1", Color.WHITE, Color.BLACK, nfnd).tex();
     public int quality;

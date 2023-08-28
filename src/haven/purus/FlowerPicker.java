@@ -65,7 +65,7 @@ public class FlowerPicker implements Runnable, ItemClickCallback, WItemDestroyCa
             if (itm.parent != null && ((Inventory) itm.parent).wmap.containsKey(itm.item)) {
                 if (target == null) {
                     itm.item.wdgmsg("iact", itm.c, 0);
-                    if (PBotUtils.waitForFlowerMenu(gui.ui, 500)) {
+                    if (PBotUtils.waitForFlowerMenu(gui.ui, 1000)) {
                         gui.registerPetalCallback(this);
                         PBotUtils.debugMsg(gui.ui, "Choose your petal");
                         for (int retries = 0, time = 5000, sleep = 5; retries < time / sleep; retries++) {
@@ -86,7 +86,7 @@ public class FlowerPicker implements Runnable, ItemClickCallback, WItemDestroyCa
                 if (target != null) {
 //                    FlowerMenu.setNextSelection(target.name);
                     itm.item.wdgmsg("iact", itm.c, 0);
-                    if (PBotUtils.waitForFlowerMenu(gui.ui, 500)) {
+                    if (PBotUtils.waitForFlowerMenu(gui.ui, 1000)) {
                         if (PBotUtils.choosePetal(gui.ui, target.name)) {
                             PBotUtils.waitFlowermenuClose(gui.ui, 500);
                         } else {

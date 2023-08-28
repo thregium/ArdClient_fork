@@ -66,7 +66,7 @@ public class Cal extends Widget {
         g.image(moon, mc);
         g.chcolor();
         g.image(sun, sc);
-        g.chcolor(255, 255, 255, 150);
+        g.chcolor(255, 255, 255, 200);
         g.image((a.night ? nlnd : dlnd)[a.is], Coord.z);
         g.image(bg, Coord.z);
         g.chcolor();

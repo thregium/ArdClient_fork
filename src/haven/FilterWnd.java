@@ -35,11 +35,12 @@ public class FilterWnd extends Window {
         int code = ev.getKeyCode();
         int mods = ev.getModifiersEx();
         //any modifier except SHIFT pressed alone is ignored, TAB is also ignored
-        return (mods != 0 && mods != KeyEvent.SHIFT_DOWN_MASK)
+        /*return (mods != 0 && mods != KeyEvent.SHIFT_DOWN_MASK)
                 || code == KeyEvent.VK_CONTROL
                 || code == KeyEvent.VK_ALT
                 || code == KeyEvent.VK_META
-                || code == KeyEvent.VK_TAB;
+                || code == KeyEvent.VK_TAB;*/
+        return (false);
     }
 
     private void setFilter(String text) {

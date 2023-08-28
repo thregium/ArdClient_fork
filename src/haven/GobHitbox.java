@@ -122,12 +122,8 @@ public class GobHitbox extends Sprite {
 //    private static final BBox[] bboxHwall = new BBox[]{new BBox(new Coord(-1, 0), new Coord(0, 11))};
 //    private static final BBox[] bboxCupboard = new BBox[]{new BBox(new Coord(-5, -5), new Coord(5, 5))};
 
-    public static BBox[] getBBox(Gob gob) {
-        Resource res = null;
-        try {
-            res = gob.getres();
-        } catch (Loading l) {
-        }
+    public static BBox[] getBBox(Gob gob) throws Loading {
+        Resource res = gob.getres();
         if (res == null)
             return (null);
 
@@ -197,7 +193,7 @@ public class GobHitbox extends Sprite {
             }
         }
 
-        try {
+//        try {
             List<Resource.Neg> negs = new ArrayList<>(res.layers(Resource.Neg.class));
             List<Resource.Obst> obsts = new ArrayList<>(res.layers(Resource.Obst.class));
             for (RenderLink.Res link : res.layers(RenderLink.Res.class)) {
@@ -238,9 +234,9 @@ public class GobHitbox extends Sprite {
                 hitboxes.put(res.name, boxes);
                 return (boxes);
             }
-        } catch (Exception ignore) {
-            ignore.printStackTrace();
-        }
+//        } catch (Exception ignore) {
+//            ignore.printStackTrace();
+//        }
         return (null);
     }
 

@@ -359,7 +359,7 @@ public class PBotGob {
      *
      * @return array of hitboxes
      */
-    public GobHitbox.BBox[] getHitboxes() {
+    public GobHitbox.BBox[] getHitboxes() throws Loading {
         return (GobHitbox.getBBox(gob));
     }
 
@@ -368,7 +368,7 @@ public class PBotGob {
      *
      * @return first hitbox of gob
      */
-    public GobHitbox.BBox getHitbox() {
+    public GobHitbox.BBox getHitbox() throws Loading {
         GobHitbox.BBox[] bboxes = getHitboxes();
         return (bboxes.length > 0 ? bboxes[0] : null);
     }
