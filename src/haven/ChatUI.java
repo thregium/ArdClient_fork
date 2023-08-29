@@ -30,6 +30,7 @@ import haven.automation.Discord;
 import haven.sloth.gob.AggroMark;
 import haven.sloth.gob.Mark;
 import modification.configuration;
+import modification.dev;
 import net.dv8tion.jda.core.entities.TextChannel;
 
 import java.awt.Color;
@@ -211,6 +212,7 @@ public class ChatUI extends Widget {
                     else
                         t = fnd.render(text, w, TextAttribute.FOREGROUND, col);
                 } catch (Exception e) {
+                    dev.simpleLog(e);
                     if (col == null)
                         t = fnd.render(RichText.Parser.quote(text), w);
                     else
@@ -548,19 +550,21 @@ public class ChatUI extends Widget {
 
         protected void clicked(CharPos pos) {
             AttributedCharacterIterator inf = pos.part.ti();
-            inf.setIndex(pos.ch.getCharIndex() + pos.part.start);
-            FuckMeGentlyWithAChainsaw url = (FuckMeGentlyWithAChainsaw) inf.getAttribute(ChatAttribute.HYPERLINK);
-            if ((url != null) && (WebBrowser.self != null)) {
-                try {
-                    WebBrowser.self.show(url.url);
-                } catch (WebBrowser.BrowserException e) {
-                    getparent(GameUI.class).error("Could not launch web browser.");
+            if (pos.ch.getCharIndex() >= 0) {
+                inf.setIndex(pos.ch.getCharIndex() + pos.part.start);
+                FuckMeGentlyWithAChainsaw url = (FuckMeGentlyWithAChainsaw) inf.getAttribute(ChatAttribute.HYPERLINK);
+                if ((url != null) && (WebBrowser.self != null)) {
+                    try {
+                        WebBrowser.self.show(url.url);
+                    } catch (WebBrowser.BrowserException e) {
+                        getparent(GameUI.class).error("Could not launch web browser.");
+                    }
                 }
-            }
-            String hs = (String) inf.getAttribute(ChatAttribute.HEARTH_SECRET);
-            if (hs != null && ui.gui != null && ui.gui.buddies != null) {
-                ui.gui.buddies.show();
-                ui.gui.buddies.wdgmsg("bypwd", hs);
+                String hs = (String) inf.getAttribute(ChatAttribute.HEARTH_SECRET);
+                if (hs != null && ui.gui != null && ui.gui.buddies != null) {
+                    ui.gui.buddies.show();
+                    ui.gui.buddies.wdgmsg("bypwd", hs);
+                }
             }
         }
 
@@ -871,6 +875,7 @@ public class ChatUI extends Widget {
                     try {
                         r = fnd.render(text, w, TextAttribute.FOREGROUND, col);
                     } catch (Exception e) {
+                        dev.simpleLog(e);
                         r = fnd.render(RichText.Parser.quote(text), w, TextAttribute.FOREGROUND, col);
                     }
                     cn = nm;
@@ -995,6 +1000,7 @@ public class ChatUI extends Widget {
                     try {
                         r = fnd.render(text, w, TextAttribute.FOREGROUND, col);
                     } catch (Exception e) {
+                        dev.simpleLog(e);
                         r = fnd.render(RichText.Parser.quote(text), w, TextAttribute.FOREGROUND, col);
                     }
                     cn = nm;

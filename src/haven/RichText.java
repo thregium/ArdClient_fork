@@ -702,18 +702,20 @@ public class RichText extends Text {
             for (Part p = fp; p != null; p = p.next) {
                 boolean lb = p instanceof Newline;
                 int pw, ph;
+                int times = 0;
                 while (true) {
                     p.x = x;
                     pw = p.width();
                     ph = p.height();
                     if (w > 0) {
-                        if (p.x + pw > w) {
+                        if (p.x + pw > w && times < 2) {
                             p = p.split(w - x);
                             if (lp == null)
                                 fp = p;
                             else
                                 lp.next = p;
                             lb = true;
+                            times++;
                             continue;
                         }
                     }

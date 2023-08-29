@@ -13,6 +13,7 @@ import haven.Text;
 import haven.UI;
 import haven.Utils;
 import haven.Widget;
+import modification.dev;
 
 import java.awt.Color;
 import java.awt.font.TextAttribute;
@@ -86,6 +87,7 @@ public class RealmChannel extends ChatUI.MultiChat {
                     try {
                         r = ChatUI.fnd.render(text, w, TextAttribute.FOREGROUND, from.color);
                     } catch (Exception e) {
+                        dev.simpleLog(e);
                         r = ChatUI.fnd.render(RichText.Parser.quote(text), w, TextAttribute.FOREGROUND, from.color);
                     }
                     cn = nm;
