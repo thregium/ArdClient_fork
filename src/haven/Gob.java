@@ -610,7 +610,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             }
 
             for (Overlay ol : new ArrayList<>(dols)) {
-                ols.add(ol);
+                this.ols.add(ol);
                 dols.remove(ol);
             }
             if (virtual && ols.isEmpty())

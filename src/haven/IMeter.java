@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 
 public class IMeter extends MovableWidget {
     private static final Resource ponysfx = Resource.local().loadwait("sfx/alarmpony");
-    private static final Pattern hppat = Pattern.compile("Health: (\\d+)/(\\d+)/(\\d+)");
+    private static final Pattern hppat = Pattern.compile("Health: (\\d+)/(\\d+)/(\\d+)/?(\\d+)?");
     private static final Pattern stampat = Pattern.compile("Stamina: (\\d+)");
     private static final Pattern energypat = Pattern.compile("Energy: (\\d+)");
     static Coord off = new Coord(22, 7);
@@ -150,15 +150,19 @@ public class IMeter extends MovableWidget {
                 Matcher matcher = hppat.matcher(tt);
                 String meterinfo = null;
                 if (matcher.find()) {
-                    ui.sess.details.shp = Integer.parseInt(matcher.group(1));
-                    ui.sess.details.hhp = Integer.parseInt(matcher.group(2));
-                    ui.sess.details.mhp = Integer.parseInt(matcher.group(3));
-                    if (ui.sess.details.shp < ui.sess.details.hhp && ui.sess.details.hhp < ui.sess.details.mhp)
-                        meterinfo = ui.sess.details.shp + "/" + ui.sess.details.hhp + "/" + ui.sess.details.mhp;
-                    else if ((ui.sess.details.shp < ui.sess.details.hhp && ui.sess.details.hhp == ui.sess.details.mhp) || (ui.sess.details.shp == ui.sess.details.hhp && ui.sess.details.hhp < ui.sess.details.mhp))
-                        meterinfo = ui.sess.details.shp + "/" + ui.sess.details.mhp;
-                    else if (ui.sess.details.shp == ui.sess.details.hhp && ui.sess.details.hhp == ui.sess.details.mhp)
-                        meterinfo = ui.sess.details.mhp + "";
+                    if (matcher.groupCount() == 4) {
+                        meterinfo = matcher.group(1);
+                    } else {
+                        ui.sess.details.shp = Integer.parseInt(matcher.group(1));
+                        ui.sess.details.hhp = Integer.parseInt(matcher.group(2));
+                        ui.sess.details.mhp = Integer.parseInt(matcher.group(3));
+                        if (ui.sess.details.shp < ui.sess.details.hhp && ui.sess.details.hhp < ui.sess.details.mhp)
+                            meterinfo = ui.sess.details.shp + "/" + ui.sess.details.hhp + "/" + ui.sess.details.mhp;
+                        else if ((ui.sess.details.shp < ui.sess.details.hhp && ui.sess.details.hhp == ui.sess.details.mhp) || (ui.sess.details.shp == ui.sess.details.hhp && ui.sess.details.hhp < ui.sess.details.mhp))
+                            meterinfo = ui.sess.details.shp + "/" + ui.sess.details.mhp;
+                        else if (ui.sess.details.shp == ui.sess.details.hhp && ui.sess.details.hhp == ui.sess.details.mhp)
+                            meterinfo = ui.sess.details.mhp + "";
+                    }
                 } else {
                     matcher = stampat.matcher(tt);
                     if (matcher.find()) {
