@@ -605,7 +605,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 } else {
                     boolean done = ol.spr.tick(dt);
                     if ((!ol.delign || (ol.spr instanceof Overlay.CDel)) && done)
-                        ols.remove(ol);
+                        this.ols.remove(ol);
                 }
             }
 
