@@ -5,15 +5,15 @@ import haven.sloth.util.ObservableListener;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pagina> {
     private static final int WIDTH = 200;
     private final TextEntry entry;
-    private final List<MenuGrid.Pagina> all = new ArrayList<>();
+    private final List<MenuGrid.Pagina> all = Collections.synchronizedList(new ArrayList<>());
     private final ActList list;
     public boolean ignoreinit;
 
@@ -80,7 +80,7 @@ public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pa
 
     public void act(MenuGrid.Pagina act) {
         if (ui.gui != null) {
-            ui.gui.menu.use(act.button(), new MenuGrid.Interaction(),false);
+            ui.gui.menu.use(act.button(), new MenuGrid.Interaction(), false);
         }
     }
 
@@ -132,23 +132,21 @@ public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pa
 
         String filter = entry.text().toLowerCase();
         ItemFilter itemFilter = ItemFilter.create(filter);
-        synchronized (all) {
-            if (filter.startsWith("new:")) {
-                all.stream().filter(p -> p.newp != 0).forEach(list::add);
-            }
-            if (list.listitems() == 0) {
-                List<MenuGrid.Pagina> filtered = all.stream().filter(p -> {
-                    String name = p.act().name.toLowerCase();
-                    Indir<Resource> parent = p.act().parent;
-                    String par = "";
-                    if (parent != null) {
-                        MenuGrid.Pagina pp = p.scm.paginafor(parent);
-                        par = pp.act().name.toLowerCase();
-                    }
-                    return (par.contains(filter) || name.contains(filter) || itemFilter.matches(p, ui.sess));
-                }).collect(Collectors.toList());
-                filtered.forEach(list::add);
-            }
+        List<MenuGrid.Pagina> all = this.all;
+        if (filter.startsWith("new:")) {
+            all.stream().filter(p -> p.newp != 0).forEach(list::add);
+        }
+        if (list.listitems() == 0) {
+            all.stream().filter(p -> {
+                String name = p.act().name.toLowerCase();
+                Indir<Resource> parent = p.act().parent;
+                String par = "";
+                if (parent != null) {
+                    MenuGrid.Pagina pp = p.scm.paginafor(parent);
+                    par = pp.act().name.toLowerCase();
+                }
+                return (par.contains(filter) || name.contains(filter) || itemFilter.matches(p, ui.sess));
+            }).forEach(list::add);
         }
         list.sort(new ItemComparator());
         if (list.listitems() > 0) {

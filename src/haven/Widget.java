@@ -841,11 +841,11 @@ public class Widget {
                 if (errorWdgs.stream().noneMatch(w -> w.errWdg.equals(finalWdg))) {
                     errorWdgs.add(new ErrorWidget(finalWdg, strErr));
                     if (ui != null)
-                        PBotUtils.sysMsg(ui, strErr + ". $col[255, 0, 0]{Details in DEBUG CHANNEL}. Please contact the developer!");
+                        PBotUtils.sysMsg(ui, strErr + ". $col[255,0,0]{Details in DEBUG CHANNEL}. Please contact the developer!");
                     Debug.printStackTrace(e);
                 } else if (errorWdgs.stream().anyMatch(w -> w.errWdg.equals(finalWdg) && w.repeat())) {
                     if (ui != null)
-                        PBotUtils.sysMsg(ui, strErr + ". $col[255, 0, 0]{Details in DEBUG CHANNEL}. Please contact the developer!");
+                        PBotUtils.sysMsg(ui, strErr + ". $col[255,0,0]{Details in DEBUG CHANNEL}. Please contact the developer!");
                     Debug.printStackTrace(e);
                 }
             }
@@ -880,11 +880,11 @@ public class Widget {
                 if (errorWdgs.stream().noneMatch(w -> w.errWdg.equals(finalWdg))) {
                     errorWdgs.add(new ErrorWidget(finalWdg, strErr));
                     if (ui != null)
-                        PBotUtils.sysMsg(ui, strErr + ". $col[255, 0, 0]{Details in DEBUG CHANNEL}. Please contact the developer!");
+                        PBotUtils.sysMsg(ui, strErr + ". $col[255,0,0]{Details in DEBUG CHANNEL}. Please contact the developer!");
                     Debug.printStackTrace(e);
                 } else if (errorWdgs.stream().anyMatch(w -> w.errWdg.equals(finalWdg) && w.repeat())) {
                     if (ui != null)
-                        PBotUtils.sysMsg(ui, strErr + ". $col[255, 0, 0]{Details in DEBUG CHANNEL}. Please contact the developer!");
+                        PBotUtils.sysMsg(ui, strErr + ". $col[255,0,0]{Details in DEBUG CHANNEL}. Please contact the developer!");
                     Debug.printStackTrace(e);
                 }
             }
