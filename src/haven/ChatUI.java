@@ -204,10 +204,19 @@ public class ChatUI extends Widget {
                 this.text = text;
                 if (Config.chattimestamp)
                     text = timestamp(text);
-                if (col == null)
-                    this.t = fnd.render(RichText.Parser.quote(text), w);
-                else
-                    this.t = fnd.render(RichText.Parser.quote(text), w, TextAttribute.FOREGROUND, col);
+                Text t;
+                try {
+                    if (col == null)
+                        t = fnd.render(text, w);
+                    else
+                        t = fnd.render(text, w, TextAttribute.FOREGROUND, col);
+                } catch (Exception e) {
+                    if (col == null)
+                        t = fnd.render(RichText.Parser.quote(text), w);
+                    else
+                        t = fnd.render(RichText.Parser.quote(text), w, TextAttribute.FOREGROUND, col);
+                }
+                this.t = t;
             }
 
             public Text text() {
@@ -858,7 +867,12 @@ public class ChatUI extends Widget {
                 String nm = (b == null) ? "???" : (b.name);
                 if ((r == null) || !nm.equals(cn)) {
                     String tf = String.format("%s: %s", nm, text);
-                    r = fnd.render(RichText.Parser.quote(Config.chattimestamp ? timestamp(tf) : tf), w, TextAttribute.FOREGROUND, col);
+                    String text = Config.chattimestamp ? timestamp(tf) : tf;
+                    try {
+                        r = fnd.render(text, w, TextAttribute.FOREGROUND, col);
+                    } catch (Exception e) {
+                        r = fnd.render(RichText.Parser.quote(text), w, TextAttribute.FOREGROUND, col);
+                    }
                     cn = nm;
                 }
                 return (r);
@@ -977,7 +991,12 @@ public class ChatUI extends Widget {
                 String nm = (b == null) ? "???" : (b.name);
                 if ((r == null) || !nm.equals(cn)) {
                     String tf = String.format("%s: %s", nm, text);
-                    r = fnd.render(RichText.Parser.quote(Config.chattimestamp ? timestamp(tf) : tf), w, TextAttribute.FOREGROUND, col);
+                    String text = Config.chattimestamp ? timestamp(tf) : tf;
+                    try {
+                        r = fnd.render(text, w, TextAttribute.FOREGROUND, col);
+                    } catch (Exception e) {
+                        r = fnd.render(RichText.Parser.quote(text), w, TextAttribute.FOREGROUND, col);
+                    }
                     cn = nm;
                 }
                 return (r);

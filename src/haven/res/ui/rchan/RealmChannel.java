@@ -82,7 +82,12 @@ public class RealmChannel extends ChatUI.MultiChat {
                     nm = "???";
                 if ((r == null) || !nm.equals(cn)) {
                     String tf = String.format("%s: %s", nm, text);
-                    r = ChatUI.fnd.render(RichText.Parser.quote(Config.chattimestamp ? ChatUI.timestamp(tf) : tf), w, TextAttribute.FOREGROUND, from.color);
+                    String text = Config.chattimestamp ? ChatUI.timestamp(tf) : tf;
+                    try {
+                        r = ChatUI.fnd.render(text, w, TextAttribute.FOREGROUND, from.color);
+                    } catch (Exception e) {
+                        r = ChatUI.fnd.render(RichText.Parser.quote(text), w, TextAttribute.FOREGROUND, from.color);
+                    }
                     cn = nm;
                 }
             }

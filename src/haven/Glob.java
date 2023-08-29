@@ -366,12 +366,12 @@ public class Glob {
 //            int sdl = (int) Math.floor((1 - ast.sp) * (sdt));
 //            if (sdl >= 1)
 //                dayOfMonth = Resource.getLocString(Resource.BUNDLE_LABEL, seasonNames[ast.is]) + String.format(" %d (%d ", (sdp + 1), sdl) + Resource.getLocString(Resource.BUNDLE_LABEL, "left") + String.format(" (%d RL))", nextseason);
-                dayOfMonth = Resource.getLocString(Resource.BUNDLE_LABEL, seasonNames[ast.is]) + String.format(" %d/%d ", (sdp + 1), sdt);
+                dayOfMonth = Resource.getLocString(Resource.BUNDLE_LABEL, seasonNames[ast.is]) + String.format(" %d/%d", (sdp + 1), sdt);
 //            else
 //                dayOfMonth = Resource.getLocString(Resource.BUNDLE_LABEL, String.format("Last day of %s", seasonNames[ast.is]));
             int mp = (int) Math.round(ast.mp * mPhaseNames.length) % mPhaseNames.length;
             phaseOfMoon = mPhaseNames[mp] + " Moon";
-            year = "Year " + (int) Math.floor(ast.years) + 1;
+            year = "Year " + ((int) Math.floor(ast.years) + 1);
         }
 
         mservertime = Resource.getLocString(Resource.BUNDLE_LABEL, "Day") + String.format(" %d, %02d:%02d:%02d", day, hours, mins, seconds) + (night ? ", Night" : ", Day");

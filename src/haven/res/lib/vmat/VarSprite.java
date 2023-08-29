@@ -2,7 +2,6 @@ package haven.res.lib.vmat;
 
 import haven.FastMesh;
 import haven.Gob;
-import haven.Loading;
 import haven.Message;
 import haven.RenderLink;
 import haven.Rendered;
@@ -27,7 +26,7 @@ public class VarSprite extends UnivSprite {
 
     public Collection<Rendered> iparts(int mask) {
         Collection<Rendered> rl = new LinkedList<>();
-        Mapping mats = (this.cmats == null) ? Mapping.empty : cmats;
+        Mapping mats = mats();
         for (FastMesh.MeshRes mr : res.layers(FastMesh.MeshRes.class)) {
             String sid = mr.rdat.get("vm");
             int mid = (sid == null) ? -1 : Integer.parseInt(sid);
@@ -51,14 +50,8 @@ public class VarSprite extends UnivSprite {
 
     public boolean tick(int idt) {
         Mapping mats = mats(), pmats = this.cmats;
-        if (mats != pmats) {
-            try {
-                this.cmats = mats;
-                update();
-            } catch (Loading l) {
-                this.cmats = pmats;
-            }
-        }
+        if (mats != pmats)
+            update();
         return (super.tick(idt));
     }
 }

@@ -16,8 +16,7 @@ public class Wrapping implements Rendered {
         this.mid = mid;
     }
 
-    public void draw(GOut g) {
-    }
+    public void draw(GOut g) {}
 
     public boolean setup(RenderList rl) {
         rl.add(r, st);
