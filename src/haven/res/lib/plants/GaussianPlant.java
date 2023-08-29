@@ -24,21 +24,25 @@ public class GaussianPlant implements Factory {
         this.r = r;
     }
 
+    public GaussianPlant(Object[] args) {
+        this(((Number) args[0]).intValue(), ((Number) args[1]).intValue(), ((Number) args[2]).floatValue());
+    }
+
     public Sprite create(Owner owner, Resource res, Message sdt) {
         List<MeshRes> meshes = new ArrayList<>(res.layers(MeshRes.class));
-        CSprite cs = new CSprite(owner, res);
+        CSprite spr = new CSprite(owner, res);
         if (Config.simpleforage) {
             MeshRes mesh = meshes.get(0);
-            cs.addpart(0, 0, mesh.mat.get(), mesh.m);
+            spr.addpart(0, 0, mesh.mat.get(), mesh.m);
         } else {
             Random rnd = owner.mkrandoom();
-            int scount = rnd.nextInt(this.numh - this.numl + 1) + this.numl;
-            for (int i = 0; i < scount; ++i) {
+            int num = rnd.nextInt(this.numh - this.numl + 1) + this.numl;
+            for (int i = 0; i < num; ++i) {
                 MeshRes mesh = meshes.get(rnd.nextInt(meshes.size()));
-                cs.addpart((float) rnd.nextGaussian() * this.r, (float) rnd.nextGaussian() * this.r, mesh.mat.get(), mesh.m);
+                spr.addpart((float) rnd.nextGaussian() * this.r, (float) rnd.nextGaussian() * this.r, mesh.mat.get(), mesh.m);
             }
         }
 
-        return (cs);
+        return (spr);
     }
 }

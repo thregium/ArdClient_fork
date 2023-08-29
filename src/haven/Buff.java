@@ -27,6 +27,7 @@
 package haven;
 
 import haven.ItemInfo.AttrCache;
+import modification.dev;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -35,6 +36,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed {
     public static final Text.Foundry nfnd = new Text.Foundry(Text.dfont, 10);
@@ -44,6 +47,7 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
     public static final Coord imgoff = new Coord(3, 3);
     public static final Coord ameteroff = new Coord(3, 37), ametersz = new Coord(32, 3);
     public static final Coord sameteroff = new Coord(3, 27), sametersz = new Coord(22, 2);
+    private static final Pattern travelpat = Pattern.compile("Travel weariness: ([0-9\\.]+)/([0-9\\.]+) \\(([0-9\\.]+)\\%\\)");
     public Indir<Resource> res;
     public double cmeter = -1;
     public double cmrem = -1;
@@ -437,7 +441,11 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
             shorttip = longtip = null;
         } else if (msg == "tip") {
             String tt = (String) args[0];
-            this.tt = tt.equals("") ? null : tt;
+            this.tt = tt.isEmpty() ? null : tt;
+            Matcher mat = travelpat.matcher(tt);
+            if (mat.find()) {
+                dev.simpleLog(tt.replaceAll(travelpat.pattern(), "$1/$2 - $3"));
+            }
             shorttip = longtip = null;
         } else if (msg == "am") {
             this.ameter = (Integer) args[0];

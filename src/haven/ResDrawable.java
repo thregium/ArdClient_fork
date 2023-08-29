@@ -51,7 +51,7 @@ public class ResDrawable extends Drawable {
             inited = true;
         } catch (Loading l) {
             error = l;
-            l.waitfor(this::waitforinit, waiting -> {});
+            //l.waitfor(this::waitforinit, waiting -> {});
         }
     }
 
@@ -161,6 +161,7 @@ public class ResDrawable extends Drawable {
     }
 
     public void ctick(int dt) {
+        waitforinit();
         if (spr == null) {
             delay += dt;
         } else {

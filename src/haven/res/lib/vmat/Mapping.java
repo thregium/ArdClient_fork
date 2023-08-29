@@ -1,18 +1,22 @@
 package haven.res.lib.vmat;
 
 import haven.FastMesh;
+import haven.GAttrib;
 import haven.Gob;
 import haven.Material;
 import haven.Rendered;
 import haven.Resource;
-import modification.dev;
 
 import java.util.Collection;
 import java.util.LinkedList;
 
-public abstract class Mapping extends Gob.ResAttr {
-    static {
-        dev.checkFileVersion("lib/vmat", 36);
+public abstract class Mapping extends GAttrib {
+    public Mapping() {
+        super(null);
+    }
+
+    public Mapping(final Gob gob) {
+        super(gob);
     }
 
     public abstract Material mergemat(Material orig, int mid);
@@ -31,7 +35,7 @@ public abstract class Mapping extends Gob.ResAttr {
         return (rl.toArray(new Rendered[0]));
     }
 
-    public final static Mapping empty = new Mapping() {
+    public static final Mapping empty = new Mapping() {
         public Material mergemat(Material orig, int mid) {
             return (orig);
         }

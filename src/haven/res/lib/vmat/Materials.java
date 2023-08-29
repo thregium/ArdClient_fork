@@ -6,17 +6,17 @@ import haven.Indir;
 import haven.IntMap;
 import haven.Material;
 import haven.Message;
+import haven.Pair;
 import haven.Resource;
 import modification.dev;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 
 public class Materials extends Mapping {
-    static {
-        dev.checkFileVersion("lib/vmat", 36);
-    }
-
     public static final Map<Integer, Material> empty = Collections.emptyMap();
     public final Map<Integer, Material> mats;
 
@@ -37,13 +37,7 @@ public class Materials extends Mapping {
     }
 
     public static Material stdmerge(Material orig, Material var) {
-        haven.resutil.OverTex otex = null;
-        for (GLState st : orig.states) {
-            if (st instanceof haven.resutil.OverTex) {
-                otex = (haven.resutil.OverTex) st;
-                break;
-            }
-        }
+        haven.resutil.OverTex otex = Arrays.stream(orig.states).filter(haven.resutil.OverTex.class::isInstance).map(haven.resutil.OverTex.class::cast).findFirst().orElse(null);
         if (otex == null)
             return (var);
         return (new Material(var, otex));
@@ -56,12 +50,18 @@ public class Materials extends Mapping {
         return (stdmerge(orig, var));
     }
 
-    public Materials(Map<Integer, Material> mats) {
+    public Materials(Gob gob, Map<Integer, Material> mats) {
+        super(gob);
         this.mats = mats;
     }
 
     public Materials(Gob gob, Message dat) {
+        super(gob);
         this.mats = decode(gob.context(Resource.Resolver.class), dat);
+    }
+
+    public static void parse(Gob gob, Message dat) {
+        gob.setattr(new Materials(gob, decode(gob.context(Resource.Resolver.class), dat)));
     }
 }
 

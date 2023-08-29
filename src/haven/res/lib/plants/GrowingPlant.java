@@ -10,8 +10,6 @@ import haven.Sprite.Owner;
 import haven.Sprite.ResourceException;
 import haven.resutil.CSprite;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -23,30 +21,32 @@ public class GrowingPlant implements Factory {
         this.num = num;
     }
 
-    public Sprite create(Owner owner, Resource res, Message sdt) {
-        int stg = sdt.uint8();
-        List<MeshRes> meshes = res.layers(MeshRes.class).stream().filter(m -> m.id / 10 == stg).collect(Collectors.toList());
+    public GrowingPlant(Object[] args) {
+        this(((Number) args[0]).intValue());
+    }
 
-        if (meshes.size() < 1) {
-            throw (new ResourceException("No variants for grow stage " + stg, res));
+    public Sprite create(Owner owner, Resource res, Message sdt) {
+        int st = sdt.uint8();
+        List<MeshRes> meshes = res.layers(MeshRes.class).stream().filter(m -> m.id / 10 == st).collect(Collectors.toList());
+
+        if (meshes.isEmpty())
+            throw (new ResourceException("No variants for grow stage " + st, res));
+        CSprite spr = new CSprite(owner, res);
+        if (Config.simplecrops) {
+            MeshRes mesh = meshes.get(0);
+            spr.addpart(0, 0, mesh.mat.get(), mesh.m);
         } else {
-            CSprite cs = new CSprite(owner, res);
-            if (Config.simplecrops) {
-                MeshRes mesh = meshes.get(0);
-                cs.addpart(0, 0, mesh.mat.get(), mesh.m);
-            } else {
-                Random rnd = owner.mkrandoom();
-                for (int i = 0; i < this.num; ++i) {
-                    MeshRes mesh = meshes.get(rnd.nextInt(meshes.size()));
-                    cs.addpart(0, 0, mesh.mat.get(), mesh.m);
-                    if (this.num > 1) {
-                        cs.addpart(rnd.nextFloat() * 11.0F - 5.5F, rnd.nextFloat() * 11.0F - 5.5F, mesh.mat.get(), mesh.m);
-                    } else {
-                        cs.addpart(rnd.nextFloat() * 4.4F - 2.2F, rnd.nextFloat() * 4.4F - 2.2F, mesh.mat.get(), mesh.m);
-                    }
+            Random rnd = owner.mkrandoom();
+            for (int i = 0; i < this.num; ++i) {
+                MeshRes mesh = meshes.get(rnd.nextInt(meshes.size()));
+                spr.addpart(0, 0, mesh.mat.get(), mesh.m);
+                if (this.num > 1) {
+                    spr.addpart(rnd.nextFloat() * 11f - 5.5f, rnd.nextFloat() * 11f - 5.5f, mesh.mat.get(), mesh.m);
+                } else {
+                    spr.addpart(rnd.nextFloat() * 4.4f - 2.2f, rnd.nextFloat() * 4.4f - 2.2f, mesh.mat.get(), mesh.m);
                 }
             }
-            return (cs);
         }
+        return (spr);
     }
 }

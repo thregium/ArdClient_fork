@@ -25,8 +25,8 @@ import java.util.Collection;
 import java.util.Random;
 
 public class Tree extends Sprite {
-    private final Location scale;
-    private final Location rot;
+//    private final Location scale;
+//    private final Location rot;
     public final float fscale;
     public final Rendered[][] parts;
     public int stage, sel;
@@ -87,17 +87,12 @@ public class Tree extends Sprite {
     }
 
     public static Random randoom(Gob owner) {
-        Random rnd;
-        try {
-            Coord tc = owner.rc.floor(MCache.tilesz);
-            MCache.Grid grid = owner.glob.map.getgridt(tc);
-            tc = tc.sub(grid.ul);
-            rnd = new Random(grid.id);
-            rnd.setSeed(rnd.nextLong() ^ tc.x);
-            rnd.setSeed(rnd.nextLong() ^ tc.y);
-        } catch (Loading e) {
-            rnd = new Random(0);
-        }
+        Coord tc = owner.rc.floor(MCache.tilesz);
+        MCache.Grid grid = owner.glob.map.getgridt(tc);
+        tc = tc.sub(grid.ul);
+        Random rnd = new Random(grid.id);
+        rnd.setSeed(rnd.nextLong() ^ tc.x);
+        rnd.setSeed(rnd.nextLong() ^ tc.y);
         return (rnd);
     }
 
@@ -116,9 +111,16 @@ public class Tree extends Sprite {
 
     public Tree(Owner owner, Resource res, float scale, int s, int fl) {
         super(owner, res);
-        rot = rndrot(owner);
+//        rot = rndrot(owner);
         this.fscale = scale;
-        this.scale = (scale == 1.0f) ? null : mkscale(scale);
+        if (owner instanceof Gob) {
+            Gob gob = (Gob) owner;
+            gob.setattr(new TreeRotation(gob, rndrot(gob)));
+//            gob.setattr(new GobSvaj(gob));
+            if (fscale != 1.0f)
+                gob.setattr(new TreeScale(gob, fscale));
+        }
+//        this.scale = (scale == 1.0f) ? null : mkscale(scale);
         parts = mkparts(res, s, fl);
         sel = s;
     }
@@ -131,12 +133,12 @@ public class Tree extends Sprite {
     }
 
     public boolean setup(RenderList r) {
-        if (rot != null)
-            r.prepc(rot);
-        if (scale != null) {
-            r.prepc(scale);
-            r.prepc(States.normalize);
-        }
+//        if (rot != null)
+//            r.prepc(rot);
+//        if (scale != null) {
+//            r.prepc(scale);
+//            r.prepc(States.normalize);
+//        }
         for (Rendered p : parts[stage])
             r.add(p, null);
         this.loc = r.cstate().get(PView.loc);
@@ -157,8 +159,14 @@ public class Tree extends Sprite {
                     break leaves;
                 }
                 Random rrand = lrand;
-                if (owner instanceof Gob)
-                    rrand = randoom((Gob) owner);
+
+                if (owner instanceof Gob) {
+                    try {
+                        rrand = randoom((Gob) owner);
+                    } catch (Loading l) {
+                        break leaves;
+                    }
+                }
                 lrate = 0.05 + (Math.pow(rrand.nextDouble(), 0.75) * 0.95);
             }
             if (fscale < 0.75)

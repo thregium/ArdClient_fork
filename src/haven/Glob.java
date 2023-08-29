@@ -356,23 +356,26 @@ public class Glob {
         long seconds = secintoday % 60;
 
         String dayOfMonth = "";
+        String year = "";
         String phaseOfMoon = " ";
         if (ast != null) {
-            int nextseason = (int) Math.ceil((1 - ast.sp) * (ast.is == 1 ? 35 : ast.is == 3 ? 5 : 10));
+//            int nextseason = (int) Math.ceil((1 - ast.sp) * (ast.is == 1 ? 35 : ast.is == 3 ? 5 : 10));
 
             int sdt = (ast.is == 1 ? 105 : ast.is == 3 ? 15 : 30); //days of season total
             int sdp = (int) (ast.sp * (sdt)); //days of season passed
-            int sdl = (int) Math.floor((1 - ast.sp) * (sdt));
-            if (sdl >= 1)
-                dayOfMonth = Resource.getLocString(Resource.BUNDLE_LABEL, seasonNames[ast.is]) + String.format(" %d (%d ", (sdp + 1), sdl) + Resource.getLocString(Resource.BUNDLE_LABEL, "left") + String.format(" (%d RL))", nextseason);
-            else
-                dayOfMonth = Resource.getLocString(Resource.BUNDLE_LABEL, String.format("Last day of %s", seasonNames[ast.is]));
+//            int sdl = (int) Math.floor((1 - ast.sp) * (sdt));
+//            if (sdl >= 1)
+//                dayOfMonth = Resource.getLocString(Resource.BUNDLE_LABEL, seasonNames[ast.is]) + String.format(" %d (%d ", (sdp + 1), sdl) + Resource.getLocString(Resource.BUNDLE_LABEL, "left") + String.format(" (%d RL))", nextseason);
+                dayOfMonth = Resource.getLocString(Resource.BUNDLE_LABEL, seasonNames[ast.is]) + String.format(" %d/%d ", (sdp + 1), sdt);
+//            else
+//                dayOfMonth = Resource.getLocString(Resource.BUNDLE_LABEL, String.format("Last day of %s", seasonNames[ast.is]));
             int mp = (int) Math.round(ast.mp * mPhaseNames.length) % mPhaseNames.length;
             phaseOfMoon = mPhaseNames[mp] + " Moon";
+            year = "Year " + (int) Math.floor(ast.years) + 1;
         }
 
         mservertime = Resource.getLocString(Resource.BUNDLE_LABEL, "Day") + String.format(" %d, %02d:%02d:%02d", day, hours, mins, seconds) + (night ? ", Night" : ", Day");
-        lservertime = String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "%s"), dayOfMonth);
+        lservertime = String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "%s") + ". %s", dayOfMonth, year);
         rservertime = Resource.getLocString(Resource.BUNDLE_LABEL, phaseOfMoon);
         if (secintoday >= dewyladysmantletimemin && secintoday <= dewyladysmantletimemax)
             bservertime = Resource.getLocString(Resource.BUNDLE_LABEL, "(Dewy Lady's Mantle)");

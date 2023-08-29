@@ -3,6 +3,7 @@ package haven.res.lib.globfx;
 import haven.Coord2d;
 import haven.Coord3f;
 import haven.Drawable;
+import haven.GLState;
 import haven.Glob;
 import haven.Gob;
 import haven.RenderList;
@@ -61,11 +62,9 @@ public class GlobEffector extends Drawable {
             }
         }
         synchronized (cur) {
-            synchronized (effects) {
-                if ((effects.size() == 0) && (data.size() == 0)) {
-                    glob.oc.lrem(holder);
-                    cur.remove(glob);
-                }
+            if ((effects.size() == 0) && (data.size() == 0)) {
+                glob.oc.lrem(holder);
+                cur.remove(glob);
             }
         }
     }
@@ -94,9 +93,13 @@ public class GlobEffector extends Drawable {
         }
     }
 
+    public Object monitor() {
+        return (this.gob);
+    }
+
     @SuppressWarnings("unchecked")
     public <T extends Effect> T get(T fx) {
-        synchronized (effects) {
+        synchronized (this.gob) {
             T ret = (T) effects.get(fx);
             if (ret == null)
                 effects.put(ret = fx, fx);
@@ -106,7 +109,7 @@ public class GlobEffector extends Drawable {
 
     @SuppressWarnings("unchecked")
     public <T extends Datum> T getdata(T fx) {
-        synchronized (data) {
+        synchronized (this.gob) {
             T ret = (T) data.get(fx);
             if (ret == null)
                 data.put(ret = fx, fx);
@@ -115,21 +118,31 @@ public class GlobEffector extends Drawable {
     }
 
     private static GlobEffector get(Glob glob) {
+        Collection<Gob> add = null;
+        GlobEffector ret;
         synchronized (cur) {
             Reference<GlobEffector> ref = cur.get(glob);
-            if (ref == null) {
+            ret = (ref == null) ? null : ref.get();
+            if (ret == null) {
                 Gob hgob = new Gob(glob, Coord2d.z) {
                     public Coord3f getc() {
                         return (Coord3f.o);
                     }
+
+                    public GLState getmapstate(Coord3f pc) {
+                        return (null);
+                    }
                 };
                 GlobEffector ne = new GlobEffector(hgob);
                 hgob.setattr(ne);
-                glob.oc.ladd(ne.holder = Collections.singleton(hgob));
-                cur.put(glob, ref = new WeakReference<GlobEffector>(ne));
+                add = ne.holder = Collections.singleton(hgob);
+                cur.put(glob, new WeakReference<GlobEffector>(ret = ne));
             }
-            return (ref.get());
+
         }
+        if (add != null)
+            glob.oc.ladd(add);
+        return (ret);
     }
 
     public static <T extends Effect> T get(Glob glob, T fx) {

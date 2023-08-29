@@ -342,6 +342,11 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     }
                 }
             }
+
+            Collection<GAttrib> attr = new ArrayList<>(Gob.this.attr.values());
+            for (GAttrib a : attr)
+                if (a instanceof Overlay.SetupMod)
+                    ((Overlay.SetupMod) a).setupgob(buf);
         }
     };
 
@@ -571,43 +576,50 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     }
 
     public void ctick(int dt) {
-        if (!discovered) {
-            resname().ifPresent(this::discovered);
-        }
-
-        synchronized (attr) {
-            for (GAttrib a : attr.values())
-                a.ctick(dt);
-        }
-
-        synchronized (dattrs) {
-            for (Pair<GAttrib, Consumer<Gob>> pair : new ArrayList<>(dattrs)) {
-                setattr(pair.a);
-                pair.a.ctick(dt);
-                pair.b.accept(this);
+        final Hidden hid = getattr(Hidden.class);
+        if (!(hid != null && Config.hideuniquegobs) || configuration.showhiddenoverlay) {
+            if (!discovered) {
+                resname().ifPresent(this::discovered);
             }
-            dattrs.clear();
-        }
 
-        synchronized (ols) {
-            for (Overlay ol : new ArrayList<>(ols)) {
-                if (ol.spr == null) {
-                    try {
-                        ol.spr = Sprite.create(this, ol.res.get(), ol.sdt.clone());
-                    } catch (Loading e) {
+            Collection<GAttrib> attr = new ArrayList<>(this.attr.values());
+            for (GAttrib a : attr)
+                a.ctick(dt);
+
+            synchronized (dattrs) {
+                for (Pair<GAttrib, Consumer<Gob>> pair : new ArrayList<>(dattrs)) {
+                    setattr(pair.a);
+                    pair.a.ctick(dt);
+                    pair.b.accept(this);
+                }
+                dattrs.clear();
+            }
+
+            synchronized (ols) {
+                for (Overlay ol : ols) {
+                    if (ol.spr == null) {
+                        try {
+                            ol.spr = Sprite.create(this, ol.res.get(), ol.sdt.clone());
+                        } catch (Loading e) {
+                        }
+                    } else {
+                        boolean done = ol.spr.tick(dt);
+                        if ((!ol.delign || (ol.spr instanceof Overlay.CDel)) && done)
+                            ols.remove(ol);
                     }
-                } else {
-                    boolean done = ol.spr.tick(dt);
-                    if ((!ol.delign || (ol.spr instanceof Overlay.CDel)) && done)
-                        ols.remove(ol);
                 }
             }
+
             for (Overlay ol : new ArrayList<>(dols)) {
-                ols.add(ol);
+                synchronized (ols) {
+                    ols.add(ol);
+                }
                 dols.remove(ol);
             }
-            if (virtual && ols.isEmpty())
-                glob.oc.remove(id);
+            synchronized (ols) {
+                if (virtual && ols.isEmpty())
+                    glob.oc.remove(id);
+            }
         }
     }
 
@@ -1161,6 +1173,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     }
 
                     rl.add(ol, null);
+
+                    if (ol.spr instanceof Overlay.SetupMod)
+                        ((Overlay.SetupMod) ol.spr).setupmain(rl);
                 }
                 if (Config.showbarreltext && name().matches("gfx/terobjs/barrel") && !ols.isEmpty()) {
                     if (barrelText != null) {
@@ -1189,11 +1204,13 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     }
                 }
                 if ((!Config.showbarreltext || ols.isEmpty()) && barreltext != null) barreltext = null;
-                for (Overlay ol : ols) {
-                    if (ol.spr instanceof Overlay.SetupMod)
-                        ((Overlay.SetupMod) ol.spr).setupmain(rl);
-                }
             }
+
+
+            Collection<GAttrib> attr = new ArrayList<>(this.attr.values());
+            for (GAttrib a : attr)
+                if (a instanceof Overlay.SetupMod)
+                    ((Overlay.SetupMod) a).setupmain(rl);
 
             if (type == Type.HUMAN || type == Type.VEHICLE || type == Type.WATERVEHICLE || type == Type.ANIMAL || type == Type.SMALLANIMAL || type == Type.TAMEDANIMAL || type == Type.DANGANIMAL) {
 //                    if (Movable.isMovable(name)) {}
@@ -1388,8 +1405,8 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             }
 
 
-            for (final haven.sloth.gob.Rendered attr : new ArrayList<>(renderedattrs)) {
-                attr.setup(rl);
+            for (final haven.sloth.gob.Rendered rattr : new ArrayList<>(renderedattrs)) {
+                rattr.setup(rl);
             }
 
             GobHighlight highlight = getattr(GobHighlight.class);
