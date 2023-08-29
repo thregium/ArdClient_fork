@@ -595,31 +595,26 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 dattrs.clear();
             }
 
-            synchronized (ols) {
-                for (Overlay ol : ols) {
-                    if (ol.spr == null) {
-                        try {
-                            ol.spr = Sprite.create(this, ol.res.get(), ol.sdt.clone());
-                        } catch (Loading e) {
-                        }
-                    } else {
-                        boolean done = ol.spr.tick(dt);
-                        if ((!ol.delign || (ol.spr instanceof Overlay.CDel)) && done)
-                            ols.remove(ol);
+            Collection<Overlay> ols = new ArrayList<>(this.ols);
+            for (Overlay ol : ols) {
+                if (ol.spr == null) {
+                    try {
+                        ol.spr = Sprite.create(this, ol.res.get(), ol.sdt.clone());
+                    } catch (Loading e) {
                     }
+                } else {
+                    boolean done = ol.spr.tick(dt);
+                    if ((!ol.delign || (ol.spr instanceof Overlay.CDel)) && done)
+                        ols.remove(ol);
                 }
             }
 
             for (Overlay ol : new ArrayList<>(dols)) {
-                synchronized (ols) {
-                    ols.add(ol);
-                }
+                ols.add(ol);
                 dols.remove(ol);
             }
-            synchronized (ols) {
-                if (virtual && ols.isEmpty())
-                    glob.oc.remove(id);
-            }
+            if (virtual && ols.isEmpty())
+                glob.oc.remove(id);
         }
     }
 
