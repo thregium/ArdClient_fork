@@ -45,18 +45,16 @@ public class Materials extends Mapping {
         return (stdmerge(orig, var));
     }
 
-    public Materials(Gob gob, Map<Integer, Material> mats) {
-        super(gob);
+    public Materials(Map<Integer, Material> mats) {
         this.mats = mats;
     }
 
     public Materials(Gob gob, Message dat) {
-        super(gob);
         this.mats = decode(gob.context(Resource.Resolver.class), dat);
     }
 
-    public static void parse(Gob gob, Message dat) {
-        gob.setattr(new Materials(gob, decode(gob.context(Resource.Resolver.class), dat)));
-    }
+//    public static void parse(Gob gob, Message dat) {
+//        gob.setattr(new Materials(gob, decode(gob.context(Resource.Resolver.class), dat)));
+//    }
 }
 

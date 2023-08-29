@@ -11,17 +11,18 @@ import haven.res.lib.uspr.UnivSprite;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Optional;
 
 public class VarSprite extends UnivSprite {
+    private Gob.ResAttr.Cell<Mapping> aptr;
     private Mapping cmats;
 
     public VarSprite(Owner owner, Resource res, Message sdt) {
         super(owner, res, sdt);
+        aptr = Gob.getrattr(owner, Mapping.class);
     }
 
     public Mapping mats() {
-        return (Optional.ofNullable((owner instanceof Gob) ? ((Gob) owner) : null).map(gob -> gob.getattr(Mapping.class)).orElse(Mapping.empty));
+        return (((aptr != null) && (aptr.attr != null)) ? aptr.attr : Mapping.empty);
     }
 
     public Collection<Rendered> iparts(int mask) {

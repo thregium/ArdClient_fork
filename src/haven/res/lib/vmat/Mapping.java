@@ -1,7 +1,6 @@
 package haven.res.lib.vmat;
 
 import haven.FastMesh;
-import haven.GAttrib;
 import haven.Gob;
 import haven.Material;
 import haven.Rendered;
@@ -10,13 +9,9 @@ import haven.Resource;
 import java.util.Collection;
 import java.util.LinkedList;
 
-public abstract class Mapping extends GAttrib {
+public abstract class Mapping extends Gob.ResAttr {
     public Mapping() {
-        super(null);
-    }
-
-    public Mapping(final Gob gob) {
-        super(gob);
+//        super(null);
     }
 
     public abstract Material mergemat(Material orig, int mid);
