@@ -72,6 +72,9 @@ import haven.purus.TroughFiller;
 import haven.res.gfx.fx.floatimg.DamageText;
 import haven.res.ui.croster.RosterButton;
 import haven.sloth.util.ObservableCollection;
+import modification.CustomFakeGrid;
+import modification.configuration;
+
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.font.TextAttribute;
@@ -89,8 +92,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
-import modification.CustomFakeGrid;
-import modification.configuration;
 
 public class MenuGrid extends Widget {
     public final static Coord bgsz = Inventory.invsq.sz().add(-1, -1);
@@ -455,9 +456,8 @@ public class MenuGrid extends Widget {
 
 
     public boolean cons(Pagina p, Collection<PagButton> buf) {
-        Collection<Pagina> open, close = new HashSet<>();
+        Collection<Pagina> open = new LinkedList<>(), close = new HashSet<>();
         synchronized (paginae) {
-            open = new LinkedList<>();
             for (Pagina pag : paginae) {
                 if (pag.newp == 2) {
                     pag.newp = 0;
@@ -465,11 +465,11 @@ public class MenuGrid extends Widget {
                 }
                 open.add(pag);
             }
-            for (Pagina pag : pmap.values()) {
-                if (pag.newp == 2) {
-                    pag.newp = 0;
-                    pag.fstart = 0;
-                }
+        }
+        for (Pagina pag : new ArrayList<>(pmap.values())) {
+            if (pag.newp == 2) {
+                pag.newp = 0;
+                pag.fstart = 0;
             }
         }
         boolean ret = true;

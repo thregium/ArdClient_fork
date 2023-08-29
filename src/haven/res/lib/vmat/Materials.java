@@ -1,19 +1,14 @@
 package haven.res.lib.vmat;
 
-import haven.GLState;
 import haven.Gob;
 import haven.Indir;
 import haven.IntMap;
 import haven.Material;
 import haven.Message;
-import haven.Pair;
 import haven.Resource;
-import modification.dev;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 
 public class Materials extends Mapping {
