@@ -370,7 +370,7 @@ public class KeyBinder {
                 } else if (code != KeyEvent.VK_ESCAPE) {
                     listener.keyBindChanged(bind, make(ev, bind.action));
                 }
-                remove();
+                clear();
             }
             return true;
         }
@@ -390,11 +390,11 @@ public class KeyBinder {
 
         @Override
         public boolean mousedown(Coord c, int button) {
-            remove();
+            clear();
             return true;
         }
 
-        public void remove() {
+        public void clear() {
             mousegrab.remove();
             keygrab.remove();
             reqdestroy();

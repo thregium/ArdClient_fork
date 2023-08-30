@@ -138,6 +138,16 @@ public class RichText extends Text {
                     break;
                 }
             }
+            if (this.img == null) {
+                int tid = id == -1 ? 0 : id;
+                for (TexR tex : res.layers(TexR.class)) {
+                    if (tex.id == tid) {
+                        this.img = tex.tex.fill();
+                        this.imgscale = 1;
+                        break;
+                    }
+                }
+            }
             if (this.img == null)
                 throw (new RuntimeException("Found no image with id " + id + " in " + res.toString()));
         }

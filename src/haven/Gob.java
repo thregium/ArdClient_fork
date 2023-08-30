@@ -582,21 +582,21 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 resname().ifPresent(this::discovered);
             }
 
-            Collection<GAttrib> attr = new ArrayList<>(this.attr.values());
-            for (GAttrib a : attr)
+            for (GAttrib a : new ArrayList<>(this.attr.values()))
                 a.ctick(dt);
 
-            synchronized (dattrs) {
-                for (Pair<GAttrib, Consumer<Gob>> pair : new ArrayList<>(dattrs)) {
-                    setattr(pair.a);
-                    pair.a.ctick(dt);
-                    pair.b.accept(this);
-                }
-                dattrs.clear();
+            List<Pair<GAttrib, Consumer<Gob>>> dattrs;
+            synchronized (this.dattrs) {
+                dattrs = new ArrayList<>(this.dattrs);
+                this.dattrs.clear();
+            }
+            for (Pair<GAttrib, Consumer<Gob>> pair : dattrs) {
+                setattr(pair.a);
+                pair.a.ctick(dt);
+                pair.b.accept(this);
             }
 
-            Collection<Overlay> ols = new ArrayList<>(this.ols);
-            for (Overlay ol : ols) {
+            for (Overlay ol : new ArrayList<>(ols)) {
                 if (ol.spr == null) {
                     try {
                         ol.spr = Sprite.create(this, ol.res.get(), ol.sdt.clone());
@@ -605,12 +605,12 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 } else {
                     boolean done = ol.spr.tick(dt);
                     if ((!ol.delign || (ol.spr instanceof Overlay.CDel)) && done)
-                        this.ols.remove(ol);
+                        ols.remove(ol);
                 }
             }
 
             for (Overlay ol : new ArrayList<>(dols)) {
-                this.ols.add(ol);
+                ols.add(ol);
                 dols.remove(ol);
             }
             if (virtual && ols.isEmpty())
@@ -967,9 +967,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         if (a instanceof haven.sloth.gob.Rendered)
             renderedattrs.add((haven.sloth.gob.Rendered) a);
         Class<? extends GAttrib> ac = attrclass(a.getClass());
-        synchronized (attr) {
-            attr.put(ac, a);
-        }
+        attr.put(ac, a);
 //        if (DefSettings.SHOWPLAYERPATH.get() && gobpath == null && a instanceof LinMove) {
 //            final UI ui = glob.ui.get();
 //            if (ui != null) {
@@ -990,24 +988,18 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     }
 
     public void delayedsetattr(GAttrib a, Consumer<Gob> cb) {
-        synchronized (dattrs) {
-            dattrs.add(new Pair<>(a, cb));
-        }
+        dattrs.add(new Pair<>(a, cb));
     }
 
     public <C extends GAttrib> C getattr(Class<C> c) {
-        synchronized (attr) {
-            GAttrib attr = this.attr.get(attrclass(c));
-            if (!c.isInstance(attr))
-                return (null);
-            return (c.cast(attr));
-        }
+        GAttrib attr = this.attr.get(attrclass(c));
+        if (!c.isInstance(attr))
+            return (null);
+        return (c.cast(attr));
     }
 
     public void delattr(Class<? extends GAttrib> c) {
-        synchronized (attr) {
-            attr.remove(attrclass(c));
-        }
+        attr.remove(attrclass(c));
     }
 
     private Class<? extends ResAttr> rattrclass(Class<? extends ResAttr> cl) {
@@ -1021,7 +1013,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 
     @SuppressWarnings("unchecked")
     public <T extends ResAttr> ResAttr.Cell<T> getrattr(Class<T> c) {
-        for (ResAttr.Cell<?> rd : rdata) {
+        for (ResAttr.Cell<?> rd : new ArrayList<>(rdata)) {
             if (rd.clsid == c)
                 return ((ResAttr.Cell<T>) rd);
         }
@@ -1067,7 +1059,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     }
 
     public void setrattr(Indir<Resource> resid, Message dat) {
-        for (ResAttr.Cell<?> rd : rdata) {
+        for (ResAttr.Cell<?> rd : new ArrayList<>(rdata)) {
             if (rd.resid == resid) {
                 if (dat.equals(rd.odat))
                     return;

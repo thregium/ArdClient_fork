@@ -150,7 +150,7 @@ public class IMeter extends MovableWidget {
                 Matcher matcher = hppat.matcher(tt);
                 String meterinfo = null;
                 if (matcher.find()) {
-                    if (matcher.groupCount() == 4) {
+                    if (matcher.group(4) != null) {
                         meterinfo = matcher.group(1);
                     } else {
                         ui.sess.details.shp = Integer.parseInt(matcher.group(1));
