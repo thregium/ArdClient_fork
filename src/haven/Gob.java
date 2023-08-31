@@ -923,6 +923,14 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         }
     }
 
+    public void move(Coord2d c) {
+        move(c, this.a);
+    }
+
+    public void move(double a) {
+        move(this.rc, a);
+    }
+
     public Coord3f getc() {
         Moving m = getattr(Moving.class);
         Coord3f ret = (m != null) ? m.getc() : getrc();
