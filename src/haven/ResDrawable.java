@@ -67,7 +67,7 @@ public class ResDrawable extends Drawable {
             gob.type = Type.getType(res.name);
 
         MessageBuf stdCopy = sdt.clone();
-        byte[] args = new byte[2];
+//        byte[] args = new byte[2];
         /*if(Config.largetree || Config.largetreeleaves || Config.bonsai){
             if(res.name.contains("tree") && !stdCopy.eom()){
 
@@ -98,15 +98,6 @@ public class ResDrawable extends Drawable {
                 }
             }
         }*/
-        if (configuration.scaletree && (this.gob.type == Type.TREE || this.gob.type == Type.BUSH) && !stdCopy.eom()) {
-            args[0] = (byte) stdCopy.uint8();
-            int fscale = configuration.scaletreeint;
-            if (!stdCopy.eom() && (fscale = stdCopy.uint8()) > configuration.scaletreeint) {
-                fscale = configuration.scaletreeint;
-            }
-            args[1] = (byte) fscale;
-            stdCopy = new MessageBuf(args);
-        }
         //Dump Name/Type of non-gob
         //System.out.println(this.res.get().name);
         //System.out.println(gob.type);

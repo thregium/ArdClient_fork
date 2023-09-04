@@ -10,6 +10,7 @@ import haven.MCache;
 import haven.Material;
 import haven.Matrix4f;
 import haven.Message;
+import haven.MessageBuf;
 import haven.PView;
 import haven.Pair;
 import haven.RenderLink;
@@ -19,6 +20,7 @@ import haven.Resource;
 import haven.Sprite;
 import haven.States;
 import haven.res.lib.leaves.FallingLeaves;
+import modification.configuration;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -109,16 +111,25 @@ public class Tree extends Sprite {
         return (null);
     }
 
+    private static final float MIN_SCALE = 0.3f;
     public Tree(Owner owner, Resource res, float scale, int s, int fl) {
         super(owner, res);
 //        rot = rndrot(owner);
         this.fscale = scale;
         if (owner instanceof Gob) {
             Gob gob = (Gob) owner;
+            gob.delattr(TreeRotation.class);
             gob.setattr(new TreeRotation(gob, rndrot(gob)));
 //            gob.setattr(new GobSvaj(gob));
-            if (fscale != 1.0f)
-                gob.setattr(new TreeScale(gob, fscale));
+            float nscale = configuration.scaletreeint / 100f;
+            gob.delattr(TreeScale.class);
+            if (fscale != 1.0f) {
+                float min = Math.max(MIN_SCALE, fscale);
+                float sc = fscale * nscale;
+                gob.setattr(new TreeScale(gob, configuration.scaletree ? Math.max(Math.min(min, nscale), sc) : min));
+            } else if (configuration.scaletree) {
+                gob.setattr(new TreeScale(gob, nscale));
+            }
         }
 //        this.scale = (scale == 1.0f) ? null : mkscale(scale);
         parts = mkparts(res, s, fl);

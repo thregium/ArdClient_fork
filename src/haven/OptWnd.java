@@ -1187,7 +1187,7 @@ public class OptWnd extends Window {
                     ui.sess.glob.oc.refreshallresdraw();
                 }
             }
-        }, new HSlider(200, 0, 255, configuration.scaletreeint) {
+        }, new HSlider(200, 0, 400, configuration.scaletreeint) {
 
             @Override
             protected void added() {
