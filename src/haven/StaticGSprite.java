@@ -54,6 +54,6 @@ public class StaticGSprite extends GSprite implements GSprite.ImageSprite {
     }
 
     public BufferedImage image() {
-        return (img.img);
+        return (img.rawimage);
     }
 }
