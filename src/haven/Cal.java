@@ -61,7 +61,6 @@ public class Cal extends Widget {
         Coord mc = Coord.sc((a.dt + 0.25) * 2 * PI, hbr).add(sz.div(2)).sub(moon.sz.div(2));
         Coord sc = Coord.sc((a.dt + 0.75) * 2 * PI, hbr).add(sz.div(2)).sub(sun.sz.div(2));
         this.parent.ui.sess.glob.moonid = moon.id;
-        this.parent.ui.sess.glob.night = a.night;
         g.chcolor(a.mc);
         g.image(moon, mc);
         g.chcolor();

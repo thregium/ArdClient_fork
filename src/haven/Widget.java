@@ -81,14 +81,14 @@ public class Widget {
     @RName("cnt")
     public static class $Cont implements Factory {
         public Widget create(UI ui, Object[] args) {
-            return (new Widget((Coord) args[0]));
+            return (new Widget(UI.scale((Coord) args[0])));
         }
     }
 
     @RName("ccnt")
     public static class $CCont implements Factory {
         public Widget create(UI ui, Object[] args) {
-            Widget ret = new Widget((Coord) args[0]) {
+            Widget ret = new Widget(UI.scale((Coord) args[0])) {
                 public void presize() {
                     c = parent.sz.div(2).sub(sz.div(2));
                 }

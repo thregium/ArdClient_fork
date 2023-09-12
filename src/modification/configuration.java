@@ -275,6 +275,8 @@ public class configuration {
     public static boolean showgobssemistat = Utils.getprefb("showgobssemistat", true);
     public static boolean showgobsnewfags = Utils.getprefb("showgobsnewfags", true);
     public static boolean showgobsdynamic = Utils.getprefb("showgobsdynamic", true);
+    public static boolean enablegobticks = Utils.getprefb("enablegobticks", true);
+    public static boolean enablegobcticks = Utils.getprefb("enablegobcticks", true);
 
     public static boolean disablepavingoutlineonmap = Utils.getprefb("disablepavingoutlineonmap", false);
 

@@ -69,6 +69,7 @@ public class GobHitbox extends Sprite {
         rl.prepo(clrstate);
         if (mode == GL2.GL_LINE_LOOP && !configuration.showaccboundingboxes)
             rl.prepo(States.xray);
+        rl.prepc(States.normalize);
         return true;
     }
 

@@ -182,7 +182,7 @@ public class Charlist extends Widget {
 //                MainFrame.instance.p.removeUI(ui);
             }
         };
-        parent.add(btn, 120, 553);
+        parent.add(btn, UI.scale(120), parent.sz.y - UI.scale(50));
     }
 
     private int scrolltgt = -1;

@@ -6486,6 +6486,7 @@ public class OptWnd extends Window {
                         new CheckBox("newfags", v -> Utils.setprefb("showgobsnewfags", configuration.showgobsnewfags = v), configuration.showgobsnewfags),
                         new CheckBox("dynamic", v -> Utils.setprefb("showgobsdynamic", configuration.showgobsdynamic = v), configuration.showgobsdynamic)
                         );
+                appender.addRow(new CheckBox("Gob Tick", v -> Utils.setprefb("enablegobticks", configuration.enablegobticks = v), configuration.enablegobticks), new CheckBox("Gob Ctick", v -> Utils.setprefb("enablegobcticks", configuration.enablegobcticks = v), configuration.enablegobcticks));
                 appender.add(new CheckBox("Disable biome tile transitions") {
                     {
                         a = Config.disabletiletrans;

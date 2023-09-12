@@ -158,6 +158,7 @@ public class OCache implements Iterable<Gob> {
     }
 
     public void tick() {
+        if (!configuration.enablegobticks) return;
         Collection<Gob> values = new ArrayList<>(objs.values());
         synchronized (this) {
             for (Gob g : values) {
@@ -167,6 +168,7 @@ public class OCache implements Iterable<Gob> {
     }
 
     public void ctick(int dt) {
+        if (!configuration.enablegobcticks) return;
         Collection<Gob> values = new ArrayList<>(objs.values());
         synchronized (this) {
             for (Gob g : values) {

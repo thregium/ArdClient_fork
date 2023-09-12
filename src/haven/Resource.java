@@ -1160,7 +1160,7 @@ public class Resource implements Serializable {
             if (tsz == null)
                 tsz = sz;
             rawtsz = tsz;
-            ssz = new Coord(Math.round(UI.scale(sz.x / scale)), Math.round(UI.scale(sz.y / scale)));
+            ssz = UI.scale(sz.div(scale));
             if (scale != UI.getScale()) {
                 img = scaled();
                 sz = ssz;

@@ -29,6 +29,7 @@ package haven;
 import java.awt.Color;
 
 public class Astronomy {
+    //day >= 0.2 - dawn
     public final double dt, mp, yt, sp, sd;
     public final double years, ym, md;
     public final boolean night;
