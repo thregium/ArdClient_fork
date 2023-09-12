@@ -7,6 +7,7 @@ import modification.configuration;
 import javax.media.opengl.GL2;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,10 +67,10 @@ public class GobHitbox extends Sprite {
     }
 
     public boolean setup(RenderList rl) {
+        Location.goback(rl.state(), "gob");
         rl.prepo(clrstate);
         if (mode == GL2.GL_LINE_LOOP && !configuration.showaccboundingboxes)
             rl.prepo(States.xray);
-        rl.prepc(States.normalize);
         return true;
     }
 
