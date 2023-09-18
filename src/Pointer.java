@@ -218,7 +218,7 @@ public class Pointer extends Widget {
 
                     String name = ((Text.Line) this.tooltip).text;
                     if (name != null) {
-                        configuration.treesMap.put(name, gobid);
+                        configuration.treesMap.put(gobid, name);
                     }
                 }
                 break;

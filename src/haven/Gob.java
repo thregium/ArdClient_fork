@@ -1184,9 +1184,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             if (Config.showbarrelstatus && name().matches("gfx/terobjs/barrel")) {
                 if (barrelRet) rl.prepc(barrelemptycolormaterial.get());
             }
-            for (Map.Entry<String, Long> entry : configuration.treesMap.entrySet()) {
-                if (entry.getValue() == id) {
-                    String text = entry.getKey();
+            for (Map.Entry<Long, String> entry : configuration.treesMap.entrySet()) {
+                if (entry.getKey() == id) {
+                    String text = entry.getValue();
                     if (text != null) {
                         if (treetext == null) treetext = new gobText(this, text, Color.ORANGE, 50);
                         rl.add(treetext, null);

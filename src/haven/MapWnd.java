@@ -1582,7 +1582,7 @@ public class MapWnd extends ResizableWnd {
     }
 
     public void markobj(long gobid, long oid, Indir<Resource> resid, String nm) {
-        configuration.treesMap.put(nm, gobid);
+        configuration.treesMap.put(gobid, nm);
         synchronized (deferred) {
             deferred.add(new Runnable() {
                 double f = 0;
