@@ -931,6 +931,9 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     }
 
     private boolean dropItMaybe() {
+        Widget prn = parent;
+        if (configuration.autodroponlyplayer && prn != PBotUtils.playerInventory(ui).inv)
+            return (true);
         Resource curs = ui.root.getcurs(Coord.z);
         Resource res = this.resource();
         String name = res.basename();

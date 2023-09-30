@@ -4814,6 +4814,8 @@ public class OptWnd extends Window {
 
 
         y = 15;
+        autodropsettings.add(new CheckBox("Only player inventory", val -> Utils.setprefb("autodroponlyplayer", configuration.autodroponlyplayer = val), configuration.autodroponlyplayer), new Coord(list.sz.x + 10, y));
+        y += 20;
         autodropsettings.add(new CheckBox("Drop mined stones") {
             {
                 a = Config.dropMinedStones;
