@@ -373,7 +373,7 @@ public class Glob {
             int mp = (int) Math.round(ast.mp * mPhaseNames.length) % mPhaseNames.length;
             phaseOfMoon = mPhaseNames[mp] + " Moon";
             year = "Year " + ((int) Math.floor(ast.years) + 1);
-            dayTime = ast.night ? (ast.dt >= 0.2 ? "Dawn" : "Night") : "Day";
+            dayTime = ast.night ? (ast.dt >= 0.2 && ast.dt < 0.5 ? "Dawn" : "Night") : "Day";
         }
 
         mservertime = Resource.getLocString(Resource.BUNDLE_LABEL, "Day") + String.format(" %d, %02d:%02d:%02d", day, hours, mins, seconds) + (dayTime.isEmpty() ? "" : ", " + dayTime);

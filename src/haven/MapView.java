@@ -184,6 +184,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     private Object tt;
 
     private boolean ismousedown = false;
+    private boolean canautoclick = true;
 
     public interface Delayed {
         public void run(GOut g);
@@ -2249,6 +2250,16 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             camload = e;
         }
         updateSpeed(dt);
+        if (configuration.autoclick && ismousedown && canautoclick && ui.modflags() == 0) {
+            canautoclick = false;
+            delay(new Hittest(ui.mc, 1) {
+                @Override
+                protected void hit(final Coord pc, final Coord2d mc, final ClickInfo inf) {
+                    wdgmsg("click", pc, mc.floor(posres), 1, 0);
+                    canautoclick = true;
+                }
+            });
+        }
         if (!movequeue.isEmpty() && (System.currentTimeMillis() - lastMove > 500) && triggermove()) {
             movingto = movequeue.poll();
             if (movingto != null) {
@@ -3014,8 +3025,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         } else if ((grab != null) && grab.mmousedown(c, button)) {
         } else {
             if (configuration.autoclick)
-                if (button == 1) {
+                if (button == 1 && ui.modflags() == 0) {
                     ismousedown = true;
+                    canautoclick = true;
                 }
             delay(new Click(c, ui.modflags(), button));
         }
@@ -3052,9 +3064,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     public void mousemove(Coord c) {
-        if (configuration.autoclick)
-            if (ismousedown && ui.modflags() == 0)
-                delay(new Click(c, ui.modflags(), 1));
         if (grab != null)
             grab.mmousemove(c);
 

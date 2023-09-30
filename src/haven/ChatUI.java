@@ -927,7 +927,7 @@ public class ChatUI extends Widget {
                 Integer from = (Integer) args[0];
                 String line = (String) args[1];
 
-                if (name.equals(Resource.getLocString(Resource.BUNDLE_LABEL, "Area Chat")) && line.startsWith(CMD_PREFIX_HLIGHT)) {
+                if (/*name.equals(Resource.getLocString(Resource.BUNDLE_LABEL, "Area Chat")) && */line.startsWith(CMD_PREFIX_HLIGHT)) {
                     try {
                         long gobid = Long.parseLong(line.substring(1));
                         OCache oc = ui.gui.map.glob.oc;
