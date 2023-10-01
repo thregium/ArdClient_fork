@@ -83,6 +83,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
@@ -188,6 +189,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
     public interface Delayed {
         public void run(GOut g);
+        default void onFinish() {};
     }
 
     public interface Grabber {
@@ -2252,10 +2254,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         updateSpeed(dt);
         if (configuration.autoclick && ismousedown && canautoclick && ui.modflags() == 0) {
             canautoclick = false;
-            delay(new Hittest(ui.mc, 1) {
+            delay(new Click(ui.mc, ui.modflags(), 1) {
                 @Override
-                protected void hit(final Coord pc, final Coord2d mc, final ClickInfo inf) {
-                    wdgmsg("click", pc, mc.floor(posres), 1, 0);
+                public void onFinish() {
                     canautoclick = true;
                 }
             });
@@ -2512,6 +2513,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 });
             } finally {
                 g.st.set(bk);
+                onFinish();
             }
         }
 
@@ -2559,6 +2561,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 });
             } finally {
                 g.st.set(bk);
+                onFinish();
             }
         }
 
@@ -3024,11 +3027,12 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             fakeGob = null;
         } else if ((grab != null) && grab.mmousedown(c, button)) {
         } else {
-            if (configuration.autoclick)
+            if (configuration.autoclick) {
                 if (button == 1 && ui.modflags() == 0) {
                     ismousedown = true;
                     canautoclick = true;
                 }
+            }
             delay(new Click(c, ui.modflags(), button));
         }
         return (true);
