@@ -2252,7 +2252,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             camload = e;
         }
         updateSpeed(dt);
-        if (configuration.autoclick && ismousedown && canautoclick && ui.modflags() == 0) {
+        if (configuration.autoclick && ismousedown && canautoclick) {
             canautoclick = false;
             delay(new Click(ui.mc, ui.modflags(), 1) {
                 @Override
@@ -3028,7 +3028,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         } else if ((grab != null) && grab.mmousedown(c, button)) {
         } else {
             if (configuration.autoclick) {
-                if (button == 1 && ui.modflags() == 0) {
+                if (button == 1) {
                     ismousedown = true;
                     canautoclick = true;
                 }
