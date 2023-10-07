@@ -429,13 +429,14 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         }
 
         if (!chrid.isEmpty() && ui.sess != null) {
+            String endpoint = Utils.getpref("vendan-mapv4-endpoint", "");
             Glob glob = ui.sess.glob;
-            if (glob != null) {
+            if (glob != null && !endpoint.isEmpty()) {
                 glob.addReference(chrid);
                 if (configuration.loadMapSetting(chrid, "mapper")) {
                     MappingClient map = MappingClient.getInstance(chrid);
                     if (map != null) {
-                        map.SetEndpoint(Utils.getpref("vendan-mapv4-endpoint", ""));
+                        map.SetEndpoint(endpoint);
                         map.EnableGridUploads(true);
                         map.SetPlayerName(chrid);
                     }

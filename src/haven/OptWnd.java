@@ -250,7 +250,7 @@ public class OptWnd extends Window {
     public static Widget ColorPreWithLabel(final String text, final IndirSetting<Color> cl) {
         final Widget container = new Widget();
         final Label lbl = new Label(text);
-        final IndirColorPreview pre = new IndirColorPreview(new Coord(16, 16), cl);
+        final IndirColorPreview pre = new IndirColorPreview(UI.scale(16, 16), cl);
         final int height = Math.max(lbl.sz.y, pre.sz.y) / 2;
         container.add(lbl, new Coord(0, height - lbl.sz.y / 2));
         container.add(pre, new Coord(lbl.sz.x, height - pre.sz.y / 2));
@@ -261,7 +261,7 @@ public class OptWnd extends Window {
     public static Widget ColorPreWithLabel(final String text, final IndirSetting<Color> cl, final Consumer<Color> cb) {
         final Widget container = new Widget();
         final Label lbl = new Label(text);
-        final IndirColorPreview pre = new IndirColorPreview(new Coord(16, 16), cl, cb);
+        final IndirColorPreview pre = new IndirColorPreview(UI.scale(16, 16), cl, cb);
         final int height = Math.max(lbl.sz.y, pre.sz.y) / 2;
         container.add(lbl, new Coord(0, height - lbl.sz.y / 2));
         container.add(pre, new Coord(lbl.sz.x, height - pre.sz.y / 2));
@@ -276,7 +276,7 @@ public class OptWnd extends Window {
         appender.add(new Label("Online Auto-Mapper Service:"));
 
         appender.addRow(new Label("Server URL:"),
-                new TextEntry(240, Utils.getpref("vendan-mapv4-endpoint", "")) {
+                new TextEntry(UI.scale(240), Utils.getpref("vendan-mapv4-endpoint", "")) {
                     public boolean keydown(KeyEvent ev) {
                         if (!parent.visible)
                             return false;
@@ -401,7 +401,7 @@ public class OptWnd extends Window {
             }
         });
 
-        mapping.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
+        mapping.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         mapping.pack();
     }
 
@@ -421,7 +421,7 @@ public class OptWnd extends Window {
 
         WidgetVerticalAppender app2 = new WidgetVerticalAppender(main);
         app2.setVerticalMargin(VERTICAL_MARGIN);
-        app2.setX(btnw + 10);
+        app2.setX(btnw + UI.scale(10));
         app2.add(new PButton(btnw, "General", 'g', general));
         app2.add(new PButton(btnw, "Combat", 'c', combat));
         app2.add(new PButton(btnw, "Control", 'k', control));
@@ -431,7 +431,7 @@ public class OptWnd extends Window {
 
         WidgetVerticalAppender app3 = new WidgetVerticalAppender(main);
         app3.setVerticalMargin(VERTICAL_MARGIN);
-        app3.setX((btnw + 10) * 2);
+        app3.setX((btnw + UI.scale(10)) * 2);
         app3.add(new PButton(btnw, "Item Overlay", 'q', quality));
         app3.add(new PButton(btnw, "Pop-up Menu", 'f', flowermenus));
         app3.add(new PButton(btnw, "Quick Actions", 'b', quickactionsettings));
@@ -455,7 +455,7 @@ public class OptWnd extends Window {
 
         WidgetVerticalAppender app4 = new WidgetVerticalAppender(main);
         app4.setVerticalMargin(5);
-        app4.setX(btnw + 10);
+        app4.setX(btnw + UI.scale(10));
         app4.setY(Math.max(Math.max(app1.getY(), app2.getY()), app3.getY()) + 25);
         app4.add(new Button(btnw, "Changelog") {
             public void click() {
@@ -543,7 +543,7 @@ public class OptWnd extends Window {
 
     private void initAudio() {
         initAudioFirstColumn();
-        audio.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
+        audio.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         audio.pack();
     }
 
@@ -557,7 +557,7 @@ public class OptWnd extends Window {
             resources.sfxmenus.forEach(s -> resources.sfxlist.addItem(configuration.createSFXSlider(s)));
         }
         appender2.add(resources.sfxlist);
-        resources.sfxsearch = new TextEntry(200, "") {
+        resources.sfxsearch = new TextEntry(UI.scale(200), "") {
             @Override
             public void changed() {
                 update();
@@ -589,7 +589,7 @@ public class OptWnd extends Window {
             }
         };
         appender2.add(resources.sfxsearch);
-        appender2.add(new Button(200, "Clear") {
+        appender2.add(new Button(UI.scale(200), "Clear") {
             @Override
             public boolean mousedown(Coord mc, int btn) {
                 if (ui.modctrl && btn == 1) {
@@ -613,7 +613,7 @@ public class OptWnd extends Window {
 
         appender.add(new Label("Master audio volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, (int) (Audio.volume * 1000)) {
+        appender.add(new HSlider(UI.scale(200), 0, 1000, (int) (Audio.volume * 1000)) {
             public void changed() {
                 Audio.setvolume(val / 1000.0);
             }
@@ -621,7 +621,7 @@ public class OptWnd extends Window {
         appender.setVerticalMargin(0);
         appender.add(new Label("In-game event volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
             protected void attach(UI ui) {
                 super.attach(ui);
                 val = (int) (ui.audio.pos.volume * 1000);
@@ -634,7 +634,7 @@ public class OptWnd extends Window {
         appender.setVerticalMargin(0);
         appender.add(new Label("Ambient volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
             protected void attach(UI ui) {
                 super.attach(ui);
                 val = (int) (ui.audio.amb.volume * 1000);
@@ -646,7 +646,7 @@ public class OptWnd extends Window {
         });
         appender.addRow(new Label("Cleave Sound"), makeDropdownCleave());
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
             protected void added() {
                 super.added();
                 val = (int) (Config.cleavesoundvol * 1000);
@@ -661,7 +661,7 @@ public class OptWnd extends Window {
         appender.setVerticalMargin(0);
         appender.add(new Label("Timers alarm volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
             protected void added() {
                 super.added();
                 val = (int) (Config.timersalarmvol * 1000);
@@ -676,7 +676,7 @@ public class OptWnd extends Window {
         appender.setVerticalMargin(0);
         appender.add(new Label("Alerted gobs sound volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
             protected void added() {
                 super.added();
                 val = (int) (Config.alertsvol * 1000);
@@ -690,7 +690,7 @@ public class OptWnd extends Window {
         });
         appender.add(new Label("'Ding' sound volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
             protected void added() {
                 super.added();
                 val = (int) (Config.sfxdingvol * 1000);
@@ -705,7 +705,7 @@ public class OptWnd extends Window {
         appender.setVerticalMargin(0);
         appender.add(new Label("'Whip' sound volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
             protected void added() {
                 super.added();
                 val = (int) (Config.sfxwhipvol * 1000);
@@ -719,19 +719,24 @@ public class OptWnd extends Window {
         });
         appender.add(new Label("Audio buffer"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 512, 16384, Utils.getprefi("audiobufsize", 4096)) {
+        appender.add(new HSlider(UI.scale(200), 512, 16384, Utils.getprefi("audiobufsize", 4096)) {
             public void changed() {
-                val = (val / 16) / 16;
+                val = (val / 16) * 16;
                 Utils.setprefi("audiobufsize", val);
                 try {
                     ui.cons.run(new String[]{"audiobufsize", Integer.toString(val / 4)});
                 } catch (Exception e) {}
             }
+
+            @Override
+            public Object tooltip(final Coord c, final Widget prev) {
+                return (Text.render(String.format("Audiobuf %s", val)));
+            }
         });
         appender.setVerticalMargin(0);
 //        appender.add(new Label("Fireplace sound volume (req. restart)"));
 //        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-//        appender.add(new HSlider(200, 0, 1000, 0) {
+//        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
 //            protected void added() {
 //                super.added();
 //                val = (int) (Config.sfxfirevol * 1000);
@@ -746,7 +751,7 @@ public class OptWnd extends Window {
 //        appender.setVerticalMargin(0);
 //        appender.add(new Label("Cauldron sound volume - Changes are not immediate, will trigger on next cauldon sound start."));
 //        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-//        appender.add(new HSlider(200, 0, 1000, 0) {
+//        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
 //            protected void added() {
 //                super.added();
 //                val = (int) (Config.sfxcauldronvol * 1000);
@@ -761,7 +766,7 @@ public class OptWnd extends Window {
 //        appender.setVerticalMargin(0);
 //        appender.add(new Label("Beehive sound volume"));
 //        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-//        appender.add(new HSlider(200, 0, 1000, 0) {
+//        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
 //            protected void added() {
 //                super.added();
 //                val = (int) (Config.sfxbeehivevol * 1000);
@@ -800,7 +805,7 @@ public class OptWnd extends Window {
 
     private void initDisplay() {
         initDisplayFirstColumn();
-        display.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
+        display.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         display.pack();
     }
 
@@ -818,7 +823,7 @@ public class OptWnd extends Window {
             appender.add(ColorPreWithLabel("Button Color: ", BTNCOL));
             appender.add(ColorPreWithLabel("Textbox Color: ", TXBCOL));
             appender.add(ColorPreWithLabel("Slider Color: ", SLIDERCOL));
-            uip.add(new PButton(200, "Back", 27, main), new Coord(210, 380));
+            uip.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 380));
             uip.pack();
         }
     }
@@ -1094,38 +1099,38 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.addRow(new CheckBox("Highlight empty/full storages", val -> Utils.setprefb("showcupboardstatus", Config.showcupboardstatus = val), Config.showcupboardstatus), new ColorPreview(new Coord(20, 20), Gob.getEmptyStorageColor(), Gob::setEmptyStorageColor), new ColorPreview(new Coord(20, 20), Gob.getFullStorageColor(), Gob::setFullStorageColor));
-        appender.addRow(new CheckBox("Highlight empty barrels", val -> Utils.setprefb("showbarrelstatus", Config.showbarrelstatus = val), Config.showbarrelstatus), new ColorPreview(new Coord(20, 20), Gob.getEmptyBarrelColor(), Gob::setEmptyBarrelColor));
+        appender.addRow(new CheckBox("Highlight empty/full storages", val -> Utils.setprefb("showcupboardstatus", Config.showcupboardstatus = val), Config.showcupboardstatus), new ColorPreview(UI.scale(20, 20), Gob.getEmptyStorageColor(), Gob::setEmptyStorageColor), new ColorPreview(UI.scale(20, 20), Gob.getFullStorageColor(), Gob::setFullStorageColor));
+        appender.addRow(new CheckBox("Highlight empty barrels", val -> Utils.setprefb("showbarrelstatus", Config.showbarrelstatus = val), Config.showbarrelstatus), new ColorPreview(UI.scale(20, 20), Gob.getEmptyBarrelColor(), Gob::setEmptyBarrelColor));
         appender.addRow(new CheckBox("Show barrel content text over barrel", val -> Utils.setprefb("showbarreltext", Config.showbarreltext = val), Config.showbarreltext));
-        appender.addRow(new CheckBox("Highlight partially full storages", val -> Utils.setprefb("showpartialstoragestatus", Config.showpartialstoragestatus = val), Config.showpartialstoragestatus), new ColorPreview(new Coord(20, 20), Gob.getHalfStorageColor(), Gob::setHalfStorageColor));
+        appender.addRow(new CheckBox("Highlight partially full storages", val -> Utils.setprefb("showpartialstoragestatus", Config.showpartialstoragestatus = val), Config.showpartialstoragestatus), new ColorPreview(UI.scale(20, 20), Gob.getHalfStorageColor(), Gob::setHalfStorageColor));
         appender.add(new CheckBox("Highlight sheds based on amount of contents", val -> Utils.setprefb("showshedstatus", Config.showshedstatus = val), Config.showshedstatus));
-        appender.addRow(new CheckBox("Highlight empty/full cheese racks.", val -> Utils.setprefb("showrackstatus", Config.showrackstatus = val), Config.showrackstatus), new ColorPreview(Coord.of(16, 16), CHEESERACKEMPTYCOLOR.get(), val -> {
+        appender.addRow(new CheckBox("Highlight empty/full cheese racks.", val -> Utils.setprefb("showrackstatus", Config.showrackstatus = val), Config.showrackstatus), new ColorPreview(UI.scale(16, 16), CHEESERACKEMPTYCOLOR.get(), val -> {
             CHEESERACKEMPTYCOLOR.set(val);
             Gob.cRackEmpty = new Material.Colors(val);
-        }), new ColorPreview(Coord.of(16, 16), CHEESERACKFULLCOLOR.get(), val -> {
+        }), new ColorPreview(UI.scale(16, 16), CHEESERACKFULLCOLOR.get(), val -> {
             CHEESERACKFULLCOLOR.set(val);
             Gob.cRackFull = new Material.Colors(val);
         }));
-        appender.addRow(new CheckBox("Highlight partially full cheese racks.", val -> Utils.setprefb("cRackmissing", Config.cRackmissing = val), Config.cRackmissing), new ColorPreview(Coord.of(16, 16), CHEESERACKMISSINGCOLOR.get(), val -> {
+        appender.addRow(new CheckBox("Highlight partially full cheese racks.", val -> Utils.setprefb("cRackmissing", Config.cRackmissing = val), Config.cRackmissing), new ColorPreview(UI.scale(16, 16), CHEESERACKMISSINGCOLOR.get(), val -> {
             CHEESERACKMISSINGCOLOR.set(val);
             Gob.cRackMissing = new Material.Colors(val);
         }));
-        appender.addRow(new CheckBox("Highlight finished garden pots.", val -> Utils.setprefb("highlightpots", Config.highlightpots = val), Config.highlightpots), new ColorPreview(Coord.of(16, 16), GARDENPOTDONECOLOR.get(), val -> {
+        appender.addRow(new CheckBox("Highlight finished garden pots.", val -> Utils.setprefb("highlightpots", Config.highlightpots = val), Config.highlightpots), new ColorPreview(UI.scale(16, 16), GARDENPOTDONECOLOR.get(), val -> {
             GARDENPOTDONECOLOR.set(val);
             Gob.potDOne = new Material.Colors(val);
         }));
-        appender.addRow(new CheckBox("Show trough status", val -> Utils.setprefb("showtroughstatus", configuration.showtroughstatus = val), configuration.showtroughstatus), new ColorPreview(new Coord(20, 20), Gob.getEmptyTroughColor(), Gob::setEmptyTroughColor), new ColorPreview(new Coord(20, 20), Gob.getHalfTroughColor(), Gob::setHalfTroughColor), new ColorPreview(new Coord(20, 20), Gob.getFullTroughColor(), Gob::setFullTroughColor));
-        appender.addRow(new CheckBox("Show beehive status", val -> Utils.setprefb("showbeehivestatus", configuration.showbeehivestatus = val), configuration.showbeehivestatus), new ColorPreview(new Coord(20, 20), Gob.getFullBeehiveColor(), Gob::setFullBeehiveColor));
-        appender.addRow(new CheckBox("Show tree berry status", val -> Utils.setprefb("showtreeberry", configuration.showtreeberry = val), configuration.showtreeberry), new ColorPreview(new Coord(20, 20), new Color(configuration.showtreeberryamb, true), val -> {
+        appender.addRow(new CheckBox("Show trough status", val -> Utils.setprefb("showtroughstatus", configuration.showtroughstatus = val), configuration.showtroughstatus), new ColorPreview(UI.scale(20, 20), Gob.getEmptyTroughColor(), Gob::setEmptyTroughColor), new ColorPreview(UI.scale(20, 20), Gob.getHalfTroughColor(), Gob::setHalfTroughColor), new ColorPreview(UI.scale(20, 20), Gob.getFullTroughColor(), Gob::setFullTroughColor));
+        appender.addRow(new CheckBox("Show beehive status", val -> Utils.setprefb("showbeehivestatus", configuration.showbeehivestatus = val), configuration.showbeehivestatus), new ColorPreview(UI.scale(20, 20), Gob.getFullBeehiveColor(), Gob::setFullBeehiveColor));
+        appender.addRow(new CheckBox("Show tree berry status", val -> Utils.setprefb("showtreeberry", configuration.showtreeberry = val), configuration.showtreeberry), new ColorPreview(UI.scale(20, 20), new Color(configuration.showtreeberryamb, true), val -> {
             configuration.showtreeberryamb = val.hashCode();
             Utils.setprefi("showtreeberryamb", val.hashCode());
-        }), new ColorPreview(new Coord(20, 20), new Color(configuration.showtreeberrydif, true), val -> {
+        }), new ColorPreview(UI.scale(20, 20), new Color(configuration.showtreeberrydif, true), val -> {
             configuration.showtreeberrydif = val.hashCode();
             Utils.setprefi("showtreeberrydif", val.hashCode());
-        }), new ColorPreview(new Coord(20, 20), new Color(configuration.showtreeberryspc, true), val -> {
+        }), new ColorPreview(UI.scale(20, 20), new Color(configuration.showtreeberryspc, true), val -> {
             configuration.showtreeberryspc = val.hashCode();
             Utils.setprefi("showtreeberryspc", val.hashCode());
-        }), new ColorPreview(new Coord(20, 20), new Color(configuration.showtreeberryemi, true), val -> {
+        }), new ColorPreview(UI.scale(20, 20), new Color(configuration.showtreeberryemi, true), val -> {
             configuration.showtreeberryemi = val.hashCode();
             Utils.setprefi("showtreeberryemi", val.hashCode());
         }));
@@ -1278,7 +1283,7 @@ public class OptWnd extends Window {
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Cosmetic Effect around other gobs, fps drops").tex();
             }
-        }, new HSlider(200, 1, 20, configuration.blizzarddensity) {
+        }, new HSlider(UI.scale(200), 1, 20, configuration.blizzarddensity) {
             @Override
             public void changed() {
                 configuration.blizzarddensity = val;
@@ -1362,7 +1367,7 @@ public class OptWnd extends Window {
                     ui.sess.glob.oc.refreshallresdraw();
                 }
             }
-        }, new HSlider(200, 0, 400, configuration.scaletreeint) {
+        }, new HSlider(UI.scale(200), 0, 400, configuration.scaletreeint) {
 
             @Override
             protected void added() {
@@ -1399,7 +1404,7 @@ public class OptWnd extends Window {
          appender.add(bt);
          appender.add(ltl);**/
 
-        Button OutputSettings = new Button(220, "Output Light Settings to System Tab") {
+        Button OutputSettings = new Button(UI.scale(220), "Output Light Settings to System Tab") {
             @Override
             public void click() {
                 PBotUtils.sysLogAppend(ui, "Ambient Red " + DefSettings.NVAMBIENTCOL.get().getRed() + " Green - " + DefSettings.NVAMBIENTCOL.get().getGreen() + " Blue - " + NVAMBIENTCOL.get().getBlue(), "white");
@@ -1409,7 +1414,7 @@ public class OptWnd extends Window {
         };
         appender.add(OutputSettings);
         appender.add(new Label("Ghandhi Lighting Presets"));
-        Button Preset1 = new Button(220, "Friday Evening") {
+        Button Preset1 = new Button(UI.scale(220), "Friday Evening") {
             @Override
             public void click() {
                 DefSettings.NVAMBIENTCOL.set(new Color(51, 59, 119));
@@ -1418,7 +1423,7 @@ public class OptWnd extends Window {
             }
         };
         appender.add(Preset1);
-        Button Preset2 = new Button(220, "Thieving Night") {
+        Button Preset2 = new Button(UI.scale(220), "Thieving Night") {
             @Override
             public void click() {
                 DefSettings.NVAMBIENTCOL.set(new Color(5, 10, 51));
@@ -1427,7 +1432,7 @@ public class OptWnd extends Window {
             }
         };
         appender.add(Preset2);
-        Button Preset3 = new Button(220, "Hunting Dusk") {
+        Button Preset3 = new Button(UI.scale(220), "Hunting Dusk") {
             @Override
             public void click() {
                 DefSettings.NVAMBIENTCOL.set(new Color(165, 213, 255));
@@ -1436,7 +1441,7 @@ public class OptWnd extends Window {
             }
         };
         appender.add(Preset3);
-        Button Preset4 = new Button(220, "Sunny Morning") {
+        Button Preset4 = new Button(UI.scale(220), "Sunny Morning") {
             @Override
             public void click() {
                 DefSettings.NVAMBIENTCOL.set(new Color(211, 180, 72));
@@ -1446,7 +1451,7 @@ public class OptWnd extends Window {
         };
         appender.add(Preset4);
         appender.add(new Label("Default Lighting"));
-        Button Preset5 = new Button(220, "Amber Default") {
+        Button Preset5 = new Button(UI.scale(220), "Amber Default") {
             @Override
             public void click() {
                 DefSettings.NVAMBIENTCOL.set(new Color(200, 200, 200));
@@ -1462,12 +1467,12 @@ public class OptWnd extends Window {
     }
 
     private void initOldMap() {
-        oldMap.add(new Label("Show boulders:"), new Coord(10, 0));
-        oldMap.add(new Label("Show bushes:"), new Coord(165, 0));
-        oldMap.add(new Label("Show trees:"), new Coord(320, 0));
-        oldMap.add(new Label("Hide icons:"), new Coord(475, 0));
+        oldMap.add(new Label("Show boulders:"), UI.scale(10, 0));
+        oldMap.add(new Label("Show bushes:"), UI.scale(165, 0));
+        oldMap.add(new Label("Show trees:"), UI.scale(320, 0));
+        oldMap.add(new Label("Hide icons:"), UI.scale(475, 0));
 
-        oldMap.add(new PButton(200, "Back", 27, mapPanel), new Coord(210, 380));
+        oldMap.add(new PButton(UI.scale(200), "Back", 27, mapPanel), UI.scale(210, 380));
         oldMap.pack();
     }
 
@@ -1476,7 +1481,7 @@ public class OptWnd extends Window {
         final WidgetVerticalAppender appender2 = new WidgetVerticalAppender(withScrollport(mapPanel, UI.scale(620, 350)));
         appender.setVerticalMargin(5);
         appender.setHorizontalMargin(5);
-        appender2.setX(200);
+        appender2.setX(UI.scale(200));
 
         CheckListbox tiles = new CheckListbox(UI.scale(190), 17) {
             @Override
@@ -1535,7 +1540,7 @@ public class OptWnd extends Window {
                 }
             }
         };
-        TextEntry searchEntry = new TextEntry(190, "") {
+        TextEntry searchEntry = new TextEntry(UI.scale(190), "") {
             @Override
             public void changed() {
                 update();
@@ -1567,7 +1572,7 @@ public class OptWnd extends Window {
             searchEntry.settext("");
             tilesUpdate.accept(searchEntry.text());
         }, true);
-        appender.addRow(chb, new ColorPreview(Coord.of(20, 20), MapFile.highlightColor, val -> Utils.setprefi("highlightTileColor", (MapFile.highlightColor = val).getRGB())));
+        appender.addRow(chb, new ColorPreview(UI.scale(20, 20), MapFile.highlightColor, val -> Utils.setprefi("highlightTileColor", (MapFile.highlightColor = val).getRGB())));
         appender.add(tiles);
         appender.add(searchEntry);
         configuration.tilesCollection.addListener(new ObservableListener<String>() {
@@ -1603,7 +1608,7 @@ public class OptWnd extends Window {
                 tilesUpdate.accept(searchEntry.text());
             }
         });
-        appender.add(new HSlider(190, 1, 10000, configuration.highlightTilePeriod) {
+        appender.add(new HSlider(UI.scale(190), 1, 10000, configuration.highlightTilePeriod) {
             @Override
             public void changed() {
                 Utils.setprefi("highlightTilePeriod", configuration.highlightTilePeriod = val);
@@ -1616,7 +1621,7 @@ public class OptWnd extends Window {
         });
 
         appender2.add(new Label("Both"));
-        appender2.addRow(new Label("Simple map color"), new HSlider(100, 0, 100, (int) (configuration.simplelmapintens * 100)) {
+        appender2.addRow(new Label("Simple map color"), new HSlider(UI.scale(100), 0, 100, (int) (configuration.simplelmapintens * 100)) {
             public void changed() {
                 configuration.simplelmapintens = val / 100f;
                 Utils.setpreff("simplelmapintens", val / 100f);
@@ -1678,12 +1683,12 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender2.add(new PButton(50, "Old map options", 'm', oldMap));
+        appender2.add(new PButton(UI.scale(50), "Old map options", 'm', oldMap));
 
         appender2.add(new Label(""));
         appender2.add(new Label("Minimap"));
         final String[] tiers = {"Default", "Blend", "Simple"};
-        appender2.addRow(new IndirLabel(() -> String.format("Minimap type: %s", tiers[MINIMAPTYPE.get()])), new IndirHSlider(100, 0, 2, MINIMAPTYPE));
+        appender2.addRow(new IndirLabel(() -> String.format("Minimap type: %s", tiers[MINIMAPTYPE.get()])), new IndirHSlider(UI.scale(100), 0, 2, MINIMAPTYPE));
         appender2.add(new CheckBox("Disable outline") {
             {
                 a = Config.disableBlackOutLinesOnMap;
@@ -1720,7 +1725,7 @@ public class OptWnd extends Window {
 
         appender2.add(new Label(""));
         appender2.add(new Label("Map"));
-        appender2.addRow(new IndirLabel(() -> String.format("Map type: %s", tiers[MAPTYPE.get()])), new IndirHSlider(100, 0, 2, MAPTYPE));
+        appender2.addRow(new IndirLabel(() -> String.format("Map type: %s", tiers[MAPTYPE.get()])), new IndirHSlider(UI.scale(100), 0, 2, MAPTYPE));
         appender2.addRow(new CheckBox("Additional marks on the map") {
             {
                 a = resources.customMarkObj;
@@ -1736,12 +1741,12 @@ public class OptWnd extends Window {
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Automatically places markrs on the map: caves, dungeons, tarpits.").tex();
             }
-        }, new Button(50, "Configurate") {
+        }, new Button(UI.scale(50), "Configurate") {
             public void click() {
                 Window w = new Window(Coord.z, "Map Marks Configurate");
                 WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
                 final CustomWidgetList list = new CustomWidgetList(resources.customMarks, "CustomMarks");
-                final TextEntry value = new TextEntry(150, "") {
+                final TextEntry value = new TextEntry(UI.scale(150), "") {
                     @Override
                     public void activate(String text) {
                         list.add(text);
@@ -1749,13 +1754,13 @@ public class OptWnd extends Window {
                     }
                 };
                 wva.add(list);
-                wva.addRow(value, new Button(45, "Add") {
+                wva.addRow(value, new Button(UI.scale(45), "Add") {
                     @Override
                     public void click() {
                         list.add(value.text());
                         value.settext("");
                     }
-                }, new Button(45, "Load Default") {
+                }, new Button(UI.scale(45), "Load Default") {
                     @Override
                     public void click() {
                         for (String dmark : resources.customMarkObjs) {
@@ -1823,7 +1828,7 @@ public class OptWnd extends Window {
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Draw outline on large map").tex();
             }
-        }, new CheckBox("Another outline", val -> Utils.setprefb("anotheroutlinemap", configuration.anotheroutlinemap = val), configuration.anotheroutlinemap), new HSlider(100, 0, 255, configuration.mapoutlinetransparency) {
+        }, new CheckBox("Another outline", val -> Utils.setprefb("anotheroutlinemap", configuration.anotheroutlinemap = val), configuration.anotheroutlinemap), new HSlider(UI.scale(100), 0, 255, configuration.mapoutlinetransparency) {
             public void changed() {
                 configuration.mapoutlinetransparency = val;
                 Utils.setprefi("mapoutlinetransparency", val);
@@ -1850,29 +1855,29 @@ public class OptWnd extends Window {
                 return Text.render("Draw ridges on large map").tex();
             }
         });
-        appender2.addRow(new CheckBox("Draw fog of war", val -> Utils.setprefb("fogofwar", configuration.savingFogOfWar = val), configuration.savingFogOfWar), new ColorPreview(new Coord(20, 20), new Color(configuration.fogOfWarColor, true), val -> {
+        appender2.addRow(new CheckBox("Draw fog of war", val -> Utils.setprefb("fogofwar", configuration.savingFogOfWar = val), configuration.savingFogOfWar), new ColorPreview(UI.scale(20, 20), new Color(configuration.fogOfWarColor, true), val -> {
             configuration.fogOfWarColor = val.hashCode();
             Utils.setprefi("fogofwarcolor", val.hashCode());
-        }), new ColorPreview(new Coord(20, 20), new Color(configuration.fogOfWarColorTemp, true), val -> {
+        }), new ColorPreview(UI.scale(20, 20), new Color(configuration.fogOfWarColorTemp, true), val -> {
             configuration.fogOfWarColor = val.hashCode();
             Utils.setprefi("fogofwarcolorTemp", val.hashCode());
         }));
 
         appender2.add(new Label(""));
         appender2.add(new Label("Other"));
-        appender2.addRow(new Label("Distance view color"), new ColorPreview(new Coord(20, 20), new Color(configuration.distanceviewcolor, true), val -> {
+        appender2.addRow(new Label("Distance view color"), new ColorPreview(UI.scale(20, 20), new Color(configuration.distanceviewcolor, true), val -> {
             configuration.distanceviewcolor = val.hashCode();
             Utils.setprefi("distanceviewcolor", val.hashCode());
         }));
-        appender2.addRow(new Label("Pathfinding color"), new ColorPreview(new Coord(20, 20), new Color(configuration.pfcolor, true), val -> {
+        appender2.addRow(new Label("Pathfinding color"), new ColorPreview(UI.scale(20, 20), new Color(configuration.pfcolor, true), val -> {
             configuration.pfcolor = val.hashCode();
             Utils.setprefi("pfcolor", val.hashCode());
         }));
-        appender2.addRow(new Label("Dowse color"), new ColorPreview(new Coord(20, 20), new Color(configuration.dowsecolor, true), val -> {
+        appender2.addRow(new Label("Dowse color"), new ColorPreview(UI.scale(20, 20), new Color(configuration.dowsecolor, true), val -> {
             configuration.dowsecolor = val.hashCode();
             Utils.setprefi("dowsecolor", val.hashCode());
         }));
-        appender2.addRow(new Label("Questline color"), new ColorPreview(new Coord(20, 20), new Color(configuration.questlinecolor, true), val -> {
+        appender2.addRow(new Label("Questline color"), new ColorPreview(UI.scale(20, 20), new Color(configuration.questlinecolor, true), val -> {
             configuration.questlinecolor = val.hashCode();
             Utils.setprefi("questlinecolor", val.hashCode());
         }));
@@ -1916,7 +1921,7 @@ public class OptWnd extends Window {
             }
         });
 
-        appender2.addRow(new HSlider(200, 0, 5000, configuration.tempmarkstime) {
+        appender2.addRow(new HSlider(UI.scale(200), 0, 5000, configuration.tempmarkstime) {
             @Override
             protected void added() {
                 super.added();
@@ -1932,7 +1937,7 @@ public class OptWnd extends Window {
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Marks time : " + configuration.tempmarkstime + "s").tex();
             }
-        }, new HSlider(200, 0, 5000, configuration.tempmarksfrequency) {
+        }, new HSlider(UI.scale(200), 0, 5000, configuration.tempmarksfrequency) {
             @Override
             protected void added() {
                 super.added();
@@ -1950,7 +1955,7 @@ public class OptWnd extends Window {
             }
         });
 
-        mapPanel.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
+        mapPanel.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         mapPanel.pack();
     }
 
@@ -2191,7 +2196,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        general.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
+        general.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         general.pack();
     }
 
@@ -2304,7 +2309,7 @@ public class OptWnd extends Window {
         });
         appender.addRow(new Label("Combat Start Sound"), makeDropdownCombat());
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
             protected void added() {
                 super.added();
                 val = (int) (Config.attackedvol * 1000);
@@ -2427,7 +2432,7 @@ public class OptWnd extends Window {
         });
         appender.addRow(new Label("Combat key bindings:"), combatkeysDropdown());
 
-        combat.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
+        combat.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         combat.pack();
     }
 
@@ -2438,7 +2443,7 @@ public class OptWnd extends Window {
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
 
         appender.addRow(new Label("Bad/Top camera scrolling sensitivity"),
-                new HSlider(200, 0, 50, Config.badcamsensitivity) {
+                new HSlider(UI.scale(200), 0, 50, Config.badcamsensitivity) {
                     protected void added() {
                         super.added();
                         val = Config.badcamsensitivity;
@@ -2455,7 +2460,7 @@ public class OptWnd extends Window {
                     }
                 });
         appender.addRow(new Label("Minimal distance for bad/top camera: "),
-                new HSlider(200, -200, 200, (int) configuration.badcamdistminimaldefault) {
+                new HSlider(UI.scale(200), -200, 200, (int) configuration.badcamdistminimaldefault) {
                     @Override
                     public void changed() {
                         configuration.badcamdistminimaldefault = val;
@@ -2469,7 +2474,7 @@ public class OptWnd extends Window {
                 }
         );
         appender.addRow(new CheckBox("Proximity to the right mouse click", val -> Utils.setprefb("rightclickproximity", configuration.rightclickproximity = val), configuration.rightclickproximity),
-                new HSlider(200, 0, 200, configuration.rightclickproximityradius) {
+                new HSlider(UI.scale(200), 0, 200, configuration.rightclickproximityradius) {
                     @Override
                     public void changed() {
                         configuration.rightclickproximityradius = val;
@@ -2483,7 +2488,7 @@ public class OptWnd extends Window {
                 }
         );
         appender.addRow(new Label("Proximity to the attack cursor: "),
-                new HSlider(200, 0, 200, configuration.attackproximityradius) {
+                new HSlider(UI.scale(200), 0, 200, configuration.attackproximityradius) {
                     @Override
                     public void changed() {
                         configuration.attackproximityradius = val;
@@ -2644,7 +2649,7 @@ public class OptWnd extends Window {
         appender.add(disableshiftclick);
 
 
-        control.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
+        control.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         control.pack();
     }
 
@@ -2803,7 +2808,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.addRow(new CheckBox("Draw focused widget rectangle", val -> Utils.setprefb("focusrectangle", configuration.focusrectangle = val), configuration.focusrectangle), new CheckBox("Solid", val -> Utils.setprefb("focusrectanglesolid", configuration.focusrectanglesolid = val), configuration.focusrectanglesolid), new ColorPreview(new Coord(20, 20), new Color(configuration.focusrectanglecolor, true), val -> {
+        appender.addRow(new CheckBox("Draw focused widget rectangle", val -> Utils.setprefb("focusrectangle", configuration.focusrectangle = val), configuration.focusrectangle), new CheckBox("Solid", val -> Utils.setprefb("focusrectanglesolid", configuration.focusrectanglesolid = val), configuration.focusrectanglesolid), new ColorPreview(UI.scale(20, 20), new Color(configuration.focusrectanglecolor, true), val -> {
             configuration.focusrectanglecolor = val.hashCode();
             Utils.setprefi("focusrectanglecolor", val.hashCode());
         }));
@@ -3159,7 +3164,7 @@ public class OptWnd extends Window {
         appender.add(autoopenlist);
 
 
-//        Button resetWndBtn = new Button(220, "Reset Windows (req. logout)") {
+//        Button resetWndBtn = new Button(UI.scale(220), "Reset Windows (req. logout)") {
 //            @Override
 //            public void click() {
 //                try {
@@ -3182,7 +3187,7 @@ public class OptWnd extends Window {
 //            }
 //        };
 //        uis.add(resetWndBtn, new Coord(620 / 2 - resetWndBtn.sz.x / 2, 320));
-        uis.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
+        uis.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         uis.pack();
     }
 
@@ -3249,7 +3254,7 @@ public class OptWnd extends Window {
                 Config.qualitybg = val;
                 a = val;
             }
-        }, new HSlider(200, 0, 255, Config.qualitybgtransparency) {
+        }, new HSlider(UI.scale(200), 0, 255, Config.qualitybgtransparency) {
             public void changed() {
                 Utils.setprefi("qualitybgtransparency", val);
                 Config.qualitybgtransparency = val;
@@ -3407,7 +3412,7 @@ public class OptWnd extends Window {
             }
         });
 
-        quality.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
+        quality.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         quality.pack();
     }
 
@@ -3435,7 +3440,7 @@ public class OptWnd extends Window {
         });
 
         appender.addRow(new Label("Discord Token: "),
-                new TextEntry(240, Utils.getpref("discordtoken", "")) {
+                new TextEntry(UI.scale(240), Utils.getpref("discordtoken", "")) {
                     @Override
                     public boolean keydown(KeyEvent ev) {
                         if (!parent.visible)
@@ -3451,7 +3456,7 @@ public class OptWnd extends Window {
         );
 
         appender.addRow(new Label("Discord Channel: "),
-                new TextEntry(240, Utils.getpref("discordchannel", "")) {
+                new TextEntry(UI.scale(240), Utils.getpref("discordchannel", "")) {
                     @Override
                     public boolean keydown(KeyEvent ev) {
                         if (!parent.visible)
@@ -3490,7 +3495,7 @@ public class OptWnd extends Window {
             }
         });
 
-        Frame f = new Frame(new Coord(300, 100), false);
+        Frame f = new Frame(UI.scale(300, 100), false);
 
         discorduser = new CheckBox("Message a specific user.") {
             {
@@ -3521,12 +3526,12 @@ public class OptWnd extends Window {
         };
 
         appender.add(f);
-        f.add(new Label("Messages everyone by default."), 2, 0);
-        f.add(discorduser, 0, 20);
-        f.add(discordrole, 0, 40);
+        f.add(new Label("Messages everyone by default."), UI.scale(2), 0);
+        f.add(discorduser, 0, UI.scale(20));
+        f.add(discordrole, 0, UI.scale(40));
 
-        f.add(new Label("User Name/Role ID to Alert:"), 2, 60);
-        f.add(new TextEntry(80, Utils.getpref("discordalertstring", "")) {
+        f.add(new Label("User Name/Role ID to Alert:"), UI.scale(2), UI.scale(60));
+        f.add(new TextEntry(UI.scale(80), Utils.getpref("discordalertstring", "")) {
                   @Override
                   public boolean keydown(KeyEvent ev) {
                       if (!parent.visible)
@@ -3538,10 +3543,10 @@ public class OptWnd extends Window {
                       return buf.key(ev);
                   }
               }
-                , new Coord(180, 60));
+                , UI.scale(180, 60));
 
 
-        discord.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
+        discord.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         discord.pack();
     }
 
@@ -3557,7 +3562,7 @@ public class OptWnd extends Window {
 
         appender.add(new Label(""));
 
-        appender.addRow(new Label("Broken hat replacer"), new Button(50, "Configurate") {
+        appender.addRow(new Label("Broken hat replacer"), new Button(UI.scale(50), "Configurate") {
             public void click() {
                 Window w = new Window(Coord.z, "Hat wardrobe");
                 WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
@@ -3589,7 +3594,7 @@ public class OptWnd extends Window {
                         }
                     }
                 };
-                final TextEntry value = new TextEntry(150, "") {
+                final TextEntry value = new TextEntry(UI.scale(150), "") {
                     @Override
                     public void activate(String text) {
                         list.add(text);
@@ -3597,13 +3602,13 @@ public class OptWnd extends Window {
                     }
                 };
                 wva.add(list);
-                wva.addRow(value, new Button(45, "Add") {
+                wva.addRow(value, new Button(UI.scale(45), "Add") {
                     @Override
                     public void click() {
                         list.put(value.text(), false);
                         value.settext("");
                     }
-                }, new Button(45, "Load Default") {
+                }, new Button(UI.scale(45), "Load Default") {
                     @Override
                     public void click() {
                         for (String dmark : resources.normalhatslist) {
@@ -3638,7 +3643,7 @@ public class OptWnd extends Window {
                 resources.paintcloth = val;
                 a = val;
             }
-        }, new Button(50, "Configurate") {
+        }, new Button(UI.scale(50), "Configurate") {
             public void click() {
                 Window w = new Window(Coord.z, "Cloth Painter") {{
                     WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
@@ -3720,7 +3725,7 @@ public class OptWnd extends Window {
                                         ccol(d, "Diffuse", name, this),
                                         ccol(s, "Specular", name, this),
                                         ccol(e, "Emission", name, this),
-                                        new HSlider(100, -100, 100, shine) {
+                                        new HSlider(UI.scale(100), -100, 100, shine) {
                                             public void changed() {
                                                 savejson(name, parent);
                                             }
@@ -3747,7 +3752,7 @@ public class OptWnd extends Window {
                         }
 
                         public ColorPreview ccol(int i, String name, String wname, Window pa) {
-                            return (new ColorPreview(new Coord(20, 20), new Color(i, true), val -> {
+                            return (new ColorPreview(UI.scale(20, 20), new Color(i, true), val -> {
                                 savejson(wname, pa);
                             }, name) {
 
@@ -3848,7 +3853,7 @@ public class OptWnd extends Window {
                         }
                     };
                     TextEntry search = new TextEntry(cwl.sz.x, "");
-                    TextEntry addentry = new TextEntry(0, "") {
+                    TextEntry addentry = new TextEntry(UI.scale(0), "") {
                         public void activate(String text) {
                             if (!text.equals("")) {
                                 cwl.put(text, false);
@@ -3856,7 +3861,7 @@ public class OptWnd extends Window {
                             }
                         }
                     };
-                    Button addbtn = new Button(45, "Add") {
+                    Button addbtn = new Button(UI.scale(45), "Add") {
                         public void click() {
                             if (!addentry.text().equals("")) {
                                 cwl.put(addentry.text(), false);
@@ -3908,7 +3913,7 @@ public class OptWnd extends Window {
                 configuration.resizableworld = val;
                 a = val;
             }
-        }, new HSlider(200, 1, 500, (int) (configuration.worldsize * 100)) {
+        }, new HSlider(UI.scale(200), 1, 500, (int) (configuration.worldsize * 100)) {
             @Override
             public void changed() {
                 configuration.worldsize = val / 100f;
@@ -3930,7 +3935,7 @@ public class OptWnd extends Window {
                 configuration.rotateworld = val;
                 a = val;
             }
-        }, new HSlider(100, 0, 36000, (int) (configuration.rotateworldvalx * 100)) {
+        }, new HSlider(UI.scale(100), 0, 36000, (int) (configuration.rotateworldvalx * 100)) {
             @Override
             public void changed() {
                 configuration.rotateworldvalx = val / 100f;
@@ -3941,7 +3946,7 @@ public class OptWnd extends Window {
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Rotate angle x: " + configuration.rotateworldvalx + "%").tex();
             }
-        }, new HSlider(100, 0, 36000, (int) (configuration.rotateworldvaly * 100)) {
+        }, new HSlider(UI.scale(100), 0, 36000, (int) (configuration.rotateworldvaly * 100)) {
             @Override
             public void changed() {
                 configuration.rotateworldvaly = val / 100f;
@@ -3952,7 +3957,7 @@ public class OptWnd extends Window {
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Rotate angle y: " + configuration.rotateworldvaly + "%").tex();
             }
-        }, new HSlider(100, 0, 36000, (int) (configuration.rotateworldvalz * 100)) {
+        }, new HSlider(UI.scale(100), 0, 36000, (int) (configuration.rotateworldvalz * 100)) {
             @Override
             public void changed() {
                 configuration.rotateworldvalz = val / 100f;
@@ -4027,12 +4032,12 @@ public class OptWnd extends Window {
 
         appender.add(new Label("Pathfinder"));
         final String[] tiers = {"Perfect", "Medium", "Fastest"};
-        appender.addRow(new IndirLabel(() -> String.format("Pathfinding Tier: %s", tiers[PATHFINDINGTIER.get()])), new IndirHSlider(200, 0, 2, PATHFINDINGTIER));
+        appender.addRow(new IndirLabel(() -> String.format("Pathfinding Tier: %s", tiers[PATHFINDINGTIER.get()])), new IndirHSlider(UI.scale(200), 0, 2, PATHFINDINGTIER));
         appender.add(new IndirCheckBox("Limit pathfinding search to 40 tiles", LIMITPATHFINDING));
         appender.add(new IndirCheckBox("Research if goal was not found (requires Limited pathfinding)", RESEARCHUNTILGOAL));
         appender.add(new CheckBox("Purus pathfinder evade riges", val -> Utils.setprefb("puruspfignoreridge", configuration.puruspfignoreridge = val), configuration.puruspfignoreridge));
 
-        modification.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
+        modification.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         modification.pack();
     }
 
@@ -4107,7 +4112,7 @@ public class OptWnd extends Window {
             }
         });
 
-        appender.addRow(new Label("Autodrink Threshold"), new HSlider(130, 0, 100, Config.autodrinkthreshold) {
+        appender.addRow(new Label("Autodrink Threshold"), new HSlider(UI.scale(130), 0, 100, Config.autodrinkthreshold) {
             protected void added() {
                 super.added();
                 val = (Config.autodrinkthreshold);
@@ -4125,7 +4130,7 @@ public class OptWnd extends Window {
 
         appender.addRow(new Label("Autodrink check frequency (Seconds)"), makeAutoDrinkTimeDropdown());
 
-        appender.addRow(new Label("Autosip Threshold to this position"), new HSlider(130, 0, 100, configuration.autosipthreshold) {
+        appender.addRow(new Label("Autosip Threshold to this position"), new HSlider(UI.scale(130), 0, 100, configuration.autosipthreshold) {
             protected void added() {
                 super.added();
                 val = (configuration.autosipthreshold);
@@ -4141,7 +4146,7 @@ public class OptWnd extends Window {
             }
         });
 
-        appender.addRow(new Label("Error waiting time"), new HSlider(130, 0, 10000, configuration.sipwaiting) {
+        appender.addRow(new Label("Error waiting time"), new HSlider(UI.scale(130), 0, 10000, configuration.sipwaiting) {
             protected void added() {
                 super.added();
                 val = (configuration.sipwaiting);
@@ -4168,7 +4173,7 @@ public class OptWnd extends Window {
             }
         });
 
-        waterPanel.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
+        waterPanel.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         waterPanel.pack();
     }
 
@@ -4210,9 +4215,9 @@ public class OptWnd extends Window {
             }
         });
 
-        Frame f = new Frame(new Coord(200, 100), false);
-        f.add(new Label("Uncommon below:"), 5, 10);
-        f.add(new TextEntry(40, String.valueOf(Config.uncommonq)) {
+        Frame f = new Frame(UI.scale(200, 100), false);
+        f.add(new Label("Uncommon below:"), UI.scale(5, 10));
+        f.add(new TextEntry(UI.scale(40), String.valueOf(Config.uncommonq)) {
             @Override
             public boolean keydown(KeyEvent e) {
                 return !(e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12);
@@ -4232,10 +4237,10 @@ public class OptWnd extends Window {
                 }
                 return false;
             }
-        }, new Coord(140, 10));
+        }, UI.scale(140, 10));
 
-        f.add(new Label("Rare below:"), 5, 30);
-        f.add(new TextEntry(40, String.valueOf(Config.rareq)) {
+        f.add(new Label("Rare below:"), UI.scale(5, 30));
+        f.add(new TextEntry(UI.scale(40), String.valueOf(Config.rareq)) {
             @Override
             public boolean keydown(KeyEvent e) {
                 return !(e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12);
@@ -4257,8 +4262,8 @@ public class OptWnd extends Window {
             }
         }, new Coord(140, 30));
 
-        f.add(new Label("Epic below:"), 5, 50);
-        f.add(new TextEntry(40, String.valueOf(Config.epicq)) {
+        f.add(new Label("Epic below:"), UI.scale(5, 50));
+        f.add(new TextEntry(UI.scale(40), String.valueOf(Config.epicq)) {
             @Override
             public boolean keydown(KeyEvent e) {
                 return !(e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12);
@@ -4280,8 +4285,8 @@ public class OptWnd extends Window {
             }
         }, new Coord(140, 50));
 
-        f.add(new Label("Legendary below:"), 5, 70);
-        f.add(new TextEntry(40, String.valueOf(Config.legendaryq)) {
+        f.add(new Label("Legendary below:"), UI.scale(5, 70));
+        f.add(new TextEntry(UI.scale(40), String.valueOf(Config.legendaryq)) {
             @Override
             public boolean keydown(KeyEvent e) {
                 return !(e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12);
@@ -4301,7 +4306,7 @@ public class OptWnd extends Window {
                 }
                 return false;
             }
-        }, new Coord(140, 70));
+        }, UI.scale(140, 70));
 
         appender.add(f);
         appender.add(new CheckBox("Insane Item Alert (Above Legendary)") {
@@ -4316,7 +4321,7 @@ public class OptWnd extends Window {
             }
         });
 
-        appender.setX(310 + 10);
+        appender.setX(UI.scale(310 + 10));
         appender.setY(0);
 
         appender.add(new Label("Choose/add item quality color:"));
@@ -4345,15 +4350,15 @@ public class OptWnd extends Window {
                 configuration.morethanquility = val;
                 a = val;
             }
-        }, new ColorPreview(new Coord(20, 20), new Color(configuration.morethancolor, true), val -> {
+        }, new ColorPreview(UI.scale(20, 20), new Color(configuration.morethancolor, true), val -> {
             configuration.morethancolor = val.hashCode();
             Utils.setprefi("morethancolor", val.hashCode());
-        }), new ColorPreview(new Coord(20, 20), new Color(configuration.morethancoloroutline, true), val -> {
+        }), new ColorPreview(UI.scale(20, 20), new Color(configuration.morethancoloroutline, true), val -> {
             configuration.morethancoloroutline = val.hashCode();
             Utils.setprefi("morethancoloroutline", val.hashCode());
         }));
-        final ColorPreview colPre = new ColorPreview(new Coord(20, 20), Color.WHITE, val -> CustomQualityList.NewColor = val);
-        final TextEntry value = new TextEntry(120, "") {
+        final ColorPreview colPre = new ColorPreview(UI.scale(20, 20), Color.WHITE, val -> CustomQualityList.NewColor = val);
+        final TextEntry value = new TextEntry(UI.scale(120), "") {
             @Override
             public void activate(String text) {
                 try {
@@ -4364,7 +4369,7 @@ public class OptWnd extends Window {
                 settext("");
             }
         };
-        appender.addRow(value, colPre, new Button(45, "Add") {
+        appender.addRow(value, colPre, new Button(UI.scale(45), "Add") {
             @Override
             public void click() {
                 try {
@@ -4377,7 +4382,7 @@ public class OptWnd extends Window {
             }
         });
 
-        qualityPanel.add(new PButton(200, "Back", 27, quality), UI.scale(210, 360));
+        qualityPanel.add(new PButton(UI.scale(200), "Back", 27, quality), UI.scale(210, 360));
         qualityPanel.pack();
     }
 
@@ -4442,19 +4447,19 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.addRow(new Button(50, "Resource") {
+        appender.addRow(new Button(UI.scale(50), "Resource") {
                             public void click() {
                                 if (ui.sess != null) {
                                     ui.sess.allCache();
                                 }
                             }
                         },
-                new Button(50, "Clear Memory") {
+                new Button(UI.scale(50), "Clear Memory") {
                     public void click() {
                         System.gc();
                     }
                 },
-                new Button(50, "Resource Cleaner") {
+                new Button(UI.scale(50), "Resource Cleaner") {
                     public void click() {
                         getCleaner("Resource Cleaner", "res/").start();
                     }
@@ -4463,7 +4468,7 @@ public class OptWnd extends Window {
                         return Text.render("Delete only resources excluding other files such as for example maps. After completing the game turns off").tex();
                     }
                 },
-                new Button(50, "Map Cleaner") {
+                new Button(UI.scale(50), "Map Cleaner") {
                     public void click() {
                         getCleaner("Map Cleaner", "map/").start();
                     }
@@ -4475,7 +4480,7 @@ public class OptWnd extends Window {
 
 
         appender.add(new Label(""));
-        TextEntry baseurl = new TextEntry(200, Config.resurl.toString()) {
+        TextEntry baseurl = new TextEntry(UI.scale(200), Config.resurl.toString()) {
             {
                 sz = new Coord(TextEntry.fnd.render(text()).sz().x + 10, sz.y);
             }
@@ -4484,13 +4489,13 @@ public class OptWnd extends Window {
                 return Text.render("This is base url. Сhange this if necessary.").tex();
             }
         };
-        TextEntry hashid = new TextEntry(200, "") {
+        TextEntry hashid = new TextEntry(UI.scale(200), "") {
             @Override
             public void changed() {
                 sz = new Coord(TextEntry.fnd.render(text()).sz().x + 10, sz.y);
             }
         };
-        TextEntry textEntry = new TextEntry(200, "") {
+        TextEntry textEntry = new TextEntry(UI.scale(200), "") {
             @Override
             public boolean type(char c, KeyEvent ev) {
                 if (c == '\n') {
@@ -4517,7 +4522,7 @@ public class OptWnd extends Window {
         };
         appender.addRow(new Label("Base URL: "), baseurl);
         appender.addRow(new Label("res/"), textEntry,
-                new Button(30, "ENTER") {
+                new Button(UI.scale(30), "ENTER") {
                     public void click() {
                         String hash = String.format("%016x.0", namehash(namehash(0, baseurl.text()), "res/" + textEntry.text())); //-8944751680107289605
                         hashid.settext(hash);
@@ -4531,7 +4536,7 @@ public class OptWnd extends Window {
                             h = (h * 31) + name.charAt(i);
                         return (h);
                     }
-                }, new Button(50, "Download") {
+                }, new Button(UI.scale(50), "Download") {
                     public void click() {
                         try {
                             Resource res = Resource.remote(baseurl.text()).loadwait(textEntry.text());
@@ -4541,7 +4546,7 @@ public class OptWnd extends Window {
                         }
                     }
                 });
-        appender.addRow(new Label("%appdata%\\Haven and Hearth\\data\\"), hashid, new Button(50, "Remove") {
+        appender.addRow(new Label("%appdata%\\Haven and Hearth\\data\\"), hashid, new Button(UI.scale(50), "Remove") {
             public void click() {
                 if (hashid.text() != null && !hashid.text().equals("")) {
                     try {
@@ -4566,7 +4571,7 @@ public class OptWnd extends Window {
         });
 
         final WidgetVerticalAppender appender3 = new WidgetVerticalAppender(devPanel);
-        appender3.setX(620 - 140 - 10);
+        appender3.setX(UI.scale(620 - 140 - 10));
 
         appender3.add(new CheckBox("Skip msg!") {
             {
@@ -4592,7 +4597,7 @@ public class OptWnd extends Window {
         dev.msglist.items.sort(Comparator.comparing(o -> o.name));
         appender3.add(dev.msglist);
 
-        devPanel.add(new PButton(200, "Back", 27, modification), UI.scale(210, 360));
+        devPanel.add(new PButton(UI.scale(200), "Back", 27, modification), UI.scale(210, 360));
         devPanel.pack();
     }
 
@@ -4604,7 +4609,7 @@ public class OptWnd extends Window {
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
         appender2.setVerticalMargin(VERTICAL_MARGIN);
         appender2.setHorizontalMargin(HORIZONTAL_MARGIN);
-        appender2.setX(150);
+        appender2.setX(UI.scale(150));
 
         appender2.add(new Label("Autopick Clusters:"));
         CheckListbox clusterlist = new CheckListbox(UI.scale(140), 17) {
@@ -4643,7 +4648,7 @@ public class OptWnd extends Window {
                 items.sort(Comparator.comparing(o -> Resource.getLocString(Resource.BUNDLE_FLOWER, o.name)));
             }
         }
-        ObservableList checkList = new ObservableList(140, 17) {
+        ObservableList checkList = new ObservableList(UI.scale(140), 17) {
             @Override
             protected void itemclick(CheckListboxItem itm, int button) {
                 super.itemclick(itm, button);
@@ -4653,7 +4658,7 @@ public class OptWnd extends Window {
             protected void drawitemname(GOut g, CheckListboxItem itm) {
                 Text t = Text.render(Resource.getLocString(Resource.BUNDLE_FLOWER, itm.name));
                 Tex T = t.tex();
-                g.image(T, new Coord(2, 2), t.sz());
+                g.image(T, UI.scale(2, 2), t.sz());
                 T.dispose();
             }
         };
@@ -4661,7 +4666,7 @@ public class OptWnd extends Window {
         Config.flowermenus.addListener(checkList);
         //  flowerlist.items.addAll(Config.flowermenus.values());
         appender.add(checkList);
-        TextEntry search = new TextEntry(140, "") {
+        TextEntry search = new TextEntry(UI.scale(140), "") {
             @Override
             public void changed() {
                 update();
@@ -4697,7 +4702,7 @@ public class OptWnd extends Window {
             }
         };
         appender.add(search);
-        appender.add(new Button(140, "Clear") {
+        appender.add(new Button(UI.scale(140), "Clear") {
             @Override
             public boolean mousedown(Coord mc, int btn) {
                 if (ui.modctrl && btn == 1) {
@@ -4716,7 +4721,7 @@ public class OptWnd extends Window {
             }
         });
 
-        flowermenus.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
+        flowermenus.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         flowermenus.pack();
     }
 
@@ -4821,7 +4826,7 @@ public class OptWnd extends Window {
 //            }
 //        });
 
-        quickactionsettings.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
+        quickactionsettings.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         quickactionsettings.pack();
     }
 
@@ -4832,8 +4837,8 @@ public class OptWnd extends Window {
         y += 15;
         final CurioList list = studydesksettings.add(new CurioList(), x, y);
 
-        y += list.sz.y + 5;
-        final TextEntry value = studydesksettings.add(new TextEntry(150, "") {
+        y += list.sz.y + UI.scale(5);
+        final TextEntry value = studydesksettings.add(new TextEntry(UI.scale(150), "") {
             @Override
             public void activate(String text) {
                 list.add(text);
@@ -4841,17 +4846,17 @@ public class OptWnd extends Window {
             }
         }, x, y);
 
-        studydesksettings.add(new Button(45, "Add") {
+        studydesksettings.add(new Button(UI.scale(45), "Add") {
             @Override
             public void click() {
                 list.add(value.text());
                 value.settext("");
             }
-        }, x + 155, y - 2);
+        }, x + UI.scale(155), y - UI.scale(2));
 
         my = Math.max(my, y);
 
-        studydesksettings.add(new PButton(200, "Back", 27, main), 0, my + 35);
+        studydesksettings.add(new PButton(UI.scale(200), "Back", 27, main), 0, my + UI.scale(35));
         studydesksettings.pack();
     }
 
@@ -4863,7 +4868,7 @@ public class OptWnd extends Window {
         final AutodropList list = autodropsettings.add(new AutodropList(), x, y);
 
         y += list.sz.y + 5;
-        final TextEntry value = autodropsettings.add(new TextEntry(150, "") {
+        final TextEntry value = autodropsettings.add(new TextEntry(UI.scale(150), "") {
             @Override
             public void activate(String text) {
                 list.add(text);
@@ -4871,18 +4876,18 @@ public class OptWnd extends Window {
             }
         }, x, y);
 
-        autodropsettings.add(new Button(45, "Add") {
+        autodropsettings.add(new Button(UI.scale(45), "Add") {
             @Override
             public void click() {
                 list.add(value.text());
                 value.settext("");
             }
-        }, x + 155, y - 2);
+        }, x + UI.scale(155), y - UI.scale(2));
 
 
-        y = 15;
-        autodropsettings.add(new CheckBox("Only player inventory", val -> Utils.setprefb("autodroponlyplayer", configuration.autodroponlyplayer = val), configuration.autodroponlyplayer), new Coord(list.sz.x + 10, y));
-        y += 20;
+        y = UI.scale(15);
+        autodropsettings.add(new CheckBox("Only player inventory", val -> Utils.setprefb("autodroponlyplayer", configuration.autodroponlyplayer = val), configuration.autodroponlyplayer), new Coord(list.sz.x + UI.scale(10), y));
+        y += UI.scale(20);
         autodropsettings.add(new CheckBox("Drop mined stones") {
             {
                 a = Config.dropMinedStones;
@@ -4893,8 +4898,8 @@ public class OptWnd extends Window {
                 Config.dropMinedStones = val;
                 a = val;
             }
-        }, new Coord(list.sz.x + 10, y));
-        y += 20;
+        }, new Coord(list.sz.x + UI.scale(10), y));
+        y += UI.scale(20);
         autodropsettings.add(new CheckBox("Drop mined ore") {
             {
                 a = Config.dropMinedOre;
@@ -4905,8 +4910,8 @@ public class OptWnd extends Window {
                 Config.dropMinedOre = val;
                 a = val;
             }
-        }, new Coord(list.sz.x + 10, y));
-        y += 20;
+        }, new Coord(list.sz.x + UI.scale(10), y));
+        y += UI.scale(20);
         autodropsettings.add(new CheckBox("Drop mined silver/gold ore") {
             {
                 a = Config.dropMinedOrePrecious;
@@ -4917,8 +4922,8 @@ public class OptWnd extends Window {
                 Config.dropMinedOrePrecious = val;
                 a = val;
             }
-        }, new Coord(list.sz.x + 10, y));
-        y += 20;
+        }, new Coord(list.sz.x + UI.scale(10), y));
+        y += UI.scale(20);
         autodropsettings.add(new CheckBox("Drop mined Cat Gold.") {
             {
                 a = Config.dropMinedCatGold;
@@ -4929,8 +4934,8 @@ public class OptWnd extends Window {
                 Config.dropMinedCatGold = val;
                 a = val;
             }
-        }, new Coord(list.sz.x + 10, y));
-        y += 20;
+        }, new Coord(list.sz.x + UI.scale(10), y));
+        y += UI.scale(20);
         autodropsettings.add(new CheckBox("Drop mined Petrified SeaShells.") {
             {
                 a = Config.dropMinedSeaShells;
@@ -4941,8 +4946,8 @@ public class OptWnd extends Window {
                 Config.dropMinedSeaShells = val;
                 a = val;
             }
-        }, new Coord(list.sz.x + 10, y));
-        y += 20;
+        }, new Coord(list.sz.x + UI.scale(10), y));
+        y += UI.scale(20);
         autodropsettings.add(new CheckBox("Drop mined Strange Crystals.") {
             {
                 a = Config.dropMinedCrystals;
@@ -4953,8 +4958,8 @@ public class OptWnd extends Window {
                 Config.dropMinedCrystals = val;
                 a = val;
             }
-        }, new Coord(list.sz.x + 10, y));
-        y += 20;
+        }, new Coord(list.sz.x + UI.scale(10), y));
+        y += UI.scale(20);
         autodropsettings.add(new CheckBox("Drop mined Quarryartz.") {
             {
                 a = Config.dropMinedQuarryquartz;
@@ -4965,13 +4970,13 @@ public class OptWnd extends Window {
                 Config.dropMinedQuarryquartz = val;
                 a = val;
             }
-        }, new Coord(list.sz.x + 10, y));
-        autodropsettings.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
+        }, new Coord(list.sz.x + UI.scale(10), y));
+        autodropsettings.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         autodropsettings.pack();
     }
 
     private void initkeybindsettings() {
-        WidgetList<KeyBinder.ShortcutWidget> list = keybindsettings.add(new WidgetList<KeyBinder.ShortcutWidget>(new Coord(300, 24), 16) {
+        WidgetList<KeyBinder.ShortcutWidget> list = keybindsettings.add(new WidgetList<KeyBinder.ShortcutWidget>(UI.scale(300, 24), 16) {
             @Override
             public boolean mousedown(Coord c0, int button) {
                 boolean result = super.mousedown(c0, button);
@@ -5003,7 +5008,7 @@ public class OptWnd extends Window {
 
 
         keybindsettings.pack();
-        keybindsettings.add(new PButton(200, "Back", 27, main), new Coord(410, 360));
+        keybindsettings.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(410, 360));
         keybindsettings.pack();
     }
 
@@ -5080,7 +5085,7 @@ public class OptWnd extends Window {
             }
         });
 //        appender.addRow(new Label("Enter Village name for Chat Alert sound, and village chat relay."),
-//                new TextEntry(150, Config.chatalert) {
+//                new TextEntry(UI.scale(150), Config.chatalert) {
 //                    @Override
 //                    public boolean type(char c, KeyEvent ev) {
 //                        if (!parent.visible)
@@ -5097,7 +5102,7 @@ public class OptWnd extends Window {
 //                }
 //        );
 //        appender.addRow(new Label("Enter Discord Channel for Alerts to be sent to."),
-//                new TextEntry(150, Config.AlertChannel) {
+//                new TextEntry(UI.scale(150), Config.AlertChannel) {
 //                    @Override
 //                    public boolean type(char c, KeyEvent ev) {
 //                        if (!parent.visible)
@@ -5114,7 +5119,7 @@ public class OptWnd extends Window {
 //                }
 //        );
 //        appender.addRow(new Label("Enter Discord Bot Key"),
-//                new TextEntry(475, Config.discordtoken) {
+//                new TextEntry(UI.scale(475), Config.discordtoken) {
 //                    @Override
 //                    public boolean type(char c, KeyEvent ev) {
 //                        if (!parent.visible)
@@ -5155,7 +5160,7 @@ public class OptWnd extends Window {
 //        };
 //        appender.add(discordcheckbox);
 //        appender.addRow(new Label("Enter Discord channel name for village chat output."),
-//                new TextEntry(150, Config.discordchannel) {
+//                new TextEntry(UI.scale(150), Config.discordchannel) {
 //                    @Override
 //                    public boolean type(char c, KeyEvent ev) {
 //                        if (!parent.visible)
@@ -5173,7 +5178,7 @@ public class OptWnd extends Window {
 //        );
 //
 //        appender.addRow(new Label("Enter Discord Name For Bot."),
-//                new TextEntry(150, Config.charname) {
+//                new TextEntry(UI.scale(150), Config.charname) {
 //                    @Override
 //                    public boolean type(char c, KeyEvent ev) {
 //                        if (!parent.visible)
@@ -5203,7 +5208,7 @@ public class OptWnd extends Window {
 //                a = val;
 //            }
 //        });
-        chatsettings.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
+        chatsettings.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         chatsettings.pack();
     }
 
@@ -5221,7 +5226,7 @@ public class OptWnd extends Window {
                 }, Config.showgridlines),
                 new CheckBox("Accurate", val -> Utils.setprefb("showaccgridlines", configuration.showaccgridlines = val), configuration.showaccgridlines),
                 new CheckBox("Grid type (old/new)", val -> Utils.setprefb("slothgrid", Config.slothgrid = val), Config.slothgrid),
-                new IndirColorPreview(Coord.of(20, 20), GUIDESCOLOR, val -> TileOutline.color = new States.ColState(val.getRed(), val.getGreen(), val.getBlue(), (int) (val.getAlpha() * 0.5)))
+                new IndirColorPreview(UI.scale(20, 20), GUIDESCOLOR, val -> TileOutline.color = new States.ColState(val.getRed(), val.getGreen(), val.getBlue(), (int) (val.getAlpha() * 0.5)))
         );
         appender.addRow(
                 new CheckBox("Display hitboxes", val -> {
@@ -5232,7 +5237,7 @@ public class OptWnd extends Window {
                     }
                 }, Config.showboundingboxes),
                 new CheckBox("Accurate", val -> Utils.setprefb("showaccboundingboxes", configuration.showaccboundingboxes = val), configuration.showaccboundingboxes),
-                new IndirColorPreview(Coord.of(20, 20), HITBOXCOLOR, val -> {
+                new IndirColorPreview(UI.scale(20, 20), HITBOXCOLOR, val -> {
                     GobHitbox.bbclrstate = new States.ColState(val);
                     if (ui.sess != null) {
                         ui.sess.glob.oc.changeAllGobs();
@@ -5240,7 +5245,7 @@ public class OptWnd extends Window {
                 })
         );
         Label placegridtext = new Label("Place Grid (" + Utils.getprefd("plobpgran", 8) + "): ");
-        appender.addRow(placegridtext, new HSlider(200, 0, 255 * 100, (int) (Utils.getprefd("plobpgran", 8) * 100)) {
+        appender.addRow(placegridtext, new HSlider(UI.scale(200), 0, 255 * 100, (int) (Utils.getprefd("plobpgran", 8) * 100)) {
                     @Override
                     public double scale() {
                         return (5.5);
@@ -5264,7 +5269,7 @@ public class OptWnd extends Window {
                 }
         );
         Label placeangletext = new Label("Place Angle (" + Utils.getprefd("plobagran", 16) + "): ");
-        appender.addRow(placeangletext, new HSlider(200, 0, 255 * 100, (int) (Utils.getprefd("plobagran", 16) * 100)) {
+        appender.addRow(placeangletext, new HSlider(UI.scale(200), 0, 255 * 100, (int) (Utils.getprefd("plobagran", 16) * 100)) {
                     @Override
                     public void changed() {
                         placeangletext.settext("Place Angle (" + val / 100.0 + "): ");
@@ -5313,7 +5318,7 @@ public class OptWnd extends Window {
                         gui.msg("Unique gobs are now" + (Config.hideuniquegobs ? " " : " NOT ") + "hidden.", Color.WHITE);
                     }
                 }, Config.hideuniquegobs).wsettip("Toggle bulk hide by pressing the keybind you assign in Keybind Settings"),
-                new IndirColorPreview(Coord.of(20, 20), HIDDENCOLOR, val -> {
+                new IndirColorPreview(UI.scale(20, 20), HIDDENCOLOR, val -> {
                     GobHitbox.fillclrstate = new States.ColState(val);
                     HitboxMesh.updateColor(new States.ColState(val));
                     if (ui.sess != null) {
@@ -5331,7 +5336,7 @@ public class OptWnd extends Window {
         );
         appender.add(new CheckBox("Draw colored overlay for hidden objects. Hide will need to be toggled", val -> Utils.setprefb("showoverlay", Config.showoverlay = val), Config.showoverlay));
         appender.add(new CheckBox("Show game object overlays while hidden", val -> Utils.setprefb("showhiddenoverlay", configuration.showhiddenoverlay = val), configuration.showhiddenoverlay));
-        hidesettings.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
+        hidesettings.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         hidesettings.pack();
     }
 
@@ -5355,7 +5360,7 @@ public class OptWnd extends Window {
         appender.setVerticalMargin(0);
         appender.addRow(new Label("Unknown Player Alarm"), makeAlarmDropdownUnknown());
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
             protected void added() {
                 super.added();
                 val = (int) (Config.alarmunknownvol * 1000);
@@ -5370,7 +5375,7 @@ public class OptWnd extends Window {
         appender.setVerticalMargin(0);
         appender.addRow(new Label("Red Player Alarm"), makeAlarmDropdownRed());
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
             protected void added() {
                 super.added();
                 val = (int) (Config.alarmredvol * 1000);
@@ -5395,7 +5400,7 @@ public class OptWnd extends Window {
             }
         });
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
             protected void added() {
                 super.added();
                 val = (int) (Config.chatalarmvol * 1000);
@@ -5410,7 +5415,7 @@ public class OptWnd extends Window {
         appender.setVerticalMargin(0);
         appender.addRow(new Label("Study Finish Alarm"), makeAlarmDropdownStudy());
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(200, 0, 1000, 0) {
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
             protected void added() {
                 super.added();
                 val = (int) (Config.studyalarmvol * 1000);
@@ -5422,14 +5427,14 @@ public class OptWnd extends Window {
                 Utils.setprefd("studyalarmvol", vol);
             }
         });
-        appender.add(new Button(200, "New Alerts System", false) {
+        appender.add(new Button(UI.scale(200), "New Alerts System", false) {
             public void click() {
                 if (ui.gui != null)
                     ui.gui.toggleAlerted();
             }
         });
 
-        soundalarms.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
+        soundalarms.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         soundalarms.pack();
     }
 
@@ -5751,7 +5756,7 @@ public class OptWnd extends Window {
         };
         boulderlist.items.addAll(Config.boulders.values());
         boulderlist.items.sort(Comparator.comparing(a -> a.name));
-        oldMap.add(boulderlist, new Coord(10, 15));
+        oldMap.add(boulderlist, UI.scale(10, 15));
 
         CheckListbox bushlist = new CheckListbox(UI.scale(140), 16) {
             @Override
@@ -5762,7 +5767,7 @@ public class OptWnd extends Window {
         };
         bushlist.items.addAll(Config.bushes.values());
         bushlist.items.sort(Comparator.comparing(a -> a.name));
-        oldMap.add(bushlist, new Coord(165, 15));
+        oldMap.add(bushlist, UI.scale(165, 15));
 
         CheckListbox treelist = new CheckListbox(UI.scale(140), 16) {
             @Override
@@ -5773,7 +5778,7 @@ public class OptWnd extends Window {
         };
         treelist.items.addAll(Config.trees.values());
         treelist.items.sort(Comparator.comparing(a -> a.name));
-        oldMap.add(treelist, new Coord(320, 15));
+        oldMap.add(treelist, UI.scale(320, 15));
 
         CheckListbox iconslist = new CheckListbox(UI.scale(140), 16) {
             @Override
@@ -5784,7 +5789,7 @@ public class OptWnd extends Window {
         };
         iconslist.items.addAll(Config.icons.values());
         iconslist.items.sort(Comparator.comparing(a -> a.name));
-        oldMap.add(iconslist, new Coord(475, 15));
+        oldMap.add(iconslist, UI.scale(475, 15));
 
         oldMap.add(new CheckBox("Show road Endpoints") {
             {
@@ -5796,7 +5801,7 @@ public class OptWnd extends Window {
                 Config.showroadendpoint = val;
                 a = val;
             }
-        }, 240, 330);
+        }, UI.scale(240, 330));
 
         oldMap.add(new CheckBox("Show road Midpoints") {
             {
@@ -5808,7 +5813,7 @@ public class OptWnd extends Window {
                 Config.showroadmidpoint = val;
                 a = val;
             }
-        }, 240, 350);
+        }, UI.scale(240, 350));
 
         oldMap.add(new CheckBox("Hide ALL Icons") {
             {
@@ -5820,13 +5825,13 @@ public class OptWnd extends Window {
                 Config.hideallicons = val;
                 a = val;
             }
-        }, 425, 330);
+        }, UI.scale(425, 330));
 
 
-        oldMap.add(new PButton(140, "Clear Boulders", 27, clearboulders), new Coord(10, 302));
-        oldMap.add(new PButton(140, "Clear Bushes", 27, clearbushes), new Coord(165, 302));
-        oldMap.add(new PButton(140, "Clear Trees", 27, cleartrees), new Coord(320, 302));
-        oldMap.add(new PButton(140, "Clear Icons", 27, clearhides), new Coord(475, 302));
+        oldMap.add(new PButton(140, "Clear Boulders", 27, clearboulders), UI.scale(10, 302));
+        oldMap.add(new PButton(140, "Clear Bushes", 27, clearbushes), UI.scale(165, 302));
+        oldMap.add(new PButton(140, "Clear Trees", 27, cleartrees), UI.scale(320, 302));
+        oldMap.add(new PButton(140, "Clear Icons", 27, clearhides), UI.scale(475, 302));
 
 
         oldMap.pack();
@@ -5848,9 +5853,9 @@ public class OptWnd extends Window {
     }
 
     private void showChangeLog() {
-        Window log = ui.root.add(new Window(new Coord(50, 50), "Changelog"), new Coord(100, 50));
+        Window log = ui.root.add(new Window(UI.scale(50, 50), "Changelog"), new Coord(100, 50));
         log.justclose = true;
-        Textlog txt = log.add(new Textlog(new Coord(450, 200)));
+        Textlog txt = log.add(new Textlog(UI.scale(450, 200)));
         txt.quote = false;
         int maxlines = txt.maxLines = 200;
         log.pack();
@@ -6206,7 +6211,7 @@ public class OptWnd extends Window {
 
         public VideoPanel(Panel back) {
             super();
-            add(new PButton(200, "Back", 27, back), UI.scale(210, 360));
+            add(new PButton(UI.scale(200), "Back", 27, back), UI.scale(210, 360));
             resize(UI.scale(620, 400));
         }
 
@@ -6345,12 +6350,12 @@ public class OptWnd extends Window {
                         cf.dirty = true;
                     }
                 });
-                appender.addRow(new Label("Outlines COLOR"), new ColorPreview(new Coord(20, 20), new Color(configuration.outlinecolor, true), val -> {
+                appender.addRow(new Label("Outlines COLOR"), new ColorPreview(UI.scale(20, 20), new Color(configuration.outlinecolor, true), val -> {
                     configuration.outlinecolor = val.hashCode();
                     Utils.setprefi("outlinecolor", val.hashCode());
                     Outlines.shadersupdate();
                 }));
-                appender.addRow(new Label("Outline height ()"), new HSlider(100, 0, 10, (int) (configuration.outlineh)) {
+                appender.addRow(new Label("Outline height ()"), new HSlider(UI.scale(100), 0, 10, (int) (configuration.outlineh)) {
                     @Override
                     public void changed() {
                         configuration.outlineh = val;
@@ -6384,7 +6389,7 @@ public class OptWnd extends Window {
 
                 Label fpsBackgroundLimitLbl = new Label("Background FPS limit: " + (Config.fpsBackgroundLimit == -1 ? "unlimited" : Config.fpsBackgroundLimit));
                 appender.add(fpsBackgroundLimitLbl);
-                appender.add(new HSlider(200, 0, 49, 0) {
+                appender.add(new HSlider(UI.scale(200), 0, 49, 0) {
                     protected void added() {
                         super.added();
                         if (Config.fpsBackgroundLimit == -1) {
@@ -6414,7 +6419,7 @@ public class OptWnd extends Window {
 
                 Label fpsLimitLbl = new Label("FPS limit: " + (Config.fpsLimit == -1 ? "unlimited" : Config.fpsLimit));
                 appender.add(fpsLimitLbl);
-                appender.add(new HSlider(200, 0, 49, 0) {
+                appender.add(new HSlider(UI.scale(200), 0, 49, 0) {
                     protected void added() {
                         super.added();
                         if (Config.fpsLimit == -1) {
@@ -6447,7 +6452,7 @@ public class OptWnd extends Window {
                 } else {
                     final Label dpy = new Label("");
                     appender.addRow(
-                            new HSlider(160, (int) (cf.anisotex.min() * 2), (int) (cf.anisotex.max() * 2), (int) (cf.anisotex.val * 2)) {
+                            new HSlider(UI.scale(160), (int) (cf.anisotex.min() * 2), (int) (cf.anisotex.max() * 2), (int) (cf.anisotex.val * 2)) {
                                 protected void added() {
                                     super.added();
                                     dpy();
@@ -6513,7 +6518,7 @@ public class OptWnd extends Window {
                 Label frequencytext = new Label(animtext.apply(configuration.animationfrequency));
                 appender.addRow(
                         frequencytext,
-                        new HSlider(200, 0, 5000, configuration.animationfrequency) {
+                        new HSlider(UI.scale(200), 0, 5000, configuration.animationfrequency) {
                             @Override
                             public void changed() {
                                 frequencytext.settext(animtext.apply(val));
@@ -6526,7 +6531,7 @@ public class OptWnd extends Window {
                             }
                         }
                 );
-                appender.addRow(new CheckBox("Background UI timeout ticks", val -> Utils.setprefb("uitickwait", UI.canwait = val), UI.canwait), new HSlider(200, 1, 10000, (int) UI.timewait) {
+                appender.addRow(new CheckBox("Background UI timeout ticks", val -> Utils.setprefb("uitickwait", UI.canwait = val), UI.canwait), new HSlider(UI.scale(200), 1, 10000, (int) UI.timewait) {
                     @Override
                     public void changed() {
                         Utils.setprefi("uitickwaittime", (int) (UI.timewait = val));
@@ -6549,7 +6554,7 @@ public class OptWnd extends Window {
 //                    }
 //                });
                 appender.addRow(new IndirLabel(() -> String.format("Map View Distance: %d",
-                        DRAWGRIDRADIUS.get())), new IndirHSlider(200, 1, 6, DRAWGRIDRADIUS, val -> {
+                        DRAWGRIDRADIUS.get())), new IndirHSlider(UI.scale(200), 1, 6, DRAWGRIDRADIUS, val -> {
                     if (ui.gui != null && ui.gui.map != null) {
                         ui.gui.map.view = val;
                     }
@@ -6689,7 +6694,7 @@ public class OptWnd extends Window {
                 });
 
                 appender.add(new Label("Disable animations:"));
-                CheckListbox disanimlist = new CheckListbox(320, Config.disableanim.values().size(), 18 + Config.fontadd) {
+                CheckListbox disanimlist = new CheckListbox(UI.scale(320), Config.disableanim.values().size(), 18 + Config.fontadd) {
                     @Override
                     protected void itemclick(CheckListboxItem itm, int button) {
                         super.itemclick(itm, button);
@@ -6703,7 +6708,7 @@ public class OptWnd extends Window {
                     Label dpy = new Label("");
                     final double smin = 1, smax = Math.floor(UI.maxscale() / 0.25) * 0.25;
                     final int steps = (int) Math.round((smax - smin) / 0.25);
-                    appender.addRow(new Label("UGLY UI scale (don't use)"), new HSlider(160, 0, steps, (int) Math.round(steps * (Utils.getprefd("uiscale", 1.0) - smin) / (smax - smin))) {
+                    appender.addRow(new Label("UGLY UI scale (don't use)"), new HSlider(UI.scale(160), 0, steps, (int) Math.round(steps * (Utils.getprefd("uiscale", 1.0) - smin) / (smax - smin))) {
                         @Override
                         protected void added() {
                             dpy();

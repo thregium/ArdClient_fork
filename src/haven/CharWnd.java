@@ -102,7 +102,7 @@ public class CharWnd extends Window {
 
     public static class FoodMeter extends Widget {
         public static final Tex frame = Resource.loadtex("gfx/hud/chr/foodm");
-        public static final Coord marg = new Coord(5, 5), trmg = new Coord(10, 10);
+        public static final Coord marg = UI.scale(5, 5), trmg = UI.scale(10, 10);
         public double cap;
         public List<El> els = new LinkedList<El>();
         private List<El> enew = null, etr = null;
@@ -282,7 +282,7 @@ public class CharWnd extends Window {
 
     public static class GlutMeter extends Widget {
         public static final Tex frame = Resource.loadtex("gfx/hud/chr/glutm");
-        public static final Coord marg = new Coord(5, 5);
+        public static final Coord marg = UI.scale(5, 5);
         public Color fg = Color.WHITE;
         public Color bg = Color.WHITE;
         public double glut, lglut, gmod;
@@ -359,7 +359,7 @@ public class CharWnd extends Window {
                     BufferedImage img = spec.image();
                     String nm = spec.name();
                     TexI rnm = PUtils.strokeTex(elf.render(nm));
-                    BufferedImage buf = TexI.mkbuf(new Coord(elh + 5 + rnm.sz().x, elh));
+                    BufferedImage buf = TexI.mkbuf(new Coord(elh + UI.scale(5) + rnm.sz().x, elh));
                     Graphics g = buf.getGraphics();
                     g.drawImage(convolvedown(img, new Coord(elh, elh), tflt), 0, 0, null);
                     g.drawImage(rnm.back, elh + 5, ((elh - rnm.sz().y) / 2) + 1, null);
@@ -497,7 +497,7 @@ public class CharWnd extends Window {
         private int cbv = -1, ccv = -1;
 
         private Attr(Glob glob, String attr, Color bg) {
-            super(new Coord(attrw, attrf.height() + 2));
+            super(new Coord(attrw, attrf.height() + UI.scale(2)));
             res = Resource.remote().loadwait("gfx/hud/chr/" + attr);
             this.nm = attr;
             this.img = res.layer(Resource.imgc).tex();
@@ -568,7 +568,7 @@ public class CharWnd extends Window {
         private int cbv, ccv;
 
         private SAttr(Glob glob, String attr, Color bg) {
-            super(new Coord(attrw, attrf.height() + 2));
+            super(new Coord(attrw, attrf.height() + UI.scale(2)));
             res = Resource.remote().loadwait("gfx/hud/chr/" + attr);
             this.nm = attr;
             this.img = res.layer(Resource.imgc).tex();
@@ -814,13 +814,13 @@ public class CharWnd extends Window {
             upd();
             super.draw(g);
             g.chcolor(255, 192, 255, 255);
-            g.aimage(twt.get(), new Coord(sz.x - 4, 17), 1.0, 0.0);
+            g.aimage(twt.get(), new Coord(sz.x - UI.scale(4), UI.scale(17)), 1.0, 0.0);
             g.chcolor(255, 255, 192, 255);
-            g.aimage(tenct.get(), new Coord(sz.x - 4, 47), 1.0, 0.0);
+            g.aimage(tenct.get(), new Coord(sz.x - UI.scale(4), UI.scale(47)), 1.0, 0.0);
             g.chcolor(192, 192, 255, 255);
-            g.aimage(texpt.get(), sz.add(-4, -15), 1.0, 0.0);
+            g.aimage(texpt.get(), sz.add(UI.scale(-4, -15)), 1.0, 0.0);
             g.chcolor(192, 192, 255, 255);
-            g.aimage(tlpht.get(), sz.add(-4, -49), 1.0, 0.0);
+            g.aimage(tlpht.get(), sz.add(UI.scale(-4, -49)), 1.0, 0.0);
         }
     }
 
@@ -1176,7 +1176,7 @@ public class CharWnd extends Window {
                                      Math.max(img.sz().y, title.sz().y) + 25 + msg.sz().y));
                             */
                             resize(new Coord(Math.max(Math.max(img.sz().x, title.sz().x), msg.sz().x),
-                                    img.sz().y + 15 + title.sz().y + 15 + msg.sz().y));
+                                    img.sz().y + UI.scale(15) + title.sz().y + UI.scale(15) + msg.sz().y));
                             presize();
                         } catch (Loading l) {
                             return;
@@ -1229,12 +1229,12 @@ public class CharWnd extends Window {
                     buf.append(cond.status);
                 }
                 buf.append("}");
-                text = ifnd.render(buf.toString(), parent.sz.x - 20);
-                resize(text.sz().add(15, 1));
+                text = ifnd.render(buf.toString(), parent.sz.x - UI.scale(20));
+                resize(text.sz().add(UI.scale(15, 1)));
             }
 
             public void draw(GOut g) {
-                g.image(text.tex(), new Coord(15, 0));
+                g.image(text.tex(), UI.scale(15, 0));
             }
         }
 
@@ -1371,7 +1371,7 @@ public class CharWnd extends Window {
         }
 
         public static class QView extends Widget {
-            public static final Text.Furnace qtfnd = new BlurFurn(new Text.Foundry(Text.serif.deriveFont(java.awt.Font.BOLD, 16)).aa(true), 2, 1, Color.BLACK);
+            public static final Text.Furnace qtfnd = new BlurFurn(new Text.Foundry(Text.serif.deriveFont(java.awt.Font.BOLD, UI.scale(16))).aa(true), 2, 1, Color.BLACK);
             public static final Text.Foundry qcfnd = new Text.Foundry(Text.sans, UI.scale(12)).aa(true);
             public final QVInfo info;
             private Condition[] ccond;
@@ -1415,16 +1415,16 @@ public class CharWnd extends Window {
                         g.chcolor(192, 192, 255, 255);
                     else if (info.done() == QST_DISABLED)
                         g.chcolor(255, 128, 0, 255);
-                    g.image(rtitle, new Coord(3, y));
+                    g.image(rtitle, new Coord(UI.scale(3), y));
                     g.chcolor();
                     y += rtitle.sz().y + 5;
                 }
                 for (Tex c : rcond) {
-                    g.image(c, new Coord(3, y));
+                    g.image(c, new Coord(UI.scale(3), y));
                     if (c == glowon) {
                         double a = (1.0 - Math.pow(Math.cos(glowt * 2 * Math.PI), 2));
                         g.chcolor(255, 255, 255, (int) (128 * a));
-                        g.image(glow, new Coord(0, y - 3));
+                        g.image(glow, new Coord(0, y - UI.scale(3)));
                         g.chcolor();
                     }
                     y += c.sz().y;
@@ -1513,7 +1513,7 @@ public class CharWnd extends Window {
 
             protected void layouth(Widget cont) {
                 RichText text = ifnd.render(rendertext(), cont.sz.x - margin3);
-                cont.add(new Img(text.tex()), UI.scale(new Coord(10, 10)));
+                cont.add(new Img(text.tex()), UI.scale(10, 10));
             }
 
             protected void layoutc(Widget cont) {
@@ -1539,7 +1539,7 @@ public class CharWnd extends Window {
                     } else {
                         nw[i] = new DefaultCond(cont, cond[i]);
                     }
-                    y += cont.add(nw[i], new Coord(10, y)).sz.y;
+                    y += cont.add(nw[i], new Coord(UI.scale(10), y)).sz.y;
                 }
                 condw = nw;
             }
@@ -1627,7 +1627,7 @@ public class CharWnd extends Window {
 
         protected void drawitem(GOut g, Skill sk) {
             if (sk.small == null)
-                sk.small = new TexI(convolvedown(sk.res.get().layer(Resource.imgc).img, UI.scale(new Coord(40, 40)), iconfilter));
+                sk.small = new TexI(convolvedown(sk.res.get().layer(Resource.imgc).img, UI.scale(40, 40), iconfilter));
             g.image(sk.small, Coord.z);
         }
 
@@ -1659,7 +1659,7 @@ public class CharWnd extends Window {
     }
 
     public class CredoGrid extends Scrollport {
-        public final Coord crsz = UI.scale(new Coord(70, 88));
+        public final Coord crsz = UI.scale(70, 88);
         public final int btnw = UI.scale(100);
         public final Tex credoufr = new TexI(convolvedown(Resource.loadimg("gfx/hud/chr/yrkirframe"), crsz, iconfilter));
         public final Tex credosfr = new TexI(convolvedown(Resource.loadimg("gfx/hud/chr/yrkirsframe"), crsz, iconfilter));
@@ -1823,13 +1823,13 @@ public class CharWnd extends Window {
 
         public ExpGrid(Coord sz) {
             super(sz);
-            seen = new Group(UI.scale(new Coord(40, 40)), new Coord(-1, 5), null, Collections.emptyList());
+            seen = new Group(UI.scale(40, 40), UI.scale(-1, 5), null, Collections.emptyList());
             itemtooltip = Experience::tooltip;
         }
 
         protected void drawitem(GOut g, Experience exp) {
             if (exp.small == null)
-                exp.small = new TexI(convolvedown(exp.res.get().layer(Resource.imgc).img, UI.scale(new Coord(40, 40)), iconfilter));
+                exp.small = new TexI(convolvedown(exp.res.get().layer(Resource.imgc).img, UI.scale(40, 40), iconfilter));
             g.image(exp.small, Coord.z);
         }
 
@@ -1922,7 +1922,7 @@ public class CharWnd extends Window {
             g.aimage(w.rnm.get(), new Coord(x, itemh / 2), 0, 0.5);
             Tex qd = w.rqd.get();
             if (qd != null)
-                g.aimage(qd, new Coord(sz.x - 15, itemh / 2), 1.0, 0.5);
+                g.aimage(qd, new Coord(sz.x - UI.scale(15), itemh / 2), 1.0, 0.5);
         }
 
         protected void itemclick(Wound item, int button) {
@@ -2094,7 +2094,7 @@ public class CharWnd extends Window {
     public CharWnd(Glob glob) {
         super(Coord.z, "Character Sheet", "Character Sheet");
 
-        final Tabs tabs = new Tabs(new Coord(15, 10), Coord.z, this);
+        final Tabs tabs = new Tabs(UI.scale(15, 10), Coord.z, this);
         Tabs.Tab battr = tabs.add();
         {
             Widget left = new Widget.Temporary();
@@ -2548,7 +2548,7 @@ public class CharWnd extends Window {
                     Config.studylock = val;
                     a = val;
                 }
-            }, new Coord(407, 10));
+            }, UI.scale(407, 10));
             sattr.add(new CheckBox(Resource.getLocString(Resource.BUNDLE_LABEL, "Auto")) {
                 {
                     a = Config.autostudy;
@@ -2559,7 +2559,7 @@ public class CharWnd extends Window {
                     Config.autostudy = val;
                     a = val;
                 }
-            }, new Coord(465, 10));
+            }, UI.scale(465, 10));
             Frame.around(sattr, Collections.singletonList(inf));
             getparent(GameUI.class).studywnd.setStudy((Inventory) child);
         } else if (place == "fmg") {
