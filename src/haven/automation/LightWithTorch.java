@@ -8,6 +8,7 @@ import haven.Gob;
 import haven.Label;
 import haven.Resource;
 import haven.Text;
+import haven.UI;
 import haven.WItem;
 import haven.Widget;
 import haven.Window;
@@ -21,7 +22,7 @@ import java.util.List;
 import static haven.OCache.posres;
 
 public class LightWithTorch extends Window implements GobSelectCallback {
-    private static final Text.Foundry infof = new Text.Foundry(Text.sans, 10).aa(true);
+    private static final Text.Foundry infof = new Text.Foundry(Text.sans, UI.scale(10)).aa(true);
     private Gob gob;
     private static final int TIMEOUT_ACT = 6000;
     private Gob smelter;

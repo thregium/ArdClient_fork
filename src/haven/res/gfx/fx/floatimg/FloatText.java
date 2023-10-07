@@ -4,6 +4,7 @@ import haven.Gob;
 import haven.Resource;
 import haven.TexI;
 import haven.Text;
+import haven.UI;
 import haven.Utils;
 
 import java.awt.Color;
@@ -14,7 +15,7 @@ public class FloatText extends FloatSprite {
             hhp = new Color(255, 204, 0),
             armor = new Color(136, 255, 136);
     private static final Object lock = new Object();
-    public static final Text.Foundry fnd = new Text.Foundry(Text.sans, 12);
+    public static final Text.Foundry fnd = new Text.Foundry(Text.sans, UI.scale(12));
 
     public FloatText(Owner owner, Resource res, String text, Color color) {
         super(owner, res,

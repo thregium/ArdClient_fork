@@ -110,11 +110,11 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
     public boolean nextrandomnameinv = false;
 
     public BuddyWnd() {
-        super(new Coord(width, 380));
+        super(new Coord(width, UI.scale(380)));
         setfocustab(true);
         int y = 0;
         add(new Img(CharWnd.catf.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Kin")).tex()), new Coord(0, 0));
-        search = add(new TextEntry(110, "") {
+        search = add(new TextEntry(UI.scale(110), "") {
             @Override
             public boolean keydown(KeyEvent ev) {
                 if (!parent.visible)
@@ -124,12 +124,12 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
                 bl.filter = text().toLowerCase();
                 return ret;
             }
-        }, new Coord(width - 110, y + 5));
-        y += 35;
+        }, new Coord(width - UI.scale(110), y + UI.scale(5)));
+        y += UI.scale(35);
 
         bl = add(new BuddyList(width - Window.wbox.bisz().x, 7), new Coord(Window.wbox.btloff().x, y));
         Frame.around(this, Collections.singletonList(bl));
-        add(new Button(75, "Export kins") {
+        add(new Button(UI.scale(75), "Export kins") {
             public void click() {
                 try {
                     String cname = getCharName();
@@ -169,11 +169,11 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
                 return Text.render("Save to Kins.txt").tex();
             }
         }, new Coord(0, y + bl.sz.y));
-        y += 195;
+        y += UI.scale(195);
 
         add(new Label("Sort by:"), new Coord(0, y));
-        y += 15;
-        int sbw = (width - 20) / 3;
+        y += UI.scale(15);
+        int sbw = (width - UI.scale(20)) / 3;
         sbstatus = add(new Button(sbw, "Status") {
             public void click() {
                 setcmp(statuscmp);
@@ -183,7 +183,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
             public void click() {
                 setcmp(groupcmp);
             }
-        }, new Coord(sbw + 10, y));
+        }, new Coord(sbw + UI.scale(10), y));
         sbalpha = add(new Button(sbw, "Name") {
             public void click() {
                 setcmp(alphacmp);
@@ -197,10 +197,10 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
             if (sort.equals("group")) bcmp = groupcmp;
             if (sort.equals("status")) bcmp = statuscmp;
         }
-        y += 35;
+        y += UI.scale(35);
 
         add(new Label("Presentation name:"), new Coord(0, y));
-        y += 15;
+        y += UI.scale(15);
         pname = add(new TextEntry(width, "") {
             {
                 dshow = true;
@@ -210,16 +210,16 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
                 setpname(text);
             }
         }, new Coord(0, y));
-        y += 25;
-        add(new Button(75, "Set") {
+        y += UI.scale(25);
+        add(new Button(UI.scale(75), "Set") {
             public void click() {
                 setpname(pname.text());
             }
         }, new Coord(0, y));
-        y += 35;
+        y += UI.scale(35);
 
         add(new Label("My hearth secret:"), new Coord(0, y));
-        y += 15;
+        y += UI.scale(15);
         charpass = add(new TextEntry(width, "") {
             {
                 dshow = true;
@@ -229,7 +229,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
                 setpwd(text);
             }
         }, new Coord(0, y));
-        y += 25;
+        y += UI.scale(25);
         add(new Button(sbw, "Set") {
             public void click() {
                 setpwd(charpass.text());
@@ -239,16 +239,16 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
             public void click() {
                 setpwd("");
             }
-        }, new Coord(sbw + 10, y));
+        }, new Coord(sbw + UI.scale(10), y));
         add(new Button(sbw, "Random") {
             public void click() {
                 setpwd(randpwd());
             }
         }, new Coord(width - sbw, y));
-        y += 35;
+        y += UI.scale(35);
 
         add(new Label("Make kin by hearth secret:"), new Coord(0, y));
-        y += 15;
+        y += UI.scale(15);
         opass = add(new TextEntry(width, "") {
             public void activate(String text) {
                 String name = getCharName();
@@ -262,8 +262,8 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
                     setpname(name);
             }
         }, new Coord(0, y));
-        y += 25;
-        add(new Button(75, "Add kin") {
+        y += UI.scale(25);
+        add(new Button(UI.scale(75), "Add kin") {
             public void click() {
                 String name = getCharName();
                 boolean random = ui.modflags() == UI.MOD_CTRL;
@@ -276,7 +276,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
                     setpname(name);
             }
         }, new Coord(0, y));
-        add(new Button(75, "Add all kins from txt") {
+        add(new Button(UI.scale(75), "Add all kins from txt") {
             public void click() {
                 boolean allrandom = ui.modflags() == UI.MOD_CTRL;
                 java.awt.EventQueue.invokeLater(() -> {
@@ -304,7 +304,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
                         setpname(name);
                 });
             }
-        }, new Coord(0, y + 25));
+        }, new Coord(0, y + UI.scale(25)));
         pack();
     }
 
@@ -447,7 +447,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
                     pack();
                 }
                 if (b != null) {
-                    info = add(new BuddyInfo(new Coord(225, sz.y - 35 - Window.wbox.bisz().y), b), width + 20, 35);
+                    info = add(new BuddyInfo(new Coord(UI.scale(225), sz.y - UI.scale(35) - Window.wbox.bisz().y), b), width + UI.scale(20), UI.scale(35));
                     infof = Frame.around(this, Collections.singletonList(info));
                 }
                 pack();
@@ -500,8 +500,8 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
     }
 
     public static class GroupRect extends Widget {
-        final private static Coord offset = UI.scale(new Coord(2, 2));
-        final private static Coord selsz = UI.scale(new Coord(19, 19));
+        final private static Coord offset = UI.scale(2, 2);
+        final private static Coord selsz = UI.scale(19, 19);
         final private static Coord colsz = selsz.sub(offset.mul(2));
         final private GroupSelector selector;
         final private int group;
@@ -559,10 +559,10 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
             for (int i = 0; i < gc.length; i++) {
                 if (i == group) {
                     g.chcolor();
-                    g.frect(new Coord(i * 20, 0), new Coord(19, 19));
+                    g.frect(new Coord(i * UI.scale(20), 0), UI.scale(19, 19));
                 }
                 g.chcolor(gc[i]);
-                g.frect(new Coord(2 + (i * 20), 2), new Coord(15, 15));
+                g.frect(new Coord(UI.scale(2) + (i * UI.scale(20)), UI.scale(2)), UI.scale(15, 15));
             }
             g.chcolor();
         }
@@ -682,7 +682,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
             this.buddy = buddy;
 //            this.ava = adda(new Avaview(Avaview.dasz, -1, "avacam"), sz.x / 2, 10, 0.5, 0);
             this.ava = adda(new Avaview(new Coord(sz.x, (int) (sz.y * 0.60)), -1, "bdavacam"), 0, 0, 0, 0);
-            this.nick = add(new TextEntry(sz.x - 20, buddy.name) {
+            this.nick = add(new TextEntry(sz.x - UI.scale(20), buddy.name) {
                 {
                     dshow = true;
                 }
@@ -691,12 +691,12 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
                     buddy.chname(text);
                     commit();
                 }
-            }, 10, ava.c.y + ava.sz.y + 10);
+            }, UI.scale(10), ava.c.y + ava.sz.y + UI.scale(10));
             this.grp = add(new GroupSelector(buddy.group) {
                 public void changed(int group) {
                     buddy.chgrp(group);
                 }
-            }, 15, nick.c.y + nick.sz.y + 10);
+            }, UI.scale(15), nick.c.y + nick.sz.y + UI.scale(10));
             setopts();
         }
 
@@ -785,7 +785,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         public String filter;
 
         public BuddyList(int w, int h) {
-            super(w, h, 20);
+            super(w, h, UI.scale(20));
         }
 
         public Buddy listitem(int idx) {
@@ -829,7 +829,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
             else if (b.online == 0)
                 g.image(offline, Coord.z);
             g.chcolor(gc[b.group]);
-            g.aimage(b.rname().tex(), new Coord(25, 10), 0, 0.5);
+            g.aimage(b.rname().tex(), UI.scale(25, 10), 0, 0.5);
             g.chcolor();
         }
 

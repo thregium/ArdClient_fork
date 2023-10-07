@@ -35,10 +35,10 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 public class FastText {
-    public static final Font font = UI.scale(Text.sans, 11);
+    public static final Font font = UI.scale(Text.sans, UI.scale(11));
     public static final int h;
     public static final FontMetrics meter;
-    public static final Text.Foundry fnd = new Text.Foundry(Text.sans, 11);
+    public static final Text.Foundry fnd = new Text.Foundry(Text.sans, UI.scale(11));
     private static final Tex[] ct = new Tex[225];
     private static final TextMap textmap;
 

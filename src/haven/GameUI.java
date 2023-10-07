@@ -1213,7 +1213,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
                 mmap.save(file);
 
                 mmapwnd.mapfile = mapfile;
-                mapfile.uploadMarks();
+//                mapfile.uploadMarks();
             }
 
             if (trackon) {

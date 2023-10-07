@@ -11,6 +11,7 @@ import haven.Label;
 import static haven.OCache.posres;
 import haven.Resource;
 import haven.Text;
+import haven.UI;
 import haven.VMeter;
 import haven.WItem;
 import haven.Widget;
@@ -27,7 +28,7 @@ import java.util.Random;
 
 
 public class SteelRefueler extends Window implements GobSelectCallback {
-    private static final Text.Foundry infof = new Text.Foundry(Text.sans, 10).aa(true);
+    private static final Text.Foundry infof = new Text.Foundry(Text.sans, UI.scale(10)).aa(true);
     private List<Gob> crucibles = new ArrayList<>();
     private List<Gob> stockpiles = new ArrayList<>();
     private List<Double> completepercent = new ArrayList<>();

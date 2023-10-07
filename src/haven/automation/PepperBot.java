@@ -11,6 +11,7 @@ import haven.MCache;
 import haven.MapView;
 import haven.Resource;
 import haven.Text;
+import haven.UI;
 import haven.WItem;
 import haven.Widget;
 import haven.Window;
@@ -29,7 +30,7 @@ import static haven.OCache.posres;
 public class PepperBot extends Window implements AreaSelectCallback, GobSelectCallback {
     private Coord ca, cb;
     private boolean containeronly = false, replant = true, replantcontainer = false;
-    private static final Text.Foundry infof = new Text.Foundry(Text.sans, 10).aa(true);
+    private static final Text.Foundry infof = new Text.Foundry(Text.sans, UI.scale(10)).aa(true);
     private CheckBox replantChkbox, fillContainerChkbox, replantBarrelChkbox;
     private Gob barrel, hfire, rowmarker, water, cauldron, htable, grinder;
     public Thread testthread;

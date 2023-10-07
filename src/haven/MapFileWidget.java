@@ -42,6 +42,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
 import static haven.MCache.cmaps;
 import static haven.Text.latin;
@@ -72,7 +73,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
     public static Tex getCachedTextTex(String text) {
         Tex tex = cachedTextTex.get(text);
         if (tex == null) {
-            Text.Foundry fnd = new Text.Foundry(latin.deriveFont(Font.BOLD), 12).aa(true);
+            Text.Foundry fnd = new Text.Foundry(latin.deriveFont(Font.BOLD), UI.scale(12)).aa(true);
             tex = Text.renderstroked(text, Color.white, Color.BLACK, fnd).tex();
             cachedTextTex.put(text, tex);
         }
@@ -727,7 +728,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
                 setloc = null;
                 follow = false;
                 curloc = new Location(curloc.seg, dmc.add(dsc.sub(c)));
-            } else if (c.dist(dsc) > 5) {
+            } else if (c.dist(dsc) > UI.scale(5)) {
                 dragging = true;
             }
         }
@@ -756,19 +757,29 @@ public class MapFileWidget extends Widget implements Console.Directory {
                 tc = c.sub(sz.div(2)).add(curloc.tc);
             if (tc != null && lastmousedown.equals(c)) {
                 DisplayMarker mark = markerat(tc);
-                if (mark != null && mark.m instanceof MapFile.SMarker) {
-                    MapFile.SMarker sm = (MapFile.SMarker) mark.m;
+                if (mark != null) {
                     if (ui.modflags() == 0) {
-                        final FlowerMenu menu = new FlowerMenu((selection) -> {
-                            if (selection == 0) {
+                        List<Pair<String, Runnable>> list = new ArrayList<>();
+                        list.add(new Pair<>("Focus", () -> clickmarker(mark, 1)));
+                        list.add(new Pair<>("Send", () -> uploadMark(mark.m)));
+                        list.add(new Pair<>("Remove", () -> deletemarker(mark)));
+                        if (mark.m instanceof MapFile.SMarker) {
+                            MapFile.SMarker sm = (MapFile.SMarker) mark.m;
+                            list.add(new Pair<>((!sm.autosend ? "Enable" : "Disable") + "  sending to mapper", () -> {
                                 sm.makeAutosend(!sm.autosend);
                                 if (sm.autosend)
-                                    uploadMarks();
+                                    uploadMark(sm);
                                 file.defersave();
-                            } else if (selection == 1) {
-                                deletemarker(mark);
+                            }));
+                        }
+                        final FlowerMenu menu = new FlowerMenu((idx) -> {
+                            for (int i = 0; i < list.size(); i++) {
+                                if (idx == i) {
+                                    list.get(i).b.run();
+                                    break;
+                                }
                             }
-                        }, !sm.autosend ? "Enable sending to mapper" : "Disable sending to mapper", "Remove mark");
+                        }, list.stream().map(e -> e.a).toArray(String[]::new));
                         ui.root.getchilds(FlowerMenu.class).forEach(wdg -> wdg.choose(null));
                         ui.root.add(menu, ui.mc);
                     }
@@ -1071,6 +1082,28 @@ public class MapFileWidget extends Widget implements Console.Directory {
                         }
                         return false;
                     });
+                }
+            }
+        }
+    }
+
+    public void uploadMark(Marker marker) {
+        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+            String username = ui.gui.chrid;
+            if (!username.isEmpty() && configuration.loadMapSetting(username, "mapper")) {
+                MappingClient map = MappingClient.getInstance(username);
+                if (map != null) {
+                    Predicate<Marker> p = (m) -> {
+                        if (m instanceof MapFile.SMarker) {
+                            return (((MapFile.SMarker) m).autosend);
+                        }
+                        if (m instanceof MapFile.PMarker) {
+                            return ((MapFile.PMarker) m).color.equals(Color.GREEN) && configuration.loadMapSetting(username, "green") && !m.name().isEmpty();
+                        }
+                        return false;
+                    };
+                    if (p.test(marker))
+                        map.Sendmarker(file, marker);
                 }
             }
         }

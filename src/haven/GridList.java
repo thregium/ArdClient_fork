@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class GridList<T> extends Widget {
-    public static final Text.Furnace dcatf = new BlurFurn(new TexFurn(new Text.Foundry(Text.dfont, 18).aa(true), Window.ctex), 2, 1, new Color(96, 48, 0));
+    public static final Text.Furnace dcatf = new BlurFurn(new TexFurn(new Text.Foundry(Text.dfont, UI.scale(18)).aa(true), Window.ctex), 2, 1, new Color(96, 48, 0));
     public final Text.Furnace catf;
     public final Scrollbar sb;
     public T sel = null;

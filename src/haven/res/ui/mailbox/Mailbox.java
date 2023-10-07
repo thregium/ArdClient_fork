@@ -20,7 +20,7 @@ public class Mailbox extends Widget {
     public static final Tex sq = Inventory.invsq;
     public static final int itemmarg = (bg.sz().y - sq.sz().y) / 2,
             bbtnw = UI.scale(70);
-    public static final Text.Foundry nfnd = new Text.Foundry(Text.sans, 12);
+    public static final Text.Foundry nfnd = new Text.Foundry(Text.sans, UI.scale(12));
     public static final Coord sqc = new Coord(itemmarg, itemmarg),
             itemc = sqc.add(1, 1),
             bbtnc = bg.sz().sub(UI.scale(5, 2)),

@@ -815,6 +815,20 @@ public class ChatUI extends Widget {
         public void uimsg(String msg, Object... args) {
             if ((msg == "msg") || (msg == "log")) {
                 String line = (String) args[0];
+                if (line.startsWith(CMD_PREFIX_HLIGHT)) {
+                    try {
+                        long gobid = Long.parseLong(line.substring(1));
+                        OCache oc = ui.gui.map.glob.oc;
+                        Gob gob = oc.getgob(gobid);
+                        if (gob != null) {
+                            gob.delattr(GobHighlight.class);
+                            gob.setattr(new GobHighlight(gob));
+                            oc.changed(gob);
+                            return;
+                        }
+                    } catch (NumberFormatException nfe) {
+                    }
+                }
                 Color col = null;
                 if (args.length > 1) col = (Color) args[1];
                 if (col == null) col = Color.WHITE;
@@ -1088,6 +1102,21 @@ public class ChatUI extends Widget {
                 Integer from = (Integer) args[0];
                 long gobid = Utils.uint32((Integer) args[1]);
                 String line = (String) args[2];
+                if (line.startsWith(CMD_PREFIX_HLIGHT)) {
+                    try {
+                        long gid = Long.parseLong(line.substring(1));
+                        OCache oc = ui.gui.map.glob.oc;
+                        Gob gob = oc.getgob(gid);
+                        if (gob != null) {
+                            gob.delattr(GobHighlight.class);
+                            gob.setattr(new GobHighlight(gob));
+                            oc.changed(gob);
+                            return;
+                        }
+                    } catch (NumberFormatException nfe) {
+                    }
+                }
+
                 Color col = Color.WHITE;
 
                 try {
@@ -1200,6 +1229,20 @@ public class ChatUI extends Widget {
             if (msg == "msg") {
                 String t = (String) args[0];
                 String line = (String) args[1];
+                if (line.startsWith(CMD_PREFIX_HLIGHT)) {
+                    try {
+                        long gid = Long.parseLong(line.substring(1));
+                        OCache oc = ui.gui.map.glob.oc;
+                        Gob gob = oc.getgob(gid);
+                        if (gob != null) {
+                            gob.delattr(GobHighlight.class);
+                            gob.setattr(new GobHighlight(gob));
+                            oc.changed(gob);
+                            return;
+                        }
+                    } catch (NumberFormatException nfe) {
+                    }
+                }
                 if (t.equals("in")) {
                     Message cmsg = new InMessage(line, iw());
                     append(cmsg);

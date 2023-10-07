@@ -33,7 +33,7 @@ import java.awt.event.KeyEvent;
 
 public class RootWidget extends ConsoleHost implements UI.MessageWidget {
     public static final Resource defcurs = Resource.remote().loadwait("gfx/hud/curs/arw");
-    public static final Text.Foundry msgfoundry = new Text.Foundry(Text.dfont, 14);
+    public static final Text.Foundry msgfoundry = new Text.Foundry(Text.dfont, UI.scale(14));
     public static final Resource errsfx = Resource.remote().loadwait("sfx/error");
     public static final Resource msgsfx = Resource.remote().loadwait("sfx/msg");
     public boolean modtip = false;

@@ -141,7 +141,7 @@ public class OptWnd extends Window {
     public static final int VERTICAL_MARGIN = 5;
     public static final int HORIZONTAL_MARGIN = 5;
     public static final int VERTICAL_AUDIO_MARGIN = 5;
-    private static final Text.Foundry fonttest = new Text.Foundry(Text.sans, 10).aa(true);
+    private static final Text.Foundry fonttest = new Text.Foundry(Text.sans, UI.scale(10)).aa(true);
     private static final List<Integer> caveindust = Arrays.asList(1, 2, 5, 10, 15, 30, 45, 60, 120);
     private static final Pair[] combatkeys = new Pair[]{
             new Pair<>("[1-5] and [shift + 1-5]", 0),
@@ -4730,7 +4730,7 @@ public class OptWnd extends Window {
         final CustomWidgetList list = new CustomWidgetList(resources.customQuickActions, "QuickPattern");
 
         appender.add(list);
-        final TextEntry value = new TextEntry(150, "") {
+        final TextEntry value = new TextEntry(UI.scale(150), "") {
             @Override
             public void activate(String text) {
                 list.add(text);
@@ -4739,13 +4739,13 @@ public class OptWnd extends Window {
         };
 
         appender.add(value);
-        appender.addRow(new Button(45, "Add") {
+        appender.addRow(new Button(UI.scale(45), "Add") {
             @Override
             public void click() {
                 list.add(value.text());
                 value.settext("");
             }
-        }, new Button(45, "Load Default") {
+        }, new Button(UI.scale(45), "Load Default") {
             @Override
             public void click() {
                 for (String dact : resources.defaultQuickActions) {
@@ -4764,7 +4764,7 @@ public class OptWnd extends Window {
 
         appender.setX(list.sz.x);
         appender.setY(list.c.y);
-        appender.addRow(new Label("Quick radius"), new HSlider(200, 1, 100, configuration.quickradius) {
+        appender.addRow(new Label("Quick radius"), new HSlider(UI.scale(200), 1, 100, configuration.quickradius) {
             @Override
             public void changed() {
                 configuration.quickradius = val;

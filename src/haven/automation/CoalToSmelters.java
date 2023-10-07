@@ -15,6 +15,7 @@ import haven.Loading;
 import static haven.OCache.posres;
 import haven.Resource;
 import haven.Text;
+import haven.UI;
 import haven.WItem;
 import haven.Widget;
 import haven.Window;
@@ -28,7 +29,7 @@ import java.util.List;
 import java.util.Random;
 
 public class CoalToSmelters extends Window implements GobSelectCallback {
-    private static final Text.Foundry infof = new Text.Foundry(Text.sans, 10).aa(true);
+    private static final Text.Foundry infof = new Text.Foundry(Text.sans, UI.scale(10)).aa(true);
     private Coord selectedAreaA, selectedAreaB;
     private Gob gob;
     private static final int TIMEOUT_ACT = 12000;

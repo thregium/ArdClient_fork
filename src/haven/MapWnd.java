@@ -242,19 +242,19 @@ public class MapWnd extends ResizableWnd {
         public void resize(int h) {
             super.resize(new Coord(sz.x, h));
 
-            fdropf.c = new Coord(sz.x - 200, 0);
-            fdrop.c = new Coord(fdropf.c.x + 5, fdropf.c.y + 5);
+            fdropf.c = new Coord(sz.x - UI.scale(200), 0);
+            fdrop.c = new Coord(fdropf.c.x + UI.scale(5), fdropf.c.y + UI.scale(5));
 
-            listf.resize(listf.sz.x, sz.y - 140);
+            listf.resize(listf.sz.x, sz.y - UI.scale(140));
             listf.c = new Coord(sz.x - listf.sz.x, fdropf.c.y + fdropf.sz.y);
             list.resize(listf.inner());
-            mebtn.c = new Coord(sz.x - 200, sz.y - mebtn.sz.y);
-            mibtn.c = new Coord(sz.x - 95, sz.y - mibtn.sz.y);
+            mebtn.c = new Coord(sz.x - UI.scale(200), sz.y - mebtn.sz.y);
+            mibtn.c = new Coord(sz.x - UI.scale(95), sz.y - mibtn.sz.y);
 
             if (namesel != null) {
-                namesel.c = listf.c.add(0, listf.sz.y + 10);
+                namesel.c = listf.c.add(0, listf.sz.y + UI.scale(10));
                 if (colsel != null)
-                    colsel.c = namesel.c.add(0, namesel.sz.y + 10);
+                    colsel.c = namesel.c.add(0, namesel.sz.y + UI.scale(10));
                 mremove.c = new Coord(namesel.c.x, sz.y - mremove.sz.y);
             }
         }
@@ -1471,7 +1471,7 @@ public class MapWnd extends ResizableWnd {
                             commit();
                             change2(null);
                             setfocus(MarkerList.this);
-                            uploadMarks();
+                            uploadMark(mark);
                         }
                     });
                 }
@@ -1486,6 +1486,7 @@ public class MapWnd extends ResizableWnd {
                             this.group = group;
                             pm.color = BuddyWnd.gc[group];
                             view.file.update(mark);
+                            uploadMark(mark);
                         }
                     });
                     if ((colsel.group = Utils.index(BuddyWnd.gc, pm.color)) < 0)
@@ -1614,7 +1615,9 @@ public class MapWnd extends ResizableWnd {
                         Coord sc = tc.add(info.sc.sub(obg.gc).mul(cmaps));
                         SMarker prev = view.file.smarkers.get(oid);
                         if (prev == null) {
-                            view.file.add(new SMarker(info.seg, sc, rnm, oid, new Resource.Spec(Resource.remote(), res.name, res.ver)));
+                            SMarker nsm = new SMarker(info.seg, sc, rnm, oid, new Resource.Spec(Resource.remote(), res.name, res.ver));
+                            view.file.add(nsm);
+                            uploadMark(nsm);
                         } else {
                             if ((prev.seg != info.seg) || !prev.tc.equals(sc)) {
                                 prev.seg = info.seg;
@@ -1622,7 +1625,6 @@ public class MapWnd extends ResizableWnd {
                                 view.file.update(prev);
                             }
                         }
-                        uploadMarks();
                     } finally {
                         view.file.lock.writeLock().unlock();
                     }
@@ -1685,6 +1687,8 @@ public class MapWnd extends ResizableWnd {
                         if (prev == null) {
                             SMarker mark = new SMarker(info.seg, sc, rnm, oid, new Resource.Spec(Resource.remote(), iconRes.name, iconRes.ver));
                             mark.makeAutosend(sendeable);
+                            if (sendeable)
+                                uploadMark(mark);
                             view.file.add(mark);
                         } else {
                             if ((prev.seg != info.seg) || !prev.tc.equals(sc)) {
@@ -1693,7 +1697,6 @@ public class MapWnd extends ResizableWnd {
                                 view.file.update(prev);
                             }
                         }
-                        uploadMarks();
                     } finally {
                         view.file.lock.writeLock().unlock();
                     }
@@ -1708,6 +1711,10 @@ public class MapWnd extends ResizableWnd {
 
     public void uploadMarks() {
         view.uploadMarks();
+    }
+
+    public void uploadMark(Marker marker) {
+        view.uploadMark(marker);
     }
 
     @Override

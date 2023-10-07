@@ -7,6 +7,7 @@ import haven.Coord;
 import haven.GameUI;
 import haven.Label;
 import haven.Text;
+import haven.UI;
 import haven.Widget;
 import haven.Window;
 import net.dv8tion.jda.core.entities.TextChannel;
@@ -26,7 +27,7 @@ public class ShieldChecker extends Window {
     private static final int SLEEP5 = 1000 * 60 * 5; //5 min
     private boolean firstrun = true;
     private int iteration;
-    private static final Text.Foundry infof = new Text.Foundry(Text.sans, 10).aa(true);
+    private static final Text.Foundry infof = new Text.Foundry(Text.sans, UI.scale(10)).aa(true);
 
     public ShieldChecker() {
         super(new Coord(220, 180), "Shield Checker");

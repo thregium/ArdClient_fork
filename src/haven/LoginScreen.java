@@ -44,9 +44,9 @@ import java.util.Properties;
 import java.util.Scanner;
 
 public class LoginScreen extends Widget {
-    public static Text.Foundry textf = new Text.Foundry(Text.sans, 16).aa(true);
-    public static Text.Foundry textfs = new Text.Foundry(Text.sans, 14).aa(true);
-    public static Text.Foundry special = new Text.Foundry(Text.latin, 14).aa(true);
+    public static Text.Foundry textf = new Text.Foundry(Text.sans, UI.scale(16)).aa(true);
+    public static Text.Foundry textfs = new Text.Foundry(Text.sans, UI.scale(14)).aa(true);
+    public static Text.Foundry special = new Text.Foundry(Text.latin, UI.scale(14)).aa(true);
     boolean serverStatus;
     Login cur;
     Text error;

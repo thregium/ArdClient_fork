@@ -66,7 +66,7 @@ public class Polity extends Widget {
 
     public class MemberList extends Listbox<Member> {
         public MemberList(int w, int h) {
-            super(w, h, 20);
+            super(w, h, UI.scale(20));
         }
 
         public Member listitem(int idx) {
@@ -106,8 +106,8 @@ public class Polity extends Widget {
         }
     }
 
-    public static final Text.Foundry nmf = new Text.Foundry(Text.serif.deriveFont(Font.BOLD, 14)).aa(true);
-    public static final Text.Foundry membf = new Text.Foundry(Text.serif.deriveFont(Font.BOLD, 12)).aa(true);
+    public static final Text.Foundry nmf = new Text.Foundry(Text.serif.deriveFont(Font.BOLD, UI.scale(14))).aa(true);
+    public static final Text.Foundry membf = new Text.Foundry(Text.serif.deriveFont(Font.BOLD, UI.scale(12))).aa(true);
 
     public Polity(String cap, String name) {
         super(new Coord(width, 200));

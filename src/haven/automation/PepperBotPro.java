@@ -7,6 +7,7 @@ import haven.Gob;
 import haven.Label;
 import haven.MapView;
 import haven.Text;
+import haven.UI;
 import haven.Widget;
 import haven.Window;
 import haven.purus.pbot.PBotUtils;
@@ -16,7 +17,7 @@ import java.util.Comparator;
 
 public class PepperBotPro extends Window implements GobSelectCallback {
     private Coord ca, cb;
-    private static final Text.Foundry infof = new Text.Foundry(Text.sans, 10).aa(true);
+    private static final Text.Foundry infof = new Text.Foundry(Text.sans, UI.scale(10)).aa(true);
     private Gob barrel, hfire, water, cauldron, htable, grinder;
     private ArrayList<Gob> crops1, crops2, crops3, crops4 = new ArrayList<Gob>();
     private ArrayList<Gob> tables1, tables2, tables3, tables4 = new ArrayList<Gob>();

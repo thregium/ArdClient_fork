@@ -18,6 +18,7 @@ import haven.sloth.gob.Type;
 import modification.dev;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -284,6 +285,50 @@ public class MappingClient {
                 dev.simpleLog("collected " + markers.size() + " markers");
 
                 scheduler.execute(new ProcessMapper(mapfile, markers));
+            } else {
+                if (retries-- > 0) {
+                    dev.simpleLog("rescheduling upload");
+                    scheduler.schedule(this, 5, TimeUnit.SECONDS);
+                }
+            }
+        }
+    }
+
+    public void Sendmarker(MapFile mapfile, Marker marker) {
+        scheduler.schedule(new ExtractMapper1(mapfile, marker), 5, TimeUnit.SECONDS);
+    }
+
+    private class ExtractMapper1 implements Runnable {
+        MapFile mapfile;
+        Marker marker;
+        int retries = 5;
+
+        ExtractMapper1(MapFile mapfile, Marker marker) {
+            this.mapfile = mapfile;
+            this.marker = marker;
+        }
+
+        @Override
+        public void run() {
+            if (mapfile.lock.readLock().tryLock()) {
+                MarkerData marker;
+                try {
+                    long gridid;
+                    Coord mgc = new Coord(Math.floorDiv(this.marker.tc.x, 100), Math.floorDiv(this.marker.tc.y, 100));
+                    gridid = mapfile.segments.get(this.marker.seg).map.get(mgc);
+                    marker = new MarkerData(this.marker, gridid);
+                } catch (Exception ex) {
+                    if (retries-- > 0) {
+                        dev.simpleLog("rescheduling upload");
+                        scheduler.schedule(this, 5, TimeUnit.SECONDS);
+                    }
+                    return;
+                } finally {
+                    mapfile.lock.readLock().unlock();
+                }
+                dev.simpleLog("collected " + marker);
+
+                scheduler.execute(new ProcessMapper(mapfile, Collections.singletonList(marker)));
             } else {
                 if (retries-- > 0) {
                     dev.simpleLog("rescheduling upload");

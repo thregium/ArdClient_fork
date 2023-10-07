@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ConsoleHost extends Widget implements ReadLine.Owner {
-    public static Text.Foundry cmdfoundry = new Text.Foundry(Text.mono, 12, new java.awt.Color(245, 222, 179));
+    public static Text.Foundry cmdfoundry = new Text.Foundry(Text.mono, UI.scale(12), new java.awt.Color(245, 222, 179));
     public ReadLine cmdline = null;
     private Text.Line cmdtext = null;
     private String cmdtextf = null;

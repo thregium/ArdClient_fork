@@ -6,6 +6,7 @@ import haven.Coord;
 import haven.Gob;
 import haven.Label;
 import haven.Text;
+import haven.UI;
 import haven.Widget;
 import haven.Window;
 import haven.purus.pbot.PBotUtils;
@@ -18,7 +19,7 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 
 public class DestroyArea extends Window implements GobSelectCallback {
-    private static final Text.Foundry infof = new Text.Foundry(Text.sans, 10).aa(true);
+    private static final Text.Foundry infof = new Text.Foundry(Text.sans, UI.scale(10)).aa(true);
     public Thread selectingarea, runner;
     private Button runbtn, stopbtn, selectareabtn, selectgobbtn;
     private Coord selectedAreaA, selectedAreaB;

@@ -1372,7 +1372,7 @@ public class CharWnd extends Window {
 
         public static class QView extends Widget {
             public static final Text.Furnace qtfnd = new BlurFurn(new Text.Foundry(Text.serif.deriveFont(java.awt.Font.BOLD, 16)).aa(true), 2, 1, Color.BLACK);
-            public static final Text.Foundry qcfnd = new Text.Foundry(Text.sans, 12).aa(true);
+            public static final Text.Foundry qcfnd = new Text.Foundry(Text.sans, UI.scale(12)).aa(true);
             public final QVInfo info;
             private Condition[] ccond;
             private Tex[] rcond = {};

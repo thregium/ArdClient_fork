@@ -78,7 +78,7 @@ import java.util.function.DoubleUnaryOperator;
 public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.HasPose {
     public int cropstgmaxval = 0;
     private Overlay bowvector = null;
-    public static final Text.Foundry gobhpf = new Text.Foundry(Text.serif, 14).aa(true);
+    public static final Text.Foundry gobhpf = new Text.Foundry(Text.serif, UI.scale(14)).aa(true);
     private static final Material.Colors dframeEmpty = new Material.Colors(new Color(0, 255, 0, 200));
     public static Material.Colors cRackEmpty = new Material.Colors(DefSettings.CHEESERACKEMPTYCOLOR.get());
     public static Material.Colors cRackFull = new Material.Colors(DefSettings.CHEESERACKFULLCOLOR.get());

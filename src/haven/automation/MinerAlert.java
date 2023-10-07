@@ -16,6 +16,7 @@ import haven.Loading;
 import haven.MCache;
 import haven.Resource;
 import haven.Text;
+import haven.UI;
 import haven.Utils;
 import haven.Widget;
 import haven.Window;
@@ -44,7 +45,7 @@ public class MinerAlert extends Window {
     public Gob gob;
     private Button runbtn, stopbtn, mutebtn;
     private final Label labelcountiron, labelcountgold, labelcountcinnabar, labelcountsilver, labelcounttin, labelcountlead, labelcountcopper, labelcountmagnetite, labelcounthematite, labelcountslimes, labelcountslimestotal;
-    private static final Text.Foundry infof = new Text.Foundry(Text.sans, 10).aa(true);
+    private static final Text.Foundry infof = new Text.Foundry(Text.sans, UI.scale(10)).aa(true);
     private double lasterror = 0;
     public List<Gob> slimecount = new ArrayList<>();
     private static final Resource goldsfx = Resource.local().loadwait("sfx/Zelda");
