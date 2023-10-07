@@ -93,15 +93,18 @@ public class LoginScreen extends Widget {
         int maxlines = txt.maxLines = 200;
         log.pack();
         try {
+            String git = "";
             {
                 try (InputStream in = ClassLoader.getSystemResourceAsStream("buildinfo")) {
                     if (in != null) {
                         Properties info = new Properties();
                         info.load(in);
                         String ver = info.getProperty("version");
-                        String git = info.getProperty("git-rev");
+                        git = info.getProperty("git-rev");
+                        String commit = info.getProperty("commit");
                         txt.append(String.format("Current version: %s", ver));
                         txt.append(String.format("Current git: %s", git));
+                        txt.append(String.format("%s", commit.replaceAll("/;", "\n")));
                     }
                 } catch (IOException e) {
                 }
@@ -112,7 +115,7 @@ public class LoginScreen extends Widget {
                     String strLine;
                     int count = 0;
                     while ((count < maxlines) && (strLine = br.readLine()) != null) {
-                        txt.append(strLine);
+                        txt.append(strLine.contains("%s") ? String.format(strLine, git) : strLine);
                         out.write((strLine + Config.LINE_SEPARATOR).getBytes());
                         count++;
                     }

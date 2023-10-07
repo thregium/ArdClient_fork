@@ -29,6 +29,7 @@ package haven;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import haven.purus.pbot.PBotAPI;
 import haven.sloth.util.ObservableMap;
 import modification.SQLitePreference;
 import modification.configuration;
@@ -96,6 +97,7 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 public class Utils {
@@ -255,18 +257,49 @@ public class Utils {
             Preferences current = prefs;
             if (pref != current && current instanceof SQLitePreference) {
                 SQLitePreference sqcurrent = (SQLitePreference) current;
-                for (String key : pref.keys()) {
-                    String old = pref.get(key, null);
-                    if (old != null) {
-                        sqcurrent.putWait(key, old);
-                        System.out.printf("[PREFERENCE] %s added%n", key);
-                    } else {
-                        System.out.printf("[PREFERENCE] %s null%n", key);
+                UI ui = PBotAPI.ui();
+                Text.Foundry tf = new Text.Foundry(Text.sans, UI.scale(48));
+                Thread task = new Thread(() -> {
+                    synchronized (Utils.class) {
+                        try {
+                            Thread.sleep(500);
+                            Label last = null;
+                            try {
+                                for (String key : pref.keys()) {
+                                    String old = pref.get(key, null);
+                                    Label last1 = last;
+                                    if (old != null) {
+                                        sqcurrent.putWait(key, old);
+                                        System.out.printf("[PREFERENCE] %s added%n", key);
+                                        last = new Label(String.format("%s ADDED", key), tf);
+                                        last.setcolor(Color.GREEN);
+                                        ui.root.add(last, ui.root.sz.sub(last.sz).div(2));
+                                    } else {
+                                        System.out.printf("[PREFERENCE] %s null%n", key);
+                                        last = new Label(String.format("%s NULL", key), tf);
+                                        last.setcolor(Color.RED);
+                                        ui.root.add(last, ui.root.sz.sub(last.sz).div(2));
+                                    }
+                                    if (last1 != null) last1.reqdestroy();
+                                }
+                            } catch (BackingStoreException e) {
+                            }
+                            System.out.printf("[PREFERENCE] converted%n");
+                            Label last1 = last;
+                            last = new Label("DONE", tf);
+                            last.setcolor(Color.GREEN);
+                            ui.root.add(last, ui.root.sz.sub(last.sz).div(2));
+                            if (last1 != null) last1.reqdestroy();
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
                     }
-                }
-                System.out.printf("[PREFERENCE] converted%n");
-                MainFrame.instance.mt.getThreadGroup().interrupt();
-                MainFrame.instance.mt.interrupt();
+                    MainFrame.instance.mt.getThreadGroup().interrupt();
+                    MainFrame.instance.mt.interrupt();
+                });
+                task.setDaemon(true);
+                task.start();
             } else {
                 System.out.printf("[PREFERENCE] pref same%n");
             }
