@@ -8,7 +8,7 @@ public class HSliderListbox extends Listbox<HSliderNamed> {
     public final List<HSliderNamed> items = new ArrayList<>();
 
     public HSliderListbox(int w, int h) {
-        super(w, h, 18);
+        super(w, h, UI.scale(18));
     }
 
     public HSliderListbox(int w, int h, int itemh) {

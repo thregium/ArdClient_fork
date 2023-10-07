@@ -43,7 +43,7 @@ public class Textlog extends Widget {
     static Tex texpap = Resource.loadtex("gfx/hud/texpap");
     static Tex schain = Resource.loadtex("gfx/hud/schain");
     static Tex sflarp = Resource.loadtex("gfx/hud/sflarp");
-    static final RichText.Foundry fnd = new RichText.Foundry(new ChatUI.ChatParser(TextAttribute.FAMILY, Text.cfg.font.get("sans"), TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD, TextAttribute.SIZE, 12, TextAttribute.FOREGROUND, Color.BLACK));
+    static final RichText.Foundry fnd = new RichText.Foundry(new ChatUI.ChatParser(TextAttribute.FAMILY, Text.cfg.font.get("sans"), TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD, TextAttribute.SIZE, UI.scale(12), TextAttribute.FOREGROUND, Color.BLACK));
     List<ChatUI.Channel.Message> lines;
     int maxy, cury;
     int margin = 3;

@@ -781,12 +781,6 @@ public class Session implements Resource.Resolver {
         sworker.interrupt();
         rworker.interrupt();
         ticker.interrupt();
-        if (this.alive() && this.username != null) {
-            MappingClient.getInstance(username).SetEndpoint("");
-            MappingClient.getInstance(username).EnableGridUploads(false);
-            MappingClient.getInstance(username).EnableTracking(false);
-            MappingClient.removeInstance(username);
-        }
     }
 
     public synchronized boolean alive() {

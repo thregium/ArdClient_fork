@@ -477,14 +477,12 @@ public class WItem extends Widget implements DTarget2 {
         } else if (btn == 3) {
             if (ui.modflags() == 0 && item.contents != null) {
                 boolean ex = item.contentswnd == null;
-                item.wdgmsg("iact", c, ui.modflags());
-                new Thread(() -> {
-                    try {Thread.sleep(350);
-                    } catch (InterruptedException ignored) {}
-                    if ((item.contentswnd == null) == ex) item.showcontwnd(ex);
-                }).start();
-            } else
-            if (ui.modmeta && !(parent instanceof Equipory)) {
+                if (item.contents.getClass().toString().contains("ItemStack")) {
+                    item.showcontwnd(ex);
+                } else {
+                    item.wdgmsg("iact", c, ui.modflags());
+                }
+            } else if (ui.modmeta && !(parent instanceof Equipory)) {
                 wdgmsg("transfer-identical-asc", this.item);
             } else
                 item.wdgmsg("iact", c, ui.modflags());

@@ -110,17 +110,17 @@ Window extends MovableWidget implements DTarget {
     public int curiocount = 0;
     public boolean justclose = false;
     //Large margin vs small margin
-    public static final Coord dlmrgn = new Coord(23, 14), dsmrgn = new Coord(3, 3);
+    public static final Coord dlmrgn = UI.scale(23, 14), dsmrgn = UI.scale(3, 3);
     //caption foundry
     public static final BufferedImage ctex = Resource.loadimg("gfx/hud/fonttex");
-    public static final Text.Furnace cf = new Text.Imager(new PUtils.TexFurn(new Text.Foundry(Text.sans, 15).aa(true), ctex)) {
+    public static final Text.Furnace cf = new Text.Imager(new PUtils.TexFurn(new Text.Foundry(Text.sans, UI.scale(15)).aa(true), ctex)) {
         protected BufferedImage proc(Text text) {
             return (rasterimg(blurmask2(text.img.getRaster(), 1, 1, Color.BLACK)));
         }
     };
     //Basic frame box
     public static final IBox wbox = new IBox(Theme.fullres("frame")) {
-        final Coord co = new Coord(3, 3), bo = new Coord(2, 2);
+        final Coord co = UI.scale(3, 3), bo = UI.scale(2, 2);
 
         public Coord btloff() {
             return (super.btloff().sub(bo));
@@ -529,8 +529,8 @@ Window extends MovableWidget implements DTarget {
             }
 
             if (this.cap.text.equals(Resource.getLocString(Resource.BUNDLE_WINDOW, "Study Desk"))) {
-                int offX = 5;
-                int sizeY = 36 * 7 + 5;
+                int offX = UI.scale(5);
+                int sizeY = UI.scale(36 * 7 + 5);
                 int totalLP = 0;
                 int totalAttn = 0;
                 Map<String, String> names = new HashMap<>();
@@ -558,10 +558,10 @@ Window extends MovableWidget implements DTarget {
                     totalAttn += entry.getValue();
                 }
                 g.image(Text.labelFnd.render("Total Attention: " + String.format("%,d", totalAttn)).tex(), new Coord(offX, sizeY));
-                sizeY += 14;
+                sizeY += UI.scale(14);
 
                 g.image(Text.labelFnd.render("Total LP: " + String.format("%,d", totalLP)).tex(), new Coord(offX, sizeY));
-                sizeY += 14;
+                sizeY += UI.scale(14);
                 //iterates the curio list to only print out total study times for unique curios
                 List<Map.Entry<String, Double>> lst = studyTimes.entrySet().stream().sorted((e1, e2) -> e1.getValue().compareTo(e2.getValue())).collect(Collectors.toList());
                 for (Map.Entry<String, Double> entry : lst) {
@@ -574,7 +574,7 @@ Window extends MovableWidget implements DTarget {
                     if (entry.getValue() > Config.curiotimetarget * 3) {
 
                         g.image(Text.labelFnd.render(names.get(entry.getKey()) + ": " + sensibleTimeFormat(entry.getValue()) + " - " + sensibleLPFormat(LP), CURIOHIGH.get()).tex(), new Coord(offX, sizeY));
-                        sizeY += 15;
+                        sizeY += UI.scale(15);
                         for (int i = 0; i < Curios.size(); i++) {
                             if (Curios.contains(entry.getKey())) {
                                 FinalCurios.add(entry.getKey());
@@ -583,7 +583,7 @@ Window extends MovableWidget implements DTarget {
                         GetCurios.add(entry.getKey());
                     } else if (entry.getValue() < Config.curiotimetarget) {
                         g.image(Text.labelFnd.render(names.get(entry.getKey()) + ": " + sensibleTimeFormat(entry.getValue()) + " - " + sensibleLPFormat(LP), CURIOLOW.get()).tex(), new Coord(offX, sizeY));
-                        sizeY += 15;
+                        sizeY += UI.scale(15);
                         for (int i = 0; i < Curios.size(); i++) {
                             if (Curios.contains(entry.getKey())) {
                                 FinalCurios.add(entry.getKey());
@@ -593,7 +593,7 @@ Window extends MovableWidget implements DTarget {
 
                     } else {
                         g.image(Text.labelFnd.render(names.get(entry.getKey()) + ": " + sensibleTimeFormat(entry.getValue()) + " - " + sensibleLPFormat(LP), CURIOTARGET.get()).tex(), new Coord(offX, sizeY));
-                        sizeY += 15;
+                        sizeY += UI.scale(15);
                         for (int i = 0; i < Curios.size(); i++) {
                             if (Curios.contains(entry.getKey())) {
                                 FinalCurios.add(entry.getKey());
@@ -619,12 +619,12 @@ Window extends MovableWidget implements DTarget {
                         curiosliderlabel.destroy();
                     if (curioslider != null)
                         curioslider.destroy();
-                    curiotarget = add(ColorPreWithLabel("Target Color", CURIOTARGET), new Coord(0, sizeY - 5));
-                    curiohigh = add(ColorPreWithLabel("High Color", CURIOHIGH), new Coord(0, sizeY + 15));
-                    curiolow = add(ColorPreWithLabel("Low Color", CURIOLOW), new Coord(0, sizeY + 35));
-                    studyhours = add(new Label(""), new Coord(140, sizeY + 40));
-                    curiosliderlabel = add(new Label("Curio Time Target:"), new Coord(0, sizeY + 50));
-                    curioslider = add(new HSlider(130, 0, 10080, Config.curiotimetarget) {
+                    curiotarget = add(ColorPreWithLabel("Target Color", CURIOTARGET), new Coord(0, sizeY - UI.scale(5)));
+                    curiohigh = add(ColorPreWithLabel("High Color", CURIOHIGH), new Coord(0, sizeY + UI.scale(15)));
+                    curiolow = add(ColorPreWithLabel("Low Color", CURIOLOW), new Coord(0, sizeY + UI.scale(35)));
+                    studyhours = add(new Label(""), new Coord(UI.scale(140), sizeY + UI.scale(40)));
+                    curiosliderlabel = add(new Label("Curio Time Target:"), new Coord(0, sizeY + UI.scale(50)));
+                    curioslider = add(new HSlider(UI.scale(130), 0, 10080, Config.curiotimetarget) {
                         public void added() {
                             super.added();
                             val = (Config.curiotimetarget);
@@ -640,15 +640,20 @@ Window extends MovableWidget implements DTarget {
                         private void updateLabel() {
                             studyhours.settext(String.format("%d Hours", val / 60));
                         }
-                    }, new Coord(105, sizeY + 55));
-                    checkcurios = add(new Button(110, "Check Curios") {
+
+                        @Override
+                        public Object tooltip(final Coord c, final Widget prev) {
+                            return (RichText.render(String.format("%s(%s)", val / 60, val / 60 / ui.sess.glob.getTimeFac())));
+                        }
+                    }, new Coord(UI.scale(105), sizeY + UI.scale(55)));
+                    checkcurios = add(new Button(UI.scale(110), "Check Curios") {
                         public void click() {
                             CurioReport = true;
                         }
-                    }, new Coord(90, sizeY - 5));
+                    }, new Coord(UI.scale(90), sizeY - UI.scale(5)));
                 }
-                sizeY += 80;
-                resize(265, sizeY);
+                sizeY += UI.scale(80);
+                resize(UI.scale(265), sizeY);
                 if (CurioReport) {
                     CurioReport = false;
                     Curios.clear();
@@ -667,7 +672,7 @@ Window extends MovableWidget implements DTarget {
         curiocount = CurioCounter.size(); //set this so we can only trigger the button/label redraw when the value changes.
         //caption if applies
         if (cap != null) {
-            g.image(cap.tex(), cfg.capc);
+            g.image(cap.tex(), UI.scale(cfg.capc));
         }
     }
 
@@ -732,7 +737,7 @@ Window extends MovableWidget implements DTarget {
     }
 
     private void placecbtn() {
-        cbtn.c = new Coord(sz.x - cbtn.sz.x - atl.x - cfg.btnc.x, -atl.y + cfg.btnc.y);
+        cbtn.c = new Coord(sz.x - cbtn.sz.x - atl.x - UI.scale(cfg.btnc).x, -atl.y + UI.scale(cfg.btnc).y);
         final Coord c;
         if (lbtn != null) {
             lbtn.c = cbtn.c.sub(lbtn.sz.x + 5, 0);
@@ -749,16 +754,16 @@ Window extends MovableWidget implements DTarget {
     private void resize2(Coord sz) {
         asz = sz; //usable size for content
         csz = asz.add(mrgn.mul(2)); //add margin around usable size
-        wsz = csz.add(cfg.tlc).add(cfg.brc); //usable size + margin + frame size
+        wsz = csz.add(UI.scale(cfg.tlc)).add(UI.scale(cfg.brc)); //usable size + margin + frame size
         //tlo, rbo = top left offset, bottom right offset usually 0 always...
         //Basically same job as tlc, brc
         this.sz = wsz;
         //top left coordinate of inner content area
-        ctl = cfg.tlc;
+        ctl = UI.scale(cfg.tlc);
         //Top left coordinate of where usable space starts after accounting for margin
         atl = ctl.add(mrgn);
         //Where the close button goes
-        cbtn.c = new Coord(sz.x - cfg.btnc.x - cbtn.sz.x, cfg.btnc.y);
+        cbtn.c = new Coord(sz.x - UI.scale(cfg.btnc).x - cbtn.sz.x, UI.scale(cfg.btnc).y);
         for (Widget ch = child; ch != null; ch = ch.next)
             ch.presize();
         placecbtn();

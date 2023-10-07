@@ -12,7 +12,6 @@ import haven.sloth.io.ForagableData;
 import haven.sloth.io.HiddenWndData;
 import haven.sloth.io.HighlightData;
 import haven.sloth.io.Storage;
-//import haven.sloth.script.LispScript;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -207,6 +206,10 @@ public class DefSettings {
 
     public static final IndirSetting<Integer> MINIMAPTYPE = new IndirSetting<>(global, "graphics.minimap-type");        //[Int] 0, 1, 2 = { default, blend, blend }
     public static final IndirSetting<Integer> MAPTYPE = new IndirSetting<>(global, "graphics.map-type");                //[Int] 0, 1, 2 = { default, blend, blend }
+
+    public static final IndirSetting<Boolean> sqlitecache = new IndirSetting<Boolean>(global, "sqlite.enable") {{
+        ensure(true);
+    }};
 
     /**
      * Checks out settings nad saves them if they are dirty

@@ -94,6 +94,13 @@ public class Storage {
 
     public void close() {
         try {
+            stmts.forEach((k, v) -> {
+                try {
+                    v.close();
+                } catch (SQLException se) {
+                    logger.atSevere().withCause(se).log("Failed to close %s", v);
+                }
+            });
             conn.close();
         } catch (SQLException se) {
             logger.atSevere().withCause(se).log("Failed to close %s", conn);

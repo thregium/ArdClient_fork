@@ -259,10 +259,12 @@ public class PBotDiscord {
      */
     public static void mapAlertEveryone(String username, String string) {
         try {
-            String base = MappingClient.getInstance(username).endpoint;
+            MappingClient map = MappingClient.getInstance(username);
+            if (map == null) return;
+            String base = map.endpoint;
             String mod = base.split("/")[2];
             String output = String.format("@everyone " + string + " at: " + " http://" + mod
-                    + "/map/#/grid/2/%d/%d/6", MappingClient.getInstance(username).lastMapRef.gc.x, MappingClient.getInstance(username).lastMapRef.gc.y);
+                    + "/map/#/grid/2/%d/%d/6", map.lastMapRef.gc.x, map.lastMapRef.gc.y);
             PBotDiscord.sendMessage(output);
         } catch (Exception e) {
             e.printStackTrace();
@@ -276,10 +278,12 @@ public class PBotDiscord {
      */
     public static void mapAlert(String username, String name, String string) {
         try {
-            String base = MappingClient.getInstance(username).endpoint;
+            MappingClient map = MappingClient.getInstance(username);
+            if (map == null) return;
+            String base = map.endpoint;
             String mod = base.split("/")[2];
             String output = String.format(getAlertString(name) + " " + string + " at: " + " http://" + mod
-                    + "/map/#/grid/%d/%d/%d/6", MappingClient.getInstance(username).lastMapRef.mapID, MappingClient.getInstance(username).lastMapRef.gc.x, MappingClient.getInstance(username).lastMapRef.gc.y);
+                    + "/map/#/grid/%d/%d/%d/6", map.lastMapRef.mapID, map.lastMapRef.gc.x, map.lastMapRef.gc.y);
             PBotDiscord.sendMessage(output);
         } catch (Exception e) {
             e.printStackTrace();
@@ -293,10 +297,11 @@ public class PBotDiscord {
      */
     public static void mapAlertRole(String username, String id, String string) {
         try {
-            String base = MappingClient.getInstance(username).endpoint;
+            MappingClient map = MappingClient.getInstance(username);
+            String base = map.endpoint;
             String mod = base.split("/")[2];
             String output = String.format(string + " at: " + " http://" + mod
-                    + "/map/#/grid/%d/%d/%d/6", MappingClient.getInstance(username).lastMapRef.mapID, MappingClient.getInstance(username).lastMapRef.gc.x, MappingClient.getInstance(username).lastMapRef.gc.y);
+                    + "/map/#/grid/%d/%d/%d/6", map.lastMapRef.mapID, map.lastMapRef.gc.x, map.lastMapRef.gc.y);
             PBotDiscord.messageRole(id, output);
         } catch (Exception e) {
             e.printStackTrace();

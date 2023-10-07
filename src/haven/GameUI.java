@@ -54,6 +54,11 @@ import haven.sloth.gui.Timer.TimersWnd;
 import haven.sloth.gui.chr.SkillnCredoWnd;
 import haven.sloth.gui.livestock.LivestockManager;
 import haven.sloth.gui.script.ScriptManager;
+import integrations.mapv4.MappingClient;
+import modification.configuration;
+import modification.dev;
+import modification.newQuickSlotsWdg;
+
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.image.WritableRaster;
@@ -70,10 +75,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Consumer;
-import modification.configuration;
-import modification.dev;
-import modification.newQuickSlotsWdg;
-
 
 import static haven.Action.TOGGLE_CHARACTER;
 import static haven.Action.TOGGLE_EQUIPMENT;
@@ -218,12 +219,10 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
                 menupanel.move();
             }
         });
-        menupanel = add(new Hidepanel("menu", new Indir<Coord>() {
-            @Override
-            public Coord get() {
-                return (new Coord(GameUI.this.sz.x, Math.min(brpanel.c.y/* - menupanel.sz.y*/ + 1, GameUI.this.sz.y - menupanel.sz.y)));
-            }
-        }, new Coord(1, 0)));
+        menupanel = add(new Hidepanel("menu", () -> {
+//                return (new Coord(GameUI.this.sz.x, Math.min(brpanel.c.y/* - menupanel.sz.y*/ + 1, GameUI.this.sz.y - menupanel.sz.y)));
+            return (new Coord(GameUI.this.sz.x, brpanel.c.y));
+        }, new Coord(1, 1)));
 
         // brpanel.add(new Img(Resource.loadtex("gfx/hud/brframe")), 0, 0);
         if (Config.lockedmainmenu)
@@ -233,8 +232,8 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             public boolean mousedown(Coord c, int button) {
                 return (true);
             }
-        }, false), UI.scale(10, 10));
-        cal = umpanel.add(new Cal(), new Coord(0, 10));
+        }, false));
+        cal = umpanel.add(new Cal(), UI.scale(0, 10));
         if (Config.hidecalendar)
             cal.hide();
 //        add(new Widget(new Coord(360, 40)) {
@@ -248,42 +247,48 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
 //            }
 //        }, new Coord(HavenPanel.w / 2 - 360 / 2, umpanel.sz.y));
 
-        add(new Widget(new Coord(360, umpanel.sz.y)) {
+        add(new Widget(new Coord(UI.scale(360), umpanel.sz.y)) {
             @Override
             public void draw(GOut g) {
-                if (c.x != umpanel.c.x - 360)
-                    c.x = umpanel.c.x - 360;
+                if (c.x != umpanel.c.x - UI.scale(360))
+                    c.x = umpanel.c.x - UI.scale(360);
                 if (Config.showservertime) {
+                    Text ttime = ui.sess.glob.tservertimetex.get();
+                    Text dtime = ui.sess.glob.dservertimetex.get();
+                    Text ytime = ui.sess.glob.yservertimetex.get();
                     Text mtime = ui.sess.glob.mservertimetex.get();
-                    Text ltime = ui.sess.glob.lservertimetex.get();
-                    Text rtime = ui.sess.glob.rservertimetex.get();
                     Text btime = ui.sess.glob.bservertimetex.get();
                     Text winfo = ui.sess.glob.weathertimetex.get();
-                    int y = 10;
+                    int y = UI.scale(10);
+                    int x = UI.scale(5);
+                    if (ttime != null) {
+                        g.aimage(ttime.tex(), new Coord(sz.x - x, y), 1, 0);
+                        y += ttime.sz().y;
+                    }
+                    if (dtime != null) {
+                        g.aimage(dtime.tex(), new Coord(sz.x - x, y), 1, 0);
+                        y += dtime.sz().y;
+                    }
+                    if (ytime != null) {
+                        g.aimage(ytime.tex(), new Coord(sz.x - x, y), 1, 0);
+                        y += ytime.sz().y;
+                    }
                     if (mtime != null) {
-                        g.aimage(mtime.tex(), new Coord(sz.x - 5, y), 1, 0);
+                        g.aimage(mtime.tex(), new Coord(sz.x - x, y), 1, 0);
                         y += mtime.sz().y;
                     }
-                    if (ltime != null) {
-                        g.aimage(ltime.tex(), new Coord(sz.x - 5, y), 1, 0);
-                        y += ltime.sz().y;
-                    }
-                    if (rtime != null) {
-                        g.aimage(rtime.tex(), new Coord(sz.x - 5, y), 1, 0);
-                        y += rtime.sz().y;
-                    }
                     if (btime != null) {
-                        g.aimage(btime.tex(), new Coord(sz.x - 5, y), 1, 0);
+                        g.aimage(btime.tex(), new Coord(sz.x - x, y), 1, 0);
                         y += btime.sz().y;
                     }
                     if (configuration.showweatherinfo && winfo != null) {
-                        g.aimage(winfo.tex(), new Coord(sz.x - 5, y), 1, 0);
+                        g.aimage(winfo.tex(), new Coord(sz.x - x, y), 1, 0);
                         y += winfo.sz().y;
                     }
                     if (sz.y != y) resize(sz.x, y);
                 }
             }
-        }, new Coord(umpanel.c.x - 360, 0));
+        }, new Coord(umpanel.c.x - UI.scale(360), 0));
 
         opts = add(new OptWnd());
         opts.hide();
@@ -348,14 +353,14 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
 
         if (Config.statuswdgvisible) {
             statuswindow = new StatusWdg();
-            add(statuswindow, new Coord(HavenPanel.w / 2 + 80, 10));
+            add(statuswindow, umpanel.c.add(umpanel.sz.x + UI.scale(10), UI.scale(10)));
         }
 
         histbelt = new CraftHistoryBelt(Utils.getprefb("histbelt_vertical", true));
         add(histbelt, new Coord(70, 200));
         if (!Config.histbelt)
             histbelt.hide();
-        if (!chrid.equals("")) {
+        if (!chrid.isEmpty()) {
             Utils.loadprefchklist("boulderssel_" + chrid, Config.boulders);
             Utils.loadprefchklist("bushessel_" + chrid, Config.bushes);
             Utils.loadprefchklist("treessel_" + chrid, Config.trees);
@@ -423,6 +428,21 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             add(ui.root.sessionDisplay);
         }
 
+        if (!chrid.isEmpty() && ui.sess != null) {
+            Glob glob = ui.sess.glob;
+            if (glob != null) {
+                glob.addReference(chrid);
+                if (configuration.loadMapSetting(chrid, "mapper")) {
+                    MappingClient map = MappingClient.getInstance(chrid);
+                    if (map != null) {
+                        map.SetEndpoint(Utils.getpref("vendan-mapv4-endpoint", ""));
+                        map.EnableGridUploads(true);
+                        map.SetPlayerName(chrid);
+                    }
+                }
+            }
+        }
+
         synchronized (crutchList) {
             crutchList.forEach(Runnable::run);
             crutchList.clear();
@@ -458,6 +478,20 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             configuration.snowThread.kill();
         super.destroy();
         ui.gui = null;
+
+        if (!chrid.isEmpty() && ui.sess != null) {
+            Glob glob = ui.sess.glob;
+            if (glob != null) {
+                glob.removeReference(chrid);
+                MappingClient map = MappingClient.getInstance(chrid);
+                if (map != null) {
+                    map.SetEndpoint("");
+                    map.EnableGridUploads(false);
+                    map.EnableTracking(false);
+                    MappingClient.removeInstance(chrid);
+                }
+            }
+        }
     }
 
     public void beltPageSwitch1() {
@@ -528,7 +562,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             opts.raise();
             fitwdg(opts);
             setfocus(opts);
-            opts.chpanel(opts.map);
+            opts.chpanel(opts.mapPanel);
         } else {
             opts.show(false);
         }
@@ -747,7 +781,6 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             this.g = g;
             cur = show(tvis = true) ? 0 : 1;
         }
-
 
         @Override
         public <T extends Widget> T add(T child) {
@@ -1200,7 +1233,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
                 msgnosfx(Resource.getLocString(Resource.BUNDLE_MSG, "Party permissions are now turned on."));
             }
         } else if (place == "menu") {
-            menu = (MenuGrid) brpanel.add(child, 20, 34);
+            menu = (MenuGrid) brpanel.add(child);
             try {
                 final BeltData data = new BeltData(ui.sess.username + "::" + chrid);
                 fbelt = add(new BeltWnd("fk", data, KeyEvent.VK_F1, KeyEvent.VK_F10, 5, 50), new Coord(0, 50));
@@ -1691,12 +1724,13 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
     public class MainMenu extends Widget {
         public MainMenu() {
             super(menubg.sz());
-            add(new MenuButton2("rbtn-src", "Menu Search", TOGGLE_SEARCH), 1, 1);
-            add(new MenuButton2("rbtn-inv", "Inventory", TOGGLE_INVENTORY), 34, 1);
-            add(new MenuButton2("rbtn-equ", "Equipment", TOGGLE_EQUIPMENT), 67, 1);
-            add(new MenuButton2("rbtn-chr", "Character Sheet", TOGGLE_CHARACTER), 100, 1);
-            add(new MenuButton2("rbtn-bud", "Kith & Kin", TOGGLE_KIN_LIST), 133, 1);
-            add(new MenuButton2("rbtn-opt", "Options", TOGGLE_OPTIONS), 166, 1);
+            add(new MenuButton2("rbtn-src", "Menu Search", TOGGLE_SEARCH), UI.scale(1, 1));
+            add(new MenuButton2("rbtn-inv", "Inventory", TOGGLE_INVENTORY), UI.scale(34, 1));
+            add(new MenuButton2("rbtn-equ", "Equipment", TOGGLE_EQUIPMENT), UI.scale(67, 1));
+            add(new MenuButton2("rbtn-chr", "Character Sheet", TOGGLE_CHARACTER), UI.scale(100, 1));
+            add(new MenuButton2("rbtn-bud", "Kith & Kin", TOGGLE_KIN_LIST), UI.scale(133, 1));
+            add(new MenuButton2("rbtn-opt", "Options", TOGGLE_OPTIONS), UI.scale(166, 1));
+            pack();
         }
 
         @Override
@@ -2069,7 +2103,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             Utils.setprefb("statuswdgvisible", false);
         } else {
             statuswindow = new StatusWdg();
-            add(statuswindow, new Coord(HavenPanel.w / 2 + 80, 10));
+            add(statuswindow, umpanel.c.add(umpanel.sz.x + UI.scale(10), UI.scale(10)));
             Config.statuswdgvisible = true;
             Utils.setprefb("statuswdgvisible", true);
         }
@@ -2291,7 +2325,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         if (map != null)
             map.resize(sz);
         if (statuswindow != null)
-            statuswindow.c = new Coord(HavenPanel.w / 2 + 80, 10);
+            statuswindow.c = umpanel.c.add(umpanel.sz.x + UI.scale(10), UI.scale(10));
     }
 
     @Override

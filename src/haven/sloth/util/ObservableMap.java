@@ -30,6 +30,14 @@ public class ObservableMap<K, V> {
         listeners.forEach((lst) -> lst.remove(key));
     }
 
+    public synchronized void clear() {
+        Collection<K> keys = keySet();
+        base.clear();
+        for (K key: keys) {
+            listeners.forEach((lst) -> lst.remove(key));
+        }
+    }
+
     public Set<Map.Entry<K, V>> entrySet() {
         return base.entrySet();
     }

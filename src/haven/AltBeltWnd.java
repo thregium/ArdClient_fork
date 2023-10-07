@@ -10,7 +10,7 @@ public class AltBeltWnd extends MovableWidget implements DTarget {
         public Widget create(UI ui, Object[] args) {
             Coord2d sz = (Coord2d) args[0];
             String cap = (args.length > 1) ? (String) args[1] : null;
-            return new AltBeltWnd(sz.floor(), cap);
+            return new AltBeltWnd(UI.scale(sz.floor()), cap);
         }
     }
 

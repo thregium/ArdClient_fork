@@ -836,7 +836,7 @@ public class Widget {
             try {
                 wdg.tick(dt);
             } catch (Exception e) {
-                String strErr = "Tick of " + wdg.getClass().getSimpleName() + " " + wdg.getClass().getClassLoader() + " cause a " + e;
+                String strErr = "Tick of " + wdg.getClass().getSimpleName() + " cause a " + e;
                 Widget finalWdg = wdg;
                 if (errorWdgs.stream().noneMatch(w -> w.errWdg.equals(finalWdg))) {
                     errorWdgs.add(new ErrorWidget(finalWdg, strErr));
@@ -875,7 +875,7 @@ public class Widget {
             try {
                 wdg.draw(g2);
             } catch (Exception e) {
-                String strErr = "Draw of " + wdg.getClass().getSimpleName() + " " + wdg.getClass().getClassLoader() + " cause a " + e;
+                String strErr = "Draw of " + wdg.getClass().getSimpleName() + " cause a " + e;
                 Widget finalWdg = wdg;
                 if (errorWdgs.stream().noneMatch(w -> w.errWdg.equals(finalWdg))) {
                     errorWdgs.add(new ErrorWidget(finalWdg, strErr));
@@ -1516,7 +1516,7 @@ public class Widget {
                             else
                                 text = title + "\n\n" + pag.text;
                         }
-                        rend = RichText.render(text, 300).tex();
+                        rend = RichText.render(text, UI.scale(300)).tex();
                     } catch (Loading l) {
                         return (null);
                     }

@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class SQLiteCache implements ResCache {
-    private final static Map<String, SQLiteCache> caches = Collections.synchronizedMap(new HashMap<>());
+    private static final Map<String, SQLiteCache> caches = Collections.synchronizedMap(new HashMap<>());
     private final Storage storage;
 
     public SQLiteCache(String name) {

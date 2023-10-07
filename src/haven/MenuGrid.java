@@ -94,8 +94,8 @@ import java.util.WeakHashMap;
 import java.util.function.Consumer;
 
 public class MenuGrid extends Widget {
-    public final static Coord bgsz = Inventory.invsq.sz().add(-1, -1);
-    public final static RichText.Foundry ttfnd = new RichText.Foundry(TextAttribute.FAMILY, Text.cfg.font.get("sans"), TextAttribute.SIZE, Text.cfg.tooltipCap); //aa(true)
+    public static final Coord bgsz = Inventory.invsq.sz().add(-1, -1);
+    public static final RichText.Foundry ttfnd = new RichText.Foundry(TextAttribute.FAMILY, Text.cfg.font.get("sans"), TextAttribute.SIZE, Text.cfg.tooltipCap); //aa(true)
     public final Map<String, SpecialPagina> specialpag = new HashMap<>();
     public final ObservableCollection<Pagina> paginae = new ObservableCollection<>(new HashSet<>());
     public static Coord gsz = configuration.getMenuGrid();

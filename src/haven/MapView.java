@@ -58,6 +58,7 @@ import haven.sloth.io.HighlightData;
 import haven.sloth.script.pathfinding.Hitbox;
 import haven.sloth.script.pathfinding.Move;
 import haven.sloth.script.pathfinding.NBAPathfinder;
+import integrations.mapv4.MappingClient;
 import modification.CustomFakeGrid;
 import modification.configuration;
 import modification.dev;
@@ -83,7 +84,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
@@ -184,12 +184,15 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     private String lasttt = "";
     private Object tt;
 
+    protected static long autoclicktimeout = 250;
+    protected long lastautoclick = System.currentTimeMillis();
     private boolean ismousedown = false;
     private boolean canautoclick = true;
 
     public interface Delayed {
         public void run(GOut g);
-        default void onFinish() {};
+
+        default void onFinish() {}
     }
 
     public interface Grabber {
@@ -806,6 +809,24 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
     }
 
+    @Override
+    protected void added() {
+        super.added();
+        Gob player = player();
+        if (player != null) {
+            Coord2d c = player.rc;
+            if (glob.sess != null && glob.sess.alive() && glob.sess.username != null && ui.gui != null) {
+                String username = ui.gui.chrid;
+                if (!username.isEmpty() && configuration.loadMapSetting(username, "mapper")) {
+                    MappingClient map = MappingClient.getInstance(username);
+                    if (map != null) {
+                        map.CheckGridCoord(c);
+                    }
+                }
+            }
+        }
+    }
+
     public boolean visol(String tag) {
         synchronized (oltags) {
             return (oltags.containsKey(tag));
@@ -1342,10 +1363,10 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         private void setupSet(RenderList rl, GobSet set) {
             if (
                     (!configuration.showgobsoldfags && set == oldfags)
-                    || (!configuration.showgobssemifags && set == semifags)
-                    || (!configuration.showgobssemistat && set == semistat)
-                    || (!configuration.showgobsnewfags && set == newfags)
-                    || (!configuration.showgobsdynamic && set == dynamic)
+                            || (!configuration.showgobssemifags && set == semifags)
+                            || (!configuration.showgobssemistat && set == semistat)
+                            || (!configuration.showgobsnewfags && set == newfags)
+                            || (!configuration.showgobsdynamic && set == dynamic)
             ) return;
             try {
                 rl.add(set, null);
@@ -2252,14 +2273,15 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             camload = e;
         }
         updateSpeed(dt);
-        if (configuration.autoclick && ismousedown && canautoclick) {
-            canautoclick = false;
-            delay(new Click(ui.mc, ui.modflags(), 1) {
-                @Override
-                public void onFinish() {
-                    canautoclick = true;
-                }
-            });
+        if (configuration.autoclick && ismousedown && canautoclick && System.currentTimeMillis() - lastautoclick >= autoclicktimeout) {
+                canautoclick = false;
+                delay(new Click(ui.mc, ui.modflags(), 1) {
+                    @Override
+                    public void onFinish() {
+                        canautoclick = true;
+                        lastautoclick = System.currentTimeMillis();
+                    }
+                });
         }
         if (!movequeue.isEmpty() && (System.currentTimeMillis() - lastMove > 500) && triggermove()) {
             movingto = movequeue.poll();
@@ -3157,7 +3179,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 lasttt = null;
                 try {
                     String t = RichText.Parser.quote(ntt);
-                    tt = RichText.render(t, 1000);
+                    tt = RichText.render(t, UI.scale(1000));
                 } catch (Exception e) {
                     e.printStackTrace();
                     tt = null;
@@ -3369,9 +3391,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         if (selection != null) {
             if (selection.tt != null)
                 return (selection.tt);
-        } else if ((placing_l != null) && (placing_l.done())) {
+        } else if ((placing_l != null) && (placing_l.done()) && ui.modshift) {
             Plob placing = placing_l.get();
-            return "Place: " + new Coord2d((placing.rc.x % tilesz.x + tilesz.x) % tilesz.x, (placing.rc.y % tilesz.y + tilesz.y) % tilesz.y) + "\n" +  "Angle: " + Math.toDegrees(placing.a);
+            return "Place: " + new Coord2d((placing.rc.x % tilesz.x + tilesz.x) % tilesz.x, (placing.rc.y % tilesz.y + tilesz.y) % tilesz.y) + "\n" + "Angle: " + Math.toDegrees(placing.a);
         } else if (tt != null && ui.modshift) {
             return tt;
         } else if (tooltip != null && ui.modshift) {

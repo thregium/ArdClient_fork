@@ -19,7 +19,7 @@ public class ColorPreview extends Widget {
         col = cl;
         tooltip = RichText.Parser.quote(String.format((this.name.equals("") ? "" : this.name +"\n") + "Red: %d\nGreen: %d\nBlue: %d\nAlpha: %d",
                 col.getRed(), col.getGreen(), col.getBlue(), col.getAlpha()));
-        tooltip = RichText.render((String) tooltip, 200);
+        tooltip = RichText.render((String) tooltip, UI.scale(200));
     }
 
     public ColorPreview(Coord sz, Color cl, Consumer<Color> callback) {
@@ -58,7 +58,7 @@ public class ColorPreview extends Widget {
                 cp = null;
                 col = color;
                 tooltip = RichText.Parser.quote(String.format((this.name.equals("") ? "" : this.name +"\n") + "Red: %d\nGreen: %d\nBlue: %d\nAlpha: %d", col.getRed(), col.getGreen(), col.getBlue(), col.getAlpha()));
-                tooltip = RichText.render((String) tooltip, 200);
+                tooltip = RichText.render((String) tooltip, UI.scale(200));
                 if (callback != null)
                     callback.accept(col);
             }));

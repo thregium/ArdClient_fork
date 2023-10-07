@@ -67,6 +67,7 @@ import static haven.Utils.getprop;
 
 public class Config {
     public static String revVersion = "1.0";
+    public static String prefspec = "hafen";
     public static final File HOMEDIR = new File("").getAbsoluteFile();
     public static boolean dumpcode = Utils.getprop("haven.dumpcode", "off").equals("on");
     public static final boolean iswindows = System.getProperty("os.name").startsWith("Windows");
@@ -326,7 +327,6 @@ public class Config {
     public static String playerposfile;
     public static Double uiscale = getfloat("haven.uiscale", null);
     public static byte[] authck = null;
-    public static String prefspec = Utils.getprop("haven.prefspec", "hafen");
     //public static String version;
     public static String version = Utils.getpref("version", "1.0");
     public static String newversion;
@@ -385,9 +385,7 @@ public class Config {
     public static final Map<String, CheckListboxItem> icons = new HashMap<>();
     public static final Map<String, CheckListboxItem> oldicons = new HashMap<>();
 
-    public static CheckListbox flowerlist = null;
-    public static TextEntry petalsearch = null;
-    public static final Map<String, CheckListboxItem> flowermenus = new TreeMap<>();
+    public static final ObservableMap<String, CheckListboxItem> flowermenus = new ObservableMap<>(new TreeMap<>());
 
 //    public final static HashMap<String, CheckListboxItem> flowermenus = new HashMap<String, CheckListboxItem>(37) {{
 //        put("Pick", new CheckListboxItem("Pick", Resource.BUNDLE_FLOWER));
@@ -433,7 +431,7 @@ public class Config {
     public static final Map<String, CheckListboxItem> autoclusters = new HashMap<>();
 
     public static final Map<String, CheckListboxItem> curiolist = new HashMap<>();
-    public static final Map<String, Tex> additonalicons = new HashMap<>();
+    public static final Map<String, Indir<Tex>> additonalicons = new HashMap<>();
     public static final Map<String, CheckListboxItem> alarmitems = new HashMap<>();
     public static final Map<String, String> defaultitems = new HashMap<>();
     public static final Set<String> locres = new HashSet<>(Arrays.asList(
@@ -818,35 +816,35 @@ public class Config {
         curiolist.put("Uncrushed Husk", new CheckListboxItem("Uncrushed Husk"));
         curiolist.put("Easter Egg", new CheckListboxItem("Easter Egg"));
 
-        additonalicons.put("gfx/terobjs/items/mandrakespirited", Resource.loadtex("gfx/icons/mandrakespirited"));
-        additonalicons.put("gfx/terobjs/vehicle/bram", Resource.loadtex("gfx/icons/bram"));
-        additonalicons.put("gfx/kritter/toad/toad", Resource.loadtex("gfx/icons/toad"));
-        additonalicons.put("gfx/terobjs/vehicle/rowboat", Resource.loadtex("gfx/icons/rowboat"));
-        additonalicons.put("gfx/terobjs/vehicle/dugout", Resource.loadtex("gfx/icons/dugout"));
-        additonalicons.put("gfx/terobjs/vehicle/knarr", Resource.loadtex("gfx/icons/knarr"));
-        additonalicons.put("gfx/terobjs/vehicle/snekkja", Resource.loadtex("gfx/icons/snekkja"));
-        additonalicons.put("gfx/kritter/chicken/chicken", Resource.loadtex("gfx/icons/deadhen"));
-        additonalicons.put("gfx/kritter/chicken/rooster", Resource.loadtex("gfx/icons/deadrooster"));
-        additonalicons.put("gfx/kritter/rabbit/rabbit", Resource.loadtex("gfx/icons/deadrabbit"));
-        additonalicons.put("gfx/kritter/hedgehog/hedgehog", Resource.loadtex("gfx/icons/deadhedgehog"));
-        additonalicons.put("gfx/kritter/squirrel/squirrel", Resource.loadtex("gfx/icons/deadsquirrel"));
-        additonalicons.put("gfx/terobjs/items/arrow", Resource.loadtex("gfx/icons/arrow"));
-        additonalicons.put("gfx/terobjs/items/boarspear", Resource.loadtex("gfx/icons/arrow"));
-        additonalicons.put("gfx/kritter/frog/frog", Resource.loadtex("gfx/icons/frog"));
-        additonalicons.put("gfx/terobjs/vehicle/wagon", Resource.loadtex("gfx/icons/wagon"));
-        additonalicons.put("gfx/terobjs/vehicle/wheelbarrow", Resource.loadtex("gfx/icons/wheelbarrow"));
-        additonalicons.put("gfx/terobjs/vehicle/cart", Resource.loadtex("gfx/icons/cart"));
-        additonalicons.put("gfx/terobjs/vehicle/wreckingball", Resource.loadtex("gfx/icons/wball"));
-        additonalicons.put("gfx/kritter/nidbane/nidbane", Resource.loadtex("gfx/icons/spooky"));
-        additonalicons.put("gfx/kritter/irrbloss/irrbloss", Resource.loadtex("gfx/icons/irrbloss"));
-        additonalicons.put("gfx/kritter/opiumdragon/opiumdragon", Resource.loadtex("gfx/icons/opiumdragon"));
-        additonalicons.put("gfx/terobjs/lobsterpot", Resource.loadtex("gfx/icons/lobsterpot"));
-        additonalicons.put("gfx/terobjs/fishingnet", Resource.loadtex("gfx/icons/fishingnet"));
-        additonalicons.put("gfx/kritter/horse/stallion", Resource.loadtex("gfx/icons/stallionicon"));
-        additonalicons.put("gfx/kritter/horse/mare", Resource.loadtex("gfx/icons/mareicon"));
-        additonalicons.put("gfx/kritter/stalagoomba/stalagoomba", configuration.imageToTex(configuration.modificationPath + "/gfx/icons/stalagoomba.png", Coord.of(20, 20)));
-        additonalicons.put("gfx/kritter/dryad/dryad", configuration.imageToTex(configuration.modificationPath + "/gfx/icons/dryad.png"));
-        additonalicons.put("gfx/kritter/ent/ent", configuration.imageToTex(configuration.modificationPath + "/gfx/icons/ent.png"));
+        additonalicons.put("gfx/terobjs/items/mandrakespirited", Utils.cache(() -> Resource.loadtex("gfx/icons/mandrakespirited")));
+        additonalicons.put("gfx/terobjs/vehicle/bram", Utils.cache(() -> Resource.loadtex("gfx/icons/bram")));
+        additonalicons.put("gfx/kritter/toad/toad", Utils.cache(() -> Resource.loadtex("gfx/icons/toad")));
+        additonalicons.put("gfx/terobjs/vehicle/rowboat", Utils.cache(() -> Resource.loadtex("gfx/icons/rowboat")));
+        additonalicons.put("gfx/terobjs/vehicle/dugout", Utils.cache(() -> Resource.loadtex("gfx/icons/dugout")));
+        additonalicons.put("gfx/terobjs/vehicle/knarr", Utils.cache(() -> Resource.loadtex("gfx/icons/knarr")));
+        additonalicons.put("gfx/terobjs/vehicle/snekkja", Utils.cache(() -> Resource.loadtex("gfx/icons/snekkja")));
+        additonalicons.put("gfx/kritter/chicken/chicken", Utils.cache(() -> Resource.loadtex("gfx/icons/deadhen")));
+        additonalicons.put("gfx/kritter/chicken/rooster", Utils.cache(() -> Resource.loadtex("gfx/icons/deadrooster")));
+        additonalicons.put("gfx/kritter/rabbit/rabbit", Utils.cache(() -> Resource.loadtex("gfx/icons/deadrabbit")));
+        additonalicons.put("gfx/kritter/hedgehog/hedgehog", Utils.cache(() -> Resource.loadtex("gfx/icons/deadhedgehog")));
+        additonalicons.put("gfx/kritter/squirrel/squirrel", Utils.cache(() -> Resource.loadtex("gfx/icons/deadsquirrel")));
+        additonalicons.put("gfx/terobjs/items/arrow", Utils.cache(() -> Resource.loadtex("gfx/icons/arrow")));
+        additonalicons.put("gfx/terobjs/items/boarspear", Utils.cache(() -> Resource.loadtex("gfx/icons/arrow")));
+        additonalicons.put("gfx/kritter/frog/frog", Utils.cache(() -> Resource.loadtex("gfx/icons/frog")));
+        additonalicons.put("gfx/terobjs/vehicle/wagon", Utils.cache(() -> Resource.loadtex("gfx/icons/wagon")));
+        additonalicons.put("gfx/terobjs/vehicle/wheelbarrow", Utils.cache(() -> Resource.loadtex("gfx/icons/wheelbarrow")));
+        additonalicons.put("gfx/terobjs/vehicle/cart", Utils.cache(() -> Resource.loadtex("gfx/icons/cart")));
+        additonalicons.put("gfx/terobjs/vehicle/wreckingball", Utils.cache(() -> Resource.loadtex("gfx/icons/wball")));
+        additonalicons.put("gfx/kritter/nidbane/nidbane", Utils.cache(() -> Resource.loadtex("gfx/icons/spooky")));
+        additonalicons.put("gfx/kritter/irrbloss/irrbloss", Utils.cache(() -> Resource.loadtex("gfx/icons/irrbloss")));
+        additonalicons.put("gfx/kritter/opiumdragon/opiumdragon", Utils.cache(() -> Resource.loadtex("gfx/icons/opiumdragon")));
+        additonalicons.put("gfx/terobjs/lobsterpot", Utils.cache(() -> Resource.loadtex("gfx/icons/lobsterpot")));
+        additonalicons.put("gfx/terobjs/fishingnet", Utils.cache(() -> Resource.loadtex("gfx/icons/fishingnet")));
+        additonalicons.put("gfx/kritter/horse/stallion", Utils.cache(() -> Resource.loadtex("gfx/icons/stallionicon")));
+        additonalicons.put("gfx/kritter/horse/mare", Utils.cache(() -> Resource.loadtex("gfx/icons/mareicon")));
+        additonalicons.put("gfx/kritter/stalagoomba/stalagoomba", Utils.cache(() -> configuration.imageToTex(configuration.modificationPath + "/gfx/icons/stalagoomba.png", Coord.of(20, 20))));
+        additonalicons.put("gfx/kritter/dryad/dryad", Utils.cache(() -> configuration.imageToTex(configuration.modificationPath + "/gfx/icons/dryad.png")));
+        additonalicons.put("gfx/kritter/ent/ent", Utils.cache(() -> configuration.imageToTex(configuration.modificationPath + "/gfx/icons/ent.png")));
 
         alarmitems.put("gfx/terobjs/herbs/flotsam", new CheckListboxItem("Peculiar Flotsam"));
         alarmitems.put("gfx/terobjs/herbs/chimingbluebell", new CheckListboxItem("Chiming Bluebell"));

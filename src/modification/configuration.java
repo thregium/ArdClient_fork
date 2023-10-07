@@ -21,6 +21,7 @@ import haven.Tex;
 import haven.TexI;
 import haven.Text;
 import haven.TextEntry;
+import haven.UI;
 import haven.Utils;
 import haven.Widget;
 import haven.WidgetVerticalAppender;
@@ -87,7 +88,6 @@ public class configuration {
     public static String defaultTitle = MainFrame.TITLE;
     public static String defaultCustomTitle = "https://youtu.be/dQw4w9WgXcQ";
     public static String defaultUtilsCustomTitle = Utils.getpref("custom-title", defaultCustomTitle);
-    public static boolean sqlitecache = Utils.getprefb("sqlitecache", false);
 
     public static String tittleCheck(Session sess) {
         String name = "", title;
@@ -124,7 +124,7 @@ public class configuration {
     public static boolean instflmchosen = Utils.getprefb("instflmchosen", false);
     public static boolean instflmcancel = Utils.getprefb("instflmcancel", true);
 
-//    public static boolean proximityspecial = Utils.getprefb("proximityspecial", false);
+    //    public static boolean proximityspecial = Utils.getprefb("proximityspecial", false);
     public static boolean customquality = Utils.getprefb("customquality", false);
     public static String qualitypos = Utils.getpref("qualitypos", "Left-Bottom");
     public static boolean shownumeric = Utils.getprefb("shownumeric", true);
@@ -692,8 +692,6 @@ public class configuration {
         if (Config.flowermenus.get(name) == null) {
             CheckListboxItem ci = new CheckListboxItem(name);
             Config.flowermenus.put(name, ci);
-            if (Config.petalsearch != null && Config.flowerlist != null && Config.petalsearch.text().equals(""))
-                Config.flowerlist.items.add(ci);
             Utils.setcollection("petalcol", Config.flowermenus.keySet());
         }
     }
@@ -715,7 +713,7 @@ public class configuration {
     }
 
     public static HSliderNamed createSFXSlider(HSliderListboxItem item) {
-        return (new HSliderNamed(item, 180, 0, 100, () -> {
+        return (new HSliderNamed(item, UI.scale(180), 0, 100, () -> {
             synchronized (resources.sfxmenus) {
                 Utils.setprefsliderlst("customsfxvol", resources.sfxmenus);
             }
@@ -1398,6 +1396,7 @@ public class configuration {
             }
         }
     }
+
     public static int highlightTilePeriod = Utils.getprefi("highlightTilePeriod", 2000);
 
     public static <KEY, VALUE> Map<KEY, VALUE> copyMap(final Map<KEY, VALUE> original) {
@@ -1409,7 +1408,7 @@ public class configuration {
     public static boolean autorunscriptsenable = Utils.getprefb("autorunscriptsenable", false);
     public static final ObservableCollection<String> autorunscripts = new ObservableCollection<>(Utils.loadcollection("autorunscripts"));
 
-    public static boolean savingFogOfWar = Utils.getprefb("fogofwar", false);
+    public static boolean savingFogOfWar = Utils.getprefb("fogofwar", true);
     public static int fogOfWarColor = Utils.getprefi("fogofwarcolor", new Color(255, 255, 0, 100).getRGB());
     public static int fogOfWarColorTemp = Utils.getprefi("fogofwarcolorTemp", new Color(0, 255, 0, 100).getRGB());
 

@@ -168,7 +168,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         this.ui = ui;
         this.res = res;
         this.sdt = new MessageBuf(sdt);
-        waitforinit();
+//        waitforinit();
     }
 
     public GItem(Indir<Resource> res, Message sdt) {
@@ -242,7 +242,22 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     private int waitCounter;
 
     public GSprite spr() {
-        if (!inited) return (null);
+        if (!inited) {
+            try {
+                ResData nr = newRes;
+                if (nr != null) {
+                    synchronized (this) {
+                        res = nr.res;
+                        sdt = nr.sdt;
+                    }
+                    newRes = null;
+                }
+                this.spr = GSprite.create(this, res.get(), sdt.clone());
+                inited = true;
+            } catch (Loading l) {
+                return (null);
+            }
+        }
         GSprite spr = this.spr;
         if (!postProcessed.get() && Utils.rtime() - dropCooldown > dropDelay) {
             try {
@@ -317,12 +332,12 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
             }
             Resource.Pagina pg = item.res.get().layer(Resource.pagina);
             if (pg != null)
-                img = ItemInfo.catimgs(0, img, RichText.render("\n" + pg.text, 200).img);
+                img = ItemInfo.catimgs(0, img, RichText.render("\n" + pg.text, UI.scale(200)).img);
             return (img);
         }
     }
 
-    public synchronized List<ItemInfo> info() {
+    public List<ItemInfo> info() {
         if (info == null) {
             info = ItemInfo.buildinfo(this, rawinfo);
             Resource.Pagina pg = res.get().layer(Resource.pagina);
@@ -333,7 +348,8 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
                 List<WItem> ret = new ArrayList<>();
                 /*if (stack instanceof Inventory) {
                     ret.addAll(((Inventory) stack).wmap.values());
-                } else */if (stack.getClass().toString().contains("ItemStack")) {
+                } else */
+                if (stack.getClass().toString().contains("ItemStack")) {
                     try {
                         Field fwmap = stack.getClass().getField("wmap");
                         Map<GItem, WItem> wmap = (Map<GItem, WItem>) fwmap.get(stack);
@@ -422,17 +438,15 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         return (spr);
     }
 
+    private ResData newRes = null;
+
     public void uimsg(String name, Object... args) {
         if (name == "num") {
             num = (Integer) args[0];
         } else if (name == "chres") {
-            synchronized (this) {
-                res = ui.sess.getres((Integer) args[0]);
-                sdt = (args.length > 1) ? new MessageBuf((byte[]) args[1]) : MessageBuf.nil;
-                spr = null;
-                inited = false;
-                waitforinit();
-            }
+            newRes = new ResData(ui.sess.getres((Integer) args[0]), (args.length > 1) ? new MessageBuf((byte[]) args[1]) : MessageBuf.nil);
+            inited = false;
+//            waitforinit();
         } else if (name == "tt") {
             info = null;
             if (rawinfo != null)
@@ -468,33 +482,33 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
             contentsid = null;
             if (args.length > 2)
                 contentsid = args[2];
-            synchronized (this) {
-                if (info != null && !info.isEmpty()) {
-                    Widget stack = contents;
-                    List<WItem> ret = new ArrayList<>();
+            List<ItemInfo> info = this.info;
+            if (info != null && !info.isEmpty()) {
+                Widget stack = contents;
+                List<WItem> ret = new ArrayList<>();
                     /*if (stack instanceof Inventory) {
                         ret.addAll(((Inventory) stack).wmap.values());
-                    } else*/ if (stack.getClass().toString().contains("ItemStack")) {
-                        try {
-                            Field fwmap = stack.getClass().getField("wmap");
-                            Map<GItem, WItem> wmap = (Map<GItem, WItem>) fwmap.get(stack);
-                            ret.addAll(wmap.values());
-                        } catch (IllegalAccessException | NoSuchFieldException e) {
-                            throw (new RuntimeException(e));
-                        }
+                    } else*/
+                if (stack.getClass().toString().contains("ItemStack")) {
+                    try {
+                        Field fwmap = stack.getClass().getField("wmap");
+                        Map<GItem, WItem> wmap = (Map<GItem, WItem>) fwmap.get(stack);
+                        ret.addAll(wmap.values());
+                    } catch (IllegalAccessException | NoSuchFieldException e) {
+                        throw (new RuntimeException(e));
                     }
-                    int amount = 0;
-                    double sum = 0;
-                    for (WItem w : ret) {
-                        QBuff q = w.item.quality();
-                        if (q != null) {
-                            amount++;
-                            sum += q.q;
-                        }
-                    }
-                    if (amount > 0)
-                        info.add(new Quality(this, sum / amount));
                 }
+                int amount = 0;
+                double sum = 0;
+                for (WItem w : ret) {
+                    QBuff q = w.item.quality();
+                    if (q != null) {
+                        amount++;
+                        sum += q.q;
+                    }
+                }
+                if (amount > 0)
+                    info.add(new Quality(this, sum / amount));
             }
         }
     }

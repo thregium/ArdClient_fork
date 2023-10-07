@@ -38,14 +38,14 @@ public class TextEntry extends Widget implements ReadLine.Owner {
     public static final Color defcol = new Color(255, 205, 109);
     public static final Color dirtycol = new Color(255, 232, 209);
     public static final Color selcol = new Color(24, 80, 192);
-    public static final Text.Foundry fnd = new Text.Foundry(Text.serif, 12).aa(true);
+    public static final Text.Foundry fnd = new Text.Foundry(Text.serif, UI.scale(12)).aa(true);
     public static final Tex lcap = Theme.tex("textedit", 0);
     public static final Tex mext = Theme.tex("textedit", 1);
     public static final Tex rcap = Theme.tex("textedit", 2);
     public static final Tex caret = Resource.loadtex("gfx/hud/text/caret");
-    public static final Coord toff = new Coord(lcap.sz().x - 1, 3);
-    public static final Coord coff = new Coord(-3, -1);
-    public static final int wmarg = lcap.sz().x + rcap.sz().x + 1;
+    public static final Coord toff = new Coord(lcap.sz().x - UI.scale(1), UI.scale(3));
+    public static final Coord coff = UI.scale(-3, -1);
+    public static final int wmarg = lcap.sz().x + rcap.sz().x + UI.scale(1);
     public boolean dshow = false;
     public ReadLine buf;
     public int sx;

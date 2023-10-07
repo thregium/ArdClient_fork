@@ -40,13 +40,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed {
-    public static final Text.Foundry nfnd = new Text.Foundry(Text.dfont, 10);
+    public static final Text.Foundry nfnd = new Text.Foundry(Text.dfont, UI.scale(10));
     public static final Tex frame = Resource.loadtex("gfx/hud/buffs/frame");
     public static final Tex cframe = Resource.loadtex("gfx/hud/buffs/cframe");
     public static final Tex scframe = Theme.tex("scframe");
-    public static final Coord imgoff = new Coord(3, 3);
-    public static final Coord ameteroff = new Coord(3, 37), ametersz = new Coord(32, 3);
-    public static final Coord sameteroff = new Coord(3, 27), sametersz = new Coord(22, 2);
+    public static final Coord imgoff = UI.scale(3, 3);
+    public static final Coord ameteroff = UI.scale(3, 37), ametersz = UI.scale(32, 3);
+    public static final Coord sameteroff = UI.scale(3, 27), sametersz = UI.scale(22, 2);
     private static final Pattern travelpat = Pattern.compile("Travel weariness: ([0-9\\.]+)/([0-9\\.]+) \\(([0-9\\.]+)\\%\\)");
     public Indir<Resource> res;
     public double cmeter = -1;
@@ -105,7 +105,7 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
         public double ameter();
     }
 
-    public static abstract class AMeterTip extends ItemInfo.Tip implements AMeterInfo {
+    public abstract static class AMeterTip extends ItemInfo.Tip implements AMeterInfo {
         public AMeterTip(Owner owner) {
             super(owner);
         }
@@ -134,8 +134,8 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
         put("paginae/atk/cornered", new Color(221, 28, 26));
         put("paginae/atk/reeling", new Color(203, 168, 6));
     }};
-    private final Coord simpleOpeningSz = new Coord(32, 32);
-    private final Coord simpleOpeningSmallSz = new Coord(22, 21);
+    private final Coord simpleOpeningSz = UI.scale(32, 32);
+    private final Coord simpleOpeningSmallSz = UI.scale(22, 21);
 
     public boolean isOpening() {
         try {
@@ -347,6 +347,7 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
         return (Text.render(ret).img);
     }
 
+    private Pattern ezFix = Pattern.compile("(.*\\$img\\[)([A-Za-z\\/]+)(].*)");
     private BufferedImage longtip() {
         BufferedImage img;
         if (rawinfo != null)
@@ -354,8 +355,10 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
         else
             img = shorttip();
         Resource.Pagina pag = res.get().layer(Resource.pagina);
-        if (pag != null)
-            img = ItemInfo.catimgs(0, img, RichText.render("\n" + pag.text, 200).img);
+        if (pag != null) {
+            String text = ezFix.matcher(pag.text).find() ? pag.text.replaceAll(ezFix.pattern(), "$1" + "$2" + ",h=1ln" + "$3") : pag.text;
+            img = ItemInfo.catimgs(0, img, RichText.render("\n" + text, UI.scale(200)).img);
+        }
         return (img);
     }
 

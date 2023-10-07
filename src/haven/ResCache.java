@@ -45,7 +45,7 @@ public interface ResCache {
     ResCache global = StupidJavaCodeContainer.makeglobal();
 
     static ResCache getCache(String name) {
-        if (!configuration.sqlitecache) {
+        if (!DefSettings.sqlitecache.get()) {
             return (global);
         } else {
             return (SQLiteCache.get(name));

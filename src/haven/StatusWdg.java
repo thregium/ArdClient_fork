@@ -95,7 +95,7 @@ public class StatusWdg extends Widget {
                     }
                 }
             });
-            if (configuration.statustooltip) tooltip = RichText.render(RichText.Parser.quote(String.format("%s", brt)), 250);
+            if (configuration.statustooltip) tooltip = RichText.render(RichText.Parser.quote(String.format("%s", brt)), UI.scale(250));
         } catch (SocketException se) {
             // don't print socket exceptions when network is unreachable to prevent console spamming on bad connections
             if (!se.getMessage().equals("Network is unreachable"))

@@ -63,7 +63,7 @@ public class Avaview extends PView {
             if (args[0] != null)
                 avagob = Utils.uint32((Integer) args[0]);
             if ((args.length > 1) && (args[1] != null)) {
-                sz = (Coord) args[1];
+                sz = UI.scale((Coord) args[1]);
                 inner = true;
             }
             if ((args.length > 2) && (args[2] != null))
@@ -332,7 +332,7 @@ public class Avaview extends PView {
                     base.append(rnm(md.mod));
                 }
 
-            return RichText.render(base.toString(), 300);
+            return RichText.render(base.toString(), UI.scale(300));
         }
         return null;
     }

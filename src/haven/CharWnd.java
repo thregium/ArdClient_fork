@@ -61,10 +61,10 @@ import static java.awt.Color.green;
  * large. */
 public class CharWnd extends Window {
     public static final RichText.Foundry ifnd = new RichText.Foundry(Resource.remote(), TextAttribute.FAMILY, Text.cfg.font.get("sans"), TextAttribute.SIZE, Text.cfg.charWndBox).aa(true);
-    public static final Text.Furnace catf = new BlurFurn(new TexFurn(new Text.Foundry(Text.sans, 20).aa(true), Window.ctex), 2, 2, new Color(96, 48, 0));
-    public static final Text.Furnace failf = new BlurFurn(new TexFurn(new Text.Foundry(Text.sans, 25).aa(true), Resource.loadimg("gfx/hud/fontred")), 3, 2, new Color(96, 48, 0));
+    public static final Text.Furnace catf = new BlurFurn(new TexFurn(new Text.Foundry(Text.sans, UI.scale(20)).aa(true), Window.ctex), 2, 2, new Color(96, 48, 0));
+    public static final Text.Furnace failf = new BlurFurn(new TexFurn(new Text.Foundry(Text.sans, UI.scale(25)).aa(true), Resource.loadimg("gfx/hud/fontred")), 3, 2, new Color(96, 48, 0));
     public static final Text.Foundry attrf = Text.attrf;
-    public static final Text.Foundry numfnd = new Text.Foundry(Text.sans, 12);
+    public static final Text.Foundry numfnd = new Text.Foundry(Text.sans, UI.scale(12));
     public static final Color debuff = new Color(255, 128, 128);
     public static final Color buff = new Color(128, 255, 128);
     public static final Color tbuff = new Color(128, 128, 255);
@@ -534,21 +534,21 @@ public class CharWnd extends Window {
             g.frect(Coord.z, sz);
             g.chcolor();
             Coord cn = new Coord(0, sz.y / 2);
-            g.aimage(img, cn.add(5, 0), Coord.of(20), 0, 0.5);
-            g.aimage(rnm, cn.add(20 + 10, 1), 0, 0.5);
+            g.aimage(img, cn.add(UI.scale(5), 0), UI.scale(20, 20), 0, 0.5);
+            g.aimage(rnm, cn.add(UI.scale(20 + 10), 1), 0, 0.5);
 
             cbv = attr.base;
             ccv = attr.comp;
             if (ccv > cbv) {
                 Tex buffed = PUtils.strokeTex(attrf.render(Integer.toString(ccv), buff));
-                g.aimage(buffed, cn.add(sz.x - 7, 1), 1, 0.5);
+                g.aimage(buffed, cn.add(sz.x - UI.scale(7), 1), 1, 0.5);
             } else if (ccv < cbv) {
                 Tex debuffed = PUtils.strokeTex(attrf.render(Integer.toString(ccv), debuff));
-                g.aimage(debuffed, cn.add(sz.x - 7, 1), 1, 0.5);
+                g.aimage(debuffed, cn.add(sz.x - UI.scale(7), 1), 1, 0.5);
             }
 
             Tex base = PUtils.strokeTex(attrf.render(Integer.toString(cbv), Color.WHITE));
-            g.aimage(base, cn.add(sz.x - 50, 1), 1, 0.5);
+            g.aimage(base, cn.add(sz.x - UI.scale(50), 1), 1, 0.5);
         }
 
         public void lvlup() {
@@ -623,10 +623,10 @@ public class CharWnd extends Window {
             g.chcolor();
             super.draw(g);
             Coord cn = new Coord(0, sz.y / 2);
-            g.aimage(img, cn.add(5, 0), Coord.of(20), 0, 0.5);
-            g.aimage(rnm, cn.add(20 + 10, 1), 0, 0.5);
+            g.aimage(img, cn.add(UI.scale(5), 0), UI.scale(20, 20), 0, 0.5);
+            g.aimage(rnm, cn.add(UI.scale(20 + 10), 1), 0, 0.5);
             if (!Config.splitskills) {
-                g.aimage(ct, cn.add(sz.x - 40, 1), 1, 0.5);
+                g.aimage(ct, cn.add(sz.x - UI.scale(40), 1), 1, 0.5);
             } else {
                 cbv = attr.base;
                 ccv = attr.comp;
@@ -640,15 +640,15 @@ public class CharWnd extends Window {
                     } else {
                         buffed = PUtils.strokeTex(attrf.render(Integer.toString(ccv), buff));
                     }
-                    g.aimage(buffed, cn.add(sz.x - 35, 1), 1, 0.5);
+                    g.aimage(buffed, cn.add(sz.x - UI.scale(35), 1), 1, 0.5);
                 } else if (ccv < cbv) {
                     if (tbv > cbv) {
 //                        Text buffed = attrf.render(Integer.toString(tbv + (cbv - ccv)), tbuff);
                         Tex buffed = PUtils.strokeTex(attrf.render(Integer.toString(ccv + (tbv - cbv)), tbuff));
-                        g.aimage(buffed, cn.add(sz.x - 35, 1), 1, 0.5);
+                        g.aimage(buffed, cn.add(sz.x - UI.scale(35), 1), 1, 0.5);
                     } else {
                         Tex debuffed = PUtils.strokeTex(attrf.render(Integer.toString(ccv), debuff));
-                        g.aimage(debuffed, cn.add(sz.x - 35, 1), 1, 0.5);
+                        g.aimage(debuffed, cn.add(sz.x - UI.scale(35), 1), 1, 0.5);
                     }
                 }
 
@@ -658,7 +658,7 @@ public class CharWnd extends Window {
                 } else {
                     base = PUtils.strokeTex(attrf.render(Integer.toString(cbv), Color.WHITE));
                 }
-                g.aimage(base, cn.add(sz.x - 65, 1), 1, 0.5);
+                g.aimage(base, cn.add(sz.x - UI.scale(65), 1), 1, 0.5);
             }
         }
 
@@ -777,10 +777,10 @@ public class CharWnd extends Window {
         private StudyInfo(Coord sz, Widget study) {
             super(sz);
             this.study = study;
-            add(new Label("Attention:"), 2, 2);
-            add(new Label("Experience cost:"), 2, 32);
-            add(new Label("LP/H"), 2, sz.y - 64);
-            add(new Label("Learning points:"), 2, sz.y - 32);
+            add(new Label("Attention:"), UI.scale(2, 2));
+            add(new Label("Experience cost:"), UI.scale(2, 32));
+            add(new Label("LP/H"), UI.scale(2), sz.y - UI.scale(64));
+            add(new Label("Learning points:"), UI.scale(2), sz.y - UI.scale(32));
 
             if (Config.studybuff && ((Inventory) study).getFreeSpace() > 0) {
                 Buff tgl = study.ui.gui.buffs.gettoggle("brain");
@@ -1620,8 +1620,8 @@ public class CharWnd extends Window {
 
         public SkillGrid(Coord sz) {
             super(sz);
-            nsk = new Group(new Coord(40, 40), new Coord(-1, 5), Resource.getLocString(Resource.BUNDLE_LABEL, "Available Skills"), Collections.emptyList());
-            csk = new Group(new Coord(40, 40), new Coord(-1, 5), Resource.getLocString(Resource.BUNDLE_LABEL, "Known Skills"), Collections.emptyList());
+            nsk = new Group(UI.scale(40, 40), UI.scale(-1, 5), Resource.getLocString(Resource.BUNDLE_LABEL, "Available Skills"), Collections.emptyList());
+            csk = new Group(UI.scale(40, 40), UI.scale(-1, 5), Resource.getLocString(Resource.BUNDLE_LABEL, "Known Skills"), Collections.emptyList());
             itemtooltip = Skill::tooltip;
         }
 

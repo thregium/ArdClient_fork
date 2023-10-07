@@ -43,11 +43,11 @@ import static java.lang.Math.PI;
 public class FlowerMenu extends Widget {
     public static final Color pink = new Color(255, 0, 128);
     public static final Color ptc = Color.YELLOW;
-    public static final Text.Foundry ptf = new Text.Foundry(Text.dfont, 12);
-    public static final Coord customBoxPadding = new Coord(4, 4);
+    public static final Text.Foundry ptf = new Text.Foundry(Text.dfont, UI.scale(12));
+    public static final Coord customBoxPadding = UI.scale(4, 4);
     public static final IBox pbox = Window.wbox;
     public static final Tex pbg = Window.bg;
-    public static final int ph = 30, ppl = 8;
+    public static final int ph = UI.scale(30), ppl = UI.scale(8);
     private static final int HORSE_DELAY = 1;
     private static final int TIMEOUT = 5000;
     public Petal[] opts;
@@ -85,7 +85,7 @@ public class FlowerMenu extends Widget {
             super(Coord.z);
             this.name = name;
             text = ptf.render(Resource.getLocString(Resource.BUNDLE_FLOWER, name), Color.YELLOW);
-            resize(text.sz().x + 25, ph);
+            resize(text.sz().x + UI.scale(25), ph);
         }
 
         public void move(Coord c) {
@@ -112,7 +112,7 @@ public class FlowerMenu extends Widget {
 
         public void draw(GOut g) {
             g.chcolor(new Color(DefSettings.WNDCOL.get().getRed(), DefSettings.WNDCOL.get().getGreen(), DefSettings.WNDCOL.get().getBlue(), (int) (255 * a)));
-            g.image(pbg, new Coord(3, 3), new Coord(3, 3), sz.add(new Coord(-6, -6)));
+            g.image(pbg, UI.scale(3, 3), UI.scale(3, 3), sz.add(UI.scale(-6, -6)));
 
             if (h) {
                 g.chcolor(0, 0, 0, (int) (128 * a));
@@ -121,7 +121,7 @@ public class FlowerMenu extends Widget {
             }
             // pbg is to short for wide petals
             if (pbg.sz().x < sz.x && AMBERMENU.get())
-                g.image(pbg, new Coord(pbg.sz().x, 3), new Coord(3, 3), sz.add(new Coord(-6, -6)));
+                g.image(pbg, new Coord(pbg.sz().x, UI.scale(3)), UI.scale(3, 3), sz.add(UI.scale(-6, -6)));
             pbox.draw(g, Coord.z, sz);
             g.image(text.tex(), sz.div(2).sub(text.sz().div(2)));
         }
@@ -306,7 +306,7 @@ public class FlowerMenu extends Widget {
 
         private CustomPetal(String name) {
             super(name);
-            sz = new Coord(text.sz().x + 35, 30);
+            sz = new Coord(text.sz().x + UI.scale(35), UI.scale(30));
         }
 
         @Override
@@ -324,8 +324,8 @@ public class FlowerMenu extends Widget {
                 g.frect(Coord.z, sz);
                 g.chcolor(new Color(255, 255, 255, (int) (255 * a)));
             }
-            FastText.print(g, new Coord(10, 7), Integer.toString((num + 1) % 10));
-            g.image(text.tex(), sz.sub(8, 0).sub(text.sz()).div(2).add(8, 0));
+            FastText.print(g, UI.scale(10, 7), Integer.toString((num + 1) % 10));
+            g.image(text.tex(), sz.sub(8, 0).sub(text.sz()).div(2).add(UI.scale(8), 0));
             g.chcolor();
         }
 

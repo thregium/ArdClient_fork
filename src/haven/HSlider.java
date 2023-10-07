@@ -158,8 +158,7 @@ public class HSlider extends Widget {
         return (true);
     }
 
-    public void changed() {
-    }
+    public void changed() {}
 
     public void resize(int w) {
         super.resize(new Coord(w, sflarp.sz().y));

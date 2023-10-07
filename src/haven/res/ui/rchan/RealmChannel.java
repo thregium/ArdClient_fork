@@ -5,7 +5,10 @@ import haven.ChatUI;
 import haven.Config;
 import haven.Coord;
 import haven.GameUI;
+import haven.Gob;
+import haven.GobHighlight;
 import haven.Indir;
+import haven.OCache;
 import haven.Resource;
 import haven.RichText;
 import haven.Tex;
@@ -254,6 +257,22 @@ public class RealmChannel extends ChatUI.MultiChat {
             Number cfrom = (Number) args[1];
             Number bfrom = (Number) args[2];
             String line = (String) args[3];
+
+            if (line.startsWith(ChatUI.CMD_PREFIX_HLIGHT)) {
+                try {
+                    long gobid = Long.parseLong(line.substring(1));
+                    OCache oc = ui.gui.map.glob.oc;
+                    Gob gob = oc.getgob(gobid);
+                    if (gob != null) {
+                        gob.delattr(GobHighlight.class);
+                        gob.setattr(new GobHighlight(gob));
+                        oc.changed(gob);
+                        return;
+                    }
+                } catch (NumberFormatException nfe) {
+                }
+            }
+
             String pname = null;
             if (args.length > 4)
                 pname = (String) args[4];

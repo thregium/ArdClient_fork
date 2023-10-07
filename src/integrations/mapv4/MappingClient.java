@@ -32,6 +32,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -51,11 +52,11 @@ public class MappingClient {
     private ExecutorService gridsUploader = Executors.newSingleThreadExecutor();
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
     public String mapString;
-    public final String accName;
+    public final String username;
 
 //    private static volatile MappingClient INSTANCE = null;
 
-    private static volatile Map<String, MappingClient> clients = new HashMap<>();
+    private static volatile Map<String, MappingClient> clients = Collections.synchronizedMap(new HashMap<>());
 
 //    public static MappingClient getInstance() {
 //        if (INSTANCE == null) {
@@ -68,21 +69,17 @@ public class MappingClient {
 //        return INSTANCE;
 //    }
 
-    public static MappingClient getInstance(String username) {
-        MappingClient client = clients.get(username);
-        if (client == null) {
-            client = new MappingClient(username);
-            clients.put(username, client);
-        }
-        return (client);
+    public static MappingClient getInstance(final String username) {
+        if (username.isEmpty()) return (null);
+        return (clients.computeIfAbsent(username, MappingClient::new));
     }
 
-    public static void removeInstance(String username) {
-        MappingClient client = clients.get(username);
+    public static void removeInstance(final String username) {
+        if (username.isEmpty()) return;
+        MappingClient client = clients.remove(username);
         if (client != null) {
             client.scheduler.shutdownNow();
             client.gridsUploader.shutdownNow();
-            clients.remove(username);
         }
     }
 
@@ -109,7 +106,7 @@ public class MappingClient {
     private PositionUpdates pu = new PositionUpdates();
 
     private MappingClient(String accName) {
-        this.accName = accName;
+        this.username = accName;
         scheduler.scheduleAtFixedRate(pu, 5L, 5L, TimeUnit.SECONDS);
     }
 
@@ -181,10 +178,10 @@ public class MappingClient {
      */
     public MapRef GetMapRef(boolean remote) {
         try {
-            Gob player = Glob.getByReference(accName).oc.getGUI().map.player();
+            Gob player = Glob.getByReference(username).oc.getGUI().map.player();
             Coord gc = toGC(player.rc);
             synchronized (cache) {
-                long id = Glob.getByReference(accName).map.getgrid(gc).id;
+                long id = Glob.getByReference(username).map.getgrid(gc).id;
                 MapRef mapRef = cache.get(id);
                 if (mapRef == null && remote) {
                     scheduler.execute(new Locate(id));
@@ -396,7 +393,7 @@ public class MappingClient {
             if (trackingEnabled && CheckEndpoint()) {
                 JSONObject upload = new JSONObject();
                 try {
-                    Glob g = Glob.getByReference(accName);
+                    Glob g = Glob.getByReference(username);
                     if (g == null) {
                         return;
                     }
@@ -417,7 +414,7 @@ public class MappingClient {
                                         j.put("type", Integer.toHexString(BuddyWnd.gc[ki.group].getRGB()));
                                     }
                                 }
-                                MCache.Grid grid = Glob.getByReference(accName).map.getgrid(toGC(gob.rc));
+                                MCache.Grid grid = Glob.getByReference(username).map.getgrid(toGC(gob.rc));
                                 j.put("gridID", String.valueOf(grid.id));
                                 JSONObject c = new JSONObject();
                                 Coord2d goc = gridOffset(gob.rc);
@@ -481,7 +478,7 @@ public class MappingClient {
             if (gridEnabled) {
                 final String[][] gridMap = new String[3][3];
                 Map<String, WeakReference<MCache.Grid>> gridRefs = new HashMap<>();
-                Glob glob = Glob.getByReference(accName);
+                Glob glob = Glob.getByReference(username);
                 LoadingMap error = null;
                 for (int x = -1; x <= 1; x++) {
                     for (int y = -1; y <= 1; y++) {
@@ -575,7 +572,7 @@ public class MappingClient {
         @Override
         public void run() {
             try {
-                Glob glob = Glob.getByReference(accName);
+                Glob glob = Glob.getByReference(username);
                 MCache.Grid g = grid.get();
                 if (g != null && glob != null && glob.map != null) {
                     Loading l = MinimapImageGenerator.checkForLoading(glob.map, g);

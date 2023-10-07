@@ -83,7 +83,7 @@ public class MapWnd extends ResizableWnd {
     private final Collection<Runnable> deferred = new LinkedList<>();
     private static final Tex plx = Text.renderstroked("\u2716", Color.red, Color.BLACK, Text.num12boldFnd).tex();
     private Predicate<Marker> filter = (m -> true);
-    private final static Comparator<Marker> namecmp = (Comparator.comparing(a -> a.nm));
+    private static final Comparator<Marker> namecmp = (Comparator.comparing(a -> a.nm));
     private final Map<Color, Tex> xmap = new HashMap<>(6);
     private final Map<Long, Tex> namemap = new HashMap<>(50);
     private final Map<Coord, Coord> questlinemap = new HashMap<>();
@@ -212,10 +212,10 @@ public class MapWnd extends ResizableWnd {
             fdrop = add(markersFilter());
             fdropf = Frame.around(this, Collections.singletonList(fdrop));
 
-            listf = add(new Frame(new Coord(200, 200), false));
+            listf = add(new Frame(UI.scale(200, 200), false));
             list = listf.add(new MarkerList(listf.inner().x, 0));
 
-            mebtn = add(new Button(95, "Export...", false) {
+            mebtn = add(new Button(UI.scale(95), "Export...", false) {
                 public void click() {
                     boolean errors = ui.modflags() == UI.MOD_CTRL;
                     view.exportmap(errors, -1);
@@ -226,7 +226,7 @@ public class MapWnd extends ResizableWnd {
                     return Text.render("Ctrl for Export with errors").tex();
                 }
             });
-            mibtn = add(new Button(95, "Import...", false) {
+            mibtn = add(new Button(UI.scale(95), "Import...", false) {
                 public void click() {
                     boolean errors = ui.modflags() == UI.MOD_CTRL;
                     view.importmap(errors);
@@ -261,7 +261,7 @@ public class MapWnd extends ResizableWnd {
 
         @SuppressWarnings("unchecked")
         private Dropbox<Pair<String, String>> markersFilter() {
-            Dropbox<Pair<String, String>> modes = new Dropbox<Pair<String, String>>(195, filters.length, Math.max(Text.render(filters[0].a.toString()).sz().y, 20)) {
+            Dropbox<Pair<String, String>> modes = new Dropbox<Pair<String, String>>(UI.scale(195), filters.length, Math.max(Text.render(filters[0].a.toString()).sz().y, UI.scale(20))) {
                 @Override
                 protected Pair<String, String> listitem(int i) {
                     return filters[i];
@@ -308,11 +308,10 @@ public class MapWnd extends ResizableWnd {
         }
     }
 
+    private static final int btnsz = UI.scale(21);
     public class ZoomBar extends Widget {
-        private final static int btnsz = 21;
-
         public ZoomBar() {
-            super(new Coord(btnsz * 2 + 20, btnsz));
+            super(new Coord(btnsz * 2 + UI.scale(20), btnsz));
             add(new IButton("gfx/hud/worldmap/minus", "", "", "") {
                 @Override
                 public void click() {
@@ -340,13 +339,13 @@ public class MapWnd extends ResizableWnd {
                         view.curloc.tc.y = tc.y;
                     }
                 }
-            }, new Coord(btnsz + 20, 0));
+            }, new Coord(btnsz + UI.scale(20), 0));
         }
 
         @Override
         public void draw(GOut g) {
             super.draw(g);
-            g.image(renderz(), new Coord((btnsz * 2 + 20) / 2 - zoomtex.sz().x / 2, btnsz / 2 - zoomtex.sz().y / 2));
+            g.image(renderz(), new Coord((btnsz * 2 + UI.scale(20)) / 2 - zoomtex.sz().x / 2, btnsz / 2 - zoomtex.sz().y / 2));
         }
 
         private Tex renderz() {
@@ -362,7 +361,7 @@ public class MapWnd extends ResizableWnd {
     public class ToolBar extends Widget {
         public ToolBar() {
             super(Coord.z);
-            final int spacer = 5;
+            final int spacer = UI.scale(5);
             final ICheckBox pclaim = new ICheckBox("gfx/hud/wndmap/btns/claim", "", "-d", "", "") {
                 public boolean mousewheel(Coord c, int amount) {
                     if (!checkhit(c) || !ui.modshift)
@@ -384,8 +383,6 @@ public class MapWnd extends ResizableWnd {
 //            final ICheckBox realm = new ICheckBox("gfx/hud/wndmap/btns/realm", "", "-d", "", "");
 //            add(realm, vclaim.c.add(vclaim.sz.x + spacer, 0)).changed(a -> toggleol("realm", a)).settip(Resource.getLocString(Resource.BUNDLE_LABEL, "Display realms"));
             final IButton geoloc = new IButton("gfx/hud/wndmap/btns/geoloc", "", "", "") {
-                private Coord2d locatedAC = null;
-                private Coord2d detectedAC = null;
                 private BufferedImage green = Resource.loadimg("hud/geoloc-green");
                 private BufferedImage red = Resource.loadimg("hud/geoloc-red");
 
@@ -393,32 +390,37 @@ public class MapWnd extends ResizableWnd {
 
                 @Override
                 public Object tooltip(Coord c, Widget prev) {
-                    if (this.locatedAC != null) {
-                        tooltip = Text.render("Located absolute coordinates: " + this.locatedAC.toGridCoordinate());
-                    } else if (this.detectedAC != null) {
-                        tooltip = Text.render("Detected login absolute coordinates: " + this.detectedAC.toGridCoordinate());
-                    } else {
-                        tooltip = Text.render("Unable to determine your current location.");
-                    }
-                    if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
-                        if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
-                            MappingClient.MapRef mr = MappingClient.getInstance(ui.sess.username).lastMapRef;
-                            if (mr != null) {
-                                tooltip = Text.render("Coordinates: " + mr);
+                    search:{
+                        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                            String username = ui.gui.chrid;
+                            if (!username.isEmpty() && configuration.loadMapSetting(username, "mapper")) {
+                                MappingClient map = MappingClient.getInstance(username);
+                                if (map != null) {
+                                    MappingClient.MapRef mr = map.lastMapRef;
+                                    if (mr != null) {
+                                        tooltip = Text.render("Coordinates: " + mr);
+                                        break search;
+                                    }
+                                }
                             }
                         }
+                        tooltip = Text.render("Unable to determine your current location.");
                     }
                     return super.tooltip(c, prev);
                 }
 
                 @Override
                 public void click() {
-                    if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
-                        if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
-                            MappingClient.MapRef mr = MappingClient.getInstance(ui.sess.username).GetMapRef(true);
-                            if (mr != null) {
-                                MappingClient.getInstance(ui.sess.username).OpenMap(mr);
-                                return;
+                    if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                        String username = ui.gui.chrid;
+                        if (!username.isEmpty() && configuration.loadMapSetting(username, "mapper")) {
+                            MappingClient map = MappingClient.getInstance(username);
+                            if (map != null) {
+                                MappingClient.MapRef mr = map.GetMapRef(true);
+                                if (mr != null) {
+                                    map.OpenMap(mr);
+                                    return;
+                                }
                             }
                         }
                     }
@@ -427,16 +429,23 @@ public class MapWnd extends ResizableWnd {
                 @Override
                 public void draw(GOut g) {
                     boolean redraw = false;
-                    if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
-                        if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
-                            MappingClient.MapRef mr = MappingClient.getInstance(ui.sess.username).lastMapRef;
-                            if (state != 2 && mr != null) {
-                                state = 2;
-                                redraw = true;
-                            }
-                            if (state != 0 && mr == null) {
-                                state = 0;
-                                redraw = true;
+                    if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                        String username = ui.gui.chrid;
+                        if (!username.isEmpty() && configuration.loadMapSetting(username, "mapper")) {
+                            MappingClient map = MappingClient.getInstance(username);
+                            if (map != null) {
+                                MappingClient.MapRef mr = map.lastMapRef;
+                                if (mr != null) {
+                                    if (state != 2) {
+                                        state = 2;
+                                        redraw = true;
+                                    }
+                                } else {
+                                    if (state != 0) {
+                                        state = 0;
+                                        redraw = true;
+                                    }
+                                }
                             }
                         }
                     }
@@ -458,114 +467,114 @@ public class MapWnd extends ResizableWnd {
                 }
             };
             add(geoloc, vclaim.c.add(vclaim.sz.x + spacer, 0));
-            final IButton oddigeoloc = new IButton("gfx/hud/wndmap/btns/geoloc", "", "", "") {
-                private Coord coords = null;
-                private BufferedImage green = Resource.loadimg("hud/geoloc-green");
-                private BufferedImage red = Resource.loadimg("hud/geoloc-red");
-
-                private boolean state = false;
-
-                @Override
-                public Object tooltip(Coord c, Widget prev) {
-                    Coord coords = getCurCoords();
-                    String oddi = "";
-                    String vatsul = "";
-                    if (coords != null) {
-                        this.coords = coords;
-                        oddi = String.format("Current location: %d x %d", coords.x, coords.y);
-                    } else
-                        oddi = "Location not found";
-
-                    MCache.Grid g = getGrid();
-                    if (g != null) {
-                        vatsul = String.format("Current grid id: %d", g.id);
-                    } else
-                        vatsul = "Grid not found";
-                    String addinfo = "Click to open the Odditown map\nShfit+Click to open the Vatsul map";
-
-                    tooltip = RichText.render(oddi + "\n" + vatsul + "\n" + addinfo, 300).tex();
-                    return (super.tooltip(c, prev));
-                }
-
-                @Override
-                public void click() {
-                    if (ui.modflags() != UI.MOD_SHIFT) {
-                        Coord coords = getCurCoords();
-                        if (coords != null) {
-                            this.coords = coords;
-                            try {
-                                WebBrowser.self.show(new URL(String.format("http://odditown.com/haven/map/#x=%d&y=%d&zoom=9", coords.x, coords.y)));
-                            } catch (WebBrowser.BrowserException e) {
-                                getparent(GameUI.class).error("Could not launch web browser.");
-                            } catch (MalformedURLException e) {
-                            }
-                        } else {
-                            getparent(GameUI.class).error("Unable to determine your current location.");
-                        }
-                    } else {
-                        try {
-                            MCache.Grid g = getGrid();
-                            if (g != null)
-                                WebBrowser.self.show(new URL("https://vatsul.com/HnHMap/whereis/" + g.id));
-                        } catch (NullPointerException | MalformedURLException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-
-                @Override
-                public void draw(GOut g) {
-                    boolean redraw = false;
-
-                    Coord coords = getCurCoords();
-                    if (coords != null) {
-                        this.coords = coords;
-                        if (!state) {
-                            state = true;
-                            redraw = true;
-                        }
-                    } else if (state) {
-                        state = false;
-                        redraw = true;
-                    }
-
-
-                    if (redraw) this.redraw();
-                    super.draw(g);
-                }
-
-                @Override
-                public void draw(BufferedImage buf) {
-                    Graphics2D g = (Graphics2D) buf.getGraphics();
-                    if (state) {
-                        g.drawImage(green, 0, 0, null);
-                    } else {
-                        g.drawImage(red, 0, 0, null);
-                    }
-                    g.dispose();
-                }
-
-                private MCache.Grid getGrid() {
-                    try {
-                        Coord mpc = new Coord2d(mv.getcc()).floor(tilesz);
-                        return (ui.sess.glob.map.getgrid(mpc.div(cmaps)));
-                    } catch (Exception e) {
-                    }
-                    return (null);
-                }
-
-                private Coord getCurCoords() {
-                    try {
-                        MCache.Grid obg = getGrid();
-                        return (Config.gridIdsMap.get(obg.id));
-                    } catch (Exception e) {
-                    }
-                    return (null);
-                }
-            };
-            add(oddigeoloc, geoloc.c.add(geoloc.sz.x + spacer, 0));
+//            final IButton oddigeoloc = new IButton("gfx/hud/wndmap/btns/geoloc", "", "", "") {
+//                private Coord coords = null;
+//                private BufferedImage green = Resource.loadimg("hud/geoloc-green");
+//                private BufferedImage red = Resource.loadimg("hud/geoloc-red");
+//
+//                private boolean state = false;
+//
+//                @Override
+//                public Object tooltip(Coord c, Widget prev) {
+//                    Coord coords = getCurCoords();
+//                    String oddi = "";
+//                    String vatsul = "";
+//                    if (coords != null) {
+//                        this.coords = coords;
+//                        oddi = String.format("Current location: %d x %d", coords.x, coords.y);
+//                    } else
+//                        oddi = "Location not found";
+//
+//                    MCache.Grid g = getGrid();
+//                    if (g != null) {
+//                        vatsul = String.format("Current grid id: %d", g.id);
+//                    } else
+//                        vatsul = "Grid not found";
+//                    String addinfo = "Click to open the Odditown map\nShfit+Click to open the Vatsul map";
+//
+//                    tooltip = RichText.render(oddi + "\n" + vatsul + "\n" + addinfo, 300).tex();
+//                    return (super.tooltip(c, prev));
+//                }
+//
+//                @Override
+//                public void click() {
+//                    if (ui.modflags() != UI.MOD_SHIFT) {
+//                        Coord coords = getCurCoords();
+//                        if (coords != null) {
+//                            this.coords = coords;
+//                            try {
+//                                WebBrowser.self.show(new URL(String.format("http://odditown.com/haven/map/#x=%d&y=%d&zoom=9", coords.x, coords.y)));
+//                            } catch (WebBrowser.BrowserException e) {
+//                                getparent(GameUI.class).error("Could not launch web browser.");
+//                            } catch (MalformedURLException e) {
+//                            }
+//                        } else {
+//                            getparent(GameUI.class).error("Unable to determine your current location.");
+//                        }
+//                    } else {
+//                        try {
+//                            MCache.Grid g = getGrid();
+//                            if (g != null)
+//                                WebBrowser.self.show(new URL("https://vatsul.com/HnHMap/whereis/" + g.id));
+//                        } catch (NullPointerException | MalformedURLException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }
+//
+//                @Override
+//                public void draw(GOut g) {
+//                    boolean redraw = false;
+//
+//                    Coord coords = getCurCoords();
+//                    if (coords != null) {
+//                        this.coords = coords;
+//                        if (!state) {
+//                            state = true;
+//                            redraw = true;
+//                        }
+//                    } else if (state) {
+//                        state = false;
+//                        redraw = true;
+//                    }
+//
+//
+//                    if (redraw) this.redraw();
+//                    super.draw(g);
+//                }
+//
+//                @Override
+//                public void draw(BufferedImage buf) {
+//                    Graphics2D g = (Graphics2D) buf.getGraphics();
+//                    if (state) {
+//                        g.drawImage(green, 0, 0, null);
+//                    } else {
+//                        g.drawImage(red, 0, 0, null);
+//                    }
+//                    g.dispose();
+//                }
+//
+//                private MCache.Grid getGrid() {
+//                    try {
+//                        Coord mpc = new Coord2d(mv.getcc()).floor(tilesz);
+//                        return (ui.sess.glob.map.getgrid(mpc.div(cmaps)));
+//                    } catch (Exception e) {
+//                    }
+//                    return (null);
+//                }
+//
+//                private Coord getCurCoords() {
+//                    try {
+//                        MCache.Grid obg = getGrid();
+//                        return (Config.gridIdsMap.get(obg.id));
+//                    } catch (Exception e) {
+//                    }
+//                    return (null);
+//                }
+//            };
+//            add(oddigeoloc, geoloc.c.add(geoloc.sz.x + spacer, 0));
             final IButton grid = add(new IButton("gfx/hud/wndmap/btns/grid", "Toggle grid on minimap", MapWnd.this::toggleMapGrid),
-                    oddigeoloc.c.add(oddigeoloc.sz.x + spacer, 0));
+                    geoloc.c.add(geoloc.sz.x + spacer, 0));
             final IButton viewdist = add(new IButton("gfx/hud/wndmap/btns/viewdist", null, MapWnd.this::toggleMapViewDist) {
                 @Override
                 public boolean mouseup(Coord c, int button) {
@@ -601,7 +610,7 @@ public class MapWnd extends ResizableWnd {
 
                 @Override
                 public Object tooltip(Coord c, Widget prev) {
-                    return (RichText.render("Click - Toggle view range" + "\n" + "Right-Click - Display fog of war" + "\n" + "Ctrl+Right-Click - Display temp fog of war" + "\n" + "Alt+Right-Click - Clear temp fog of war", 300).tex());
+                    return (RichText.render("Click - Toggle view range" + "\n" + "Right-Click - Display fog of war" + "\n" + "Ctrl+Right-Click - Display temp fog of war" + "\n" + "Alt+Right-Click - Clear temp fog of war", UI.scale(300)).tex());
                 }
             }, grid.c.add(grid.sz.x + spacer, 0));
             final IButton iconbtn = add(new IButton("gfx/hud/wndmap/btns/lbtn-ico", "Icon settings", () -> {
@@ -618,22 +627,11 @@ public class MapWnd extends ResizableWnd {
                     }
                 }
             }), viewdist.c.add(viewdist.sz.x + spacer, 0));
-            final Button oldsetting = add(new Button(0, "⚙") {
-                public Object tooltip(Coord c, Widget prev) {
-                    return (Text.render("old Settings").tex());
-                }
-
-                public void click() {
-                    GameUI gui = getparent(GameUI.class);
-                    if (gui != null)
-                        gui.toggleMapSettings();
-                }
-            }, iconbtn.c.add(iconbtn.sz.x + spacer, 0));
             final Button setting = add(new Button(0, "⚙", MapWnd.this::toggleMapSettings) {
                 public Object tooltip(Coord c, Widget prev) {
                     return (Text.render("Settings").tex());
                 }
-            }, oldsetting.c.add(oldsetting.sz.x + spacer, 0));
+            }, iconbtn.c.add(iconbtn.sz.x + spacer, 0));
             pack();
         }
     }
@@ -1136,7 +1134,7 @@ public class MapWnd extends ResizableWnd {
                                 if (icon != null)
                                     tex = cachedtex(gob);
                                 else
-                                    tex = Config.additonalicons.get(res.name);
+                                    tex = Config.additonalicons.get(res.name).get();
                             }
                         } else if (gob.type == Type.ROAD && Config.showroadmidpoint) {
                             tex = LocalMiniMap.roadicn;
@@ -1395,7 +1393,7 @@ public class MapWnd extends ResizableWnd {
         }
 
         public MarkerList(int w, int n) {
-            super(w, n, 20);
+            super(w, n, UI.scale(20));
         }
 
         private Function<String, Text> names = new CachedFunction<>(500, fnd::render);
@@ -1414,7 +1412,7 @@ public class MapWnd extends ResizableWnd {
                 g.chcolor(((PMarker) mark).color);
             else
                 g.chcolor();
-            g.aimage(names.apply(mark.nm).tex(), new Coord(5, itemh / 2), 0, 0.5);
+            g.aimage(names.apply(mark.nm).tex(), new Coord(UI.scale(5), itemh / 2), 0, 0.5);
         }
 
         protected void itemclick(Marker mark, int button) {
@@ -1454,7 +1452,7 @@ public class MapWnd extends ResizableWnd {
 
             if (mark != null) {
                 if (tool.namesel == null) {
-                    tool.namesel = tool.add(new TextEntry(200, "") {
+                    tool.namesel = tool.add(new TextEntry(UI.scale(200), "") {
                         {
                             dshow = true;
                         }
@@ -1493,7 +1491,7 @@ public class MapWnd extends ResizableWnd {
                     if ((colsel.group = Utils.index(BuddyWnd.gc, pm.color)) < 0)
                         colsel.group = 0;
                 }
-                mremove = tool.add(new Button(200, "Remove", false) {
+                mremove = tool.add(new Button(UI.scale(200), "Remove", false) {
                     public void click() {
                         view.file.remove(mark);
                         setfocus(MarkerList.this);
@@ -1510,15 +1508,15 @@ public class MapWnd extends ResizableWnd {
         tool.resize(sz.y);
         if (!decohide()) {
             tool.c = new Coord(sz.x - tool.sz.x, 0);
-            viewf.resize(new Coord(sz.x - tool.sz.x - 10, sz.y));
+            viewf.resize(new Coord(sz.x - tool.sz.x - UI.scale(10), sz.y));
         } else {
             viewf.resize(sz);
             tool.c = Coord.z;
         }
         view.resize(viewf.inner());
-        toolbar2.c = viewf.c.add(viewf.sz.x / 2 - toolbar2.sz.x / 2, 0).sub(0, 7);
+        toolbar2.c = viewf.c.add(viewf.sz.x / 2 - toolbar2.sz.x / 2, 0).sub(0, UI.scale(7));
         toolbar.c = viewf.c.add(0, viewf.sz.y - toolbar.sz.y).add(UI.scale(2), UI.scale(-2));
-        zoombar.c = viewf.c.add(viewf.sz.x - zoombar.sz.x, viewf.sz.y - zoombar.sz.y).sub(7, 7);
+        zoombar.c = viewf.c.add(viewf.sz.x - zoombar.sz.x, viewf.sz.y - zoombar.sz.y).sub(UI.scale(7, 7));
     }
 
     public void compact(boolean a) {
@@ -1594,7 +1592,7 @@ public class MapWnd extends ResizableWnd {
                         Resource.Tooltip tt = res.layer(Resource.tooltip);
                         if (tt == null)
                             return;
-                        rnm = tt.t;
+                        rnm = tt.origt;
                     }
                     double now = Utils.rtime();
                     if (f == 0)

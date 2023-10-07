@@ -54,13 +54,13 @@ public class Fightsess extends Widget {
     public static final Tex actframe = Buff.frame;
     public static final Coord actframeo = Buff.imgoff;
     public static final Tex indframe = Resource.loadtex("gfx/hud/combat/indframe");
-    public static final Coord indframeo = (indframe.sz().sub(32, 32)).div(2);
+    public static final Coord indframeo = (indframe.sz().sub(UI.scale(32, 32))).div(2);
     public static final Tex indbframe = Resource.loadtex("gfx/hud/combat/indbframe");
-    public static final Coord indbframeo = (indframe.sz().sub(32, 32)).div(2);
+    public static final Coord indbframeo = (indframe.sz().sub(UI.scale(32, 32))).div(2);
     public static final Tex useframe = Resource.loadtex("gfx/hud/combat/lastframe");
-    public static final Coord useframeo = (useframe.sz().sub(32, 32)).div(2);
-    public static final int actpitch = 75;
-    public static final int smallactpitch = 40;
+    public static final Coord useframeo = (useframe.sz().sub(UI.scale(32, 32))).div(2);
+    public static final int actpitch = UI.scale(75);
+    public static final int smallactpitch = UI.scale(40);
     public float actionscale = Utils.getpreff("combatscale", 1);
     public static int blue = 0, red = 0, myblue = 0, myred = 0, oldblue = 0, oldred = 0, unarmedcombat;
     public static Double delta, expected, lastactopened;
@@ -81,8 +81,8 @@ public class Fightsess extends Widget {
         put("paginae/atk/cornered", new Color(221, 28, 26));
         put("paginae/atk/reeling", new Color(203, 168, 6));
     }};
-    private Coord simpleOpeningSz = new Coord(32, 32);
-    private Coord smallerOpeningSz = new Coord(24, 24);
+    private Coord simpleOpeningSz = UI.scale(32, 32);
+    private Coord smallerOpeningSz = UI.scale(24, 24);
 
     //    private Coord actionAnchor;
     private Coord enemyBuffAnchor;
@@ -181,7 +181,7 @@ public class Fightsess extends Widget {
         fv = parent.getparent(GameUI.class).fv;
         presize();
 
-        Coord awc = new Coord(400, 175);
+        Coord awc = UI.scale(400, 175);
         Coord awsz = awc.mul(actionscale);
         actionWdg = new MovableWidget(awsz, "FightSessActions") {
             @Override
@@ -356,7 +356,7 @@ public class Fightsess extends Widget {
             }
         };
 
-        cooldownWdg = new MovableWidget(new Coord(600, 200), "FightSessCooldowns") {
+        cooldownWdg = new MovableWidget(UI.scale(600, 200), "FightSessCooldowns") {
             @Override
             public void draw(GOut g) {
                 double now = Utils.rtime();
@@ -365,18 +365,18 @@ public class Fightsess extends Widget {
                 int gcy = sz.y / 2 - 50;
                 for (Buff buff : fv.buffs.children(Buff.class)) {
 //                    Coord bc = Config.altfightui ? new Coord(gcx - buff.c.x - Buff.cframe.sz().x - 80, 180) : pcc.add(-buff.c.x - Buff.cframe.sz().x - 20, buff.c.y + pho - Buff.cframe.sz().y);
-                    Coord bc = new Coord(gcx - buff.c.x - Buff.cframe.sz().x - 80, gcy);
+                    Coord bc = new Coord(gcx - buff.c.x - Buff.cframe.sz().x - UI.scale(80), gcy);
                     drawOpening(g, buff, bc);
                 }
 
                 if (fv.current != null) {
                     for (Buff buff : fv.current.buffs.children(Buff.class)) {
-                        Coord bc = new Coord(gcx + buff.c.x + 80, gcy);
+                        Coord bc = new Coord(gcx + buff.c.x + UI.scale(80), gcy);
                         drawOpening(g, buff, bc);
                     }
 
-                    g.aimage(ip.get().tex(), new Coord(gcx - 45, gcy + 20), 0.5, 0.5);
-                    g.aimage(oip.get().tex(), new Coord(gcx + 45, gcy + 20), 0.5, 0.5);
+                    g.aimage(ip.get().tex(), new Coord(gcx - UI.scale(45), gcy + UI.scale(20)), 0.5, 0.5);
+                    g.aimage(oip.get().tex(), new Coord(gcx + UI.scale(45), gcy + UI.scale(20)), 0.5, 0.5);
 
                     if (fv.lsrel.size() > 1) {
                         fxon(fv.current.gobid, tgtfx);
@@ -429,11 +429,11 @@ public class Fightsess extends Widget {
 
                 {
 //                    Coord cdc = Config.altfightui ? new Coord(gcx, 200) : pcc.sub(cmc);
-                    Coord cdc = new Coord(gcx, gcy + 20);
+                    Coord cdc = new Coord(gcx, gcy + UI.scale(20));
                     if (now < fv.atkct) {
                         double a = (now - fv.atkcs) / (fv.atkct - fv.atkcs);
                         g.chcolor(255, 0, 128, 224);
-                        g.fellipse(cdc, new Coord(24, 24), Math.PI / 2 - (Math.PI * 2 * Math.min(1.0 - a, 1.0)), Math.PI / 2);
+                        g.fellipse(cdc, UI.scale(24, 24), Math.PI / 2 - (Math.PI * 2 * Math.min(1.0 - a, 1.0)), Math.PI / 2);
                         g.chcolor();
                         if (Config.showcooldown)
                             g.atextstroked(Utils.fmt1DecPlace(fv.atkct - now), cdc, 0.5, 0.5, Color.WHITE, Color.BLACK, Text.num11Fnd);
@@ -522,10 +522,10 @@ public class Fightsess extends Widget {
 
             public Object tooltip(Coord c, Widget prev) {
                 int cx = sz.x / 2;
-                int cy = sz.y / 2 - 50;
+                int cy = sz.y / 2 - UI.scale(50);
                 for (Buff buff : fv.buffs.children(Buff.class)) {
 //            Coord dc = Config.altfightui ? new Coord(cx - buff.c.x - Buff.cframe.sz().x - 80, 180) : pcc.add(-buff.c.x - Buff.cframe.sz().x - 20, buff.c.y + pho - Buff.cframe.sz().y);
-                    Coord dc = new Coord(cx - buff.c.x - Buff.cframe.sz().x - 80, cy);
+                    Coord dc = new Coord(cx - buff.c.x - Buff.cframe.sz().x - UI.scale(80), cy);
                     if (c.isect(dc, buff.sz)) {
                         Object ret = buff.tooltip(c.sub(dc), prevtt);
                         if (ret != null) {
@@ -620,12 +620,12 @@ public class Fightsess extends Widget {
 //        cooldownAnchor = center.sub(0, (int) (center.y / 1.5f));
 //        actionAnchor = acenter;
         cooldownAnchor = ccenter;
-        enemyBuffAnchor = cooldownAnchor.add(50, 0);
-        enemyIPAnchor = cooldownAnchor.add(75, 15);
-        enemyLastMoveAnchor = cooldownAnchor.add(50, 25);
-        buffAnchor = cooldownAnchor.sub(50, 0);
-        IPAnchor = cooldownAnchor.add(-75, 15);
-        lastMoveAnchor = cooldownAnchor.add(-50, 25);
+        enemyBuffAnchor = cooldownAnchor.add(UI.scale(50, 0));
+        enemyIPAnchor = cooldownAnchor.add(UI.scale(75, 15));
+        enemyLastMoveAnchor = cooldownAnchor.add(UI.scale(50, 25));
+        buffAnchor = cooldownAnchor.sub(UI.scale(50, 0));
+        IPAnchor = cooldownAnchor.add(UI.scale(-75, 15));
+        lastMoveAnchor = cooldownAnchor.add(UI.scale(-50, 25));
     }
 
     private void updatepos() {
@@ -634,7 +634,7 @@ public class Fightsess extends Widget {
         if (((map = getparent(GameUI.class).map) == null) || ((pl = map.player()) == null) || (pl.sc == null))
             return;
         pcc = pl.sc;
-        pho = (int) (pl.sczu.mul(20f).y) - 20;
+        pho = (int) (pl.sczu.mul(20f).y) - UI.scale(20);
     }
 
     private static final Resource tgtfx = Resource.remote().loadwait("gfx/hud/combat/trgtarw");
@@ -666,8 +666,8 @@ public class Fightsess extends Widget {
     }
 
 
-    private static final Text.Furnace ipf = new PUtils.BlurFurn(new Text.Foundry(Text.serif, 18, new Color(128, 128, 255)).aa(true), 1, 1, new Color(48, 48, 96));
-    private static final Text.Furnace ipf2 = new PUtils.BlurFurn(new Text.Foundry(Text.serif, 18, new Color(255, 0, 0)).aa(true), 1, 1, new Color(48, 48, 96));
+    private static final Text.Furnace ipf = new PUtils.BlurFurn(new Text.Foundry(Text.serif, UI.scale(18), new Color(128, 128, 255)).aa(true), 1, 1, new Color(48, 48, 96));
+    private static final Text.Furnace ipf2 = new PUtils.BlurFurn(new Text.Foundry(Text.serif, UI.scale(18), new Color(255, 0, 0)).aa(true), 1, 1, new Color(48, 48, 96));
     //private static final Text.Furnace ipf3 = new PUtils.BlurFurn(new Text.Foundry(Text.serif, 18, new Color(128, 128, 255)).aa(true), 1, 1, new Color(48, 48, 96));
     private final Text.UText<?> ip = new Text.UText<Integer>(ipf) {
         public String text(Integer v) {
@@ -783,11 +783,11 @@ public class Fightsess extends Widget {
     private void drawOpeningofftarget(GOut g, Buff buff, Coord bc, int size) {
         try {
             Coord smalSz = new Coord(size, size);
-            Coord metSz = new Coord(size, 3);
+            Coord metSz = new Coord(size, UI.scale(3));
             Resource res = buff.res.get();
             Color clr = openings.get(res.name);
             if (clr == null) {
-                buff.draw(g.reclip(bc, smalSz.add(0, 10)), size);
+                buff.draw(g.reclip(bc, smalSz.add(0, UI.scale(10))), size);
                 return;
             }
 
@@ -798,8 +798,8 @@ public class Fightsess extends Widget {
                 g.frect(bc.add(Buff.ameteroff), new Coord(buff.ameter * metSz.x / 100, metSz.y));
             }
 
-            bc.x += 3;
-            bc.y += 3;
+            bc.x += UI.scale(3);
+            bc.y += UI.scale(3);
             g.chcolor(clr);
             g.frect(bc, smalSz);
             g.chcolor(Color.WHITE);

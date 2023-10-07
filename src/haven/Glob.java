@@ -96,14 +96,16 @@ public class Glob {
     public String servertime;
     public Tex servertimetex;
     public int moonid = 0;
+    public String tservertime;
+    public String dservertime;
+    public String yservertime;
     public String mservertime;
-    public String lservertime;
-    public String rservertime;
     public String bservertime;
     public final List<String> weatherinfo = Collections.synchronizedList(new ArrayList<>());
+    public final AtomicReference<Text> tservertimetex = new AtomicReference<>(null);
+    public final AtomicReference<Text> dservertimetex = new AtomicReference<>(null);
+    public final AtomicReference<Text> yservertimetex = new AtomicReference<>(null);
     public final AtomicReference<Text> mservertimetex = new AtomicReference<>(null);
-    public final AtomicReference<Text> lservertimetex = new AtomicReference<>(null);
-    public final AtomicReference<Text> rservertimetex = new AtomicReference<>(null);
     public final AtomicReference<Text> bservertimetex = new AtomicReference<>(null);
     public final AtomicReference<Text> weathertimetex = new AtomicReference<>(null);
     public final Map<Long, DamageText.Numbers> gobmap = new ConcurrentHashMap<>();
@@ -119,7 +121,14 @@ public class Glob {
         gobhitmap = new GobHitmap();
         map = new MCache(sess);
         party = new Party(this);
-        reference.put(sess.username, this);
+    }
+
+    public void addReference(String username) {
+        reference.put(username, this);
+    }
+
+    public void removeReference(String username) {
+        reference.remove(username, this);
     }
 
     @Resource.PublishedCode(name = "wtr")
@@ -355,6 +364,8 @@ public class Glob {
         long seconds = secintoday % 60;
 
         String dayOfMonth = "";
+        String season = "";
+        String month = "";
         String year = "";
         String phaseOfMoon = " ";
         String dayTime = "";
@@ -362,23 +373,28 @@ public class Glob {
         if (ast != null) {
 //            int nextseason = (int) Math.ceil((1 - ast.sp) * (ast.is == 1 ? 35 : ast.is == 3 ? 5 : 10));
 
-            int sdt = (ast.is == 1 ? 105 : ast.is == 3 ? 15 : 30); //days of season total
-            int sdp = (int) (ast.sp * (sdt)); //days of season passed
+//            int sdt = (ast.is == 1 ? 105 : ast.is == 3 ? 15 : 30); //days of season total
+//            int sdp = (int) (ast.sp * (sdt)); //days of season passed
+            int sdt = (int) (Math.round(ast.md / (ast.ym % 1))); //days of season total
+            int sdp = (int) (Math.floor(ast.md) + 1); //days of season passed
 //            int sdl = (int) Math.floor((1 - ast.sp) * (sdt));
 //            if (sdl >= 1)
 //                dayOfMonth = Resource.getLocString(Resource.BUNDLE_LABEL, seasonNames[ast.is]) + String.format(" %d (%d ", (sdp + 1), sdl) + Resource.getLocString(Resource.BUNDLE_LABEL, "left") + String.format(" (%d RL))", nextseason);
-                dayOfMonth = Resource.getLocString(Resource.BUNDLE_LABEL, seasonNames[ast.is]) + String.format(" %d/%d", (sdp + 1), sdt);
+            season = Resource.getLocString(Resource.BUNDLE_LABEL, seasonNames[ast.is]);
+                dayOfMonth = String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Day") + " %d/%d", sdp, sdt);
 //            else
 //                dayOfMonth = Resource.getLocString(Resource.BUNDLE_LABEL, String.format("Last day of %s", seasonNames[ast.is]));
             int mp = (int) Math.round(ast.mp * mPhaseNames.length) % mPhaseNames.length;
-            phaseOfMoon = mPhaseNames[mp] + " Moon";
-            year = "Year " + ((int) Math.floor(ast.years) + 1);
-            dayTime = ast.night ? (ast.dt >= 0.2 && ast.dt < 0.5 ? "Dawn" : "Night") : "Day";
+            phaseOfMoon = String.format("$col[%s,%s,%s]{%s}", ast.mc.getRed(), ast.mc.getGreen(), ast.mc.getBlue(), Resource.getLocString(Resource.BUNDLE_LABEL, mPhaseNames[mp] + " Moon"));
+            month = Resource.getLocString(Resource.BUNDLE_LABEL, "Month") + " " + (int) (Math.floor(ast.ym) + 1);
+            year = Resource.getLocString(Resource.BUNDLE_LABEL, "Year") + " " + ((int) Math.floor(ast.years) + 1);
+            dayTime = Resource.getLocString(Resource.BUNDLE_LABEL, ast.dt >= 0.2 && ast.dt < 0.3 ? "Dawn" : (ast.night ? "Night" : "Day"));
         }
 
-        mservertime = Resource.getLocString(Resource.BUNDLE_LABEL, "Day") + String.format(" %d, %02d:%02d:%02d", day, hours, mins, seconds) + (dayTime.isEmpty() ? "" : ", " + dayTime);
-        lservertime = String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "%s") + ". %s", dayOfMonth, year);
-        rservertime = Resource.getLocString(Resource.BUNDLE_LABEL, phaseOfMoon);
+        tservertime = String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Time") + " %02d:%02d:%02d", hours, mins, seconds) + (dayTime.isEmpty() ? "" : ", " + dayTime);
+        dservertime = String.format("%s (%s)", dayOfMonth, day);
+        yservertime = String.format("%s. %s. %s", month, season, year);
+        mservertime = phaseOfMoon;
         if (secintoday >= dewyladysmantletimemin && secintoday <= dewyladysmantletimemax)
             bservertime = Resource.getLocString(Resource.BUNDLE_LABEL, "(Dewy Lady's Mantle)");
         /*
@@ -402,9 +418,10 @@ public class Glob {
         }else
             servertime += Resource.getLocString(Resource.BUNDLE_LABEL, " (Daytime)");
         */
+        infoUpdate(tservertimetex, tservertime);
+        infoUpdate(dservertimetex, dservertime);
+        infoUpdate(yservertimetex, yservertime);
         infoUpdate(mservertimetex, mservertime);
-        infoUpdate(lservertimetex, lservertime);
-        infoUpdate(rservertimetex, rservertime);
         infoUpdate(bservertimetex, bservertime);
 
         if (configuration.showweatherinfo) {
@@ -414,12 +431,12 @@ public class Glob {
             }
 
             String text = String.join("", tempw.toArray(new String[0]));
-            infoUpdate(weathertimetex, text, () -> Text.create(text, ItemInfo.catimgs(0, true, tempw.stream().map(in -> Text.renderstroked(in).img).toArray(BufferedImage[]::new))));
+            infoUpdate(weathertimetex, text, () -> Text.create(text, ItemInfo.catimgs(0, true, tempw.stream().map(in -> PUtils.strokeImg(Text.render(in))).toArray(BufferedImage[]::new))));
         }
     }
 
     private void infoUpdate(AtomicReference<Text> t, String text) {
-        infoUpdate(t, text, () -> Text.renderstroked(text));
+        infoUpdate(t, text, () -> Text.create(text, PUtils.strokeImg(RichText.render(text, -1))));
     }
 
     private void infoUpdate(AtomicReference<Text> t, String text, Supplier<Text> getter) {
@@ -436,19 +453,22 @@ public class Glob {
             if (t == "tm") {
                 updgtime(((Number) a[n++]).doubleValue(), inc);
             } else if (t == "astro") {
-                double dt = ((Number) a[n++]).doubleValue();
-                double mp = ((Number) a[n++]).doubleValue();
-                double yt = ((Number) a[n++]).doubleValue();
-                boolean night = (Integer) a[n++] != 0;
-                Color mc = (Color) a[n++];
-                int is = (n < a.length) ? ((Number) a[n++]).intValue() : 1;
-                double sp = (n < a.length) ? ((Number) a[n++]).doubleValue() : 0.5;
-                double sd = (n < a.length) ? ((Number) a[n++]).doubleValue() : 0.5;
-                double years = (n < a.length) ? ((Number) a[n++]).doubleValue() : 0.5;
-                double ym = (n < a.length) ? ((Number) a[n++]).doubleValue() : 0.5;
-                double md = (n < a.length) ? ((Number) a[n++]).doubleValue() : 0.5;
+                double dt = ((Number) a[n++]).doubleValue();//current day time [0, 1]
+                double mp = ((Number) a[n++]).doubleValue();//current moon phase [0, 1]
+                double yt = ((Number) a[n++]).doubleValue();//current year time [0, 1]
+                boolean night = (Integer) a[n++] != 0;//night sprite
+                Color mc = (Color) a[n++];//moon color
+                int is = (n < a.length) ? ((Number) a[n++]).intValue() : 1;//season {0, 1, 2, 3}
+                double sp = (n < a.length) ? ((Number) a[n++]).doubleValue() : 0.5;//season period [0, 1]
+                double sd = (n < a.length) ? ((Number) a[n++]).doubleValue() : 0.5;//season days [1, 0]???
+                double years = (n < a.length) ? ((Number) a[n++]).doubleValue() : 0.5;//current year [0, ->]
+                double ym = (n < a.length) ? ((Number) a[n++]).doubleValue() : 0.5;//current month in year [0, max month]
+                double md = (n < a.length) ? ((Number) a[n++]).doubleValue() : 0.5;//current day in month [0, max days]
                 ast = new Astronomy(dt, mp, yt, night, mc, is, sp, sd, years, ym, md);
-                dev.simpleLog(String.format("Glob Astronomy: day:%s month:%s year:%s night:%s mc:%s season:%s sp:%s sd:%s years:%s ym:%s md:%s", dt, mp, yt, night, mc, is, sp, sd, years, ym, md));
+                dev.simpleLog(String.format("Glob Astronomy: day:%s moon:%s year:%s night:%s mc:%s season:%s sp:%s sd:%s years:%s ym:%s md:%s", dt, mp, yt, night, mc, is, sp, sd, years, ym, md));
+                //Glob Astronomy: day:0.21407407522201538 moon:0.9404691457748413 year:0.8234115242958069 night:true mc:java.awt.Color[r=175,g=225,b=250] season:2 sp:0.4404691457748413 sd:0.9654287695884705 years:7.823411464691162 ym:4.940469264984131 md:28.214073181152344
+                //Glob Astronomy: day:0.700960636138916 moon:0.023365354165434837 year:0.8372275829315186 night:false mc:java.awt.Color[r=175,g=225,b=250] season:2 sp:0.5233653783798218 sd:0.9946214556694031 years:7.8372273445129395 ym:5.023365497589111 md:0.700960636138916
+                //Glob Astronomy: day:0.38636574149131775 moon:0.14621219038963318 year:0.8577020168304443 night:false mc:java.awt.Color[r=175,g=225,b=250] season:2 sp:0.6462122201919556 sd:0.8034355640411377 years:7.857702255249023 ym:5.146212100982666 md:4.38636589050293
             } else if (t == "light") {
                 synchronized (this) {
                     tlightamb = (Color) a[n++];

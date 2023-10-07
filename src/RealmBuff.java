@@ -67,7 +67,7 @@ public class RealmBuff extends Buff implements ResOwner {
 
                 Pagina var5 = this.res.get().layer(Resource.pagina);
                 if (var5 != null) {
-                    var4 = ItemInfo.catimgs(0, new BufferedImage[]{var4, RichText.render("\n" + Resource.getLocString(Resource.BUNDLE_LABEL, var5.text), 200, new Object[0]).img});
+                    var4 = ItemInfo.catimgs(0, new BufferedImage[]{var4, RichText.render("\n" + Resource.getLocString(Resource.BUNDLE_LABEL, var5.text), UI.scale(200), new Object[0]).img});
                 }
 
                 this.rtip = new TexI(var4);

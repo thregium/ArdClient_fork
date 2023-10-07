@@ -96,11 +96,6 @@ public class Charlist extends Widget {
             add(new Img(tf.render(chr.name).tex()), avaf.pos("ur").adds(5, 0));
             adda(new Button(UI.scale(100), "Play"), pos("cbr").subs(10, 2), 1.0, 1.0).action(() -> {
                 Charlist.this.wdgmsg("play", chr.name);
-                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
-                    if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
-                        MappingClient.getInstance(ui.sess.username).SetPlayerName(chr.name);
-                    }
-                }
             });
         }
 
@@ -163,13 +158,6 @@ public class Charlist extends Widget {
 
     @Override
     protected void added() {
-        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
-            if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
-                MappingClient.getInstance(ui.sess.username).SetEndpoint(Utils.getpref("vendan-mapv4-endpoint", ""));
-                MappingClient.getInstance(ui.sess.username).EnableGridUploads(configuration.loadMapSetting(ui.sess.username, "mapper"));
-//                MappingClient.getInstance(ui.sess.username).EnableTracking(configuration.loadMapSetting(ui.sess.username, "track"));
-            }
-        }
         parent.setfocus(this);
         ui.charlist = this;
         Button btn = new Button(90, "Log out") {

@@ -27,7 +27,7 @@ public class CheckListbox extends Listbox<CheckListboxItem> {
     };
 
     public CheckListbox(int w, int h) {
-        super(w, h, 18);
+        super(w, h, UI.scale(18));
     }
 
     public CheckListbox(int w, int h, int itemh) {

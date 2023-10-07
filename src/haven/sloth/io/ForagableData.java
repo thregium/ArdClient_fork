@@ -7,6 +7,7 @@ import haven.Resource;
 import haven.RichText;
 import haven.Tex;
 import haven.Text;
+import haven.UI;
 import haven.sloth.gob.Type;
 
 import java.sql.ResultSet;
@@ -74,7 +75,7 @@ public class ForagableData {
                          final int spring, final int summer,
                          final int autumn, final int winter) {
         this.name = Text.render(name);
-        this.location = RichText.render("Found in:\n  \u2022 " + location.replaceAll(",\\s+", "\n  \u2022 "), 200);
+        this.location = RichText.render("Found in:\n  \u2022 " + location.replaceAll(",\\s+", "\n  \u2022 "), UI.scale(200));
         if (res != null && !res.equals("")) {
             this.res = Resource.remote().load(res);
         } else {

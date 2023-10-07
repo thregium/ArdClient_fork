@@ -30,6 +30,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import haven.sloth.util.ObservableMap;
+import modification.SQLitePreference;
+import modification.configuration;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.RenderingHints;
@@ -92,9 +97,6 @@ import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.prefs.Preferences;
-import modification.configuration;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class Utils {
     public static final java.nio.charset.Charset utf8 = java.nio.charset.Charset.forName("UTF-8");
@@ -248,6 +250,27 @@ public class Utils {
         });
         Console.setscmd("threads", (cons, args) -> Utils.dumptg(null, cons.out));
         Console.setscmd("gc", (cons, args) -> System.gc());
+        Console.setscmd("sqliteexport", (cons, args) -> {
+            Preferences pref = Preferences.userNodeForPackage(Utils.class);
+            Preferences current = prefs;
+            if (pref != current && current instanceof SQLitePreference) {
+                SQLitePreference sqcurrent = (SQLitePreference) current;
+                for (String key : pref.keys()) {
+                    String old = pref.get(key, null);
+                    if (old != null) {
+                        sqcurrent.putWait(key, old);
+                        System.out.printf("[PREFERENCE] %s added%n", key);
+                    } else {
+                        System.out.printf("[PREFERENCE] %s null%n", key);
+                    }
+                }
+                System.out.printf("[PREFERENCE] converted%n");
+                MainFrame.instance.mt.getThreadGroup().interrupt();
+                MainFrame.instance.mt.interrupt();
+            } else {
+                System.out.printf("[PREFERENCE] pref same%n");
+            }
+        });
     }
 
     public static Coord imgsz(BufferedImage img) {
@@ -443,9 +466,15 @@ public class Utils {
 
     public static synchronized Preferences prefs() {
         if (prefs == null) {
-            Preferences node = Preferences.userNodeForPackage(Utils.class);
-            if (Config.prefspec != null)
-                node = node.node(Config.prefspec);
+            Preferences node;
+            if (!DefSettings.sqlitecache.get()) {
+                node = Preferences.userNodeForPackage(Utils.class);
+            } else {
+                node = SQLitePreference.get("preferences");
+            }
+
+//            if (Config.prefspec != null)
+//                node = node.node(Config.prefspec);
             prefs = node;
         }
         return (prefs);

@@ -64,7 +64,7 @@ public class Text {
     public static final Foundry delfnd2;
     public static final Foundry slotFnd;
     public static final Foundry attrf;
-    public final static FontSettings cfg;
+    public static final FontSettings cfg;
     public final BufferedImage img;
     public final String text;
     private Tex tex;
@@ -99,8 +99,8 @@ public class Text {
             this.richText = scale(richText);
         }
 
-        static private int scale(int value) {
-            return value + Config.fontadd;
+        private static int scale(int value) {
+            return UI.scale(value + Config.fontadd);
         }
     }
 
@@ -137,27 +137,27 @@ public class Text {
             cfg.font.put("dialog", "Dialog");
         }
 
-        dfont = sans = new Font(Text.cfg.font.get("sans"), Font.PLAIN, 12);
-        serif = new Font(Text.cfg.font.get("serif"), Font.PLAIN, 12);
-        mono = new Font("Monospace", Font.PLAIN, 12);
-        fraktur = Resource.remote().loadwait("ui/fraktur").layer(Resource.Font.class).font;
-        num20Fnd = new Foundry(serif, 20);
+        dfont = sans = new Font(Text.cfg.font.get("sans"), Font.PLAIN, UI.scale(12));
+        serif = new Font(Text.cfg.font.get("serif"), Font.PLAIN, UI.scale(12));
+        mono = new Font("Monospace", Font.PLAIN, UI.scale(12));
+        fraktur = Resource.local().loadwait("ui/fraktur").layer(Resource.Font.class).font;
+        num20Fnd = new Foundry(serif, UI.scale(20));
 
-        latin = new Font("Dialog", Font.PLAIN, 10);
-        num8Fnd = new Text.Foundry(latin, 8);
+        latin = new Font("Dialog", Font.PLAIN, UI.scale(10));
+        num8Fnd = new Text.Foundry(latin, UI.scale(8));
         num10Fnd = new Foundry(latin);
-        num11Fnd = new Text.Foundry(latin, 11);
-        num12Fnd = new Text.Foundry(latin, 12);
-        num12boldFnd = new Text.Foundry(latin.deriveFont(Font.BOLD), 12).aa(true);
-        num13boldFnd = new Text.Foundry(latin.deriveFont(Font.BOLD), 12).aa(true);
-        num14boldFnd = new Text.Foundry(latin.deriveFont(Font.BOLD), 14).aa(true);
-        num20boldFnd = new Text.Foundry(latin.deriveFont(Font.BOLD), 20).aa(true);
+        num11Fnd = new Text.Foundry(latin, UI.scale(11));
+        num12Fnd = new Text.Foundry(latin, UI.scale(12));
+        num12boldFnd = new Text.Foundry(latin.deriveFont(Font.BOLD), UI.scale(12)).aa(true);
+        num13boldFnd = new Text.Foundry(latin.deriveFont(Font.BOLD), UI.scale(12)).aa(true);
+        num14boldFnd = new Text.Foundry(latin.deriveFont(Font.BOLD), UI.scale(14)).aa(true);
+        num20boldFnd = new Text.Foundry(latin.deriveFont(Font.BOLD), UI.scale(20)).aa(true);
 
-        delfnd = new Text.Foundry(latin.deriveFont(Font.BOLD), 16);
-        delfnd2 = new Text.Foundry(serif.deriveFont(Font.BOLD), 18);
+        delfnd = new Text.Foundry(latin.deriveFont(Font.BOLD), UI.scale(16));
+        delfnd2 = new Text.Foundry(serif.deriveFont(Font.BOLD), UI.scale(18));
         std = new Foundry(sans, Text.cfg.def);
-        std12 = new Foundry(new Font("Sans", Font.PLAIN, 12), 12);
-        std16 = new Foundry(sans, 16);
+        std12 = new Foundry(new Font("Sans", Font.PLAIN, UI.scale(12)), UI.scale(12));
+        std16 = new Foundry(sans, UI.scale(16));
         labelFnd = new Foundry(sans, Text.cfg.label);
 
         switch (Resource.language) {
@@ -224,7 +224,7 @@ public class Text {
         return (ret);
     }
 
-    public static abstract class Furnace {
+    public abstract static class Furnace {
         public abstract Text render(String text);
 
         public Text renderf(String fmt, Object... args) {

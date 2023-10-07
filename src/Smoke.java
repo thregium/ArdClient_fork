@@ -5,6 +5,7 @@ import haven.MessageBuf;
 import haven.ResData;
 import haven.Resource;
 import haven.RichText;
+import haven.UI;
 import haven.res.lib.tspec.Spec;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -83,7 +84,7 @@ public class Smoke extends ItemInfo.Tip {
                 buf.append(" ").append(Resource.getLocString(Resource.BUNDLE_LABEL, "and")).append(" ");
                 buf.append(all.get(all.size() - 1).descr());
             }
-            return (RichText.render(buf.toString(), 250).img);
+            return (RichText.render(buf.toString(), UI.scale(250)).img);
         }
     }
 

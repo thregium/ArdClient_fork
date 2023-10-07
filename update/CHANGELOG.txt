@@ -1,1 +1,1 @@
-Info on https://github.com/Cediner/ArdClient/commits/
+Details on https://github.com/Cediner/ArdClient/commit/%s

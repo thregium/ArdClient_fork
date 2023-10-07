@@ -10,8 +10,8 @@ import java.util.Map;
 
 public class InventoryBelt extends Widget implements DTarget {
     private static final Tex invsq = Resource.loadtex("gfx/hud/invsq-opaque");
-    private static final Coord sqsz = new Coord(36, 33);
-    private static final Coord sqsz2 = new Coord(33, 33);
+    private static final Coord sqsz = UI.scale(36, 33);
+    private static final Coord sqsz2 = UI.scale(33, 33);
     public boolean dropul = true;
     public Coord isz;
     Map<GItem, WItem> wmap = new HashMap<GItem, WItem>();
@@ -31,7 +31,7 @@ public class InventoryBelt extends Widget implements DTarget {
     }
 
     public InventoryBelt(Coord sz) {
-        super(invsq.sz().add(new Coord(-1 + 3, -1)).mul(sz.x * sz.y, 1).add(new Coord(1, 1)));
+        super(invsq.sz().add(UI.scale(-1 + 3, -1)).mul(sz.x * sz.y, 1).add(UI.scale(1, 1)));
         isz = sz;
     }
 
@@ -49,7 +49,7 @@ public class InventoryBelt extends Widget implements DTarget {
             c.x = isz.x * c.y + c.x;
             c.y = 0;
             GItem i = (GItem) child;
-            wmap.put(i, add(new WItem(i), c.mul(sqsz).add(1, 1)));
+            wmap.put(i, add(new WItem(i), c.mul(sqsz).add(UI.scale(1, 1))));
         }
     }
 
@@ -83,7 +83,7 @@ public class InventoryBelt extends Widget implements DTarget {
     public void uimsg(String msg, Object... args) {
         if (msg == "sz") {
             isz = (Coord) args[0];
-            resize(invsq.sz().add(new Coord(-1, -1)).mul(isz).add(new Coord(1, 1)));
+            resize(invsq.sz().add(UI.scale(-1, -1)).mul(isz).add(UI.scale(1, 1)));
         } else if (msg == "mode") {
             dropul = (((Integer) args[0]) == 0);
         } else {
@@ -137,7 +137,7 @@ public class InventoryBelt extends Widget implements DTarget {
         }
         for (int i = 0; i < (isz.y * isz.x); i++) {
             if (invTable[i][0] == 0)
-                return new Coord(i * 36, 0);
+                return new Coord(i * UI.scale(36), 0);
         }
         return null;
     }
@@ -157,7 +157,7 @@ public class InventoryBelt extends Widget implements DTarget {
 
         for (int i = 0; i < (isz.y * isz.x); i++) {
             if (invTable[i][0] == 0)
-                cordlist.add(new Coord(i * 36, 0));
+                cordlist.add(new Coord(i * UI.scale(36), 0));
         }
         return cordlist;
     }

@@ -14,7 +14,7 @@ public class IndirColorPreview extends Widget {
         col = cl;
         tooltip = RichText.Parser.quote(String.format("Red: %d\nGreen: %d\nBlue: %d\nAlpha: %d",
                 col.get().getRed(), col.get().getGreen(), col.get().getBlue(), col.get().getAlpha()));
-        tooltip = RichText.render((String) tooltip, 200);
+        tooltip = RichText.render((String) tooltip, UI.scale(200));
     }
 
     public IndirColorPreview(Coord sz, IndirSetting<Color> cl) {
@@ -38,7 +38,7 @@ public class IndirColorPreview extends Widget {
                 col.set(color);
                 tooltip = RichText.Parser.quote(String.format("Red: %d\nGreen: %d\nBlue: %d\nAlpha: %d",
                         col.get().getRed(), col.get().getGreen(), col.get().getBlue(), col.get().getAlpha()));
-                tooltip = RichText.render((String) tooltip, 200);
+                tooltip = RichText.render((String) tooltip, UI.scale(200));
                 if (callback != null)
                     callback.accept(col.get());
             }));

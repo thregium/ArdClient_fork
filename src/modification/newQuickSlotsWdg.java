@@ -4,10 +4,8 @@ import haven.Config;
 import haven.Coord;
 import haven.DTarget;
 import haven.Equipory;
-import haven.GItem;
 import haven.GOut;
-import haven.GSprite;
-import haven.Resource;
+import haven.UI;
 import haven.WItem;
 import haven.Widget;
 import haven.sloth.gui.MovableWidget;
@@ -16,8 +14,8 @@ import static haven.Inventory.invsq;
 
 public class newQuickSlotsWdg extends MovableWidget implements DTarget {
     public static final int slots = 4;
-    private static final Coord ssz = new Coord(33, 33);
-    private static final Coord spz = new Coord(4, 33);
+    private static final Coord ssz = UI.scale(33, 33);
+    private static final Coord spz = UI.scale(4, 33);
 
     public static class Item {
         public Coord coord;

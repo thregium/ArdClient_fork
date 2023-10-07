@@ -43,6 +43,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -137,7 +138,7 @@ public class FightWnd extends Widget {
             .add(FightWnd.class, wdg -> wdg)
             .add(Glob.class, wdg -> wdg.ui.sess.glob)
             .add(Session.class, wdg -> wdg.ui.sess);
-    public static final Text.Foundry namef = new Text.Foundry(Text.serif.deriveFont(java.awt.Font.BOLD, 16f)).aa(true);
+    public static final Text.Foundry namef = new Text.Foundry(Text.serif.deriveFont(java.awt.Font.BOLD, UI.scale(16f))).aa(true);
 
     public class Action implements ItemInfo.ResOwner {
         public final Indir<Resource> res;
@@ -228,7 +229,7 @@ public class FightWnd extends Widget {
             return (icon);
         }
 
-        private Pattern ezFix = Pattern.compile("(.*\\$img\\[)([A-Za-z\\/^\\,^\\=]+)(.*)");
+        private Pattern ezFix = Pattern.compile("(.*\\$img\\[)([A-Za-z\\/]+)(].*)");
 
         public BufferedImage renderinfo(int width) {
             ItemInfo.Layout l = new ItemInfo.Layout();
@@ -276,7 +277,7 @@ public class FightWnd extends Widget {
         }
 
         public Coord marg() {
-            return (new Coord(10, 10));
+            return (UI.scale(10, 10));
         }
 
         public void tick(double dt) {
@@ -487,7 +488,7 @@ public class FightWnd extends Widget {
         private boolean onadd(Coord c, int idx) {
             Coord ic = c.sub(0, (idx - sb.val) * itemh);
             int by = (itemh - add[0].sz().y) / 2;
-            return (ic.isect(new Coord(sz.x - 10 - add[0].sz().x, by), add[0].sz()));
+            return (ic.isect(new Coord(sz.x - UI.scale(10) - add[0].sz().x, by), add[0].sz()));
         }
 
         private boolean onsub(Coord c, int idx) {
@@ -615,9 +616,9 @@ public class FightWnd extends Widget {
     public class BView extends Widget implements DropTarget {
         private int subp = -1;
         private int addp = -1;
-        private final int subOffX = 3;
-        private final int addOffX = 16;
-        private final int subOffY = invsq.sz().y + 10 + 10;
+        private final int subOffX = UI.scale(3);
+        private final int addOffX = UI.scale(16);
+        private final int subOffY = invsq.sz().y + UI.scale(10 + 10);
         private UI.Grab d = null;
         private Action drag = null;
         private Coord dp;
@@ -626,11 +627,11 @@ public class FightWnd extends Widget {
         private boolean anim = false;
 
         private BView() {
-            super(new Coord(((invsq.sz().x + UI.scale(2)) * (order.length - 1)) + (UI.scale(10) * ((order.length - 1) / 5)) + 60, 0).add(invsq.sz().x, invsq.sz().y + 35));
+            super(new Coord(((invsq.sz().x + UI.scale(2)) * (order.length - 1)) + (UI.scale(10) * ((order.length - 1) / 5)) + UI.scale(60), 0).add(invsq.sz().x, invsq.sz().y + UI.scale(35)));
         }
 
         private Coord itemc(int i) {
-            return (new Coord(((invsq.sz().x + 2) * i) + (10 * (i / 5)), 0));
+            return (new Coord(((invsq.sz().x + 2) * i) + (UI.scale(10) * (i / 5)), 0));
         }
 
         private int citem(Coord c) {
@@ -681,7 +682,7 @@ public class FightWnd extends Widget {
         }
 
         public void draw(GOut g) {
-            int pcy = invsq.sz().y + 4;
+            int pcy = invsq.sz().y + UI.scale(4);
 
             int[] reo;
             if (anim) {
@@ -734,7 +735,7 @@ public class FightWnd extends Widget {
                 g.chcolor();
             }
 
-            g.image(count, new Coord(370, pcy));
+            g.image(count, new Coord(UI.scale(370), pcy));
 
             if ((drag != null) && (dp == null)) {
                 try {
@@ -935,7 +936,7 @@ public class FightWnd extends Widget {
             boolean ret = super.mousedown(c, button);
             if (ret && (button == 1)) {
                 double now = Utils.rtime();
-                if (((now - lt) < 0.5) && (c.dist(lc) < 10) && (sel != null) && (saves[sel] != unused)) {
+                if (((now - lt) < 0.5) && (c.dist(lc) < UI.scale(10)) && (sel != null) && (saves[sel] != unused)) {
                     if (sel == usesave) {
                         edit = sel;
                         nmed = ReadLine.make(this, saves[sel].text);
@@ -1070,10 +1071,10 @@ public class FightWnd extends Widget {
             saves[i] = unused;
 
         Dropbox<Pair<String, Integer>> filterDropdown = getFilterDropdown();
-        add(filterDropdown, new Coord(270 + 230 - filterDropdown.sz.x, 15));
+        add(filterDropdown, new Coord(UI.scale(270 + 230) - filterDropdown.sz.x, UI.scale(15)));
         Frame.around(this, Collections.singletonList(filterDropdown));
 
-        schoolsDropdown = new Dropbox<Pair<Text, Integer>>(250, saves.length, saves[0].sz().y) {
+        schoolsDropdown = new Dropbox<Pair<Text, Integer>>(UI.scale(250), saves.length, saves[0].sz().y) {
             @Override
             protected Pair<Text, Integer> listitem(int i) {
                 return new Pair<>(saves[i], i);
@@ -1103,18 +1104,18 @@ public class FightWnd extends Widget {
         };
 
 
-        info = add(new ImageInfoBox(new Coord(223, 152)), new Coord(5, 35).add(wbox.btloff()));
+        info = add(new ImageInfoBox(UI.scale(223, 152)), UI.scale(5, 35).add(wbox.btloff()));
         Frame.around(this, Collections.singletonList(info));
 
         add(CharWnd.settip(new Img(CharWnd.catf.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Martial Arts & Combat Schools")).tex()), "gfx/hud/chr/tips/combat"), 0, 0);
-        actlist = add(new Actions(235, actionsListHeight()), new Coord(265, 35).add(wbox.btloff()));
+        actlist = add(new Actions(UI.scale(235), actionsListHeight()), UI.scale(265, 35).add(wbox.btloff()));
         Frame.around(this, Collections.singletonList(actlist));
-        Widget p = add(new BView(), 77, 200);
+        Widget p = add(new BView(), UI.scale(77, 200));
 
-        add(schoolsDropdown, new Coord(10, 280));
+        add(schoolsDropdown, UI.scale(10, 280));
         Frame.around(this, Collections.singletonList(schoolsDropdown));
 
-        add(new Button(110, "Save", false) {
+        add(new Button(UI.scale(110), "Save", false) {
             public void click() {
                 Pair<Text, Integer> sel = schoolsDropdown.sel;
                 if (sel != null) {
@@ -1122,19 +1123,19 @@ public class FightWnd extends Widget {
                     use(sel.b);
                 }
             }
-        }, 280, 277);
-        add(new Button(110, "Rename", false) {
+        }, UI.scale(280, 277));
+        add(new Button(UI.scale(110), "Rename", false) {
             public void click() {
                 Pair<Text, Integer> sel = schoolsDropdown.sel;
                 if (sel == null || sel.a.text.equals(Resource.getLocString(Resource.BUNDLE_LABEL, "unused save")))
                     return;
 
-                Window renwnd = new Window(new Coord(225, 100), "Rename School") {
+                Window renwnd = new Window(UI.scale(225, 100), "Rename School") {
                     {
-                        final TextEntry txtname = new TextEntry(200, sel.a.text);
-                        add(txtname, new Coord(15, 20));
+                        final TextEntry txtname = new TextEntry(UI.scale(200), sel.a.text);
+                        add(txtname, UI.scale(15, 20));
 
-                        Button add = new Button(60, "Save") {
+                        Button add = new Button(UI.scale(60), "Save") {
                             @Override
                             public void click() {
                                 saves[sel.b] = attrf.render(txtname.text());
@@ -1143,15 +1144,15 @@ public class FightWnd extends Widget {
                                 parent.reqdestroy();
                             }
                         };
-                        add(add, new Coord(15, 60));
+                        add(add, UI.scale(15, 60));
 
-                        Button cancel = new Button(60, "Cancel") {
+                        Button cancel = new Button(UI.scale(60), "Cancel") {
                             @Override
                             public void click() {
                                 parent.reqdestroy();
                             }
                         };
-                        add(cancel, new Coord(155, 60));
+                        add(cancel, UI.scale(155, 60));
                     }
 
                     @Override
@@ -1171,10 +1172,10 @@ public class FightWnd extends Widget {
                         return super.type(key, ev);
                     }
                 };
-                ui.gui.add(renwnd, new Coord(ui.gui.sz.x / 2 - 200, ui.gui.sz.y / 2 - 200));
+                ui.gui.add(renwnd, new Coord(ui.gui.sz.x / 2 - UI.scale(200), ui.gui.sz.y / 2 - UI.scale(200)));
                 renwnd.show();
             }
-        }, 395, 277);
+        }, UI.scale(395, 277));
 
         pack();
     }
@@ -1213,7 +1214,7 @@ public class FightWnd extends Widget {
         return (null);
     }
 
-    private final Text unused = new Text.Foundry(Text.sans.deriveFont(Font.ITALIC, 14)).aa(true).render(Resource.getLocString(Resource.BUNDLE_LABEL, "unused save"));
+    private final Text unused = new Text.Foundry(Text.sans.deriveFont(Font.ITALIC, UI.scale(14))).aa(true).render(Resource.getLocString(Resource.BUNDLE_LABEL, "unused save"));
 
     public void uimsg(String nm, Object... args) {
         if (nm == "avail") {

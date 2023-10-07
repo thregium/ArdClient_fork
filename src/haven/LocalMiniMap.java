@@ -331,7 +331,7 @@ public class LocalMiniMap extends Widget {
                         if (icon != null)
                             tex = gob.isDead() ? icon.texgrey() : icon.tex();
                         else
-                            tex = Config.additonalicons.get(res.name);
+                            tex = Config.additonalicons.get(res.name).get();
                         g.image(tex, p2c(gob.rc).sub(tex.sz().mul(iconZoom).div(2)).add(delta), tex.dim.mul(iconZoom));
                     }
                 }
@@ -474,7 +474,7 @@ public class LocalMiniMap extends Widget {
                         if (icon != null)
                             tex = gob.isDead() == Boolean.TRUE ? icon.texgrey() : icon.tex();
                         else
-                            tex = Config.additonalicons.get(gob.getres().name);
+                            tex = Config.additonalicons.get(gob.getres().name).get();
                         g.image(tex, p2c(gob.rc).sub(tex.sz().mul(iconZoom).div(2)).add(delta), tex.dim.mul(iconZoom));
                     }
                 }
@@ -629,13 +629,14 @@ public class LocalMiniMap extends Widget {
                         return (null);
                     });
                     if (Config.discordplayeralert) {
-                        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                            String username = ui.gui.chrid;
                             if (Config.discorduser) {
-                                PBotDiscord.mapAlert(ui.sess.username, Config.discordalertstring, "Player");
+                                PBotDiscord.mapAlert(username, Config.discordalertstring, "Player");
                             } else if (Config.discordrole) {
-                                PBotDiscord.mapAlertRole(ui.sess.username, Config.discordalertstring, "Player");
+                                PBotDiscord.mapAlertRole(username, Config.discordalertstring, "Player");
                             } else {
-                                PBotDiscord.mapAlertEveryone(ui.sess.username, "Player");
+                                PBotDiscord.mapAlertEveryone(username, "Player");
                             }
                         }
                     }
@@ -647,13 +648,14 @@ public class LocalMiniMap extends Widget {
                         return (null);
                     });
                     if (Config.discordplayeralert) {
-                        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                            String username = ui.gui.chrid;
                             if (Config.discorduser) {
-                                PBotDiscord.mapAlert(ui.sess.username, Config.discordalertstring, "Player");
+                                PBotDiscord.mapAlert(username, Config.discordalertstring, "Player");
                             } else if (Config.discordrole) {
-                                PBotDiscord.mapAlertRole(ui.sess.username, Config.discordalertstring, "Player");
+                                PBotDiscord.mapAlertRole(username, Config.discordalertstring, "Player");
                             } else {
-                                PBotDiscord.mapAlertEveryone(ui.sess.username, "Player");
+                                PBotDiscord.mapAlertEveryone(username, "Player");
                             }
                         }
                     }

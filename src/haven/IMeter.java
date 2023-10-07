@@ -28,6 +28,7 @@ package haven;
 
 import haven.sloth.gui.MovableWidget;
 import java.awt.Color;
+import java.awt.font.TextAttribute;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,9 +40,9 @@ public class IMeter extends MovableWidget {
     private static final Pattern hppat = Pattern.compile("Health: (\\d+)/(\\d+)/(\\d+)/?(\\d+)?");
     private static final Pattern stampat = Pattern.compile("Stamina: (\\d+)");
     private static final Pattern energypat = Pattern.compile("Energy: (\\d+)");
-    static Coord off = new Coord(22, 7);
-    static Coord fsz = new Coord(101, 24);
-    static Coord msz = new Coord(75, 10);
+    static Coord off = UI.scale(22, 7);
+    static Coord fsz = UI.scale(101, 24);
+    static Coord msz = UI.scale(75, 10);
     Indir<Resource> bg;
     List<Meter> meters;
     private boolean ponyalarm = true;
@@ -90,7 +91,7 @@ public class IMeter extends MovableWidget {
     }
 
     protected Tex tex() {
-        return (this.bg.get().layer(Resource.imgc).tex(this.scale));
+        return (this.bg.get().layer(Resource.imgc).tex(UI.getScale() * this.scale));
     }
 
     protected void drawBg(GOut g) {
@@ -194,19 +195,21 @@ public class IMeter extends MovableWidget {
         }
     }
 
-    private static final Text.Foundry fnd = new Text.Foundry(Text.latin);
+    private static final RichText.Foundry fnd = new RichText.Foundry(TextAttribute.FAMILY, "Dialog", TextAttribute.SIZE, UI.scale(10));
 
     public boolean mousewheel(Coord coord, int amount) {
         if (ui.modflags() == (UI.MOD_CTRL | UI.MOD_META)) {
             float scale = Math.max(Math.min(this.scale - (0.1f * amount), 5f), 1f);
             float lastscale = this.scale;
-            Utils.setpreff("scale-" + this.key, this.scale = scale);
+            if (lastscale != scale) {
+                Utils.setpreff("scale-" + this.key, this.scale = scale);
 
-            resize(fsz.mul(this.scale));
-            move(c.sub(sz.sub(fsz.mul(lastscale)).div(2)));
-            Text meterinfo = this.meterinfo;
-            if (meterinfo != null)
-                updatemeterinfo(meterinfo.text);
+                resize(fsz.mul(scale));
+                move(c.sub(sz.sub(fsz.mul(lastscale)).div(2)));
+                Text meterinfo = this.meterinfo;
+                if (meterinfo != null)
+                    this.meterinfo = Text.create(meterinfo.text, PUtils.strokeImg(fnd.render(meterinfo.text, -1, TextAttribute.SIZE, UI.scale(10) * scale)));
+            }
             return (true);
         }
         return (super.mousewheel(c, amount));
@@ -216,7 +219,7 @@ public class IMeter extends MovableWidget {
         if (str == null || str.isEmpty()) return;
         Text meterinfo = this.meterinfo;
         if (meterinfo == null || !meterinfo.text.equals(str)) {
-            this.meterinfo = Text.create(str, PUtils.strokeImg(new Text.Foundry(Text.latin, (int) (10 * this.scale)).render(str)));
+            this.meterinfo = Text.create(str, PUtils.strokeImg(fnd.render(str, -1, TextAttribute.SIZE, UI.scale(10) * this.scale)));
         }
     }
 }

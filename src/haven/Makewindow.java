@@ -126,7 +126,7 @@ public class Makewindow extends Widget {
                 img = ItemInfo.longtip(info);
             Resource.Pagina pg = res.get().layer(Resource.pagina);
             if (pg != null)
-                img = ItemInfo.catimgs(0, img, RichText.render("\n" + pg.text, 200).img);
+                img = ItemInfo.catimgs(0, img, RichText.render("\n" + pg.text, UI.scale(200)).img);
             return (img);
         }
 

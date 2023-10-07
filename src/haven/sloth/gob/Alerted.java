@@ -174,14 +174,15 @@ public class Alerted {
                             if (Config.discordalarmalert) {
                                 if (g.glob.ui != null) {
                                     UI ui = g.glob.ui.get();
-                                    if (ui != null && ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                                    if (ui != null && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                                         String s = g.name().substring(g.name().lastIndexOf("/") + 1);
+                                        String username = ui.gui.chrid;
                                         if (Config.discorduser) {
-                                            PBotDiscord.mapAlert(ui.sess.username, Config.discordalertstring, s);
+                                            PBotDiscord.mapAlert(username, Config.discordalertstring, s);
                                         } else if (Config.discordrole) {
-                                            PBotDiscord.mapAlertRole(ui.sess.username, Config.discordalertstring, s);
+                                            PBotDiscord.mapAlertRole(username, Config.discordalertstring, s);
                                         } else {
-                                            PBotDiscord.mapAlertEveryone(ui.sess.username, s);
+                                            PBotDiscord.mapAlertEveryone(username, s);
                                         }
                                     }
                                 }

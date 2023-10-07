@@ -70,8 +70,8 @@ public class ChatUI extends Widget {
     private static final Resource alarmsfx = Resource.local().loadwait("sfx/Ding");
     // public static final RichText.Foundry fnd = new RichText.Foundry(new ChatParser(TextAttribute.FONT, Text.dfont.deriveFont((float)Config.fontsizechat)));
     public static final RichText.Foundry fnd = new RichText.Foundry(new ChatParser(TextAttribute.FONT, Text.dfont.deriveFont((float) Config.fontsizechat), TextAttribute.FOREGROUND, Color.BLACK));
-    public static final Text.Foundry qfnd = new Text.Foundry(Text.dfont, 12, new java.awt.Color(192, 255, 192));
-    public static final int selw = 130;
+    public static final Text.Foundry qfnd = new Text.Foundry(Text.dfont, UI.scale(12), new java.awt.Color(192, 255, 192));
+    public static final int selw = UI.scale(130);
     public static final Coord marg = new Coord(9, 9);
     public static final Color[] urgcols = new Color[]{
             null,
@@ -318,7 +318,7 @@ public class ChatUI extends Widget {
         public void resize(Coord sz) {
             super.resize(sz);
             if (sb != null) {
-                sb.move(new Coord(sz.x - (12 - marg.x), 34 - marg.y));
+                sb.move(new Coord(sz.x - (UI.scale(12) - marg.x), UI.scale(34) - marg.y));
                 sb.resize(ih() - sb.c.y);
                 int y = 0;
                 for (Message m : msgs)

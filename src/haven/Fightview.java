@@ -50,15 +50,15 @@ import java.util.Set;
 
 public class Fightview extends MovableWidget {
     public static Tex bg = Theme.tex("bosq");
-    public static int height = 5;
-    public static int ymarg = 5;
-    public static int width = 165;
+    public static int height = UI.scale(5);
+    public static int ymarg = UI.scale(5);
+    public static int width = UI.scale(165);
     static int oldblue, lastactopening, unarmed;
     private int damage = 0;
-    public static Coord avasz = new Coord(27, 27);
-    public static Coord cavac = new Coord(width - Avaview.dasz.x - 10, 10);
-    public static Coord cgivec = new Coord(cavac.x - 35, cavac.y);
-    public static Coord cpursc = new Coord(cavac.x - 75, cgivec.y + 35);
+    public static Coord avasz = UI.scale(27, 27);
+    public static Coord cavac = new Coord(width - Avaview.dasz.x - UI.scale(10), UI.scale(10));
+    public static Coord cgivec = new Coord(cavac.x - UI.scale(35), cavac.y);
+    public static Coord cpursc = new Coord(cavac.x - UI.scale(75), cgivec.y + UI.scale(35));
     public LinkedList<Relation> lsrel = new LinkedList<>();
     public final Map<Long, Widget> obinfo = new HashMap<>();
     public Relation current = null;
@@ -121,8 +121,8 @@ public class Fightview extends MovableWidget {
         public Relation(long gobid) {
             this.gobid = gobid;
             add(this.ava = new Avaview(avasz, gobid, "fightcam")).canactivate = true;
-            add(this.give = new GiveButton(0, new Coord(30, 30)));
-            add(this.purs = new Button(70, "Pursue"));
+            add(this.give = new GiveButton(0, UI.scale(30, 30)));
+            add(this.purs = new Button(UI.scale(70), "Pursue"));
             for (DefenseType type : DefenseType.values()) {
                 defweights.put(type, 0.0);
                 preweights.put(type, 0.0);
@@ -575,10 +575,10 @@ public class Fightview extends MovableWidget {
 
     public void draw(GOut g) {
         try {
-            int y = 10;
+            int y = UI.scale(10);
 //        if (curava != null)
 //            y = curava.c.y + curava.sz.y + 10;
-            int x = width - bg.sz().x - 10;
+            int x = width - bg.sz().x - UI.scale(10);
             for (Relation rel : lsrel) {
                 if (rel == current) {
                     g.chcolor(Color.YELLOW);
@@ -588,22 +588,22 @@ public class Fightview extends MovableWidget {
                     g.image(bg, new Coord(x, y));
                 }
 
-                rel.ava.c = new Coord(12, y + 3);
-                rel.purs.c = new Coord(rel.ava.c.x + rel.ava.sz.x + 2, y + 3);
-                rel.give.c = new Coord(rel.purs.c.x + rel.purs.sz.x + 2, y + 3);
+                rel.ava.c = new Coord(UI.scale(12), y + UI.scale(3));
+                rel.purs.c = new Coord(rel.ava.c.x + rel.ava.sz.x + UI.scale(2), y + UI.scale(3));
+                rel.give.c = new Coord(rel.purs.c.x + rel.purs.sz.x + UI.scale(2), y + UI.scale(3));
                 rel.show(true);
                 g.chcolor(Color.GREEN);
-                FastText.printf(g, new Coord(12, y + 30), "IP %d", rel.ip);
+                FastText.printf(g, new Coord(UI.scale(12), y + UI.scale(30)), "IP %d", rel.ip);
                 g.chcolor(Color.RED);
-                FastText.printf(g, new Coord(12, y + 42), "IP %d", rel.oip);
-                final Coord c = new Coord(40, y + 30);
+                FastText.printf(g, new Coord(UI.scale(12), y + UI.scale(42)), "IP %d", rel.oip);
+                final Coord c = new Coord(UI.scale(40), y + UI.scale(30));
                 for (Widget wdg = rel.buffs.child; wdg != null; wdg = wdg.next) {
                     if (!(wdg instanceof Buff))
                         continue;
                     final Buff buf = (Buff) wdg;
                     if (buf.ameter >= 0 && buf.isOpening()) {
                         buf.fightdraw(g.reclip(c.copy(), Buff.scframe.sz()));
-                        c.x += Buff.scframe.sz().x + 2;
+                        c.x += Buff.scframe.sz().x + UI.scale(2);
                     }
                 }
                 final Gob gob = ui.sess.glob.oc.getgob(rel.gobid);
@@ -612,7 +612,7 @@ public class Fightview extends MovableWidget {
 //                    FastText.printf(g, new Coord(12, y + 64), "Speed: %f", gob.getv());
 //                    FastText.printf(g, new Coord(12, y + 72), "Distance: %f", gob.getc().dist(ui.sess.glob.oc.getgob(ui.gui.map.plgob).getc()) / 11.0);
 
-                    g.image(RichText.render(String.format("$bg[35,35,35,192]{$b{Speed: %.1f : Distance: %.2f}}", gob.getv(), gob.getc().dist(ui.sess.glob.oc.getgob(ui.gui.map.plgob).getc()) / 11.0), -1).tex(), new Coord(12, y + 68));
+                    g.image(RichText.render(String.format("$bg[35,35,35,192]{$b{Speed: %.1f : Distance: %.2f}}", gob.getv(), gob.getc().dist(ui.sess.glob.oc.getgob(ui.gui.map.plgob).getc()) / 11.0), -1).tex(), new Coord(UI.scale(12), y + UI.scale(68)));
                 }
                 g.chcolor();
                 y += bg.sz().y + ymarg + 16;

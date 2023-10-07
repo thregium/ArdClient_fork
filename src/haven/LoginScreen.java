@@ -31,7 +31,6 @@ import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,11 +38,15 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Scanner;
 
 public class LoginScreen extends Widget {
+    public static Text.Foundry textf = new Text.Foundry(Text.sans, 16).aa(true);
+    public static Text.Foundry textfs = new Text.Foundry(Text.sans, 14).aa(true);
+    public static Text.Foundry special = new Text.Foundry(Text.latin, 14).aa(true);
     boolean serverStatus;
     Login cur;
     Text error;
@@ -54,22 +57,20 @@ public class LoginScreen extends Widget {
     LoginList loginList;
     OptWnd opts;
     Img background;
-    static Text.Foundry textf, textfs, special;
-    static Tex bg = resources.bgCheck();
+    static Tex bg = null;
+    static Tex bg() {
+        if (bg == null)
+            bg = resources.bgCheck();
+        return (bg);
+    }
 
     Text progress = null;
     private Window log;
 
     public final StatusLabel status;
 
-    static {
-        textf = new Text.Foundry(Text.sans, 16).aa(true);
-        textfs = new Text.Foundry(Text.sans, 14).aa(true);
-        special = new Text.Foundry(Text.latin, 14).aa(true);
-    }
-
     public LoginScreen() {
-        super(bg.sz());
+        super(bg().sz());
 //        super(new Coord(800, 600));
         setfocustab(true);
         background = add(new Img(bg), Coord.z);
@@ -106,23 +107,27 @@ public class LoginScreen extends Widget {
                 }
             }
 
-            InputStream in = ClassLoader.getSystemResourceAsStream("CHANGELOG.txt");
-            BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-            File f = Config.getFile("CHANGELOG.txt");
-            FileOutputStream out = new FileOutputStream(f);
-            String strLine;
-            int count = 0;
-            while ((count < maxlines) && (strLine = br.readLine()) != null) {
-                txt.append(strLine);
-                out.write((strLine + Config.LINE_SEPARATOR).getBytes());
-                count++;
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream("CHANGELOG.txt"), StandardCharsets.UTF_8))) {
+                try (FileOutputStream out = new FileOutputStream(Config.getFile("CHANGELOG.txt"))) {
+                    String strLine;
+                    int count = 0;
+                    while ((count < maxlines) && (strLine = br.readLine()) != null) {
+                        txt.append(strLine);
+                        out.write((strLine + Config.LINE_SEPARATOR).getBytes());
+                        count++;
+                    }
+                }
             }
-            br.close();
-            out.close();
-            in.close();
         } catch (IOException ignored) {
         }
         txt.setprog(0);
+
+        log.add(new Button(log.sz.x, "REPAIR PREFERENCES").action(() -> {
+            try {
+                ui.cons.run("sqliteexport");
+            } catch (Exception e) {}
+        }), log.pos("cbl")).settip("After exporting client will turn off");
+        log.pack();
     }
 
     private static abstract class Login extends Widget {

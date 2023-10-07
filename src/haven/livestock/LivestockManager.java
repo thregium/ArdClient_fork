@@ -87,7 +87,7 @@ public class LivestockManager extends ResizableWnd {
         add(new PButton(80, "Drop Bones", DropBones), new Coord(420, 40));
 
 
-        Utils.loadprefchklist("flowersel", Config.flowermenus);
+        Utils.loadprefchklist("flowersel", Config.flowermenus.base);
 
         InspectBox = new CheckBox("") {
             {
@@ -107,7 +107,7 @@ public class LivestockManager extends ResizableWnd {
                     if (itm.name.equals("Inspect")) {
                         itm.selected = val;
                         a = val;
-                        Utils.setprefchklst("flowersel", Config.flowermenus);
+                        Utils.setprefchklst("flowersel", Config.flowermenus.base);
                     }
                 }
             }
@@ -134,7 +134,7 @@ public class LivestockManager extends ResizableWnd {
                     if (itm.name.equals("Slaughter")) {
                         itm.selected = val;
                         a = val;
-                        Utils.setprefchklst("flowersel", Config.flowermenus);
+                        Utils.setprefchklst("flowersel", Config.flowermenus.base);
                     }
                 }
             }
@@ -245,7 +245,7 @@ public class LivestockManager extends ResizableWnd {
             DropIntestinesBox.a = false;
             DropMeatBox.a = false;
             DropBonesBox.a = false;
-            Utils.loadprefchklist("flowersel", Config.flowermenus);
+            Utils.loadprefchklist("flowersel", Config.flowermenus.base);
             for (CheckListboxItem itm : Config.flowermenus.values()) {
                 if (itm.name.equals("Inspect"))
                     itm.selected = false;
@@ -269,7 +269,7 @@ public class LivestockManager extends ResizableWnd {
         DropIntestinesBox.a = false;
         DropMeatBox.a = false;
         DropBonesBox.a = false;
-        Utils.loadprefchklist("flowersel", Config.flowermenus);
+        Utils.loadprefchklist("flowersel", Config.flowermenus.base);
         for (CheckListboxItem itm : Config.flowermenus.values()) {
             if (itm.name.equals("Inspect"))
                 itm.selected = false;
@@ -306,7 +306,7 @@ public class LivestockManager extends ResizableWnd {
             DropIntestinesBox.a = false;
             DropMeatBox.a = false;
             DropBonesBox.a = false;
-            Utils.loadprefchklist("flowersel", Config.flowermenus);
+            Utils.loadprefchklist("flowersel", Config.flowermenus.base);
             for (CheckListboxItem itm : Config.flowermenus.values()) {
                 if (itm.name.equals("Inspect"))
                     itm.selected = false;

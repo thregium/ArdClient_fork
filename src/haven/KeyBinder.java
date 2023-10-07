@@ -317,7 +317,7 @@ public class KeyBinder {
             this.keyBind = bind;
             this.invalidate = invalidate;
             if (bind.action.description != null) {
-                tooltip = RichText.render(bind.action.description, 200);
+                tooltip = RichText.render(bind.action.description, UI.scale(200));
             }
             btn.autosize(true);
             btn.c.x = 300 - btn.sz.x;

@@ -1057,17 +1057,21 @@ public class MapFileWidget extends Widget implements Console.Directory {
     }
 
     public void uploadMarks() {
-        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
-            if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
-                MappingClient.getInstance(ui.sess.username).ProcessMap(file, (m) -> {
-                    if (m instanceof MapFile.SMarker) {
-                        return (((MapFile.SMarker) m).autosend);
-                    }
-                    if (m instanceof MapFile.PMarker) {
-                        return ((MapFile.PMarker) m).color.equals(Color.GREEN) && configuration.loadMapSetting(ui.sess.username, "green") && !m.name().equals("");
-                    }
-                    return false;
-                });
+        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+            String username = ui.gui.chrid;
+            if (!username.isEmpty() && configuration.loadMapSetting(username, "mapper")) {
+                MappingClient map = MappingClient.getInstance(username);
+                if (map != null) {
+                    map.ProcessMap(file, (m) -> {
+                        if (m instanceof MapFile.SMarker) {
+                            return (((MapFile.SMarker) m).autosend);
+                        }
+                        if (m instanceof MapFile.PMarker) {
+                            return ((MapFile.PMarker) m).color.equals(Color.GREEN) && configuration.loadMapSetting(username, "green") && !m.name().isEmpty();
+                        }
+                        return false;
+                    });
+                }
             }
         }
     }

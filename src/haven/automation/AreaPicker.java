@@ -22,6 +22,7 @@ import haven.Tex;
 import haven.Text;
 import haven.TextEntry;
 import haven.Trinity;
+import haven.UI;
 import haven.WItem;
 import haven.Widget;
 import haven.WidgetVerticalAppender;
@@ -174,7 +175,7 @@ public class AreaPicker extends Window implements Runnable {
         selectedgobwnd = new Window(Coord.z, "Selecting gob") {
             {
                 WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
-                selectedgoblbox = new CheckListbox(100, 10) {
+                selectedgoblbox = new CheckListbox(UI.scale(100), 10) {
                     @Override
                     protected void itemclick(CheckListboxItem itm, int button) {
                         if (!isblocked()) {
@@ -394,7 +395,7 @@ public class AreaPicker extends Window implements Runnable {
         selectedstoragewnd = new Window(Coord.z, "Selecting storage") {
             {
                 WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
-                selectedstoragelbox = new CheckListbox(100, 10) {
+                selectedstoragelbox = new CheckListbox(UI.scale(100), 10) {
                     @Override
                     protected void itemclick(CheckListboxItem itm, int button) {
                         if (!isblocked()) {
@@ -470,7 +471,7 @@ public class AreaPicker extends Window implements Runnable {
             {
                 WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
                 stringInInvContent().forEach(i -> selecteditemlist.add(new CheckListboxItem(i)));
-                selecteditemlbox = new CheckListbox(100, 10) {
+                selecteditemlbox = new CheckListbox(UI.scale(100), 10) {
                     @Override
                     protected void itemclick(CheckListboxItem itm, int button) {
                         if (!isblocked()) {

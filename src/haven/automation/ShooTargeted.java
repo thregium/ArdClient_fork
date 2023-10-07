@@ -28,7 +28,7 @@ public class ShooTargeted implements Runnable {
         for (CheckListboxItem itm : Config.flowermenus.values()) {
             if (itm.name.equals("Inspect") || itm.name.equals("Slaughter")) {
                 itm.selected = false;
-                Utils.setprefchklst("flowersel", Config.flowermenus);
+                Utils.setprefchklst("flowersel", Config.flowermenus.base);
             }
         }
 
@@ -40,11 +40,11 @@ public class ShooTargeted implements Runnable {
         for (CheckListboxItem itm : Config.flowermenus.values()) {
             if (itm.name.equals("Inspect")) {
                 itm.selected = inspect;
-                Utils.setprefchklst("flowersel", Config.flowermenus);
+                Utils.setprefchklst("flowersel", Config.flowermenus.base);
             }
             if (itm.name.equals("Slaughter")) {
                 itm.selected = slaughter;
-                Utils.setprefchklst("flowersel", Config.flowermenus);
+                Utils.setprefchklst("flowersel", Config.flowermenus.base);
             }
         }
     }

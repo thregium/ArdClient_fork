@@ -39,6 +39,7 @@ import haven.sloth.gfx.SnowFall;
 import haven.sloth.gob.Movable;
 import haven.sloth.gob.Type;
 import haven.sloth.util.ObservableListener;
+import haven.sloth.util.ObservableMapListener;
 import integrations.mapv4.MappingClient;
 import modification.Decal;
 import modification.configuration;
@@ -53,7 +54,6 @@ import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -63,6 +63,7 @@ import java.net.JarURLConnection;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -137,7 +138,7 @@ import static haven.DefSettings.WNDCOL;
 
 
 public class OptWnd extends Window {
-    public static final int VERTICAL_MARGIN = 10;
+    public static final int VERTICAL_MARGIN = 5;
     public static final int HORIZONTAL_MARGIN = 5;
     public static final int VERTICAL_AUDIO_MARGIN = 5;
     private static final Text.Foundry fonttest = new Text.Foundry(Text.sans, 10).aa(true);
@@ -154,23 +155,25 @@ public class OptWnd extends Window {
     private static final List<String> AutoDrinkTime = Arrays.asList("1", "3", "5", "10", "15", "20", "25", "30", "45", "60");
     private static final List<String> menuSize = Arrays.asList("4", "5", "6", "7", "8", "9", "10");
     private static List<String> pictureList = configuration.findFiles(configuration.picturePath, Arrays.asList(".png", ".jpg", ".gif"));
-    public final Panel main, video, audio, display, map, general, combat, control, uis, uip, quality, mapping, flowermenus, quickactionsettings, soundalarms, hidesettings, studydesksettings, autodropsettings, keybindsettings, chatsettings, clearboulders, clearbushes, cleartrees, clearhides, discord, additions, modification;
+    public final Panel main, video, audio, display, oldMap, general, combat, control, uis, uip, quality, mapping, flowermenus, quickactionsettings, soundalarms, hidesettings, studydesksettings, autodropsettings, keybindsettings, chatsettings, clearboulders, clearbushes, cleartrees, clearhides, discord, modification;
     public Panel waterPanel, qualityPanel, mapPanel, devPanel;
     public Panel current;
     public CheckBox discordcheckbox, menugridcheckbox;
     CheckBox sm = null, rm = null, lt = null, bt = null, ltl, discordrole, discorduser;
 
     public OptWnd(boolean gopts) {
-        super(new Coord(620, 400), "Options", true);
+        super(UI.scale(620, 400), "Options", true);
 
         main = add(new Panel());
         video = add(new VideoPanel(main));
         audio = add(new Panel());
         display = add(new Panel());
-        map = add(new Panel());
+        oldMap = add(new Panel());
+        mapPanel = add(new Panel());
         general = add(new Panel());
         combat = add(new Panel());
         control = add(new Panel());
+        waterPanel = add(new Panel());
         uis = add(new Panel());
         uip = add(new Panel());
         quality = add(new Panel());
@@ -186,22 +189,21 @@ public class OptWnd extends Window {
         clearbushes = add(new Panel());
         cleartrees = add(new Panel());
         clearhides = add(new Panel());
-        additions = add(new Panel());
         discord = add(new Panel());
         mapping = add(new Panel());
         modification = add(new Panel());
-        waterPanel = add(new Panel());
         qualityPanel = add(new Panel());
-        mapPanel = add(new Panel());
         devPanel = add(new Panel());
 
         initMain(gopts);
         initAudio();
         initDisplay();
+        initOldMap();
         initMap();
         initGeneral();
         initCombat();
         initControl();
+        initWater();
         initUis();
         initTheme();
         initQuality();
@@ -213,13 +215,10 @@ public class OptWnd extends Window {
         initautodropsettings();
         initkeybindsettings();
         initchatsettings();
-        initAdditions();
         initMapping();
         initDiscord();
         initModification();
-        initWater();
         initQualityPanel();
-        initMapPanel();
         initDevPanel();
 
         chpanel(main);
@@ -229,13 +228,13 @@ public class OptWnd extends Window {
         this(true);
     }
 
-    static private Scrollport.Scrollcont withScrollport(Widget widget, Coord sz) {
+    private static Scrollport.Scrollcont withScrollport(Widget widget, Coord sz) {
         final Scrollport scroll = new Scrollport(sz);
         widget.add(scroll, new Coord(0, 0));
         return scroll.cont;
     }
 
-    static private Scrollport withScroll(Widget widget, Coord sz) {
+    private static Scrollport withScroll(Widget widget, Coord sz) {
         final Scrollport scroll = new Scrollport(sz);
         widget.add(scroll, new Coord(0, 0));
         return scroll;
@@ -245,6 +244,7 @@ public class OptWnd extends Window {
         if (current != null)
             current.hide();
         (current = p).show();
+        p.move(asz.sub(p.sz).div(2));
     }
 
     public static Widget ColorPreWithLabel(final String text, final IndirSetting<Color> cl) {
@@ -270,7 +270,7 @@ public class OptWnd extends Window {
     }
 
     private void initMapping() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(mapping, new Coord(620, 350)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(mapping, UI.scale(620, 350)));
         appender.setVerticalMargin(VERTICAL_MARGIN);
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
         appender.add(new Label("Online Auto-Mapper Service:"));
@@ -280,9 +280,18 @@ public class OptWnd extends Window {
                     public boolean keydown(KeyEvent ev) {
                         if (!parent.visible)
                             return false;
-                        Utils.setpref("vendan-mapv4-endpoint", text());
-                        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
-                            MappingClient.getInstance(ui.sess.username).SetEndpoint(Utils.getpref("vendan-mapv4-endpoint", ""));
+                        String text = text();
+                        Utils.setpref("vendan-mapv4-endpoint", text);
+                        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                            MappingClient map = MappingClient.getInstance(ui.gui.chrid);
+                            if (map != null) {
+                                map.SetEndpoint(text);
+
+                                Gob player = ui.gui.map.player();
+                                if (player != null) {
+                                    map.CheckGridCoord(player.rc);
+                                }
+                            }
                         }
                         return buf.key(ev);
                     }
@@ -291,22 +300,34 @@ public class OptWnd extends Window {
 
         appender.add(new CheckBox("Enable mapv4 mapper") {
             public void set(boolean val) {
-                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
-                    configuration.saveMapSetting(ui.sess.username, val, "mapper");
-                    MappingClient.getInstance(ui.sess.username).EnableGridUploads(val);
-//                    MappingClient.getInstance(ui.sess.username).EnableTracking(val);
-                    a = val;
+                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                    String username = ui.gui.chrid;
+                    if (!username.isEmpty()) {
+                        configuration.saveMapSetting(username, val, "mapper");
+                        MappingClient map = MappingClient.getInstance(username);
+                        if (map != null) {
+                            map.EnableGridUploads(val);
+//                    map.EnableTracking(val);
+                        }
+                        a = val;
+                    }
                 }
             }
 
             public void tick(double dt) {
                 super.tick(dt);
-                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
-                    boolean b = configuration.loadMapSetting(ui.sess.username, "mapper");
-                    if (a != b) {
-                        a = b;
-                        MappingClient.getInstance(ui.sess.username).EnableGridUploads(a);
+                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                    String username = ui.gui.chrid;
+                    if (!username.isEmpty()) {
+                        boolean b = configuration.loadMapSetting(username, "mapper");
+                        if (a != b) {
+                            a = b;
+                            MappingClient map = MappingClient.getInstance(username);
+                            if (map != null) {
+                                map.EnableGridUploads(a);
 //                        MappingClient.getInstance(ui.sess.username).EnableTracking(a);
+                            }
+                        }
                     }
                 }
             }
@@ -325,38 +346,56 @@ public class OptWnd extends Window {
 //        });
         appender.add(new CheckBox("Enable navigation tracking") {
             public void set(boolean val) {
-                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
-                    configuration.saveMapSetting(ui.sess.username, val, "track");
-                    MappingClient.getInstance(ui.sess.username).EnableTracking(val);
-                    a = val;
+                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                    String username = ui.gui.chrid;
+                    if (!username.isEmpty()) {
+                        configuration.saveMapSetting(username, val, "track");
+                        MappingClient map = MappingClient.getInstance(username);
+                        if (map != null) {
+                            map.EnableTracking(val);
+                        }
+                        a = val;
+                    }
                 }
             }
 
             public void tick(double dt) {
                 super.tick(dt);
-                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
-                    boolean b = configuration.loadMapSetting(ui.sess.username, "track");
-                    if (a != b) {
-                        a = b;
-                        MappingClient.getInstance(ui.sess.username).EnableTracking(a);
+                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                    String username = ui.gui.chrid;
+                    if (!username.isEmpty()) {
+                        boolean b = configuration.loadMapSetting(username, "track");
+                        if (a != b) {
+                            a = b;
+                            MappingClient map = MappingClient.getInstance(username);
+                            if (map != null) {
+                                map.EnableTracking(a);
+                            }
+                        }
                     }
                 }
             }
         });
         appender.add(new CheckBox("Upload custom GREEN markers to map") {
             public void set(boolean val) {
-                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
-                    configuration.saveMapSetting(ui.sess.username, val, "green");
-                    a = val;
+                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                    String username = ui.gui.chrid;
+                    if (!username.isEmpty()) {
+                        configuration.saveMapSetting(username, val, "green");
+                        a = val;
+                    }
                 }
             }
 
             public void tick(double dt) {
                 super.tick(dt);
-                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
-                    boolean b = configuration.loadMapSetting(ui.sess.username, "green");
-                    if (a != b) {
-                        a = b;
+                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                    String username = ui.gui.chrid;
+                    if (!username.isEmpty()) {
+                        boolean b = configuration.loadMapSetting(username, "green");
+                        if (a != b) {
+                            a = b;
+                        }
                     }
                 }
             }
@@ -367,35 +406,41 @@ public class OptWnd extends Window {
     }
 
     private void initMain(boolean gopts) {
-        main.add(new PButton(200, "Video", 'v', video), new Coord(0, 0));
-        main.add(new PButton(200, "Audio", 'a', audio), new Coord(0, 30));
-        main.add(new PButton(200, "Display", 'd', display), new Coord(0, 60));
-        main.add(new PButton(200, "Map", 'm', map), new Coord(0, 90));
-        main.add(new PButton(200, "General", 'g', general), new Coord(210, 0));
-        main.add(new PButton(200, "Combat", 'c', combat), new Coord(210, 30));
-        main.add(new PButton(200, "Control", 'k', control), new Coord(210, 60));
-        main.add(new PButton(200, "UI", 'u', uis), new Coord(210, 90));
-        main.add(new PButton(200, "Item Overlay", 'q', quality), new Coord(420, 0));
-        main.add(new PButton(200, "Pop-up Menu", 'f', flowermenus), new Coord(420, 30));
-        main.add(new PButton(200, "Quick Actions", 'b', quickactionsettings), new Coord(420, 60));
-        main.add(new PButton(200, "Sound Alarms", 's', soundalarms), new Coord(420, 90));
-        main.add(new PButton(200, "World Overlay", 'h', hidesettings), new Coord(420, 120));
-        main.add(new PButton(200, "Study Desk", 'o', studydesksettings), new Coord(0, 120));
-        main.add(new PButton(200, "Keybinds", 'p', keybindsettings), new Coord(210, 120));
-        main.add(new PButton(200, "Chat", 'c', chatsettings), new Coord(420, 150));
-        main.add(new PButton(200, "Theme", 't', uip), new Coord(0, 150));
-        main.add(new PButton(200, "Autodrop", 's', autodropsettings), new Coord(420, 180));
-        main.add(new PButton(200, "Additional settings", 'z', additions), new Coord(0, 180));
-        main.add(new PButton(200, "PBotDiscord", 'z', discord), new Coord(0, 210));
-        main.add(new PButton(200, "Mapping", 'z', mapping), new Coord(420, 210));
-        main.add(new PButton(200, "Modification", 'z', modification), new Coord(0, 240));
+        int btnw = UI.scale(150);
 
-        main.add(new Button(200, "Changelog") {
-            public void click() {
-                showChangeLog();
-            }
-        }, new Coord(210, 270));
-        main.add(new Button(200, "Scripts") {
+        WidgetVerticalAppender app1 = new WidgetVerticalAppender(main);
+        app1.setVerticalMargin(VERTICAL_MARGIN);
+        app1.add(new PButton(btnw, "Video", 'v', video));
+        app1.add(new PButton(btnw, "Audio", 'a', audio));
+        app1.add(new PButton(btnw, "Display", 'd', display));
+        app1.add(new PButton(btnw, "Map", 'm', mapPanel));
+        app1.add(new PButton(btnw, "Study Desk", 'o', studydesksettings));
+        app1.add(new PButton(btnw, "Theme", 't', uip));
+        app1.add(new PButton(btnw, "PBotDiscord", 'z', discord));
+        app1.add(new PButton(btnw, "Modification", 'z', modification));
+
+        WidgetVerticalAppender app2 = new WidgetVerticalAppender(main);
+        app2.setVerticalMargin(VERTICAL_MARGIN);
+        app2.setX(btnw + 10);
+        app2.add(new PButton(btnw, "General", 'g', general));
+        app2.add(new PButton(btnw, "Combat", 'c', combat));
+        app2.add(new PButton(btnw, "Control", 'k', control));
+        app2.add(new PButton(btnw, "UI", 'u', uis));
+        app2.add(new PButton(btnw, "Keybinds", 'p', keybindsettings));
+        app2.add(new PButton(btnw, "Water", 'w', waterPanel));
+
+        WidgetVerticalAppender app3 = new WidgetVerticalAppender(main);
+        app3.setVerticalMargin(VERTICAL_MARGIN);
+        app3.setX((btnw + 10) * 2);
+        app3.add(new PButton(btnw, "Item Overlay", 'q', quality));
+        app3.add(new PButton(btnw, "Pop-up Menu", 'f', flowermenus));
+        app3.add(new PButton(btnw, "Quick Actions", 'b', quickactionsettings));
+        app3.add(new PButton(btnw, "Sound Alarms", 's', soundalarms));
+        app3.add(new PButton(btnw, "World Overlay", 'h', hidesettings));
+        app3.add(new PButton(btnw, "Chat", 'c', chatsettings));
+        app3.add(new PButton(btnw, "Autodrop", 's', autodropsettings));
+        app3.add(new PButton(btnw, "Mapping", 'z', mapping));
+        app3.add(new Button(btnw, "Scripts") {
             public void click() {
                 Widget wdg = getparent(GameUI.class);
                 if (wdg == null) wdg = ui.root;
@@ -406,10 +451,19 @@ public class OptWnd extends Window {
                 wdg.add(pblist);
                 pblist.show(true);
             }
-        }, new Coord(420, 240));
+        });
 
+        WidgetVerticalAppender app4 = new WidgetVerticalAppender(main);
+        app4.setVerticalMargin(5);
+        app4.setX(btnw + 10);
+        app4.setY(Math.max(Math.max(app1.getY(), app2.getY()), app3.getY()) + 25);
+        app4.add(new Button(btnw, "Changelog") {
+            public void click() {
+                showChangeLog();
+            }
+        });
         if (gopts) {
-//            main.add(new Button(200, "Disconnect Discord") {
+//            main.add(new Button(btnw, "Disconnect Discord") {
 //                public void click() {
 //                    ui.gui.discordconnected = false;
 //                    if (Discord.jdalogin != null) {
@@ -426,8 +480,8 @@ public class OptWnd extends Window {
 //                    } else
 //                        PBotUtils.sysMsg(ui, "Not currently connected.", Color.white);
 //                }
-//            }, new Coord(210, 150));
-//            main.add(new Button(200, "Join Village Discord") {
+//            }, new Coord(btnw + 10, 150));
+//            main.add(new Button(btnw, "Join Village Discord") {
 //                public void click() {
 //                    if (!ui.gui.discordconnected) {
 //                        if (Config.discordtoken != null) {
@@ -438,8 +492,8 @@ public class OptWnd extends Window {
 //                    } else
 //                        PBotUtils.sysMsg(ui, "Already connected.", Color.white);
 //                }
-//            }, new Coord(210, 180));
-//            main.add(new Button(200, "Join Ingame Discord") {
+//            }, new Coord(btnw + 10, 180));
+//            main.add(new Button(btnw, "Join Ingame Discord") {
 //                public void click() {
 //                    if (ui.gui.discordconnected)
 //                        PBotUtils.sysMsg(ui, "Already Connected.", Color.white);
@@ -448,9 +502,9 @@ public class OptWnd extends Window {
 //                        ui.gui.discordconnected = true;
 //                    }
 //                }
-//            }, new Coord(210, 210));
+//            }, new Coord(btnw + 10, 210));
             /*
-            main.add(new Button(200, "Join ArdClient Discord") {
+            main.add(new Button(btnw, "Join ArdClient Discord") {
                 public void click() {
                     try {
                         WebBrowser.self.show(new URL(String.format("https://disc"+"ord.gg/Rx"+"gVh5j")));
@@ -459,36 +513,37 @@ public class OptWnd extends Window {
                     } catch (MalformedURLException e) {
                     }
                 }
-            }, new Coord(210, 240));
+            }, new Coord(btnw + 10, 240));
             */
 
-            main.add(new Button(200, "Switch character") {
+            app4.add(new Button(btnw, "Switch character") {
                 public void click() {
                     ui.gui.act("lo", "cs");
                     if (ui.gui != null && ui.gui.map != null)
                         ui.gui.map.canceltasks();
                 }
-            }, new Coord(210, 300));
-            main.add(new Button(200, "Log out") {
+            });
+            app4.add(new Button(btnw, "Log out") {
                 public void click() {
                     ui.gui.act("lo");
                     if (ui.gui != null && ui.gui.map != null)
                         ui.gui.map.canceltasks();
                     //MainFrame.instance.p.closeSession(ui);
                 }
-            }, new Coord(210, 330));
+            });
         }
-        main.add(new Button(200, "Close") {
+        main.pack();
+        main.add(new Button(UI.scale(200), "Close") {
             public void click() {
                 OptWnd.this.hide();
             }
-        }, new Coord(210, 360));
+        }, new Coord((main.sz.x - UI.scale(200)) / 2, main.sz.y));
         main.pack();
     }
 
     private void initAudio() {
         initAudioFirstColumn();
-        audio.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
+        audio.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
         audio.pack();
     }
 
@@ -496,7 +551,7 @@ public class OptWnd extends Window {
         final WidgetVerticalAppender appender2 = new WidgetVerticalAppender(audio);
         appender2.setVerticalMargin(0);
 
-        resources.sfxlist = new HSliderListbox(200, 17);
+        resources.sfxlist = new HSliderListbox(UI.scale(200), 17);
         synchronized (resources.sfxmenus) {
             Utils.loadprefsliderlist("customsfxvol", resources.sfxmenus);
             resources.sfxmenus.forEach(s -> resources.sfxlist.addItem(configuration.createSFXSlider(s)));
@@ -552,8 +607,8 @@ public class OptWnd extends Window {
             }
         });
 
-        Scrollport scroll = withScroll(audio, new Coord(620 - 210, 350));
-        scroll.move(Coord.of(210, 0));
+        Scrollport scroll = withScroll(audio, UI.scale(620 - 210, 350));
+        scroll.move(UI.scale(210, 0));
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(scroll.cont);
 
         appender.add(new Label("Master audio volume"));
@@ -662,6 +717,17 @@ public class OptWnd extends Window {
                 Utils.setprefd("sfxwhipvol", vol);
             }
         });
+        appender.add(new Label("Audio buffer"));
+        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
+        appender.add(new HSlider(200, 512, 16384, Utils.getprefi("audiobufsize", 4096)) {
+            public void changed() {
+                val = (val / 16) / 16;
+                Utils.setprefi("audiobufsize", val);
+                try {
+                    ui.cons.run(new String[]{"audiobufsize", Integer.toString(val / 4)});
+                } catch (Exception e) {}
+            }
+        });
         appender.setVerticalMargin(0);
 //        appender.add(new Label("Fireplace sound volume (req. restart)"));
 //        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
@@ -734,12 +800,12 @@ public class OptWnd extends Window {
 
     private void initDisplay() {
         initDisplayFirstColumn();
-        display.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
+        display.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
         display.pack();
     }
 
     private void initTheme() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(uip, new Coord(620, 350)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(uip, UI.scale(620, 350)));
         appender.setVerticalMargin(VERTICAL_MARGIN);
         { //Theme
             final IndirRadioGroup<String> rgrp = new IndirRadioGroup<>("Main Hud Theme (requires restart)", HUDTHEME);
@@ -758,7 +824,7 @@ public class OptWnd extends Window {
     }
 
     private void initDisplayFirstColumn() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(display, new Coord(620, 350)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(display, UI.scale(620, 350)));
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
 
         appender.add(new CheckBox("Show Session Display") {
@@ -779,8 +845,6 @@ public class OptWnd extends Window {
                         ui.root.add(ui.root.sessionDisplay);
             }
         });
-        appender.add(new CheckBox("Show server time (game time)", val -> Utils.setprefb("showservertime", Config.showservertime = val), Config.showservertime));
-        appender.add(new CheckBox("Show weather info (req. server time)", val -> Utils.setprefb("showweatherinfo", configuration.showweatherinfo = val), configuration.showweatherinfo));
 //        appender.add(new CheckBox("Show polowners info") {
 //            {
 //                a = configuration.showpolownersinfo;
@@ -793,17 +857,6 @@ public class OptWnd extends Window {
 //            }
 //        });
 
-        appender.add(new CheckBox("Show IMeter Text") {
-            {
-                a = Config.showmetertext;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("showmetertext", val);
-                Config.showmetertext = val;
-                a = val;
-            }
-        });
         appender.add(new CheckBox("Big Animals (required for Small World)") {
             {
                 a = Config.biganimals;
@@ -851,6 +904,46 @@ public class OptWnd extends Window {
                 }
             }
         });
+        appender.add(new CheckBox("Decals are visible on top of all", Decal::setXray, Decal.getXray()));
+        appender.add(new CheckBox("Straight cave wall (requires new chunk render)") {
+            {
+                a = Config.straightcavewall;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("straightcavewall", val);
+                Config.straightcavewall = val;
+                a = val;
+                if (ui.sess != null) {
+                    ui.sess.glob.map.invalidateAll();
+                }
+            }
+        });
+        appender.add(new CheckBox("Straight ridges") {
+            {
+                a = configuration.straightridges;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("straightridges", val);
+                configuration.straightridges = val;
+                a = val;
+                if (ui.sess != null) {
+                    ui.sess.glob.map.invalidateAll();
+                }
+            }
+        });
+        appender.add(new CheckBox("New overlay for plant stage") {
+            {
+                a = configuration.newCropStageOverlay;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("newCropStageOverlay", val);
+                configuration.newCropStageOverlay = val;
+                a = val;
+            }
+        });
         appender.add(new CheckBox("Display stage 1 (fresh planted) crops when crop stage overlay enabled.") {
             {
                 a = Config.showfreshcropstage;
@@ -859,28 +952,6 @@ public class OptWnd extends Window {
             public void set(boolean val) {
                 Utils.setprefb("showfreshcropstage", val);
                 Config.showfreshcropstage = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Always display long tooltips.") {
-            {
-                a = Config.longtooltips;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("longtooltips", val);
-                Config.longtooltips = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Display Avatar Equipment tooltips.") {
-            {
-                a = Config.avatooltips;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("avatooltips", val);
-                Config.avatooltips = val;
                 a = val;
             }
         });
@@ -1124,6 +1195,110 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("Enable speed sprite") {
+            {
+                a = configuration.gobspeedsprite;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("gobspeedsprite", val);
+                configuration.gobspeedsprite = val;
+                a = val;
+                if (ui != null && ui.gui != null && ui.sess != null && ui.sess.glob != null && ui.sess.glob.oc != null) {
+                    for (Gob g : ui.sess.glob.oc.getallgobs()) {
+                        if (val) {
+                            if (g.findol(GobSpeedSprite.id) == null && (g.type == Type.HUMAN || g.type == Type.ANIMAL || g.name().startsWith("gfx/kritter/")))
+                                g.addol(new Gob.Overlay(GobSpeedSprite.id, new GobSpeedSprite(g)));
+                        } else {
+                            Gob.Overlay speed = g.findol(GobSpeedSprite.id);
+                            if (speed != null)
+                                g.ols.remove(speed);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Show speed over head (HUMAN, ANIMAL, gfx/kritter/)").tex();
+            }
+        });
+        appender.add(new CheckBox("Enable snow fall") {
+            {
+                a = configuration.snowfalloverlay;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("snowfalloverlay", val);
+                configuration.snowfalloverlay = val;
+                a = val;
+                if (ui != null && ui.gui != null) {
+                    Gob player = PBotUtils.player(ui);
+                    if (player != null) {
+                        if (val) {
+                            if (player.findol(-4921) == null)
+                                player.addol(new Gob.Overlay(-4921, new SnowFall(player)));
+                        } else {
+                            Gob.Overlay snow = player.findol(-4921);
+                            if (snow != null)
+                                player.ols.remove(snow);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Cosmetic Effect around the player").tex();
+            }
+        });
+        appender.addRow(new CheckBox("Enable blizzard") {
+            {
+                a = configuration.blizzardoverlay;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("blizzardoverlay", val);
+                configuration.blizzardoverlay = val;
+                a = val;
+                if (ui != null && ui.gui != null && ui.sess != null && ui.sess.glob != null && ui.sess.glob.oc != null) {
+                    if (val) {
+                        if (configuration.snowThread == null)
+                            configuration.snowThread = new configuration.SnowThread(ui.sess.glob.oc);
+                        if (!configuration.snowThread.isAlive())
+                            configuration.snowThread.start();
+                    } else {
+                        if (configuration.snowThread != null && configuration.snowThread.isAlive())
+                            configuration.snowThread.kill();
+                    }
+                }
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Cosmetic Effect around other gobs, fps drops").tex();
+            }
+        }, new HSlider(200, 1, 20, configuration.blizzarddensity) {
+            @Override
+            public void changed() {
+                configuration.blizzarddensity = val;
+                Utils.setprefi("blizzarddensity", configuration.blizzarddensity);
+
+                if (configuration.blizzardoverlay && ui != null && ui.gui != null && ui.sess != null && ui.sess.glob != null && ui.sess.glob.oc != null) {
+                    OCache oc = ui.sess.glob.oc;
+
+                    if (configuration.getCurrentsnow(oc) < val)
+                        configuration.addsnow(oc);
+                    else
+                        configuration.deleteSnow(oc);
+                }
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Blizzard density: " + configuration.blizzarddensity).tex();
+            }
+        });
 
         /**bt = new CheckBox("Miniature trees (req. logout)") {
          {
@@ -1286,18 +1461,190 @@ public class OptWnd extends Window {
         appender.add(ColorPreWithLabel("Specular Color", NVSPECCOC));
     }
 
-    private void initMap() {
-        map.add(new Label("Show boulders:"), new Coord(10, 0));
-        map.add(new Label("Show bushes:"), new Coord(165, 0));
-        map.add(new Label("Show trees:"), new Coord(320, 0));
-        map.add(new Label("Hide icons:"), new Coord(475, 0));
-//        map.add(new Button(200, "Icon update (donotpress)") {
-//            public void click() {
-//                Iconfinder.updateConfig();
-//            }
-//        }, new Coord(425, 360));
+    private void initOldMap() {
+        oldMap.add(new Label("Show boulders:"), new Coord(10, 0));
+        oldMap.add(new Label("Show bushes:"), new Coord(165, 0));
+        oldMap.add(new Label("Show trees:"), new Coord(320, 0));
+        oldMap.add(new Label("Hide icons:"), new Coord(475, 0));
 
-        map.add(new CheckBox("Draw party members/names") {
+        oldMap.add(new PButton(200, "Back", 27, mapPanel), new Coord(210, 380));
+        oldMap.pack();
+    }
+
+    private void initMap() {
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(mapPanel);
+        final WidgetVerticalAppender appender2 = new WidgetVerticalAppender(withScrollport(mapPanel, UI.scale(620, 350)));
+        appender.setVerticalMargin(5);
+        appender.setHorizontalMargin(5);
+        appender2.setX(200);
+
+        CheckListbox tiles = new CheckListbox(UI.scale(190), 17) {
+            @Override
+            public void itemclick(CheckListboxItem itm, int button) {
+                super.itemclick(itm, button);
+                GameUI gui = getparent(GameUI.class);
+                if (gui != null) {
+                    MapWnd wnd = gui.mapfile;
+                    if (wnd != null) {
+                        wnd.highlight(itm.name, itm.selected);
+                        return;
+                    }
+                }
+                {
+                    itm.selected = !itm.selected;
+                }
+            }
+
+            protected void drawitemname(GOut g, CheckListboxItem itm) {
+                String[] names = itm.name.split("/");
+                String text;
+                if (names.length > 0) {
+                    if (names.length > 1) {
+                        String n1 = names[names.length - 1];
+                        String n2 = names[names.length - 2];
+                        text = String.format("%s (%s)", n1.length() > 1 ? n1.substring(0, 1).toUpperCase() + n1.substring(1) : n1, n2.length() > 1 ? n2.substring(0, 1).toUpperCase() + n2.substring(1) : n2);
+                    } else {
+                        String n1 = names[0];
+                        text = String.format("%s", n1.length() > 1 ? n1.substring(0, 1).toUpperCase() + n1.substring(1) : n1);
+                    }
+                } else {
+                    String n1 = itm.name;
+                    text = String.format("%s", n1.length() > 1 ? n1.substring(0, 1).toUpperCase() + n1.substring(1) : n1);
+                }
+                Text t = Text.render(text);
+                Tex T = t.tex();
+                g.image(T, new Coord(2, 2), t.sz());
+                T.dispose();
+            }
+        };
+        Runnable tilesSort = () -> {
+            synchronized (tiles.items) {
+                tiles.items.sort(Comparator.comparing(t -> configuration.getShortName(t.name)));
+            }
+        };
+        Consumer<String> tilesUpdate = (filter) -> {
+            tiles.filter = !filter.isEmpty();
+            tilesSort.run();
+            tiles.sb.val = 0;
+            synchronized (tiles.filtered) {
+                tiles.filtered.clear();
+                if (tiles.filter) {
+                    synchronized (tiles.items) {
+                        tiles.items.stream().filter(t -> t.name.toLowerCase().contains(filter.toLowerCase())).forEach(tiles.filtered::add);
+                    }
+                }
+            }
+        };
+        TextEntry searchEntry = new TextEntry(190, "") {
+            @Override
+            public void changed() {
+                update();
+            }
+
+            @Override
+            public boolean mousedown(Coord mc, int btn) {
+                if (btn == 3) {
+                    settext("");
+                    update();
+                    return (true);
+                } else {
+                    return (super.mousedown(mc, btn));
+                }
+            }
+
+            public void update() {
+                tilesUpdate.accept(text());
+            }
+
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Right Click to clear entry").tex();
+            }
+        };
+        CheckBox chb = new CheckBox("Highlight tiles", val -> {
+            synchronized (tiles.items) {
+                tiles.items.stream().filter(t -> t.selected).forEach(t -> tiles.itemclick(t, 1));
+            }
+            searchEntry.settext("");
+            tilesUpdate.accept(searchEntry.text());
+        }, true);
+        appender.addRow(chb, new ColorPreview(Coord.of(20, 20), MapFile.highlightColor, val -> Utils.setprefi("highlightTileColor", (MapFile.highlightColor = val).getRGB())));
+        appender.add(tiles);
+        appender.add(searchEntry);
+        configuration.tilesCollection.addListener(new ObservableListener<String>() {
+            @Override
+            public void init(Collection<String> base) {
+                synchronized (tiles.items) {
+                    base.forEach(t -> tiles.items.add(new CheckListboxItem(t)));
+                }
+                tilesUpdate.accept(searchEntry.text());
+            }
+
+            @Override
+            public void added(String item) {
+                synchronized (tiles.items) {
+                    tiles.items.add(new CheckListboxItem(item));
+                }
+                tilesUpdate.accept(searchEntry.text());
+            }
+
+            @Override
+            public void edited(String olditem, String newitem) {
+                synchronized (tiles.items) {
+                    tiles.items.stream().filter(t -> t.name.equals(olditem)).forEach(t -> t.name = newitem);
+                }
+                tilesUpdate.accept(searchEntry.text());
+            }
+
+            @Override
+            public void remove(String item) {
+                synchronized (tiles.items) {
+                    tiles.items.stream().filter(t -> t.name.equals(item)).collect(Collectors.toList()).forEach(tiles.items::remove);
+                }
+                tilesUpdate.accept(searchEntry.text());
+            }
+        });
+        appender.add(new HSlider(190, 1, 10000, configuration.highlightTilePeriod) {
+            @Override
+            public void changed() {
+                Utils.setprefi("highlightTilePeriod", configuration.highlightTilePeriod = val);
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Highlight frequency: " + val).tex();
+            }
+        });
+
+        appender2.add(new Label("Both"));
+        appender2.addRow(new Label("Simple map color"), new HSlider(100, 0, 100, (int) (configuration.simplelmapintens * 100)) {
+            public void changed() {
+                configuration.simplelmapintens = val / 100f;
+                Utils.setpreff("simplelmapintens", val / 100f);
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Simple map blend: " + val / 100f).tex();
+            }
+        });
+        appender2.add(new CheckBox("Draw cave tiles on map") {
+            {
+                a = configuration.cavetileonmap;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("cavetileonmap", val);
+                configuration.cavetileonmap = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Draw cave tiles on large map. Outline nust be disable.").tex();
+            }
+        });
+        appender2.add(new CheckBox("Disable paving outline", val -> Utils.setprefb("disablepavingoutlineonmap", configuration.disablepavingoutlineonmap = val), configuration.disablepavingoutlineonmap));
+        appender2.add(new CheckBox("Draw party members/names") {
             {
                 a = Config.mapdrawparty;
             }
@@ -1307,9 +1654,9 @@ public class OptWnd extends Window {
                 Config.mapdrawparty = val;
                 a = val;
             }
-        }, 10, 370);
+        });
 
-        map.add(new CheckBox("Show names above questgivers") {
+        appender2.add(new CheckBox("Show names above questgivers") {
             {
                 a = Config.mapdrawquests;
             }
@@ -1319,8 +1666,8 @@ public class OptWnd extends Window {
                 Config.mapdrawquests = val;
                 a = val;
             }
-        }, 10, 330);
-        map.add(new CheckBox("Show names above marker flags") {
+        });
+        appender2.add(new CheckBox("Show names above marker flags") {
             {
                 a = Config.mapdrawflags;
             }
@@ -1330,19 +1677,300 @@ public class OptWnd extends Window {
                 Config.mapdrawflags = val;
                 a = val;
             }
-        }, 10, 350);
-        map.add(new PButton(50, "New map options", 'm', mapPanel), 425, 350);
+        });
+        appender2.add(new PButton(50, "Old map options", 'm', oldMap));
 
-        map.add(new PButton(200, "Back", 27, main), new Coord(210, 380));
-        map.pack();
+        appender2.add(new Label(""));
+        appender2.add(new Label("Minimap"));
+        final String[] tiers = {"Default", "Blend", "Simple"};
+        appender2.addRow(new IndirLabel(() -> String.format("Minimap type: %s", tiers[MINIMAPTYPE.get()])), new IndirHSlider(100, 0, 2, MINIMAPTYPE));
+        appender2.add(new CheckBox("Disable outline") {
+            {
+                a = Config.disableBlackOutLinesOnMap;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("disableBlackOutLinesOnMap", val);
+                Config.disableBlackOutLinesOnMap = val;
+                a = val;
+            }
+        });
+        appender2.add(new CheckBox("Map Scale") {
+            {
+                a = Config.mapscale;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("mapscale", val);
+                Config.mapscale = val;
+                a = val;
+            }
+        });
+        appender2.add(new CheckBox("Trollex Map Binds") {
+            {
+                a = Config.trollexmap;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("trollexmap", val);
+                Config.trollexmap = val;
+                a = val;
+            }
+        });
+
+        appender2.add(new Label(""));
+        appender2.add(new Label("Map"));
+        appender2.addRow(new IndirLabel(() -> String.format("Map type: %s", tiers[MAPTYPE.get()])), new IndirHSlider(100, 0, 2, MAPTYPE));
+        appender2.addRow(new CheckBox("Additional marks on the map") {
+            {
+                a = resources.customMarkObj;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("customMarkObj", val);
+                resources.customMarkObj = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Automatically places markrs on the map: caves, dungeons, tarpits.").tex();
+            }
+        }, new Button(50, "Configurate") {
+            public void click() {
+                Window w = new Window(Coord.z, "Map Marks Configurate");
+                WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
+                final CustomWidgetList list = new CustomWidgetList(resources.customMarks, "CustomMarks");
+                final TextEntry value = new TextEntry(150, "") {
+                    @Override
+                    public void activate(String text) {
+                        list.add(text);
+                        settext("");
+                    }
+                };
+                wva.add(list);
+                wva.addRow(value, new Button(45, "Add") {
+                    @Override
+                    public void click() {
+                        list.add(value.text());
+                        value.settext("");
+                    }
+                }, new Button(45, "Load Default") {
+                    @Override
+                    public void click() {
+                        for (String dmark : resources.customMarkObjs) {
+                            boolean exist = false;
+                            for (String mark : resources.customMarks.keySet()) {
+                                if (dmark.equalsIgnoreCase(mark)) {
+                                    exist = true;
+                                    break;
+                                }
+                            }
+                            if (!exist)
+                                list.put(dmark, false);
+                        }
+                    }
+                });
+                w.pack();
+
+                ui.root.adda(w, ui.root.sz.div(2), 0.5, 0.5);
+            }
+        });
+        appender2.add(new CheckBox("Scaling marks from zoom") {
+            {
+                a = configuration.scalingmarks;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("scalingmarks", val);
+                configuration.scalingmarks = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("On a large map the marks will look small").tex();
+            }
+        });
+        appender2.add(new CheckBox("Allow texture map") {
+            {
+                a = configuration.allowtexturemap;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("allowtexturemap", val);
+                configuration.allowtexturemap = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Draw textures on large map").tex();
+            }
+        });
+        appender2.addRow(new CheckBox("Allow outline map") {
+            {
+                a = configuration.allowoutlinemap;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("allowoutlinemap", val);
+                configuration.allowoutlinemap = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Draw outline on large map").tex();
+            }
+        }, new CheckBox("Another outline", val -> Utils.setprefb("anotheroutlinemap", configuration.anotheroutlinemap = val), configuration.anotheroutlinemap), new HSlider(100, 0, 255, configuration.mapoutlinetransparency) {
+            public void changed() {
+                configuration.mapoutlinetransparency = val;
+                Utils.setprefi("mapoutlinetransparency", val);
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render(val + "").tex();
+            }
+        });
+        appender2.add(new CheckBox("Allow ridges map") {
+            {
+                a = configuration.allowridgesmap;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("allowridgesmap", val);
+                configuration.allowridgesmap = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Draw ridges on large map").tex();
+            }
+        });
+        appender2.addRow(new CheckBox("Draw fog of war", val -> Utils.setprefb("fogofwar", configuration.savingFogOfWar = val), configuration.savingFogOfWar), new ColorPreview(new Coord(20, 20), new Color(configuration.fogOfWarColor, true), val -> {
+            configuration.fogOfWarColor = val.hashCode();
+            Utils.setprefi("fogofwarcolor", val.hashCode());
+        }), new ColorPreview(new Coord(20, 20), new Color(configuration.fogOfWarColorTemp, true), val -> {
+            configuration.fogOfWarColor = val.hashCode();
+            Utils.setprefi("fogofwarcolorTemp", val.hashCode());
+        }));
+
+        appender2.add(new Label(""));
+        appender2.add(new Label("Other"));
+        appender2.addRow(new Label("Distance view color"), new ColorPreview(new Coord(20, 20), new Color(configuration.distanceviewcolor, true), val -> {
+            configuration.distanceviewcolor = val.hashCode();
+            Utils.setprefi("distanceviewcolor", val.hashCode());
+        }));
+        appender2.addRow(new Label("Pathfinding color"), new ColorPreview(new Coord(20, 20), new Color(configuration.pfcolor, true), val -> {
+            configuration.pfcolor = val.hashCode();
+            Utils.setprefi("pfcolor", val.hashCode());
+        }));
+        appender2.addRow(new Label("Dowse color"), new ColorPreview(new Coord(20, 20), new Color(configuration.dowsecolor, true), val -> {
+            configuration.dowsecolor = val.hashCode();
+            Utils.setprefi("dowsecolor", val.hashCode());
+        }));
+        appender2.addRow(new Label("Questline color"), new ColorPreview(new Coord(20, 20), new Color(configuration.questlinecolor, true), val -> {
+            configuration.questlinecolor = val.hashCode();
+            Utils.setprefi("questlinecolor", val.hashCode());
+        }));
+
+        appender2.add(new Label(""));
+        appender2.addRow(new CheckBox("Temporary marks") {
+            {
+                a = configuration.tempmarks;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("tempmarks", val);
+                configuration.tempmarks = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Draw checked icons on map for a while").tex();
+            }
+        }, new CheckBox("All Temporary marks") {
+            {
+                a = configuration.tempmarksall;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("tempmarksall", val);
+                configuration.tempmarksall = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Draw all icons on map for a while").tex();
+            }
+        }, new Label("Total: ") {
+            public void tick(double dt) {
+                super.tick(dt);
+                if (ui != null && ui.gui != null && ui.gui.mapfile != null)
+                    settext("Total: " + ui.gui.mapfile.getTempMarkList().size());
+            }
+        });
+
+        appender2.addRow(new HSlider(200, 0, 5000, configuration.tempmarkstime) {
+            @Override
+            protected void added() {
+                super.added();
+            }
+
+            @Override
+            public void changed() {
+                configuration.tempmarkstime = val;
+                Utils.setprefi("tempmarkstime", configuration.tempmarkstime);
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Marks time : " + configuration.tempmarkstime + "s").tex();
+            }
+        }, new HSlider(200, 0, 5000, configuration.tempmarksfrequency) {
+            @Override
+            protected void added() {
+                super.added();
+            }
+
+            @Override
+            public void changed() {
+                configuration.tempmarksfrequency = val;
+                Utils.setprefi("tempmarksfrequency", configuration.tempmarksfrequency);
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Frequency time : " + configuration.tempmarksfrequency + "ms").tex();
+            }
+        });
+
+        mapPanel.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
+        mapPanel.pack();
     }
 
     private void initGeneral() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(general, new Coord(620, 350)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(general, UI.scale(620, 350)));
 
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
 
-        appender.add(new CheckBox("Use SQLite resource cache instead of default %appdata% (req. restart)", v -> Utils.setprefb("sqlitecache", v), configuration.sqlitecache));
+        appender.add(new IndirCheckBox("SQLite cache instead of default %appdata% (req. restart)", DefSettings.sqlitecache));
+        appender.add(new CheckBox("Show Entering/Leaving Messages in Sys Log instead of large Popup - FPS increase?") {
+            {
+                a = Config.DivertPolityMessages;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("DivertPolityMessages", val);
+                Config.DivertPolityMessages = val;
+                a = val;
+            }
+        });
         appender.add(new CheckBox("Confirmation popup box on game exit.") {
             {
                 a = Config.confirmclose;
@@ -1563,12 +2191,12 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        general.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
+        general.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
         general.pack();
     }
 
     private void initCombat() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(combat, new Coord(620, 350)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(combat, UI.scale(620, 350)));
 
         appender.setVerticalMargin(VERTICAL_MARGIN);
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
@@ -1799,12 +2427,12 @@ public class OptWnd extends Window {
         });
         appender.addRow(new Label("Combat key bindings:"), combatkeysDropdown());
 
-        combat.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
+        combat.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
         combat.pack();
     }
 
     private void initControl() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(control, new Coord(620, 350)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(control, UI.scale(620, 350)));
 
 //        appender.setVerticalMargin(VERTICAL_MARGIN);
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
@@ -1868,6 +2496,26 @@ public class OptWnd extends Window {
                     }
                 }
         );
+        appender.add(new CheckBox("Autoclick DiabloLike move") {
+            {
+                a = configuration.autoclick;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("autoclick", val);
+                configuration.autoclick = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Bad works with the old system movement. Turn on only by interest.").tex();
+            }
+        });
+        appender.add(new CheckBox("Open stack with alt on hover (Close with alt on hover widget)", val -> Utils.setprefb("altstacks", configuration.openStacksOnAlt = val), configuration.openStacksOnAlt));
+        CheckBox mineboulderchk = new CheckBox("Chip boulders while mine cursor", v -> Utils.setprefb("bouldersmine", configuration.bouldersmine = v), configuration.bouldersmine);
+        mineboulderchk.setcolor(Color.ORANGE);
+        appender.add(mineboulderchk);
         appender.addRow(new CheckBox("Lock bad camera elevator") {
             {
                 a = configuration.badcamelevlock;
@@ -1996,16 +2644,60 @@ public class OptWnd extends Window {
         appender.add(disableshiftclick);
 
 
-        control.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
+        control.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
         control.pack();
     }
 
     private void initUis() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(uis, new Coord(620, 310)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(uis, UI.scale(620, 310)));
 
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
 
         appender.addRow(new Label("Language (req. restart):"), langDropdown());
+        appender.addRow(new CheckBox("Custom title: ") {
+                            {
+                                a = configuration.customTitleBoolean;
+                            }
+
+                            public void set(boolean val) {
+                                Utils.setprefb("custom-title-bol", val);
+                                configuration.customTitleBoolean = val;
+                                a = val;
+
+                                MainFrame.instance.setTitle(configuration.tittleCheck(ui.sess));
+                            }
+                        },
+                new ResizableTextEntry(configuration.defaultUtilsCustomTitle) {
+                    @Override
+                    public void changed() {
+                        Utils.setpref("custom-title", text());
+                        configuration.defaultUtilsCustomTitle = text();
+                        MainFrame.instance.setTitle(configuration.tittleCheck(ui.sess));
+                    }
+                });
+        appender.addRow(new CheckBox("Custom login background: ") {
+                            {
+                                a = resources.defaultUtilsCustomLoginScreenBgBoolean;
+                            }
+
+                            public void set(boolean val) {
+                                Utils.setprefb("custom-login-background-bol", val);
+                                resources.defaultUtilsCustomLoginScreenBgBoolean = val;
+                                a = val;
+                                LoginScreen.bg = resources.bgCheck();
+                                if (ui != null && ui.root != null && ui.root.getchild(LoginScreen.class) != null)
+                                    ui.uimsg(1, "bg");
+                            }
+                        },
+                pictureList != null ? makePictureChoiseDropdown() : new Label("The modification folder has no pictures") {
+                    @Override
+                    public Object tooltip(Coord c0, Widget prev) {
+                        return Text.render("Create modification folder and add in pictures or launch updater").tex();
+                    }
+                });
+
+        appender.add(new Label("MenuGrid"));
+        appender.addRow(new Label("Custom grid size: "), makeCustomMenuGrid(0), makeCustomMenuGrid(1));
         menugridcheckbox = new CheckBox("Disable all menugrid hotkeys (Bottom Right grid)") {
             {
                 a = Config.disablemenugrid;
@@ -2075,6 +2767,69 @@ public class OptWnd extends Window {
 //                a = val;
 //            }
 //        });
+
+        appender.add(new CheckBox("Show FPS") {
+            {
+                a = Config.showfps;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("showfps", val);
+                Config.showfps = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Show server time (game time)", val -> Utils.setprefb("showservertime", Config.showservertime = val), Config.showservertime));
+        appender.add(new CheckBox("Show weather info (req. server time)", val -> Utils.setprefb("showweatherinfo", configuration.showweatherinfo = val), configuration.showweatherinfo));
+        appender.add(new CheckBox("Show IMeter Text") {
+            {
+                a = Config.showmetertext;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("showmetertext", val);
+                Config.showmetertext = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Show player id in Kith & Kin") {
+            {
+                a = configuration.kinid;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("kinid", val);
+                configuration.kinid = val;
+                a = val;
+            }
+        });
+        appender.addRow(new CheckBox("Draw focused widget rectangle", val -> Utils.setprefb("focusrectangle", configuration.focusrectangle = val), configuration.focusrectangle), new CheckBox("Solid", val -> Utils.setprefb("focusrectanglesolid", configuration.focusrectanglesolid = val), configuration.focusrectanglesolid), new ColorPreview(new Coord(20, 20), new Color(configuration.focusrectanglecolor, true), val -> {
+            configuration.focusrectanglecolor = val.hashCode();
+            Utils.setprefi("focusrectanglecolor", val.hashCode());
+        }));
+        appender.add(new CheckBox("Always display long tooltips.") {
+            {
+                a = Config.longtooltips;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("longtooltips", val);
+                Config.longtooltips = val;
+                a = val;
+            }
+        });
+
+        appender.add(new CheckBox("Display Avatar Equipment tooltips.") {
+            {
+                a = Config.avatooltips;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("avatooltips", val);
+                Config.avatooltips = val;
+                a = val;
+            }
+        });
         appender.add(new CheckBox("Detailed Shift+Mouseover tooltips - Negative FPS Impact when holding shift.") {
             {
                 a = Config.detailedresinfo;
@@ -2097,6 +2852,29 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("Show distance on Point") {
+            {
+                a = configuration.showpointdist;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("showpointdist", val);
+                configuration.showpointdist = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Show number in inventory") {
+            {
+                a = configuration.showinvnumber;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("showinvnumber", val);
+                configuration.showinvnumber = val;
+                a = val;
+            }
+        });
+
         appender.add(new CheckBox("Show quick hand slots") {
             {
                 a = Config.quickslots;
@@ -2122,6 +2900,35 @@ public class OptWnd extends Window {
                 }
             }
         });
+        appender.add(new CheckBox("New quick hand slots") {
+            {
+                a = configuration.newQuickSlotWdg;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("newQuickSlotWdg", val);
+                configuration.newQuickSlotWdg = val;
+                a = val;
+
+                try {
+                    if (ui != null && ui.gui != null) {
+                        Widget qs = ui.gui.quickslots;
+                        Widget nqs = ui.gui.newquickslots;
+
+                        if (qs != null && nqs != null) {
+                            if (val) {
+                                nqs.show();
+                                qs.hide();
+                            } else {
+                                nqs.hide();
+                                qs.show();
+                            }
+                        }
+                    }
+                } catch (ClassCastException e) { // in case we are at the login screen
+                }
+            }
+        });
         appender.add(new CheckBox("Disable ctrl clicking to drop items from quick hand slots.") {
             {
                 a = Config.disablequickslotdrop;
@@ -2133,7 +2940,45 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+
+        appender.add(new Label("Flowermenu"));
+        appender.addRow(new Label("Instant Flowermenu: "),
+                new CheckBox("Opening") {
+                    {
+                        a = configuration.instflmopening;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("instflmopening", val);
+                        configuration.instflmopening = val;
+                        a = val;
+                    }
+                }, new CheckBox("Chosen") {
+                    {
+                        a = configuration.instflmchosen;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("instflmchosen", val);
+                        configuration.instflmchosen = val;
+                        a = val;
+                    }
+                }, new CheckBox("Cancel") {
+                    {
+                        a = configuration.instflmcancel;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("instflmcancel", val);
+                        configuration.instflmcancel = val;
+                        a = val;
+                    }
+                });
+        appender.add(new IndirCheckBox("Don't close flowermenu on clicks", BUGGEDMENU));
+        appender.add(new IndirCheckBox("Close button to each flowermenu", CLOSEFORMENU));
         appender.add(new IndirCheckBox("Amber flowermenus", AMBERMENU));
+
+        appender.add(new Label(""));
         appender.add(new CheckBox("Alternative equipment belt window") {
             {
                 a = Config.quickbelt;
@@ -2282,7 +3127,7 @@ public class OptWnd extends Window {
         final Label fontAdd = new Label("");
         appender.addRow(
                 new Label("Increase font size by (req. restart):"),
-                new HSlider(160, 0, 3, Config.fontadd) {
+                new HSlider(UI.scale(160), 0, 3, Config.fontadd) {
                     public void added() {
                         super.added();
                         updateLabel();
@@ -2302,7 +3147,7 @@ public class OptWnd extends Window {
         );
 
         appender.add(new Label("Open selected windows on login."));
-        CheckListbox autoopenlist = new CheckListbox(320, Config.autowindows.values().size(), 18 + Config.fontadd) {
+        CheckListbox autoopenlist = new CheckListbox(UI.scale(320), Config.autowindows.values().size(), 18 + Config.fontadd) {
             @Override
             protected void itemclick(CheckListboxItem itm, int button) {
                 super.itemclick(itm, button);
@@ -2337,12 +3182,12 @@ public class OptWnd extends Window {
 //            }
 //        };
 //        uis.add(resetWndBtn, new Coord(620 / 2 - resetWndBtn.sz.x / 2, 320));
-        uis.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
+        uis.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
         uis.pack();
     }
 
     private void initQuality() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(quality, new Coord(620, 350)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(quality, UI.scale(620, 350)));
         appender.setHorizontalMargin(5);
 
         List<String> qualityposlist = new ArrayList<>(Arrays.asList("Left-Top", "Top-Center", "Right-Top", "Right-Center", "Right-Bottom", "Bottom-Center", "Left-Bottom", "Left-Center", "Center"));
@@ -2545,40 +3390,29 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-
-        quality.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
-        quality.pack();
-    }
-
-    private void initAdditions() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(additions, new Coord(620, 350)));
-
-        appender.setVerticalMargin(VERTICAL_MARGIN);
-        appender.setHorizontalMargin(HORIZONTAL_MARGIN);
-
-        appender.add(new Label("Additional Client Features"));
-
-        appender.add(new CheckBox("Straight cave wall (requires new chunk render)") {
+        appender.add(new CheckBox("Show base quality fep on food") {
             {
-                a = Config.straightcavewall;
+                a = FoodInfo.showbaseq;
             }
 
             public void set(boolean val) {
-                Utils.setprefb("straightcavewall", val);
-                Config.straightcavewall = val;
+                Utils.setprefb("showbaseq", val);
+                FoodInfo.showbaseq = val;
                 a = val;
-                if (ui.sess != null) {
-                    ui.sess.glob.map.invalidateAll();
-                }
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Shows base quality fep on food: fep (basefep) - %").tex();
             }
         });
 
-        additions.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
-        additions.pack();
+        quality.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
+        quality.pack();
     }
 
     private void initDiscord() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(discord, new Coord(620, 350)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(discord, UI.scale(620, 350)));
 
         appender.setVerticalMargin(VERTICAL_MARGIN);
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
@@ -2707,62 +3541,19 @@ public class OptWnd extends Window {
                 , new Coord(180, 60));
 
 
-        discord.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
+        discord.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
         discord.pack();
     }
 
     private void initModification() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(modification, new Coord(620, 350)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(modification, UI.scale(620, 350)));
         appender.setHorizontalMargin(5);
 
         appender.add(new Label("Strange or unreal modifications"));
 
-        appender.addRow(new PButton(50, "Water", 'w', waterPanel),
-                new PButton(50, "Map", 'm', mapPanel),
+        appender.addRow(
                 new PButton(50, "Dev", 'w', devPanel)
         );
-
-        appender.addRow(new CheckBox("Custom title: ") {
-                            {
-                                a = configuration.customTitleBoolean;
-                            }
-
-                            public void set(boolean val) {
-                                Utils.setprefb("custom-title-bol", val);
-                                configuration.customTitleBoolean = val;
-                                a = val;
-
-                                MainFrame.instance.setTitle(configuration.tittleCheck(ui.sess));
-                            }
-                        },
-                new ResizableTextEntry(configuration.defaultUtilsCustomTitle) {
-                    @Override
-                    public void changed() {
-                        Utils.setpref("custom-title", text());
-                        configuration.defaultUtilsCustomTitle = text();
-                        MainFrame.instance.setTitle(configuration.tittleCheck(ui.sess));
-                    }
-                });
-        appender.addRow(new CheckBox("Custom login background: ") {
-                            {
-                                a = resources.defaultUtilsCustomLoginScreenBgBoolean;
-                            }
-
-                            public void set(boolean val) {
-                                Utils.setprefb("custom-login-background-bol", val);
-                                resources.defaultUtilsCustomLoginScreenBgBoolean = val;
-                                a = val;
-                                LoginScreen.bg = resources.bgCheck();
-                                if (ui != null && ui.root != null && ui.root.getchild(LoginScreen.class) != null)
-                                    ui.uimsg(1, "bg");
-                            }
-                        },
-                pictureList != null ? makePictureChoiseDropdown() : new Label("The modification folder has no pictures") {
-                    @Override
-                    public Object tooltip(Coord c0, Widget prev) {
-                        return Text.render("Create modification folder and add in pictures or launch updater").tex();
-                    }
-                });
 
         appender.add(new Label(""));
 
@@ -3095,17 +3886,6 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Player Status tooltip") {
-            {
-                a = configuration.statustooltip;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("statustooltip", val);
-                configuration.statustooltip = val;
-                a = val;
-            }
-        });
         appender.add(new CheckBox("New gilding window") {
             {
                 a = configuration.newgildingwindow;
@@ -3117,68 +3897,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("New overlay for plant stage") {
-            {
-                a = configuration.newCropStageOverlay;
-            }
 
-            public void set(boolean val) {
-                Utils.setprefb("newCropStageOverlay", val);
-                configuration.newCropStageOverlay = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("New quick hand slots") {
-            {
-                a = configuration.newQuickSlotWdg;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("newQuickSlotWdg", val);
-                configuration.newQuickSlotWdg = val;
-                a = val;
-
-                try {
-                    if (ui != null && ui.gui != null) {
-                        Widget qs = ui.gui.quickslots;
-                        Widget nqs = ui.gui.newquickslots;
-
-                        if (qs != null && nqs != null) {
-                            if (val) {
-                                nqs.show();
-                                qs.hide();
-                            } else {
-                                nqs.hide();
-                                qs.show();
-                            }
-                        }
-                    }
-                } catch (ClassCastException e) { // in case we are at the login screen
-                }
-            }
-        });
-        appender.add(new CheckBox("Autoclick DiabloLike move") {
-            {
-                a = configuration.autoclick;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("autoclick", val);
-                configuration.autoclick = val;
-                a = val;
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Bad works with the old system movement. Turn on only by interest.").tex();
-            }
-        });
-
-        appender.addRow(new Label("Custom grid size: "), makeCustomMenuGrid(0), makeCustomMenuGrid(1));
-
-        CheckBox mineboulderchk = new CheckBox("Chip boulders while mine cursor", v -> Utils.setprefb("bouldersmine", configuration.bouldersmine = v), configuration.bouldersmine);
-        mineboulderchk.setcolor(Color.ORANGE);
-        appender.add(mineboulderchk);
         appender.addRow(new CheckBox("Resizable World") {
             {
                 a = configuration.resizableworld;
@@ -3256,59 +3975,6 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Show base quality fep on food") {
-            {
-                a = FoodInfo.showbaseq;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("showbaseq", val);
-                FoodInfo.showbaseq = val;
-                a = val;
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Shows base quality fep on food: fep (basefep) - %").tex();
-            }
-        });
-        appender.add(new CheckBox("Decals are visible on top of all", Decal::setXray, Decal.getXray()));
-        appender.add(new CheckBox("Straight ridges") {
-            {
-                a = configuration.straightridges;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("straightridges", val);
-                configuration.straightridges = val;
-                a = val;
-                if (ui.sess != null) {
-                    ui.sess.glob.map.invalidateAll();
-                }
-            }
-        });
-        appender.add(new CheckBox("Show distance on Point") {
-            {
-                a = configuration.showpointdist;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("showpointdist", val);
-                configuration.showpointdist = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Show number in inventory") {
-            {
-                a = configuration.showinvnumber;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("showinvnumber", val);
-                configuration.showinvnumber = val;
-                a = val;
-            }
-        });
         appender.add(new CheckBox("New livestock manager - need open Livestock Manager Sloth from Xtensions") {
             {
                 a = configuration.forcelivestock;
@@ -3341,124 +4007,6 @@ public class OptWnd extends Window {
                 return Text.render("Auto Open Livestock Manager Sloth").tex();
             }
         });
-        appender.add(new CheckBox("Show player id in Kith & Kin") {
-            {
-                a = configuration.kinid;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("kinid", val);
-                configuration.kinid = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Enable speed sprite") {
-            {
-                a = configuration.gobspeedsprite;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("gobspeedsprite", val);
-                configuration.gobspeedsprite = val;
-                a = val;
-                if (ui != null && ui.gui != null && ui.sess != null && ui.sess.glob != null && ui.sess.glob.oc != null) {
-                    for (Gob g : ui.sess.glob.oc.getallgobs()) {
-                        if (val) {
-                            if (g.findol(GobSpeedSprite.id) == null && (g.type == Type.HUMAN || g.type == Type.ANIMAL || g.name().startsWith("gfx/kritter/")))
-                                g.addol(new Gob.Overlay(GobSpeedSprite.id, new GobSpeedSprite(g)));
-                        } else {
-                            Gob.Overlay speed = g.findol(GobSpeedSprite.id);
-                            if (speed != null)
-                                g.ols.remove(speed);
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Show speed over head (HUMAN, ANIMAL, gfx/kritter/)").tex();
-            }
-        });
-        appender.add(new CheckBox("Enable snow fall") {
-            {
-                a = configuration.snowfalloverlay;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("snowfalloverlay", val);
-                configuration.snowfalloverlay = val;
-                a = val;
-                if (ui != null && ui.gui != null) {
-                    Gob player = PBotUtils.player(ui);
-                    if (player != null) {
-                        if (val) {
-                            if (player.findol(-4921) == null)
-                                player.addol(new Gob.Overlay(-4921, new SnowFall(player)));
-                        } else {
-                            Gob.Overlay snow = player.findol(-4921);
-                            if (snow != null)
-                                player.ols.remove(snow);
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Cosmetic Effect around the player").tex();
-            }
-        });
-        appender.addRow(new CheckBox("Enable blizzard") {
-                            {
-                                a = configuration.blizzardoverlay;
-                            }
-
-                            public void set(boolean val) {
-                                Utils.setprefb("blizzardoverlay", val);
-                                configuration.blizzardoverlay = val;
-                                a = val;
-                                if (ui != null && ui.gui != null && ui.sess != null && ui.sess.glob != null && ui.sess.glob.oc != null) {
-                                    if (val) {
-                                        if (configuration.snowThread == null)
-                                            configuration.snowThread = new configuration.SnowThread(ui.sess.glob.oc);
-                                        if (!configuration.snowThread.isAlive())
-                                            configuration.snowThread.start();
-                                    } else {
-                                        if (configuration.snowThread != null && configuration.snowThread.isAlive())
-                                            configuration.snowThread.kill();
-                                    }
-                                }
-                            }
-
-                            @Override
-                            public Object tooltip(Coord c0, Widget prev) {
-                                return Text.render("Cosmetic Effect around other gobs, fps drops").tex();
-                            }
-                        },
-                new HSlider(200, 1, 20, configuration.blizzarddensity) {
-                    @Override
-                    public void changed() {
-                        configuration.blizzarddensity = val;
-                        Utils.setprefi("blizzarddensity", configuration.blizzarddensity);
-
-                        if (configuration.blizzardoverlay && ui != null && ui.gui != null && ui.sess != null && ui.sess.glob != null && ui.sess.glob.oc != null) {
-                            OCache oc = ui.sess.glob.oc;
-
-                            if (configuration.getCurrentsnow(oc) < val)
-                                configuration.addsnow(oc);
-                            else
-                                configuration.deleteSnow(oc);
-                        }
-                    }
-
-                    @Override
-                    public Object tooltip(Coord c0, Widget prev) {
-                        return Text.render("Blizzard density: " + configuration.blizzarddensity).tex();
-                    }
-                });
-        appender.add(new IndirCheckBox("Never delete grids", KEEPGRIDS));
-        appender.add(new IndirCheckBox("Never delete gobs", KEEPGOBS));
 
         appender.add(new CheckBox("Caching Gemstone") {
             {
@@ -3476,11 +4024,6 @@ public class OptWnd extends Window {
                 return Text.render("Caching Gemstone for fast loading").tex();
             }
         });
-        appender.addRow(new CheckBox("Draw focused widget rectangle", val -> Utils.setprefb("focusrectangle", configuration.focusrectangle = val), configuration.focusrectangle), new CheckBox("Solid", val -> Utils.setprefb("focusrectanglesolid", configuration.focusrectanglesolid = val), configuration.focusrectanglesolid), new ColorPreview(new Coord(20, 20), new Color(configuration.focusrectanglecolor, true), val -> {
-            configuration.focusrectanglecolor = val.hashCode();
-            Utils.setprefi("focusrectanglecolor", val.hashCode());
-        }));
-        appender.add(new CheckBox("Open stack with alt on hover (Close with alt on hover widget)", val -> Utils.setprefb("altstacks", configuration.openStacksOnAlt = val), configuration.openStacksOnAlt));
 
         appender.add(new Label("Pathfinder"));
         final String[] tiers = {"Perfect", "Medium", "Fastest"};
@@ -3489,59 +4032,12 @@ public class OptWnd extends Window {
         appender.add(new IndirCheckBox("Research if goal was not found (requires Limited pathfinding)", RESEARCHUNTILGOAL));
         appender.add(new CheckBox("Purus pathfinder evade riges", val -> Utils.setprefb("puruspfignoreridge", configuration.puruspfignoreridge = val), configuration.puruspfignoreridge));
 
-        appender.add(new Label("Flowermenu"));
-        appender.addRow(new Label("Instant Flowermenu: "),
-                new CheckBox("Opening") {
-                    {
-                        a = configuration.instflmopening;
-                    }
-
-                    public void set(boolean val) {
-                        Utils.setprefb("instflmopening", val);
-                        configuration.instflmopening = val;
-                        a = val;
-                    }
-                }, new CheckBox("Chosen") {
-                    {
-                        a = configuration.instflmchosen;
-                    }
-
-                    public void set(boolean val) {
-                        Utils.setprefb("instflmchosen", val);
-                        configuration.instflmchosen = val;
-                        a = val;
-                    }
-                }, new CheckBox("Cancel") {
-                    {
-                        a = configuration.instflmcancel;
-                    }
-
-                    public void set(boolean val) {
-                        Utils.setprefb("instflmcancel", val);
-                        configuration.instflmcancel = val;
-                        a = val;
-                    }
-                });
-        appender.add(new IndirCheckBox("Don't close flowermenu on clicks", BUGGEDMENU));
-        appender.add(new IndirCheckBox("Close button to each flowermenu", CLOSEFORMENU));
-        appender.addRow(new CheckBox("Background UI timeout ticks", val -> Utils.setprefb("uitickwait", UI.canwait = val), UI.canwait), new HSlider(200, 1, 10000, (int) UI.timewait) {
-            @Override
-            public void changed() {
-                Utils.setprefi("uitickwaittime", (int) (UI.timewait = val));
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("UI tick timeout: " + val + "ms").tex();
-            }
-        });
-
-        modification.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
+        modification.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
         modification.pack();
     }
 
     private void initWater() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(waterPanel, new Coord(620, 350)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(waterPanel, UI.scale(620, 350)));
         appender.setVerticalMargin(5);
         appender.setHorizontalMargin(5);
 
@@ -3672,12 +4168,12 @@ public class OptWnd extends Window {
             }
         });
 
-        waterPanel.add(new PButton(200, "Back", 27, modification), new Coord(210, 360));
+        waterPanel.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
         waterPanel.pack();
     }
 
     private void initQualityPanel() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(qualityPanel, new Coord(620, 350)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(qualityPanel, UI.scale(620, 350)));
         appender.setHorizontalMargin(5);
 
         appender.add(new CheckBox("Item Quality Coloring") {
@@ -3881,460 +4377,12 @@ public class OptWnd extends Window {
             }
         });
 
-        qualityPanel.add(new PButton(200, "Back", 27, quality), new Coord(210, 360));
+        qualityPanel.add(new PButton(200, "Back", 27, quality), UI.scale(210, 360));
         qualityPanel.pack();
     }
 
-    private void initMapPanel() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(mapPanel);
-        final WidgetVerticalAppender appender2 = new WidgetVerticalAppender(withScrollport(mapPanel, new Coord(620, 350)));
-        appender.setVerticalMargin(5);
-        appender.setHorizontalMargin(5);
-        appender2.setX(200);
-
-        CheckListbox tiles = new CheckListbox(190, 17) {
-            @Override
-            public void itemclick(CheckListboxItem itm, int button) {
-                super.itemclick(itm, button);
-                GameUI gui = getparent(GameUI.class);
-                if (gui != null) {
-                    MapWnd wnd = gui.mapfile;
-                    if (wnd != null) {
-                        wnd.highlight(itm.name, itm.selected);
-                        return;
-                    }
-                }
-                {
-                    itm.selected = !itm.selected;
-                }
-            }
-
-            protected void drawitemname(GOut g, CheckListboxItem itm) {
-                String[] names = itm.name.split("/");
-                String text;
-                if (names.length > 0) {
-                    if (names.length > 1) {
-                        String n1 = names[names.length - 1];
-                        String n2 = names[names.length - 2];
-                        text = String.format("%s (%s)", n1.length() > 1 ? n1.substring(0, 1).toUpperCase() + n1.substring(1) : n1, n2.length() > 1 ? n2.substring(0, 1).toUpperCase() + n2.substring(1) : n2);
-                    } else {
-                        String n1 = names[0];
-                        text = String.format("%s", n1.length() > 1 ? n1.substring(0, 1).toUpperCase() + n1.substring(1) : n1);
-                    }
-                } else {
-                    String n1 = itm.name;
-                    text = String.format("%s", n1.length() > 1 ? n1.substring(0, 1).toUpperCase() + n1.substring(1) : n1);
-                }
-                Text t = Text.render(text);
-                Tex T = t.tex();
-                g.image(T, new Coord(2, 2), t.sz());
-                T.dispose();
-            }
-        };
-        Runnable tilesSort = () -> {
-            synchronized (tiles.items) {
-                tiles.items.sort(Comparator.comparing(t -> configuration.getShortName(t.name)));
-            }
-        };
-        Consumer<String> tilesUpdate = (filter) -> {
-            tiles.filter = !filter.isEmpty();
-            tilesSort.run();
-            tiles.sb.val = 0;
-            synchronized (tiles.filtered) {
-                tiles.filtered.clear();
-                if (tiles.filter) {
-                    synchronized (tiles.items) {
-                        tiles.items.stream().filter(t -> t.name.toLowerCase().contains(filter.toLowerCase())).forEach(tiles.filtered::add);
-                    }
-                }
-            }
-        };
-        TextEntry searchEntry = new TextEntry(190, "") {
-            @Override
-            public void changed() {
-                update();
-            }
-
-            @Override
-            public boolean mousedown(Coord mc, int btn) {
-                if (btn == 3) {
-                    settext("");
-                    update();
-                    return (true);
-                } else {
-                    return (super.mousedown(mc, btn));
-                }
-            }
-
-            public void update() {
-                tilesUpdate.accept(text());
-            }
-
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Right Click to clear entry").tex();
-            }
-        };
-        CheckBox chb = new CheckBox("Highlight tiles", val -> {
-            synchronized (tiles.items) {
-                tiles.items.stream().filter(t -> t.selected).forEach(t -> tiles.itemclick(t, 1));
-            }
-            searchEntry.settext("");
-            tilesUpdate.accept(searchEntry.text());
-        }, true);
-        appender.addRow(chb, new ColorPreview(Coord.of(20, 20), MapFile.highlightColor, val -> Utils.setprefi("highlightTileColor", (MapFile.highlightColor = val).getRGB())));
-        appender.add(tiles);
-        appender.add(searchEntry);
-        configuration.tilesCollection.addListener(new ObservableListener<String>() {
-            @Override
-            public void init(Collection<String> base) {
-                synchronized (tiles.items) {
-                    base.forEach(t -> tiles.items.add(new CheckListboxItem(t)));
-                }
-                tilesUpdate.accept(searchEntry.text());
-            }
-
-            @Override
-            public void added(String item) {
-                synchronized (tiles.items) {
-                    tiles.items.add(new CheckListboxItem(item));
-                }
-                tilesUpdate.accept(searchEntry.text());
-            }
-
-            @Override
-            public void edited(String olditem, String newitem) {
-                synchronized (tiles.items) {
-                    tiles.items.stream().filter(t -> t.name.equals(olditem)).forEach(t -> t.name = newitem);
-                }
-                tilesUpdate.accept(searchEntry.text());
-            }
-
-            @Override
-            public void remove(String item) {
-                synchronized (tiles.items) {
-                    tiles.items.stream().filter(t -> t.name.equals(item)).collect(Collectors.toList()).forEach(tiles.items::remove);
-                }
-                tilesUpdate.accept(searchEntry.text());
-            }
-        });
-        appender.add(new HSlider(190, 1, 10000, configuration.highlightTilePeriod) {
-            @Override
-            public void changed() {
-                Utils.setprefi("highlightTilePeriod", configuration.highlightTilePeriod = val);
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Highlight frequency: " + val).tex();
-            }
-        });
-
-        appender2.add(new Label("Both"));
-        appender2.addRow(new Label("Simple map color"), new HSlider(100, 0, 100, (int) (configuration.simplelmapintens * 100)) {
-            public void changed() {
-                configuration.simplelmapintens = val / 100f;
-                Utils.setpreff("simplelmapintens", val / 100f);
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Simple map blend: " + val / 100f).tex();
-            }
-        });
-        appender2.add(new CheckBox("Draw cave tiles on map") {
-            {
-                a = configuration.cavetileonmap;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("cavetileonmap", val);
-                configuration.cavetileonmap = val;
-                a = val;
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Draw cave tiles on large map. Outline nust be disable.").tex();
-            }
-        });
-        appender2.add(new CheckBox("Disable paving outline", val -> Utils.setprefb("disablepavingoutlineonmap", configuration.disablepavingoutlineonmap = val), configuration.disablepavingoutlineonmap));
-
-        appender2.add(new Label(""));
-        appender2.add(new Label("Minimap"));
-        final String[] tiers = {"Default", "Blend", "Simple"};
-        appender2.addRow(new IndirLabel(() -> String.format("Minimap type: %s", tiers[MINIMAPTYPE.get()])), new IndirHSlider(100, 0, 2, MINIMAPTYPE));
-        appender2.add(new CheckBox("Disable outline") {
-            {
-                a = Config.disableBlackOutLinesOnMap;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("disableBlackOutLinesOnMap", val);
-                Config.disableBlackOutLinesOnMap = val;
-                a = val;
-            }
-        });
-        appender2.add(new CheckBox("Map Scale") {
-            {
-                a = Config.mapscale;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("mapscale", val);
-                Config.mapscale = val;
-                a = val;
-            }
-        });
-        appender2.add(new CheckBox("Trollex Map Binds") {
-            {
-                a = Config.trollexmap;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("trollexmap", val);
-                Config.trollexmap = val;
-                a = val;
-            }
-        });
-
-        appender2.add(new Label(""));
-        appender2.add(new Label("Map"));
-        appender2.addRow(new IndirLabel(() -> String.format("Map type: %s", tiers[MAPTYPE.get()])), new IndirHSlider(100, 0, 2, MAPTYPE));
-        appender2.addRow(new CheckBox("Additional marks on the map") {
-            {
-                a = resources.customMarkObj;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("customMarkObj", val);
-                resources.customMarkObj = val;
-                a = val;
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Automatically places markrs on the map: caves, dungeons, tarpits.").tex();
-            }
-        }, new Button(50, "Configurate") {
-            public void click() {
-                Window w = new Window(Coord.z, "Map Marks Configurate");
-                WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
-                final CustomWidgetList list = new CustomWidgetList(resources.customMarks, "CustomMarks");
-                final TextEntry value = new TextEntry(150, "") {
-                    @Override
-                    public void activate(String text) {
-                        list.add(text);
-                        settext("");
-                    }
-                };
-                wva.add(list);
-                wva.addRow(value, new Button(45, "Add") {
-                    @Override
-                    public void click() {
-                        list.add(value.text());
-                        value.settext("");
-                    }
-                }, new Button(45, "Load Default") {
-                    @Override
-                    public void click() {
-                        for (String dmark : resources.customMarkObjs) {
-                            boolean exist = false;
-                            for (String mark : resources.customMarks.keySet()) {
-                                if (dmark.equalsIgnoreCase(mark)) {
-                                    exist = true;
-                                    break;
-                                }
-                            }
-                            if (!exist)
-                                list.put(dmark, false);
-                        }
-                    }
-                });
-                w.pack();
-
-                ui.root.adda(w, ui.root.sz.div(2), 0.5, 0.5);
-            }
-        });
-        appender2.add(new CheckBox("Scaling marks from zoom") {
-            {
-                a = configuration.scalingmarks;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("scalingmarks", val);
-                configuration.scalingmarks = val;
-                a = val;
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("On a large map the marks will look small").tex();
-            }
-        });
-        appender2.add(new CheckBox("Allow texture map") {
-            {
-                a = configuration.allowtexturemap;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("allowtexturemap", val);
-                configuration.allowtexturemap = val;
-                a = val;
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Draw textures on large map").tex();
-            }
-        });
-        appender2.addRow(new CheckBox("Allow outline map") {
-            {
-                a = configuration.allowoutlinemap;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("allowoutlinemap", val);
-                configuration.allowoutlinemap = val;
-                a = val;
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Draw outline on large map").tex();
-            }
-        }, new CheckBox("Another outline", val -> Utils.setprefb("anotheroutlinemap", configuration.anotheroutlinemap = val), configuration.anotheroutlinemap), new HSlider(100, 0, 255, configuration.mapoutlinetransparency) {
-            public void changed() {
-                configuration.mapoutlinetransparency = val;
-                Utils.setprefi("mapoutlinetransparency", val);
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render(val + "").tex();
-            }
-        });
-        appender2.add(new CheckBox("Allow ridges map") {
-            {
-                a = configuration.allowridgesmap;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("allowridgesmap", val);
-                configuration.allowridgesmap = val;
-                a = val;
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Draw ridges on large map").tex();
-            }
-        });
-        appender2.addRow(new CheckBox("Draw fog of war", val -> Utils.setprefb("fogofwar", configuration.savingFogOfWar = val), configuration.savingFogOfWar), new ColorPreview(new Coord(20, 20), new Color(configuration.fogOfWarColor, true), val -> {
-            configuration.fogOfWarColor = val.hashCode();
-            Utils.setprefi("fogofwarcolor", val.hashCode());
-        }), new ColorPreview(new Coord(20, 20), new Color(configuration.fogOfWarColorTemp, true), val -> {
-            configuration.fogOfWarColor = val.hashCode();
-            Utils.setprefi("fogofwarcolorTemp", val.hashCode());
-        }));
-
-        appender2.add(new Label(""));
-        appender2.add(new Label("Other"));
-        appender2.addRow(new Label("Distance view color"), new ColorPreview(new Coord(20, 20), new Color(configuration.distanceviewcolor, true), val -> {
-            configuration.distanceviewcolor = val.hashCode();
-            Utils.setprefi("distanceviewcolor", val.hashCode());
-        }));
-        appender2.addRow(new Label("Pathfinding color"), new ColorPreview(new Coord(20, 20), new Color(configuration.pfcolor, true), val -> {
-            configuration.pfcolor = val.hashCode();
-            Utils.setprefi("pfcolor", val.hashCode());
-        }));
-        appender2.addRow(new Label("Dowse color"), new ColorPreview(new Coord(20, 20), new Color(configuration.dowsecolor, true), val -> {
-            configuration.dowsecolor = val.hashCode();
-            Utils.setprefi("dowsecolor", val.hashCode());
-        }));
-        appender2.addRow(new Label("Questline color"), new ColorPreview(new Coord(20, 20), new Color(configuration.questlinecolor, true), val -> {
-            configuration.questlinecolor = val.hashCode();
-            Utils.setprefi("questlinecolor", val.hashCode());
-        }));
-
-        appender2.add(new Label(""));
-        appender2.addRow(new CheckBox("Temporary marks") {
-            {
-                a = configuration.tempmarks;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("tempmarks", val);
-                configuration.tempmarks = val;
-                a = val;
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Draw checked icons on map for a while").tex();
-            }
-        }, new CheckBox("All Temporary marks") {
-            {
-                a = configuration.tempmarksall;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("tempmarksall", val);
-                configuration.tempmarksall = val;
-                a = val;
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Draw all icons on map for a while").tex();
-            }
-        }, new Label("Total: ") {
-            public void tick(double dt) {
-                super.tick(dt);
-                if (ui != null && ui.gui != null && ui.gui.mapfile != null)
-                    settext("Total: " + ui.gui.mapfile.getTempMarkList().size());
-            }
-        });
-
-        appender2.addRow(new HSlider(200, 0, 5000, configuration.tempmarkstime) {
-            @Override
-            protected void added() {
-                super.added();
-            }
-
-            @Override
-            public void changed() {
-                configuration.tempmarkstime = val;
-                Utils.setprefi("tempmarkstime", configuration.tempmarkstime);
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Marks time : " + configuration.tempmarkstime + "s").tex();
-            }
-        }, new HSlider(200, 0, 5000, configuration.tempmarksfrequency) {
-            @Override
-            protected void added() {
-                super.added();
-            }
-
-            @Override
-            public void changed() {
-                configuration.tempmarksfrequency = val;
-                Utils.setprefi("tempmarksfrequency", configuration.tempmarksfrequency);
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Frequency time : " + configuration.tempmarksfrequency + "ms").tex();
-            }
-        });
-
-        mapPanel.add(new PButton(200, "Back", 27, modification), new Coord(210, 360));
-        mapPanel.pack();
-    }
-
     private void initDevPanel() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(devPanel, new Coord(620, 350)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(devPanel, UI.scale(620, 350)));
         appender.setVerticalMargin(5);
         appender.setHorizontalMargin(5);
 
@@ -4532,7 +4580,7 @@ public class OptWnd extends Window {
             }
         });
 
-        dev.msglist = new CheckListbox(140, 15) {
+        dev.msglist = new CheckListbox(UI.scale(140), 15) {
             @Override
             protected void itemclick(CheckListboxItem itm, int button) {
                 super.itemclick(itm, button);
@@ -4544,7 +4592,7 @@ public class OptWnd extends Window {
         dev.msglist.items.sort(Comparator.comparing(o -> o.name));
         appender3.add(dev.msglist);
 
-        devPanel.add(new PButton(200, "Back", 27, modification), new Coord(210, 360));
+        devPanel.add(new PButton(200, "Back", 27, modification), UI.scale(210, 360));
         devPanel.pack();
     }
 
@@ -4559,7 +4607,7 @@ public class OptWnd extends Window {
         appender2.setX(150);
 
         appender2.add(new Label("Autopick Clusters:"));
-        CheckListbox clusterlist = new CheckListbox(140, 17) {
+        CheckListbox clusterlist = new CheckListbox(UI.scale(140), 17) {
             @Override
             protected void itemclick(CheckListboxItem itm, int button) {
                 super.itemclick(itm, button);
@@ -4571,22 +4619,35 @@ public class OptWnd extends Window {
         // clusterlist.items.addAll(Config.autoclusters.values());
         appender2.add(clusterlist);
 
-        appender.add(new CheckBox("Automatic selecton:") {
-            {
-                a = configuration.autoflower;
+        appender.add(new CheckBox("Automatic selecton:", val -> Utils.setprefb("autoflower", configuration.autoflower = val), configuration.autoflower));
+        class ObservableList extends CheckListbox implements ObservableMapListener<String, CheckListboxItem> {
+            public ObservableList(final int w, final int h) {
+                super(w, h);
             }
 
-            public void set(boolean val) {
-                Utils.setprefb("autoflower", val);
-                configuration.autoflower = val;
-                a = val;
+            @Override
+            public void init(final Map<String, CheckListboxItem> base) {
+                items.addAll(base.values());
+                items.sort(Comparator.comparing(o -> Resource.getLocString(Resource.BUNDLE_FLOWER, o.name)));
             }
-        });
-        Config.flowerlist = new CheckListbox(140, 17) {
+
+            @Override
+            public void put(final String key, final CheckListboxItem val) {
+                items.add(val);
+                items.sort(Comparator.comparing(o -> Resource.getLocString(Resource.BUNDLE_FLOWER, o.name)));
+            }
+
+            @Override
+            public void remove(final String key) {
+                items.removeIf(i -> i.name.equals(key));
+                items.sort(Comparator.comparing(o -> Resource.getLocString(Resource.BUNDLE_FLOWER, o.name)));
+            }
+        }
+        ObservableList checkList = new ObservableList(140, 17) {
             @Override
             protected void itemclick(CheckListboxItem itm, int button) {
                 super.itemclick(itm, button);
-                Utils.setprefchklst("flowersel", Config.flowermenus);
+                Utils.setprefchklst("flowersel", Config.flowermenus.base);
             }
 
             protected void drawitemname(GOut g, CheckListboxItem itm) {
@@ -4596,12 +4657,11 @@ public class OptWnd extends Window {
                 T.dispose();
             }
         };
-        Utils.loadprefchklist("flowersel", Config.flowermenus);
-        Config.flowerlist.items.addAll(Config.flowermenus.values());
-        Config.flowerlist.items.sort(Comparator.comparing(o -> Resource.getLocString(Resource.BUNDLE_FLOWER, o.name)));
+        Utils.loadprefchklist("flowersel", Config.flowermenus.base);
+        Config.flowermenus.addListener(checkList);
         //  flowerlist.items.addAll(Config.flowermenus.values());
-        appender.add(Config.flowerlist);
-        Config.petalsearch = new TextEntry(140, "") {
+        appender.add(checkList);
+        TextEntry search = new TextEntry(140, "") {
             @Override
             public void changed() {
                 update();
@@ -4619,27 +4679,34 @@ public class OptWnd extends Window {
             }
 
             public void update() {
-                Config.flowerlist.items.clear();
-                for (Map.Entry<String, CheckListboxItem> entry : Config.flowermenus.entrySet()) {
-                    if (Resource.getLocString(Resource.BUNDLE_FLOWER, entry.getKey()).toLowerCase().contains(text().toLowerCase()))
-                        Config.flowerlist.items.add(entry.getValue());
+                checkList.filtered.clear();
+                if (text().isEmpty()) {
+                    checkList.filter = false;
+                } else {
+                    checkList.filter = true;
+                    for (Map.Entry<String, CheckListboxItem> entry : Config.flowermenus.entrySet()) {
+                        if (Resource.getLocString(Resource.BUNDLE_FLOWER, entry.getKey()).toLowerCase().contains(text().toLowerCase()))
+                            checkList.filtered.add(entry.getValue());
+                    }
+                    checkList.filtered.sort(Comparator.comparing(o -> Resource.getLocString(Resource.BUNDLE_FLOWER, o.name)));
                 }
-                Config.flowerlist.items.sort(Comparator.comparing(o -> Resource.getLocString(Resource.BUNDLE_FLOWER, o.name)));
             }
 
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Right Click to clear entry").tex();
             }
         };
-        appender.add(Config.petalsearch);
+        appender.add(search);
         appender.add(new Button(140, "Clear") {
             @Override
             public boolean mousedown(Coord mc, int btn) {
                 if (ui.modctrl && btn == 1) {
                     Config.flowermenus.clear();
-                    Config.flowerlist.items.clear();
+                    checkList.filter = false;
+                    checkList.items.clear();
+                    checkList.filtered.clear();
                     Utils.setcollection("petalcol", Config.flowermenus.keySet());
-                    Utils.setprefchklst("flowersel", Config.flowermenus);
+                    Utils.setprefchklst("flowersel", Config.flowermenus.base);
                 }
                 return (true);
             }
@@ -4649,12 +4716,12 @@ public class OptWnd extends Window {
             }
         });
 
-        flowermenus.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
+        flowermenus.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
         flowermenus.pack();
     }
 
     private void initquickactionsettings() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(quickactionsettings, new Coord(620, 350)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(quickactionsettings, UI.scale(620, 350)));
 
 //        appender.setVerticalMargin(VERTICAL_MARGIN);
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
@@ -4754,7 +4821,7 @@ public class OptWnd extends Window {
 //            }
 //        });
 
-        quickactionsettings.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
+        quickactionsettings.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
         quickactionsettings.pack();
     }
 
@@ -4899,7 +4966,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         }, new Coord(list.sz.x + 10, y));
-        autodropsettings.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
+        autodropsettings.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
         autodropsettings.pack();
     }
 
@@ -5136,12 +5203,12 @@ public class OptWnd extends Window {
 //                a = val;
 //            }
 //        });
-        chatsettings.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
+        chatsettings.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
         chatsettings.pack();
     }
 
     private void initHideMenu() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(hidesettings, new Coord(620, 350)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(hidesettings, UI.scale(620, 350)));
         appender.setVerticalMargin(2);
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
 
@@ -5264,12 +5331,12 @@ public class OptWnd extends Window {
         );
         appender.add(new CheckBox("Draw colored overlay for hidden objects. Hide will need to be toggled", val -> Utils.setprefb("showoverlay", Config.showoverlay = val), Config.showoverlay));
         appender.add(new CheckBox("Show game object overlays while hidden", val -> Utils.setprefb("showhiddenoverlay", configuration.showhiddenoverlay = val), configuration.showhiddenoverlay));
-        hidesettings.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
+        hidesettings.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
         hidesettings.pack();
     }
 
     private void initSoundAlarms() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(soundalarms, new Coord(620, 350)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(soundalarms, UI.scale(620, 350)));
         appender.add(new Label("Individual alarms are now set by alt+right clicking an object, or navigating to the alert menu and adding manually."));
         appender.add(new Label("The alert menu can be found by navigating through the bottom right menugrid using 'Game Windows'"));
         appender.setVerticalMargin(VERTICAL_MARGIN);
@@ -5362,7 +5429,7 @@ public class OptWnd extends Window {
             }
         });
 
-        soundalarms.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
+        soundalarms.add(new PButton(200, "Back", 27, main), UI.scale(210, 360));
         soundalarms.pack();
     }
 
@@ -5675,7 +5742,7 @@ public class OptWnd extends Window {
     public void setMapSettings() {
         final String charname = ui.gui.chrid;
 
-        CheckListbox boulderlist = new CheckListbox(140, 16) {
+        CheckListbox boulderlist = new CheckListbox(UI.scale(140), 16) {
             @Override
             protected void itemclick(CheckListboxItem itm, int button) {
                 super.itemclick(itm, button);
@@ -5684,9 +5751,9 @@ public class OptWnd extends Window {
         };
         boulderlist.items.addAll(Config.boulders.values());
         boulderlist.items.sort(Comparator.comparing(a -> a.name));
-        map.add(boulderlist, new Coord(10, 15));
+        oldMap.add(boulderlist, new Coord(10, 15));
 
-        CheckListbox bushlist = new CheckListbox(140, 16) {
+        CheckListbox bushlist = new CheckListbox(UI.scale(140), 16) {
             @Override
             protected void itemclick(CheckListboxItem itm, int button) {
                 super.itemclick(itm, button);
@@ -5695,9 +5762,9 @@ public class OptWnd extends Window {
         };
         bushlist.items.addAll(Config.bushes.values());
         bushlist.items.sort(Comparator.comparing(a -> a.name));
-        map.add(bushlist, new Coord(165, 15));
+        oldMap.add(bushlist, new Coord(165, 15));
 
-        CheckListbox treelist = new CheckListbox(140, 16) {
+        CheckListbox treelist = new CheckListbox(UI.scale(140), 16) {
             @Override
             protected void itemclick(CheckListboxItem itm, int button) {
                 super.itemclick(itm, button);
@@ -5706,9 +5773,9 @@ public class OptWnd extends Window {
         };
         treelist.items.addAll(Config.trees.values());
         treelist.items.sort(Comparator.comparing(a -> a.name));
-        map.add(treelist, new Coord(320, 15));
+        oldMap.add(treelist, new Coord(320, 15));
 
-        CheckListbox iconslist = new CheckListbox(140, 16) {
+        CheckListbox iconslist = new CheckListbox(UI.scale(140), 16) {
             @Override
             protected void itemclick(CheckListboxItem itm, int button) {
                 super.itemclick(itm, button);
@@ -5717,9 +5784,9 @@ public class OptWnd extends Window {
         };
         iconslist.items.addAll(Config.icons.values());
         iconslist.items.sort(Comparator.comparing(a -> a.name));
-        map.add(iconslist, new Coord(475, 15));
+        oldMap.add(iconslist, new Coord(475, 15));
 
-        map.add(new CheckBox("Show road Endpoints") {
+        oldMap.add(new CheckBox("Show road Endpoints") {
             {
                 a = Config.showroadendpoint;
             }
@@ -5731,7 +5798,7 @@ public class OptWnd extends Window {
             }
         }, 240, 330);
 
-        map.add(new CheckBox("Show road Midpoints") {
+        oldMap.add(new CheckBox("Show road Midpoints") {
             {
                 a = Config.showroadmidpoint;
             }
@@ -5743,7 +5810,7 @@ public class OptWnd extends Window {
             }
         }, 240, 350);
 
-        map.add(new CheckBox("Hide ALL Icons") {
+        oldMap.add(new CheckBox("Hide ALL Icons") {
             {
                 a = Config.hideallicons;
             }
@@ -5756,13 +5823,13 @@ public class OptWnd extends Window {
         }, 425, 330);
 
 
-        map.add(new PButton(140, "Clear Boulders", 27, clearboulders), new Coord(10, 302));
-        map.add(new PButton(140, "Clear Bushes", 27, clearbushes), new Coord(165, 302));
-        map.add(new PButton(140, "Clear Trees", 27, cleartrees), new Coord(320, 302));
-        map.add(new PButton(140, "Clear Icons", 27, clearhides), new Coord(475, 302));
+        oldMap.add(new PButton(140, "Clear Boulders", 27, clearboulders), new Coord(10, 302));
+        oldMap.add(new PButton(140, "Clear Bushes", 27, clearbushes), new Coord(165, 302));
+        oldMap.add(new PButton(140, "Clear Trees", 27, cleartrees), new Coord(320, 302));
+        oldMap.add(new PButton(140, "Clear Icons", 27, clearhides), new Coord(475, 302));
 
 
-        map.pack();
+        oldMap.pack();
     }
 
     public void wdgmsg(Widget sender, String msg, Object... args) {
@@ -5788,37 +5855,44 @@ public class OptWnd extends Window {
         int maxlines = txt.maxLines = 200;
         log.pack();
         try {
+            String git = "";
             {
                 try (InputStream in = ClassLoader.getSystemResourceAsStream("buildinfo")) {
                     if (in != null) {
                         Properties info = new Properties();
                         info.load(in);
                         String ver = info.getProperty("version");
-                        String git = info.getProperty("git-rev");
+                        git = info.getProperty("git-rev");
+                        String commit = info.getProperty("commit");
                         txt.append(String.format("Current version: %s", ver));
                         txt.append(String.format("Current git: %s", git));
+                        txt.append(String.format("%s", commit.replaceAll("/;", "\n")));
                     }
                 } catch (IOException e) {
                 }
             }
 
-            InputStream in = ClassLoader.getSystemResourceAsStream("CHANGELOG.txt");
-            BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-            File f = Config.getFile("CHANGELOG.txt");
-            FileOutputStream out = new FileOutputStream(f);
-            String strLine;
-            int count = 0;
-            while ((count < maxlines) && (strLine = br.readLine()) != null) {
-                txt.append(strLine);
-                out.write((strLine + Config.LINE_SEPARATOR).getBytes());
-                count++;
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream("CHANGELOG.txt"), StandardCharsets.UTF_8))) {
+                try (FileOutputStream out = new FileOutputStream(Config.getFile("CHANGELOG.txt"))) {
+                    String strLine;
+                    int count = 0;
+                    while ((count < maxlines) && (strLine = br.readLine()) != null) {
+                        txt.append(strLine.contains("%s") ? String.format(strLine, git) : strLine);
+                        out.write((strLine + Config.LINE_SEPARATOR).getBytes());
+                        count++;
+                    }
+                }
             }
-            br.close();
-            out.close();
-            in.close();
         } catch (IOException ignored) {
         }
         txt.setprog(0);
+
+        log.add(new Button(log.sz.x, "REPAIR PREFERENCES").action(() -> {
+            try {
+                ui.cons.run("sqliteexport");
+            } catch (Exception e) {}
+        }), log.pos("cbl")).settip("After exporting client will turn off");
+        log.pack();
     }
 
     private Dropbox<String> makeAlarmDropdownUnknown() {
@@ -6132,8 +6206,8 @@ public class OptWnd extends Window {
 
         public VideoPanel(Panel back) {
             super();
-            add(new PButton(200, "Back", 27, back), new Coord(210, 360));
-            resize(new Coord(620, 400));
+            add(new PButton(200, "Back", 27, back), UI.scale(210, 360));
+            resize(UI.scale(620, 400));
         }
 
         public void draw(GOut g) {
@@ -6150,20 +6224,9 @@ public class OptWnd extends Window {
 
             public CPanel(GLSettings gcf) {
                 this.cf = gcf;
-                final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(this, new Coord(620, 350)));
+                final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(this, UI.scale(620, 350)));
                 appender.setVerticalMargin(2);
                 appender.setHorizontalMargin(HORIZONTAL_MARGIN);
-                appender.add(new CheckBox("Show Entering/Leaving Messages in Sys Log instead of large Popup - FPS increase?") {
-                    {
-                        a = Config.DivertPolityMessages;
-                    }
-
-                    public void set(boolean val) {
-                        Utils.setprefb("DivertPolityMessages", val);
-                        Config.DivertPolityMessages = val;
-                        a = val;
-                    }
-                });
                 appender.add(new CheckBox("Per-fragment lighting") {
                     {
                         a = cf.flight.val;
@@ -6459,10 +6522,21 @@ public class OptWnd extends Window {
 
                             @Override
                             public Object tooltip(Coord c0, Widget prev) {
-                                return RichText.render(RichText.Parser.quote("Animation cooldown: " + val + " ms\n0 - always on, 5000 - always off"), 300).tex();
+                                return RichText.render(RichText.Parser.quote("Animation cooldown: " + val + " ms\n0 - always on, 5000 - always off"), UI.scale(300)).tex();
                             }
                         }
                 );
+                appender.addRow(new CheckBox("Background UI timeout ticks", val -> Utils.setprefb("uitickwait", UI.canwait = val), UI.canwait), new HSlider(200, 1, 10000, (int) UI.timewait) {
+                    @Override
+                    public void changed() {
+                        Utils.setprefi("uitickwaittime", (int) (UI.timewait = val));
+                    }
+
+                    @Override
+                    public Object tooltip(Coord c0, Widget prev) {
+                        return Text.render("UI tick timeout: " + val + "ms").tex();
+                    }
+                });
 //                appender.add(new CheckBox("Lower terrain draw distance - Will increase performance, but look like shit. (requires logout)") {
 //                    {
 //                        a = Config.lowerterraindistance;
@@ -6488,6 +6562,8 @@ public class OptWnd extends Window {
                         new CheckBox("newfags", v -> Utils.setprefb("showgobsnewfags", configuration.showgobsnewfags = v), configuration.showgobsnewfags),
                         new CheckBox("dynamic", v -> Utils.setprefb("showgobsdynamic", configuration.showgobsdynamic = v), configuration.showgobsdynamic)
                         );
+                appender.add(new IndirCheckBox("Never delete grids", KEEPGRIDS));
+                appender.add(new IndirCheckBox("Never delete gobs", KEEPGOBS));
                 appender.addRow(new CheckBox("Gob Tick", v -> Utils.setprefb("enablegobticks", configuration.enablegobticks = v), configuration.enablegobticks), new CheckBox("Gob Ctick", v -> Utils.setprefb("enablegobcticks", configuration.enablegobcticks = v), configuration.enablegobcticks));
                 appender.add(new CheckBox("Disable biome tile transitions") {
                     {
@@ -6597,17 +6673,6 @@ public class OptWnd extends Window {
                     public void set(boolean val) {
                         Utils.setprefb("simpleforage", val);
                         Config.simpleforage = val;
-                        a = val;
-                    }
-                });
-                appender.add(new CheckBox("Show FPS") {
-                    {
-                        a = Config.showfps;
-                    }
-
-                    public void set(boolean val) {
-                        Utils.setprefb("showfps", val);
-                        Config.showfps = val;
                         a = val;
                     }
                 });

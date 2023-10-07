@@ -664,7 +664,7 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
                     } else if (ke.getID() == KeyEvent.KEY_RELEASED) {
                         ui.keyup(ke);
                     } else if (ke.getID() == KeyEvent.KEY_TYPED) {
-                        if (lastkey != null && (lastkey.getWhen() == ke.getWhen() || lastkey.getWhen() + 1 == ke.getWhen()) && ke.getKeyChar() == lastkey.getKeyChar())
+                        if (lastkey != null && ke.getWhen() - lastkey.getWhen() <= 5 && ke.getKeyChar() == lastkey.getKeyChar())
                             ui.type(ke);
                         else
                             ui.keydown(ke);
