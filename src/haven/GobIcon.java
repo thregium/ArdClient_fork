@@ -27,6 +27,7 @@
 package haven;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -36,11 +37,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class GobIcon extends GAttrib {
-    private static final int size = 20;
+    private static final int size = UI.scale(20);
     public static final PUtils.Convolution filter = new PUtils.Hanning(1);
-    private static final Map<Indir<Resource>, Image> cache = new WeakHashMap<Indir<Resource>, Image>();
+    private static final Map<Indir<Resource>, Image> cache = new WeakHashMap<>();
     public final Indir<Resource> res;
     private Image img;
 
@@ -83,7 +87,7 @@ public class GobIcon extends GAttrib {
             this.rimg = rimg;
             BufferedImage buf = PUtils.copy(rimg.img);
             if ((buf.getWidth() > size) || (buf.getHeight() > size)) {
-                buf = PUtils.convolve(buf, new Coord(20, 20), filter);
+                buf = PUtils.convolve(buf, UI.scale(20, 20), filter);
             }
             buf = Utils.outline2(buf, Color.GRAY);
             TexI tex = new TexI(buf);
@@ -104,7 +108,7 @@ public class GobIcon extends GAttrib {
             if (texgrey == null) {
                 BufferedImage bimg = PUtils.monochromize(rimg.img, Color.WHITE);
                 if ((bimg.getWidth() > size) && (bimg.getHeight() > size)) {
-                    bimg = PUtils.convolvedown(bimg, new Coord(20, 20), filter);
+                    bimg = PUtils.convolvedown(bimg, UI.scale(20, 20), filter);
                 }
                 texgrey = new TexI(bimg);
             }
@@ -250,9 +254,11 @@ public class GobIcon extends GAttrib {
 
         public class IconList extends Searchbox<Icon> {
             private Coord showc;
+            private List<Icon> all = Collections.emptyList();
             private List<Icon> ordered = Collections.emptyList();
             private Map<String, Setting> cur = null;
             private boolean reorder = false;
+            private Filter filter = Filter.ALL;
 
             private IconList(int w, int h) {
                 super(w, h, elh);
@@ -272,12 +278,13 @@ public class GobIcon extends GAttrib {
                     for (Setting set : cur.values())
                         ordered.add(new Icon(set));
                     this.cur = cur;
-                    this.ordered = ordered;
+                    this.all = ordered;
                     reorder = true;
                 }
                 if (reorder) {
                     reorder = false;
-                    for (Icon icon : ordered) {
+                    this.ordered = all.stream().filter(filter.predicate).collect(Collectors.toList());
+                    for (Icon icon : ordered.stream().filter(filter.predicate).collect(Collectors.toList())) {
                         if (icon.name == null) {
                             try {
                                 Resource.Tooltip name = icon.conf.res.loadsaved(Resource.remote()).layer(Resource.tooltip);
@@ -308,7 +315,7 @@ public class GobIcon extends GAttrib {
             }
 
             public boolean searchmatch(int idx, String txt) {
-                Icon icon = ordered.get(idx);
+                Icon icon = listitem(idx);
                 if (icon.name == null)
                     return (false);
                 return (icon.name.text.toLowerCase().contains(txt.toLowerCase()));
@@ -319,8 +326,7 @@ public class GobIcon extends GAttrib {
                 super.draw(g);
             }
 
-            protected void drawbg(GOut g) {
-            }
+            protected void drawbg(GOut g) {}
 
             public void drawitem(GOut g, Icon icon, int idx) {
                 if (soughtitem(idx)) {
@@ -388,20 +394,64 @@ public class GobIcon extends GAttrib {
                 if (save != null)
                     save.run();
             }
+
+            public boolean filter(final Filter filter) {
+                Filter old = this.filter;
+                boolean ret = old == filter;
+                this.filter = ret ? Filter.ALL : filter;
+                reorder = true;
+                return (ret);
+            }
+        }
+
+        enum Filter {
+            ALL(i -> true),
+            TREE(predicate("(gfx/terobjs/mm/trees/.*)")),
+            BUSH(predicate("(gfx/terobjs/mm/bushes/.*)")),
+            BOULDER(predicate("(gfx/invobjs/alabaster)|(gfx/invobjs/apatite)|(gfx/invobjs/arkose)|(gfx/invobjs/basalt)|(gfx/invobjs/blackcoal)|(gfx/invobjs/magnetite)|(gfx/invobjs/hematite)|(gfx/invobjs/breccia)|(gfx/invobjs/cassiterite)|(gfx/invobjs/chalcopyrite)|(gfx/invobjs/chert)|(gfx/invobjs/cinnabar)|(gfx/invobjs/diabase)|(gfx/invobjs/diorite)|(gfx/invobjs/dolomite)|(gfx/invobjs/eclogite)|(gfx/invobjs/feldspar)|(gfx/invobjs/flint)|(gfx/invobjs/fluorospar)|(gfx/invobjs/gabbro)|(gfx/invobjs/galena)|(gfx/invobjs/gneiss)|(gfx/invobjs/granite)|(gfx/invobjs/graywacke)|(gfx/invobjs/greenschist)|(gfx/invobjs/ilmenite)|(gfx/invobjs/hornsilver)|(gfx/invobjs/hornblende)|(gfx/invobjs/limonite)|(gfx/invobjs/limestone)|(gfx/invobjs/jasper)|(gfx/invobjs/corund)|(gfx/invobjs/kyanite)|(gfx/invobjs/leadglance)|(gfx/invobjs/nagyagite)|(gfx/invobjs/malachite)|(gfx/invobjs/marble)|(gfx/invobjs/mica)|(gfx/invobjs/microlite)|(gfx/invobjs/olivine)|(gfx/invobjs/orthoclase)|(gfx/invobjs/peacockore)|(gfx/invobjs/pegmatite)|(gfx/invobjs/porphyry)|(gfx/invobjs/pumice)|(gfx/invobjs/quartz)|(gfx/invobjs/rhyolite)|(gfx/invobjs/sandstone)|(gfx/invobjs/schist)|(gfx/invobjs/serpentine)|(gfx/invobjs/argentite)|(gfx/invobjs/slate)|(gfx/invobjs/soapstone)|(gfx/invobjs/sodalite)|(gfx/invobjs/sunstone)|(gfx/invobjs/cuprite)|(gfx/invobjs/zincspar)")),
+            HERBS(predicate("(gfx/invobjs/herbs/.*)|(gfx/invobjs/small/tangledbramble)|(gfx/invobjs/small/thornythistle)|(gfx/invobjs/small/bladderwrack)|(gfx/invobjs/champignon-small)|(gfx/invobjs/clay-cave)|(gfx/invobjs/clay-gray)|(gfx/invobjs/small/yulelights)|(gfx/invobjs/small/yulestar)|(gfx/invobjs/whirlingsnowflake)")),
+            KRITTER(predicate("(gfx/kritter/.*)|(gfx/invobjs/bayshrimp)|(gfx/invobjs/bogturtle)|(gfx/invobjs/brimstonebutterfly)|(gfx/invobjs/bunny)|(gfx/invobjs/cavecentipede)|(gfx/invobjs/cavemoth)|(gfx/invobjs/rooster)|(gfx/invobjs/crab)|(gfx/invobjs/earthworm)|(gfx/invobjs/dragonfly-emerald)|(gfx/invobjs/silkmoth-f)|(gfx/invobjs/firefly)|(gfx/invobjs/forestlizard)|(gfx/invobjs/forestsnail)|(gfx/invobjs/frog)|(gfx/invobjs/grasshopper)|(gfx/invobjs/grub)|(gfx/invobjs/hen)|(gfx/invobjs/irrbloss)|(gfx/invobjs/jellyfish)|(gfx/invobjs/ladybug)|(gfx/invobjs/lobster)|(gfx/invobjs/magpie)|(gfx/invobjs/mallard-m)|(gfx/invobjs/mallard-f)|(gfx/invobjs/mole)|(gfx/invobjs/monarchbutterfly)|(gfx/invobjs/moonmoth)|(gfx/invobjs/ptarmigan)|(gfx/invobjs/quail)|(gfx/invobjs/rabbit)|(gfx/invobjs/rabbit-doe)|(gfx/invobjs/rat)|(gfx/invobjs/rockdove)|(gfx/invobjs/sandflea)|(gfx/invobjs/seagull)|(gfx/invobjs/springbumblebee)|(gfx/invobjs/stagbeetle)|(gfx/invobjs/swan)|(gfx/invobjs/toad)|(gfx/invobjs/small/snapdragon)|(gfx/invobjs/waterstrider)|(gfx/invobjs/woodgrouse-m)|(gfx/invobjs/woodgrouse-f)|(gfx/invobjs/woodworm)")),
+            MARK(predicate("(gfx/terobjs/mm/[a-z]+)|(gfx/hud/mmap/.*)|(gfx/invobjs/clue-.*)"));
+
+            final Predicate<Icon> predicate;
+
+            Filter(final Predicate<Icon> predicate) {
+                this.predicate = predicate;
+            }
+
+            public boolean check(final Icon icon) {
+                return (predicate.test(icon));
+            }
+
+            private static Predicate<Icon> predicate(final String name) {
+                return (i -> i.conf.res.name().matches(name));
+            }
         }
 
         public SettingsWindow(Settings conf, Runnable save) {
-            super(Coord.z, "Icon settings");
+            super(Coord.z, "Icon settings", "Icon settings");
             this.conf = conf;
             this.save = save;
             Composer composer = new Composer(this).vmrgn(UI.scale(5)).hmrgn(UI.scale(5));
-            IconList list = composer.add(new IconList(UI.scale(250), 21));
+            IconList list = new IconList(UI.scale(250), 21);
+            List<ImageButton> blist = new ArrayList<>();
+            blist.addAll(Arrays.asList(
+                    new ImageButton("gfx/hud/rosters/growth", blist, () -> list.filter(Filter.TREE)),
+                    new ImageButton("gfx/hud/rosters/alive", blist, () -> list.filter(Filter.BUSH)),
+                    new ImageButton("gfx/invobjs/limestone", blist, () -> list.filter(Filter.BOULDER)),
+                    new ImageButton("gfx/hud/rosters/metabolism", blist, () -> list.filter(Filter.HERBS)),
+                    new ImageButton("gfx/invobjs/rabbit-doe", blist, () -> list.filter(Filter.KRITTER)),
+                    new ImageButton("gfx/hud/curs/flag", blist, () -> list.filter(Filter.MARK))
+                    ));
+            composer.addar(UI.scale(230), blist.toArray(new ImageButton[0]));
+            composer.add(list);
             composer.hpad(UI.scale(5));
             composer.add(new CheckBox("Notification on newly seen icons") {
                 {
                     this.a = conf.notify;
                 }
 
+                @Override
                 public void changed(boolean val) {
                     conf.notify = val;
                     if (save != null)
@@ -410,11 +460,77 @@ public class GobIcon extends GAttrib {
             });
             composer.hpad(UI.scale(10));
             composer.addar(UI.scale(230),
-                    new Button(UI.scale(50), "Show all", false, list::showall),
-                    new Button(UI.scale(50), "Hide all", false, list::hideall),
-                    new Button(UI.scale(80), "Reset to default", false, list::reset)
+                    new Button("All", list::showall),
+                    new Button("None", list::hideall),
+                    new Button("Reset", list::reset)
             );
             pack();
+        }
+
+        private static class ImageButton extends IButton {
+            private final String name;
+            private final List<ImageButton> list;
+            private final BooleanSupplier action;
+            private boolean enable;
+            private static Color dcol = new Color(87, 82, 82, 128);
+            private static Color ecol = new Color(218, 101, 101, 128);
+
+            public ImageButton(final String name, final List<ImageButton> list, final BooleanSupplier action) {
+                super(img(name));
+                this.name = name;
+                this.list = list;
+                this.action = action;
+            }
+
+            private static BufferedImage img(String name) {
+                BufferedImage img = Resource.remote().loadwait(name).layer(Resource.imgc).img;
+                Coord tsz;
+                if (img.getWidth() > img.getHeight())
+                    tsz = new Coord(elh, (elh * img.getHeight()) / img.getWidth());
+                else
+                    tsz = new Coord((elh * img.getWidth()) / img.getHeight(), elh);
+                img = PUtils.convolve(img, tsz, filter);
+                return (img);
+            }
+
+            @Override
+            public void draw(BufferedImage buf) {
+                Graphics g = buf.getGraphics();
+                if (a)
+                    g.drawImage(down, 1, 1, null);
+                else if (h)
+                    g.drawImage(hover, 0, 1, null);
+                else
+                    g.drawImage(up, 0, 0, null);
+                g.dispose();
+            }
+
+            @Override
+            public void draw(GOut g) {
+                Color col;
+                if (enable) col = ecol;
+                else if (a) col = found;
+                else if (h) col = other;
+                else col = every;
+                g.chcolor(col);
+                g.frect(Coord.z, sz);
+                g.chcolor();
+                g.chcolor(dcol);
+                g.rect(Coord.z, sz);
+                g.chcolor();
+                super.draw(g);
+            }
+
+            @Override
+            public void click() {
+                list.forEach(b -> b.enable = false);
+                enable = !action.getAsBoolean();
+            }
+
+            @Override
+            public boolean checkhit(final Coord c) {
+                return (c.isect(Coord.z, sz));
+            }
         }
     }
 }

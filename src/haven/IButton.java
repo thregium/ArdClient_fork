@@ -65,6 +65,14 @@ public class IButton extends SIWidget {
         this(up, down, up);
     }
 
+    public IButton(BufferedImage up) {
+        this(up, up, up);
+    }
+
+    public IButton(BufferedImage up, Runnable action) {
+        this(up, up, up, action);
+    }
+
     public IButton(String base, String up, String down, String hover, final Runnable action) {
         this(load(base + up), load(base + down), load(base + (hover == null ? up : hover)), action);
     }

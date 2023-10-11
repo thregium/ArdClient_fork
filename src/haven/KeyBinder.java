@@ -301,7 +301,7 @@ public class KeyBinder {
         private final Func0 invalidate;
 
         public ShortcutWidget(KeyBind bind, Func0 invalidate) {
-            btn = add(new Button(85, bind.shortcut()) {
+            btn = add(new Button(UI.scale(85), bind.shortcut()) {
                           @Override
                           public void click() {
                               ui.root.add(new ShortcutSelectorWdg(keyBind, ShortcutWidget.this), ui.mc.sub(50, 20));
@@ -313,15 +313,15 @@ public class KeyBinder {
                               return super.mouseup(Coord.z, button);
                           }
                       },
-                    225, 0);
+                    UI.scale(225, 0));
             this.keyBind = bind;
             this.invalidate = invalidate;
             if (bind.action.description != null) {
                 tooltip = RichText.render(bind.action.description, UI.scale(200));
             }
             btn.autosize(true);
-            btn.c.x = 300 - btn.sz.x;
-            add(new Label(bind.action.name), 5, 5);
+            btn.c.x = UI.scale(300) - btn.sz.x;
+            add(new Label(bind.action.name), UI.scale(5, 5));
         }
 
         @Override
@@ -336,13 +336,13 @@ public class KeyBinder {
         public void update() {
             keyBind = KeyBinder.get(keyBind.action);
             btn.change(keyBind.shortcut());
-            btn.c.x = 300 - btn.sz.x;
+            btn.c.x = UI.scale(300) - btn.sz.x;
         }
     }
 
     private static class ShortcutSelectorWdg extends Widget {
         private static final Color BGCOLOR = new Color(32, 64, 32, 196);
-        private static final Coord PAD = new Coord(5, 5);
+        private static final Coord PAD = UI.scale(5, 5);
         private final KeyBind bind;
         private final Result listener;
         private final Tex label;
@@ -360,6 +360,22 @@ public class KeyBinder {
         @Override
         public boolean keydown(KeyEvent ev) {
             int code = ev.getKeyCode();
+            if (code == 0 && configuration.keyboardkeys) {
+                try {
+                    String keyString = ev.toString();
+                    String rawCodeText = "rawCode=";
+                    int rawCodeIndex = keyString.indexOf(rawCodeText);
+                    if (rawCodeIndex != -1) {
+                        String rawCodeString = keyString.substring(rawCodeIndex + rawCodeText.length(), keyString.indexOf(',', rawCodeIndex));
+                        int rawCodeInt = Integer.parseInt(rawCodeString);
+                        if (rawCodeIndex != 0 && rawCodeIndex != ev.getKeyCode()) {
+                            code = rawCodeInt;
+                        }
+                    }
+                } catch (Exception exception) {
+                    dev.simpleLog(exception);
+                }
+            }
             if (code != 0
                     && code != KeyEvent.VK_CONTROL
                     && code != KeyEvent.VK_SHIFT

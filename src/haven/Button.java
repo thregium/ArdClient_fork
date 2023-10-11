@@ -73,7 +73,7 @@ public class Button extends SIWidget {
     }
 
     public static Button wrapped(int w, String text) {
-        Button ret = new Button(w, tf.renderwrap(Resource.getLocString(Resource.BUNDLE_BUTTON, text), w - 10));
+        Button ret = new Button(w, tf.renderwrap(Resource.getLocString(Resource.BUNDLE_BUTTON, text), w - UI.scale(10)));
         ret.stext = Resource.getLocString(Resource.BUNDLE_BUTTON, text);
         ret.origtext = text;
         return (ret);
@@ -96,7 +96,7 @@ public class Button extends SIWidget {
         this.cont = this.text.img;
         this.action = action;
         if (this.text != null)
-            this.resize(new Coord(Math.max(w, this.text.sz().x + 10), sz.y));
+            this.resize(new Coord(Math.max(w, this.text.sz().x + UI.scale(10)), sz.y));
     }
 
     public Button(int w, String text, boolean lg) {

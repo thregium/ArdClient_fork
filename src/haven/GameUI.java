@@ -1673,8 +1673,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             } else if ((polities.contains(sender)) && (msg == "close")) {
                 sender.hide();
             } else if (sender == iconwnd) {
-                ui.destroy(iconwnd);
-                iconwnd = null;
+                iconwnd.hide();
                 return;
             }
         }

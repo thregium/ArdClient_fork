@@ -626,10 +626,9 @@ public class MapWnd extends ResizableWnd {
                         return;
                     if (gui.iconwnd == null) {
                         gui.iconwnd = new GobIcon.SettingsWindow(gui.iconconf, () -> Utils.defer(gui::saveiconconf));
-                        gui.fitwdg(gui.add(gui.iconwnd, Utils.getprefc("wndc-icon", new Coord(200, 200))));
+                        gui.fitwdg(gui.add(gui.iconwnd, Utils.getprefc("wndc-icon", UI.scale(200, 200))));
                     } else {
-                        ui.destroy(gui.iconwnd);
-                        gui.iconwnd = null;
+                        gui.iconwnd.toggleVisibility();
                     }
                 }
             }), viewdist.c.add(viewdist.sz.x + spacer, 0));

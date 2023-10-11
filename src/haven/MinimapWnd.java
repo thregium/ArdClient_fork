@@ -272,10 +272,9 @@ public class MinimapWnd extends ResizableWnd {
                 return;
             if (ui.gui.iconwnd == null) {
                 ui.gui.iconwnd = new GobIcon.SettingsWindow(ui.gui.iconconf, () -> Utils.defer(ui.gui::saveiconconf));
-                ui.gui.fitwdg(ui.gui.add(ui.gui.iconwnd, Utils.getprefc("wndc-icon", new Coord(200, 200))));
+                ui.gui.fitwdg(ui.gui.add(ui.gui.iconwnd, Utils.getprefc("wndc-icon", UI.scale(200, 200))));
             } else {
-                ui.destroy(ui.gui.iconwnd);
-                ui.gui.iconwnd = null;
+                ui.gui.iconwnd.toggleVisibility();
             }
         }), viewdist.c.add(viewdist.sz.x + spacer, 0));
         final Button setting = add(new Button(0, "⚙", () -> ui.gui.toggleMapSettings()) {
