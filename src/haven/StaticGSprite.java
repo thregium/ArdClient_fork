@@ -49,6 +49,10 @@ public class StaticGSprite extends GSprite implements GSprite.ImageSprite {
         g.image(img, Coord.z);
     }
 
+    public void draw(GOut g, Coord sz) {
+        g.image(img, Coord.z, sz);
+    }
+
     public Coord sz() {
         return (img.sz);
     }

@@ -488,6 +488,22 @@ public class MapFileWidget extends Widget implements Console.Directory {
         }
     }
 
+    private static final Map<Coord, Tex> gridreds = Collections.synchronizedMap(new HashMap<>());
+    private static Tex gridred(Coord sz) {
+        return (gridreds.computeIfAbsent(sz, s -> {
+            BufferedImage ret = TexI.mkbuf(sz);
+            int col = Color.WHITE.getRGB();
+            for (int x = 0; x < sz.x; x++) {
+                ret.setRGB(x, 0, col);
+                ret.setRGB(x, sz.y - 1, col);
+            }
+            for (int y = 1; y < sz.y - 1; y++) {
+                ret.setRGB(0, y, col);
+                ret.setRGB(sz.x - 1, y, col);
+            }
+            return (new TexI(ret));
+        }));
+    }
     public void draw(GOut g) {
         Location loc = this.curloc;
         if (loc == null)
@@ -515,12 +531,15 @@ public class MapFileWidget extends Widget implements Console.Directory {
                 continue;
             }
             if (configuration.bigmapshowgrid) {
-                g.image(gridred, ul, cmaps.div(scalef()));
+                g.chcolor(new Color(configuration.mapgridcolor, true));
+//                g.image(gridred, ul, cmaps.div(scalef()));
+                g.image(gridred(cmaps.div(scalef())), ul);
 //                g.chcolor(Color.RED);
 //                Coord rect = cmaps.div(scalef());
 //                g.dottedline(ul, ul.add(rect.x, 0), 1);
 //                g.dottedline(ul, ul.add(0, rect.y), 1);
 //                g.chcolor();
+                g.chcolor();
             }
         }
         if ((markers == null) || (file.markerseq != markerseq))
@@ -1069,19 +1088,21 @@ public class MapFileWidget extends Widget implements Console.Directory {
 
     public void uploadMarks() {
         if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
-            String username = ui.gui.chrid;
-            if (!username.isEmpty() && configuration.loadMapSetting(username, "mapper")) {
-                MappingClient map = MappingClient.getInstance(username);
-                if (map != null) {
-                    map.ProcessMap(file, (m) -> {
-                        if (m instanceof MapFile.SMarker) {
-                            return (((MapFile.SMarker) m).autosend);
-                        }
-                        if (m instanceof MapFile.PMarker) {
-                            return ((MapFile.PMarker) m).color.equals(Color.GREEN) && configuration.loadMapSetting(username, "green") && !m.name().isEmpty();
-                        }
-                        return false;
-                    });
+            if (!ui.gui.chrid.isEmpty()) {
+                String username = ui.sess.username + "/" + ui.gui.chrid;
+                if (configuration.loadMapSetting(username, "mapper")) {
+                    MappingClient map = MappingClient.getInstance(username);
+                    if (map != null) {
+                        map.ProcessMap(file, (m) -> {
+                            if (m instanceof MapFile.SMarker) {
+                                return (((MapFile.SMarker) m).autosend);
+                            }
+                            if (m instanceof MapFile.PMarker) {
+                                return ((MapFile.PMarker) m).color.equals(Color.GREEN) && configuration.loadMapSetting(username, "green") && !m.name().isEmpty();
+                            }
+                            return false;
+                        });
+                    }
                 }
             }
         }
@@ -1089,21 +1110,23 @@ public class MapFileWidget extends Widget implements Console.Directory {
 
     public void uploadMark(Marker marker) {
         if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
-            String username = ui.gui.chrid;
-            if (!username.isEmpty() && configuration.loadMapSetting(username, "mapper")) {
-                MappingClient map = MappingClient.getInstance(username);
-                if (map != null) {
-                    Predicate<Marker> p = (m) -> {
-                        if (m instanceof MapFile.SMarker) {
-                            return (((MapFile.SMarker) m).autosend);
-                        }
-                        if (m instanceof MapFile.PMarker) {
-                            return ((MapFile.PMarker) m).color.equals(Color.GREEN) && configuration.loadMapSetting(username, "green") && !m.name().isEmpty();
-                        }
-                        return false;
-                    };
-                    if (p.test(marker))
-                        map.Sendmarker(file, marker);
+            if (!ui.gui.chrid.isEmpty()) {
+                String username = ui.sess.username + "/" + ui.gui.chrid;
+                if (configuration.loadMapSetting(username, "mapper")) {
+                    MappingClient map = MappingClient.getInstance(username);
+                    if (map != null) {
+                        Predicate<Marker> p = (m) -> {
+                            if (m instanceof MapFile.SMarker) {
+                                return (((MapFile.SMarker) m).autosend);
+                            }
+                            if (m instanceof MapFile.PMarker) {
+                                return ((MapFile.PMarker) m).color.equals(Color.GREEN) && configuration.loadMapSetting(username, "green") && !m.name().isEmpty();
+                            }
+                            return false;
+                        };
+                        if (p.test(marker))
+                            map.Sendmarker(file, marker);
+                    }
                 }
             }
         }

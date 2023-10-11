@@ -283,13 +283,18 @@ public class OptWnd extends Window {
                         String text = text();
                         Utils.setpref("vendan-mapv4-endpoint", text);
                         if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
-                            MappingClient map = MappingClient.getInstance(ui.gui.chrid);
-                            if (map != null) {
-                                map.SetEndpoint(text);
+                            if (!ui.gui.chrid.isEmpty()) {
+                                String username = ui.sess.username + "/" + ui.gui.chrid;
+                                MappingClient map = MappingClient.getInstance(username);
+                                if (map != null) {
+                                    map.SetEndpoint(text);
+                                    map.EnableGridUploads(true);
+                                    map.SetPlayerName(username);
 
-                                Gob player = ui.gui.map.player();
-                                if (player != null) {
-                                    map.CheckGridCoord(player.rc);
+                                    Gob player = ui.gui.map.player();
+                                    if (player != null) {
+                                        map.CheckGridCoord(player.rc);
+                                    }
                                 }
                             }
                         }
@@ -301,8 +306,8 @@ public class OptWnd extends Window {
         appender.add(new CheckBox("Enable mapv4 mapper") {
             public void set(boolean val) {
                 if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
-                    String username = ui.gui.chrid;
-                    if (!username.isEmpty()) {
+                    if (!ui.gui.chrid.isEmpty()) {
+                        String username = ui.sess.username + "/" + ui.gui.chrid;
                         configuration.saveMapSetting(username, val, "mapper");
                         MappingClient map = MappingClient.getInstance(username);
                         if (map != null) {
@@ -317,8 +322,8 @@ public class OptWnd extends Window {
             public void tick(double dt) {
                 super.tick(dt);
                 if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
-                    String username = ui.gui.chrid;
-                    if (!username.isEmpty()) {
+                    if (!ui.gui.chrid.isEmpty()) {
+                        String username = ui.sess.username + "/" + ui.gui.chrid;
                         boolean b = configuration.loadMapSetting(username, "mapper");
                         if (a != b) {
                             a = b;
@@ -347,8 +352,8 @@ public class OptWnd extends Window {
         appender.add(new CheckBox("Enable navigation tracking") {
             public void set(boolean val) {
                 if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
-                    String username = ui.gui.chrid;
-                    if (!username.isEmpty()) {
+                    if (!ui.gui.chrid.isEmpty()) {
+                        String username = ui.sess.username + "/" + ui.gui.chrid;
                         configuration.saveMapSetting(username, val, "track");
                         MappingClient map = MappingClient.getInstance(username);
                         if (map != null) {
@@ -362,8 +367,8 @@ public class OptWnd extends Window {
             public void tick(double dt) {
                 super.tick(dt);
                 if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
-                    String username = ui.gui.chrid;
-                    if (!username.isEmpty()) {
+                    if (!ui.gui.chrid.isEmpty()) {
+                        String username = ui.sess.username + "/" + ui.gui.chrid;
                         boolean b = configuration.loadMapSetting(username, "track");
                         if (a != b) {
                             a = b;
@@ -1683,6 +1688,28 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender2.add(new CheckBox("Show road Endpoints") {
+            {
+                a = Config.showroadendpoint;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("showroadendpoint", val);
+                Config.showroadendpoint = val;
+                a = val;
+            }
+        });
+        appender2.add(new CheckBox("Show road Midpoints") {
+            {
+                a = Config.showroadmidpoint;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("showroadmidpoint", val);
+                Config.showroadmidpoint = val;
+                a = val;
+            }
+        });
         appender2.add(new PButton(UI.scale(50), "Old map options", 'm', oldMap));
 
         appender2.add(new Label(""));
@@ -1865,19 +1892,20 @@ public class OptWnd extends Window {
 
         appender2.add(new Label(""));
         appender2.add(new Label("Other"));
-        appender2.addRow(new Label("Distance view color"), new ColorPreview(UI.scale(20, 20), new Color(configuration.distanceviewcolor, true), val -> {
+        appender2.addRow(new Label("Grid color"), new ColorPreview(UI.scale(16, 16), new Color(configuration.mapgridcolor, true), val -> Utils.setprefi("mapgridcolor", configuration.mapgridcolor = val.hashCode())));
+        appender2.addRow(new Label("Distance view color"), new ColorPreview(UI.scale(16, 16), new Color(configuration.distanceviewcolor, true), val -> {
             configuration.distanceviewcolor = val.hashCode();
             Utils.setprefi("distanceviewcolor", val.hashCode());
         }));
-        appender2.addRow(new Label("Pathfinding color"), new ColorPreview(UI.scale(20, 20), new Color(configuration.pfcolor, true), val -> {
+        appender2.addRow(new Label("Pathfinding color"), new ColorPreview(UI.scale(16, 16), new Color(configuration.pfcolor, true), val -> {
             configuration.pfcolor = val.hashCode();
             Utils.setprefi("pfcolor", val.hashCode());
         }));
-        appender2.addRow(new Label("Dowse color"), new ColorPreview(UI.scale(20, 20), new Color(configuration.dowsecolor, true), val -> {
+        appender2.addRow(new Label("Dowse color"), new ColorPreview(UI.scale(16, 16), new Color(configuration.dowsecolor, true), val -> {
             configuration.dowsecolor = val.hashCode();
             Utils.setprefi("dowsecolor", val.hashCode());
         }));
-        appender2.addRow(new Label("Questline color"), new ColorPreview(UI.scale(20, 20), new Color(configuration.questlinecolor, true), val -> {
+        appender2.addRow(new Label("Questline color"), new ColorPreview(UI.scale(16, 16), new Color(configuration.questlinecolor, true), val -> {
             configuration.questlinecolor = val.hashCode();
             Utils.setprefi("questlinecolor", val.hashCode());
         }));
@@ -3350,6 +3378,7 @@ public class OptWnd extends Window {
                 Utils.setpref("studytimepos", item);
             }
         }, new CheckBox("Real time", val -> Utils.setprefb("studytimereal", configuration.studytimereal = val), configuration.studytimereal));
+        appender.add(new CheckBox("Show approximate real time on tooltips instead ingame", val -> Utils.setprefb("tooltipapproximatert", configuration.tooltipapproximatert = val), configuration.tooltipapproximatert));
         appender.add(new CheckBox("Draw old mountbar") {
             {
                 a = configuration.oldmountbar;
@@ -5225,9 +5254,14 @@ public class OptWnd extends Window {
                         gui.map.togglegrid();
                 }, Config.showgridlines),
                 new CheckBox("Accurate", val -> Utils.setprefb("showaccgridlines", configuration.showaccgridlines = val), configuration.showaccgridlines),
-                new CheckBox("Grid type (old/new)", val -> Utils.setprefb("slothgrid", Config.slothgrid = val), Config.slothgrid),
                 new IndirColorPreview(UI.scale(20, 20), GUIDESCOLOR, val -> TileOutline.color = new States.ColState(val.getRed(), val.getGreen(), val.getBlue(), (int) (val.getAlpha() * 0.5)))
         );
+        appender.addRow(new CheckBox("Grid type (old/new)", val -> Utils.setprefb("slothgrid", Config.slothgrid = val), Config.slothgrid), new HSlider(UI.scale(50), 0, 256, Config.slothgridoffset) {
+            @Override
+            public void changed() {
+                Utils.setprefi("slothgridoffset", Config.slothgridoffset = val);
+            }
+        });
         appender.addRow(
                 new CheckBox("Display hitboxes", val -> {
                     Utils.setprefb("showboundingboxes", Config.showboundingboxes = val);
@@ -5244,6 +5278,7 @@ public class OptWnd extends Window {
                     }
                 })
         );
+        appender.add(new CheckBox("Place objects without ctrl", val -> Utils.setprefb("pointplacing", configuration.pointplacing = val), configuration.pointplacing));
         Label placegridtext = new Label("Place Grid (" + Utils.getprefd("plobpgran", 8) + "): ");
         appender.addRow(placegridtext, new HSlider(UI.scale(200), 0, 255 * 100, (int) (Utils.getprefd("plobpgran", 8) * 100)) {
                     @Override
@@ -5790,30 +5825,6 @@ public class OptWnd extends Window {
         iconslist.items.addAll(Config.icons.values());
         iconslist.items.sort(Comparator.comparing(a -> a.name));
         oldMap.add(iconslist, UI.scale(475, 15));
-
-        oldMap.add(new CheckBox("Show road Endpoints") {
-            {
-                a = Config.showroadendpoint;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("showroadendpoint", val);
-                Config.showroadendpoint = val;
-                a = val;
-            }
-        }, UI.scale(240, 330));
-
-        oldMap.add(new CheckBox("Show road Midpoints") {
-            {
-                a = Config.showroadmidpoint;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("showroadmidpoint", val);
-                Config.showroadmidpoint = val;
-                a = val;
-            }
-        }, UI.scale(240, 350));
 
         oldMap.add(new CheckBox("Hide ALL Icons") {
             {
@@ -6566,7 +6577,7 @@ public class OptWnd extends Window {
                         new CheckBox("semistat", v -> Utils.setprefb("showgobssemistat", configuration.showgobssemistat = v), configuration.showgobssemistat),
                         new CheckBox("newfags", v -> Utils.setprefb("showgobsnewfags", configuration.showgobsnewfags = v), configuration.showgobsnewfags),
                         new CheckBox("dynamic", v -> Utils.setprefb("showgobsdynamic", configuration.showgobsdynamic = v), configuration.showgobsdynamic)
-                        );
+                );
                 appender.add(new IndirCheckBox("Never delete grids", KEEPGRIDS));
                 appender.add(new IndirCheckBox("Never delete gobs", KEEPGOBS));
                 appender.addRow(new CheckBox("Gob Tick", v -> Utils.setprefb("enablegobticks", configuration.enablegobticks = v), configuration.enablegobticks), new CheckBox("Gob Ctick", v -> Utils.setprefb("enablegobcticks", configuration.enablegobcticks = v), configuration.enablegobcticks));

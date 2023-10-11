@@ -898,11 +898,13 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 if (glob.ui != null) {
                     UI ui = glob.ui.get();
                     if (ui != null && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
-                        String username = ui.gui.chrid;
-                        if (!username.isEmpty() && configuration.loadMapSetting(username, "mapper")) {
-                            MappingClient map = MappingClient.getInstance(username);
-                            if (map != null) {
-                                map.CheckGridCoord(c);
+                        if (!ui.gui.chrid.isEmpty()) {
+                            String username = ui.sess.username + "/" + ui.gui.chrid;
+                            if (configuration.loadMapSetting(username, "mapper")) {
+                                MappingClient map = MappingClient.getInstance(username);
+                                if (map != null) {
+                                    map.CheckGridCoord(c);
+                                }
                             }
                         }
                     }

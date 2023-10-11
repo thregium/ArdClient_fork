@@ -284,7 +284,7 @@ Window extends MovableWidget implements DTarget {
 
         if (minimized) {
             fullsz = asz;
-            resize(asz.x, 0);
+            resize(Math.min(cap.sz().x + 100, asz.x), -mrgn.mul(2).y);
         } else {
             resize(fullsz);
         }
@@ -709,9 +709,9 @@ Window extends MovableWidget implements DTarget {
     public Coord contentsz() {
         Coord max = new Coord(0, 0);
         for (Widget wdg = child; wdg != null; wdg = wdg.next) {
-            if (wdg == cbtn || wdg == lbtn)
+            if (wdg == cbtn || wdg == lbtn || wdg == mbtn || wdg == hbtn)
                 continue;
-            if (!wdg.visible)
+            if (!wdg.visible())
                 continue;
             Coord br = wdg.c.add(wdg.sz);
             if (br.x > max.x)
@@ -987,6 +987,7 @@ Window extends MovableWidget implements DTarget {
             list.add(new Pair<>("Sort", run));
             list.add(new Pair<>("Open Stacks", () -> invs.forEach(Inventory::openStacks)));
             list.add(new Pair<>("Close Stacks", () -> invs.forEach(Inventory::closeStacks)));
+            list.add(new Pair<>("Toggle Alt", () -> invs.forEach(Inventory::toggleAltInventory)));
 //            list.put("Stack", () -> {});
 //            list.put("Unstack", () -> {});
         }

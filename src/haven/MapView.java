@@ -366,12 +366,23 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         private Coord dragorig = null;
         private float elevorig, anglorig;
 
+        private final AtomicBoolean dirty = new AtomicBoolean();
+        private long lastSave = System.currentTimeMillis();
+
         public void tick(double dt) {
             Coord3f cc = getcc();
             cc.y = -cc.y;
             if (Config.disableelev)
                 cc.z = 0;
             view.update(PointedCam.compute(cc.add(camoff).add(0.0f, 0.0f, 15f), dist, elev, angl));
+
+            if (dirty.get() && System.currentTimeMillis() - lastSave >= 1e3) {
+                dirty.set(false);
+                Utils.setpreff("badcamelevdefault", elev);
+                Utils.setpreff("badcamangldefault", angl);
+                Utils.setpreff("badcamdistdefault", dist);
+                lastSave = System.currentTimeMillis();
+            }
         }
 
         public float angle() {
@@ -401,8 +412,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             angl = angl % ((float) Math.PI * 2.0f);
             configuration.badcamelevdefault = elev;
             configuration.badcamangldefault = angl;
-            Utils.setpreff("badcamelevdefault", elev);
-            Utils.setpreff("badcamangldefault", angl);
+            dirty.set(true);
         }
 
         public boolean wheel(Coord c, int amount) {
@@ -410,7 +420,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             if (d < configuration.badcamdistminimaldefault)
                 d = configuration.badcamdistminimaldefault;
             dist = d;
-            Utils.setpreff("badcamdistdefault", dist);
+            dirty.set(true);
             return (true);
         }
     }
@@ -816,11 +826,13 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         if (player != null) {
             Coord2d c = player.rc;
             if (glob.sess != null && glob.sess.alive() && glob.sess.username != null && ui.gui != null) {
-                String username = ui.gui.chrid;
-                if (!username.isEmpty() && configuration.loadMapSetting(username, "mapper")) {
-                    MappingClient map = MappingClient.getInstance(username);
-                    if (map != null) {
-                        map.CheckGridCoord(c);
+                if (!ui.gui.chrid.isEmpty()) {
+                    String username = ui.sess.username + "/" + ui.gui.chrid;
+                    if (configuration.loadMapSetting(username, "mapper")) {
+                        MappingClient map = MappingClient.getInstance(username);
+                        if (map != null) {
+                            map.CheckGridCoord(c);
+                        }
                     }
                 }
             }
@@ -2326,7 +2338,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         Coord2d gran = (plobpgran == 0) ? null : new Coord2d(1.0 / plobpgran, 1.0 / plobpgran).mul(tilesz);
 
         public void adjust(Plob plob, Coord pc, Coord2d mc, int modflags) {
-            if ((modflags & 2) == 0)
+            if ((modflags & 2) == 0 && !Utils.getprefb("pointplacing", false))
                 plob.rc = mc.floor(tilesz).mul(tilesz).add(tilesz.div(2));
             else if (gran != null)
                 plob.rc = mc.add(gran.div(2)).floor(gran).mul(gran);

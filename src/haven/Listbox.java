@@ -63,8 +63,22 @@ public abstract class Listbox<T> extends ListWidget<T> {
         }
     }
 
+    public void fixScrollbar() {
+        int val = sb.val;
+        int min = sb.min;
+        int max = sb.max;
+        int nmax = listitems() - h;
+        if (min == val) {
+
+        } else if (max == val) {
+            if (max != nmax)
+                sb.val = nmax;
+        }
+        sb.max = nmax;
+    }
+
     public void draw(GOut g) {
-        sb.max = listitems() - h;
+        fixScrollbar();
         drawbg(g);
         int n = listitems();
         for (int i = 0; (i * itemh) < sz.y; i++) {

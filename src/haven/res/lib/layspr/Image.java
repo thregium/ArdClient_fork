@@ -15,4 +15,8 @@ class Image extends Layer {
     void draw(GOut g) {
         g.image(img, Coord.z);
     }
+
+    void draw(GOut g, Coord sz) {
+        g.image(img, Coord.z, sz);
+    }
 }

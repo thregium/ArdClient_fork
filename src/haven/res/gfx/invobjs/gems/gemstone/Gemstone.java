@@ -167,6 +167,10 @@ public class Gemstone extends GSprite implements GSprite.ImageSprite, haven.res.
         g.image(tex, Coord.z);
     }
 
+    public void draw(GOut g, Coord sz) {
+        g.image(tex, Coord.z, sz);
+    }
+
     public String name() {
         return (name);
     }

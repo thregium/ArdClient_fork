@@ -97,7 +97,9 @@ public abstract class GSprite implements Drawn {
     }
 
     public abstract void draw(GOut g);
-
+    public void draw(GOut g, Coord sz) {
+        draw(g);
+    }
     public abstract Coord sz();
 
     public void tick(double dt) {

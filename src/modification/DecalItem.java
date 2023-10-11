@@ -75,6 +75,15 @@ public class DecalItem extends GSprite implements haven.res.ui.tt.defn.DynName {
             g.image(lay, layc.add(layoff));
     }
 
+    public void draw(GOut g, Coord sz) {
+        g.image(bg, Coord.z, sz);
+        Coord scale = bg.sz().div(sz);
+        if (lay != null) {
+            Coord ssz = lay.sz().div(scale);
+            g.image(lay, layc.add(layoff).div(scale), ssz);
+        }
+    }
+
     public Coord sz() {
         return (bg.sz());
     }

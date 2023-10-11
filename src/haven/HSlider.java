@@ -163,4 +163,9 @@ public class HSlider extends Widget {
     public void resize(int w) {
         super.resize(new Coord(w, sflarp.sz().y));
     }
+
+    @Override
+    public Object tooltip(final Coord c, final Widget prev) {
+        return (Text.render(String.format("%s [%s,%s]", val, min, max)));
+    }
 }

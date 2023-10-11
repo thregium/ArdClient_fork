@@ -302,9 +302,67 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
             spr.tick(delay + dt);
             delay = 0;
         } else delay += dt;
+
+        updateQuality();
         testMatch();
         updcontinfo();
         ckconthover();
+    }
+
+    private final AtomicBoolean needUpdateQuality = new AtomicBoolean();
+
+    private void updateQuality() {
+        if (needUpdateQuality.get()) {
+            needUpdateQuality.set(false);
+
+            try {
+                List<ItemInfo> info = this.info;
+                if (info != null && !info.isEmpty()) {
+                    synchronized (infoSync) {
+                        info = this.info;
+                        if (info != null && !info.isEmpty()) {
+                            Widget stack = contents;
+                            if (stack != null) {
+                                List<WItem> ret = new ArrayList<>();
+                    /*if (stack instanceof Inventory) {
+                        ret.addAll(((Inventory) stack).wmap.values());
+                    } else*/
+                                if (stack.getClass().toString().contains("ItemStack")) {
+                                    try {
+                                        Field fwmap = stack.getClass().getField("wmap");
+                                        Map<GItem, WItem> wmap = (Map<GItem, WItem>) fwmap.get(stack);
+                                        ret.addAll(wmap.values());
+                                    } catch (IllegalAccessException | NoSuchFieldException e) {
+                                        throw (new RuntimeException(e));
+                                    }
+                                }
+                                if (!ret.isEmpty()) {
+                                    int amount = 0;
+                                    double sum = 0;
+                                    for (WItem w : ret) {
+                                        QBuff q = w.item.quality();
+                                        if (q != null) {
+                                            amount++;
+                                            sum += q.q;
+                                        }
+                                    }
+                                    if (amount > 0) {
+                                        Quality q = ItemInfo.find(Quality.class, info);
+                                        if (q == null) {
+                                            info.add(new Quality(this, sum / amount));
+                                        } else {
+                                            q.q = sum / amount;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (Throwable e) {
+                needUpdateQuality.set(true);
+            }
+        }
     }
 
     public void testMatch() {
@@ -338,43 +396,22 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     }
 
     public List<ItemInfo> info() {
+        List<ItemInfo> info = this.info;
         if (info == null) {
-            info = ItemInfo.buildinfo(this, rawinfo);
-            Resource.Pagina pg = res.get().layer(Resource.pagina);
-            if (pg != null)
-                info.add(new ItemInfo.Pagina(this, pg.text));
-            if (contents != null) {
-                Widget stack = contents;
-                List<WItem> ret = new ArrayList<>();
-                /*if (stack instanceof Inventory) {
-                    ret.addAll(((Inventory) stack).wmap.values());
-                } else */
-                if (stack.getClass().toString().contains("ItemStack")) {
-                    try {
-                        Field fwmap = stack.getClass().getField("wmap");
-                        Map<GItem, WItem> wmap = (Map<GItem, WItem>) fwmap.get(stack);
-                        ret.addAll(wmap.values());
-                    } catch (IllegalAccessException | NoSuchFieldException e) {
-                        throw (new RuntimeException(e));
-                    }
+            info = this.info;
+            if (info == null) {
+                info = ItemInfo.buildinfo(this, rawinfo);
+                Resource.Pagina pg = res.get().layer(Resource.pagina);
+                if (pg != null)
+                    info.add(new ItemInfo.Pagina(this, pg.text));
+                try {
+                    // getres() can throw Loading, ignore it
+                    FoodService.checkFood(info, getres());
+                } catch (Exception ex) {
                 }
-                int amount = 0;
-                double sum = 0;
-                for (WItem w : ret) {
-                    QBuff q = w.item.quality();
-                    if (q != null) {
-                        amount++;
-                        sum += q.q;
-                    }
-                }
-                if (amount > 0)
-                    info.add(new Quality(this, sum / amount));
+                this.info = info;
             }
-            try {
-                // getres() can throw Loading, ignore it
-                FoodService.checkFood(info, getres());
-            } catch (Exception ex) {
-            }
+            needUpdateQuality.set(true);
         }
         return (info);
     }
@@ -472,6 +509,8 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         }
     }
 
+    private final Object infoSync = new Object();
+
     public void addchild(Widget child, Object... args) {
         /* XXX: Update this to use a checkable args[0] once a
          * reasonable majority of clients can be expected to not crash
@@ -482,34 +521,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
             contentsid = null;
             if (args.length > 2)
                 contentsid = args[2];
-            List<ItemInfo> info = this.info;
-            if (info != null && !info.isEmpty()) {
-                Widget stack = contents;
-                List<WItem> ret = new ArrayList<>();
-                    /*if (stack instanceof Inventory) {
-                        ret.addAll(((Inventory) stack).wmap.values());
-                    } else*/
-                if (stack.getClass().toString().contains("ItemStack")) {
-                    try {
-                        Field fwmap = stack.getClass().getField("wmap");
-                        Map<GItem, WItem> wmap = (Map<GItem, WItem>) fwmap.get(stack);
-                        ret.addAll(wmap.values());
-                    } catch (IllegalAccessException | NoSuchFieldException e) {
-                        throw (new RuntimeException(e));
-                    }
-                }
-                int amount = 0;
-                double sum = 0;
-                for (WItem w : ret) {
-                    QBuff q = w.item.quality();
-                    if (q != null) {
-                        amount++;
-                        sum += q.q;
-                    }
-                }
-                if (amount > 0)
-                    info.add(new Quality(this, sum / amount));
-            }
+            needUpdateQuality.set(true);
         }
     }
 

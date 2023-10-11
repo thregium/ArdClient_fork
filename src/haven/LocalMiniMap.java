@@ -630,13 +630,15 @@ public class LocalMiniMap extends Widget {
                     });
                     if (Config.discordplayeralert) {
                         if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
-                            String username = ui.gui.chrid;
-                            if (Config.discorduser) {
-                                PBotDiscord.mapAlert(username, Config.discordalertstring, "Player");
-                            } else if (Config.discordrole) {
-                                PBotDiscord.mapAlertRole(username, Config.discordalertstring, "Player");
-                            } else {
-                                PBotDiscord.mapAlertEveryone(username, "Player");
+                            if (!ui.gui.chrid.isEmpty()) {
+                                String username = ui.sess.username + "/" + ui.gui.chrid;
+                                if (Config.discorduser) {
+                                    PBotDiscord.mapAlert(username, Config.discordalertstring, "Player");
+                                } else if (Config.discordrole) {
+                                    PBotDiscord.mapAlertRole(username, Config.discordalertstring, "Player");
+                                } else {
+                                    PBotDiscord.mapAlertEveryone(username, "Player");
+                                }
                             }
                         }
                     }
@@ -649,13 +651,15 @@ public class LocalMiniMap extends Widget {
                     });
                     if (Config.discordplayeralert) {
                         if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
-                            String username = ui.gui.chrid;
-                            if (Config.discorduser) {
-                                PBotDiscord.mapAlert(username, Config.discordalertstring, "Player");
-                            } else if (Config.discordrole) {
-                                PBotDiscord.mapAlertRole(username, Config.discordalertstring, "Player");
-                            } else {
-                                PBotDiscord.mapAlertEveryone(username, "Player");
+                            if (!ui.gui.chrid.isEmpty()) {
+                                String username = ui.sess.username + "/" + ui.gui.chrid;
+                                if (Config.discorduser) {
+                                    PBotDiscord.mapAlert(username, Config.discordalertstring, "Player");
+                                } else if (Config.discordrole) {
+                                    PBotDiscord.mapAlertRole(username, Config.discordalertstring, "Player");
+                                } else {
+                                    PBotDiscord.mapAlertEveryone(username, "Player");
+                                }
                             }
                         }
                     }

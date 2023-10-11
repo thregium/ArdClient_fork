@@ -26,9 +26,6 @@
 
 package haven;
 
-import integrations.mapv4.MappingClient;
-import modification.configuration;
-
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;

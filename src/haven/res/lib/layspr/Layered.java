@@ -54,6 +54,11 @@ public class Layered extends GSprite implements GSprite.ImageSprite {
             l.draw(g);
     }
 
+    public void draw(GOut g, Coord sz) {
+        for (Layer l : lay)
+            l.draw(g, sz);
+    }
+
     public Coord sz() {
         return (sz);
     }

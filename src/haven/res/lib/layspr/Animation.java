@@ -39,5 +39,10 @@ class Animation extends Layer {
         for (int i = 0; i < a.f[cf].length; i++)
             g.image(a.f[cf][i], Coord.z);
     }
+
+    void draw(GOut g, Coord sz) {
+        for (int i = 0; i < a.f[cf].length; i++)
+            g.image(a.f[cf][i], Coord.z, sz);
+    }
 }
 

@@ -13,5 +13,8 @@ abstract class Layer {
     }
 
     abstract void draw(GOut g);
+    void draw(GOut g, Coord sz) {
+        draw(g);
+    }
 }
 

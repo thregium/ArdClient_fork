@@ -132,6 +132,7 @@ public class configuration {
     public static boolean showstudytime = Utils.getprefb("showstudytime", true);
     public static String studytimepos = Utils.getpref("studytimepos", "Left-Top");
     public static boolean studytimereal = Utils.getprefb("studytimereal", false);
+    public static boolean tooltipapproximatert = Utils.getprefb("tooltipapproximatert", false);
 
     public static boolean rightclickproximity = Utils.getprefb("rightclickproximity", false);
     public static int rightclickproximityradius = Utils.getprefi("rightclickproximityradius", 5);
@@ -278,6 +279,7 @@ public class configuration {
     public static boolean enablegobticks = Utils.getprefb("enablegobticks", true);
     public static boolean enablegobcticks = Utils.getprefb("enablegobcticks", true);
     public static boolean autodroponlyplayer = Utils.getprefb("autodroponlyplayer", false);
+    public static boolean pointplacing = Utils.getprefb("pointplacing", false);
 
     public static boolean disablepavingoutlineonmap = Utils.getprefb("disablepavingoutlineonmap", false);
 
@@ -1411,6 +1413,7 @@ public class configuration {
     public static boolean savingFogOfWar = Utils.getprefb("fogofwar", true);
     public static int fogOfWarColor = Utils.getprefi("fogofwarcolor", new Color(255, 255, 0, 100).getRGB());
     public static int fogOfWarColorTemp = Utils.getprefi("fogofwarcolorTemp", new Color(0, 255, 0, 100).getRGB());
+    public static int mapgridcolor = Utils.getprefi("mapgridcolor", new Color(255, 100, 100, 150).getRGB());
 
     public static boolean openStacksOnAlt = Utils.getprefb("altstacks", false);
 

@@ -303,12 +303,16 @@ public class Material extends GLState {
                         i.remove();
                     }
                     if (getres().name.contains("gfx/tiles/overlay/")) {
-                        new ArrayList<>(states).stream().filter(st -> st instanceof States.ColState).findFirst().ifPresent(st -> {
+                        new ArrayList<>(states).stream().filter(States.ColState.class::isInstance).findFirst().ifPresent(st -> {
                             states.add(Light.deflight);
                             Color stColor = ((States.ColState) st).c;
                             states.add(new Material.Colors(Color.BLACK, new Color(0, 0, 0, 255 / 8), Color.BLACK, stColor, 0f));
                             states.remove(st);
                         });
+                    }
+                    if (getres().name.contains("gfx/kritter/horse/hide")) {
+                        states.removeIf(st -> st instanceof TexGL.TexDraw);//fix black horses
+                        states.removeIf(st -> st instanceof TexGL.TexClip);//fix black horses
                     }
                     m = new Material(states.toArray(new GLState[0])) {
                         public String toString() {

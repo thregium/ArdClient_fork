@@ -424,7 +424,7 @@ public class WItem extends Widget implements DTarget2 {
         g.chcolor();
     }
 
-    public boolean mousedown(Coord c, int btn) {
+    public boolean mousedown(Coord c, int btn) {//TODO add invxf2
         if (btn == 1) {
             if (!locked) {
                 if (ui.gui.itemClickCallback != null) {

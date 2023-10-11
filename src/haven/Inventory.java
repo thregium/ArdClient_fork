@@ -30,11 +30,13 @@ import haven.purus.pbot.PBotInventory;
 import haven.purus.pbot.PBotItem;
 import haven.purus.pbot.PBotUtils;
 import haven.res.ui.tt.q.qbuff.QBuff;
+import haven.res.ui.tt.q.quality.Quality;
 import modification.configuration;
 
 import java.awt.Color;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,33 +48,25 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-public class Inventory extends Widget implements DTarget {
-    public static final Coord sqsz = UI.scale(new Coord(33, 33));
+public class Inventory extends Widget implements DTarget2 {
+    public static final Coord sqsz = UI.scale(33, 33);
     public static final Tex invsq/* = Resource.loadtex("gfx/hud/invsq")*/;
     public boolean dropul = true;
     public Coord isz;
     public boolean[] sqmask = null;
-    public static final Comparator<WItem> ITEM_COMPARATOR_ASC = new Comparator<WItem>() {
-        @Override
-        public int compare(WItem o1, WItem o2) {
-            QualityList ql1 = o1.itemq.get();
-            double q1 = (ql1 != null && !ql1.isEmpty()) ? ql1.single(QualityList.SingleType.Average).value : 0;
+    public static final Comparator<WItem> ITEM_COMPARATOR_ASC = (o1, o2) -> {
+        QualityList ql1 = o1.itemq.get();
+        double q1 = (ql1 != null && !ql1.isEmpty()) ? ql1.single(QualityList.SingleType.Average).value : 0;
 
-            QualityList ql2 = o2.itemq.get();
-            double q2 = (ql2 != null && !ql2.isEmpty()) ? ql2.single(QualityList.SingleType.Average).value : 0;
+        QualityList ql2 = o2.itemq.get();
+        double q2 = (ql2 != null && !ql2.isEmpty()) ? ql2.single(QualityList.SingleType.Average).value : 0;
 
-            return Double.compare(q1, q2);
-        }
+        return Double.compare(q1, q2);
     };
-    public static final Comparator<WItem> ITEM_COMPARATOR_DESC = new Comparator<WItem>() {
-        @Override
-        public int compare(WItem o1, WItem o2) {
-            return ITEM_COMPARATOR_ASC.compare(o2, o1);
-        }
-    };
+    public static final Comparator<WItem> ITEM_COMPARATOR_DESC = (o1, o2) -> ITEM_COMPARATOR_ASC.compare(o2, o1);
 
     public boolean locked = false;
-    public Map<GItem, WItem> wmap = new HashMap<GItem, WItem>();
+    public Map<GItem, WItem> wmap = Collections.synchronizedMap(new HashMap<>());
 
     static {
         Coord sz = sqsz.add(1, 1);
@@ -133,23 +127,62 @@ public class Inventory extends Widget implements DTarget {
         super.draw(g);
     }
 
+    private final AltInventory ainv;
+
     public Inventory(Coord sz) {
 //        super(invsq.sz().add(new Coord(-1, -1)).mul(sz).add(new Coord(1, 1)));
         super(sqsz.mul(sz).add(1, 1));
         isz = sz;
+        ainv = new AltInventory(this);
+        add(ainv, Coord.of(this.sz.x, 0));
+        ainv.hide();
+    }
+
+    @Override
+    protected void added() {
+        super.added();
+        if (ainv.visible()) {
+            Coord max = sqsz.mul(isz).add(1, 1);
+            max.x = Math.max(max.x, ainv.c.x + ainv.sz.x);
+            max.y = Math.max(max.y, ainv.c.y + ainv.sz.y);
+            resize(max);
+        }
+    }
+
+    @Override
+    public void resize(final Coord sz) {
+        super.resize(sz);
+    }
+
+    @Override
+    public void pack() {
+//        super.pack();
+        Coord invsz = sqsz.mul(isz).add(1, 1);
+        Coord max = invsz;
+        if (ainv.visible()) {
+            ainv.move(Coord.of(invsz.x, 0));
+            max.x = Math.max(max.x, ainv.c.x + ainv.sz.x);
+            max.y = Math.max(max.y, ainv.c.y + ainv.sz.y);
+        }
+        resize(max);
+        parent.pack();
     }
 
     public boolean mousewheel(Coord c, int amount) {
-        if (ui.modshift) {
-            Inventory minv = getparent(GameUI.class).maininv;
-            if (minv != this) {
-                if (amount < 0)
-                    wdgmsg("invxf", minv.wdgid(), 1);
-                else if (amount > 0)
-                    minv.wdgmsg("invxf", this.wdgid(), 1);
+        Coord invsz = sqsz.mul(isz).add(1, 1);
+        if (c.isect(Coord.z, invsz)) {
+            if (ui.modshift) {
+                Inventory minv = getparent(GameUI.class).maininv;
+                if (minv != this) {
+                    if (amount < 0)
+                        wdgmsg("invxf", minv.wdgid(), 1);
+                    else if (amount > 0)
+                        minv.wdgmsg("invxf", this.wdgid(), 1);
+                }
             }
+            return (true);
         }
-        return (true);
+        return (super.mousewheel(c, amount));
     }
 
     @Override
@@ -162,7 +195,9 @@ public class Inventory extends Widget implements DTarget {
         Coord c = (Coord) args[0];
         if (child instanceof GItem) {
             GItem i = (GItem) child;
-            wmap.put(i, add(new WItem(i), c.mul(sqsz).add(1, 1)));
+            WItem w = new WItem(i);
+            wmap.put(i, add(w, c.mul(sqsz).add(1, 1)));
+            ainv.addItem(w);
         }
     }
 
@@ -170,24 +205,64 @@ public class Inventory extends Widget implements DTarget {
         super.cdestroy(w);
         if (w instanceof GItem) {
             GItem i = (GItem) w;
-            ui.destroy(wmap.remove(i));
+            WItem wItem = wmap.remove(i);
+            ui.destroy(wItem);
+            ainv.removeItem(wItem);
         }
     }
 
-    public boolean drop(Coord cc, Coord ul) {
+    public boolean drop(WItem target, Coord cc, Coord ul) {
+        for (Widget wdg = lchild; wdg != null; wdg = wdg.prev) {
+            if (wdg.visible()) {
+                if (wdg instanceof DTarget) {
+                    Coord ccc = cc.sub(wdg.c);
+                    Coord ulc = ul.sub(wdg.c);
+                    if (ccc.isect(Coord.z, wdg.sz)) {
+                        if (((DTarget) wdg).drop(ccc, ulc))
+                            return (true);
+                    }
+                } else if (wdg instanceof DTarget2) {
+                    Coord ccc = cc.sub(wdg.c);
+                    Coord ulc = ul.sub(wdg.c);
+                    if (ccc.isect(Coord.z, wdg.sz)) {
+                        if (((DTarget2) wdg).drop(target, ccc, ulc))
+                            return (true);
+                    }
+                }
+            }
+        }
         Coord dc = dropul ? ul.add(sqsz.div(2)).div(sqsz) : cc.div(sqsz);
         wdgmsg("drop", dc);
         return (true);
     }
 
-    public boolean iteminteract(Coord cc, Coord ul) {
-        return (false);
+    public boolean iteminteract(WItem target, Coord cc, Coord ul) {
+        for (Widget wdg = lchild; wdg != null; wdg = wdg.prev) {
+            if (wdg.visible()) {
+                if (wdg instanceof DTarget) {
+                    Coord ccc = cc.sub(wdg.c);
+                    Coord ulc = ul.sub(wdg.c);
+                    if (ccc.isect(Coord.z, wdg.sz)) {
+                        if (((DTarget) wdg).iteminteract(ccc, ulc))
+                            break;
+                    }
+                } else if (wdg instanceof DTarget2) {
+                    Coord ccc = cc.sub(wdg.c);
+                    Coord ulc = ul.sub(wdg.c);
+                    if (ccc.isect(Coord.z, wdg.sz)) {
+                        if (((DTarget2) wdg).iteminteract(target, ccc, ulc))
+                            break;
+                    }
+                }
+            }
+        }
+        return (true);
     }
 
     public void uimsg(String msg, Object... args) {
         if (msg == "sz") {
             isz = (Coord) args[0];
-            resize(invsq.sz().add(UI.scale(new Coord(-1, -1))).mul(isz).add(UI.scale(new Coord(1, 1))));
+            pack();
             sqmask = null;
         } else if (msg == "mask") {
             boolean[] nmask;
@@ -772,19 +847,19 @@ public class Inventory extends Widget implements DTarget {
     }
 
     public Integer coordToSloti(Coord slot) {
-            Coord c = new Coord();
-            int mo = 0;
-            int max = 0;
-            for (c.y = 0; c.y < isz.y; c.y++) {
-                for (c.x = 0; c.x < isz.x; c.x++) {
-                    if (sqmask == null || !sqmask[mo++]) {
-                        if (slot.x == c.x && slot.y == c.y) return (max);
-                        else max++;
-                    }
+        Coord c = new Coord();
+        int mo = 0;
+        int max = 0;
+        for (c.y = 0; c.y < isz.y; c.y++) {
+            for (c.x = 0; c.x < isz.x; c.x++) {
+                if (sqmask == null || !sqmask[mo++]) {
+                    if (slot.x == c.x && slot.y == c.y) return (max);
+                    else max++;
                 }
             }
-            return (null);
         }
+        return (null);
+    }
 
     public class InvItem {
         private final WItem wItem;
@@ -931,4 +1006,239 @@ public class Inventory extends Widget implements DTarget {
             }
         }
     }
+
+    public static class AltInventory extends Widget implements DTarget2 {
+        private static final Color even = new Color(255, 255, 255, 16);
+        private static final Color odd = new Color(255, 255, 255, 32);
+
+        private final Inventory inv;
+        private final ItemGroupList list;
+
+        public AltInventory(final Inventory inv) {
+            this.inv = inv;
+            list = add(new ItemGroupList(inv, UI.scale(150), 16, UI.scale(16)));
+            pack();
+        }
+
+        public void addItem(final WItem wItem) {
+            list.addItems(wItem);
+        }
+
+        public void removeItem(final WItem wItem) {
+            list.removeItems(wItem);
+        }
+
+        @Override
+        public void draw(final GOut g) {
+            super.draw(g);
+            g.chcolor(even);
+            g.rect(Coord.z, g.sz());
+            g.chcolor();
+        }
+
+        @Override
+        public boolean drop(final WItem target, final Coord cc, final Coord ul) {
+            for (Widget wdg = lchild; wdg != null; wdg = wdg.prev) {
+                if (wdg.visible()) {
+                    if (wdg instanceof DTarget) {
+                        Coord ccc = cc.sub(wdg.c);
+                        Coord ulc = ul.sub(wdg.c);
+                        if (ccc.isect(Coord.z, wdg.sz)) {
+                            if (((DTarget) wdg).drop(ccc, ulc))
+                                return (true);
+                        }
+                    } else if (wdg instanceof DTarget2) {
+                        Coord ccc = cc.sub(wdg.c);
+                        Coord ulc = ul.sub(wdg.c);
+                        if (ccc.isect(Coord.z, wdg.sz)) {
+                            if (((DTarget2) wdg).drop(target, ccc, ulc))
+                                return (true);
+                        }
+                    }
+                }
+            }
+            return (false);
+        }
+
+        @Override
+        public boolean iteminteract(final WItem target, final Coord cc, final Coord ul) {
+            for (Widget wdg = lchild; wdg != null; wdg = wdg.prev) {
+                if (wdg.visible()) {
+                    if (wdg instanceof DTarget) {
+                        Coord ccc = cc.sub(wdg.c);
+                        Coord ulc = ul.sub(wdg.c);
+                        if (ccc.isect(Coord.z, wdg.sz)) {
+                            if (((DTarget) wdg).iteminteract(ccc, ulc))
+                                return (true);;
+                        }
+                    } else if (wdg instanceof DTarget2) {
+                        Coord ccc = cc.sub(wdg.c);
+                        Coord ulc = ul.sub(wdg.c);
+                        if (ccc.isect(Coord.z, wdg.sz)) {
+                            if (((DTarget2) wdg).iteminteract(target, ccc, ulc))
+                                return (true);
+                        }
+                    }
+                }
+            }
+            return (false);
+        }
+
+        enum Grouping {
+            NONE("Type"),
+            Q("Quality"),
+            Q1("Quality 1"),
+            Q5("Quality 5"),
+            Q10("Quality 10");
+
+            private final String name;
+
+            Grouping(String name) {this.name = name;}
+        }
+
+        private static class ItemType {
+            final WItem item;
+            Widget cont;
+            final Set<WItem> items = new HashSet<>();
+
+            public ItemType(WItem w) {
+                this.item = w;
+                this.cont = w.item.contents;
+            }
+
+            public void tick() {
+                Widget cont = item.item.contents;
+                if (this.cont != cont) {
+                    if (cont == null) {
+
+                    }
+                }
+            }
+        }
+
+
+        private static class ItemGroupList extends Listbox<WItem> implements DTarget2 {
+            private final Inventory inv;
+            private final Set<WItem> list = Collections.synchronizedSet(new HashSet<>());
+            private List<WItem> wlist = Collections.emptyList();
+
+            public ItemGroupList(Inventory inv, int w, int h, int itemh) {
+                super(w, h, itemh);
+                this.inv = inv;
+            }
+
+            public void addItems(final WItem wItem) {
+                list.add(wItem);
+            }
+
+            public void removeItems(final WItem wItem) {
+                list.remove(wItem);
+            }
+
+            @Override
+            protected WItem listitem(int i) {
+                return (wlist.get(i));
+            }
+
+            @Override
+            protected int listitems() {
+                return (wlist.size());
+            }
+
+            @Override
+            protected void drawitem(GOut g, WItem item, int i) {
+                g.chcolor(((i % 2) == 0) ? even : odd);
+                g.frect(Coord.z, g.sz());
+                g.chcolor();
+                int x = 0;
+                GSprite spr = item.item.spr();
+                if (spr != null) {
+                    Coord sz = spr.sz();
+                    double sy = 1.0 * sz.y / itemh;
+                    sz = sz.div(sy);
+                    spr.draw(g, sz);
+                    x += sz.x;
+                }
+                String name = item.item.getname();
+                if (!name.isEmpty()) {
+                    Tex tex = Text.render(name).tex();
+                    g.image(tex, Coord.of(x, (itemh - tex.sz().y) / 2));
+                    x += tex.sz().x;
+                }
+                QBuff q = item.item.quality();
+                if (q != null) {
+                    if (q.qtex != null)
+                        g.image(q.qtex, Coord.of(x, (itemh - q.qtex.sz().y) / 2));
+                }
+            }
+
+            @Override
+            public void dispose() {
+                super.dispose();
+            }
+
+            @Override
+            public void tick(double dt) {
+                super.tick(dt);
+                List<WItem> wlist = new ArrayList<>();
+                for (WItem wItem : list) {
+                    Widget cont = wItem.item.contents;
+                    if (cont != null) {
+                        wlist.addAll(cont.getchilds(WItem.class));
+                    } else {
+                        wlist.add(wItem);
+                    }
+                }
+                wlist.sort((o1, o2) -> (o1.item.getname().compareTo(o2.item.getname())));
+                this.wlist = wlist;
+            }
+
+            @Override
+            protected void itemclick(final WItem item, final int button) {
+                item.mousedown(Coord.z, button);
+            }
+
+            @Override
+            protected void drawbg(GOut g) {}
+
+            @Override
+            public boolean drop(final WItem target, final Coord cc, final Coord ul) {
+                Coord slot = inv.getFreeSlot();
+                if (slot != null)
+                    inv.wdgmsg("drop", slot);
+                return (true);
+            }
+
+            @Override
+            public boolean iteminteract(final WItem target, final Coord cc, final Coord ul) {
+                int idx = idxat(cc);
+                WItem item = (idx >= listitems()) ? null : listitem(idx);
+                if (item != null) {
+                    item.iteminteract(target, Coord.z, Coord.z);
+                }
+                return (true);
+            }
+
+            @Override
+            public Object tooltip(Coord c, Widget prev) {
+                int idx = idxat(c);
+                WItem item = (idx >= listitems()) ? null : listitem(idx);
+                if (item != null) {
+                    return item.tooltip(Coord.z, prev);
+                }
+                return super.tooltip(c, prev);
+            }
+        }
+    }
+
+    public void showAltInventory(boolean show) {
+        ainv.show(show);
+        pack();
+    }
+
+    public void toggleAltInventory() {
+        ainv.show(!ainv.visible());
+        pack();
+    }
 }
+//список всех предметов

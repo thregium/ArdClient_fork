@@ -30,15 +30,15 @@ public class StudyWnd extends GameUI.Hidewnd {
         private final Text.UTex<?> twt = new Text.UTex<>(() -> tw + "/" + ui.sess.glob.getcattr("int").comp, s -> PUtils.strokeTex(Text.std.render(s)));
         private final Text.UTex<?> tenct = new Text.UTex<>(() -> tenc, s -> PUtils.strokeTex(Text.std.render(Integer.toString(s))));
         private final DecimalFormat f = new DecimalFormat("##.##");
-        private final Text.UTex<?> tlphr = new Text.UTex<>(() -> tlph, s -> PUtils.strokeTex(Text.std.render(String.format("%s (%s)", f.format(tlph), f.format(tlph * ui.sess.glob.getTimeFac())))));
+        private final Text.UTex<?> tlphr = new Text.UTex<>(() -> tlph, s -> PUtils.strokeTex(Text.std.render(String.format("%s", !Utils.getprefb("tooltipapproximatert", false) ? f.format(tlph) : f.format(tlph * ui.sess.glob.getTimeFac())))));
 
         private StudyInfo(Coord sz, Widget study) {
             super(sz);
             this.study = study;
-            add(new Label("Attention:"), 2, 2);
-            add(new Label("Experience cost:"), 2, 18);
-            add(new Label("Learning points:"), 2, 34);
-            add(new Label("LP/H:"), 2, 50);
+            add(new Label("Attention:"), UI.scale(2, 2));
+            add(new Label("Experience cost:"), UI.scale(2, 18));
+            add(new Label("Learning points:"), UI.scale(2, 34));
+            add(new Label("LP/H:"), UI.scale(2, 50));
         }
 
         private void upd() {

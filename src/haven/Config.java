@@ -133,6 +133,7 @@ public class Config {
     public static boolean mapshowviewdist = Utils.getprefb("mapshowviewdist", false);
     public static boolean disabletiletrans = Utils.getprefb("disabletiletrans", false);
     public static boolean slothgrid = Utils.getprefb("slothgrid", false);
+    public static int slothgridoffset = Utils.getprefi("slothgridoffset", 0);
     public static boolean itemmeterbar = Utils.getprefb("itemmeterbar", false);
     public static boolean showprogressperc = Utils.getprefb("showprogressperc", true);
     public static int fpsLimit = Utils.getprefi("fpsLimit", 200);

@@ -772,7 +772,7 @@ public class CharWnd extends Window {
         private final Text.UTex<?> twt = new Text.UTex<>(() -> tw + "/" + ui.sess.glob.getcattr("int").comp, s -> PUtils.strokeTex(numfnd.render(s)));
         private final Text.UTex<?> tenct = new Text.UTex<>(() -> tenc, s -> PUtils.strokeTex(numfnd.render(Integer.toString(tenc))));
         private final DecimalFormat f = new DecimalFormat("##.##");
-        private final Text.UTex<?> tlpht = new Text.UTex<>(() -> tlph, s -> PUtils.strokeTex(Text.std.render(String.format("%s (%s)", f.format(tlph), f.format(tlph * ui.sess.glob.getTimeFac())))));
+        private final Text.UTex<?> tlpht = new Text.UTex<>(() -> tlph, s -> PUtils.strokeTex(Text.std.render(String.format("%s", !Utils.getprefb("tooltipapproximatert", false) ? f.format(tlph) : f.format(tlph * ui.sess.glob.getTimeFac())))));
 
         private StudyInfo(Coord sz, Widget study) {
             super(sz);

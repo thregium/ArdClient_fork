@@ -286,6 +286,12 @@ public class GOut {
         image(img.tex(), c.add(img.o));
     }
 
+    public void image(Resource.Image img, Coord c, Coord sz) {
+        if (img == null)
+            return;
+        image(img.tex(), c.add(img.o), sz);
+    }
+
     /* Draw texture at c, quite simply. */
     public void image(Tex tex, Coord c) {
         if (tex == null)

@@ -631,7 +631,7 @@ public class FightWnd extends Widget {
         }
 
         private Coord itemc(int i) {
-            return (new Coord(((invsq.sz().x + 2) * i) + (UI.scale(10) * (i / 5)), 0));
+            return (new Coord(((invsq.sz().x + UI.scale(2)) * i) + (UI.scale(10) * (i / 5)), 0));
         }
 
         private int citem(Coord c) {

@@ -81,14 +81,16 @@ public class MinimapWnd extends ResizableWnd {
                     search:
                     {
                         if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
-                            String username = ui.gui.chrid;
-                            if (!username.isEmpty() && configuration.loadMapSetting(username, "mapper")) {
-                                MappingClient map = MappingClient.getInstance(username);
-                                if (map != null) {
-                                    MappingClient.MapRef mr = map.lastMapRef;
-                                    if (mr != null) {
-                                        tooltip = Text.render("Coordinates: " + mr);
-                                        break search;
+                            if (!ui.gui.chrid.isEmpty()) {
+                                String username = ui.sess.username + "/" + ui.gui.chrid;
+                                if (configuration.loadMapSetting(username, "mapper")) {
+                                    MappingClient map = MappingClient.getInstance(username);
+                                    if (map != null) {
+                                        MappingClient.MapRef mr = map.lastMapRef;
+                                        if (mr != null) {
+                                            tooltip = Text.render("Coordinates: " + mr);
+                                            break search;
+                                        }
                                     }
                                 }
                             }
@@ -104,14 +106,16 @@ public class MinimapWnd extends ResizableWnd {
             @Override
             public void click() {
                 if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
-                    String username = ui.gui.chrid;
-                    if (!username.isEmpty() && configuration.loadMapSetting(username, "mapper")) {
-                        MappingClient map = MappingClient.getInstance(username);
-                        if (map != null) {
-                            MappingClient.MapRef mr = map.GetMapRef(true);
-                            if (mr != null) {
-                                map.OpenMap(mr);
-                                return;
+                    if (!ui.gui.chrid.isEmpty()) {
+                        String username = ui.sess.username + "/" + ui.gui.chrid;
+                        if (configuration.loadMapSetting(username, "mapper")) {
+                            MappingClient map = MappingClient.getInstance(username);
+                            if (map != null) {
+                                MappingClient.MapRef mr = map.GetMapRef(true);
+                                if (mr != null) {
+                                    map.OpenMap(mr);
+                                    return;
+                                }
                             }
                         }
                     }
@@ -122,20 +126,22 @@ public class MinimapWnd extends ResizableWnd {
             public void draw(GOut g) {
                 boolean redraw = false;
                 if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
-                    String username = ui.gui.chrid;
-                    if (!username.isEmpty() && configuration.loadMapSetting(username, "mapper")) {
-                        MappingClient map = MappingClient.getInstance(username);
-                        if (map != null) {
-                            MappingClient.MapRef mr = map.lastMapRef;
-                            if (mr != null) {
-                                if (state != 2) {
-                                    state = 2;
-                                    redraw = true;
-                                }
-                            } else {
-                                if (state != 0) {
-                                    state = 0;
-                                    redraw = true;
+                    if (!ui.gui.chrid.isEmpty()) {
+                        String username = ui.sess.username + "/" + ui.gui.chrid;
+                        if (configuration.loadMapSetting(username, "mapper")) {
+                            MappingClient map = MappingClient.getInstance(username);
+                            if (map != null) {
+                                MappingClient.MapRef mr = map.lastMapRef;
+                                if (mr != null) {
+                                    if (state != 2) {
+                                        state = 2;
+                                        redraw = true;
+                                    }
+                                } else {
+                                    if (state != 0) {
+                                        state = 0;
+                                        redraw = true;
+                                    }
                                 }
                             }
                         }

@@ -431,10 +431,11 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         if (!chrid.isEmpty() && ui.sess != null) {
             String endpoint = Utils.getpref("vendan-mapv4-endpoint", "");
             Glob glob = ui.sess.glob;
+            String username = ui.sess.username + "/" + chrid;
             if (glob != null && !endpoint.isEmpty()) {
-                glob.addReference(chrid);
-                if (configuration.loadMapSetting(chrid, "mapper")) {
-                    MappingClient map = MappingClient.getInstance(chrid);
+                glob.addReference(username);
+                if (configuration.loadMapSetting(username, "mapper")) {
+                    MappingClient map = MappingClient.getInstance(username);
                     if (map != null) {
                         map.SetEndpoint(endpoint);
                         map.EnableGridUploads(true);
@@ -482,14 +483,15 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
 
         if (!chrid.isEmpty() && ui.sess != null) {
             Glob glob = ui.sess.glob;
+            String username = ui.sess.username + "/" + chrid;
             if (glob != null) {
-                glob.removeReference(chrid);
-                MappingClient map = MappingClient.getInstance(chrid);
+                glob.removeReference(username);
+                MappingClient map = MappingClient.getInstance(username);
                 if (map != null) {
                     map.SetEndpoint("");
                     map.EnableGridUploads(false);
                     map.EnableTracking(false);
-                    MappingClient.removeInstance(chrid);
+                    MappingClient.removeInstance(username);
                 }
             }
         }
@@ -1205,11 +1207,11 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
                     throw (new RuntimeException("failed to load mapfile", e));
                 }
 
-                mapfile = new MapWnd(file, map, Utils.getprefc("wndsz-map", new Coord(700, 500)), "Map");
+                mapfile = new MapWnd(file, map, Utils.getprefc("wndsz-map", UI.scale(700, 500)), "Map");
                 mapfile.hide();
-                add(mapfile, 50, 50);
+                add(mapfile, UI.scale(50, 50));
 
-                mmap = new LocalMiniMap(new Coord(133, 133), map);
+                mmap = new LocalMiniMap(UI.scale(133, 133), map);
                 mmapwnd = adda(new MinimapWnd(mmap), new Coord(sz.x, 0), 1, 0);
                 mmap.save(file);
 
@@ -1237,9 +1239,9 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             menu = (MenuGrid) brpanel.add(child);
             try {
                 final BeltData data = new BeltData(ui.sess.username + "::" + chrid);
-                fbelt = add(new BeltWnd("fk", data, KeyEvent.VK_F1, KeyEvent.VK_F10, 5, 50), new Coord(0, 50));
-                npbelt = add(new BeltWnd("np", data, KeyEvent.VK_NUMPAD0, KeyEvent.VK_NUMPAD9, 4, 100), new Coord(0, 100));
-                nbelt = add(new BeltWnd("n", data, KeyEvent.VK_0, KeyEvent.VK_9, 5, 0), new Coord(0, 150));
+                fbelt = add(new BeltWnd("fk", data, KeyEvent.VK_F1, KeyEvent.VK_F10, 5, 50), UI.scale(0, 50));
+                npbelt = add(new BeltWnd("np", data, KeyEvent.VK_NUMPAD0, KeyEvent.VK_NUMPAD9, 4, 100), UI.scale(0, 100));
+                nbelt = add(new BeltWnd("n", data, KeyEvent.VK_0, KeyEvent.VK_9, 5, 0), UI.scale(0, 150));
             } catch (Exception e) {
                 dev.simpleLog(e);
             }
@@ -1257,19 +1259,19 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             invwnd = new Hidewnd(Coord.z, "Inventory") {
                 @Override
                 public void cresize(Widget ch) {
-                    pack();
+//                    pack();
                 }
             };
             invwnd.add(maininv = (Inventory) child, Coord.z);
             invwnd.pack();
             invwnd.show(Config.autowindows.get("Inventory").selected);
-            add(invwnd, new Coord(100, 100));
+            add(invwnd, UI.scale(100, 100));
         } else if (place == "equ") {
             equwnd = new Hidewnd(Coord.z, "Equipment");
             equipory = equwnd.add((Equipory) child, Coord.z);
             equwnd.pack();
             equwnd.hide();
-            add(equwnd, new Coord(400, 10));
+            add(equwnd, UI.scale(400, 10));
             equwnd.show(Config.autowindows.get("Equipment").selected);
         } else if (place == "hand") {
             GItem g = add((GItem) child);
@@ -1277,10 +1279,10 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             hand.add(new DraggedItem(g, lc));
             updhand();
         } else if (place == "chr") {
-            studywnd = add(new StudyWnd(), new Coord(400, 100));
+            studywnd = add(new StudyWnd(), UI.scale(400, 100));
             if (!Config.autowindows.get("Study").selected)
                 studywnd.hide();
-            chrwdg = add((CharWnd) child, new Coord(300, 50));
+            chrwdg = add((CharWnd) child, UI.scale(300, 50));
             if (!Config.autowindows.get("Character Sheet").selected)
                 chrwdg.hide();
             addcmeter(hungermeter = new HungerMeter(chrwdg.glut, "HungerMeter"));
@@ -1299,7 +1301,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
                             super.reqdestroy();
                             makewnd = null;
                         }
-                    }, new Coord(400, 200));
+                    }, UI.scale(400, 200));
                 }
                 makewnd.add(child);
                 makewnd.pack();
@@ -1315,11 +1317,11 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         } else if (place == "chat") {
             chat.addchild(child);
         } else if (place == "party") {
-            partyview = add((Partyview) child, 10, 95);
+            partyview = add((Partyview) child, UI.scale(10, 95));
         } else if (place == "meter") {
-            int x = (meters.size() % 3) * (IMeter.fsz.x + 5);
-            int y = (meters.size() / 3) * (IMeter.fsz.y + 2);
-            add(child, portrait.c.x + portrait.sz.x + 10 + x, portrait.c.y + y);
+            int x = (meters.size() % 3) * (IMeter.fsz.x + UI.scale(5));
+            int y = (meters.size() / 3) * (IMeter.fsz.y + UI.scale(2));
+            add(child, portrait.c.x + portrait.sz.x + UI.scale(10) + x, portrait.c.y + y);
             meters.add(child);
             updcmeters();
         } else if (place == "buff") {

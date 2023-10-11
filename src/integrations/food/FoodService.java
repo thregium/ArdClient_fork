@@ -1,5 +1,6 @@
 package integrations.food;
 
+import haven.Defer;
 import haven.ItemInfo;
 import haven.Resource;
 import haven.res.ui.tt.q.qbuff.QBuff;
@@ -112,57 +113,61 @@ public class FoodService {
     /**
      * Check item info and determine if it is food and we need to send it
      */
-    public static void checkFood(List<ItemInfo> infoList, Resource res) {
+    public static void checkFood(List<ItemInfo> ii, Resource res) {
 //        if (!Resource.language.equals("en")) {
 //            // Do not process localized items
 //            return;
 //        }
-        try {
-            String resName = res.name;
-            FoodInfo foodInfo = ItemInfo.find(FoodInfo.class, infoList);
-            if (foodInfo != null) {
-                QBuff qBuff = ItemInfo.find(QBuff.class, infoList);
-                double quality = qBuff != null ? qBuff.q : 10.0;
-                double multiplier = Math.sqrt(quality / 10.0);
+        List<ItemInfo> infoList = new ArrayList<>(ii);
+        Defer.later(() -> {
+            try {
+                String resName = res.name;
+                FoodInfo foodInfo = ItemInfo.find(FoodInfo.class, infoList);
+                if (foodInfo != null) {
+                    QBuff qBuff = ItemInfo.find(QBuff.class, infoList);
+                    double quality = qBuff != null ? qBuff.q : 10.0;
+                    double multiplier = Math.sqrt(quality / 10.0);
 
-                ParsedFoodInfo parsedFoodInfo = new ParsedFoodInfo();
-                parsedFoodInfo.resourceName = resName;
-                parsedFoodInfo.energy = (int) (Math.round(foodInfo.end * 100));
-                parsedFoodInfo.hunger = round2Dig(foodInfo.glut * 100);
+                    ParsedFoodInfo parsedFoodInfo = new ParsedFoodInfo();
+                    parsedFoodInfo.resourceName = resName;
+                    parsedFoodInfo.energy = (int) (Math.round(foodInfo.end * 100));
+                    parsedFoodInfo.hunger = round2Dig(foodInfo.glut * 100);
 
-                for (int i = 0; i < foodInfo.evs.length; i++) {
-                    parsedFoodInfo.feps.add(new FoodFEP(foodInfo.evs[i].ev.orignm, round2Dig(foodInfo.evs[i].a / multiplier)));
-                }
+                    for (int i = 0; i < foodInfo.evs.length; i++) {
+                        parsedFoodInfo.feps.add(new FoodFEP(foodInfo.evs[i].ev.orignm, round2Dig(foodInfo.evs[i].a / multiplier)));
+                    }
 
-                for (ItemInfo info : infoList) {
-                    if (info instanceof ItemInfo.AdHoc) {
-                        String text = ((ItemInfo.AdHoc) info).str.text;
-                        // Skip food which base FEP's cannot be calculated
-                        if (text.equals("White-truffled")
-                                || text.equals("Black-truffled")
-                                || text.equals("Peppered")) {
-                            return;
+                    for (ItemInfo info : infoList) {
+                        if (info instanceof ItemInfo.AdHoc) {
+                            String text = ((ItemInfo.AdHoc) info).str.text;
+                            // Skip food which base FEP's cannot be calculated
+                            if (text.equals("White-truffled")
+                                    || text.equals("Black-truffled")
+                                    || text.equals("Peppered")) {
+                                return (null);
+                            }
+                        }
+                        if (info instanceof ItemInfo.Name) {
+                            parsedFoodInfo.itemName = ((ItemInfo.Name) info).ostr.text;
+                        }
+                        if (info.getClass().getName().equals("Ingredient")) {
+                            String name = (String) info.getClass().getField("oname").get(info);
+                            Double value = (Double) info.getClass().getField("val").get(info);
+                            parsedFoodInfo.ingredients.add(new FoodIngredient(name, (int) (value * 100)));
+                        } else if (info.getClass().getName().equals("Smoke")) {
+                            String name = (String) info.getClass().getField("oname").get(info);
+                            Double value = (Double) info.getClass().getField("val").get(info);
+                            parsedFoodInfo.ingredients.add(new FoodIngredient(name, (int) (value * 100)));
                         }
                     }
-                    if (info instanceof ItemInfo.Name) {
-                        parsedFoodInfo.itemName = ((ItemInfo.Name) info).ostr.text;
-                    }
-                    if (info.getClass().getName().equals("Ingredient")) {
-                        String name = (String) info.getClass().getField("oname").get(info);
-                        Double value = (Double) info.getClass().getField("val").get(info);
-                        parsedFoodInfo.ingredients.add(new FoodIngredient(name, (int) (value * 100)));
-                    } else if (info.getClass().getName().equals("Smoke")) {
-                        String name = (String) info.getClass().getField("oname").get(info);
-                        Double value = (Double) info.getClass().getField("val").get(info);
-                        parsedFoodInfo.ingredients.add(new FoodIngredient(name, (int) (value * 100)));
-                    }
-                }
 
-                checkAndSend(parsedFoodInfo);
+                    checkAndSend(parsedFoodInfo);
+                }
+            } catch (Exception ex) {
+                System.out.println("Cannot create food info: " + ex.getMessage());
             }
-        } catch (Exception ex) {
-            System.out.println("Cannot create food info: " + ex.getMessage());
-        }
+            return (null);
+        });
     }
 
     private static double round2Dig(double value) {

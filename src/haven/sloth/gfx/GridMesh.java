@@ -78,6 +78,7 @@ public class GridMesh extends FastMesh {
         ShortBuffer inds = Utils.mksbuf(area * 2 * 3);
         float zoff = 0.2f;
 
+        int offset = Utils.getprefi("slothgridoffset", 0);
         Coord c = new Coord();
         Coord3f me;
         int z;
@@ -87,12 +88,12 @@ public class GridMesh extends FastMesh {
                 me = mapToScreen(c, ul, mc);
                 mez = !Config.disableelev ? me.z : 0;
                 pa.put(me.x).put(me.y).put(mez + zoff);
-                z = ((int) me.z + 128) % 256;
-                if (((me.x % (11 * 100) == 0) && (c.x % 100 == 0)) || ((me.y % (11 * 100) == 0) && (c.y % 100 == 0))) {
-                    cl.put(255).put(255).put(255).put(0.5f);
-                } else {
+                z = ((int) me.z + 128 + offset) % 256;
+//                if (((me.x % (11 * 100) == 0) && (c.x % 100 == 0)) || ((me.y % (11 * 100) == 0) && (c.y % 100 == 0))) {
+//                    cl.put(255).put(255).put(255).put(0.5f);
+//                } else {
                     cl.put(colors[z][0]).put(colors[z][1]).put(colors[z][2]).put(0.5f);
-                }
+//                }
             }
         }
 
