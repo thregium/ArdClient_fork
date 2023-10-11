@@ -1,6 +1,6 @@
 package haven;
 
-public class InventoryProxy extends Widget implements DTarget {
+public class InventoryProxy extends Widget implements DTarget2 {
     private final Inventory target;
 
     public InventoryProxy(Inventory target) {
@@ -54,12 +54,12 @@ public class InventoryProxy extends Widget implements DTarget {
     }
 
     @Override
-    public boolean drop(Coord cc, Coord ul) {
-        return target.drop(cc, ul);
+    public boolean drop(WItem wt, Coord cc, Coord ul) {
+        return target.drop(wt, cc, ul);
     }
 
     @Override
-    public boolean iteminteract(Coord cc, Coord ul) {
-        return target.iteminteract(cc, ul);
+    public boolean iteminteract(WItem wt, Coord cc, Coord ul) {
+        return target.iteminteract(wt, cc, ul);
     }
 }
