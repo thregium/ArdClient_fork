@@ -74,21 +74,21 @@ public class LoginScreen extends Widget {
 //        super(new Coord(800, 600));
         setfocustab(true);
         background = add(new Img(bg), Coord.z);
-        optbtn = adda(new Button(100, "Options"), sz.x - 10, 40, 1, 1);
+        optbtn = adda(new Button(UI.scale(100), "Options"), sz.x - UI.scale(10), UI.scale(40), 1, 1);
 //        new UpdateChecker().start();
-        loginList = adda(new LoginList(200, 29), new Coord(10, 10), 0, 0);
+        loginList = adda(new LoginList(UI.scale(200), 29), UI.scale(10, 10), 0, 0);
 //        statusbtn = adda(new Button(200, "Initializing..."), sz.x - 210, 80, 0, 1);
 //        StartUpdaterThread();
-        status = adda(new StatusLabel("www.havenandhearth.com", 0.5), Coord.of(sz.x - 10, 80), 1, 1);
+        status = adda(new StatusLabel("www.havenandhearth.com", 0.5), Coord.of(sz.x - UI.scale(10), UI.scale(80)), 1, 1);
     }
 
     private static boolean changeLogShowed = false;
 
     private void showChangeLog() {
         changeLogShowed = true;
-        log = ui.root.add(new Window(new Coord(50, 50), "Changelog"), new Coord(100, 50));
+        log = ui.root.add(new Window(UI.scale(50, 50), "Changelog"), UI.scale(100, 50));
         log.justclose = true;
-        Textlog txt = log.add(new Textlog(new Coord(450, 200)));
+        Textlog txt = log.add(new Textlog(UI.scale(450, 200)));
         txt.quote = false;
         int maxlines = txt.maxLines = 200;
         log.pack();
@@ -147,17 +147,17 @@ public class LoginScreen extends Widget {
             add(new Label("User name", textf) {{
                 setstroked(Color.BLACK);
             }}, Coord.z);
-            add(user = new TextEntry(150, username), new Coord(0, 20));
+            add(user = new TextEntry(UI.scale(150), username), UI.scale(0, 20));
             add(new Label("Password", textf) {{
                 setstroked(Color.BLACK);
-            }}, new Coord(0, 50));
-            add(pass = new TextEntry(150, ""), new Coord(0, 70));
+            }}, UI.scale(0, 50));
+            add(pass = new TextEntry(UI.scale(150), ""), UI.scale(0, 70));
             pass.pw = true;
             if (user.text().equals(""))
                 setfocus(user);
             else
                 setfocus(pass);
-            resize(new Coord(150, 150));
+            resize(UI.scale(150, 150));
             LoginScreen.this.adda(this, new Coord(LoginScreen.this.sz.x / 2, LoginScreen.this.sz.y / 2), 0.5, 0);
         }
 
@@ -194,9 +194,9 @@ public class LoginScreen extends Widget {
 
         private Tokenbox(String username) {
             label = textfs.render("Identity is saved for " + username, java.awt.Color.WHITE);
-            add(btn = new Button(100, "Forget me"), new Coord(75, 30));
-            resize(new Coord(250, 100));
-            LoginScreen.this.add(this, new Coord(295, 330));
+            add(btn = new Button(UI.scale(100), "Forget me"), UI.scale(75, 30));
+            resize(UI.scale(250, 100));
+            LoginScreen.this.add(this, UI.scale(295, 330));
         }
 
         Object[] data() {
@@ -229,10 +229,19 @@ public class LoginScreen extends Widget {
         }
     }
 
-    public class LoginList extends Listbox<LoginData> {
-        private final Tex xicon = Text.render("\u2716", Color.RED, special).tex();
+
+    public static class LoginList extends Listbox<LoginData> {
+        private static final int ITEM_HEIGHT = UI.scale(20);
+        private static final Tex xicon = Text.render("✖", Color.RED, special).tex();
+        private static final Tex upicon;
+        private static final Tex downicon;
+        static {
+            Text uptext = Text.render("▲", Color.RED, special);
+            upicon = new TexI(PUtils.uiscale(uptext.img, uptext.sz().div(2)));
+            Text downtext = Text.render("▼", Color.RED, special);
+            downicon = new TexI(PUtils.uiscale(downtext.img, downtext.sz().div(2)));
+        }
         private int hover = -1;
-        private final static int ITEM_HEIGHT = 20;
         private Coord lastMouseDown = Coord.z;
 
         public LoginList(int w, int h) {
@@ -290,10 +299,14 @@ public class LoginScreen extends Widget {
                 g.frect(Coord.z, g.sz);
                 g.chcolor();
             }
+            g.chcolor(68, 68, 68, 128);
+            g.rect(Coord.z, g.sz);
+            g.chcolor();
             Tex tex = Text.render(item.name, Color.WHITE, textfs).tex();
-            int y = ITEM_HEIGHT / 2 - tex.sz().y / 2;
-            g.image(tex, new Coord(5, y));
-            g.image(xicon, new Coord(sz.x - 25, y));
+            g.image(tex, new Coord(UI.scale(5), (ITEM_HEIGHT - tex.sz().y) / 2));
+            g.aimage(xicon, new Coord(sz.x - UI.scale(5), (ITEM_HEIGHT - xicon.sz().y) / 2), 1, 0);
+            g.aimage(upicon, new Coord(sz.x - xicon.sz().x - UI.scale(5) - UI.scale(5), 0), 1, 0);
+            g.aimage(downicon, new Coord(sz.x - xicon.sz().x - UI.scale(5) - UI.scale(5), ITEM_HEIGHT), 1, 1);
         }
 
         @Override
@@ -305,17 +318,39 @@ public class LoginScreen extends Widget {
         @Override
         protected void itemclick(LoginData itm, int button) {
             if (button == 1) {
-                if (lastMouseDown.x >= sz.x - 25 && lastMouseDown.x <= sz.x - 25 + 20) {
+                int xpos = sz.x - xicon.sz().x - UI.scale(5);
+                int cpos = sz.x - xicon.sz().x - UI.scale(5) - upicon.sz().x - UI.scale(5);
+                if (lastMouseDown.x >= xpos && lastMouseDown.x <= xpos + xicon.sz().x) {
                     synchronized (Config.logins) {
                         Config.logins.remove(itm);
                         Config.saveLogins();
                     }
-                } else if (lastMouseDown.x < sz.x - 35) {
+                } else if (lastMouseDown.x >= cpos && lastMouseDown.x <= cpos + upicon.sz().x) {
+                    if (lastMouseDown.y % ITEM_HEIGHT > ITEM_HEIGHT / 2) {
+                        moveData(itm, 1);
+                    } else if (lastMouseDown.y % ITEM_HEIGHT < ITEM_HEIGHT / 2) {
+                        moveData(itm, -1);
+                    }
+                } else {
                     parent.wdgmsg("forget");
-                    parent.wdgmsg("login", new Object[]{new AuthClient.NativeCred(itm.name, itm.pass), false});
+                    parent.wdgmsg("login", new AuthClient.NativeCred(itm.name, itm.pass), false);
                     Context.accname = itm.name;
                 }
                 super.itemclick(itm, button);
+            }
+        }
+
+        private void moveData(LoginData itm, int amount) {
+            synchronized (Config.logins) {
+                int idx = Config.logins.indexOf(itm);
+                if (idx != -1) {
+                    int f = idx + amount;
+                    if (f >= 0 && f < Config.logins.size()) {
+                        Config.logins.remove(itm);
+                        Config.logins.add(f, itm);
+                        Config.saveLogins();
+                    }
+                }
             }
         }
     }
@@ -330,7 +365,7 @@ public class LoginScreen extends Widget {
                 protected void unpress() {
                     Audio.play(Button.lbtup.stream());
                 }
-            }, LoginScreen.this.sz.x / 2, LoginScreen.this.sz.y / 2 + 100, 0.5, 0);
+            }, LoginScreen.this.sz.x / 2, LoginScreen.this.sz.y / 2 + UI.scale(100), 0.5, 0);
             progress(null);
         }
     }
@@ -464,18 +499,18 @@ public class LoginScreen extends Widget {
         int zerox = MainFrame.instance.p.getSize().width > sz.x ? 0 : sz.x / 2 - MainFrame.instance.p.getSize().width / 2;
         int zeroy = MainFrame.instance.p.getSize().height > sz.y ? 0 : sz.y / 2 - MainFrame.instance.p.getSize().height / 2;
 
-        optbtn.move(new Coord(zerox + szx - 10, zeroy + 40), 1, 1);
-        loginList.move(new Coord(zerox + 10, zeroy + 10), 0, 0);
+        optbtn.move(new Coord(zerox + szx - UI.scale(10), zeroy + UI.scale(40)), 1, 1);
+        loginList.move(new Coord(zerox + UI.scale(10), zeroy + UI.scale(10)), 0, 0);
 //        statusbtn.move(new Coord(zerox + szx - 210, zeroy + 80), 0, 1);
-        status.move(new Coord(zerox + szx - 10, zeroy + 80), 1, 1);
+        status.move(new Coord(zerox + szx - UI.scale(10), zeroy + UI.scale(80)), 1, 1);
         if (cur != null)
             cur.move(new Coord(zerox + szx / 2, zeroy + szy / 2), 0.5, 0);
         if (btn != null)
-            btn.move(new Coord(zerox + szx / 2, zeroy + szy / 2 + 100), 0.5, -1);
+            btn.move(new Coord(zerox + szx / 2, zeroy + szy / 2 + UI.scale(100)), 0.5, -1);
         move(new Coord(MainFrame.instance.p.getSize().width / 2, MainFrame.instance.p.getSize().height / 2), 0.5, 0.5);
 
         if (error != null)
-            g.aimage(error.tex(), new Coord(LoginScreen.this.sz.x / 2, LoginScreen.this.sz.y / 2 + 100), 0.5, -1);
+            g.aimage(error.tex(), new Coord(LoginScreen.this.sz.x / 2, LoginScreen.this.sz.y / 2 + UI.scale(100)), 0.5, -1);
         if (progress != null)
             g.aimage(progress.tex(), new Coord(LoginScreen.this.sz.x / 2, LoginScreen.this.sz.y / 2), 0.5, -1);
     }

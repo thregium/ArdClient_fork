@@ -42,13 +42,23 @@ import haven.sloth.gui.ResizableWnd;
 import integrations.mapv4.MappingClient;
 import modification.configuration;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -135,9 +145,9 @@ public class MapWnd extends ResizableWnd {
         super(sz, title, true);
         makeHidable();
         this.mv = mv;
-        this.player = new MapLocator(mv);
         viewf = add(new Frame(Coord.z, true));
         view = viewf.add(new View(file));
+        this.player = new MapLocator(view, mv);
         recenter();
         toolbar2 = add(new ToolBar());
         toolbar = add(new Widget(Coord.z));
@@ -309,18 +319,19 @@ public class MapWnd extends ResizableWnd {
     }
 
     private static final int btnsz = UI.scale(21);
+
     public class ZoomBar extends Widget {
         public ZoomBar() {
             super(new Coord(btnsz * 2 + UI.scale(20), btnsz));
             add(new IButton("gfx/hud/worldmap/minus", "", "", "") {
                 @Override
                 public void click() {
-                    if (MapFileWidget.zoom < MapFileWidget.zoomlvls - 1) {
+                    if (view.zoom < MapFileWidget.zoommax) {
                         zoomtex = null;
-                        Coord tc = view.curloc.tc.mul(MapFileWidget.scalef());
-                        MapFileWidget.zoom++;
-                        Utils.setprefi("zoomlmap", MapFileWidget.zoom);
-                        tc = tc.div(MapFileWidget.scalef());
+                        Coord tc = view.curloc.tc.mul(view.scalef());
+                        view.zoom++;
+                        Utils.setprefi("zoomlmap", view.zoom);
+                        tc = tc.div(view.scalef());
                         view.curloc.tc.x = tc.x;
                         view.curloc.tc.y = tc.y;
                     }
@@ -329,12 +340,12 @@ public class MapWnd extends ResizableWnd {
             add(new IButton("gfx/hud/worldmap/plus", "", "", "") {
                 @Override
                 public void click() {
-                    if (MapFileWidget.zoom > 0) {
+                    if (view.zoom > MapFileWidget.zoommin) {
                         zoomtex = null;
-                        Coord tc = view.curloc.tc.mul(MapFileWidget.scalef());
-                        MapFileWidget.zoom--;
-                        Utils.setprefi("zoomlmap", MapFileWidget.zoom);
-                        tc = tc.div(MapFileWidget.scalef());
+                        Coord tc = view.curloc.tc.mul(view.scalef());
+                        view.zoom--;
+                        Utils.setprefi("zoomlmap", view.zoom);
+                        tc = tc.div(view.scalef());
                         view.curloc.tc.x = tc.x;
                         view.curloc.tc.y = tc.y;
                     }
@@ -350,7 +361,7 @@ public class MapWnd extends ResizableWnd {
 
         private Tex renderz() {
             if (zoomtex == null)
-                zoomtex = Text.renderstroked((MapFileWidget.zoomlvls - MapFileWidget.zoom) + "", Color.WHITE, Color.BLACK).tex();
+                zoomtex = Text.renderstroked("x" + view.scalef(), Color.WHITE, Color.BLACK).tex();
             return zoomtex;
         }
     }
@@ -390,7 +401,8 @@ public class MapWnd extends ResizableWnd {
 
                 @Override
                 public Object tooltip(Coord c, Widget prev) {
-                    search:{
+                    search:
+                    {
                         if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                             if (!ui.gui.chrid.isEmpty()) {
                                 String username = ui.sess.username + "/" + ui.gui.chrid;
@@ -629,6 +641,8 @@ public class MapWnd extends ResizableWnd {
                         gui.fitwdg(gui.add(gui.iconwnd, Utils.getprefc("wndc-icon", UI.scale(200, 200))));
                     } else {
                         gui.iconwnd.toggleVisibility();
+                        if (gui.iconwnd.visible())
+                            gui.raise();
                     }
                 }
             }), viewdist.c.add(viewdist.sz.x + spacer, 0));
@@ -757,7 +771,7 @@ public class MapWnd extends ResizableWnd {
                 if (loc != null) {
                     Coord hsz = sz.div(2);
                     Coord mc = c.sub(hsz).add(loc.tc);
-                    Coord hiconsize = new Coord2d(20, 20).mul(MapFileWidget.zoom == 0 ? 1 : (scaleFactors[0] / scaleFactors[MapFileWidget.zoom] + 0.5)).round().div(2);
+                    Coord hiconsize = UI.scale(20, 20).div(2);
                     full:
                     for (TempMark cm : getTempMarkList()) {
                         if (check.test(cm)) {
@@ -834,15 +848,15 @@ public class MapWnd extends ResizableWnd {
                                 Tex nametex = namemap.get(m.gobid);
                                 if (nametex != null) { //if we have a nametex for this gobid because we've seen them before, go ahead and apply it
                                     g.chcolor(Color.WHITE);
-                                    g.image(nametex, gc.sub(psz.div(2).add(new Coord(-5, -10))));
+                                    g.image(nametex, gc.sub(psz.div(2).add(UI.scale(-5, -10))));
                                 }
                                 continue;
                             }
                             angle = gob.geta();
-                            final Coord front = new Coord(8, 0).rotate(angle).add(gc);
-                            final Coord right = new Coord(-5, 5).rotate(angle).add(gc);
-                            final Coord left = new Coord(-5, -5).rotate(angle).add(gc);
-                            final Coord notch = new Coord(-2, 0).rotate(angle).add(gc);
+                            final Coord front = UI.scale(8, 0).rotate(angle).add(gc);
+                            final Coord right = UI.scale(-5, 5).rotate(angle).add(gc);
+                            final Coord left = UI.scale(-5, -5).rotate(angle).add(gc);
+                            final Coord notch = UI.scale(-2, 0).rotate(angle).add(gc);
                             KinInfo kin = gob.getattr(KinInfo.class);
 
                             Tex tex = namemap.get(m.gobid);
@@ -982,7 +996,7 @@ public class MapWnd extends ResizableWnd {
                 Coord hsz = sz.div(2);
                 for (TempMark cm : getTempMarkList()) {
                     if (loc.seg.id == cm.loc.seg.id && check.test(cm)) {
-                        Tex tex = cachedzoomtex(cm.icon, cm.name, MapFileWidget.zoom);
+                        Tex tex = cachedzoomtex(cm.icon, cm.name, zoom);
                         if (!cm.gc.equals(Coord.z)) {
                             Coord gc = hsz.sub(loc.tc).add(cm.gc.div(scalef()));
                             if (tex != null)
@@ -1038,13 +1052,13 @@ public class MapWnd extends ResizableWnd {
                     g.chcolor(255, 0, 0, 255);
 //                    g.image(plx, ploc.sub(plx.sz().div(2)));
 
-                    final Coord coord1 = new Coord(8, 0).rotate(angle).add(ploc);
-                    final Coord coord2 = new Coord(0, -5).rotate(angle).add(ploc);
-                    final Coord coord3 = new Coord(0, -1).rotate(angle).add(ploc);
-                    final Coord coord4 = new Coord(-8, -1).rotate(angle).add(ploc);
-                    final Coord coord5 = new Coord(-8, 1).rotate(angle).add(ploc);
-                    final Coord coord6 = new Coord(0, 1).rotate(angle).add(ploc);
-                    final Coord coord7 = new Coord(0, 5).rotate(angle).add(ploc);
+                    final Coord coord1 = UI.scale(8, 0).rotate(angle).add(ploc);
+                    final Coord coord2 = UI.scale(0, -5).rotate(angle).add(ploc);
+                    final Coord coord3 = UI.scale(0, -1).rotate(angle).add(ploc);
+                    final Coord coord4 = UI.scale(-8, -1).rotate(angle).add(ploc);
+                    final Coord coord5 = UI.scale(-8, 1).rotate(angle).add(ploc);
+                    final Coord coord6 = UI.scale(0, 1).rotate(angle).add(ploc);
+                    final Coord coord7 = UI.scale(0, 5).rotate(angle).add(ploc);
                     g.poly(coord1, coord2, coord3, coord4, coord5, coord6, coord7);
                     g.chcolor(Color.BLACK);
                     g.polyline(1, coord1, coord2, coord3, coord4, coord5, coord6, coord7);
@@ -1072,7 +1086,7 @@ public class MapWnd extends ResizableWnd {
                     Coord rcd = getRealCoord(player.rc.floor(sgridsz).mul(sgridsz).sub(sgridsz.mul(4)).floor(tilesz));
                     Coord rc = hsz.sub(loc.tc).add(rcd.div(scalef()));
                     g.chcolor(new Color(configuration.distanceviewcolor, true));
-                    Coord rect = MCache.cmaps.mul(9).div(tilesz.floor()).div(scalef());
+                    Coord rect = sgridsz.mul(9).div(tilesz).div(scalef()).floor();
                     g.dottedline(rc, rc.add(rect.x - 1, 0), 1);
                     g.dottedline(rc.add(rect.x - 1, 0), rc.add(rect), 1);
                     g.dottedline(rc.add(rect).sub(1, 1), rc.add(0, rect.y - 1), 1);
@@ -1105,7 +1119,7 @@ public class MapWnd extends ResizableWnd {
                 if (loc != null) {
                     Coord hsz = sz.div(2);
                     Coord mc = c.sub(hsz).add(loc.tc);
-                    Coord hiconsize = new Coord2d(20, 20).mul(MapFileWidget.zoom == 0 ? 1 : (scaleFactors[0] / scaleFactors[MapFileWidget.zoom] + 0.5)).round().div(2);
+                    Coord hiconsize = UI.scale(20, 20).div(2);
                     for (TempMark cm : getTempMarkList()) {
                         if (check.test(cm)) {
                             for (int x = -hiconsize.x; x < hiconsize.x; x++)
@@ -1254,7 +1268,7 @@ public class MapWnd extends ResizableWnd {
         private Tex cachedzoomtex(Tex tex, String name, int z) {
             Tex itex = cachedZoomImageTex.get(name + "_zoom" + z);
             if (itex == null && tex != null) {
-                Coord zoomc = new Coord2d(tex.sz()).mul(MapFileWidget.zoom == 0 ? 1 : (scaleFactors[0] / scaleFactors[MapFileWidget.zoom] + 0.5)).round();
+                Coord zoomc = new Coord2d(tex.sz()).round();
                 itex = new TexI(PUtils.uiscale(((TexI) tex).back, zoomc));
                 cachedZoomImageTex.put(name + "_zoom" + z, itex);
             }
@@ -1436,7 +1450,7 @@ public class MapWnd extends ResizableWnd {
         public void change(Marker mark) {
             //change2(mark);
             if (mark != null)
-                view.center(new SpecLocator(mark.seg, mark.tc));
+                view.center(new SpecLocator(view, mark.seg, mark.tc));
         }
 
         public void change2(Marker mark) {

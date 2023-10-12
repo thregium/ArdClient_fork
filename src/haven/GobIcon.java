@@ -432,6 +432,7 @@ public class GobIcon extends GAttrib {
             super(Coord.z, "Icon settings", "Icon settings");
             this.conf = conf;
             this.save = save;
+            makeHidable();
             Composer composer = new Composer(this).vmrgn(UI.scale(5)).hmrgn(UI.scale(5));
             IconList list = new IconList(UI.scale(250), 21);
             List<ImageButton> blist = new ArrayList<>();

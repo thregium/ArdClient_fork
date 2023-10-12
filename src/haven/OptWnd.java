@@ -5864,7 +5864,7 @@ public class OptWnd extends Window {
     }
 
     private void showChangeLog() {
-        Window log = ui.root.add(new Window(UI.scale(50, 50), "Changelog"), new Coord(100, 50));
+        Window log = ui.root.add(new Window(UI.scale(50, 50), "Changelog"), UI.scale(100, 50));
         log.justclose = true;
         Textlog txt = log.add(new Textlog(UI.scale(450, 200)));
         txt.quote = false;
@@ -6489,6 +6489,29 @@ public class OptWnd extends Window {
                             },
                             dpy);
                 }
+                {
+                    Label dpy = new Label("");
+                    final double smin = 1, smax = Math.floor(UI.maxscale() / 0.25) * 0.25;
+                    final int steps = (int) Math.round((smax - smin) / 0.25);
+                    appender.addRow(new Label("UI scale (req restart)"), new HSlider(UI.scale(160), 0, steps, (int) Math.round(steps * (Utils.getprefd("uiscale", 1.0) - smin) / (smax - smin))) {
+                        @Override
+                        protected void added() {
+                            dpy();
+                        }
+
+                        void dpy() {
+                            dpy.settext(String.format("%.2f\u00d7", smin + (((double) this.val / steps) * (smax - smin))));
+                        }
+
+                        @Override
+                        public void changed() {
+                            double val = smin + (((double) this.val / steps) * (smax - smin));
+                            Utils.setprefd("uiscale", val);
+                            UI.updateScale();
+                            dpy();
+                        }
+                    }, dpy);
+                }
                 appender.add(new CheckBox("Add flared lip to top of ridges to make them obvious") {
                     {
                         a = Config.obviousridges;
@@ -6714,30 +6737,6 @@ public class OptWnd extends Window {
                 };
                 disanimlist.items.addAll(Config.disableanim.values());
                 appender.add(disanimlist);
-
-                {
-                    Label dpy = new Label("");
-                    final double smin = 1, smax = Math.floor(UI.maxscale() / 0.25) * 0.25;
-                    final int steps = (int) Math.round((smax - smin) / 0.25);
-                    appender.addRow(new Label("UGLY UI scale (don't use)"), new HSlider(UI.scale(160), 0, steps, (int) Math.round(steps * (Utils.getprefd("uiscale", 1.0) - smin) / (smax - smin))) {
-                        @Override
-                        protected void added() {
-                            dpy();
-                        }
-
-                        void dpy() {
-                            dpy.settext(String.format("%.2f\u00d7", smin + (((double) this.val / steps) * (smax - smin))));
-                        }
-
-                        @Override
-                        public void changed() {
-                            double val = smin + (((double) this.val / steps) * (smax - smin));
-                            Utils.setprefd("uiscale", val);
-                            UI.updateScale();
-                            dpy();
-                        }
-                    }, dpy);
-                }
 
                 pack();
             }

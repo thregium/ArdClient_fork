@@ -1017,7 +1017,7 @@ public class Inventory extends Widget implements DTarget2 {
         public AltInventory(final Inventory inv) {
             this.inv = inv;
             list = add(new ItemGroupList(inv, UI.scale(150), 16, UI.scale(16)));
-            pack();
+            super.pack();
         }
 
         public void addItem(final WItem wItem) {
@@ -1217,6 +1217,19 @@ public class Inventory extends Widget implements DTarget2 {
                     item.iteminteract(target, Coord.z, Coord.z);
                 }
                 return (true);
+            }
+
+            @Override
+            public boolean mousewheel(final Coord c, final int amount) {
+                //if(ui.modshift) {
+                //	    Inventory minv = getparent(GameUI.class).maininv;
+                //	    if(amount < 0)
+                //		wdgmsg("invxf", minv.wdgid(), 1);
+                //	    else if(amount > 0)
+                //		minv.wdgmsg("invxf", this.wdgid(), 1);
+                //	}
+                //	return(true);
+                return super.mousewheel(c, amount);
             }
 
             @Override

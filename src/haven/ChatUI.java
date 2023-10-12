@@ -212,7 +212,7 @@ public class ChatUI extends Widget {
                     else
                         t = fnd.render(text, w, TextAttribute.FOREGROUND, col);
                 } catch (Exception e) {
-                    dev.simpleLog(e);
+                    dev.simpleLog(text, e);
                     if (col == null)
                         t = fnd.render(RichText.Parser.quote(text), w);
                     else

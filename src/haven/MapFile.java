@@ -29,6 +29,7 @@ package haven;
 import haven.Defer.Future;
 import haven.resutil.Ridges;
 import modification.configuration;
+import modification.dev;
 import modification.resources;
 
 import java.awt.Color;
@@ -45,7 +46,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
@@ -532,7 +533,8 @@ public class MapFile {
         public final float[] zmap;
         public final Collection<Overlay> ols = new ArrayList<>();
         public final long mtime;
-        private final Map<BufferedImage, Color> simple_textures = new HashMap<>();
+        private static final Map<BufferedImage, Color> simple_textures = Collections.synchronizedMap(new WeakHashMap<>());
+        private static final Map<String, BufferedImage> texes = Collections.synchronizedMap(new WeakHashMap<>());
 
         public DataGrid(TileInfo[] tilesets, int[] tiles, float[] zmap, long mtime) {
             this.tilesets = tilesets;
@@ -605,6 +607,73 @@ public class MapFile {
             }
         }
 
+        private static final BufferedImage EMPTY_TILE = new BufferedImage(1, 1, 1);
+
+        private static BufferedImage tiletex(int t, TileInfo[] tilesets) {
+            Resource.Spec res = tilesets[t].res;
+            BufferedImage img = texes.get(res.name());
+            if (img == null) {
+                Resource r = null;
+                try {
+                    r = res.loadsaved(Resource.remote());
+                } catch (Loading l) {
+                    throw (l);
+                } catch (Exception e) {
+                    warn(e, "could not load tileset resource %s(v%d): %s", res.name, res.ver, e);
+                }
+//                synchronized (texes) {
+                    img = texes.get(res.name());
+                    if (img == null) {
+                        if (r != null) {
+                            Resource.Image ir = r.layer(Resource.imgc);
+                            if (ir != null) {
+                                img = ir.img;
+                            }
+                        }
+                    }
+                    if (img == null)
+                        img = EMPTY_TILE;
+                    texes.put(res.name(), img);
+//                }
+            }
+            return (img == EMPTY_TILE ? null : img);
+        }
+
+        private static BufferedImage tiletex(int t, TileInfo[] tilesets, String res) {
+            BufferedImage img = tiletex(t, tilesets);
+            if (img == null) {
+                Resource r = null;
+                try {
+                    r = Resource.remote().loadwait(res);
+                } catch (Loading l) {
+                    throw (l);
+                } catch (Exception e) {
+                    warn("could not load tileset resource %s: %s", res, e);
+                }
+//                synchronized (texes) {
+                    img = texes.get(res);
+                    if (img == null) {
+                        if (r != null) {
+                            Resource.Image ir = r.layer(Resource.imgc);
+                            TexR tr = r.layer(TexR.class);
+                            if (ir != null) {
+                                img = ir.img;
+                                texes.put(res, img);
+                            } else if (tr != null) {
+                                img = tr.tex.fill();
+                            } else {
+                                dev.simpleLog("Not found " + res);
+                            }
+                        }
+                    }
+                    if (img == null)
+                        img = EMPTY_TILE;
+                    texes.put(res, img);
+//                }
+            }
+            return (img == EMPTY_TILE ? null : img);
+        }
+
         public boolean hasTiles(String... tilenames) {
             Coord c = new Coord();
             for (c.y = 0; c.y < cmaps.y; c.y++) {
@@ -639,8 +708,8 @@ public class MapFile {
         }
 
         public BufferedImage render(Coord off) {
-            BufferedImage[] texes = new BufferedImage[tilesets.length];
-            boolean[] cached = new boolean[tilesets.length];
+//            BufferedImage[] texes = new BufferedImage[tilesets.length];
+//            boolean[] cached = new boolean[tilesets.length];
             WritableRaster buf = PUtils.imgraster(cmaps);
             Coord c = new Coord();
             if (configuration.allowtexturemap) {
@@ -651,8 +720,8 @@ public class MapFile {
                         BufferedImage tex;
                         if (configuration.cavetileonmap && isContains(t, "gfx/tiles/rocks/")) {
                             final String newtype = "gfx/terobjs/bumlings/" + tname.substring(tname.lastIndexOf("/") + 1);
-                            tex = tiletex(t, texes, cached, newtype);
-                        } else tex = tiletex(t, texes, cached);
+                            tex = tiletex(t, tilesets, newtype);
+                        } else tex = tiletex(t, tilesets);
                         int rgb = 0;
                         if (tex != null) {
                             switch (MAPTYPE.get()) {
@@ -1071,7 +1140,7 @@ public class MapFile {
 
         @Deprecated
         @SuppressWarnings("Duplicates")
-        private Color simple_tile_img(BufferedImage img) {
+        private static Color simple_tile_img(BufferedImage img) {
             return simple_textures.computeIfAbsent(img, i -> {
                 int sumr = 0, sumg = 0, sumb = 0;
                 for (int x = 0; x < img.getWidth(); x++) {

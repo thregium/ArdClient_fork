@@ -395,8 +395,8 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         lm.hide();
         scripts = add(new ScriptManager());
         scripts.hide();
-        this.questhelper = add(new QuestHelper(), new Coord(0, sz.y - 200));
-        this.questhelper.hide();
+        questhelper = add(new QuestHelper(), new Coord(0, sz.y - UI.scale(200)));
+        questhelper.hide();
         hidden = add(new HiddenManager());
         hidden.hide();
         deleted = add(new DeletedManager());

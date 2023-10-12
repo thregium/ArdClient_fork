@@ -1,5 +1,7 @@
 package haven;
 
+import haven.sloth.gui.ResizableWnd;
+
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -10,34 +12,34 @@ import java.util.List;
 
 //Ported from mamber, adjusted for public use,  credits to Matias
 
-public class QuestHelper extends Window {
+public class QuestHelper extends ResizableWnd {
     public boolean active = false;
     public QuestHelper.QuestList questList;
 
     public QuestHelper() {
-        super(Coord.z, "Quest Helper", "Quest Helper");
-        new Coord(20, 55);
-        this.add(new QuestHelper.PButton(80, "Refresh", this.questList), new Coord(100, 20));
-        this.questList = new QuestHelper.QuestList(270, 13, this);
-        this.add(this.questList, new Coord(10, 55));
+        super(Coord.z, "Quest Helper");
+        PButton btn = add(new PButton("Refresh"));
+        questList = new QuestHelper.QuestList(UI.scale(270), 13, this);
+        add(questList, UI.scale(0, btn.sz.y));
         makeHidable();
         pack();
     }
 
+    @Override
     public void wdgmsg(Widget sender, String msg, Object... args) {
         if (sender == this.cbtn) {
-            this.hide();
-            this.disable();
+            hide();
+            disable();
         } else {
             super.wdgmsg(sender, msg, args);
         }
-
     }
 
+    @Override
     public boolean type(char key, KeyEvent ev) {
         if (key == 27) {
-            this.hide();
-            this.disable();
+            hide();
+            disable();
             return true;
         } else {
             return super.type(key, ev);
@@ -45,21 +47,21 @@ public class QuestHelper extends Window {
     }
 
     public void refresh() {
-        if (this.active) {
-            this.questList.quests.clear();
-            this.questList.refresh = true;
-            this.questList.quests.sort(this.questList.comp);
+        if (active) {
+            questList.temp.clear();
+            questList.sb.val = questList.sb.min;
+            questList.refresh = true;
         }
-        presize();
     }
 
+    @Override
     public void close() {
         hide();
-        this.disable();
+        disable();
     }
 
     public void addConds(List<CharWnd.Quest.Condition> ncond, int id) {
-        if (this.active) {
+        if (active) {
             boolean alltrue = true;
 
             for (int i = 0; i < ncond.size(); ++i) {
@@ -73,21 +75,23 @@ public class QuestHelper extends Window {
                 }
 
                 boolean dontadd = false;
-                Iterator var7 = this.questList.quests.iterator();
+                Iterator var7 = questList.temp.iterator();
 
                 while (var7.hasNext()) {
                     QuestListItem item = (QuestListItem) var7.next();
                     if (qitem.name.equals(item.name) && qitem.parentid == item.parentid) {
                         dontadd = true;
+                        break;
                     }
                 }
 
                 if (!dontadd) {
-                    this.questList.quests.add(qitem);
+                    questList.temp.add(qitem);
                 }
             }
 
-            this.questList.quests.sort(this.questList.comp);
+            questList.temp.sort(questList.comp);
+            questList.quests = new ArrayList<>(questList.temp);
         }
     }
 
@@ -96,73 +100,76 @@ public class QuestHelper extends Window {
     }
 
     private static class QuestList extends Listbox<QuestListItem> {
-        private static final Coord nameoff = new Coord(0, 5);
-        public List<QuestListItem> quests = new ArrayList(50);
+        private static final Coord nameoff = UI.scale(0, 5);
+        public List<QuestListItem> temp = Collections.synchronizedList(new ArrayList<>());
+        public List<QuestListItem> quests = Collections.emptyList();
         public boolean refresh = true;
         private long lastUpdateTime = System.currentTimeMillis();
-        private final Comparator<QuestListItem> comp = (a, b) -> {
-            return a.name.compareTo(b.name);
-        };
+        private final Comparator<QuestListItem> comp = Comparator.comparing(a -> a.name);
         private QuestHelper questHelper;
 
         public QuestList(int w, int h, QuestHelper questHelper) {
-            super(w, h, 24);
+            super(w, h, UI.scale(24));
             this.questHelper = questHelper;
         }
 
+        @Override
+        public void presize() {
+            super.presize();
+            super.resize(parent.xlate(parent.sz, false).sub(c).sub(UI.scale(5, 5)));
+        }
+
+        @Override
         public void tick(double dt) {
             if (ui.gui != null && ui.gui.menu != null) {
-                if (this.questHelper.active) {
-                    long timesincelastupdate = System.currentTimeMillis() - this.lastUpdateTime;
+                if (questHelper.active) {
+                    long timesincelastupdate = System.currentTimeMillis() - lastUpdateTime;
                     if (timesincelastupdate < 1000L) {
-                        this.refresh = false;
+                        refresh = false;
                     }
 
-                    if (this.ui != null && this.refresh) {
-                        this.refresh = false;
-                        this.lastUpdateTime = System.currentTimeMillis();
-                        this.quests.clear();
+                    if (ui != null && refresh) {
+                        refresh = false;
+                        lastUpdateTime = System.currentTimeMillis();
+                        temp.clear();
 
                         try {
-                            Iterator var6 = this.ui.gui.chrwdg.cqst.quests.iterator();
-
-                            while (var6.hasNext()) {
-                                CharWnd.Quest quest = (CharWnd.Quest) var6.next();
-                                if (quest.id != this.ui.gui.chrwdg.credos.pqid) {
-                                    this.ui.gui.chrwdg.wdgmsg("qsel", new Object[]{quest.id});
+                            ui.gui.chrwdg.cqst.quests.forEach(quest -> {
+                                if (quest.id != ui.gui.chrwdg.credos.pqid) {
+                                    ui.gui.chrwdg.wdgmsg("qsel", quest.id);
                                 }
-                            }
+                            });
                         } catch (NullPointerException var9) {
                             var9.printStackTrace();
                         } catch (Loading var10) {
-                            this.refresh = true;
+                            refresh = true;
                             System.out.println("loading...");
                         }
 
-                        Collections.sort(this.quests);
-                        if (this.quests.size() > 0) {
-                            this.change2(this.quests.get(0));
-                        }
+                        selindex = -1;
                     }
                 }
-
             }
         }
 
+        @Override
         protected QuestListItem listitem(int idx) {
-            return this.quests.get(idx);
+            return quests.get(idx);
         }
 
+        @Override
         protected int listitems() {
-            return this.quests.size();
+            return quests.size();
         }
 
+        @Override
         protected void drawbg(GOut g) {
             g.chcolor(0, 0, 0, 120);
             g.frect(Coord.z, this.sz);
             g.chcolor();
         }
 
+        @Override
         protected void drawitem(GOut g, QuestListItem item, int idx) {
             try {
                 if (item.status == 2) {
@@ -175,30 +182,26 @@ public class QuestHelper extends Window {
 
                 g.text(item.name, nameoff);
 
-
                 g.chcolor();
             } catch (Loading var5) {
             }
-
         }
 
+        @Override
         public void change(QuestListItem item) {
             if (item != null) {
                 super.change(item);
-                this.ui.gui.chrwdg.wdgmsg("qsel", item.parentid);
+                ui.gui.chrwdg.wdgmsg("qsel", item.parentid);
             }
-
         }
     }
 
     private class PButton extends Button {
-        public final QuestHelper.QuestList tgt;
-
-        public PButton(int w, String title, QuestHelper.QuestList tgt) {
-            super(w, title);
-            this.tgt = tgt;
+        public PButton(String title) {
+            super(title);
         }
 
+        @Override
         public void click() {
             QuestHelper.this.refresh();
         }

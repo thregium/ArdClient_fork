@@ -126,7 +126,7 @@ public class Config {
     public static boolean showroadmidpoint = Utils.getprefb("showroadmidpoint", false);
     public static boolean qualitywhole = Utils.getprefb("qualitywhole", true);
     public static int badcamsensitivity = Utils.getprefi("badcamsensitivity", 5);
-    public static List<LoginData> logins = new ArrayList<LoginData>();
+    public static List<LoginData> logins = new ArrayList<>();
     public static boolean shooanimals = Utils.getprefb("shooanimals", false);
     public static boolean horseautorun = Utils.getprefb("horseautorun", true);
     public static boolean mapshowgrid = Utils.getprefb("mapshowgrid", false);

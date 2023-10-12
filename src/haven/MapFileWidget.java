@@ -45,6 +45,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 import static haven.MCache.cmaps;
+import static haven.MCache.cmapsd;
 import static haven.Text.latin;
 
 public class MapFileWidget extends Widget implements Console.Directory {
@@ -61,9 +62,10 @@ public class MapFileWidget extends Widget implements Console.Directory {
     private boolean dragging;
     private Coord dsc, dmc;
     private String biome, seginfo;
-    public static int zoom = Utils.getprefi("zoomlmap", 0);
-    public static int zoomlvls = 8;
-    public static final double[] scaleFactors = new double[]{1 / 8.0, 1 / 4.0, 1 / 2.0, 1, 100 / 75.0, 100 / 50.0, 100 / 25.0, 100 / 15.0, 100 / 8.0}; //FIXME that his add more scale
+    public static int zoommax = 3;
+    public static int zoommin = -3;
+    public int zoom = Math.max(zoommin, Math.min(zoommax, Utils.getprefi("zoomlmap", 0)));
+//    public static final double[] scaleFactors = new double[]{1 / 8.0, 1 / 4.0, 1 / 2.0, 1, 100 / 75.0, 100 / 50.0, 100 / 25.0, 100 / 15.0, 100 / 8.0}; //FIXME that his add more scale
     private static final Tex gridred = Resource.loadtex("gfx/hud/mmap/gridred");
 
     public static Map<String, Tex> cachedTextTex = new HashMap<>();
@@ -108,31 +110,35 @@ public class MapFileWidget extends Widget implements Console.Directory {
 
     public static class MapLocator implements Locator {
         public final MapView mv;
+        public final MapFileWidget view;
 
-        public MapLocator(MapView mv) {
+        public MapLocator(MapFileWidget view, MapView mv) {
+            this.view = view;
             this.mv = mv;
         }
 
         public Location locate(MapFile file) {
-            Coord mc = new Coord2d(mv.getcc()).floor(MCache.tilesz);
+            Coord2d mc = new Coord2d(mv.getcc()).floord(MCache.tilesz);
             if (mc == null)
                 throw (new Loading("Waiting for initial location"));
-            MCache.Grid plg = mv.ui.sess.glob.map.getgrid(mc.div(cmaps));
+            MCache.Grid plg = mv.ui.sess.glob.map.getgrid(mc.div(cmapsd).floor());
             GridInfo info = file.gridinfo.get(plg.id);
             if (info == null)
                 throw (new Loading("No grid info, probably coming soon"));
             Segment seg = file.segments.get(info.seg);
             if (seg == null)
                 throw (new Loading("No segment info, probably coming soon"));
-            return (new Location(seg, info.sc.mul(cmaps.div(scalef())).add(mc.sub(plg.ul).div(scalef()))));
+            return (new Location(seg, info.sc.mul(cmapsd.div(view.scalef())).add(mc.sub(plg.ul).div(view.scalef())).floor()));
         }
     }
 
     public static class SpecLocator implements Locator {
+        public final MapFileWidget view;
         public final long seg;
         public final Coord tc;
 
-        public SpecLocator(long seg, Coord tc) {
+        public SpecLocator(MapFileWidget view, long seg, Coord tc) {
+            this.view = view;
             this.seg = seg;
             this.tc = tc;
         }
@@ -141,7 +147,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
             Segment seg = file.segments.get(this.seg);
             if (seg == null)
                 return (null);
-            return (new Location(seg, tc.div(scalef())));
+            return (new Location(seg, tc.div(view.scalef())));
         }
     }
 
@@ -190,7 +196,9 @@ public class MapFileWidget extends Widget implements Console.Directory {
         private final Map<String[], Defer.Future<TexI>> highlightedMap = new HashMap<>();
         private final Map<String[], Boolean> highlightedHas = new HashMap<>();
 
-        public DisplayGrid(Segment seg, Coord sc, Indir<Grid> gref) {
+        private MapFileWidget view;
+        public DisplayGrid(MapFileWidget view, Segment seg, Coord sc, Indir<Grid> gref) {
+            this.view = view;
             this.seg = seg;
             this.sc = sc;
             this.gref = gref;
@@ -220,7 +228,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
                 }
                 clearfog(fogSync, fogimg);
                 clearfog(fogSyncTemp, fogimgTemp);
-                img = Defer.later(() -> new TexI(grid.render(sc.mul(cmaps.div(scalef())))));
+                img = Defer.later(() -> new TexI(grid.render(sc.mul(cmapsd.div(view.scalef()).floor()))));
                 cgrid = grid;
             }
 
@@ -241,7 +249,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
                 synchronized (olimg_c) {
                     ret = olimg_c.get(tag);
                     if (ret == null) {
-                        ret = Defer.later(() -> new TexI(cgrid.olrender(sc.mul(cmaps.div(scalef())), tag)));
+                        ret = Defer.later(() -> new TexI(cgrid.olrender(sc.mul(cmaps.div(view.scalef())), tag)));
                         olimg_c.put(tag, ret);
                     }
                 }
@@ -466,7 +474,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
         try {
             Tex img = disp.img();
             if (img != null) {
-                g.image(img, ul, cmaps.div(scalef()));
+                g.image(img, ul, cmapsd.div(scalef()).round());
             }
         } catch (Loading l) {
         }
@@ -514,14 +522,14 @@ public class MapFileWidget extends Widget implements Console.Directory {
             try {
                 for (Coord c : dext) {
                     if (display[dext.ri(c)] == null)
-                        display[dext.ri(c)] = new DisplayGrid(loc.seg, c, loc.seg.grid(c));
+                        display[dext.ri(c)] = new DisplayGrid(this, loc.seg, c, loc.seg.grid(c));
                 }
             } finally {
                 file.lock.readLock().unlock();
             }
         }
         for (Coord c : dext) {
-            Coord ul = hsz.add(c.mul(cmaps.div(scalef()))).sub(loc.tc);
+            Coord ul = hsz.sub(loc.tc).add(c.mul(cmapsd.div(scalef())).floor());
             try {
                 DisplayGrid disp = display[dext.ri(c)];
                 if (disp == null)
@@ -533,7 +541,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
             if (configuration.bigmapshowgrid) {
                 g.chcolor(new Color(configuration.mapgridcolor, true));
 //                g.image(gridred, ul, cmaps.div(scalef()));
-                g.image(gridred(cmaps.div(scalef())), ul);
+                g.image(gridred(cmapsd.div(scalef()).round()), ul);
 //                g.chcolor(Color.RED);
 //                Coord rect = cmaps.div(scalef());
 //                g.dottedline(ul, ul.add(rect.x, 0), 1);
@@ -564,7 +572,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
         if (file.lock.readLock().tryLock()) {
             try {
                 for (Map.Entry<Coord, Long> entry : loc.seg.map.entrySet())
-                    grids.add(new DisplayGrid(loc.seg, entry.getKey(), loc.seg.grid(entry.getKey())));
+                    grids.add(new DisplayGrid(this, loc.seg, entry.getKey(), loc.seg.grid(entry.getKey())));
             } finally {
                 file.lock.readLock().unlock();
             }
@@ -705,7 +713,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
                 //Only works if we're on the same map segment as our player
                 try {
                     //   tc = c.sub(sz.div(2)).add(curloc.tc);
-                    final Location pl = resolve(new MapLocator(ui.gui.map));
+                    final Location pl = resolve(new MapLocator(this, ui.gui.map));
                     if (curloc != null && curloc.seg.id == pl.seg.id) {
                         final Coord2d plc = new Coord2d(ui.sess.glob.oc.getgob(ui.gui.map.plgob).getc());
                         //Offset in terms of loftar map coordinates
@@ -812,24 +820,24 @@ public class MapFileWidget extends Widget implements Console.Directory {
     public boolean mousewheel(Coord c, int amount) {
         try {
             if (amount > 0) {
-                if (MapFileWidget.zoom < zoomlvls - 1) {
+                if (zoom < MapFileWidget.zoommax) {
                     ui.gui.mapfile.zoomtex = null;
-                    Coord tc = curloc.tc.mul(MapFileWidget.scalef());
-                    MapFileWidget.zoom++;
-                    Utils.setprefi("zoomlmap", MapFileWidget.zoom);
-                    tc = tc.div(MapFileWidget.scalef());
+                    Coord tc = curloc.tc.mul(scalef());
+                    zoom++;
+                    Utils.setprefi("zoomlmap", zoom);
+                    tc = tc.div(scalef());
                     if (curloc != null) {
                         curloc.tc.x = tc.x;
                         curloc.tc.y = tc.y;
                     }
                 }
             } else {
-                if (MapFileWidget.zoom > 0) {
+                if (zoom > MapFileWidget.zoommin) {
                     ui.gui.mapfile.zoomtex = null;
-                    Coord tc = curloc.tc.mul(MapFileWidget.scalef());
-                    MapFileWidget.zoom--;
-                    Utils.setprefi("zoomlmap", MapFileWidget.zoom);
-                    tc = tc.div(MapFileWidget.scalef());
+                    Coord tc = curloc.tc.mul(scalef());
+                    zoom--;
+                    Utils.setprefi("zoomlmap", zoom);
+                    tc = tc.div(scalef());
                     if (curloc != null) {
                         curloc.tc.x = tc.x;
                         curloc.tc.y = tc.y;
@@ -856,10 +864,9 @@ public class MapFileWidget extends Widget implements Console.Directory {
         return (super.tooltip(c, prev));
     }
 
-    public static double scalef() {
-        return scaleFactors[zoom];
+    public double scalef() {
+        return (Math.pow(2, zoom));
     }
-
 
     private Object biomeat(Coord c) {
         final Coord tc = c.sub(sz.div(2)).mul(scalef()).add(curloc.tc.mul(scalef()));

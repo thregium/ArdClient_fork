@@ -1344,8 +1344,8 @@ public class CharWnd extends Window {
                         }
                         ncond.add(cond);
                     }
-                    this.cond = ncond.toArray(new Condition[0]);
-                    this.ui.gui.questhelper.addConds(ncond, this.cqv.info.id());
+                    cond = ncond.toArray(new Condition[0]);
+                    ui.gui.questhelper.addConds(ncond, cqv.info.id());
                     refresh();
                     if (cqv != null)
                         cqv.update();
@@ -2756,7 +2756,7 @@ public class CharWnd extends Window {
                     dqst.remove(id);
                 }
             }
-            this.ui.gui.questhelper.refresh();
+            ui.gui.questhelper.refresh();
         } else {
             super.uimsg(nm, args);
         }

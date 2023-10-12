@@ -275,6 +275,8 @@ public class MinimapWnd extends ResizableWnd {
                 ui.gui.fitwdg(ui.gui.add(ui.gui.iconwnd, Utils.getprefc("wndc-icon", UI.scale(200, 200))));
             } else {
                 ui.gui.iconwnd.toggleVisibility();
+                if (ui.gui.iconwnd.visible())
+                    ui.gui.raise();
             }
         }), viewdist.c.add(viewdist.sz.x + spacer, 0));
         final Button setting = add(new Button(0, "⚙", () -> ui.gui.toggleMapSettings()) {

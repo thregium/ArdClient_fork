@@ -1,10 +1,7 @@
 package modification;
 
-import haven.CheckListbox;
-import haven.CheckListboxItem;
 import haven.HSliderListbox;
 import haven.HSliderListboxItem;
-import haven.HSliderNamed;
 import haven.Indir;
 import haven.Light;
 import haven.Material;
@@ -15,6 +12,7 @@ import haven.States;
 import haven.Tex;
 import haven.Text;
 import haven.TextEntry;
+import haven.UI;
 import haven.Utils;
 import haven.resutil.WaterTile;
 import haven.sloth.util.ObservableMap;
@@ -30,7 +28,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class resources {
     public static String picturePath = "modification/picture";
@@ -40,10 +37,11 @@ public class resources {
     public static String defaultUtilsCustomLoginScreenBg = Utils.getpref("custom-login-background", defaultCustomLoginScreenBg);
 
     public static Tex bgCheck() {
-        Tex bg;
+        Tex bg = null;
         if (defaultUtilsCustomLoginScreenBgBoolean)
-            bg = configuration.imageToTex(defaultUtilsCustomLoginScreenBg, true, Resource.loadtex("gfx/loginscr"));
-        else bg = Resource.loadtex("gfx/loginscr");
+            bg = configuration.imageToTex(defaultUtilsCustomLoginScreenBg, true);
+        if (bg == null)
+            bg = Resource.local().loadwait("gfx/loginscr").layer(Resource.imgc).tex(UI.getScale());
         return bg;
     }
 
@@ -51,14 +49,14 @@ public class resources {
 
     public static boolean customMarkObj = Utils.getprefb("customMarkObj", false);
     public static List<String> customMarkObjs = new ArrayList<>(Arrays.asList(
-                    "gfx/tiles/ridges/cavein",
-                    "gfx/tiles/ridges/caveout",
-                    "gfx/terobjs/beaverdamdoor",
-                    "gfx/terobjs/dng/batcave",
-                    "gfx/terobjs/dng/antdungeon",
-                    "gfx/terobjs/wonders/tarpit",
-                    "gfx/terobjs/dng/antdoor",
-                    "gfx/terobjs/beaverdoor"
+            "gfx/tiles/ridges/cavein",
+            "gfx/tiles/ridges/caveout",
+            "gfx/terobjs/beaverdamdoor",
+            "gfx/terobjs/dng/batcave",
+            "gfx/terobjs/dng/antdungeon",
+            "gfx/terobjs/wonders/tarpit",
+            "gfx/terobjs/dng/antdoor",
+            "gfx/terobjs/beaverdoor"
     ));
     public static List<String> hatslist = new ArrayList<>(Arrays.asList("gfx/terobjs/items/hats/mooncap", "gfx/terobjs/items/hats/evileyehat"));
     public static List<String> normalhatslist = new TreeList<>(Arrays.asList(

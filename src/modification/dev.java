@@ -76,6 +76,17 @@ public class dev {
         }
     }
 
+    public static void simpleLog(String s, Throwable e) {
+        if (logging) {
+            StackTraceElement[] stackTraceElements = new Throwable().getStackTrace();
+            StringBuilder sb = new StringBuilder();
+            sb.append("[").append(localTime()).append("]").append(" || ").append("ERROR").append(" || ").append(stackTraceElements[1]).append(" || ").append(s).append(" || ").append(e.getMessage());
+
+            System.err.println(sb.toString());
+        }
+        e.printStackTrace();
+    }
+
     public static void sysPrintStackTrace(String text) {
         if (logging) {
             StackTraceElement[] stackTraceElements = new Throwable().getStackTrace();

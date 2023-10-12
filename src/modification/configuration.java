@@ -599,7 +599,7 @@ public class configuration {
 
     public synchronized static int getCurrentsnow(OCache oc) {
         int count = 0;
-        for (final Gob g : oc) {
+        for (final Gob g : oc.getallgobs()) {
             if (g.isplayer()) continue;
             if (g.findol(-4921) != null)
                 count++;

@@ -47,7 +47,7 @@ public class Defer extends ThreadGroup {
     private static final Map<ThreadGroup, Defer> groups = new WeakHashMap<>();
     private final Queue<Future<?>> queue = new PrioQueue<>();
     private final Collection<Thread> pool = new LinkedList<>();
-    private static final int maxthreads = Math.max(2, Runtime.getRuntime().availableProcessors() - 1);
+    private static final int maxthreads = Math.min(1, Runtime.getRuntime().availableProcessors() - 1);
     private final AtomicInteger busy = new AtomicInteger(0);
 
     public interface Callable<T> {
