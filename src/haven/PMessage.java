@@ -42,6 +42,11 @@ public class PMessage extends MessageBuf {
         this.type = type;
     }
 
+    public PMessage(int type, Message msg, int len) {
+        super(msg, len);
+        this.type = type;
+    }
+
     public PMessage(int type, Message msg) {
         super(msg);
         this.type = type;
@@ -49,5 +54,9 @@ public class PMessage extends MessageBuf {
 
     public PMessage(PMessage msg) {
         this(msg.type, msg);
+    }
+
+    public PMessage clone() {
+        return(new PMessage(this));
     }
 }

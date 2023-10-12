@@ -528,28 +528,37 @@ public class MapFileWidget extends Widget implements Console.Directory {
                 file.lock.readLock().unlock();
             }
         }
+        List<Coord> cc = new ArrayList<>();
         for (Coord c : dext) {
+            cc.add(c);
+        }
+        final Object sync = new Object();
+        cc.parallelStream().forEach(c -> {
             Coord ul = hsz.sub(loc.tc).add(c.mul(cmapsd.div(scalef())).floor());
             try {
                 DisplayGrid disp = display[dext.ri(c)];
                 if (disp == null)
-                    continue;
-                drawgrid(g, ul, disp);
+                    return;
+                synchronized (sync) {
+                    drawgrid(g, ul, disp);
+                }
             } catch (Loading l) {
-                continue;
+                return;
             }
             if (configuration.bigmapshowgrid) {
-                g.chcolor(new Color(configuration.mapgridcolor, true));
+                synchronized (sync) {
+                    g.chcolor(new Color(configuration.mapgridcolor, true));
 //                g.image(gridred, ul, cmaps.div(scalef()));
-                g.image(gridred(cmapsd.div(scalef()).round()), ul);
+                    g.image(gridred(cmapsd.div(scalef()).round()), ul);
 //                g.chcolor(Color.RED);
 //                Coord rect = cmaps.div(scalef());
 //                g.dottedline(ul, ul.add(rect.x, 0), 1);
 //                g.dottedline(ul, ul.add(0, rect.y), 1);
 //                g.chcolor();
-                g.chcolor();
+                    g.chcolor();
+                }   
             }
-        }
+        });
         if ((markers == null) || (file.markerseq != markerseq))
             remark(loc, dext);
         if (markers != null && !configuration.bigmaphidemarks) {

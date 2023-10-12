@@ -141,4 +141,19 @@ public class Following extends Moving {
             return (null);
         return (flw.xf());
     }
+
+    @OCache.DeltaType(OCache.OD_FOLLOW)
+    public static class $follow implements OCache.Delta {
+        @Override
+        public void apply(Gob g, OCache.AttrDelta msg) {
+            long oid = msg.uint32();
+            if (oid != 0xffffffffL) {
+                Indir<Resource> xfres = OCache.Delta.getres(g, msg.uint16());
+                String xfname = msg.string();
+                g.setattr(new Following(g, oid, xfres, xfname));
+            } else {
+                g.delattr(Following.class);
+            }
+        }
+    }
 }

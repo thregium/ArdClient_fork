@@ -7,7 +7,6 @@ import modification.configuration;
 import javax.media.opengl.GL2;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -197,33 +196,33 @@ public class GobHitbox extends Sprite {
 
 //        try {
             List<Resource.Neg> negs = new ArrayList<>(res.layers(Resource.Neg.class));
-            List<Resource.Obst> obsts = new ArrayList<>(res.layers(Resource.Obst.class));
+            List<Resource.Obstacle> obsts = new ArrayList<>(res.layers(Resource.Obstacle.class));
             for (RenderLink.Res link : res.layers(RenderLink.Res.class)) {
                 RenderLink l = link.l;
                 if (l instanceof RenderLink.MeshMat) {
                     RenderLink.MeshMat mm = (RenderLink.MeshMat) l;
                     addIf(negs, getLayer(Resource.Neg.class, mm.srcres.indir(), mm.mesh));
-                    addIf(obsts, getLayer(Resource.Obst.class, mm.srcres.indir(), mm.mesh));
+                    addIf(obsts, getLayer(Resource.Obstacle.class, mm.srcres.indir(), mm.mesh));
                 }
                 if (l instanceof RenderLink.AmbientLink) {
                     RenderLink.AmbientLink al = (RenderLink.AmbientLink) l;
                     addIf(negs, getLayer(Resource.Neg.class, al.res));
-                    addIf(obsts, getLayer(Resource.Obst.class, al.res));
+                    addIf(obsts, getLayer(Resource.Obstacle.class, al.res));
                 }
                 if (l instanceof RenderLink.Collect) {
                     RenderLink.Collect cl = (RenderLink.Collect) l;
                     addIf(negs, getLayer(Resource.Neg.class, cl.from));
-                    addIf(obsts, getLayer(Resource.Obst.class, cl.from));
+                    addIf(obsts, getLayer(Resource.Obstacle.class, cl.from));
                 }
                 if (l instanceof RenderLink.Parameters) {
                     RenderLink.Parameters pl = (RenderLink.Parameters) l;
                     addIf(negs, getLayer(Resource.Neg.class, pl.res));
-                    addIf(obsts, getLayer(Resource.Obst.class, pl.res));
+                    addIf(obsts, getLayer(Resource.Obstacle.class, pl.res));
                 }
             }
 
             final List<BBox> hitlist = new ArrayList<>();
-            for (Resource.Obst o : obsts) {
+            for (Resource.Obstacle o : obsts) {
                 for (int i = 0; i < o.ep.length; i++) {
                     hitlist.add(new BBox(o.ep[i]));
                 }

@@ -60,7 +60,7 @@ public class GobSpawner extends Window {
             String type = res.substring(0, res.indexOf(" "));
             defaultitems.forEach((k, v) -> {
                 if (v.equals(type)) {
-                    final Gob g = ui.sess.glob.oc.getgob(next--, 0);
+                    final Gob g = ui.sess.glob.oc.getgob(next--);
                     ui.sess.glob.oc.move(g, PBotUtils.player(ui).rc, Math.toRadians(130));
                     ui.sess.glob.oc.composite(g, Resource.remote().load(k));
                     final List<ResData> data = new ArrayList<>();
@@ -74,7 +74,7 @@ public class GobSpawner extends Window {
                 }
             });
         } else {
-            final Gob g = ui.sess.glob.oc.getgob(next--, 0);
+            final Gob g = ui.sess.glob.oc.getgob(next--);
             ui.sess.glob.oc.move(g, PBotUtils.player(ui).rc, Math.toRadians(130));
             ui.sess.glob.oc.composite(g, Resource.remote().load(res));
             final List<ResData> data = new ArrayList<>();

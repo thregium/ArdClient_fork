@@ -534,4 +534,19 @@ public class GobIcon extends GAttrib {
             }
         }
     }
+
+    @OCache.DeltaType(OCache.OD_ICON)
+    public static class $icon implements OCache.Delta {
+        @Override
+        public void apply(Gob g, OCache.AttrDelta msg) {
+            int resid = msg.uint16();
+            Indir<Resource> res;
+            if (resid == 65535) {
+                g.delattr(GobIcon.class);
+            } else {
+                int ifl = msg.uint8();
+                g.setattr(new GobIcon(g, OCache.Delta.getres(g, resid)));
+            }
+        }
+    }
 }

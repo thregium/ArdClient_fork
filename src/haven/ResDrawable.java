@@ -27,7 +27,8 @@
 package haven;
 
 import haven.sloth.gob.Type;
-import modification.configuration;
+
+import java.util.function.Supplier;
 
 public class ResDrawable extends Drawable {
     public final Indir<Resource> res;
@@ -177,5 +178,50 @@ public class ResDrawable extends Drawable {
 
     public Object staticp() {
         return ((spr != null) ? spr.staticp() : null);
+    }
+
+    public Gob.Placer placer() {
+        if (spr instanceof Gob.Placing) {
+            Gob.Placer ret = ((Gob.Placing) spr).placer();
+            if (ret != null)
+                return (ret);
+        }
+        return (super.placer());
+    }
+
+    public GLState eqpoint(String nm, Message dat) {
+        if (spr instanceof EquipTarget) {
+            Location ret = ((EquipTarget) spr).eqpoint(nm, dat);
+            if (ret != null)
+                return (ret);
+        }
+        Skeleton.BoneOffset bo = res.get().layer(Skeleton.BoneOffset.class, nm);
+        if (bo != null)
+            return (bo.from(null));
+        return (null);
+    }
+
+    @OCache.DeltaType(OCache.OD_RES)
+    public static class $cres implements OCache.Delta {
+        public void apply(Gob g, OCache.AttrDelta msg) {
+            int resid = msg.uint16();
+            MessageBuf sdt = MessageBuf.nil;
+            if ((resid & 0x8000) != 0) {
+                resid &= ~0x8000;
+                sdt = new MessageBuf(msg.bytes(msg.uint8()));
+            }
+            Indir<Resource> res = OCache.Delta.getres(g, resid);
+            Drawable dr = g.getattr(Drawable.class);
+            ResDrawable d = (dr instanceof ResDrawable) ? (ResDrawable) dr : null;
+            if ((d != null) && (d.res == res) && !d.sdt.equals(sdt) && (d.spr != null) && (d.spr instanceof Sprite.CUpd)) {
+                ((Sprite.CUpd) d.spr).update(sdt);
+                d.sdt = sdt;
+                g.updsdt();
+            } else if ((d == null) || (d.res != res) || !d.sdt.equals(sdt)) {
+                g.setattr(new ResDrawable(g, res, sdt));
+                g.remol(g.findol(GobHitbox.olid_solid));
+                g.remol(g.findol(GobHitbox.olid));
+            }
+        }
     }
 }
