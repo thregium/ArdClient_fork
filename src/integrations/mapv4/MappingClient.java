@@ -295,7 +295,7 @@ public class MappingClient {
     }
 
     public void Sendmarker(MapFile mapfile, Marker marker) {
-        scheduler.schedule(new ExtractMapper1(mapfile, marker), 5, TimeUnit.SECONDS);
+        scheduler.execute(new ExtractMapper1(mapfile, marker));
     }
 
     private class ExtractMapper1 implements Runnable {
@@ -354,11 +354,12 @@ public class MappingClient {
 
         ProcessMapper(MapFile mapfile, List<MarkerData> markers) {
             this.mapfile = mapfile;
-            this.markers = markers;
+            this.markers = new ArrayList<>(markers);
         }
 
         @Override
         public void run() {
+            boolean failed = false;
             ArrayList<JSONObject> loadedMarkers = new ArrayList<>();
             while (!markers.isEmpty()) {
                 dev.simpleLog("processing " + markers.size() + " markers");
@@ -386,6 +387,9 @@ public class MappingClient {
                         loadedMarkers.add(o);
                         iterator.remove();
                     } catch (Loading ex) {
+                        failed = true;
+                    } catch (Throwable e) {
+                        dev.simpleLog(e);
                     }
                 }
                 try {
@@ -399,6 +403,9 @@ public class MappingClient {
             } catch (Exception ex) {
                 dev.simpleLog(ex);
             }
+
+            if (failed)
+                scheduler.execute(this);
         }
     }
 

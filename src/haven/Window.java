@@ -987,7 +987,7 @@ Window extends MovableWidget implements DTarget {
             list.add(new Pair<>("Sort", run));
             list.add(new Pair<>("Open Stacks", () -> invs.forEach(Inventory::openStacks)));
             list.add(new Pair<>("Close Stacks", () -> invs.forEach(Inventory::closeStacks)));
-            list.add(new Pair<>("Toggle Alt", () -> invs.forEach(Inventory::toggleAltInventory)));
+            list.add(new Pair<>("Toggle Inventory", () -> invs.forEach(Inventory::toggleAltInventory)));
 //            list.put("Stack", () -> {});
 //            list.put("Unstack", () -> {});
         }
