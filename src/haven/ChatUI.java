@@ -85,7 +85,8 @@ public class ChatUI extends Widget {
     private QuickLine qline = null;
     private final LinkedList<Notification> notifs = new LinkedList<Notification>();
     private UI.Grab qgrab;
-    public static final String CMD_PREFIX_HLIGHT = "@";
+    public static final String CMD_SYMBOL_HLIGHT = "@";
+    public static final Pattern CMD_PREFIX_HLIGHT = Pattern.compile(CMD_SYMBOL_HLIGHT + "(\\d+)");
 
 
     public ChatUI(int w, int h) {
@@ -815,17 +816,19 @@ public class ChatUI extends Widget {
         public void uimsg(String msg, Object... args) {
             if ((msg == "msg") || (msg == "log")) {
                 String line = (String) args[0];
-                if (line.startsWith(CMD_PREFIX_HLIGHT)) {
+
+                Matcher m = CMD_PREFIX_HLIGHT.matcher(line);
+                if (m.find()) {
                     try {
-                        long gobid = Long.parseLong(line.substring(1));
+                        long gobid = Long.parseLong(m.group(1));
                         OCache oc = ui.gui.map.glob.oc;
                         Gob gob = oc.getgob(gobid);
                         if (gob != null) {
                             gob.delattr(GobHighlight.class);
                             gob.setattr(new GobHighlight(gob));
                             oc.changed(gob);
-                            return;
                         }
+                        return;
                     } catch (NumberFormatException nfe) {
                     }
                 }
@@ -941,17 +944,18 @@ public class ChatUI extends Widget {
                 Integer from = (Integer) args[0];
                 String line = (String) args[1];
 
-                if (/*name.equals(Resource.getLocString(Resource.BUNDLE_LABEL, "Area Chat")) && */line.startsWith(CMD_PREFIX_HLIGHT)) {
+                Matcher m = CMD_PREFIX_HLIGHT.matcher(line);
+                if (m.find()) {
                     try {
-                        long gobid = Long.parseLong(line.substring(1));
+                        long gobid = Long.parseLong(m.group(1));
                         OCache oc = ui.gui.map.glob.oc;
                         Gob gob = oc.getgob(gobid);
                         if (gob != null) {
                             gob.delattr(GobHighlight.class);
                             gob.setattr(new GobHighlight(gob));
                             oc.changed(gob);
-                            return;
                         }
+                        return;
                     } catch (NumberFormatException nfe) {
                     }
                 }
@@ -1102,17 +1106,19 @@ public class ChatUI extends Widget {
                 Integer from = (Integer) args[0];
                 long gobid = Utils.uint32((Integer) args[1]);
                 String line = (String) args[2];
-                if (line.startsWith(CMD_PREFIX_HLIGHT)) {
+
+                Matcher m = CMD_PREFIX_HLIGHT.matcher(line);
+                if (m.find()) {
                     try {
-                        long gid = Long.parseLong(line.substring(1));
+                        long gid = Long.parseLong(m.group(1));
                         OCache oc = ui.gui.map.glob.oc;
                         Gob gob = oc.getgob(gid);
                         if (gob != null) {
                             gob.delattr(GobHighlight.class);
                             gob.setattr(new GobHighlight(gob));
                             oc.changed(gob);
-                            return;
                         }
+                        return;
                     } catch (NumberFormatException nfe) {
                     }
                 }
@@ -1229,17 +1235,18 @@ public class ChatUI extends Widget {
             if (msg == "msg") {
                 String t = (String) args[0];
                 String line = (String) args[1];
-                if (line.startsWith(CMD_PREFIX_HLIGHT)) {
+                Matcher m = CMD_PREFIX_HLIGHT.matcher(line);
+                if (m.find()) {
                     try {
-                        long gid = Long.parseLong(line.substring(1));
+                        long gid = Long.parseLong(m.group(1));
                         OCache oc = ui.gui.map.glob.oc;
                         Gob gob = oc.getgob(gid);
                         if (gob != null) {
                             gob.delattr(GobHighlight.class);
                             gob.setattr(new GobHighlight(gob));
                             oc.changed(gob);
-                            return;
                         }
+                        return;
                     } catch (NumberFormatException nfe) {
                     }
                 }

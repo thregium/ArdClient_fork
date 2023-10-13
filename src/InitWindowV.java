@@ -24,26 +24,26 @@ public class InitWindowV extends Window {
     private Button form;
 
     public InitWindowV(int req, boolean master) {
-        super(new Coord(200, 200 + (req * 15)), "Village Founding", true, Coord.z, Coord.z);
+        super(UI.scale(200, 200 + (req * 15)), "Village Founding", true, Coord.z, Coord.z);
         this.req = req;
         this.master = master;
-        int y = skull.sz.y + 10;
+        int y = skull.sz.y + UI.scale(10);
         if (master) {
             add(new Label("Village name:"), 0, y);
             y += 15;
-            name = add(new TextEntry(200, ""), 0, y);
+            name = add(new TextEntry(UI.scale(200), ""), 0, y);
             y += 30;
         }
         add(new Label("Founding fathers:"), 0, y);
         y += 20;
         slots = new Label[req];
         for (int i = 0; i < req; i++) {
-            slots[i] = add(new Label("Awaiting..."), 15, y);
+            slots[i] = add(new Label("Awaiting..."), UI.scale(15), y);
             slots[i].setcolor(wait);
             y += 15;
         }
         if (master)
-            form = add(new Button(200, "Found village"), 0, y);
+            form = add(new Button(UI.scale(200), "Found village"), 0, y);
         pack();
     }
 

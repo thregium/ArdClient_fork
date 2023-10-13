@@ -27,8 +27,6 @@
 package haven;
 
 import java.util.ArrayList;
-import java.util.Optional;
-import java.util.function.Function;
 
 public interface RenderLink {
     Rendered make(Sprite.Owner owner);
@@ -220,14 +218,12 @@ public interface RenderLink {
                 l = Collect.parse(res, buf);
             } else if (t == 3) {
                 l = Parameters.parse(res, buf);
-//                l = Collect.parse(res, buf);
             } else {
                 throw (new Resource.LoadException("Invalid renderlink type: " + t, res));
             }
         }
 
-        public void init() {
-        }
+        public void init() {}
 
         public Integer layerid() {
             return (id);

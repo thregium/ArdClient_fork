@@ -18,7 +18,7 @@ public class StudyWnd extends GameUI.Hidewnd {
         }
         final InventoryProxy invp = new InventoryProxy(inventory);
         study = add(invp, 0, 0);
-        info = add(new StudyInfo(new Coord(study.sz.x, 66), inventory), 0, study.c.y + study.sz.y + 5);
+        info = add(new StudyInfo(new Coord(study.sz.x, UI.scale(66)), inventory), 0, study.c.y + study.sz.y + UI.scale(5));
         pack();
     }
 

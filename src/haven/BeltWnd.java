@@ -251,8 +251,12 @@ public class BeltWnd extends MovableWidget {
         @Override
         public boolean mousedown(Coord c, int button) {
             if ((res != null && res.get() != null) || pag != null || script != null) {
-                dm = ui.grabmouse(this);
-                return true;
+                if (button == 1) {
+                    dm = ui.grabmouse(this);
+                    return true;
+                } else if (button == 3 && ui.modflags() == 0) {
+                    return true;
+                }
             }
             return false;
         }
@@ -281,11 +285,14 @@ public class BeltWnd extends MovableWidget {
                     dragging = false;
                 } else if (button == 1 && c.isect(Coord.z, sz)) {
                     use();
-                } else if (!locked() && button == 3) {
-                    ui.gui.wdgmsg("setbelt", slot, 1);
-                    reset();
                 }
                 return true;
+            } else {
+                 if (!locked() && button == 3 && ui.modflags() == 0) {
+                    ui.gui.wdgmsg("setbelt", slot, 1);
+                    reset();
+                    return true;
+                }
             }
             return false;
         }
@@ -578,6 +585,29 @@ public class BeltWnd extends MovableWidget {
     public void setVisibile(final boolean vis) {
         visible = vis;
         DefSettings.global.set("belt." + name + ".show", visible);
+    }
+
+    private boolean altMoveHit(final Coord c, final int btn) {
+        return ui.modflags() == 0 && btn == 1;
+    }
+
+    @Override
+    public boolean mousedown(final Coord mc, final int button) {
+        if (super.mousedown(mc, button)) {
+            //Give preference to the Widget using this
+            return (true);
+        } else if (altMoveHit(mc, button)) {
+            if (!isLock()) {
+                movableBg = true;
+                dm = ui.grabmouse(this);
+                doff = mc;
+                parent.setfocus(this);
+                raise();
+            }
+            return (true);
+        } else {
+            return (false);
+        }
     }
 
     public void mousemove(Coord c) {

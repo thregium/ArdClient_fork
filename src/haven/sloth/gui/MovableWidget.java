@@ -65,10 +65,14 @@ public abstract class MovableWidget extends Widget {
     //Whether we want to lock the current position or not
     private boolean lock;
 
-    private UI.Grab dm = null;
-    private Coord doff;
+    public boolean isLock() {
+        return (lock);
+    }
 
-    private boolean movableBg;
+    protected UI.Grab dm = null;
+    protected Coord doff;
+
+    protected boolean movableBg;
     protected boolean loadPosition = true;
 
     public MovableWidget(final Coord sz, final String name) {
@@ -147,7 +151,7 @@ public abstract class MovableWidget extends Widget {
             //Give preference to the Widget using this
             return (true);
         } else if (moveHit(mc, button)) {
-            if (!lock) {
+            if (!isLock()) {
                 movableBg = true;
                 dm = ui.grabmouse(this);
                 doff = mc;

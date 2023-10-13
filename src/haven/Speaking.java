@@ -26,7 +26,10 @@
 
 package haven;
 
+import modification.dev;
+
 import java.awt.Color;
+import java.awt.font.TextAttribute;
 
 public class Speaking extends GAttrib {
     float zo;
@@ -41,26 +44,42 @@ public class Speaking extends GAttrib {
             sb = new IBox("gfx/hud/emote", "tl", "tr", "bl", "br", "el", "er", "et", "eb");
         svans = Resource.loadtex("gfx/hud/emote/svans");
         this.zo = zo;
-        this.text = Text.render(text, Color.BLACK);
+        update(text);
     }
 
     public void update(String text) {
-        this.text = Text.render(text, Color.BLACK);
+        Text temp;
+        try {
+            temp = RichText.render(text, 200, TextAttribute.FOREGROUND, Color.BLACK);
+        } catch (Exception e) {
+            dev.simpleLog(e);
+            temp = RichText.render(RichText.Parser.quote(text), UI.scale(200), TextAttribute.FOREGROUND, Color.BLACK);
+        }
+        this.text = temp;
     }
 
     public void draw(GOut g, Coord c) {
-        Coord sz = text.sz();
+        Coord sz = fixSize(text.tex());
         if (sz.x < 10)
             sz.x = 10;
         Coord tl = c.add(new Coord(sx, sb.cisz().y + sz.y + svans.sz().y - 1).inv());
         Coord ftl = tl.add(sb.btloff());
         g.chcolor(Color.WHITE);
-        g.frect(ftl, sz);
-        sb.draw(g, tl, sz.add(sb.cisz()));
-        g.chcolor(Color.BLACK);
-        g.image(text.tex(), ftl);
+        g.frect(ftl.sub(sb.btloff()), sz.add(sb.btloff().mul(2)));
+//        sb.draw(g, tl, sz.add(sb.cisz()));
+//        g.chcolor(Color.BLACK);
+        g.chcolor();
+        g.image(text.tex(), ftl, sz);
         g.chcolor(Color.WHITE);
         g.image(svans, c.add(0, -svans.sz().y));
+    }
+
+    private Coord fixSize(Tex tex) {
+        Coord sz = tex.sz();
+        int max = UI.scale(200);
+        int p = Math.max(sz.x, sz.y);
+        sz = p > max ? sz.div(1.0 * p / max) : sz;
+        return (sz);
     }
 
     final PView.Draw2D fx = new PView.Draw2D() {

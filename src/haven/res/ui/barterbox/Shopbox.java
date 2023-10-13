@@ -44,14 +44,14 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
     public static final Tex any = PUtils.strokeTex(Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Any")));
     public static final Tex qlbl = PUtils.strokeTex(Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Quality:")));
     public static final Tex bg = Resource.loadtex("ui/shopbox");
-    public static final Coord itemc = new Coord(5, 5);
-    public static final Coord buyc = new Coord(5, 43);
-    public static final Coord buyca = new Coord(5, 66);
-    public static final Coord pricec = new Coord(200, 5);
-    public static final Coord qualc = (new Coord(200, 5)).add(invsq.sz()).add(40, 0);
-    public static final Coord cbtnc = new Coord(200, 66);
-    public static final Coord spipec = new Coord(85, 43);
-    public static final Coord bpipec = new Coord(280, 66);
+    public static final Coord itemc = UI.scale(5, 5);
+    public static final Coord buyc = UI.scale(5, 43);
+    public static final Coord buyca = UI.scale(5, 66);
+    public static final Coord pricec = UI.scale(200, 5);
+    public static final Coord qualc = (UI.scale(200, 5)).add(invsq.sz()).add(UI.scale(40), 0);
+    public static final Coord cbtnc = UI.scale(200, 66);
+    public static final Coord spipec = UI.scale(85, 43);
+    public static final Coord bpipec = UI.scale(280, 66);
     public ResData res;
     public Spec price;
     public Tex num;
@@ -85,14 +85,14 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
     public Shopbox(boolean admin) {
         super(bg.sz());
         if (this.admin = admin) {
-            spipe = add(new Button(75, "Connect"), spipec);
-            bpipe = add(new Button(75, "Connect"), bpipec);
-            cbtn = add(new Button(75, "Change"), cbtnc);
-            pnume = adda(new TextEntry(30, ""), pricec.add(invsq.sz()).add(5, 0), 0, 1);
+            spipe = add(new Button(UI.scale(75), "Connect"), spipec);
+            bpipe = add(new Button(UI.scale(75), "Connect"), bpipec);
+            cbtn = add(new Button(UI.scale(75), "Change"), cbtnc);
+            pnume = adda(new TextEntry(UI.scale(30), ""), pricec.add(invsq.sz()).add(UI.scale(5), 0), 0, 1);
             pnume.canactivate = true;
             pnume.dshow = true;
             adda(new Label("Quality:"), qualc.add(0, 0), 0, 1);
-            pqe = adda(new TextEntry(40, ""), qualc.add(40, 0), 0, 1);
+            pqe = adda(new TextEntry(40, ""), qualc.add(UI.scale(40), 0), 0, 1);
             pqe.canactivate = true;
             pqe.dshow = true;
         }
@@ -123,12 +123,12 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
                 }
 
                 if (num != null) {
-                    g.aimage(num, itemc.add(invsq.sz()).add(5, 0), 0, 2.3);
+                    g.aimage(num, itemc.add(invsq.sz()).add(UI.scale(5), 0), 0, 2.3);
                 }
 
                 if (quality != null) {
-                    g.aimage(qlbl, itemc.add(invsq.sz()).add(5, 0), 0, 1);
-                    g.aimage(quality, itemc.add(invsq.sz()).add(8 + qlbl.sz().x, 0), 0, 1);
+                    g.aimage(qlbl, itemc.add(invsq.sz()).add(UI.scale(5), 0), 0, 1);
+                    g.aimage(quality, itemc.add(invsq.sz()).add(UI.scale(8) + qlbl.sz().x, 0), 0, 1);
                 }
             }
         }
@@ -150,7 +150,7 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
 
             if (!admin && pqt != null) {
                 g.aimage(qlbl, qualc, 0, 1);
-                g.aimage(pqt, qualc.add(qlbl.sz().x + 4, 0), 0, 1);
+                g.aimage(pqt, qualc.add(qlbl.sz().x + UI.scale(4), 0), 0, 1);
             }
         }
 
@@ -332,7 +332,7 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
                     }
                     return (b);
                 }
-            }, new Coord(82, 66));
+            }, UI.scale(82, 66));
         } else if (!canbuy && this.bbtn != null) {
             this.bbtn.reqdestroy();
             this.bbtn = null;

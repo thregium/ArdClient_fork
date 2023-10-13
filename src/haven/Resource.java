@@ -97,13 +97,13 @@ public class Resource implements Serializable {
     private static Map<String, LayerFactory<?>> ltypes = new TreeMap<>();
     public static Class<Image> imgc = Image.class;
     public static Class<Neg> negc = Neg.class;
+    public static Class<Obstacle> obst = Obstacle.class;
     public static Class<Anim> animc = Anim.class;
     public static Class<Pagina> pagina = Pagina.class;
     public static Class<AButton> action = AButton.class;
     public static Class<Audio> audio = Audio.class;
     public static Class<Tooltip> tooltip = Tooltip.class;
     public static Class<Src> src = Src.class;
-    public static Class<Obst> obst = Obst.class;
 
     public static final String language = Utils.getpref("language", "en");
     public static final String BUNDLE_TOOLTIP = "tooltip";
@@ -1361,12 +1361,12 @@ public class Resource implements Serializable {
     }
 
     @LayerName("obst")
-    public class Obst extends Layer {
+    public class Obstacle extends Layer {
         public int vc;
         public Coord2d[][] ep;
         public String id;
 
-        public Obst(Message buf) {
+        public Obstacle(Message buf) {
             int ver = buf.uint8();
             if (ver >= 2) {
                 id = buf.string();

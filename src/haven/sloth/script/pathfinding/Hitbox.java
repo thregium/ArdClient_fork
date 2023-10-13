@@ -5,7 +5,6 @@ import haven.Coord;
 import haven.Coord2d;
 import haven.Gob;
 import haven.Indir;
-import haven.Loading;
 import haven.MessageBuf;
 import haven.RenderLink;
 import haven.ResDrawable;
@@ -139,6 +138,13 @@ public class Hitbox {
         this.hitable = hitable;
     }
 
+    public Hitbox(final Coord2d box) {
+        double x = box.x / 2.0;
+        double y = box.y / 2.0;
+        this.points = new Coord2d[]{new Coord2d(x, -y), new Coord2d(-x, -y), new Coord2d(-x, y), new Coord2d(x, y)};
+        this.hitable = true;
+    }
+
     public Hitbox(final List<Coord2d> points, boolean hitable) {
         this.points = new Coord2d[points.size()];
         for (int i = 0; i < points.size(); i++) {
@@ -210,34 +216,34 @@ public class Hitbox {
             }
 
             try {
-                List<Resource.Neg> negs = new ArrayList<>(res.layers(Resource.Neg.class));
-                List<Resource.Obst> obsts = new ArrayList<>(res.layers(Resource.Obst.class));
+                List<Resource.Neg> negs = new ArrayList<>(res.layers(Resource.negc));
+                List<Resource.Obstacle> obsts = new ArrayList<>(res.layers(Resource.obst));
                 for (RenderLink.Res link : res.layers(RenderLink.Res.class)) {
                     RenderLink l = link.l;
                     if (l instanceof RenderLink.MeshMat) {
                         RenderLink.MeshMat mm = (RenderLink.MeshMat) l;
-                        addIf(negs, getLayer(Resource.Neg.class, mm.srcres.indir(), mm.mesh));
-                        addIf(obsts, getLayer(Resource.Obst.class, mm.srcres.indir(), mm.mesh));
+                        addIf(negs, getLayer(Resource.negc, mm.srcres.indir(), mm.mesh));
+                        addIf(obsts, getLayer(Resource.obst, mm.srcres.indir(), mm.mesh));
                     }
                     if (l instanceof RenderLink.AmbientLink) {
                         RenderLink.AmbientLink al = (RenderLink.AmbientLink) l;
-                        addIf(negs, getLayer(Resource.Neg.class, al.res));
-                        addIf(obsts, getLayer(Resource.Obst.class, al.res));
+                        addIf(negs, getLayer(Resource.negc, al.res));
+                        addIf(obsts, getLayer(Resource.obst, al.res));
                     }
                     if (l instanceof RenderLink.Collect) {
                         RenderLink.Collect cl = (RenderLink.Collect) l;
-                        addIf(negs, getLayer(Resource.Neg.class, cl.from));
-                        addIf(obsts, getLayer(Resource.Obst.class, cl.from));
+                        addIf(negs, getLayer(Resource.negc, cl.from));
+                        addIf(obsts, getLayer(Resource.obst, cl.from));
                     }
                     if (l instanceof RenderLink.Parameters) {
                         RenderLink.Parameters pl = (RenderLink.Parameters) l;
-                        addIf(negs, getLayer(Resource.Neg.class, pl.res));
-                        addIf(obsts, getLayer(Resource.Obst.class, pl.res));
+                        addIf(negs, getLayer(Resource.negc, pl.res));
+                        addIf(obsts, getLayer(Resource.obst, pl.res));
                     }
                 }
 
                 final List<Hitbox> hitlist = new ArrayList<>();
-                for (Resource.Obst o : obsts) {
+                for (Resource.Obstacle o : obsts) {
                     for (int i = 0; i < o.ep.length; i++) {
                         boolean hitable = checkHitable(gob, o);
                         Hitbox hb = new Hitbox(o.ep[i], hitable);
@@ -300,7 +306,7 @@ public class Hitbox {
         return (false);
     }
 
-    public static boolean checkHitable(Gob gob, Resource.Obst obst) {
+    public static boolean checkHitable(Gob gob, Resource.Obstacle obst) {
         Optional<Resource> ores = gob.res();
         if (ores.isPresent()) {
             Resource res = ores.get();

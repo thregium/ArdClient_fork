@@ -23,6 +23,7 @@ import java.awt.font.TextAttribute;
 import java.util.HashMap;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 public class RealmChannel extends ChatUI.MultiChat {
     private final Map<Long, Sender> senders = new HashMap<>();
@@ -258,17 +259,18 @@ public class RealmChannel extends ChatUI.MultiChat {
             Number bfrom = (Number) args[2];
             String line = (String) args[3];
 
-            if (line.startsWith(ChatUI.CMD_PREFIX_HLIGHT)) {
+            Matcher m = ChatUI.CMD_PREFIX_HLIGHT.matcher(line);
+            if (m.find()) {
                 try {
-                    long gobid = Long.parseLong(line.substring(1));
+                    long gobid = Long.parseLong(m.group(1));
                     OCache oc = ui.gui.map.glob.oc;
                     Gob gob = oc.getgob(gobid);
                     if (gob != null) {
                         gob.delattr(GobHighlight.class);
                         gob.setattr(new GobHighlight(gob));
                         oc.changed(gob);
-                        return;
                     }
+                    return;
                 } catch (NumberFormatException nfe) {
                 }
             }

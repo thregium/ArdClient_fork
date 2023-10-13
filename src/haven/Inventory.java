@@ -104,6 +104,7 @@ public class Inventory extends Widget implements DTarget2 {
 
     @RName("inv")
     public static class $_ implements Factory {
+        @Override
         public Widget create(UI ui, Object[] args) {
             return (new Inventory((Coord) args[0]));
         }
@@ -111,6 +112,7 @@ public class Inventory extends Widget implements DTarget2 {
 
     public final Map<String, Tex> cached = new HashMap<>();
 
+    @Override
     public void draw(GOut g) {
         Coord c = new Coord();
         int mo = 0;
@@ -127,7 +129,7 @@ public class Inventory extends Widget implements DTarget2 {
         super.draw(g);
     }
 
-    private final AltInventory ainv;
+    public final AltInventory ainv;
 
     public Inventory(Coord sz) {
 //        super(invsq.sz().add(new Coord(-1, -1)).mul(sz).add(new Coord(1, 1)));
@@ -168,6 +170,7 @@ public class Inventory extends Widget implements DTarget2 {
         parent.pack();
     }
 
+    @Override
     public boolean mousewheel(Coord c, int amount) {
         Coord invsz = sqsz.mul(isz).add(1, 1);
         if (c.isect(Coord.z, invsz)) {
@@ -190,6 +193,7 @@ public class Inventory extends Widget implements DTarget2 {
         return !locked && super.mousedown(c, button);
     }
 
+    @Override
     public void addchild(Widget child, Object... args) {
         add(child);
         Coord c = (Coord) args[0];
@@ -197,20 +201,22 @@ public class Inventory extends Widget implements DTarget2 {
             GItem i = (GItem) child;
             WItem w = new WItem(i);
             wmap.put(i, add(w, c.mul(sqsz).add(1, 1)));
-            ainv.addItem(w);
+            i.addListeners(ainv.list.listeners());
         }
     }
 
+    @Override
     public void cdestroy(Widget w) {
         super.cdestroy(w);
         if (w instanceof GItem) {
             GItem i = (GItem) w;
             WItem wItem = wmap.remove(i);
             ui.destroy(wItem);
-            ainv.removeItem(wItem);
+            i.removeListeners(ainv.list.listeners());
         }
     }
 
+    @Override
     public boolean drop(WItem target, Coord cc, Coord ul) {
         for (Widget wdg = lchild; wdg != null; wdg = wdg.prev) {
             if (wdg.visible()) {
@@ -236,6 +242,7 @@ public class Inventory extends Widget implements DTarget2 {
         return (true);
     }
 
+    @Override
     public boolean iteminteract(WItem target, Coord cc, Coord ul) {
         for (Widget wdg = lchild; wdg != null; wdg = wdg.prev) {
             if (wdg.visible()) {
@@ -259,6 +266,7 @@ public class Inventory extends Widget implements DTarget2 {
         return (true);
     }
 
+    @Override
     public void uimsg(String msg, Object... args) {
         if (msg == "sz") {
             isz = (Coord) args[0];
@@ -1012,20 +1020,12 @@ public class Inventory extends Widget implements DTarget2 {
         private static final Color odd = new Color(255, 255, 255, 32);
 
         private final Inventory inv;
-        private final ItemGroupList list;
+        public final ItemGroupList list;
 
         public AltInventory(final Inventory inv) {
             this.inv = inv;
             list = add(new ItemGroupList(inv, UI.scale(150), 16, UI.scale(16)));
             super.pack();
-        }
-
-        public void addItem(final WItem wItem) {
-            list.addItems(wItem);
-        }
-
-        public void removeItem(final WItem wItem) {
-            list.removeItems(wItem);
         }
 
         @Override
@@ -1096,47 +1096,72 @@ public class Inventory extends Widget implements DTarget2 {
             Grouping(String name) {this.name = name;}
         }
 
-        private static class ItemType {
-            final WItem item;
-            Widget cont;
-            final Set<WItem> items = new HashSet<>();
+        private static class Group extends Widget {
+            private final String name;
+            private final String resname;
+            private int count;
+            private double q;
+            private GSprite spr;
+            private final List<WItem> items = Collections.synchronizedList(new ArrayList<>());
 
-            public ItemType(WItem w) {
-                this.item = w;
-                this.cont = w.item.contents;
+            public Group(final String name, final String resname) {
+                this.name = name;
+                this.resname = resname;
             }
 
-            public void tick() {
-                Widget cont = item.item.contents;
-                if (this.cont != cont) {
-                    if (cont == null) {
+            public void addItem(final WItem item) {
+                items.add(item);
+                count++;
+                if (spr == null)
+                    spr = item.item.spr();
+            }
 
-                    }
-                }
+            public void calcQuality() {
+                double sum = items.stream().mapToDouble(i -> {
+                    QBuff qb = ItemInfo.find(QBuff.class, i.item.info());
+                    if (qb == null) return (0);
+                    else return (qb.q);
+                }).sum();
+                q = sum / items.size();
+            }
+
+            private WItem takeFirst() {
+                return (items.get(0));
+            }
+
+            @Override
+            public boolean mousedown(final Coord c, final int button) {
+                return (takeFirst().mousedown(c, button));
+            }
+
+            @Override
+            public boolean mouseup(final Coord c, final int button) {
+                return (takeFirst().mouseup(c, button));
+            }
+
+            @Override
+            public void mousemove(final Coord c) {
+                takeFirst().mousemove(c);
+            }
+
+            @Override
+            public boolean mousewheel(final Coord c, final int amount) {
+                return (takeFirst().mousewheel(c, amount));
             }
         }
 
-
-        private static class ItemGroupList extends Listbox<WItem> implements DTarget2 {
+        public static class ItemGroupList extends Listbox<Group> implements DTarget2, Inventory.InventoryListener {
             private final Inventory inv;
-            private final Set<WItem> list = Collections.synchronizedSet(new HashSet<>());
-            private List<WItem> wlist = Collections.emptyList();
+            private List<Group> wlist = Collections.emptyList();
 
             public ItemGroupList(Inventory inv, int w, int h, int itemh) {
                 super(w, h, itemh);
                 this.inv = inv;
-            }
-
-            public void addItems(final WItem wItem) {
-                list.add(wItem);
-            }
-
-            public void removeItems(final WItem wItem) {
-                list.remove(wItem);
+                listeners.add(this);
             }
 
             @Override
-            protected WItem listitem(int i) {
+            protected Group listitem(int i) {
                 return (wlist.get(i));
             }
 
@@ -1146,12 +1171,12 @@ public class Inventory extends Widget implements DTarget2 {
             }
 
             @Override
-            protected void drawitem(GOut g, WItem item, int i) {
+            protected void drawitem(GOut g, Group item, int i) {
                 g.chcolor(((i % 2) == 0) ? even : odd);
                 g.frect(Coord.z, g.sz());
                 g.chcolor();
                 int x = 0;
-                GSprite spr = item.item.spr();
+                GSprite spr = item.spr;
                 if (spr != null) {
                     Coord sz = spr.sz();
                     double sy = 1.0 * sz.y / itemh;
@@ -1159,16 +1184,24 @@ public class Inventory extends Widget implements DTarget2 {
                     spr.draw(g, sz);
                     x += sz.x;
                 }
-                String name = item.item.getname();
+                int count = item.count;
+                if (count > 0) {
+                    Tex tex = Text.render("x" + count).tex();
+                    g.image(tex, Coord.of(x, (itemh - tex.sz().y) / 2));
+                    x += tex.sz().x;
+                }
+                String name = item.name;
                 if (!name.isEmpty()) {
+                    x += 5;
                     Tex tex = Text.render(name).tex();
                     g.image(tex, Coord.of(x, (itemh - tex.sz().y) / 2));
                     x += tex.sz().x;
                 }
-                QBuff q = item.item.quality();
-                if (q != null) {
-                    if (q.qtex != null)
-                        g.image(q.qtex, Coord.of(x, (itemh - q.qtex.sz().y) / 2));
+                double q = item.q;
+                if (q > 0) {
+                    x += 5;
+                    Tex tex = Text.render("(" + (count > 0 ? "~" : "") + "q" + Utils.odformat2(q, 2) + ")").tex();
+                    g.image(tex, Coord.of(x, (itemh - tex.sz().y) / 2));
                 }
             }
 
@@ -1180,21 +1213,40 @@ public class Inventory extends Widget implements DTarget2 {
             @Override
             public void tick(double dt) {
                 super.tick(dt);
-                List<WItem> wlist = new ArrayList<>();
-                for (WItem wItem : list) {
-                    Widget cont = wItem.item.contents;
-                    if (cont != null) {
-                        wlist.addAll(cont.getchilds(WItem.class));
-                    } else {
-                        wlist.add(wItem);
+                if (dirty) {
+                    dirty = false;
+                    try {
+                        List<WItem> wlist = new ArrayList<>();
+                        for (WItem wItem : inv.wmap.values()) {
+                            Widget cont = wItem.item.contents;
+                            if (cont != null) {
+                                wlist.addAll(cont.getchilds(WItem.class));
+                            } else {
+                                wlist.add(wItem);
+                            }
+                        }
+                        Map<String, Group> wmap = new HashMap<>();
+                        for (WItem wItem : wlist) {
+                            ItemInfo.Name ninfo = ItemInfo.find(ItemInfo.Name.class, wItem.item.info());
+                            if (ninfo == null) continue;
+                            String name = ninfo.ostr.text;
+                            String resname = wItem.item.resource().name;
+                            Group gr = wmap.computeIfAbsent(name + resname, n -> new Group(name, resname));
+                            gr.addItem(wItem);
+                        }
+                        for (Group g : wmap.values()) {
+                            g.calcQuality();
+                            g.items.sort((Comparator.comparingDouble(o -> o.qq.q)));
+                        }
+                        this.wlist = new ArrayList<>(wmap.values());
+                    } catch (Loading l) {
+                        dirty = true;
                     }
                 }
-                wlist.sort((o1, o2) -> (o1.item.getname().compareTo(o2.item.getname())));
-                this.wlist = wlist;
             }
 
             @Override
-            protected void itemclick(final WItem item, final int button) {
+            protected void itemclick(final Group item, final int button) {
                 item.mousedown(Coord.z, button);
             }
 
@@ -1212,7 +1264,9 @@ public class Inventory extends Widget implements DTarget2 {
             @Override
             public boolean iteminteract(final WItem target, final Coord cc, final Coord ul) {
                 int idx = idxat(cc);
-                WItem item = (idx >= listitems()) ? null : listitem(idx);
+                WItem item = null;
+                if (idx >= 0 && idx < listitems())
+                    item = listitem(idx).takeFirst();
                 if (item != null) {
                     item.iteminteract(target, Coord.z, Coord.z);
                 }
@@ -1235,11 +1289,31 @@ public class Inventory extends Widget implements DTarget2 {
             @Override
             public Object tooltip(Coord c, Widget prev) {
                 int idx = idxat(c);
-                WItem item = (idx >= listitems()) ? null : listitem(idx);
+                WItem item = null;
+                if (idx >= 0 && idx < listitems())
+                    item = listitem(idx).takeFirst();
                 if (item != null) {
                     return item.tooltip(Coord.z, prev);
                 }
                 return super.tooltip(c, prev);
+            }
+
+            private boolean dirty = true;
+
+            @Override
+            public void dirty() {
+                dirty = true;
+            }
+
+            private final List<InventoryListener> listeners = Collections.synchronizedList(new ArrayList<>());
+
+            @Override
+            public void initListeners(final List<InventoryListener> listeners) {
+                this.listeners.addAll(listeners);
+            }
+            @Override
+            public List<InventoryListener> listeners() {
+                return (listeners);
             }
         }
     }
@@ -1253,5 +1327,16 @@ public class Inventory extends Widget implements DTarget2 {
         ainv.show(!ainv.visible());
         pack();
     }
+
+    public interface InventoryListener {
+        void dirty();
+        void initListeners(final List<InventoryListener> listeners);
+        List<InventoryListener> listeners();
+    }
+
+    public interface ItemObserver {
+        List<InventoryListener> listeners();
+        void addListeners(final List<InventoryListener> listeners);
+        void removeListeners(final List<InventoryListener> listeners);
+    }
 }
-//список всех предметов

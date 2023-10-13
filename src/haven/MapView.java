@@ -184,7 +184,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     private String lasttt = "";
     private Object tt;
 
-    protected static long autoclicktimeout = 250;
+    protected static long autoclicktimeout = 500;
     protected long lastautoclick = System.currentTimeMillis();
     private boolean ismousedown = false;
     private boolean canautoclick = true;
@@ -2286,14 +2286,14 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
         updateSpeed(dt);
         if (configuration.autoclick && ismousedown && canautoclick && System.currentTimeMillis() - lastautoclick >= autoclicktimeout) {
-                canautoclick = false;
-                delay(new Click(ui.mc, ui.modflags(), 1) {
-                    @Override
-                    public void onFinish() {
-                        canautoclick = true;
-                        lastautoclick = System.currentTimeMillis();
-                    }
-                });
+            canautoclick = false;
+            delay(new Click(ui.mc, ui.modflags(), 1) {
+                @Override
+                public void onFinish() {
+                    canautoclick = true;
+                    lastautoclick = System.currentTimeMillis();
+                }
+            });
         }
         if (!movequeue.isEmpty() && (System.currentTimeMillis() - lastMove > 500) && triggermove()) {
             movingto = movequeue.poll();
@@ -2834,7 +2834,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                                 if (w instanceof ChatUI.MultiChat) {
                                     ChatUI.MultiChat chat = (ChatUI.MultiChat) w;
                                     if (chat.name().equals(Resource.getLocString(Resource.BUNDLE_LABEL, "Area Chat"))) {
-                                        chat.send(ChatUI.CMD_PREFIX_HLIGHT + gob.id);
+                                        chat.send(ChatUI.CMD_SYMBOL_HLIGHT + gob.id);
                                         break;
                                     }
                                 }
@@ -3061,13 +3061,11 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             fakeGob = null;
         } else if ((grab != null) && grab.mmousedown(c, button)) {
         } else {
-            if (configuration.autoclick) {
-                if (button == 1) {
-                    ismousedown = true;
-                    canautoclick = true;
-                }
-            }
-            delay(new Click(c, ui.modflags(), button));
+            if (configuration.autoclick && button == 1) {
+                ismousedown = true;
+                canautoclick = true;
+            } else
+                delay(new Click(c, ui.modflags(), button));
         }
         return (true);
     }
