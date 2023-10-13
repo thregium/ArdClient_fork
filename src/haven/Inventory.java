@@ -30,7 +30,6 @@ import haven.purus.pbot.PBotInventory;
 import haven.purus.pbot.PBotItem;
 import haven.purus.pbot.PBotUtils;
 import haven.res.ui.tt.q.qbuff.QBuff;
-import haven.res.ui.tt.q.quality.Quality;
 import modification.configuration;
 
 import java.awt.Color;
@@ -1034,6 +1033,12 @@ public class Inventory extends Widget implements DTarget2 {
             g.chcolor(even);
             g.rect(Coord.z, g.sz());
             g.chcolor();
+        }
+
+        @Override
+        public void tick(final double dt) {
+            if (!visible()) return;
+            super.tick(dt);
         }
 
         @Override

@@ -957,7 +957,7 @@ public class Skeleton {
                 float tm = (fmt == 0) ? (float) buf.cpfloat() : (buf.unorm16() * len);
                 int t = buf.uint8();
                 switch (t) {
-                    case 0:
+                    case 0: case 2:
                         String resnm = buf.string();
                         int resver = buf.uint16();
                         byte[] sdt = buf.bytes(buf.uint8());

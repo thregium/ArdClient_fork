@@ -1070,7 +1070,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
 
     @Override
     public void removeListeners(final List<Inventory.InventoryListener> listeners) {
-        this.listeners.removeAll(listeners);
         this.listeners.forEach(Inventory.InventoryListener::dirty);
+        this.listeners.removeAll(listeners);
     }
 }
