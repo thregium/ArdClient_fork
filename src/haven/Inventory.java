@@ -30,6 +30,8 @@ import haven.purus.pbot.PBotInventory;
 import haven.purus.pbot.PBotItem;
 import haven.purus.pbot.PBotUtils;
 import haven.res.ui.tt.q.qbuff.QBuff;
+import modification.InventoryListener;
+import modification.ItemObserver;
 import modification.configuration;
 
 import java.awt.Color;
@@ -47,7 +49,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-public class Inventory extends Widget implements DTarget2 {
+public class Inventory extends Widget implements DTarget2, ItemObserver, InventoryListener {
     public static final Coord sqsz = UI.scale(33, 33);
     public static final Tex invsq/* = Resource.loadtex("gfx/hud/invsq")*/;
     public boolean dropul = true;
@@ -148,6 +150,13 @@ public class Inventory extends Widget implements DTarget2 {
             max.y = Math.max(max.y, ainv.c.y + ainv.sz.y);
             resize(max);
         }
+        listeners.add(this);
+    }
+
+    @Override
+    public void reqdestroy() {
+        super.reqdestroy();
+        listeners.remove(this);
     }
 
     @Override
@@ -161,6 +170,7 @@ public class Inventory extends Widget implements DTarget2 {
         Coord invsz = sqsz.mul(isz).add(1, 1);
         Coord max = invsz;
         if (ainv.visible()) {
+            ainv.list.resizeh(invsz.y);
             ainv.move(Coord.of(invsz.x, 0));
             max.x = Math.max(max.x, ainv.c.x + ainv.sz.x);
             max.y = Math.max(max.y, ainv.c.y + ainv.sz.y);
@@ -200,7 +210,8 @@ public class Inventory extends Widget implements DTarget2 {
             GItem i = (GItem) child;
             WItem w = new WItem(i);
             wmap.put(i, add(w, c.mul(sqsz).add(1, 1)));
-            i.addListeners(ainv.list.listeners());
+            i.addListeners(listeners());
+            observers().forEach(InventoryListener::dirty);
         }
     }
 
@@ -211,7 +222,8 @@ public class Inventory extends Widget implements DTarget2 {
             GItem i = (GItem) w;
             WItem wItem = wmap.remove(i);
             ui.destroy(wItem);
-            i.removeListeners(ainv.list.listeners());
+            i.removeListeners(listeners());
+            observers().forEach(InventoryListener::dirty);
         }
     }
 
@@ -1020,10 +1032,61 @@ public class Inventory extends Widget implements DTarget2 {
 
         private final Inventory inv;
         public final ItemGroupList list;
+        public Dropbox<Grouping> dropGroup = new Dropbox<Grouping>(UI.scale(60), 16, UI.scale(16)) {
+            @Override
+            protected Grouping listitem(final int i) {
+                return (Grouping.values()[i]);
+            }
+
+            @Override
+            protected int listitems() {
+                return (Grouping.values().length);
+            }
+
+            @Override
+            protected void drawitem(final GOut g, final Grouping item, final int i) {
+                Tex tex = Text.render(item.name).tex();
+                g.image(tex, Coord.of(0, (itemh - tex.sz().y) / 2));
+            }
+
+            @Override
+            public void change(final int index) {
+                super.change(index);
+                inv.dirty();
+            }
+        };
+        public Dropbox<Sorting> dropSort = new Dropbox<Sorting>(UI.scale(60), 16, UI.scale(16)) {
+            @Override
+            protected Sorting listitem(final int i) {
+                return (Sorting.values()[i]);
+            }
+
+            @Override
+            protected int listitems() {
+                return (Sorting.values().length);
+            }
+
+            @Override
+            protected void drawitem(final GOut g, final Sorting item, final int i) {
+                Tex tex = Text.render(item.name).tex();
+                g.image(tex, Coord.of(0, (itemh - tex.sz().y) / 2));
+            }
+
+            @Override
+            public void change(final int index) {
+                super.change(index);
+                inv.dirty();
+            }
+        };
 
         public AltInventory(final Inventory inv) {
             this.inv = inv;
-            list = add(new ItemGroupList(inv, UI.scale(150), 16, UI.scale(16)));
+            add(dropSort, Coord.of(0, 0)).settip("List Sorting");
+            add(dropGroup, dropSort.pos("ur").adds(5, 0)).settip("Item Picking On Quality");
+            list = add(new ItemGroupList(inv, this, UI.scale(150), 16, UI.scale(16)), dropSort.pos("bl"));
+            list.resizeh(inv.sz.y);
+            dropGroup.change(0);
+            dropSort.change(0);
             super.pack();
         }
 
@@ -1089,19 +1152,39 @@ public class Inventory extends Widget implements DTarget2 {
             return (false);
         }
 
-        enum Grouping {
-            NONE("Type"),
-            Q("Quality"),
-            Q1("Quality 1"),
-            Q5("Quality 5"),
-            Q10("Quality 10");
+        public enum Grouping {
+            NORMAL("Ascending", Comparator.comparingDouble(o -> {
+                QBuff qb = ItemInfo.find(QBuff.class, o.item.info());
+                return (qb == null ? 0.0 : qb.q);
+            })),
+            REVERSED("Descending", NORMAL.cmp.reversed());
 
             private final String name;
+            private final Comparator<WItem> cmp;
 
-            Grouping(String name) {this.name = name;}
+            Grouping(String name, Comparator<WItem> cmp) {
+                this.name = name;
+                this.cmp = cmp;
+            }
         }
 
-        private static class Group extends Widget {
+        public enum Sorting {
+            NONE("None", Comparator.comparingInt(g -> 0)),
+            COUNT("Count", Comparator.<Group>comparingInt(g -> g.count).reversed()),
+            NAME("Name", Comparator.comparing(g -> g.name)),
+            RESNAME("ResName", Comparator.comparing(g -> g.resname)),
+            Q("Quality", Comparator.<Group>comparingDouble(g -> g.q).reversed());
+
+            private final String name;
+            private final Comparator<Group> cmp;
+
+            Sorting(String name, Comparator<Group> cmp) {
+                this.name = name;
+                this.cmp = cmp;
+            }
+        }
+
+        public static class Group extends Widget {
             private final String name;
             private final String resname;
             private int count;
@@ -1124,8 +1207,7 @@ public class Inventory extends Widget implements DTarget2 {
             public void calcQuality() {
                 double sum = items.stream().mapToDouble(i -> {
                     QBuff qb = ItemInfo.find(QBuff.class, i.item.info());
-                    if (qb == null) return (0);
-                    else return (qb.q);
+                    return (qb == null ? 0 : qb.q);
                 }).sum();
                 q = sum / items.size();
             }
@@ -1155,14 +1237,15 @@ public class Inventory extends Widget implements DTarget2 {
             }
         }
 
-        public static class ItemGroupList extends Listbox<Group> implements DTarget2, Inventory.InventoryListener {
+        public static class ItemGroupList extends Listbox<Group> implements DTarget2 {
             private final Inventory inv;
+            private final AltInventory ainv;
             private List<Group> wlist = Collections.emptyList();
 
-            public ItemGroupList(Inventory inv, int w, int h, int itemh) {
+            public ItemGroupList(Inventory inv, AltInventory ainv, int w, int h, int itemh) {
                 super(w, h, itemh);
                 this.inv = inv;
-                listeners.add(this);
+                this.ainv = ainv;
             }
 
             @Override
@@ -1218,8 +1301,8 @@ public class Inventory extends Widget implements DTarget2 {
             @Override
             public void tick(double dt) {
                 super.tick(dt);
-                if (dirty) {
-                    dirty = false;
+                if (inv.dirty) {
+                    inv.dirty = false;
                     try {
                         List<WItem> wlist = new ArrayList<>();
                         for (WItem wItem : inv.wmap.values()) {
@@ -1241,11 +1324,14 @@ public class Inventory extends Widget implements DTarget2 {
                         }
                         for (Group g : wmap.values()) {
                             g.calcQuality();
-                            g.items.sort((Comparator.comparingDouble(o -> o.qq.q)));
+
+                            g.items.sort(ainv.dropGroup.sel.cmp);
                         }
-                        this.wlist = new ArrayList<>(wmap.values());
+                        List<Group> list = new ArrayList<>(wmap.values());
+                        list.sort(ainv.dropSort.sel.cmp);
+                        this.wlist = list;
                     } catch (Loading l) {
-                        dirty = true;
+                        inv.dirty = true;
                     }
                 }
             }
@@ -1302,24 +1388,6 @@ public class Inventory extends Widget implements DTarget2 {
                 }
                 return super.tooltip(c, prev);
             }
-
-            private boolean dirty = true;
-
-            @Override
-            public void dirty() {
-                dirty = true;
-            }
-
-            private final List<InventoryListener> listeners = Collections.synchronizedList(new ArrayList<>());
-
-            @Override
-            public void initListeners(final List<InventoryListener> listeners) {
-                this.listeners.addAll(listeners);
-            }
-            @Override
-            public List<InventoryListener> listeners() {
-                return (listeners);
-            }
         }
     }
 
@@ -1333,15 +1401,37 @@ public class Inventory extends Widget implements DTarget2 {
         pack();
     }
 
-    public interface InventoryListener {
-        void dirty();
-        void initListeners(final List<InventoryListener> listeners);
-        List<InventoryListener> listeners();
+    private boolean dirty = true;
+
+    @Override
+    public void dirty() {
+        dirty = true;
     }
 
-    public interface ItemObserver {
-        List<InventoryListener> listeners();
-        void addListeners(final List<InventoryListener> listeners);
-        void removeListeners(final List<InventoryListener> listeners);
+    private final List<InventoryListener> listeners = Collections.synchronizedList(new ArrayList<>());
+
+    @Override
+    public void initListeners(final List<InventoryListener> listeners) {
+        this.listeners.addAll(listeners);
+    }
+    @Override
+    public List<InventoryListener> listeners() {
+        return (listeners);
+    }
+
+    private final List<InventoryListener> listeners2 = Collections.synchronizedList(new ArrayList<>());
+    @Override
+    public List<InventoryListener> observers() {
+        return (listeners2);
+    }
+
+    @Override
+    public void addListeners(final List<InventoryListener> listeners) {
+        this.listeners2.addAll(listeners);
+    }
+
+    @Override
+    public void removeListeners(final List<InventoryListener> listeners) {
+        this.listeners2.removeAll(listeners);
     }
 }

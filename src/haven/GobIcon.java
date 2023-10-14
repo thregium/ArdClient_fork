@@ -283,6 +283,7 @@ public class GobIcon extends GAttrib {
                 }
                 if (reorder) {
                     reorder = false;
+                    fixScrollbar();
                     this.ordered = all.stream().filter(filter.predicate).collect(Collectors.toList());
                     for (Icon icon : ordered.stream().filter(filter.predicate).collect(Collectors.toList())) {
                         if (icon.name == null) {

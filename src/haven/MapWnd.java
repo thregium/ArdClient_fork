@@ -642,7 +642,7 @@ public class MapWnd extends ResizableWnd {
                     } else {
                         gui.iconwnd.toggleVisibility();
                         if (gui.iconwnd.visible())
-                            gui.raise();
+                            gui.iconwnd.raise();
                     }
                 }
             }), viewdist.c.add(viewdist.sz.x + spacer, 0));

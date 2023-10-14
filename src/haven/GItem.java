@@ -34,6 +34,8 @@ import haven.res.ui.tt.q.quality.Quality;
 import haven.resutil.Curiosity;
 import haven.resutil.FoodInfo;
 import integrations.food.FoodService;
+import modification.InventoryListener;
+import modification.ItemObserver;
 import modification.configuration;
 import modification.dev;
 
@@ -52,7 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static haven.Text.num10Fnd;
 import static haven.Text.num12boldFnd;
 
-public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owner, Inventory.ItemObserver {
+public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owner, ItemObserver, InventoryListener {
     public Indir<Resource> res;
     private static ItemFilter filter;
     private static long lastFilter = 0;
@@ -531,18 +533,18 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
          * on that. */
         if (true || ((String) args[0]).equals("contents")) {
             contents = add(child);
-            if (child instanceof Inventory) {
-                Inventory inv = (Inventory) child;
-                inv.ainv.list.initListeners(listeners());
-            } else if (child instanceof Inventory.InventoryListener) {
-                Inventory.InventoryListener inv = (Inventory.InventoryListener) child;
-                inv.initListeners(listeners());
+            if (child instanceof InventoryListener) {
+                InventoryListener inv = (InventoryListener) child;
+                inv.initListeners(observers());
+            }
+            if (child instanceof ItemObserver) {
+                ItemObserver inv = (ItemObserver) child;
+                inv.addListeners(listeners2);
             }
             contentsnm = (String) args[1];
             contentsid = null;
             if (args.length > 2)
                 contentsid = args[2];
-            needUpdateQuality.set(true);
         }
     }
 
@@ -552,6 +554,10 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         if (w == contents) {
             contents = null;
             contentsid = null;
+            if (w instanceof ItemObserver) {
+                ItemObserver inv = (ItemObserver) w;
+                inv.removeListeners(listeners2);
+            }
         }
     }
 
@@ -1056,21 +1062,37 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     }
 
 
-    private final List<Inventory.InventoryListener> listeners = Collections.synchronizedList(new ArrayList<>());
+    private final List<InventoryListener> listeners = Collections.synchronizedList(new ArrayList<>());
+    private final List<InventoryListener> listeners2 = Collections.synchronizedList(new ArrayList<>());
 
     @Override
-    public List<Inventory.InventoryListener> listeners() {
+    public void dirty() {
+        needUpdateQuality.set(true);
+    }
+
+    @Override
+    public void initListeners(final List<InventoryListener> listeners) {
+        listeners2.addAll(listeners);
+    }
+
+    @Override
+    public List<InventoryListener> listeners() {
+        return (listeners2);
+    }
+
+    @Override
+    public List<InventoryListener> observers() {
         return (listeners);
     }
     @Override
-    public void addListeners(final List<Inventory.InventoryListener> listeners) {
+    public void addListeners(final List<InventoryListener> listeners) {
         this.listeners.addAll(listeners);
-        this.listeners.forEach(Inventory.InventoryListener::dirty);
+        this.listeners.forEach(InventoryListener::dirty);
     }
 
     @Override
-    public void removeListeners(final List<Inventory.InventoryListener> listeners) {
-        this.listeners.forEach(Inventory.InventoryListener::dirty);
+    public void removeListeners(final List<InventoryListener> listeners) {
+        this.listeners.forEach(InventoryListener::dirty);
         this.listeners.removeAll(listeners);
     }
 }

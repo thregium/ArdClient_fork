@@ -77,6 +77,8 @@ public class Pathfinder extends Thread {
     Set<String> inaccessibleTiles = new HashSet<String>() {{
         add("gfx/tiles/nil");
         add("gfx/tiles/deep");
+        add("gfx/tiles/odeep");
+        add("gfx/tiles/odeeper");
         add("gfx/tiles/cave");
         add("gfx/tiles/rocks/.*");
     }};

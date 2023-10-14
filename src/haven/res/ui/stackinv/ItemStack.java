@@ -8,6 +8,8 @@ import haven.Inventory;
 import haven.UI;
 import haven.WItem;
 import haven.Widget;
+import modification.InventoryListener;
+import modification.ItemObserver;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,13 +17,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ItemStack extends Widget implements DTarget, Inventory.InventoryListener {
+public class ItemStack extends Widget implements DTarget, InventoryListener, ItemObserver {
     public final List<GItem> order = new ArrayList<>();
     public final Map<GItem, WItem> wmap = new HashMap<>();
     private boolean dirty;
 
     public static ItemStack mkwidget(UI ui, Object[] args) {
         return (new ItemStack());
+    }
+
+    @Override
+    protected void added() {
+        super.added();
+        listeners.add(this);
+    }
+
+    @Override
+    public void reqdestroy() {
+        super.reqdestroy();
+        listeners.remove(this);
     }
 
     @Override
@@ -49,6 +63,7 @@ public class ItemStack extends Widget implements DTarget, Inventory.InventoryLis
             order.add(i);
             dirty = true;
             i.addListeners(listeners());
+            observers().forEach(InventoryListener::dirty);
         }
     }
 
@@ -61,6 +76,7 @@ public class ItemStack extends Widget implements DTarget, Inventory.InventoryLis
             order.remove(i);
             dirty = true;
             i.removeListeners(listeners());
+            observers().forEach(InventoryListener::dirty);
         }
     }
 
@@ -95,13 +111,32 @@ public class ItemStack extends Widget implements DTarget, Inventory.InventoryLis
     @Override
     public void dirty() {}
 
-    private final List<Inventory.InventoryListener> listeners = Collections.synchronizedList(new ArrayList<>());
+    private final List<InventoryListener> listeners = Collections.synchronizedList(new ArrayList<>());
 
     @Override
-    public void initListeners(final List<Inventory.InventoryListener> listeners) {}
+    public void initListeners(final List<InventoryListener> listeners) {
+        this.listeners.addAll(listeners);
+    }
 
     @Override
-    public List<Inventory.InventoryListener> listeners() {
+    public List<InventoryListener> listeners() {
         return (listeners);
+    }
+
+    private final List<InventoryListener> listeners2 = Collections.synchronizedList(new ArrayList<>());
+
+    @Override
+    public List<InventoryListener> observers() {
+        return (listeners2);
+    }
+
+    @Override
+    public void addListeners(final List<InventoryListener> listeners) {
+        listeners2.addAll(listeners);
+    }
+
+    @Override
+    public void removeListeners(final List<InventoryListener> listeners) {
+        listeners2.removeAll(listeners);
     }
 }

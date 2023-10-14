@@ -436,6 +436,8 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     type = Type.STUMP;
                 if (name.endsWith("log"))
                     type = Type.LOG;
+                if (name.matches("gfx/terobjs/plants/.*"))
+                    type = Type.PLANT;
 
                 String customIcon = null;
                 if ((type == Type.TREE || type == Type.BUSH || type == Type.STUMP || type == Type.LOG) && (!name.matches(".*trees/old(stump|trunk)"))) {

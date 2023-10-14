@@ -45,6 +45,13 @@ public abstract class Listbox<T> extends ListWidget<T> {
         selindex = -1;
     }
 
+    public Listbox(Coord sz, int itemh) {
+        super(sz, itemh);
+        this.h = sz.y / itemh;
+        this.sb = adda(new Scrollbar(sz.y, 0, 0), sz.x, 0, 1, 0);
+        selindex = -1;
+    }
+
     protected void drawsel(GOut g) {
         drawsel(g, selc);
     }

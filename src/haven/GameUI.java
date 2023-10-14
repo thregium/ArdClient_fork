@@ -74,6 +74,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import static haven.Action.TOGGLE_CHARACTER;
@@ -259,6 +260,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
                     Text mtime = ui.sess.glob.mservertimetex.get();
                     Text btime = ui.sess.glob.bservertimetex.get();
                     Text winfo = ui.sess.glob.weathertimetex.get();
+                    Text pinfo = provincetex.get();
                     int y = UI.scale(10);
                     int x = UI.scale(5);
                     if (ttime != null) {
@@ -280,6 +282,10 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
                     if (btime != null) {
                         g.aimage(btime.tex(), new Coord(sz.x - x, y), 1, 0);
                         y += btime.sz().y;
+                    }
+                    if (pinfo != null) {
+                        g.aimage(pinfo.tex(), new Coord(sz.x - x, y), 1, 0);
+                        y += pinfo.sz().y;
                     }
                     if (configuration.showweatherinfo && winfo != null) {
                         g.aimage(winfo.tex(), new Coord(sz.x - x, y), 1, 0);
@@ -1633,6 +1639,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         }
     }
 
+    public final AtomicReference<Text> provincetex = new AtomicReference<>(null);
     public void notifyProvince(Object... cargs) {
         if (map != null) {
             try {
@@ -1650,6 +1657,9 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
                     PBotUtils.sysMsg(ui, finish, Color.GREEN);
                 else
                     map.setpoltext(id, finish);
+                String ptext = "Province '" + name + "'";
+                if (provincetex.get() == null || !provincetex.get().text.equals(ptext))
+                    provincetex.set(Text.create(ptext, PUtils.strokeImg(RichText.render(ptext, -1))));
             } catch (Exception e) {
                 dev.simpleLog(e);
             }
