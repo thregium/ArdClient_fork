@@ -1642,6 +1642,7 @@ public class MapWnd extends ResizableWnd {
                                 prev.seg = info.seg;
                                 prev.tc = sc;
                                 view.file.update(prev);
+                                uploadMark(prev);
                             }
                         }
                     } finally {
@@ -1706,14 +1707,16 @@ public class MapWnd extends ResizableWnd {
                         if (prev == null) {
                             SMarker mark = new SMarker(info.seg, sc, rnm, oid, new Resource.Spec(Resource.remote(), iconRes.name, iconRes.ver));
                             mark.makeAutosend(sendeable);
+                            view.file.add(mark);
                             if (sendeable)
                                 uploadMark(mark);
-                            view.file.add(mark);
                         } else {
                             if ((prev.seg != info.seg) || !prev.tc.equals(sc)) {
                                 prev.seg = info.seg;
                                 prev.tc = sc;
                                 view.file.update(prev);
+                                if (sendeable)
+                                    uploadMark(prev);
                             }
                         }
                     } finally {

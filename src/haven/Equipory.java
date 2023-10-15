@@ -367,7 +367,7 @@ public class Equipory extends Widget implements DTarget {
             }
         }
         if (armorclass != null)
-            g.aimage(armorclass, new Coord(rx - 10, bg.sz().y - 10), 1, 1);
+            g.aimage(armorclass, new Coord(rx - UI.scale(10), bg.sz().y - UI.scale(10)), 1, 1);
         if (percexp == null) {
             int h = 0, s = 0, x;
             CharWnd chrwdg = null;
@@ -386,7 +386,7 @@ public class Equipory extends Widget implements DTarget {
             }
         }
         if (percexp != null)
-            g.aimage(percexp, new Coord(rx - 10, bg.sz().y - 20), 1, 1);
+            g.aimage(percexp, new Coord(rx - UI.scale(10), bg.sz().y - UI.scale(20)), 1, 1);
         if (intste == null) {
             int h = 0, s = 0, x;
             CharWnd chrwdg = null;
@@ -405,7 +405,7 @@ public class Equipory extends Widget implements DTarget {
             }
         }
         if (intste != null)
-            g.aimage(intste, new Coord(rx - 10, bg.sz().y - 30), 1, 1);
+            g.aimage(intste, new Coord(rx - UI.scale(10), bg.sz().y - UI.scale(30)), 1, 1);
     }
 
     public boolean iteminteract(Coord cc, Coord ul) {

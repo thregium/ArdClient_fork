@@ -2338,7 +2338,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         Coord2d gran = (plobpgran == 0) ? null : new Coord2d(1.0 / plobpgran, 1.0 / plobpgran).mul(tilesz);
 
         public void adjust(Plob plob, Coord pc, Coord2d mc, int modflags) {
-            if ((modflags & 2) == 0 && !Utils.getprefb("pointplacing", false))
+            if ((modflags & 2) == 0 && !configuration.pointplacing)
                 plob.rc = mc.floor(tilesz).mul(tilesz).add(tilesz.div(2));
             else if (gran != null)
                 plob.rc = mc.add(gran.div(2)).floor(gran).mul(gran);
