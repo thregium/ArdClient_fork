@@ -468,7 +468,7 @@ Window extends MovableWidget implements DTarget {
 
         try {
             if (this.cap.text.equals(Resource.getLocString(Resource.BUNDLE_WINDOW, "Table"))) {
-                add(new Button(60, "Eat All") {
+                add(new Button(UI.scale(60), "Eat All") {
                     public void click() {
                         Resource curs = ui.root.getcurs(c);
                         if (curs.name.equals("gfx/hud/curs/eat")) {
@@ -508,7 +508,7 @@ Window extends MovableWidget implements DTarget {
                         }
 
                     }
-                }, new Coord(140, 325));
+                }, UI.scale(140, 325));
                 if (Config.savecutlery) {
                     for (Widget w = this.lchild; w != null; w = w.prev) {
                         if (w instanceof Inventory) {

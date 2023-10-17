@@ -28,6 +28,7 @@ package haven;
 
 
 import haven.purus.pathfinder.Pathfinder;
+import haven.purus.pbot.PBotAPI;
 import haven.purus.pbot.PBotDiscord;
 import haven.purus.pbot.PBotScriptlist;
 import haven.purus.pbot.PBotUtils;
@@ -42,6 +43,7 @@ import haven.sloth.util.ObservableListener;
 import haven.sloth.util.ObservableMapListener;
 import integrations.mapv4.MappingClient;
 import modification.Decal;
+import modification.SQLiteCache;
 import modification.configuration;
 import modification.dev;
 import modification.resources;
@@ -155,7 +157,7 @@ public class OptWnd extends Window {
     private static final List<String> AutoDrinkTime = Arrays.asList("1", "3", "5", "10", "15", "20", "25", "30", "45", "60");
     private static final List<String> menuSize = Arrays.asList("4", "5", "6", "7", "8", "9", "10");
     private static List<String> pictureList = configuration.findFiles(configuration.picturePath, Arrays.asList(".png", ".jpg", ".gif"));
-    public final Panel main, video, audio, display, oldMap, general, combat, control, uis, uip, quality, mapping, flowermenus, quickactionsettings, soundalarms, hidesettings, studydesksettings, autodropsettings, keybindsettings, chatsettings, clearboulders, clearbushes, cleartrees, clearhides, discord, modification;
+    public final Panel main, video, audio, display, oldMap, general, combat, control, uis, uip, quality, mapping, flowermenus, quickactionsettings, hidesettings, studydesksettings, autodropsettings, keybindsettings, chatsettings, clearboulders, clearbushes, cleartrees, clearhides, discord, modification;
     public Panel waterPanel, qualityPanel, mapPanel, devPanel;
     public Panel current;
     public CheckBox discordcheckbox, menugridcheckbox;
@@ -179,7 +181,6 @@ public class OptWnd extends Window {
         quality = add(new Panel());
         flowermenus = add(new Panel());
         quickactionsettings = add(new Panel());
-        soundalarms = add(new Panel());
         hidesettings = add(new Panel());
         studydesksettings = add(new Panel());
         autodropsettings = add(new Panel());
@@ -209,7 +210,6 @@ public class OptWnd extends Window {
         initQuality();
         initFlowermenus();
         initquickactionsettings();
-        initSoundAlarms();
         initHideMenu();
         initstudydesksettings();
         initautodropsettings();
@@ -419,10 +419,9 @@ public class OptWnd extends Window {
         app1.add(new PButton(btnw, "Audio", 'a', audio));
         app1.add(new PButton(btnw, "Display", 'd', display));
         app1.add(new PButton(btnw, "Map", 'm', mapPanel));
-        app1.add(new PButton(btnw, "Study Desk", 'o', studydesksettings));
-        app1.add(new PButton(btnw, "Theme", 't', uip));
+        app1.add(new PButton(btnw, "Study Desk???", 'o', studydesksettings));
         app1.add(new PButton(btnw, "PBotDiscord", 'z', discord));
-        app1.add(new PButton(btnw, "Modification", 'z', modification));
+        app1.add(new PButton(btnw, "Others", 'z', modification));
 
         WidgetVerticalAppender app2 = new WidgetVerticalAppender(main);
         app2.setVerticalMargin(VERTICAL_MARGIN);
@@ -440,7 +439,6 @@ public class OptWnd extends Window {
         app3.add(new PButton(btnw, "Item Overlay", 'q', quality));
         app3.add(new PButton(btnw, "Pop-up Menu", 'f', flowermenus));
         app3.add(new PButton(btnw, "Quick Actions", 'b', quickactionsettings));
-        app3.add(new PButton(btnw, "Sound Alarms", 's', soundalarms));
         app3.add(new PButton(btnw, "World Overlay", 'h', hidesettings));
         app3.add(new PButton(btnw, "Chat", 'c', chatsettings));
         app3.add(new PButton(btnw, "Autodrop", 's', autodropsettings));
@@ -556,13 +554,40 @@ public class OptWnd extends Window {
         final WidgetVerticalAppender appender2 = new WidgetVerticalAppender(audio);
         appender2.setVerticalMargin(0);
 
-        resources.sfxlist = new HSliderListbox(UI.scale(200), 17);
-        synchronized (resources.sfxmenus) {
-            Utils.loadprefsliderlist("customsfxvol", resources.sfxmenus);
-            resources.sfxmenus.forEach(s -> resources.sfxlist.addItem(configuration.createSFXSlider(s)));
+        class ObservableList extends HSliderListbox implements ObservableListener<HSliderListboxItem> {
+            public ObservableList(final int w, final int h) {
+                super(w, h);
+            }
+
+            @Override
+            public void init(final Collection<HSliderListboxItem> base) {
+                items.addAll(base.stream().map(configuration::createSFXSlider).collect(Collectors.toList()));
+                items.sort(Comparator.comparing(o -> o));
+            }
+
+            @Override
+            public void added(final HSliderListboxItem val) {
+                items.add(configuration.createSFXSlider(val));
+                items.sort(Comparator.comparing(o -> o));
+            }
+
+            @Override
+            public void edited(final HSliderListboxItem olditem, final HSliderListboxItem newitem) {
+                System.out.println("EDITED");
+            }
+
+            @Override
+            public void remove(final HSliderListboxItem val) {
+                items.removeIf(i -> i.name.equals(val.name));
+                items.sort(Comparator.comparing(o -> o));
+            }
         }
-        appender2.add(resources.sfxlist);
-        resources.sfxsearch = new TextEntry(UI.scale(200), "") {
+        ObservableList checkList = new ObservableList(UI.scale(200), 17);
+        Utils.loadprefsliderlist("customsfxvol", resources.sfxmenus.base);
+        resources.sfxmenus.addListener(checkList);
+//        resources.sfxmenus.forEach(s -> checkList.addItem(configuration.createSFXSlider(s)));
+        appender2.add(checkList);
+        TextEntry search = new TextEntry(UI.scale(200), "") {
             @Override
             public void changed() {
                 update();
@@ -580,12 +605,15 @@ public class OptWnd extends Window {
             }
 
             public void update() {
-                synchronized (resources.sfxmenus) {
-                    resources.sfxlist.clear();
-                    resources.sfxmenus.forEach(s -> {
-                        if (s.contains(text()))
-                            resources.sfxlist.addItem(configuration.createSFXSlider(s));
-                    });
+                checkList.filtered.clear();
+                if (text().isEmpty()) {
+                    checkList.filter = false;
+                } else {
+                    checkList.filter = true;
+                    for (HSliderListboxItem item : resources.sfxmenus) {
+                        if (item.contains(text()))
+                            checkList.filtered.add(configuration.createSFXSlider(item));
+                    }
                 }
             }
 
@@ -593,16 +621,16 @@ public class OptWnd extends Window {
                 return Text.render("Right Click to clear entry").tex();
             }
         };
-        appender2.add(resources.sfxsearch);
+        appender2.add(search);
         appender2.add(new Button(UI.scale(200), "Clear") {
             @Override
             public boolean mousedown(Coord mc, int btn) {
                 if (ui.modctrl && btn == 1) {
-                    synchronized (resources.sfxmenus) {
-                        resources.sfxmenus.clear();
-                        resources.sfxlist.clear();
-                        Utils.setprefsliderlst("customsfxvol", resources.sfxmenus);
-                    }
+                    resources.sfxmenus.clear();
+                    checkList.filter = false;
+                    checkList.items.clear();
+                    checkList.filtered.clear();
+                    Utils.setprefsliderlst("customsfxvol", resources.sfxmenus.base);
                 }
                 return (true);
             }
@@ -617,7 +645,7 @@ public class OptWnd extends Window {
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(scroll.cont);
 
         appender.add(new Label("Master audio volume"));
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
+        appender.setVerticalMargin(0);
         appender.add(new HSlider(UI.scale(200), 0, 1000, (int) (Audio.volume * 1000)) {
             public void changed() {
                 Audio.setvolume(val / 1000.0);
@@ -625,7 +653,7 @@ public class OptWnd extends Window {
         });
         appender.setVerticalMargin(0);
         appender.add(new Label("In-game event volume"));
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
+        appender.setVerticalMargin(0);
         appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
             protected void attach(UI ui) {
                 super.attach(ui);
@@ -638,7 +666,7 @@ public class OptWnd extends Window {
         });
         appender.setVerticalMargin(0);
         appender.add(new Label("Ambient volume"));
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
+        appender.setVerticalMargin(0);
         appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
             protected void attach(UI ui) {
                 super.attach(ui);
@@ -649,81 +677,8 @@ public class OptWnd extends Window {
                 ui.audio.amb.setvolume(val / 1000.0);
             }
         });
-        appender.addRow(new Label("Cleave Sound"), makeDropdownCleave());
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.cleavesoundvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.cleavesoundvol = vol;
-                Utils.setprefd("cleavesoundvol", vol);
-            }
-        });
-        appender.setVerticalMargin(0);
-        appender.add(new Label("Timers alarm volume"));
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.timersalarmvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.timersalarmvol = vol;
-                Utils.setprefd("timersalarmvol", vol);
-            }
-        });
-        appender.setVerticalMargin(0);
-        appender.add(new Label("Alerted gobs sound volume"));
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.alertsvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.alertsvol = vol;
-                Utils.setprefd("alertsvol", vol);
-            }
-        });
-        appender.add(new Label("'Ding' sound volume"));
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.sfxdingvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.sfxdingvol = vol;
-                Utils.setprefd("sfxdingvol", vol);
-            }
-        });
-        appender.setVerticalMargin(0);
-        appender.add(new Label("'Whip' sound volume"));
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.sfxwhipvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.sfxwhipvol = vol;
-                Utils.setprefd("sfxwhipvol", vol);
-            }
-        });
         appender.add(new Label("Audio buffer"));
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
+        appender.setVerticalMargin(0);
         appender.add(new HSlider(UI.scale(200), 512, 16384, Utils.getprefi("audiobufsize", 4096)) {
             public void changed() {
                 val = (val / 16) * 16;
@@ -738,6 +693,169 @@ public class OptWnd extends Window {
                 return (Text.render(String.format("Audiobuf %s", val)));
             }
         });
+
+        appender.add(new Label(""));
+        appender.add(new Button(UI.scale(200), "New Alerts System", false) {
+            public void click() {
+                if (ui.gui != null)
+                    ui.gui.toggleAlerted();
+            }
+        });
+        appender.add(new CheckBox("Ping on ant dungeon key drops.") {
+            {
+                a = Config.dungeonkeyalert;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("dungeonkeyalert", val);
+                Config.dungeonkeyalert = val;
+                a = val;
+            }
+        });
+        appender.setVerticalMargin(0);
+        appender.addRow(new Label("Unknown Player Alarm"), makeAlarmDropdownUnknown());
+        appender.setVerticalMargin(0);
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
+            protected void added() {
+                super.added();
+                val = (int) (Config.alarmunknownvol * 1000);
+            }
+
+            public void changed() {
+                double vol = val / 1000.0;
+                Config.alarmunknownvol = vol;
+                Utils.setprefd("alarmunknownvol", vol);
+            }
+        });
+        appender.setVerticalMargin(0);
+        appender.addRow(new Label("Red Player Alarm"), makeAlarmDropdownRed());
+        appender.setVerticalMargin(0);
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
+            protected void added() {
+                super.added();
+                val = (int) (Config.alarmredvol * 1000);
+            }
+
+            public void changed() {
+                double vol = val / 1000.0;
+                Config.alarmredvol = vol;
+                Utils.setprefd("alarmredvol", vol);
+            }
+        });
+        appender.addRow(new CheckBox("Cleave sound", val -> Utils.setprefb("cleavesound", Config.cleavesound = val), Config.cleavesound), makeDropdownCleave());
+        appender.setVerticalMargin(0);
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
+            protected void added() {
+                super.added();
+                val = (int) (Config.cleavesoundvol * 1000);
+            }
+
+            public void changed() {
+                double vol = val / 1000.0;
+                Config.cleavesoundvol = vol;
+                Utils.setprefd("cleavesoundvol", vol);
+            }
+        });
+        appender.setVerticalMargin(0);
+        appender.add(new CheckBox("Alarm on new private/party chat") {
+            {
+                a = Config.chatalarm;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("chatalarm", val);
+                Config.chatalarm = val;
+                a = val;
+            }
+        });
+        appender.setVerticalMargin(0);
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
+            protected void added() {
+                super.added();
+                val = (int) (Config.chatalarmvol * 1000);
+            }
+
+            public void changed() {
+                double vol = val / 1000.0;
+                Config.chatalarmvol = vol;
+                Utils.setprefd("chatalarmvol", vol);
+            }
+        });
+        appender.setVerticalMargin(0);
+        appender.addRow(new Label("Study Finish Alarm"), makeAlarmDropdownStudy());
+        appender.setVerticalMargin(0);
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
+            protected void added() {
+                super.added();
+                val = (int) (Config.studyalarmvol * 1000);
+            }
+
+            public void changed() {
+                double vol = val / 1000.0;
+                Config.studyalarmvol = vol;
+                Utils.setprefd("studyalarmvol", vol);
+            }
+        });
+        appender.setVerticalMargin(0);
+        appender.add(new Label("Timers alarm volume"));
+        appender.setVerticalMargin(0);
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
+            protected void added() {
+                super.added();
+                val = (int) (Config.timersalarmvol * 1000);
+            }
+
+            public void changed() {
+                double vol = val / 1000.0;
+                Config.timersalarmvol = vol;
+                Utils.setprefd("timersalarmvol", vol);
+            }
+        });
+        appender.setVerticalMargin(0);
+        appender.add(new Label("Alerted gobs sound volume"));
+        appender.setVerticalMargin(0);
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
+            protected void added() {
+                super.added();
+                val = (int) (Config.alertsvol * 1000);
+            }
+
+            public void changed() {
+                double vol = val / 1000.0;
+                Config.alertsvol = vol;
+                Utils.setprefd("alertsvol", vol);
+            }
+        });
+        appender.add(new Label("'Ding' sound volume"));
+        appender.setVerticalMargin(0);
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
+            protected void added() {
+                super.added();
+                val = (int) (Config.sfxdingvol * 1000);
+            }
+
+            public void changed() {
+                double vol = val / 1000.0;
+                Config.sfxdingvol = vol;
+                Utils.setprefd("sfxdingvol", vol);
+            }
+        });
+        appender.setVerticalMargin(0);
+        appender.add(new Label("'Whip' sound volume"));
+        appender.setVerticalMargin(0);
+        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
+            protected void added() {
+                super.added();
+                val = (int) (Config.sfxwhipvol * 1000);
+            }
+
+            public void changed() {
+                double vol = val / 1000.0;
+                Config.sfxwhipvol = vol;
+                Utils.setprefd("sfxwhipvol", vol);
+            }
+        });
+
         appender.setVerticalMargin(0);
 //        appender.add(new Label("Fireplace sound volume (req. restart)"));
 //        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
@@ -795,17 +913,6 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Enable Cleave sound.") {
-            {
-                a = Config.cleavesound;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("cleavesound", val);
-                Config.cleavesound = val;
-                a = val;
-            }
-        });
     }
 
     private void initDisplay() {
@@ -828,7 +935,7 @@ public class OptWnd extends Window {
             appender.add(ColorPreWithLabel("Button Color: ", BTNCOL));
             appender.add(ColorPreWithLabel("Textbox Color: ", TXBCOL));
             appender.add(ColorPreWithLabel("Slider Color: ", SLIDERCOL));
-            uip.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 380));
+            uip.add(new PButton(UI.scale(200), "Back", 27, uis), UI.scale(210, 380));
             uip.pack();
         }
     }
@@ -2686,6 +2793,7 @@ public class OptWnd extends Window {
 
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
 
+        appender.add(new PButton(UI.scale(50), "Theme", 't', uip));
         appender.addRow(new Label("Language (req. restart):"), langDropdown());
         appender.addRow(new CheckBox("Custom title: ") {
                             {
@@ -4505,8 +4613,17 @@ public class OptWnd extends Window {
                     public Object tooltip(Coord c0, Widget prev) {
                         return Text.render("Delete only maps excluding other files such as for example resources. After completing the game turns off").tex();
                     }
-                });
-
+                },
+                new Button("Remove old map", () -> {
+                    SQLiteCache data = SQLiteCache.get("map");
+                    UI ui = PBotAPI.ui();
+                    Text.Foundry tf = new Text.Foundry(Text.sans, UI.scale(48));
+                    Thread task = new Thread(() -> {
+                        data.removeRegexp("map/8vjc92kx9am30x83/.*");
+                        data.removeRegexp("data/mm-icons/8vjc92kx9am30x83/.*");
+                    });
+                    task.start();
+                }));
 
         appender.add(new Label(""));
         TextEntry baseurl = new TextEntry(UI.scale(200), Config.resurl.toString()) {
@@ -5373,104 +5490,6 @@ public class OptWnd extends Window {
         appender.add(new CheckBox("Show game object overlays while hidden", val -> Utils.setprefb("showhiddenoverlay", configuration.showhiddenoverlay = val), configuration.showhiddenoverlay));
         hidesettings.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         hidesettings.pack();
-    }
-
-    private void initSoundAlarms() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(soundalarms, UI.scale(620, 350)));
-        appender.add(new Label("Individual alarms are now set by alt+right clicking an object, or navigating to the alert menu and adding manually."));
-        appender.add(new Label("The alert menu can be found by navigating through the bottom right menugrid using 'Game Windows'"));
-        appender.setVerticalMargin(VERTICAL_MARGIN);
-        appender.setHorizontalMargin(HORIZONTAL_MARGIN);
-        appender.add(new CheckBox("Ping on ant dungeon key drops.") {
-            {
-                a = Config.dungeonkeyalert;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("dungeonkeyalert", val);
-                Config.dungeonkeyalert = val;
-                a = val;
-            }
-        });
-        appender.setVerticalMargin(0);
-        appender.addRow(new Label("Unknown Player Alarm"), makeAlarmDropdownUnknown());
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.alarmunknownvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.alarmunknownvol = vol;
-                Utils.setprefd("alarmunknownvol", vol);
-            }
-        });
-        appender.setVerticalMargin(0);
-        appender.addRow(new Label("Red Player Alarm"), makeAlarmDropdownRed());
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.alarmredvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.alarmredvol = vol;
-                Utils.setprefd("alarmredvol", vol);
-            }
-        });
-        appender.setVerticalMargin(0);
-        appender.add(new CheckBox("Alarm on new private/party chat") {
-            {
-                a = Config.chatalarm;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("chatalarm", val);
-                Config.chatalarm = val;
-                a = val;
-            }
-        });
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.chatalarmvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.chatalarmvol = vol;
-                Utils.setprefd("chatalarmvol", vol);
-            }
-        });
-        appender.setVerticalMargin(0);
-        appender.addRow(new Label("Study Finish Alarm"), makeAlarmDropdownStudy());
-        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.studyalarmvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.studyalarmvol = vol;
-                Utils.setprefd("studyalarmvol", vol);
-            }
-        });
-        appender.add(new Button(UI.scale(200), "New Alerts System", false) {
-            public void click() {
-                if (ui.gui != null)
-                    ui.gui.toggleAlerted();
-            }
-        });
-
-        soundalarms.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
-        soundalarms.pack();
     }
 
     private Dropbox<Integer> makeCaveInDropdown() {

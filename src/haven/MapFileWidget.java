@@ -42,6 +42,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import static haven.MCache.cmaps;
@@ -280,7 +281,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
                 if (points != null) {
                     synchronized (sync) {
                         if (ui != null && ui.sess != null && ui.sess.alive()) {
-                            if (updates.stream().anyMatch(l -> l.equals(cgrid.id))) {
+                            if (new ArrayList<>(updates).stream().anyMatch(l -> l.equals(cgrid.id))) {
                                 clearfog(sync, atomic);
                                 updates.remove(cgrid.id);
                             }
@@ -910,8 +911,8 @@ public class MapFileWidget extends Widget implements Console.Directory {
         private volatile String prog = "Exporting map...";
 
         public ExportWindow() {
-            super(new Coord(300, 65), "Exporting map...", true);
-            adda(new Button(100, "Cancel", false, this::cancel), asz.x / 2, 40, 0.5, 0.0);
+            super(UI.scale(300, 65), "Exporting map...", true);
+            adda(new Button(UI.scale(100), "Cancel", false, this::cancel), asz.x / 2, UI.scale(40), 0.5, 0.0);
         }
 
         public void run(Thread th) {
@@ -919,7 +920,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
         }
 
         public void cdraw(GOut g) {
-            g.text(prog, new Coord(10, 10));
+            g.text(prog, UI.scale(10, 10));
         }
 
         public void cancel() {
@@ -950,8 +951,8 @@ public class MapFileWidget extends Widget implements Console.Directory {
         private double sprog = -1;
 
         public ImportWindow() {
-            super(new Coord(300, 65), "Importing map...", true);
-            adda(new Button(100, "Cancel", false, this::cancel), asz.x / 2, 40, 0.5, 0.0);
+            super(UI.scale(300, 65), "Importing map...", true);
+            adda(new Button(UI.scale(100), "Cancel", false, this::cancel), asz.x / 2, UI.scale(40), 0.5, 0.0);
         }
 
         public void run(Thread th) {
@@ -964,7 +965,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
                 prog = String.format("%s: %d%%", prog, (int) Math.floor(sprog * 100));
             else
                 prog = prog + "...";
-            g.text(prog, new Coord(10, 10));
+            g.text(prog, UI.scale(10, 10));
         }
 
         public void cancel() {
@@ -1086,6 +1087,133 @@ public class MapFileWidget extends Widget implements Console.Directory {
                 }
             }
         });
+    }
+
+    public static void main(String[] args) throws IOException {
+        if (args.length > 1) {
+            String type = args[0];
+            String name = args[1];//c50483c77cf8f01f
+            MapFile file = MapFile.load(ResCache.getCache("map"), name);
+            switch (type) {
+                case "exportmap": {
+                    File path = null;
+                    int v = -1;
+                    if (args.length == 3)
+                        path = new File(args[2]);
+                    else if (args.length == 4) {
+                        path = new File(args[2]);
+                        v = Integer.parseInt(args[3]);
+                    }
+
+                    final int finalV = v;
+                    Consumer<File> exporter = p -> {
+                        ExportStatus prog = new ExportStatus() {
+                            @Override
+                            public void grid(final int cs, final int ns, final int cg, final int ng) {
+                                info(String.format("Exporting map cut %,d/%,d in segment %,d/%,d", cg, ng, cs, ns));
+                            }
+
+                            @Override
+                            public void info(final String text) {
+                                System.out.println(text);
+                            }
+
+                            @Override
+                            public void mark(final int cm, final int nm) {
+                                System.out.println(String.format("Exporting marker", cm, nm));
+                            }
+                        };
+                        Thread th = new HackThread(() -> {
+                            System.out.println("Exporting map...");
+                            try {
+                                try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(p.toPath()))) {
+                                    file.export(false, finalV, out, MapFile.ExportFilter.all, prog);
+                                }
+                            } catch (IOException e) {
+                                Debug.printStackTrace(e);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            System.out.println("Exporting map Finished");
+                        }, "Mapfile exporter");
+                        th.start();
+                    };
+
+                    if (path == null) {
+                        java.awt.EventQueue.invokeLater(() -> {
+                            JFileChooser fc = new JFileChooser();
+                            fc.setFileFilter(new FileNameExtensionFilter("Exported Haven map data", "hmap"));
+                            if (fc.showSaveDialog(null) != JFileChooser.APPROVE_OPTION)
+                                return;
+                            File path1 = fc.getSelectedFile();
+                            if (path1.getName().indexOf('.') < 0)
+                                path1 = new File(path1 + ".hmap");
+                            exporter.accept(path1);
+                        });
+                    } else {
+                        exporter.accept(path);
+                    }
+                    break;
+                }
+                case "importmap": {
+                    File path = null;
+                    if (args.length > 2)
+                        path = new File(args[1]);
+
+                    Consumer<File> importer = p -> {
+                        Thread th = new HackThread(() -> {
+                            final AtomicReference<String> prog = new AtomicReference<>("Initializing");
+                            long size = p.length();
+                            class Updater extends CountingInputStream {
+                                Updater(InputStream bk) {
+                                    super(bk);
+                                }
+
+                                protected void update(long val) {
+                                    super.update(val);
+                                    System.out.printf("%s: %s%%%n", prog.get(), 1.0 * pos / size * 100);
+                                }
+                            }
+                            try {
+                                prog.set("Validating map data");
+                                try (InputStream in = new Updater(Files.newInputStream(p.toPath()))) {
+                                    file.reimport(false, in, MapFile.ImportFilter.readonly);
+                                }
+                                prog.set("Importing map data");
+                                try (InputStream in = new Updater(Files.newInputStream(p.toPath()))) {
+                                    file.reimport(false, in, MapFile.ImportFilter.all);
+                                }
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            } catch (Exception e) {
+                                Debug.printStackTrace(e);
+                            }
+                        }, "Mapfile importer");
+                        th.start();
+                    };
+
+                    if (path == null) {
+                        java.awt.EventQueue.invokeLater(() -> {
+                            JFileChooser fc = new JFileChooser();
+                            fc.setFileFilter(new FileNameExtensionFilter("Exported Haven map data", "hmap"));
+                            if (fc.showOpenDialog(null) != JFileChooser.APPROVE_OPTION)
+                                return;
+                            importer.accept(fc.getSelectedFile());
+                        });
+                    } else {
+                        importer.accept(path);
+                    }
+                    break;
+                }
+                default: {
+                    System.out.println("Command not found: " + type);
+                }
+            }
+        }
+        else {
+            System.out.println("exportmap 'map_name' [file_name] [version]");
+            System.out.println("importmap 'map_name' [file_name]");
+        }
     }
 
     @Override

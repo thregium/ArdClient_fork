@@ -5,8 +5,10 @@ import haven.Config;
 import haven.Coord;
 import haven.CustomQualityList;
 import haven.ItemInfo;
+import haven.PUtils;
 import haven.Resource;
 import haven.Tex;
+import haven.TexI;
 import haven.Text;
 import static haven.Text.num10Fnd;
 import static haven.Text.num12boldFnd;
@@ -81,12 +83,14 @@ public class QBuff extends ItemInfo.Tip {
             color = Color.white;
         }
         if (q != 0) {
+            String qd = Utils.fmt1DecPlace(q);
+            String rqd = Math.round(q) + "";
             if (!Config.largeqfont) {
-                qtex = Text.renderstroked(Utils.fmt1DecPlace(q), color, outline, num10Fnd).tex();
-                qwtex = Text.renderstroked(Math.round(q) + "", color, outline, num10Fnd).tex();
+                qtex = new TexI(PUtils.cropImg(PUtils.strokeImg(Text.render(qd, color, num10Fnd))));
+                qwtex = new TexI(PUtils.cropImg(PUtils.strokeImg(Text.render(rqd, color, num10Fnd))));
             } else {
-                qtex = Text.renderstroked(Utils.fmt1DecPlace(q), color, outline, num12boldFnd).tex();
-                qwtex = Text.renderstroked(Math.round(q) + "", color, outline, num12boldFnd).tex();
+                qtex = new TexI(PUtils.cropImg(PUtils.strokeImg(Text.render(qd, color, num12boldFnd))));
+                qwtex = new TexI(PUtils.cropImg(PUtils.strokeImg(Text.render(rqd, color, num12boldFnd))));
             }
         }
     }

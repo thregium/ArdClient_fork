@@ -71,16 +71,17 @@ public abstract class Listbox<T> extends ListWidget<T> {
     }
 
     public void fixScrollbar() {
-        int val = sb.val;
         int min = sb.min;
         int max = sb.max;
+        int val = sb.val;
         int nmax = listitems() - h;
-        if (min == val) {
-
+        if (max <= min) {
+            val = min;
         } else if (max == val) {
             if (max != nmax)
-                sb.val = nmax;
+                val = nmax;
         }
+        sb.val = val;
         sb.max = nmax;
     }
 
@@ -89,18 +90,21 @@ public abstract class Listbox<T> extends ListWidget<T> {
         drawbg(g);
         int n = listitems();
         for (int i = 0; (i * itemh) < sz.y; i++) {
-            int idx = i + sb.val;
-            if (idx >= n)
-                break;
-            T item = listitem(idx);
-            int w = sz.x - (sb.vis() ? sb.sz.x : 0);
-            GOut ig = g.reclip(new Coord(0, i * itemh), new Coord(w, itemh));
-            if (item == sel)
-                drawsel(ig);
-            else if (item == over) {
-                drawsel(ig, overc);
+            try {
+                int idx = i + sb.val;
+                if (idx >= n)
+                    break;
+                T item = listitem(idx);
+                int w = sz.x - (sb.vis() ? sb.sz.x : 0);
+                GOut ig = g.reclip(new Coord(0, i * itemh), new Coord(w, itemh));
+                if (item == sel)
+                    drawsel(ig);
+                else if (item == over) {
+                    drawsel(ig, overc);
+                }
+                drawitem(ig, item, idx);
+            } catch (IndexOutOfBoundsException ioobe) {
             }
-            drawitem(ig, item, idx);
         }
         super.draw(g);
     }

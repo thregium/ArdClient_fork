@@ -17,6 +17,7 @@ public class HSliderNamed extends Widget implements Comparable<HSliderNamed> {
             public void changed() {
                 super.changed();
                 item.val = val;
+                save();
             }
         };
         this.save = changed;

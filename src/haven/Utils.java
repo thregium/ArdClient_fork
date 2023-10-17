@@ -605,7 +605,7 @@ public class Utils {
         }
     }
 
-    public static void loadprefsliderlist(String prefname, List<HSliderListboxItem> data) {
+    public static void loadprefsliderlist(String prefname, Collection<HSliderListboxItem> data) {
         try {
             data.clear();
             String json = Config.loadFile(prefname + ".json");
@@ -623,7 +623,7 @@ public class Utils {
         }
     }
 
-    public static void setprefsliderlst(String prefname, List<HSliderListboxItem> data) {
+    public static void setprefsliderlst(String prefname, Collection<HSliderListboxItem> data) {
         configuration.executor.execute(() -> {
             try {
                 JSONObject jsonobj = new JSONObject();

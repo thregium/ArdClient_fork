@@ -699,25 +699,33 @@ public class configuration {
     }
 
     public static int addSFX(String name) {
-        synchronized (resources.sfxmenus) {
-            HSliderListboxItem h = HSliderListboxItem.contains(resources.sfxmenus, name);
-            if (h == null) {
-                h = new HSliderListboxItem(name, 100);
-                resources.sfxmenus.add(h);
-                if (resources.sfxsearch != null && resources.sfxlist != null && resources.sfxsearch.text().equals(""))
-                    resources.sfxlist.addItem(createSFXSlider(h));
-                Utils.setprefsliderlst("customsfxvol", resources.sfxmenus);
-                return (100);
-            } else {
-                return (h.val);
-            }
+        HSliderListboxItem h = HSliderListboxItem.contains(resources.sfxmenus.items(), name);
+        if (h == null) {
+            h = new HSliderListboxItem(name, 100);
+            resources.sfxmenus.add(h);
+            Utils.setprefsliderlst("customsfxvol", resources.sfxmenus.base);
+            return (100);
+        } else {
+            return (h.val);
+        }
+    }
+
+    public static int addSFX(String name, double val) {
+        HSliderListboxItem h = HSliderListboxItem.contains(resources.sfxmenus.items(), name);
+        if (h == null) {
+            h = new HSliderListboxItem(name, (int) (val * 100));
+            resources.sfxmenus.add(h);
+            Utils.setprefsliderlst("customsfxvol", resources.sfxmenus.base);
+            return ((int) (val * 100));
+        } else {
+            return (h.val);
         }
     }
 
     public static HSliderNamed createSFXSlider(HSliderListboxItem item) {
         return (new HSliderNamed(item, UI.scale(180), 0, 100, () -> {
             synchronized (resources.sfxmenus) {
-                Utils.setprefsliderlst("customsfxvol", resources.sfxmenus);
+                Utils.setprefsliderlst("customsfxvol", resources.sfxmenus.base);
             }
         }) {
             @Override

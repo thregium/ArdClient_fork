@@ -105,8 +105,8 @@ public class InventoryStudy extends Inventory {
                             continue;
                         Coord dim = layer.tex().dim;
 
-                        int clearx = dim.x > 32 ? dim.x / 32 : 1;
-                        int cleary = dim.y > 32 ? dim.y / 32 : 1;
+                        int clearx = dim.x > UI.scale(32) ? dim.x / UI.scale(32) : 1;
+                        int cleary = dim.y > UI.scale(32) ? dim.y / UI.scale(32) : 1;
                         for (int cx = x; cx < x + clearx; cx++) {
                             for (int cy = y; cy < y + cleary; cy++) {
                                 int ci = cy * 4 + cx;

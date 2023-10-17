@@ -1075,7 +1075,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
 
 
     private Coord getMeterPos(int x, int y) {
-        return new Coord(portrait.c.x + portrait.sz.x + 10 + x * (IMeter.fsz.x + 5), portrait.c.y + y * (IMeter.fsz.y + 2));
+        return new Coord(portrait.c.x + portrait.sz.x + UI.scale(10) + x * (IMeter.fsz.x + UI.scale(5)), portrait.c.y + y * (IMeter.fsz.y + UI.scale(2)));
     }
 
     public void addMeterAt(Widget m, int x, int y) {
@@ -1087,8 +1087,8 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
     private void updcmeters() {
         int i = 0;
         for (Widget meter : cmeters) {
-            int x = ((meters.size() + i) % 3) * (IMeter.fsz.x + 5);
-            int y = ((meters.size() + i) / 3) * (IMeter.fsz.y + 2);
+            int x = ((meters.size() + i) % 3) * (IMeter.fsz.x + UI.scale(5));
+            int y = ((meters.size() + i) / 3) * (IMeter.fsz.y + UI.scale(2));
 //            meter.c = new Coord(portrait.c.x + portrait.sz.x + 10 + x, portrait.c.y + y);
             i++;
         }

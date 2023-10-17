@@ -6,6 +6,8 @@ import java.util.List;
 
 public class HSliderListbox extends Listbox<HSliderNamed> {
     public final List<HSliderNamed> items = new ArrayList<>();
+    public boolean filter = false;
+    public final List<HSliderNamed> filtered = new ArrayList<>();
 
     public HSliderListbox(int w, int h) {
         super(w, h, UI.scale(18));
@@ -50,11 +52,13 @@ public class HSliderListbox extends Listbox<HSliderNamed> {
         }
         int idx = idxat(c);
         HSliderNamed item = (idx >= listitems() || idx < 0) ? null : listitem(idx);
-        if ((item == null) && (button == 1))
-            change(null);
-        else if (item != null) {
-            holded = item;
-            return (item.mousedown(c.sub(idxc(idx)), button));
+        if (button == 1) {
+            if (item == null)
+                change(null);
+            else {
+                holded = item;
+                return (item.mousedown(c.sub(idxc(idx)), button));
+            }
         }
         return (super.mousedown(c, button));
     }
@@ -66,7 +70,7 @@ public class HSliderListbox extends Listbox<HSliderNamed> {
         HSliderNamed item = (idx >= listitems() || idx < 0) ? null : listitem(idx);
         if (item == null)
             change(null);
-        else if (item != null && item.equals(holded))
+        else if (item.equals(holded))
             item.mousemove(c.sub(idxc(idx)));
         super.mousemove(c);
     }
@@ -75,26 +79,24 @@ public class HSliderListbox extends Listbox<HSliderNamed> {
     public boolean mouseup(Coord c, int button) {
         int idx = idxat(c);
         HSliderNamed item = (idx >= listitems() || idx < 0) ? null : listitem(idx);
-        if ((item == null) && (button == 1))
-            change(null);
-        else if (item != null && item.equals(holded)) {
-            holded = null;
-            item.save();
-            return (item.mouseup(c.sub(idxc(idx)), button));
+        if (button == 1) {
+            if (item == null)
+                change(null);
+            else if (item.equals(holded)) {
+                holded = null;
+                item.save();
+                return (item.mouseup(c.sub(idxc(idx)), button));
+            }
         }
         return (super.mouseup(c, button));
     }
 
     protected HSliderNamed listitem(int idx) {
-        synchronized (items) {
-            return (items.get(idx));
-        }
+        return (filter ? filtered.get(idx) : items.get(idx));
     }
 
     protected int listitems() {
-        synchronized (items) {
-            return items.size();
-        }
+        return (filter ? filtered.size() : items.size());
     }
 
     @Override
@@ -114,6 +116,12 @@ public class HSliderListbox extends Listbox<HSliderNamed> {
         super.tick(dt);
         synchronized (items) {
             items.forEach(h -> {
+                if (h.slider.ui == null)
+                    h.slider.attach(ui);
+            });
+        }
+        synchronized (filtered) {
+            filtered.forEach(h -> {
                 if (h.slider.ui == null)
                     h.slider.attach(ui);
             });

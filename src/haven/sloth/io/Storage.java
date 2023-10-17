@@ -1,9 +1,11 @@
 package haven.sloth.io;
 
 import com.google.common.flogger.FluentLogger;
+import org.sqlite.Function;
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteDataSource;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -12,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
 
 /**
  * Just a helper class to access our sqlite storage for dynamic settings that are
@@ -115,6 +118,18 @@ public class Storage {
         ds.setEnforceForeignKeys(true);
         ds.setJournalMode(SQLiteConfig.JournalMode.WAL.name());
         final SQLiteConnection scon = ds.getConnection(null, null);
+        Function.create(scon, "REGEXP", new Function() {
+            @Override
+            protected void xFunc() throws SQLException {
+                String expression = value_text(0);
+                String value = value_text(1);
+                if (value == null)
+                    value = "";
+
+                Pattern pattern = Pattern.compile(expression);
+                result(pattern.matcher(value).find() ? 1 : 0);
+            }
+        });
         scon.setAutoCommit(false);
         scon.setBusyTimeout(15000);
         return scon;

@@ -28,11 +28,11 @@ package haven;
 
 import haven.Audio.CS;
 import haven.Audio.VolAdjust;
+import modification.configuration;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 public class ActAudio extends GLState.Abstract {
@@ -155,7 +155,8 @@ public class ActAudio extends GLState.Abstract {
                 throw (new RuntimeException("No ambient clip found in " + res));
             }
             this.res = res;
-            this.bvol = bvol;
+            double volume = configuration.addSFX(res.name + "_amb", bvol) / 100.0;
+            this.bvol = volume;
         }
 
         public Ambience(Resource res) {

@@ -229,10 +229,11 @@ public class AudioSprite {
             super(owner, res);
             ClipAmbiance.Desc clamb = res.layer(ClipAmbiance.Desc.class);
             if (clamb != null) {
+                double volume = configuration.addSFX(res.name + "_amb") / 100.0;
+                clamb.spr.bvol = volume;
                 this.amb = clamb.spr;
             } else {
-                double volume = configuration.addSFX(res.name + "_amb") / 100.0;
-                this.amb = new ActAudio.Ambience(res, volume);
+                this.amb = new ActAudio.Ambience(res);
             }
 
 //            if (Config.sfxfirevol != 1.0 && "sfx/fire".equals(res.name))

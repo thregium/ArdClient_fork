@@ -350,6 +350,8 @@ public class MapFile {
                     last = now;
                 }
             } catch (InterruptedException e) {
+            } catch (Throwable e) {
+                Debug.printStackTrace(e);
             } finally {
                 synchronized (procmon) {
                     processor = null;

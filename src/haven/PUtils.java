@@ -702,4 +702,90 @@ public class PUtils {
             javax.imageio.ImageIO.write(out, "PNG", new java.io.File("/tmp/barda" + i + ".png"));
         }
     }
+
+    public static BufferedImage cropImg(BufferedImage image) {
+        return (cropImg(image.getRaster()));
+    }
+
+    public static BufferedImage cropImg(WritableRaster raster) {
+        return (cropRaster(rasterimg(raster)));
+    }
+
+    public static BufferedImage cropRaster(BufferedImage image) {
+        WritableRaster raster = image.getRaster();
+        int width = image.getWidth();
+        int height = image.getHeight();
+        int sx = -1;
+        int sy = -1;
+        int fx = width - 1;
+        int fy = height - 1;
+
+        for (int y = 0; y < height; y++) {
+            boolean emptyRow = true;
+            for (int x = 0; x < width; x++) {
+                if (raster.getSample(x, y, 3) > 0) {
+                    emptyRow = false;
+                    break;
+                }
+            }
+            if (!emptyRow) {
+                if (sy == -1)
+                    sy = y;
+                fy = y;
+            }
+        }
+
+        for (int x = 0; x < width; x++) {
+            boolean emptyCollumn = true;
+            for (int y = 0; y < height; y++) {
+                if (raster.getSample(x, y, 3) > 0) {
+                    emptyCollumn = false;
+                    break;
+                }
+            }
+            if (!emptyCollumn) {
+                if (sx == -1)
+                    sx = x;
+                fx = x;
+            }
+        }
+
+        Coord nsz = Coord.of(fx - sx + 1, fy - sy + 1);
+        if (nsz.equals(Coord.z) || (nsz.x > width || nsz.y > height))
+            return (rasterimg(raster));
+
+        WritableRaster nras = imgraster(nsz);
+        for (int y = 0; y < nras.getHeight(); y++) {
+            for (int x = 0; x < nras.getWidth(); x++) {
+                nras.setSample(x, y, 0, raster.getSample(x + sx, y + sy, 0));
+                nras.setSample(x, y, 1, raster.getSample(x + sx, y + sy, 1));
+                nras.setSample(x, y, 2, raster.getSample(x + sx, y + sy, 2));
+                nras.setSample(x, y, 3, raster.getSample(x + sx, y + sy, 3));
+            }
+        }
+
+        return (rasterimg(nras));
+    }
+
+    public static BufferedImage cropCenterHeight(BufferedImage image, int height) {
+        BufferedImage img = rasterimg(image.getRaster());
+        WritableRaster ras = img.getRaster();
+        int sy = (image.getHeight() - height) / 2;
+
+        Coord nsz = Coord.of(img.getWidth(), height);
+        if (nsz.equals(Coord.z) || (nsz.x > img.getWidth() || nsz.y > img.getHeight()))
+            return (img);
+
+        WritableRaster nras = byteraster(nsz, 4);
+        for (int y = sy; y < nras.getHeight() - sy; y++) {
+            for (int x = 0; x < nras.getWidth(); x++) {
+                nras.setSample(x, y, 0, ras.getSample(x, y, 0));
+                nras.setSample(x, y, 1, ras.getSample(x, y, 1));
+                nras.setSample(x, y, 2, ras.getSample(x, y, 2));
+                nras.setSample(x, y, 3, ras.getSample(x, y, 3));
+            }
+        }
+
+        return (rasterimg(nras));
+    }
 }

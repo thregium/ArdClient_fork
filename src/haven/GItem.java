@@ -144,10 +144,11 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         }
 
         static BufferedImage numrender(int num, Color col) {
+            String n = num + "";
             if (!Config.largeqfont)
-                return Text.renderstroked(num + "", col, Color.BLACK).img;
+                return PUtils.cropImg(PUtils.strokeImg(Text.render(n, col)));
             else
-                return Text.renderstroked(num + "", col, Color.BLACK, num12boldFnd).img;
+                return PUtils.cropImg(PUtils.strokeImg(Text.render(n, col, num12boldFnd)));
         }
     }
 

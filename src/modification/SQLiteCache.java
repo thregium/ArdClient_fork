@@ -10,8 +10,10 @@ import java.io.OutputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -106,5 +108,34 @@ public class SQLiteCache implements ResCache {
             stmt.setString(1, name);
             stmt.executeUpdate();
         });
+    }
+
+    public void removeWait(String name) {
+        storage.ensure(sql -> {
+            final PreparedStatement stmt = storage.prepare("DELETE FROM database WHERE name = ?");
+            stmt.setString(1, name);
+            stmt.executeUpdate();
+        });
+    }
+
+    public void removeRegexp(String reg) {
+        storage.write(sql -> {
+            final PreparedStatement stmt = storage.prepare("DELETE FROM database WHERE name REGEXP ?");
+            stmt.setString(1, reg);
+            stmt.executeUpdate();
+        });
+    }
+
+    public List<String> keys() {
+        final List<String> ret = new ArrayList<>();
+        storage.ensure(sql -> {
+            final PreparedStatement stmt = storage.prepare("SELECT name FROM database");
+            try (final ResultSet res = stmt.executeQuery()) {
+                while (res.next()) {
+                    ret.add(res.getString(1));
+                }
+            }
+        });
+        return (ret);
     }
 }

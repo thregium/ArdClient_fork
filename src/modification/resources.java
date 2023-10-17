@@ -11,10 +11,10 @@ import haven.Resource;
 import haven.States;
 import haven.Tex;
 import haven.Text;
-import haven.TextEntry;
 import haven.UI;
 import haven.Utils;
 import haven.resutil.WaterTile;
+import haven.sloth.util.ObservableCollection;
 import haven.sloth.util.ObservableMap;
 import org.apache.commons.collections4.list.TreeList;
 import org.json.JSONArray;
@@ -310,9 +310,7 @@ public class resources {
     ));
     public static ObservableMap<String, Boolean> customQuickActions = Utils.loadCustomList(defaultQuickActions, "QuickPattern", true);
 
-    public static HSliderListbox sfxlist = null;
-    public static TextEntry sfxsearch = null;
-    public static final List<HSliderListboxItem> sfxmenus = new TreeList<>();
+    public static final ObservableCollection<HSliderListboxItem> sfxmenus = new ObservableCollection(new TreeList<>());
 
     public static ObservableMap<String, Boolean> customSendMarks = Utils.loadCustomList(Collections.emptyList(), "CustomSendMarks");
 

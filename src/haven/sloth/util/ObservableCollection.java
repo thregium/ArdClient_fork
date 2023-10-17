@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 public class ObservableCollection<T> implements Iterable<T> {
-    private final Collection<T> base;
+    public final Collection<T> base;
     private final Set<ObservableListener<T>> listeners = new HashSet<>();
 
     public ObservableCollection(Collection<T> base) {
@@ -59,6 +59,19 @@ public class ObservableCollection<T> implements Iterable<T> {
     public int size() {
         synchronized (base) {
             return base.size();
+        }
+    }
+
+    public void clear() {
+        List<T> keys;
+        synchronized (base) {
+            keys = new ArrayList<>(base);
+            base.clear();
+        }
+        for (T key: keys) {
+            synchronized (listeners) {
+                listeners.forEach((lst) -> lst.remove(key));
+            }
         }
     }
 
