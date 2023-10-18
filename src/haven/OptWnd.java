@@ -289,7 +289,7 @@ public class OptWnd extends Window {
                                 if (map != null) {
                                     map.SetEndpoint(text);
                                     map.EnableGridUploads(true);
-                                    map.SetPlayerName(username);
+                                    map.SetPlayerName(ui.gui.chrid);
 
                                     Gob player = ui.gui.map.player();
                                     if (player != null) {

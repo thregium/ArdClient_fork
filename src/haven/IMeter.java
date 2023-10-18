@@ -112,15 +112,15 @@ public class IMeter extends MovableWidget {
         drawBg(g);
         drawMeters(g);
         g.chcolor();
-        if (Config.showmetertext) {
-            Text meterinfo = this.meterinfo;
-            if (meterinfo != null)
-                g.aimage(meterinfo.tex(), sz.div(2).add(10 * this.scale, -1 * this.scale), 0.5, 0.5);
-        }
         try {
             g.image(tex(), Coord.z);
         } catch (Loading l) {
             //Ignore
+        }
+        if (Config.showmetertext) {
+            Text meterinfo = this.meterinfo;
+            if (meterinfo != null)
+                g.aimage(meterinfo.tex(), sz.div(2).add(UI.scale(10) * this.scale, -1 * this.scale), 0.5, 0.5);
         }
         super.draw(g);
     }

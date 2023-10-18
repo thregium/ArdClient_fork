@@ -1484,7 +1484,7 @@ public class MapWnd extends ResizableWnd {
                         @Override
                         public boolean close() {
                             change2(null);
-                            setfocus(MarkerList.this);
+                            MarkerList.this.parent.setfocus(MarkerList.this);
                             return (true);
                         }
 
@@ -1494,7 +1494,7 @@ public class MapWnd extends ResizableWnd {
                             view.file.update(mark);
                             commit();
                             change2(null);
-                            setfocus(MarkerList.this);
+                            MarkerList.this.parent.setfocus(MarkerList.this);
                             uploadMark(mark);
                         }
                     });

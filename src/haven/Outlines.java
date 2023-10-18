@@ -84,11 +84,14 @@ public class Outlines implements Rendered {
     private final static Uniform sdep = new Uniform(SAMPLER2D);
     private final static Uniform msnrm = new Uniform(SAMPLER2DMS);
     private final static Uniform msdep = new Uniform(SAMPLER2DMS);
-    private final static ShaderMacro[] shaders = new ShaderMacro[4];
+    private final static ShaderMacro[] staticShaders = new ShaderMacro[4];
 
     private static ShaderMacro shader(final boolean symmetric, final boolean ms) {
+        return (shader(symmetric, ms, new Color(configuration.outlinecolor, true)));
+    }
+
+    private static ShaderMacro shader(final boolean symmetric, final boolean ms, final Color color) {
         return (new ShaderMacro() {
-            Color color = new Color(configuration.outlinecolor, true);
             int val = configuration.outlineh;
             Coord[] points = {
                     new Coord(-val, 0),
@@ -165,10 +168,19 @@ public class Outlines implements Rendered {
     }
 
     public static void shadersupdate() {
-        shaders[0] = shader(false, false);
-        shaders[1] = shader(false, true);
-        shaders[2] = shader(true, false);
-        shaders[3] = shader(true, true);
+        staticShaders[0] = shader(false, false);
+        staticShaders[1] = shader(false, true);
+        staticShaders[2] = shader(true, false);
+        staticShaders[3] = shader(true, true);
+    }
+
+    public static ShaderMacro[] shadersupdate(Color color) {
+        ShaderMacro[] shaders = new ShaderMacro[4];
+        shaders[0] = shader(false, false, color);
+        shaders[1] = shader(false, true, color);
+        shaders[2] = shader(true, false, color);
+        shaders[3] = shader(true, true, color);
+        return (shaders);
     }
 
     static {
@@ -181,8 +193,19 @@ public class Outlines implements Rendered {
 //        shaders[3] = shader(true, true);
     }
 
+    private final ShaderMacro[] shaders;
+
     public Outlines(IndirSetting<Boolean> symmetric) {
+        this(symmetric, staticShaders);
+    }
+
+    public Outlines(IndirSetting<Boolean> symmetric, Color color) {
+        this(symmetric, shadersupdate(color));
+    }
+
+    public Outlines(IndirSetting<Boolean> symmetric, ShaderMacro[] shaders) {
         this.symmetric = symmetric;
+        this.shaders = shaders;
     }
 
     public boolean setup(RenderList rl) {

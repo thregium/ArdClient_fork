@@ -1,8 +1,8 @@
 package haven.res.gfx.fx.floatimg;
 
-import haven.Coord;
 import haven.GOut;
 import haven.Gob;
+import haven.PUtils;
 import haven.Resource;
 import haven.TexI;
 import haven.Text;
@@ -14,7 +14,7 @@ import java.awt.image.BufferedImage;
 
 public class DamageText extends FloatSprite {
     public static final int id = -14115;
-    public static final Text.Foundry fnd = new Text.Foundry(Text.sans, UI.scale(13));
+    public static final Text.Foundry fnd = new Text.Foundry(Text.sans, UI.scale(13)).aa(true);
     private static final Color armorcol = new Color(136, 255, 136);
     private static final Color hhpcol = new Color(255, 204, 0);
     private static final Color shpcol = new Color(255, 0, 0);
@@ -75,7 +75,7 @@ public class DamageText extends FloatSprite {
         }
 
         if (img != null) {
-            updateTex(new TexI(Utils.outline2(img, Color.BLACK)));
+            updateTex(new TexI(PUtils.strokeImg(img)));
         }
     }
 
@@ -101,15 +101,15 @@ public class DamageText extends FloatSprite {
 
     public void draw2d(GOut g) {
         if (tex != null) {
-            final Gob gob = (Gob) owner;
-            if (gob.sc == null) {
-                return;
-            }
-            Coord sc = gob.sc.add(new Coord(gob.sczu.mul(15))).sub(0, offset);
+//            final Gob gob = (Gob) owner;
+//            if (gob.sc == null) {
+//                return;
+//            }
+//            Coord sc = gob.sc.add(new Coord(gob.sczu.mul(15))).sub(0, offset);
 
-            g.chcolor(35, 35, 35, 192);
-            g.frect(sc.sub(tex.sz().x / 2, 0), tex.sz());
-            g.chcolor();
+//            g.chcolor(35, 35, 35, 192);
+//            g.frect(sc.sub(tex.sz().x / 2, 0), tex.sz());
+//            g.chcolor();
         }
         super.draw2d(g);
     }

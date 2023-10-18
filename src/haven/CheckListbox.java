@@ -6,7 +6,7 @@ import java.util.List;
 
 public class CheckListbox extends Listbox<CheckListboxItem> {
     public static final Tex chk = Resource.loadtex("gfx/hud/chkmarks");
-    public final List<CheckListboxItem> items = new ArrayList<CheckListboxItem>() {
+    public final List<CheckListboxItem> items = Collections.synchronizedList(new ArrayList<CheckListboxItem>() {
         @Override
         public boolean add(CheckListboxItem value) {
             super.add(value);
@@ -14,9 +14,9 @@ public class CheckListbox extends Listbox<CheckListboxItem> {
                 Collections.swap(this, i, i - 1);
             return true;
         }
-    };
+    });
     public boolean filter = false;
-    public final List<CheckListboxItem> filtered = new ArrayList<CheckListboxItem>() {
+    public final List<CheckListboxItem> filtered = Collections.synchronizedList(new ArrayList<CheckListboxItem>() {
         @Override
         public boolean add(CheckListboxItem value) {
             super.add(value);
@@ -24,7 +24,7 @@ public class CheckListbox extends Listbox<CheckListboxItem> {
                 Collections.swap(this, i, i - 1);
             return true;
         }
-    };
+    });
 
     public CheckListbox(int w, int h) {
         super(w, h, UI.scale(18));

@@ -143,7 +143,7 @@ public class Equipory extends Widget implements DTarget {
 
             protected void setup(RenderList rl) {
                 super.setup(rl);
-                rl.add(outlines, null);
+//                rl.add(outlines, null);
             }
 
             protected FColor clearcolor() {
