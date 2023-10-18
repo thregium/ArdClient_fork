@@ -3401,7 +3401,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         if (selection != null) {
             if (selection.tt != null)
                 return (selection.tt);
-        } else if ((placing_l != null) && (placing_l.done()) && ui.modshift) {
+        } else if (configuration.placinginfo && (placing_l != null) && (placing_l.done())) {
             Plob placing = placing_l.get();
             return "Place: " + new Coord2d((placing.rc.x % tilesz.x + tilesz.x) % tilesz.x, (placing.rc.y % tilesz.y + tilesz.y) % tilesz.y) + "\n" + "Angle: " + Math.toDegrees(placing.a);
         } else if (tt != null && ui.modshift) {

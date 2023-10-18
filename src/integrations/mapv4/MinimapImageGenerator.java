@@ -1,16 +1,25 @@
 package integrations.mapv4;
 
 import haven.Coord;
+import haven.FColor;
+import haven.GLState;
 import haven.Loading;
 import haven.MCache;
-import static haven.MCache.cmaps;
+import haven.MapFile;
+import haven.Material;
+import haven.PUtils;
 import haven.Resource;
+import haven.States;
 import haven.TexI;
 import haven.Tiler;
 import haven.Utils;
 import haven.resutil.Ridges;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
+
+import static haven.MCache.cmaps;
 
 /**
  * @author APXEOLOG (Artyom Melnikov), at 28.01.2019
@@ -30,6 +39,49 @@ public class MinimapImageGenerator {
             texes[t] = img;
         }
         return (img);
+    }
+
+    private static Color olcol(MCache.OverlayInfo olid) {
+        /* XXX? */
+        Material mat = olid.mat();
+        FColor bc = null;
+        for (GLState state : mat.states) {
+            if (state instanceof States.ColState) {
+                States.ColState col = (States.ColState) state;
+                bc = new FColor(col.c);
+                break;
+            } else if (state instanceof Material.Colors) {
+                Material.Colors col = (Material.Colors) state;
+                bc = new FColor(col.emi[0], col.emi[1], col.emi[2]);
+                break;
+            }
+        }
+        return (bc != null ? new Color(Math.round(bc.r * 255), Math.round(bc.g * 255), Math.round(bc.b * 255), 255) : (null));
+    }
+
+    public static BufferedImage drawoverlay(MCache map, MCache.Grid grid) {
+        WritableRaster buf = PUtils.imgraster(cmaps);
+        MapFile.Grid g = MapFile.Grid.from(map, grid);
+        for (MapFile.Overlay ol : g.ols) {
+            MCache.ResOverlay olid = ol.olid.loadsaved().flayer(MCache.ResOverlay.class);
+            if (!olid.tags().contains("realm"))
+                continue;
+            Color col = olcol(olid);
+            if (col == null)
+                continue;
+            Coord c = new Coord();
+            for (c.y = 0; c.y < cmaps.y; c.y++) {
+                for (c.x = 0; c.x < cmaps.x; c.x++) {
+                    if (ol.get(c)) {
+                        buf.setSample(c.x, c.y, 0, ((col.getRed() * col.getAlpha()) + (buf.getSample(c.x, c.y, 1) * (255 - col.getAlpha()))) / 255);
+                        buf.setSample(c.x, c.y, 1, ((col.getGreen() * col.getAlpha()) + (buf.getSample(c.x, c.y, 1) * (255 - col.getAlpha()))) / 255);
+                        buf.setSample(c.x, c.y, 2, ((col.getBlue() * col.getAlpha()) + (buf.getSample(c.x, c.y, 2) * (255 - col.getAlpha()))) / 255);
+                        buf.setSample(c.x, c.y, 3, Math.max(buf.getSample(c.x, c.y, 3), col.getAlpha()));
+                    }
+                }
+            }
+        }
+        return (PUtils.rasterimg(buf));
     }
 
     public static Loading checkForLoading(MCache map, MCache.Grid grid) {

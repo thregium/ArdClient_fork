@@ -12,7 +12,7 @@ public class ActList extends Listbox<ActList.ActItem> {
     private final Map<MenuGrid.Pagina, ActItem> map = new HashMap<>();
 
     ActList(int w, int h) {
-        super(w, h, font.height() + 2);
+        super(w, h, font.height() + UI.scale(2));
     }
 
     public void add(MenuGrid.Pagina pagina) {

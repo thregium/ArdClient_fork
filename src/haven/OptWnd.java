@@ -5377,6 +5377,9 @@ public class OptWnd extends Window {
             @Override
             public void changed() {
                 Utils.setprefi("slothgridoffset", Config.slothgridoffset = val);
+                if (ui.sess != null) {
+                    ui.sess.glob.map.invalidateAll();
+                }
             }
         });
         appender.addRow(
@@ -5395,7 +5398,7 @@ public class OptWnd extends Window {
                     }
                 })
         );
-        appender.add(new CheckBox("Place objects without ctrl", val -> Utils.setprefb("pointplacing", configuration.pointplacing = val), configuration.pointplacing));
+        appender.addRow(new CheckBox("Place objects without ctrl", val -> Utils.setprefb("pointplacing", configuration.pointplacing = val), configuration.pointplacing), new CheckBox("Show placing object info", val -> Utils.setprefb("placinginfo", configuration.placinginfo = val), configuration.placinginfo));
         Label placegridtext = new Label("Place Grid (" + Utils.getprefd("plobpgran", 8) + "): ");
         appender.addRow(placegridtext, new HSlider(UI.scale(200), 0, 255 * 100, (int) (Utils.getprefd("plobpgran", 8) * 100)) {
                     @Override

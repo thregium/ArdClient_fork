@@ -280,6 +280,7 @@ public class configuration {
     public static boolean enablegobcticks = Utils.getprefb("enablegobcticks", true);
     public static boolean autodroponlyplayer = Utils.getprefb("autodroponlyplayer", false);
     public static boolean pointplacing = Utils.getprefb("pointplacing", false);
+    public static boolean placinginfo = Utils.getprefb("placinginfo", false);
 
     public static boolean disablepavingoutlineonmap = Utils.getprefb("disablepavingoutlineonmap", false);
 

@@ -46,7 +46,12 @@ public class GobIcon extends GAttrib {
     public static final PUtils.Convolution filter = new PUtils.Hanning(1);
     private static final Map<Indir<Resource>, Image> cache = new WeakHashMap<>();
     public final Indir<Resource> res;
-    private Image img;
+    protected Image img;
+
+    public GobIcon(Gob g) {
+        super(g);
+        this.res = null;
+    }
 
     public GobIcon(Gob g, Indir<Resource> res) {
         super(g);
@@ -76,12 +81,14 @@ public class GobIcon extends GAttrib {
     }
 
     public static class Image {
-        public Resource.Image rimg;
-        private TexI tex, texgrey;
+        protected Resource.Image rimg;
+        protected TexI tex, texgrey;
         public Coord cc;
         public boolean rot;
         public double ao;
         public int z;
+
+        public Image() {}
 
         public Image(Resource.Image rimg) {
             this.rimg = rimg;
@@ -115,6 +122,14 @@ public class GobIcon extends GAttrib {
             return (texgrey);
         }
 
+        public TexI tex(Coord sz, boolean isdead) {
+            BufferedImage bimg = isdead ? PUtils.monochromize(rimg.img, Color.WHITE) : rimg.img;
+            if ((bimg.getWidth() > sz.x) && (bimg.getHeight() > sz.y)) {
+                bimg = PUtils.convolvedown(bimg, sz, filter);
+            }
+            return (new TexI(bimg));
+        }
+
         public TexI tex() {
             return tex;
         }
@@ -126,6 +141,26 @@ public class GobIcon extends GAttrib {
 
         public Setting(Resource.Spec res) {
             this.res = res;
+        }
+    }
+
+    public static class CustomSetting extends Setting {
+        public final Indir<Tex> tex;
+        public final Indir<String> name;
+
+        public CustomSetting(final Resource.Spec res, final Indir<Tex> tex) {
+            super(res);
+            this.tex = tex;
+            this.name = () -> pretty(res.name); //res.basename().replaceAll("(^[a-z])(.*)", "$1".toUpperCase() + "$2"))
+            show = true;
+            defshow = true;
+        }
+
+        private static String pretty(String name) {
+            int k = name.lastIndexOf("/");
+            name = name.substring(k + 1);
+            name = name.substring(0, 1).toUpperCase() + name.substring(1);
+            return name;
         }
     }
 
@@ -168,6 +203,9 @@ public class GobIcon extends GAttrib {
             for (Setting set : settings.values()) {
                 buf.addstring(set.res.name);
                 buf.adduint16(set.res.ver);
+                if (set instanceof CustomSetting) {
+                    buf.adduint8((byte) 'c');
+                }
                 buf.adduint8((byte) 's');
                 buf.adduint8(set.show ? 1 : 0);
                 buf.adduint8((byte) 'd');
@@ -199,6 +237,10 @@ public class GobIcon extends GAttrib {
                 while (true) {
                     int datum = buf.uint8();
                     switch (datum) {
+                        case (int) 'c':
+                            Indir<Tex> ctex = Config.additonalicons.get(res.name);
+                            set = new CustomSetting(res, ctex);
+                            break;
                         case (int) 's':
                             set.show = (buf.uint8() != 0);
                             break;
@@ -232,7 +274,7 @@ public class GobIcon extends GAttrib {
                 this.conf = conf;
             }
 
-            private Tex img = null;
+            protected Tex img = null;
 
             public Tex img() {
                 if (this.img == null) {
@@ -245,6 +287,16 @@ public class GobIcon extends GAttrib {
                     this.img = new TexI(PUtils.convolve(img, tsz, filter));
                 }
                 return (this.img);
+            }
+        }
+
+        public static class CustomIcon extends Icon {
+            public Indir<String> iname;
+
+            public CustomIcon(final CustomSetting conf) {
+                super(conf);
+                img = conf.tex.get();
+                this.iname = conf.name;
             }
         }
 
@@ -275,8 +327,17 @@ public class GobIcon extends GAttrib {
                 if (cur != conf.settings) {
                     cur = conf.settings;
                     ArrayList<Icon> ordered = new ArrayList<>();
-                    for (Setting set : cur.values())
-                        ordered.add(new Icon(set));
+                    try {
+                        for (Setting set : cur.values()) {
+                            if (set instanceof CustomSetting) {
+                                CustomSetting cs = (CustomSetting) set;
+                                ordered.add(new CustomIcon(cs));
+                            } else
+                                ordered.add(new Icon(set));
+                        }
+                    } catch (Loading l) {
+                        return;
+                    }
                     this.cur = cur;
                     this.all = ordered;
                     reorder = true;
@@ -288,8 +349,13 @@ public class GobIcon extends GAttrib {
                     for (Icon icon : ordered.stream().filter(filter.predicate).collect(Collectors.toList())) {
                         if (icon.name == null) {
                             try {
-                                Resource.Tooltip name = icon.conf.res.loadsaved(Resource.remote()).layer(Resource.tooltip);
-                                icon.name = elf.render((name == null) ? "???" : name.t);
+                                if (icon instanceof CustomIcon) {
+                                    CustomIcon cicon = (CustomIcon) icon;
+                                    icon.name = elf.render(cicon.iname.get());
+                                } else {
+                                    Resource.Tooltip name = icon.conf.res.loadsaved(Resource.remote()).layer(Resource.tooltip);
+                                    icon.name = elf.render((name == null) ? "???" : name.t);
+                                }
                             } catch (Exception l) {
                                 reorder = true;
                             }
@@ -444,7 +510,7 @@ public class GobIcon extends GAttrib {
                     new ImageButton("gfx/hud/rosters/metabolism", blist, () -> list.filter(Filter.HERBS)),
                     new ImageButton("gfx/invobjs/rabbit-doe", blist, () -> list.filter(Filter.KRITTER)),
                     new ImageButton("gfx/hud/curs/flag", blist, () -> list.filter(Filter.MARK))
-                    ));
+            ));
             composer.addar(UI.scale(230), blist.toArray(new ImageButton[0]));
             composer.add(list);
             composer.hpad(UI.scale(5));
@@ -532,6 +598,45 @@ public class GobIcon extends GAttrib {
             @Override
             public boolean checkhit(final Coord c) {
                 return (c.isect(Coord.z, sz));
+            }
+        }
+    }
+
+    public static class CustomGobIcon extends GobIcon {
+        public CustomGobIcon(final Gob g, final Indir<Tex> itex) {
+            super(g, () -> g.res().orElseThrow(Loading::new));
+            this.img = new CustomImage(itex);
+        }
+
+        public class CustomImage extends Image {
+            public final Indir<Tex> itex;
+
+            public CustomImage(final Indir<Tex> itex) {
+                super();
+                this.itex = itex;
+                this.cc = tex().sz().div(2);
+            }
+
+            public TexI texgrey() {
+                if (texgrey == null) {
+                    BufferedImage bimg = PUtils.monochromize(tex().back, Color.WHITE);
+                    if ((bimg.getWidth() > size) && (bimg.getHeight() > size)) {
+                        bimg = PUtils.convolvedown(bimg, UI.scale(20, 20), filter);
+                    }
+                    texgrey = new TexI(bimg);
+                }
+                return (texgrey);
+            }
+
+            public TexI tex() {
+                if (tex == null) {
+                    BufferedImage bimg = ((TexI) itex.get()).back;
+                    if ((bimg.getWidth() > size) && (bimg.getHeight() > size)) {
+                        bimg = PUtils.convolvedown(bimg, UI.scale(20, 20), filter);
+                    }
+                    tex = new TexI(bimg);
+                }
+                return (tex);
             }
         }
     }

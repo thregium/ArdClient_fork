@@ -641,8 +641,10 @@ public class MapWnd extends ResizableWnd {
                         gui.fitwdg(gui.add(gui.iconwnd, Utils.getprefc("wndc-icon", UI.scale(200, 200))));
                     } else {
                         gui.iconwnd.toggleVisibility();
-                        if (gui.iconwnd.visible())
+                        if (gui.iconwnd.visible()) {
+                            gui.iconwnd.parent.setfocus(gui.iconwnd);
                             gui.iconwnd.raise();
+                        }
                     }
                 }
             }), viewdist.c.add(viewdist.sz.x + spacer, 0));
@@ -1008,11 +1010,11 @@ public class MapWnd extends ResizableWnd {
         }
 
         Predicate<TempMark> check = (mark) -> {
-            if (!Config.hideallicons && (Config.additonalicons.containsKey(mark.name))) {
+            /*if (!Config.hideallicons && (Config.additonalicons.containsKey(mark.name))) {
                 CheckListboxItem itm = Config.icons.get(mark.name.substring(mark.name.lastIndexOf("/") + 1));
                 if (itm != null && !itm.selected)
                     return (true);
-            }
+            }*/
             if (mark.gobIcon != null && mark.gobIcon.res != null && mark.gobIcon.res.get() != null) {
                 GobIcon.Setting conf = ui.gui.mmap.iconconf.get(mark.gobIcon.res.get());
                 if (conf != null && conf.show)
@@ -1147,13 +1149,18 @@ public class MapWnd extends ResizableWnd {
                             if (conf != null && conf.show)
                                 check = true;
                         }
-                        if (!Config.hideallicons && (icon != null || Config.additonalicons.containsKey(res.name))) {
+                        /*if (!Config.hideallicons && (icon != null || Config.additonalicons.containsKey(res.name))) {
                             CheckListboxItem itm = Config.icons.get(res.basename());
                             if (configuration.tempmarksall || (itm != null && !itm.selected) || check) {
                                 if (icon != null)
                                     tex = cachedtex(gob);
                                 else
                                     tex = Config.additonalicons.get(res.name).get();
+                            }
+                        } else */
+                         if (icon != null) {
+                            if (configuration.tempmarksall || check) {
+                                tex = cachedtex(gob);
                             }
                         } else if (gob.type == Type.ROAD && Config.showroadmidpoint) {
                             tex = LocalMiniMap.roadicn;
@@ -1242,7 +1249,7 @@ public class MapWnd extends ResizableWnd {
             GobIcon icon = gob.getattr(GobIcon.class);
             if (icon != null) {
                 boolean isdead = gob.isDead();
-                int size = 20;
+                int size = UI.scale(20);
                 Indir<Resource> indir = icon.res;
                 if (indir != null) {
                     Resource res = indir.get();
@@ -1252,9 +1259,7 @@ public class MapWnd extends ResizableWnd {
                             GobIcon.Image img = icon.img();
                             itex = isdead ? img.texgrey() : img.tex();
                             if ((itex.sz().x > size) || (itex.sz().y > size)) {
-                                BufferedImage buf = img.rimg.img;
-                                buf = PUtils.convolve(buf, new Coord(size, size), new PUtils.Hanning(1));
-                                itex = new TexI(buf);
+                                itex = img.tex(Coord.of(size), isdead);
                             }
                             cachedImageTex.put(res.name + (isdead ? "-dead" : ""), itex);
                         }

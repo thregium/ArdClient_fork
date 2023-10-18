@@ -323,7 +323,7 @@ public class LocalMiniMap extends Widget {
                     dangergobs.add(gob);
                     continue;
                 }
-                GobIcon icon = gob.getattr(GobIcon.class);
+                /*GobIcon icon = gob.getattr(GobIcon.class);
                 if (!Config.hideallicons && (icon != null || Config.additonalicons.containsKey(res.name))) {
                     CheckListboxItem itm = Config.icons.get(res.basename());
                     if (itm != null && !itm.selected) {
@@ -334,7 +334,7 @@ public class LocalMiniMap extends Widget {
                             tex = Config.additonalicons.get(res.name).get();
                         g.image(tex, p2c(gob.rc).sub(tex.sz().mul(iconZoom).div(2)).add(delta), tex.dim.mul(iconZoom));
                     }
-                }
+                }*/
                 String basename = res.basename();
                 if (gob.type == Type.BOULDER) {
                     CheckListboxItem itm = Config.boulders.get(basename.substring(0, basename.length() - 1));
@@ -417,13 +417,13 @@ public class LocalMiniMap extends Widget {
 //                            final Coord left = new Coord(-3, -3).rotate(angle).add(pc);
 //                            final Coord notch = new Coord(0, 0).rotate(angle).add(pc);
 
-                        final Coord coord1 = new Coord(8, 0).rotate(angle).add(pc);
-                        final Coord coord2 = new Coord(0, -5).rotate(angle).add(pc);
-                        final Coord coord3 = new Coord(0, -1).rotate(angle).add(pc);
-                        final Coord coord4 = new Coord(-8, -1).rotate(angle).add(pc);
-                        final Coord coord5 = new Coord(-8, 1).rotate(angle).add(pc);
-                        final Coord coord6 = new Coord(0, 1).rotate(angle).add(pc);
-                        final Coord coord7 = new Coord(0, 5).rotate(angle).add(pc);
+                        final Coord coord1 = UI.scale(8, 0).rotate(angle).add(pc);
+                        final Coord coord2 = UI.scale(0, -5).rotate(angle).add(pc);
+                        final Coord coord3 = UI.scale(0, -1).rotate(angle).add(pc);
+                        final Coord coord4 = UI.scale(-8, -1).rotate(angle).add(pc);
+                        final Coord coord5 = UI.scale(-8, 1).rotate(angle).add(pc);
+                        final Coord coord6 = UI.scale(0, 1).rotate(angle).add(pc);
+                        final Coord coord7 = UI.scale(0, 5).rotate(angle).add(pc);
                         g.chcolor(kininfo != null ? BuddyWnd.gc[kininfo.group] : Color.WHITE);
                         g.poly(coord1, coord2, coord3, coord4, coord5, coord6, coord7);
                         g.chcolor(Color.BLACK);
@@ -467,17 +467,17 @@ public class LocalMiniMap extends Widget {
 //                        } else if (Config.autohearth && enemy)
 //                            ui.gui.act("travel", "hearth");
 
-                } else {
+                }/* else {
                     GobIcon icon = gob.getattr(GobIcon.class);
                     if (icon != null) {
                         Tex tex;
                         if (icon != null)
-                            tex = gob.isDead() == Boolean.TRUE ? icon.texgrey() : icon.tex();
+                            tex = gob.isDead() ? icon.texgrey() : icon.tex();
                         else
                             tex = Config.additonalicons.get(gob.getres().name).get();
                         g.image(tex, p2c(gob.rc).sub(tex.sz().mul(iconZoom).div(2)).add(delta), tex.dim.mul(iconZoom));
                     }
-                }
+                }*/
             } catch (Exception e) { // fail silently
             }
         }
@@ -521,12 +521,12 @@ public class LocalMiniMap extends Widget {
                             CheckListboxItem itm = Config.boulders.get(res.basename().substring(0, res.basename().length() - 1));
                             if (itm != null && itm.selected)
                                 return gob;
-                        } else if (res != null && Config.additonalicons.containsKey(res.name)) {
+                        }/* else if (res != null && Config.additonalicons.containsKey(res.name)) {
                             CheckListboxItem itm = Config.icons.get(res.basename());
                             if (itm == null || !itm.selected) {
                                 return gob;
                             }
-                        }
+                        }*/
                     }
                 }
 
@@ -549,10 +549,10 @@ public class LocalMiniMap extends Widget {
                 else if (icon != null)
                     return pretty(gob.getres().name);
                 else { // custom icons
-                    if (res != null && Config.additonalicons.containsKey(res.name)) {
+                    /*if (res != null && Config.additonalicons.containsKey(res.name)) {
                         CheckListboxItem itm = Config.icons.get(res.basename());
                         return pretty(itm.name);
-                    } else if (gob.type == Type.BOULDER)
+                    } else */if (gob.type == Type.BOULDER)
                         return pretty(res.basename().substring(0, res.basename().length() - 1));
                     else
                         return pretty(gob.getres().basename());
@@ -1071,7 +1071,7 @@ public class LocalMiniMap extends Widget {
             else
                 g.chcolor();
 
-            TexI tex = disp.gob.isDead() == Boolean.TRUE ? img.texgrey() : img.tex();
+            TexI tex = disp.gob.isDead() ? img.texgrey() : img.tex();
             if (!img.rot)
                 g.image(tex, disp.sc.sub(img.cc.mul(iconZoom)).add(delta), tex.dim.mul(iconZoom));
             else {
@@ -1103,17 +1103,29 @@ public class LocalMiniMap extends Widget {
                 GobIcon icon = gob.getattr(GobIcon.class);
                 if (icon != null && icon.res != null && icon.res.get() != null) {
                     GobIcon.Setting conf = iconconf.get(icon.res.get());
-                    if ((conf != null) && conf.show) {
-                        DisplayIcon disp = pmap.get(gob);
-                        if (disp == null) {
-                            if (gob.isplayer()) disp = new DisplayIcon(icon, -1);
-                            else disp = new DisplayIcon(icon);
+                    if (conf == null && icon instanceof GobIcon.CustomGobIcon) {
+                        GobIcon.CustomGobIcon cicon = (GobIcon.CustomGobIcon) icon;
+                        Resource res = icon.res.get();
+                        iconconf.settings.put(res.name, new GobIcon.CustomSetting(new Resource.Spec(null, res.name, res.ver), cicon::tex));
+                        conf = iconconf.get(res);
+                        ui.gui.saveiconconf();
+                        if (ui.gui.iconconf.notify) {
+                            ui.sess.glob.loader.defer(() -> ui.gui.msg(String.format("%s added to list of seen icons.", res.basename())), null);
                         }
-                        disp.update(gob.rc, gob.a);
-                        KinInfo kin = gob.getattr(KinInfo.class);
-                        if ((kin != null) && (kin.group < BuddyWnd.gc.length))
-                            disp.col = BuddyWnd.gc[kin.group];
-                        ret.add(disp);
+                    }
+                    if (conf != null) {
+                        if (conf.show) {
+                            DisplayIcon disp = pmap.get(gob);
+                            if (disp == null) {
+                                if (gob.isplayer()) disp = new DisplayIcon(icon, -1);
+                                else disp = new DisplayIcon(icon);
+                            }
+                            disp.update(gob.rc, gob.a);
+                            KinInfo kin = gob.getattr(KinInfo.class);
+                            if ((kin != null) && (kin.group < BuddyWnd.gc.length))
+                                disp.col = BuddyWnd.gc[kin.group];
+                            ret.add(disp);
+                        }
                     }
                 }
             } catch (Loading l) {

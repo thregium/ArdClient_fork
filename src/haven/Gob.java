@@ -460,10 +460,15 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     customIcon = "gfx/icons/door";
                 }
 
-                if (customIcon != null) {
+                Indir<Tex> ctex = Config.additonalicons.get(name);
+                if (customIcon != null || ctex != null) {
                     String finalCustomIcon = customIcon;
                     glob.loader.defer(() -> {
                         if (getattr(GobIcon.class) == null) {
+                            if (ctex != null) {
+                                setattr(new GobIcon.CustomGobIcon(Gob.this, ctex));
+                                return;
+                            }
                             Resource res = null;
                             try {
                                 res = Resource.remote().loadwait(finalCustomIcon);

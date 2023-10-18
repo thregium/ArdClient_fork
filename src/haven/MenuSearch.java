@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pagina> {
-    private static final int WIDTH = 200;
+    private static final int WIDTH = UI.scale(200);
     private final TextEntry entry;
     private final List<MenuGrid.Pagina> all = Collections.synchronizedList(new ArrayList<>());
     private final ActList list;
@@ -74,7 +74,7 @@ public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pa
                 super.itemclick(item, button);
                 // }
             }
-        }, 0, entry.sz.y + 5);
+        }, 0, entry.sz.y + UI.scale(5));
         pack();
     }
 
