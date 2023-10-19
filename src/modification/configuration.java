@@ -1427,4 +1427,6 @@ public class configuration {
     public static boolean openStacksOnAlt = Utils.getprefb("altstacks", false);
 
     public static final Map<Long, String> treesMap = Collections.synchronizedMap(new HashMap<>());
+
+    public static List<String> customEnabledMarks = Utils.loadcollection("CustomEnabledMarks");
 }

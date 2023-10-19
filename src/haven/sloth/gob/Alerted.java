@@ -6,6 +6,7 @@ import haven.Config;
 import haven.Gob;
 import haven.Resource;
 import haven.UI;
+import haven.Utils;
 import haven.purus.pbot.PBotDiscord;
 import haven.sloth.io.Storage;
 import haven.sloth.util.ObservableCollection;
@@ -174,7 +175,7 @@ public class Alerted {
                             if (Config.discordalarmalert) {
                                 if (g.glob.ui != null) {
                                     UI ui = g.glob.ui.get();
-                                    if (ui != null && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                                    if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui != null && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                                         String s = g.name().substring(g.name().lastIndexOf("/") + 1);
                                         if (!ui.gui.chrid.isEmpty()) {
                                             String username = ui.sess.username + "/" + ui.gui.chrid;

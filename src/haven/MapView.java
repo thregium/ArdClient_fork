@@ -825,14 +825,12 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         Gob player = player();
         if (player != null) {
             Coord2d c = player.rc;
-            if (glob.sess != null && glob.sess.alive() && glob.sess.username != null && ui.gui != null) {
+            if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && glob.sess != null && glob.sess.alive() && glob.sess.username != null && ui.gui != null) {
                 if (!ui.gui.chrid.isEmpty()) {
                     String username = ui.sess.username + "/" + ui.gui.chrid;
                     if (configuration.loadMapSetting(username, "mapper")) {
                         MappingClient map = MappingClient.getInstance(username);
-                        if (map != null) {
-                            map.CheckGridCoord(c);
-                        }
+                        map.CheckGridCoord(c);
                     }
                 }
             }
@@ -3840,7 +3838,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         }
                         break;
                     case 4: //Delete all gobs like this one
-                        Window confirmwnd = new Window(new Coord(225, 100), "Confirm") {
+                        Window confirmwnd = new Window(UI.scale(225, 100), "Confirm") {
                             @Override
                             public void wdgmsg(Widget sender, String msg, Object... args) {
                                 if (sender == cbtn)
@@ -3859,10 +3857,10 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             }
                         };
 
-                        confirmwnd.add(new Label("This option deletes objects of this type " + name + ". To return the back needed in the \"xGame Windows > Deleted\" tab, select the desired and press \"Stop Deleting\""), new Coord(10, 20));
+                        confirmwnd.add(new Label("This option deletes objects of this type " + name + ". To return the back needed in the \"xGame Windows > Deleted\" tab, select the desired and press \"Stop Deleting\""), UI.scale(10, 20));
                         confirmwnd.pack();
 
-                        Button yesbtn = new Button(70, "Yes") {
+                        Button yesbtn = new Button(UI.scale(70), "Yes") {
                             @Override
                             public void click() {
                                 if (g.type == Type.TAMEDANIMAL) {
@@ -3875,17 +3873,17 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                                 parent.reqdestroy();
                             }
                         };
-                        confirmwnd.add(yesbtn, new Coord(confirmwnd.sz.x / 2 - 60 - yesbtn.sz.x, 60));
-                        Button nobtn = new Button(70, "No") {
+                        confirmwnd.add(yesbtn, new Coord(confirmwnd.sz.x / 2 - UI.scale(60) - yesbtn.sz.x, UI.scale(60)));
+                        Button nobtn = new Button(UI.scale(70), "No") {
                             @Override
                             public void click() {
                                 parent.reqdestroy();
                             }
                         };
-                        confirmwnd.add(nobtn, new Coord(confirmwnd.sz.x / 2 + 20, 60));
+                        confirmwnd.add(nobtn, new Coord(confirmwnd.sz.x / 2 + UI.scale(20), UI.scale(60)));
                         confirmwnd.pack();
 
-                        ui.gui.add(confirmwnd, new Coord(ui.gui.sz.x / 2 - confirmwnd.sz.x / 2, ui.gui.sz.y / 2 - 200));
+                        ui.gui.add(confirmwnd, new Coord(ui.gui.sz.x / 2 - confirmwnd.sz.x / 2, ui.gui.sz.y / 2 - UI.scale(200)));
                         confirmwnd.show();
                         break;
                     case 5: //Custom overlays
@@ -3896,14 +3894,14 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             Window w = new Window(Coord.z, "New mark");
                             WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
                             wva.add(new Label("Set mark name:"));
-                            final TextEntry value = new TextEntry(150, "") {
+                            final TextEntry value = new TextEntry(UI.scale(150), "") {
                                 @Override
                                 public void activate(String text) {
                                     ui.gui.mapfile.markobj(g.id, g, text, false);
                                     w.close();
                                 }
                             };
-                            wva.addRow(value, new Button(45, "Add") {
+                            wva.addRow(value, new Button(UI.scale(45), "Add") {
                                 @Override
                                 public void click() {
                                     ui.gui.mapfile.markobj(g.id, g, value.text(), false);

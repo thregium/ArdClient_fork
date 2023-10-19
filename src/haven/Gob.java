@@ -406,8 +406,12 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         if (ui != null && ui.gui != null && ui.gui.map != null && ui.gui.map.plgob != -1) {
             if (ui.gui.mapfile != null && resources.customMarkObj) {
                 for (Map.Entry<String, Boolean> entry : resources.customMarks.entrySet()) {
-                    if (name.equals(entry.getKey()) && entry.getValue()) {
-                        ui.gui.mapfile.markobj(id, this, resources.getDefaultTextName(entry.getKey()), false);
+                    String key = entry.getKey();
+                    if (name.equals(key)) {
+                        if (Boolean.TRUE.equals(entry.getValue())) {
+                            ui.gui.mapfile.markobj(id, this, resources.getDefaultTextName(key), configuration.customEnabledMarks.contains(key));
+                            break;
+                        }
                     }
                 }
             }
@@ -904,14 +908,12 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             if (isplayer()) {
                 if (glob.ui != null) {
                     UI ui = glob.ui.get();
-                    if (ui != null && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                    if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui != null && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                         if (!ui.gui.chrid.isEmpty()) {
                             String username = ui.sess.username + "/" + ui.gui.chrid;
                             if (configuration.loadMapSetting(username, "mapper")) {
                                 MappingClient map = MappingClient.getInstance(username);
-                                if (map != null) {
-                                    map.CheckGridCoord(c);
-                                }
+                                map.CheckGridCoord(c);
                             }
                         }
                     }

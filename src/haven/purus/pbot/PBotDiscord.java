@@ -260,7 +260,6 @@ public class PBotDiscord {
     public static void mapAlertEveryone(String username, String string) {
         try {
             MappingClient map = MappingClient.getInstance(username);
-            if (map == null) return;
             String base = map.endpoint;
             String mod = base.split("/")[2];
             String output = String.format("@everyone " + string + " at: " + " http://" + mod
@@ -279,7 +278,6 @@ public class PBotDiscord {
     public static void mapAlert(String username, String name, String string) {
         try {
             MappingClient map = MappingClient.getInstance(username);
-            if (map == null) return;
             String base = map.endpoint;
             String mod = base.split("/")[2];
             String output = String.format(getAlertString(name) + " " + string + " at: " + " http://" + mod

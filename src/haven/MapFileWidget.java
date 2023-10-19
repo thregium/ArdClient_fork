@@ -26,21 +26,46 @@
 
 package haven;
 
-import haven.MapFile.*;
+import haven.MapFile.ExportStatus;
+import haven.MapFile.Grid;
+import haven.MapFile.GridInfo;
+import haven.MapFile.Marker;
+import haven.MapFile.PMarker;
+import haven.MapFile.SMarker;
+import haven.MapFile.Segment;
 import integrations.mapv4.MappingClient;
 import modification.configuration;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
+import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -66,7 +91,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
     public static int zoommax = 3;
     public static int zoommin = -3;
     public int zoom = Math.max(zoommin, Math.min(zoommax, Utils.getprefi("zoomlmap", 0)));
-//    public static final double[] scaleFactors = new double[]{1 / 8.0, 1 / 4.0, 1 / 2.0, 1, 100 / 75.0, 100 / 50.0, 100 / 25.0, 100 / 15.0, 100 / 8.0}; //FIXME that his add more scale
+    //    public static final double[] scaleFactors = new double[]{1 / 8.0, 1 / 4.0, 1 / 2.0, 1, 100 / 75.0, 100 / 50.0, 100 / 25.0, 100 / 15.0, 100 / 8.0}; //FIXME that his add more scale
     private static final Tex gridred = Resource.loadtex("gfx/hud/mmap/gridred");
 
     public static Map<String, Tex> cachedTextTex = new HashMap<>();
@@ -198,6 +223,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
         private final Map<String[], Boolean> highlightedHas = new HashMap<>();
 
         private MapFileWidget view;
+
         public DisplayGrid(MapFileWidget view, Segment seg, Coord sc, Indir<Grid> gref) {
             this.view = view;
             this.seg = seg;
@@ -498,6 +524,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
     }
 
     private static final Map<Coord, Tex> gridreds = Collections.synchronizedMap(new HashMap<>());
+
     private static Tex gridred(Coord sz) {
         return (gridreds.computeIfAbsent(sz, s -> {
             BufferedImage ret = TexI.mkbuf(sz);
@@ -513,6 +540,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
             return (new TexI(ret));
         }));
     }
+
     public void draw(GOut g) {
         Location loc = this.curloc;
         if (loc == null)
@@ -789,11 +817,19 @@ public class MapFileWidget extends Widget implements Console.Directory {
                     if (ui.modflags() == 0) {
                         List<Pair<String, Runnable>> list = new ArrayList<>();
                         list.add(new Pair<>("Focus", () -> clickmarker(mark, 1)));
-                        list.add(new Pair<>("Send", () -> uploadMark(mark.m)));
+                        if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                            if (!ui.gui.chrid.isEmpty()) {
+                                String username = ui.sess.username + "/" + ui.gui.chrid;
+                                MappingClient map = MappingClient.getInstance(username);
+                                if (map != null) {
+                                    list.add(new Pair<>("Send", () -> uploadMark(mark.m)));
+                                }
+                            }
+                        }
                         list.add(new Pair<>("Remove", () -> deletemarker(mark)));
                         if (mark.m instanceof MapFile.SMarker) {
                             MapFile.SMarker sm = (MapFile.SMarker) mark.m;
-                            list.add(new Pair<>((!sm.autosend ? "Enable" : "Disable") + "  sending to mapper", () -> {
+                            list.add(new Pair<>((!sm.autosend ? "Enable" : "Disable") + "  sendable", () -> {
                                 sm.makeAutosend(!sm.autosend);
                                 if (sm.autosend)
                                     uploadMark(sm);
@@ -1209,8 +1245,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
                     System.out.println("Command not found: " + type);
                 }
             }
-        }
-        else {
+        } else {
             System.out.println("exportmap 'map_name' [file_name] [version]");
             System.out.println("importmap 'map_name' [file_name]");
         }
@@ -1222,46 +1257,43 @@ public class MapFileWidget extends Widget implements Console.Directory {
     }
 
     public void uploadMarks() {
-        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+        if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
             if (!ui.gui.chrid.isEmpty()) {
                 String username = ui.sess.username + "/" + ui.gui.chrid;
                 if (configuration.loadMapSetting(username, "mapper")) {
                     MappingClient map = MappingClient.getInstance(username);
-                    if (map != null) {
-                        map.ProcessMap(file, (m) -> {
-                            if (m instanceof MapFile.SMarker) {
-                                return (((MapFile.SMarker) m).autosend);
-                            }
-                            if (m instanceof MapFile.PMarker) {
-                                return ((MapFile.PMarker) m).color.equals(Color.GREEN) && configuration.loadMapSetting(username, "green") && !m.name().isEmpty();
-                            }
-                            return false;
-                        });
-                    }
+                    map.ProcessMap(file, (m) -> {
+                        if (m instanceof MapFile.SMarker) {
+                            return (((MapFile.SMarker) m).autosend);
+                        }
+                        if (m instanceof MapFile.PMarker) {
+                            return ((MapFile.PMarker) m).color.equals(Color.GREEN) && configuration.loadMapSetting(username, "green") && !m.name().isEmpty();
+                        }
+                        return false;
+                    });
                 }
             }
         }
     }
 
     public void uploadMark(Marker marker) {
-        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+        if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
             if (!ui.gui.chrid.isEmpty()) {
                 String username = ui.sess.username + "/" + ui.gui.chrid;
                 if (configuration.loadMapSetting(username, "mapper")) {
                     MappingClient map = MappingClient.getInstance(username);
-                    if (map != null) {
-                        Predicate<Marker> p = (m) -> {
-                            if (m instanceof MapFile.SMarker) {
-                                return (((MapFile.SMarker) m).autosend);
-                            }
-                            if (m instanceof MapFile.PMarker) {
-                                return ((MapFile.PMarker) m).color.equals(Color.GREEN) && configuration.loadMapSetting(username, "green") && !m.name().isEmpty();
-                            }
-                            return false;
-                        };
-                        if (p.test(marker))
-                            map.Sendmarker(file, marker);
-                    }
+                    Predicate<Marker> p = (m) -> {
+                        if (m instanceof MapFile.SMarker) {
+//                                return (((MapFile.SMarker) m).autosend);
+                            return (true);
+                        }
+                        if (m instanceof MapFile.PMarker) {
+                            return ((MapFile.PMarker) m).color.equals(Color.GREEN) && configuration.loadMapSetting(username, "green") && !m.name().isEmpty();
+                        }
+                        return false;
+                    };
+                    if (p.test(marker))
+                        map.Sendmarker(file, marker);
                 }
             }
         }

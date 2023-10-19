@@ -282,19 +282,17 @@ public class OptWnd extends Window {
                             return false;
                         String text = text();
                         Utils.setpref("vendan-mapv4-endpoint", text);
-                        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                        if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                             if (!ui.gui.chrid.isEmpty()) {
                                 String username = ui.sess.username + "/" + ui.gui.chrid;
                                 MappingClient map = MappingClient.getInstance(username);
-                                if (map != null) {
-                                    map.SetEndpoint(text);
-                                    map.EnableGridUploads(true);
-                                    map.SetPlayerName(ui.gui.chrid);
+                                map.SetEndpoint(text);
+                                map.EnableGridUploads(true);
+                                map.SetPlayerName(ui.gui.chrid);
 
-                                    Gob player = ui.gui.map.player();
-                                    if (player != null) {
-                                        map.CheckGridCoord(player.rc);
-                                    }
+                                Gob player = ui.gui.map.player();
+                                if (player != null) {
+                                    map.CheckGridCoord(player.rc);
                                 }
                             }
                         }
@@ -305,15 +303,13 @@ public class OptWnd extends Window {
 
         appender.add(new CheckBox("Enable mapv4 mapper") {
             public void set(boolean val) {
-                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                     if (!ui.gui.chrid.isEmpty()) {
                         String username = ui.sess.username + "/" + ui.gui.chrid;
                         configuration.saveMapSetting(username, val, "mapper");
                         MappingClient map = MappingClient.getInstance(username);
-                        if (map != null) {
-                            map.EnableGridUploads(val);
+                        map.EnableGridUploads(val);
 //                    map.EnableTracking(val);
-                        }
                         a = val;
                     }
                 }
@@ -321,17 +317,15 @@ public class OptWnd extends Window {
 
             public void tick(double dt) {
                 super.tick(dt);
-                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                     if (!ui.gui.chrid.isEmpty()) {
                         String username = ui.sess.username + "/" + ui.gui.chrid;
                         boolean b = configuration.loadMapSetting(username, "mapper");
                         if (a != b) {
                             a = b;
                             MappingClient map = MappingClient.getInstance(username);
-                            if (map != null) {
-                                map.EnableGridUploads(a);
+                            map.EnableGridUploads(a);
 //                        MappingClient.getInstance(ui.sess.username).EnableTracking(a);
-                            }
                         }
                     }
                 }
@@ -351,14 +345,12 @@ public class OptWnd extends Window {
 //        });
         appender.add(new CheckBox("Enable navigation tracking") {
             public void set(boolean val) {
-                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                     if (!ui.gui.chrid.isEmpty()) {
                         String username = ui.sess.username + "/" + ui.gui.chrid;
                         configuration.saveMapSetting(username, val, "track");
                         MappingClient map = MappingClient.getInstance(username);
-                        if (map != null) {
-                            map.EnableTracking(val);
-                        }
+                        map.EnableTracking(val);
                         a = val;
                     }
                 }
@@ -366,16 +358,14 @@ public class OptWnd extends Window {
 
             public void tick(double dt) {
                 super.tick(dt);
-                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                     if (!ui.gui.chrid.isEmpty()) {
                         String username = ui.sess.username + "/" + ui.gui.chrid;
                         boolean b = configuration.loadMapSetting(username, "track");
                         if (a != b) {
                             a = b;
                             MappingClient map = MappingClient.getInstance(username);
-                            if (map != null) {
-                                map.EnableTracking(a);
-                            }
+                            map.EnableTracking(a);
                         }
                     }
                 }
@@ -1879,7 +1869,27 @@ public class OptWnd extends Window {
             public void click() {
                 Window w = new Window(Coord.z, "Map Marks Configurate");
                 WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
-                final CustomWidgetList list = new CustomWidgetList(resources.customMarks, "CustomMarks");
+                final CustomWidgetList list = new CustomWidgetList(resources.customMarks, "CustomMarks", true) {
+                    public void wdgmsg(Widget sender, String msg, Object... args) {
+                        if (msg.equals("option")) {
+                            String name = (String) args[0];
+                            Window settings = new Window(Coord.z, name);
+                            WidgetVerticalAppender wva = new WidgetVerticalAppender(settings);
+                            wva.add(new CheckBox("Enable autosend", val -> {
+                                if (val)
+                                    configuration.customEnabledMarks.add(name);
+                                else
+                                    configuration.customEnabledMarks.remove(name);
+                                Utils.setcollection("CustomEnabledMarks", configuration.customEnabledMarks);
+                            }, configuration.customEnabledMarks.contains(name)));
+                            settings.pack();
+
+                            ui.root.adda(settings, ui.root.sz.div(2), 0.5, 0.5);
+                        } else {
+                            super.wdgmsg(sender, msg, args);
+                        }
+                    }
+                };
                 final TextEntry value = new TextEntry(UI.scale(150), "") {
                     @Override
                     public void activate(String text) {

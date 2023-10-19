@@ -18,17 +18,17 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
     public static final Comparator<Item> ITEM_COMPARATOR = Comparator.comparing(o -> o.name);
 
     public CustomWidgetList(ObservableMap<String, Boolean> list, String jsonname) {
-        super(new Coord(calcWidth(list.keySet()) + 50 + 2, 25), 10);
-        width = calcWidth(list.keySet()) + 50 + 2;
+        super(new Coord(calcWidth(list.keySet()) + UI.scale(50 + 2), UI.scale(25)), UI.scale(10));
+        width = calcWidth(list.keySet()) + UI.scale(50 + 2);
         customlist = list;
         customlist.addListener(this);
         this.jsonname = jsonname;
     }
 
     public CustomWidgetList(ObservableMap<String, Boolean> list, String jsonname, boolean options) {
-        super(new Coord(calcWidth(list.keySet()) + 50 + 2 + 25, 25), 10);
+        super(new Coord(calcWidth(list.keySet()) + UI.scale(50 + 2 + 25), UI.scale(25)), UI.scale(10));
         this.options = options;
-        width = calcWidth(list.keySet()) + 50 + 2 + 25;
+        width = calcWidth(list.keySet()) + UI.scale(50 + 2 + 25);
         customlist = list;
         customlist.addListener(this);
         this.jsonname = jsonname;
@@ -46,7 +46,7 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
     }
 
     private static int calcHeight(List<String> values) {
-        return Math.max(Text.render(values.get(0)).sz().y, 16);
+        return Math.max(Text.render(values.get(0)).sz().y, UI.scale(16));
     }
 
     @SuppressWarnings("SynchronizeOnNonFinalField")
@@ -141,15 +141,15 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
         private Button cl, opt;
 
         public Item(String name) {
-            super(new Coord(width, 25));
+            super(new Coord(width, UI.scale(25)));
             this.name = name;
 
-            cb = add(new CheckBox(name), 3, 3);
+            cb = add(new CheckBox(name), UI.scale(3, 3));
             Boolean b = customlist.get(name);
             cb.a = b != null && b;
             cb.canactivate = true;
 
-            add(cl = new Button(24, "X") {
+            add(cl = new Button(UI.scale(24), "X") {
                 @Override
                 public void click() {
                     super.wdgmsg("activate", name);
@@ -160,9 +160,9 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
                     //FIXME:a little hack, because WidgetList does not pass correct click coordinates if scrolled
                     return super.mouseup(Coord.z, button);
                 }
-            }, width - 25, 0);
+            }, width - UI.scale(25), 0);
             if (options)
-                add(opt = new Button(24, "⚙") {
+                add(opt = new Button(UI.scale(24), "⚙") {
                     public void click() {
                         super.wdgmsg("opt", name);
                     }
@@ -171,15 +171,15 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
                         //FIXME:a little hack, because WidgetList does not pass correct click coordinates if scrolled
                         return super.mouseup(Coord.z, button);
                     }
-                }, width - 50, 0);
+                }, width - UI.scale(50), 0);
         }
 
         public void draw(GOut g) {
             super.draw(g);
-            if (cl != null && cl.c != null && cl.c.x != width - 25)
-                cl.c.x = width - 25;
-            if (opt != null && opt.c != null && opt.c.x != width - 50)
-                opt.c.x = width - 50;
+            if (cl != null && cl.c != null && cl.c.x != width - UI.scale(25))
+                cl.c.x = width - UI.scale(25);
+            if (opt != null && opt.c != null && opt.c.x != width - UI.scale(50))
+                opt.c.x = width - UI.scale(50);
         }
 
         @Override
@@ -202,7 +202,7 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
                     grab.remove();
                     grab = null;
                 }
-                if (c.isect(new Coord(0, 0), sz))
+                if (c.isect(Coord.z, sz))
                     click();
                 return (true);
             }

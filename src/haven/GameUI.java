@@ -76,6 +76,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static haven.Action.TOGGLE_CHARACTER;
 import static haven.Action.TOGGLE_EQUIPMENT;
@@ -442,11 +443,9 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
                 glob.addReference(username);
                 if (configuration.loadMapSetting(username, "mapper")) {
                     MappingClient map = MappingClient.getInstance(username);
-                    if (map != null) {
-                        map.SetEndpoint(endpoint);
-                        map.EnableGridUploads(true);
-                        map.SetPlayerName(chrid);
-                    }
+                    map.SetEndpoint(endpoint);
+                    map.EnableGridUploads(true);
+                    map.SetPlayerName(chrid);
                 }
             }
         }
@@ -492,7 +491,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             String username = ui.sess.username + "/" + chrid;
             if (glob != null) {
                 glob.removeReference(username);
-                MappingClient map = MappingClient.getInstance(username);
+                MappingClient map = MappingClient.getInstance2(username);
                 if (map != null) {
                     map.SetEndpoint("");
                     map.EnableGridUploads(false);
@@ -726,7 +725,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
     }
 
     public void fixClient() {
-        PBotUtils.sysMsg(ui, String.format("Before: %d keys. %d mouses. Game focused!", ui.keygrab.size(), ui.mousegrab.size()));
+        PBotUtils.sysMsg(ui, String.format("Before: %d%s keys. %d%s mouses.", ui.keygrab.size(), ui.keygrab.stream().map(g -> g.wdg).collect(Collectors.toList()), ui.mousegrab.size(), ui.mousegrab.stream().map(g -> g.wdg).collect(Collectors.toList())));
         ui.keygrab.clear();
         ui.mousegrab.clear();
         setfocus(map);

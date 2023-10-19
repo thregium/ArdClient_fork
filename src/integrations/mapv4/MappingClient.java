@@ -71,8 +71,11 @@ public class MappingClient {
 //    }
 
     public static MappingClient getInstance(final String username) {
-        if (username.isEmpty()) return (null);
         return (clients.computeIfAbsent(username, MappingClient::new));
+    }
+
+    public static MappingClient getInstance2(final String username) {
+        return (clients.get(username));
     }
 
     public static void removeInstance(final String username) {
