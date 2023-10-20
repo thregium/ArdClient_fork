@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ObservableCollection<T> implements Iterable<T> {
     public final Collection<T> base;
@@ -68,7 +70,7 @@ public class ObservableCollection<T> implements Iterable<T> {
             keys = new ArrayList<>(base);
             base.clear();
         }
-        for (T key: keys) {
+        for (T key : keys) {
             synchronized (listeners) {
                 listeners.forEach((lst) -> lst.remove(key));
             }
@@ -136,5 +138,15 @@ public class ObservableCollection<T> implements Iterable<T> {
             if (!base.addAll(newbase)) return false;
         }
         return true;
+    }
+
+    public synchronized T computeIfAbsent(Function<Collection<T>, T> findItem, Supplier<T> createNew) {
+        T item = findItem.apply(items());
+        if (item == null) {
+            item = createNew.get();
+            if (item != null)
+                add(item);
+        }
+        return (item);
     }
 }

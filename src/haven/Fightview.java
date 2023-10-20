@@ -615,7 +615,7 @@ public class Fightview extends MovableWidget {
                     g.image(RichText.render(String.format("$bg[35,35,35,192]{$b{Speed: %.1f : Distance: %.2f}}", gob.getv(), gob.getc().dist(ui.sess.glob.oc.getgob(ui.gui.map.plgob).getc()) / 11.0), -1).tex(), new Coord(UI.scale(12), y + UI.scale(68)));
                 }
                 g.chcolor();
-                y += bg.sz().y + ymarg + 16;
+                y += bg.sz().y + ymarg + UI.scale(16);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -673,6 +673,25 @@ public class Fightview extends MovableWidget {
             }
         }
         super.wdgmsg(sender, msg, args);
+    }
+
+    @Override
+    public boolean mousedown(final Coord mc, final int button) {
+        if (super.mousedown(mc, button)) {
+            return (true);
+        }
+        if (!visible())
+            return (false);
+        int y = UI.scale(10);
+        int x = width - bg.sz().x - UI.scale(10);
+        for (Relation rel : lsrel) {
+            if (mc.isect(Coord.of(x, y), bg.sz())) {
+                wdgmsg("click", (int) rel.gobid, button);
+                return (true);
+            }
+            y += bg.sz().y + ymarg + UI.scale(16);
+        }
+        return (false);
     }
 
     private Indir<Resource> n2r(int num) {

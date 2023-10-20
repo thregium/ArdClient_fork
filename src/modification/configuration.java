@@ -6,6 +6,7 @@ import haven.CheckListboxItem;
 import haven.Config;
 import haven.Coord;
 import haven.Coord2d;
+import haven.Defer;
 import haven.Gob;
 import haven.HSliderListboxItem;
 import haven.HSliderNamed;
@@ -700,34 +701,32 @@ public class configuration {
     }
 
     public static int addSFX(String name) {
-        HSliderListboxItem h = HSliderListboxItem.contains(resources.sfxmenus.items(), name);
-        if (h == null) {
-            h = new HSliderListboxItem(name, 100);
-            resources.sfxmenus.add(h);
-            Utils.setprefsliderlst("customsfxvol", resources.sfxmenus.base);
-            return (100);
-        } else {
-            return (h.val);
-        }
+        return (addSFX(name, 1.0));
     }
 
     public static int addSFX(String name, double val) {
-        HSliderListboxItem h = HSliderListboxItem.contains(resources.sfxmenus.items(), name);
-        if (h == null) {
-            h = new HSliderListboxItem(name, (int) (val * 100));
-            resources.sfxmenus.add(h);
-            Utils.setprefsliderlst("customsfxvol", resources.sfxmenus.base);
-            return ((int) (val * 100));
-        } else {
-            return (h.val);
-        }
+        HSliderListboxItem i = resources.sfxmenus.computeIfAbsent(list -> {
+            for (HSliderListboxItem item : list)
+                if (item.name.equals(name))
+                    return (item);
+            return (null);
+        }, () -> {
+            HSliderListboxItem item = new HSliderListboxItem(name, (int) (val * 100));
+            Defer.later(() -> {
+                Utils.setprefsliderlst("customsfxvol", resources.sfxmenus.items());
+                return (null);
+            });
+            return (item);
+        });
+        return (i.val);
     }
 
     public static HSliderNamed createSFXSlider(HSliderListboxItem item) {
         return (new HSliderNamed(item, UI.scale(180), 0, 100, () -> {
-            synchronized (resources.sfxmenus) {
-                Utils.setprefsliderlst("customsfxvol", resources.sfxmenus.base);
-            }
+            Defer.later(() -> {
+                Utils.setprefsliderlst("customsfxvol", resources.sfxmenus.items());
+                return (null);
+            });
         }) {
             @Override
             public Object tooltip(Coord c, Widget prev) {

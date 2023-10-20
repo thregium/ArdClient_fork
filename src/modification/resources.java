@@ -310,7 +310,7 @@ public class resources {
     ));
     public static ObservableMap<String, Boolean> customQuickActions = Utils.loadCustomList(defaultQuickActions, "QuickPattern", true);
 
-    public static final ObservableCollection<HSliderListboxItem> sfxmenus = new ObservableCollection(new TreeList<>());
+    public static final ObservableCollection<HSliderListboxItem> sfxmenus = new ObservableCollection<>(Collections.synchronizedList(new TreeList<>()));
 
     public static ObservableMap<String, Boolean> customSendMarks = Utils.loadCustomList(Collections.emptyList(), "CustomSendMarks");
 

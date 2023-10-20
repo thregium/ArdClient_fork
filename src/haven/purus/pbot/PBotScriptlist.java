@@ -40,7 +40,7 @@ public class PBotScriptlist extends GameUI.Hidewnd {
     PBotScriptlistItem draggedItem;
 
     public PBotScriptlist() {
-        super(new Coord(228, 280), "PBot Scripts");
+        super(UI.scale(228, 280), "PBot Scripts");
 
         change = new Button(0, "T") {
             @Override
@@ -57,7 +57,7 @@ public class PBotScriptlist extends GameUI.Hidewnd {
                 }
             }
         };
-        search = new TextEntry(210 - change.sz.x, "", t -> {
+        search = new TextEntry(UI.scale(210) - change.sz.x, "", t -> {
             list.changeFilter(t);
         }, t -> {
             setfocus(list);
@@ -74,14 +74,14 @@ public class PBotScriptlist extends GameUI.Hidewnd {
                 }
             }
         };
-        add(search, new Coord(10, 5));
-        add(change, new Coord(asz.x - change.sz.x - 10, 5));
+        add(search, UI.scale(10, 5));
+        add(change, new Coord(asz.x - change.sz.x - UI.scale(10), UI.scale(5)));
 
-        list = new ScriptList(reloadList(ui, defPath), 200, 24, 10);
-        add(list, new Coord(10, 35));
+        list = new ScriptList(reloadList(ui, defPath), UI.scale(200), UI.scale(24), 10);
+        add(list, UI.scale(10, 35));
 
-        threadList = new ThreadList(210, 10);
-        add(threadList, new Coord(10, 35));
+        threadList = new ThreadList(UI.scale(210), 10);
+        add(threadList, UI.scale(10, 35));
         threadList.hide();
     }
 
@@ -90,7 +90,7 @@ public class PBotScriptlist extends GameUI.Hidewnd {
         super.draw(g);
         ui.drawafter(g1 -> {
             if (dragging && draggedItem != null) {
-                g1.image(draggedItem.getIconTex(), ui.mc.add(new Coord(32, 32).div(2).inv()), new Coord(32, 32));
+                g1.image(draggedItem.getIconTex(), ui.mc.add(UI.scale(32, 32).div(2).inv()), UI.scale(32, 32));
             }
         });
     }

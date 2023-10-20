@@ -70,8 +70,8 @@ public class ClipAmbiance implements Rendered, Rendered.Instanced {
             Resource.Audio clip = AudioSprite.randoom(chans[chan].getres(), chans[chan].cnms[idx]);
             int clipid = AudioSprite.getRandomID(AudioSprite.clips(chans[chan].getres(), chans[chan].cnms[idx]), clip);
             final VolAdjust[] clist = cur[chan];
+            double volume = configuration.addSFX(chans[chan].getres().name + "_" + chans[chan].cnms[idx] + "_" + clipid) / 100.0;
             synchronized (this) {
-                double volume = configuration.addSFX(chans[chan].getres().name + "_" + chans[chan].cnms[idx] + "_" + clipid) / 100.0;
                 clist[idx] = new VolAdjust(new Audio.Monitor(clip.stream()) {
                     protected void eof() {
                         synchronized (Glob.this) {

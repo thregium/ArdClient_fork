@@ -41,10 +41,10 @@ public class PBotScriptlistItem extends Widget implements Comparable<PBotScriptl
                     e.printStackTrace();
                 }
             } else {
-                this.iconTex = configuration.imageToTex(configuration.modificationPath + "/paginae/purus/PBotMenu.png");//Resource.local().load("paginae/purus/PBotMenu").get().layer(Resource.Image.class).tex();
+                this.iconTex = configuration.imageToTex(configuration.modificationPath + "/paginae/purus/PBotMenu.png", UI.scale(32, 32));//Resource.local().load("paginae/purus/PBotMenu").get().layer(Resource.Image.class).tex();
             }
         } else {
-            this.iconTex = configuration.imageToTex(configuration.modificationPath + "/paginae/purus/PBotFolder.png");
+            this.iconTex = configuration.imageToTex(configuration.modificationPath + "/paginae/purus/PBotFolder.png", UI.scale(32, 32));
         }
 
 //        this.nameTex = Text.render(name.substring(0, name.length() - 5)).tex();
@@ -57,7 +57,7 @@ public class PBotScriptlistItem extends Widget implements Comparable<PBotScriptl
         else
             setName("...");
 
-        resize(Coord.of(nameTex.sz().x + (iconTex != null ? iconTex.sz().x : 24), iconTex != null ? iconTex.sz().y : 24));
+        resize(Coord.of(nameTex.sz().x + (iconTex != null ? iconTex.sz().x : UI.scale(24)), iconTex != null ? iconTex.sz().y : UI.scale(24)));
     }
 
     public boolean isFolder() {
@@ -108,8 +108,8 @@ public class PBotScriptlistItem extends Widget implements Comparable<PBotScriptl
     public void draw(GOut g) {
         super.draw(g);
         if (iconTex != null)
-            g.image(getIconTex(), Coord.z, Coord.of(24, 24));
-        g.aimage(getNameTex(), Coord.of(32, 12), 0, 0.5);
+            g.image(getIconTex(), Coord.z, UI.scale(24, 24));
+        g.aimage(getNameTex(), UI.scale(32, 12), 0, 0.5);
     }
 
     @Override
