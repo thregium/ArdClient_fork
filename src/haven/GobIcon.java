@@ -202,7 +202,7 @@ public class GobIcon extends GAttrib {
             buf.adduint8(notify ? 1 : 0);
             for (Setting set : settings.values()) {
                 buf.addstring(set.res.name);
-                buf.adduint16(set.res.ver);
+                buf.adduint16(set instanceof CustomSetting ? -1 : set.res.ver);
                 if (set instanceof CustomSetting) {
                     buf.adduint8((byte) 'c');
                 }
@@ -233,13 +233,18 @@ public class GobIcon extends GAttrib {
                 Resource.Spec res = new Resource.Spec(null, resnm, resver);
                 Setting set = new Setting(res);
                 boolean setdef = false;
+                boolean failed = false;
                 data:
                 while (true) {
                     int datum = buf.uint8();
                     switch (datum) {
                         case (int) 'c':
-                            Indir<Tex> ctex = Config.additonalicons.get(res.name);
+                            Indir<Tex> ctex = Config.additonalicons.get(resnm);
                             set = new CustomSetting(res, ctex);
+                            if (ctex == null) {
+                                failed = true;
+                                Debug.println(String.format("Failed load icon for %s(%s)", resnm, resver));
+                            }
                             break;
                         case (int) 's':
                             set.show = (buf.uint8() != 0);
@@ -256,7 +261,8 @@ public class GobIcon extends GAttrib {
                 }
                 if (!setdef)
                     set.defshow = set.show;
-                ret.settings.put(res.name, set);
+                if (!failed)
+                    ret.settings.put(res.name, set);
             }
             return (ret);
         }
@@ -292,11 +298,21 @@ public class GobIcon extends GAttrib {
 
         public static class CustomIcon extends Icon {
             public Indir<String> iname;
+            public Indir<Tex> itex;
 
             public CustomIcon(final CustomSetting conf) {
                 super(conf);
-                img = conf.tex.get();
+                this.itex = conf.tex;
                 this.iname = conf.name;
+            }
+
+            public Tex img() {
+                if (this.img == null) {
+                    if (itex != null) {
+                        this.img = itex.get();
+                    }
+                }
+                return (this.img);
             }
         }
 
@@ -603,8 +619,8 @@ public class GobIcon extends GAttrib {
     }
 
     public static class CustomGobIcon extends GobIcon {
-        public CustomGobIcon(final Gob g, final Indir<Tex> itex) {
-            super(g, () -> g.res().orElseThrow(Loading::new));
+        public CustomGobIcon(final Gob g, final String name, final Indir<Tex> itex) {
+            super(g, Resource.remote().load(name));
             this.img = new CustomImage(itex);
         }
 

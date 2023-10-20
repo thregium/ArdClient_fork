@@ -1106,7 +1106,7 @@ public class LocalMiniMap extends Widget {
                     if (conf == null && icon instanceof GobIcon.CustomGobIcon) {
                         GobIcon.CustomGobIcon cicon = (GobIcon.CustomGobIcon) icon;
                         Resource res = icon.res.get();
-                        iconconf.settings.put(res.name, new GobIcon.CustomSetting(new Resource.Spec(null, res.name, res.ver), cicon::tex));
+                        iconconf.settings.put(res.name, new GobIcon.CustomSetting(new Resource.Spec(null, res.name, -1), cicon::tex));
                         conf = iconconf.get(res);
                         ui.gui.saveiconconf();
                         if (ui.gui.iconconf.notify) {

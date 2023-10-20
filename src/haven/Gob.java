@@ -470,7 +470,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     glob.loader.defer(() -> {
                         if (getattr(GobIcon.class) == null) {
                             if (ctex != null) {
-                                setattr(new GobIcon.CustomGobIcon(Gob.this, ctex));
+                                setattr(new GobIcon.CustomGobIcon(Gob.this, name, ctex));
                                 return;
                             }
                             Resource res = null;
