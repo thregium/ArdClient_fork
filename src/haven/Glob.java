@@ -380,20 +380,20 @@ public class Glob {
 //            int sdl = (int) Math.floor((1 - ast.sp) * (sdt));
 //            if (sdl >= 1)
 //                dayOfMonth = Resource.getLocString(Resource.BUNDLE_LABEL, seasonNames[ast.is]) + String.format(" %d (%d ", (sdp + 1), sdl) + Resource.getLocString(Resource.BUNDLE_LABEL, "left") + String.format(" (%d RL))", nextseason);
-            season = Resource.getLocString(Resource.BUNDLE_LABEL, seasonNames[ast.is]);
-                dayOfMonth = String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Day") + " %d/%d", sdp, sdt);
+            season = Resource.getLocString(Resource.BUNDLE_LABEL, seasonNames[ast.is]) + " " + String.format("(%s%%)", Math.round(ast.sp * 100));
+            dayOfMonth = String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Day") + " %d/%d", sdp, sdt);
 //            else
 //                dayOfMonth = Resource.getLocString(Resource.BUNDLE_LABEL, String.format("Last day of %s", seasonNames[ast.is]));
             int mp = (int) Math.round(ast.mp * mPhaseNames.length) % mPhaseNames.length;
             phaseOfMoon = String.format("$col[%s,%s,%s]{%s}", ast.mc.getRed(), ast.mc.getGreen(), ast.mc.getBlue(), Resource.getLocString(Resource.BUNDLE_LABEL, mPhaseNames[mp] + " Moon"));
-            month = Resource.getLocString(Resource.BUNDLE_LABEL, "Month") + " " + (int) (Math.floor(ast.ym) + 1);
-            year = Resource.getLocString(Resource.BUNDLE_LABEL, "Year") + " " + ((int) Math.floor(ast.years) + 1);
+            month = Resource.getLocString(Resource.BUNDLE_LABEL, "Month") + " " + String.format("%s/%s", (int) (Math.floor(ast.ym) + 1), Math.round(ast.ym / ast.yt) + 1);
+            year = Resource.getLocString(Resource.BUNDLE_LABEL, "Year") + " " + String.format("%s (%s%%)", ((int) Math.floor(ast.years) + 1), Math.round(ast.yt * 100));
             dayTime = Resource.getLocString(Resource.BUNDLE_LABEL, ast.dt >= 0.2 && ast.dt < 0.3 ? "Dawn" : (ast.night ? "Night" : "Day"));
         }
 
         tservertime = String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Time") + " %02d:%02d:%02d", hours, mins, seconds) + (dayTime.isEmpty() ? "" : ", " + dayTime);
-        dservertime = String.format("%s (%s)", dayOfMonth, day);
-        yservertime = String.format("%s. %s. %s", month, season, year);
+        dservertime = String.format("%s (%s). %s", dayOfMonth, day, month);
+        yservertime = String.format("%s. %s", season, year);
         mservertime = phaseOfMoon;
         if (secintoday >= dewyladysmantletimemin && secintoday <= dewyladysmantletimemax)
             bservertime = Resource.getLocString(Resource.BUNDLE_LABEL, "(Dewy Lady's Mantle)");

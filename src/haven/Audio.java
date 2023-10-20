@@ -608,22 +608,30 @@ public class Audio {
         }
     }
 
-    public static void play(Resource res) {
+    private static void playUnqueued(Resource res) {
         if (res.name.equals("sfx/msg"))
             play(res, Config.sfxdingvol);
         else
             play(fromres(res));
     }
 
-    public static void play(Resource res, double vol) {
+    public static void play(Resource res) {
+        queue(() -> playUnqueued(res));
+    }
+
+    private static void playUnqueued(Resource res, double vol) {
         play(new Audio.VolAdjust(fromres(res), vol));
+    }
+
+    public static void play(Resource res, double vol) {
+        queue(() -> playUnqueued(res, vol));
     }
 
     public static void play(final Indir<Resource> clip) {
         queue(new Runnable() {
             public void run() {
                 try {
-                    play(clip.get());
+                    playUnqueued(clip.get());
                 } catch (Loading e) {
                     queue(this);
                 } catch (Exception exc) {
@@ -637,7 +645,7 @@ public class Audio {
         queue(new Runnable() {
             public void run() {
                 try {
-                    play(clip.get(), vol);
+                    playUnqueued(clip.get(), vol);
                 } catch (Loading e) {
                     queue(this);
                 } catch (Exception exc) {
@@ -648,23 +656,25 @@ public class Audio {
     }
 
     public static void play(String sound, double vol) {
-        File file = new File(sound);
-        if (!file.exists() || file.isDirectory()) {
-            System.out.println("Error while playing an alarm, file " + file.getAbsolutePath() + " does not exist!");
-        } else
-            try {
-                AudioInputStream in = AudioSystem.getAudioInputStream(file);
-                AudioFormat tgtFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100, 16, 2, 4, 44100, false);
-                AudioInputStream pcmStream = AudioSystem.getAudioInputStream(tgtFormat, in);
-                Audio.CS klippi = new Audio.PCMClip(pcmStream, 2);
-                ((Audio.Mixer) Audio.player.stream).add(new Audio.VolAdjust(klippi, vol));
-            } catch (UnsupportedAudioFileException e) {
-                System.out.println("UnsupportedAudioFileException");
-                e.printStackTrace();
-            } catch (IOException e) {
-                System.out.println("IOException");
-                e.printStackTrace();
-            }
+        queue(() -> {
+            File file = new File(sound);
+            if (!file.exists() || file.isDirectory()) {
+                System.out.println("Error while playing an alarm, file " + file.getAbsolutePath() + " does not exist!");
+            } else
+                try {
+                    AudioInputStream in = AudioSystem.getAudioInputStream(file);
+                    AudioFormat tgtFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100, 16, 2, 4, 44100, false);
+                    AudioInputStream pcmStream = AudioSystem.getAudioInputStream(tgtFormat, in);
+                    Audio.CS klippi = new Audio.PCMClip(pcmStream, 2);
+                    ((Audio.Mixer) Audio.player.stream).add(new Audio.VolAdjust(klippi, vol));
+                } catch (UnsupportedAudioFileException e) {
+                    System.out.println("UnsupportedAudioFileException");
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    System.out.println("IOException");
+                    e.printStackTrace();
+                }
+        });
     }
 
     public static void main(String[] args) throws Exception {
