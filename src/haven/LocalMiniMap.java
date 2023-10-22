@@ -612,7 +612,7 @@ public class LocalMiniMap extends Widget {
             }
         }
         for (Gob gob : dangergobs) {
-            if (gob.type == Type.HUMAN && gob.id != mv.player().id) {
+            if (gob.type == Type.HUMAN && player != null && gob.id != player.id) {
                 if (ui.sess.glob.party.memb.containsKey(gob.id))
                     continue;
 

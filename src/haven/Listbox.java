@@ -95,6 +95,8 @@ public abstract class Listbox<T> extends ListWidget<T> {
                 if (idx >= n)
                     break;
                 T item = listitem(idx);
+                if (item == null)
+                    continue;
                 int w = sz.x - (sb.vis() ? sb.sz.x : 0);
                 GOut ig = g.reclip(new Coord(0, i * itemh), new Coord(w, itemh));
                 if (item == sel)

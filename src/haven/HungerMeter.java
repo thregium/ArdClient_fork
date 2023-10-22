@@ -25,7 +25,7 @@ public class HungerMeter extends IMeter {
     @Override
     public void tick(double dt) {
         super.tick(dt);
-        updatemeterinfo(String.format("%.2f\u2030:%d%%", glut.lglut * 1000, Math.round(glut.gmod * 100)));
+        updatemeterinfo(String.format("%s‰:%s%%", Utils.odformat2(glut.lglut * 1000, 1), Math.round(glut.gmod * 100)));
     }
 
     @Override

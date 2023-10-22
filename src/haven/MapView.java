@@ -1520,8 +1520,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         // This solution is bad but currently no better avaible
         if (Config.skybox) {
             boolean skyb = true;
-            if (player() != null) {
-                Coord pltc = new Coord((int) player().getc().x / 11, (int) player().getc().y / 11);
+            Gob player = player();
+            if (player != null) {
+                Coord pltc = new Coord((int) player.getc().x / 11, (int) player.getc().y / 11);
                 for (int x = -44; x < 44; x++) {
                     for (int y = -44; y < 44; y++) {
                         try {

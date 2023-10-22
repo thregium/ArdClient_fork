@@ -1229,22 +1229,6 @@ public class Config {
         } catch (Exception e) {
         }
 
-
-        // populate grid ids map
-        try {
-            Path file = Paths.get("grid_ids.txt");
-            List<String> lines = Files.readAllLines(file);
-            for (String line : lines) {
-                String[] tknzed = line.split(",");
-                try {
-                    gridIdsMap.put(Long.parseLong(tknzed[2]), Coord.of(Integer.parseInt(tknzed[0]), Integer.parseInt(tknzed[1])));
-                } catch (NumberFormatException nfe) {
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         loadLogins();
         Iconfinder.loadConfig();
     }

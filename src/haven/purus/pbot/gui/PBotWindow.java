@@ -1,6 +1,7 @@
 package haven.purus.pbot.gui;
 
 import haven.Coord;
+import haven.UI;
 import haven.Widget;
 import haven.Window;
 import haven.purus.pbot.PBotError;
@@ -47,7 +48,7 @@ public class PBotWindow extends Window {
                 t.start();
             }
         };
-        add(button, new Coord(x, y));
+        add(button, UI.scale(x, y));
         return button;
     }
 
@@ -77,7 +78,7 @@ public class PBotWindow extends Window {
                 t.start();
             }
         };
-        add(checkbox, new Coord(x, y));
+        add(checkbox, UI.scale(x, y));
         return checkbox;
     }
 

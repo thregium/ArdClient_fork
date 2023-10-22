@@ -428,7 +428,8 @@ public class CharWnd extends Window {
         }
 
         protected El listitem(int i) {
-            return (els.get(order[i]));
+            Integer ii = order[i];
+            return (ii == null ? null : els.get(ii));
         }
 
         protected int listitems() {

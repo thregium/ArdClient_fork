@@ -701,14 +701,14 @@ public class PBotUtils {
      * @return PBotWindow object
      */
     public static PBotWindow PBotWindow(UI ui, String title, int height, int width, String id) {
-        PBotWindow window = new PBotWindow(new Coord(width, height), title, id);
-        ui.gui.add(window, 300, 300);
+        PBotWindow window = new PBotWindow(UI.scale(width, height), title, id);
+        ui.gui.add(window, UI.scale(300, 300));
         return window;
     }
 
     public static PBotWindow PBotWindow(UI ui, String title, int height, int width, String id, boolean killable) {
-        PBotWindow window = new PBotWindow(new Coord(width, height), title, id, killable);
-        ui.gui.add(window, 300, 300);
+        PBotWindow window = new PBotWindow(UI.scale(width, height), title, id, killable);
+        ui.gui.add(window, UI.scale(300, 300));
         return window;
     }
 
