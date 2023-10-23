@@ -908,7 +908,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             if (isplayer()) {
                 if (glob.ui != null) {
                     UI ui = glob.ui.get();
-                    if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui != null && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                    if (!configuration.endpoint.isEmpty() && ui != null && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                         if (!ui.gui.chrid.isEmpty()) {
                             String username = ui.sess.username + "/" + ui.gui.chrid;
                             if (configuration.loadMapSetting(username, "mapper")) {

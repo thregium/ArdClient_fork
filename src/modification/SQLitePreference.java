@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.prefs.AbstractPreferences;
 import java.util.prefs.BackingStoreException;
@@ -66,6 +67,7 @@ public class SQLitePreference extends AbstractPreferences {
 
     @Override
     protected void putSpi(final String key, final String value) {
+        map.put(key, value);
         storage.write(sql -> {
             final PreparedStatement stmt = storage.prepare("INSERT OR REPLACE INTO " + nodeName + " VALUES (? , ?)");
             stmt.setString(1, key);
@@ -74,15 +76,21 @@ public class SQLitePreference extends AbstractPreferences {
         });
     }
 
+    private final Map<String, String> map = Collections.synchronizedMap(new WeakHashMap<>());
     @Override
     protected String getSpi(final String key) {
+        String get = map.get(key);
+        if (get != null)
+            return (get);
         final AtomicReference<String> ret = new AtomicReference<>();
         storage.ensure(sql -> {
             final PreparedStatement stmt = storage.prepare("SELECT data FROM " + nodeName + " WHERE name = ?");
             stmt.setString(1, key);
             try (final ResultSet res = stmt.executeQuery()) {
                 if (res.next()) {
-                    ret.set(res.getString(1));
+                    String value = res.getString(1);
+                    map.put(key, value);
+                    ret.set(value);
                 }
             }
         });
@@ -91,6 +99,9 @@ public class SQLitePreference extends AbstractPreferences {
 
     @Override
     protected void removeSpi(final String key) {
+        String get = map.get(key);
+        if (get != null)
+            map.remove(key, get);
         storage.write(sql -> {
             final PreparedStatement stmt = storage.prepare("DELETE FROM " + nodeName + " WHERE name = ?");
             stmt.setString(1, key);

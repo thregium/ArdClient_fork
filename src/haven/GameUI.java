@@ -436,7 +436,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         }
 
         if (!chrid.isEmpty() && ui.sess != null) {
-            String endpoint = Utils.getpref("vendan-mapv4-endpoint", "");
+            String endpoint = configuration.endpoint;
             Glob glob = ui.sess.glob;
             String username = ui.sess.username + "/" + chrid;
             if (glob != null && !endpoint.isEmpty()) {
@@ -1964,7 +1964,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             if (menuSearch.visible()) {
                 menuSearch.raise();
                 fitwdg(menuSearch);
-                ui.root.setfocus(menuSearch);
+                setfocus(menuSearch);
                 if (k.mods == 4)
                     menuSearch.ignoreinit = true;
             }

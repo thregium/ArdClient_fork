@@ -80,7 +80,7 @@ public class MinimapWnd extends ResizableWnd {
                 try {
                     search:
                     {
-                        if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                        if (!configuration.endpoint.isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                             if (!ui.gui.chrid.isEmpty()) {
                                 String username = ui.sess.username + "/" + ui.gui.chrid;
                                 if (configuration.loadMapSetting(username, "mapper")) {
@@ -103,7 +103,7 @@ public class MinimapWnd extends ResizableWnd {
 
             @Override
             public void click() {
-                if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                if (!configuration.endpoint.isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                     if (!ui.gui.chrid.isEmpty()) {
                         String username = ui.sess.username + "/" + ui.gui.chrid;
                         if (configuration.loadMapSetting(username, "mapper")) {
@@ -121,24 +121,27 @@ public class MinimapWnd extends ResizableWnd {
             @Override
             public void draw(GOut g) {
                 boolean redraw = false;
-                if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
-                    if (!ui.gui.chrid.isEmpty()) {
-                        String username = ui.sess.username + "/" + ui.gui.chrid;
-                        if (configuration.loadMapSetting(username, "mapper")) {
-                            MappingClient map = MappingClient.getInstance(username);
+                fin:
+                {
+                    if (!configuration.endpoint.isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                        if (!ui.gui.chrid.isEmpty()) {
+                            String username = ui.sess.username + "/" + ui.gui.chrid;
+                            if (configuration.loadMapSetting(username, "mapper")) {
+                                MappingClient map = MappingClient.getInstance(username);
                                 MappingClient.MapRef mr = map.lastMapRef;
                                 if (mr != null) {
                                     if (state != 2) {
                                         state = 2;
                                         redraw = true;
-                                    }
-                                } else {
-                                    if (state != 0) {
-                                        state = 0;
-                                        redraw = true;
+                                        break fin;
                                     }
                                 }
+                            }
                         }
+                    }
+                    if (state != 0) {
+                        state = 0;
+                        redraw = true;
                     }
                 }
                 if (redraw) this.redraw();

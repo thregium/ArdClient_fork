@@ -825,7 +825,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         Gob player = player();
         if (player != null) {
             Coord2d c = player.rc;
-            if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && glob.sess != null && glob.sess.alive() && glob.sess.username != null && ui.gui != null) {
+            if (!configuration.endpoint.isEmpty() && glob.sess != null && glob.sess.alive() && glob.sess.username != null && ui.gui != null) {
                 if (!ui.gui.chrid.isEmpty()) {
                     String username = ui.sess.username + "/" + ui.gui.chrid;
                     if (configuration.loadMapSetting(username, "mapper")) {

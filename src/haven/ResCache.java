@@ -37,6 +37,9 @@ import java.io.OutputStream;
 public interface ResCache {
 
     OutputStream store(String name) throws IOException;
+    default OutputStream storeNow(String name) throws IOException {
+        return (store(name));
+    }
 
     InputStream fetch(String name) throws IOException;
 

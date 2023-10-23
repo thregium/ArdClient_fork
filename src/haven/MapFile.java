@@ -158,7 +158,7 @@ public class MapFile {
             });
         }
         synchronized (pp.b) {
-            return (store.store(name));
+            return (store.storeNow(name));
         }
     }
 

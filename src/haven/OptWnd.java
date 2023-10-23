@@ -276,13 +276,14 @@ public class OptWnd extends Window {
         appender.add(new Label("Online Auto-Mapper Service:"));
 
         appender.addRow(new Label("Server URL:"),
-                new TextEntry(UI.scale(240), Utils.getpref("vendan-mapv4-endpoint", "")) {
+                new TextEntry(UI.scale(240), configuration.endpoint) {
                     public boolean keydown(KeyEvent ev) {
                         if (!parent.visible)
                             return false;
                         String text = text();
+                        configuration.endpoint = text;
                         Utils.setpref("vendan-mapv4-endpoint", text);
-                        if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                        if (!configuration.endpoint.isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                             if (!ui.gui.chrid.isEmpty()) {
                                 String username = ui.sess.username + "/" + ui.gui.chrid;
                                 MappingClient map = MappingClient.getInstance(username);
@@ -303,7 +304,7 @@ public class OptWnd extends Window {
 
         appender.add(new CheckBox("Enable mapv4 mapper") {
             public void set(boolean val) {
-                if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                if (!configuration.endpoint.isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                     if (!ui.gui.chrid.isEmpty()) {
                         String username = ui.sess.username + "/" + ui.gui.chrid;
                         configuration.saveMapSetting(username, val, "mapper");
@@ -317,7 +318,7 @@ public class OptWnd extends Window {
 
             public void tick(double dt) {
                 super.tick(dt);
-                if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                if (!configuration.endpoint.isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                     if (!ui.gui.chrid.isEmpty()) {
                         String username = ui.sess.username + "/" + ui.gui.chrid;
                         boolean b = configuration.loadMapSetting(username, "mapper");
@@ -345,7 +346,7 @@ public class OptWnd extends Window {
 //        });
         appender.add(new CheckBox("Enable navigation tracking") {
             public void set(boolean val) {
-                if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                if (!configuration.endpoint.isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                     if (!ui.gui.chrid.isEmpty()) {
                         String username = ui.sess.username + "/" + ui.gui.chrid;
                         configuration.saveMapSetting(username, val, "track");
@@ -358,7 +359,7 @@ public class OptWnd extends Window {
 
             public void tick(double dt) {
                 super.tick(dt);
-                if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                if (!configuration.endpoint.isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                     if (!ui.gui.chrid.isEmpty()) {
                         String username = ui.sess.username + "/" + ui.gui.chrid;
                         boolean b = configuration.loadMapSetting(username, "track");

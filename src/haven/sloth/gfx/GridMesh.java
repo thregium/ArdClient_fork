@@ -78,7 +78,7 @@ public class GridMesh extends FastMesh {
         ShortBuffer inds = Utils.mksbuf(area * 2 * 3);
         float zoff = 0.2f;
 
-        int offset = Utils.getprefi("slothgridoffset", 0);
+        int offset = Config.slothgridoffset;
         Coord c = new Coord();
         Coord3f me;
         int z;

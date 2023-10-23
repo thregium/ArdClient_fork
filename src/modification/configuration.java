@@ -67,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -1019,7 +1020,13 @@ public class configuration {
 //        }
 //    }
 
+    public static String endpoint = Utils.getpref("vendan-mapv4-endpoint", "");
+    private static final Map<String, Boolean> mapSettings = Collections.synchronizedMap(new WeakHashMap<>());
+
     public static boolean loadMapSetting(String username, String type) {
+        Boolean ret = mapSettings.get(username + type);
+        if (ret != null)
+            return (ret);
         try {
             String loginsjson = Utils.getpref("json-vendan-mapv4", null);
             if (loginsjson == null) {
@@ -1028,6 +1035,7 @@ public class configuration {
                 jo.put("name", username);
                 jo.put(type, true);
                 ja.put(jo);
+                mapSettings.put(username + type, true);
                 Utils.setpref("json-vendan-mapv4", ja.toString());
                 return (true);
             }
@@ -1038,8 +1046,9 @@ public class configuration {
                     boolean bol = true;
                     try {
                         bol = jo.get(type).toString().equals("true");
+                        mapSettings.put(username + type, bol);
                     } catch (Exception ignored) {
-                        configuration.saveMapSetting(username, bol, type);
+                        configuration.saveMapSetting(username, true, type);
                     }
                     return (bol);
                 }
@@ -1047,10 +1056,12 @@ public class configuration {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        mapSettings.put(username + type, true);
         return (true);
     }
 
     public static void saveMapSetting(String username, boolean bol, String type) {
+        mapSettings.put(username + type, bol);
         try {
             String loginsjson = Utils.getpref("json-vendan-mapv4", null);
             JSONArray ja;

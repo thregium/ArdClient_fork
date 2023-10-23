@@ -629,7 +629,7 @@ public class LocalMiniMap extends Widget {
                         return (null);
                     });
                     if (Config.discordplayeralert) {
-                        if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                        if (!configuration.endpoint.isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                             if (!ui.gui.chrid.isEmpty()) {
                                 String username = ui.sess.username + "/" + ui.gui.chrid;
                                 if (Config.discorduser) {
@@ -650,7 +650,7 @@ public class LocalMiniMap extends Widget {
                         return (null);
                     });
                     if (Config.discordplayeralert) {
-                        if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                        if (!configuration.endpoint.isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                             if (!ui.gui.chrid.isEmpty()) {
                                 String username = ui.sess.username + "/" + ui.gui.chrid;
                                 if (Config.discorduser) {

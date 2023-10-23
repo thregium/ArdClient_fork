@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
@@ -25,7 +26,7 @@ import java.util.regex.Pattern;
  */
 public class Storage {
     private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-    private final Executor writerHandler = Executors.newWorkStealingPool();
+    private final ExecutorService writerHandler = Executors.newWorkStealingPool();
     public static final Storage dynamic, overlays;
 
     static {
@@ -165,7 +166,7 @@ public class Storage {
      */
     public void write(final SQLCallback callback) {
         final StackTraceElement[] stack = Thread.currentThread().getStackTrace();
-        writerHandler.execute(() -> {
+        writerHandler.submit(() -> {
             try {
                 synchronized (conn) {
                     callback.run(conn);

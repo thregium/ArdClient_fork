@@ -477,7 +477,7 @@ public class WItem extends Widget implements DTarget2 {
         } else if (btn == 3) {
             if (ui.modflags() == 0 && item.contents != null) {
                 boolean ex = item.contentswnd == null;
-                if (item.contents.getClass().toString().contains("ItemStack")) {
+                if (item.contents.getClass().toString().contains("ItemStack") && !ex) {//only close
                     item.showcontwnd(ex);
                 } else {
                     item.wdgmsg("iact", c, ui.modflags());

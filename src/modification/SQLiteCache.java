@@ -85,6 +85,21 @@ public class SQLiteCache implements ResCache {
     }
 
     @Override
+    public OutputStream storeNow(String name) throws IOException {
+        return (new ByteArrayOutputStream() {
+            @Override
+            public void close() {
+                storage.writeAndWait(sql -> {
+                    final PreparedStatement stmt = storage.prepare("INSERT OR REPLACE INTO database VALUES (? , ?)");
+                    stmt.setString(1, name);
+                    stmt.setBytes(2, toByteArray());
+                    stmt.executeUpdate();
+                });
+            }
+        });
+    }
+
+    @Override
     public InputStream fetch(String name) throws IOException {
         final AtomicReference<InputStream> ret = new AtomicReference<>();
         storage.ensure(sql -> {

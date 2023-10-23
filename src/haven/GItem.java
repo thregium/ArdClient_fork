@@ -702,7 +702,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
                 if ((this.contents != null) && (contentswnd == null)) {
                     Widget cont = contparent();
                     this.contents.unlink();
-                    contentswdg = cont.add(new Contents(this, this.contents), ui.mc.add(1, 1)); //hovering.parentpos(cont, hovering.sz.sub(UI.scale(5, 5)).sub(Contents.hovermarg))
+                    contentswdg = cont.add(new Contents(this, this.contents), ui.mc.add(2, 2)); //hovering.parentpos(cont, hovering.sz.sub(UI.scale(5, 5)).sub(Contents.hovermarg))
                     contentswdg.hovering = true;
                 }
             }
@@ -843,6 +843,14 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
                 dm = ui.grabmouse(this);
                 doff = c;
                 return (true);
+            } else if (btn == 3) {
+                inv.unlink();
+                ContentsWindow wnd = new ContentsWindow(cont, inv);
+                cont.contentswnd = parent.add(wnd, this.c);
+                wnd.drag(doff);
+                invdest = true;
+                destroy();
+                cont.contentswdg = null;
             }
             return (false);
         }

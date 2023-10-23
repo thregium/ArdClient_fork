@@ -817,7 +817,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
                     if (ui.modflags() == 0) {
                         List<Pair<String, Runnable>> list = new ArrayList<>();
                         list.add(new Pair<>("Focus", () -> clickmarker(mark, 1)));
-                        if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+                        if (!configuration.endpoint.isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                             if (!ui.gui.chrid.isEmpty()) {
                                 String username = ui.sess.username + "/" + ui.gui.chrid;
                                 MappingClient map = MappingClient.getInstance(username);
@@ -1257,7 +1257,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
     }
 
     public void uploadMarks() {
-        if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+        if (!configuration.endpoint.isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
             if (!ui.gui.chrid.isEmpty()) {
                 String username = ui.sess.username + "/" + ui.gui.chrid;
                 if (configuration.loadMapSetting(username, "mapper")) {
@@ -1277,7 +1277,7 @@ public class MapFileWidget extends Widget implements Console.Directory {
     }
 
     public void uploadMark(Marker marker) {
-        if (!Utils.getpref("vendan-mapv4-endpoint", "").isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
+        if (!configuration.endpoint.isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
             if (!ui.gui.chrid.isEmpty()) {
                 String username = ui.sess.username + "/" + ui.gui.chrid;
                 if (configuration.loadMapSetting(username, "mapper")) {
