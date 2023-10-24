@@ -453,8 +453,8 @@ public class MapWnd extends ResizableWnd {
                                         if (state != 2) {
                                             state = 2;
                                             redraw = true;
-                                            break fin;
                                         }
+                                        break fin;
                                     }
                                 }
                             }

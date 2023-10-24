@@ -79,6 +79,8 @@ import java.util.stream.Collectors;
 public class AreaPicker extends Window implements Runnable {
     public static final String scriptname = "Area Picker";
     public static final String[] collectstates = new String[]{"Inventory", "Drop out of hand", "Storage", "Create Stockpiles (WIP)"};
+    public static final String ACTION_START = "Action:";
+    public static final List<String> actions = Arrays.asList("Inspect", "Repair", "Destroy", "Lift");
     public final WidgetVerticalAppender appender = new WidgetVerticalAppender(this);
     public Thread runthread;
     public boolean block = false;
@@ -139,7 +141,7 @@ public class AreaPicker extends Window implements Runnable {
             }
         };
 
-        selectgobbtn = new Button(50, "Select area") {
+        selectgobbtn = new Button(UI.scale(50), "Select area") {
             {
                 change(Color.RED);
             }
@@ -155,14 +157,14 @@ public class AreaPicker extends Window implements Runnable {
                 else return (super.mousedown(c, btn));
             }
         };
-        selectedgobbtn = new Button(50, "Gob list") {
+        selectedgobbtn = new Button(UI.scale(50), "Gob list") {
             {
                 change(Color.RED);
             }
 
             @Override
             public void click() {
-                if (selectedgoblist.size() == 0) {
+                if (selectedgoblist.isEmpty()) {
                     debugLogPing("Select area with objects", Color.WHITE);
                 } else {
                     if (!ui.gui.containschild(selectedgobwnd))
@@ -196,7 +198,7 @@ public class AreaPicker extends Window implements Runnable {
                     protected void drawitemname(GOut g, CheckListboxItem itm) {
                         Text t = Text.render(configuration.getShortName(itm.name) + " (" + itm.name.substring(0, itm.name.lastIndexOf('/')) + ")");
                         Tex T = t.tex();
-                        g.image(T, new Coord(2, 2), t.sz());
+                        g.image(T, UI.scale(2, 2), t.sz());
                         T.dispose();
                     }
                 };
@@ -238,7 +240,7 @@ public class AreaPicker extends Window implements Runnable {
         };
         areagobinfolbl = new Label("");
 
-        selectedflowerbtn = new Button(50, "Flower list") {
+        selectedflowerbtn = new Button(UI.scale(50), "Flower list") {
             @Override
             public void click() {
                 if (!ui.gui.containschild(selectedflowerwnd))
@@ -250,9 +252,10 @@ public class AreaPicker extends Window implements Runnable {
         selectedflowerwnd = new Window(Coord.z, "Selecting petals") {
             {
                 WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
-                flowermenulist.forEach((i) -> selectedflowerlist.add(new CheckListboxItem(i)));
+                actions.forEach(i -> selectedflowerlist.add(new CheckListboxItem(ACTION_START +i)));
+                flowermenulist.forEach(i -> selectedflowerlist.add(new CheckListboxItem(i)));
                 final List<String> temp = new ArrayList<>();
-                flowermenulist.forEach((s) -> {
+                flowermenulist.forEach(s -> {
                     String loc = Resource.language.equals("en") ? s : Resource.getLocString(Resource.BUNDLE_FLOWER, s);
                     temp.add(Resource.language.equals("en") ? s : loc.equals(s) ? s : s + " (" + Resource.getLocString(Resource.BUNDLE_FLOWER, s) + ")");
                 });
@@ -276,7 +279,7 @@ public class AreaPicker extends Window implements Runnable {
                     protected void drawitemname(GOut g, CheckListboxItem itm) {
                         String loc = Resource.language.equals("en") ? itm.name : Resource.getLocString(Resource.BUNDLE_FLOWER, itm.name);
                         Tex t = Text.render(Resource.language.equals("en") ? itm.name : loc.equals(itm.name) ? itm.name : itm.name + " (" + Resource.getLocString(Resource.BUNDLE_FLOWER, itm.name) + ")").tex();
-                        g.image(t, new Coord(2, 2), t.sz());
+                        g.image(t, UI.scale(2, 2), t.sz());
                         t.dispose();
                     }
                 };
@@ -344,7 +347,7 @@ public class AreaPicker extends Window implements Runnable {
                 String item = sel;
                 if (item != null) {
                     int x = Text.render(item).sz().x;
-                    if (sz.x != x + Dropbox.drop.sz().x + 2) resize(new Coord(x + Dropbox.drop.sz().x + 2, sz.y));
+                    if (sz.x != x + Dropbox.drop.sz().x + UI.scale(2)) resize(new Coord(x + Dropbox.drop.sz().x + UI.scale(2), sz.y));
                 }
             }
 
@@ -359,7 +362,7 @@ public class AreaPicker extends Window implements Runnable {
         };
         collecttriggerdbx.selindex = -1;
 
-        selectstoragebtn = new Button(50, "Select area") {
+        selectstoragebtn = new Button(UI.scale(50), "Select area") {
             {
                 change(Color.RED);
             }
@@ -375,14 +378,14 @@ public class AreaPicker extends Window implements Runnable {
                 else return (super.mousedown(c, btn));
             }
         };
-        selectedstoragebtn = new Button(50, "Storage list") {
+        selectedstoragebtn = new Button(UI.scale(50), "Storage list") {
             {
                 change(Color.RED);
             }
 
             @Override
             public void click() {
-                if (selectedstoragelist.size() == 0) {
+                if (selectedstoragelist.isEmpty()) {
                     debugLogPing("Select area with objects", Color.WHITE);
                 } else {
                     if (!ui.gui.containschild(selectedstoragewnd))
@@ -416,7 +419,7 @@ public class AreaPicker extends Window implements Runnable {
                     protected void drawitemname(GOut g, CheckListboxItem itm) {
                         Text t = Text.render(configuration.getShortName(itm.name) + " (" + itm.name.substring(0, itm.name.lastIndexOf('/')) + ")");
                         Tex T = t.tex();
-                        g.image(T, new Coord(2, 2), t.sz());
+                        g.image(T, UI.scale(2, 2), t.sz());
                         T.dispose();
                     }
                 };
@@ -458,7 +461,7 @@ public class AreaPicker extends Window implements Runnable {
         };
         areastorageinfolbl = new Label("");
 
-        selecteditembtn = new Button(50, "Item list") {
+        selecteditembtn = new Button(UI.scale(50), "Item list") {
             @Override
             public void click() {
                 if (!ui.gui.containschild(selecteditemwnd))
@@ -558,7 +561,7 @@ public class AreaPicker extends Window implements Runnable {
                         return (true);
                     }
                 };
-                selecteditemaddbtn = new Button(50, "Add") {
+                selecteditemaddbtn = new Button(UI.scale(50), "Add") {
                     @Override
                     public void click() {
                         if (!isblocked()) {
@@ -582,13 +585,13 @@ public class AreaPicker extends Window implements Runnable {
         iteminfolbl = new Label("");
         updateinfo("item");
 
-        runbtn = new Button(50, "Run") {
+        runbtn = new Button(UI.scale(50), "Run") {
             @Override
             public void click() {
                 (runthread = new Thread(AreaPicker.this, "Area Collecting")).start();
             }
         };
-        stopbtn = new Button(50, "Stop") {
+        stopbtn = new Button(UI.scale(50), "Stop") {
             @Override
             public void click() {
                 try {
@@ -597,7 +600,7 @@ public class AreaPicker extends Window implements Runnable {
                 }
             }
         };
-        pausumebtn = new Button(50, "Pause") {
+        pausumebtn = new Button(UI.scale(50), "Pause") {
             @Override
             public void click() {
                 if (runthread.isAlive()) {
@@ -610,7 +613,7 @@ public class AreaPicker extends Window implements Runnable {
             }
         };
 
-        loadbtn = new Button(50, "Load") {
+        loadbtn = new Button(UI.scale(50), "Load") {
             final List<Trinity<Button, Button, Button>> rows = new ArrayList<>();
 
             private void acceptTask(final String name, final Object task) {
@@ -664,9 +667,9 @@ public class AreaPicker extends Window implements Runnable {
 
                 WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
                 for (String name : object.keySet().stream().sorted(String::compareToIgnoreCase).collect(Collectors.toList())) {
-                    final Button btn = new Button(50, name, () -> acceptTask(name, object.get(name)));
-                    final Button cl = new Button(24, "X", () -> removeTask(w, object, name));
-                    final Button exp = new Button(24, "Export", () -> exportTask(name, object.get(name)));
+                    final Button btn = new Button(UI.scale(50), name, () -> acceptTask(name, object.get(name)));
+                    final Button cl = new Button(UI.scale(24), "X", () -> removeTask(w, object, name));
+                    final Button exp = new Button(UI.scale(24), "Export", () -> exportTask(name, object.get(name)));
                     exp.settip("Export task to clipboard");
                     rows.add(new Trinity<>(btn, cl, exp));
                     wva.addRow(btn, cl, exp);
@@ -692,7 +695,7 @@ public class AreaPicker extends Window implements Runnable {
                 });
             }
         };
-        savebtn = new Button(50, "Save") {
+        savebtn = new Button(UI.scale(50), "Save") {
             @Override
             public void click() {
                 Optional.ofNullable(getparent(GameUI.class)).ifPresent(gui -> {
@@ -715,13 +718,13 @@ public class AreaPicker extends Window implements Runnable {
                         if (object.has(name)) {
                             Window rw = new Window(Coord.z, "Rewrite task?");
                             WidgetVerticalAppender wva = new WidgetVerticalAppender(rw);
-                            wva.addRow(new Button(45, "Yes") {
+                            wva.addRow(new Button(UI.scale(45), "Yes") {
                                 @Override
                                 public void click() {
                                     run.accept(name);
                                     rw.close();
                                 }
-                            }, new Button(45, "No") {
+                            }, new Button(UI.scale(45), "No") {
                                 @Override
                                 public void click() {
                                     rw.close();
@@ -735,7 +738,7 @@ public class AreaPicker extends Window implements Runnable {
                     };
                     WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
                     wva.add(new Label("Set task name:"));
-                    final TextEntry value = new TextEntry(150, "") {
+                    final TextEntry value = new TextEntry(UI.scale(150), "") {
                         @Override
                         public void activate(String text) {
                             if (!text.isEmpty()) {
@@ -743,7 +746,7 @@ public class AreaPicker extends Window implements Runnable {
                             }
                         }
                     };
-                    wva.addRow(value, new Button(45, "Save") {
+                    wva.addRow(value, new Button(UI.scale(45), "Save") {
                         @Override
                         public void click() {
                             final String text = value.text();
@@ -757,7 +760,7 @@ public class AreaPicker extends Window implements Runnable {
                 });
             }
         };
-        exportbtn = new Button(50, "Export", () -> {
+        exportbtn = new Button(UI.scale(50), "Export", () -> {
             try {
                 Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
                 cb.setContents(new StringSelection(taskToObject().toString()), null);
@@ -768,7 +771,7 @@ public class AreaPicker extends Window implements Runnable {
             }
         });
         exportbtn.settip("Export task to clipboard");
-        importbtn = new Button(50, "Import", () -> {
+        importbtn = new Button(UI.scale(50), "Import", () -> {
             try {
                 if (taskFromObject(new JSONObject((String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor)))) AreaPicker.this.pack();
                 debugLogPing(String.format("Task is imported from clipboard"), Color.GREEN);
@@ -783,7 +786,7 @@ public class AreaPicker extends Window implements Runnable {
         appender.setVerticalMargin(2);
         appender.addRow(maininfolbl);
         appender.addRow(l1 = new Label("1. Objects to collect"), selectgobbtn, selectedgobbtn, areagobinfolbl);
-        appender.addRow(l2 = new Label("2. Flower Petal"), selectedflowerbtn, flowerpetalsinfolbl);
+        appender.addRow(l2 = new Label("2. Action"), selectedflowerbtn, flowerpetalsinfolbl);
         appender.addRow(l3 = new Label("3. Storage type"), collecttriggerdbx);
         appender.addRow(l4 = new Label("4. Objects to storage"), selectstoragebtn, selectedstoragebtn, areastorageinfolbl);
         appender.addRow(l5 = new Label("5. Items for storage"), selecteditembtn, iteminfolbl);
@@ -856,7 +859,7 @@ public class AreaPicker extends Window implements Runnable {
             selectedgoblbox.resize(calcWidthString(temp), selectedgoblbox.sz.y);
             selectedgobwnd.pack();
             selectedgobsearch.settext("");
-            if (selectedgoblbox.items.size() > 0) selectedgobbtn.change(Color.GREEN);
+            if (!selectedgoblbox.items.isEmpty()) selectedgobbtn.change(Color.GREEN);
             else selectedgobbtn.change(Color.RED);
 
             updatelist("gob");
@@ -930,7 +933,7 @@ public class AreaPicker extends Window implements Runnable {
                     selectedstoragelbox.resize(calcWidthString(temp), selectedstoragelbox.sz.y);
                     selectedstoragewnd.pack();
                     selectedstoragesearch.settext("");
-                    if (selectedstoragelbox.items.size() > 0) selectedstoragebtn.change(Color.GREEN);
+                    if (!selectedstoragelbox.items.isEmpty()) selectedstoragebtn.change(Color.GREEN);
                     else selectedstoragebtn.change(Color.RED);
 
                     updatelist("storage");
@@ -1016,7 +1019,7 @@ public class AreaPicker extends Window implements Runnable {
             final List<PBotGob> storages = new ArrayList<>(currentstoragelist);
             final List<PBotGob> objects = new ArrayList<>(currentgoblist);
             byte cr = checkcollectstate();
-            for (int p = 1; objects.size() > 0; p++) {
+            for (int p = 1; !objects.isEmpty(); p++) {
                 pauseCheck();
                 PBotGob pgob = closestGob(objects);
                 if (pgob == null) {
@@ -1039,7 +1042,7 @@ public class AreaPicker extends Window implements Runnable {
                             }
                         }
                     } else if (cr == 2) {
-                        if (storages.size() == 0) {
+                        if (storages.isEmpty()) {
                             debugLog("Storages is full", Color.WHITE);
                             if (!freeSlots() || PBotUtils.getItemAtHand(ui) != null) {
                                 debugLog("Not enough space for item. Stopping...", Color.WHITE);
@@ -1071,8 +1074,11 @@ public class AreaPicker extends Window implements Runnable {
                         break;
                     }
                     mark(pgob);
+                    //action
+                    //List<String> actions = containsActions(flowers);
                     if (pfRightClick(pgob)) {
-                        if (checkflowers().size() == 0) {
+                        List<String> flowers = checkflowers();
+                        if (flowers.isEmpty()) {
                             debugLog("flowermenu not required", Color.WHITE);
                             if (waitForPickUp(pgob.getGobId())) {
                                 objects.remove(pgob);
@@ -1119,7 +1125,7 @@ public class AreaPicker extends Window implements Runnable {
             }
 
             if (cr == 2) {
-                if (storages.size() == 0) {
+                if (storages.isEmpty()) {
                     debugLog("Storages is full", Color.WHITE);
                     if (!freeSlots() || PBotUtils.getItemAtHand(ui) != null) {
                         debugLog("Not enough space for item. Stopping...", Color.WHITE);
@@ -1133,7 +1139,7 @@ public class AreaPicker extends Window implements Runnable {
                         stop();
                     }
                 }
-                if (getInvItems(selecteditemlist).size() == 0) {
+                if (getInvItems(selecteditemlist).isEmpty()) {
                     debugLog("Inventory is empty", Color.WHITE);
                     stop();
                 }
@@ -1189,7 +1195,7 @@ public class AreaPicker extends Window implements Runnable {
                                         }
                                     }
                                 }
-                                if (getInvItems(selecteditemlist).size() == 0) {
+                                if (getInvItems(selecteditemlist).isEmpty()) {
                                     PBotWindowAPI.closeWindow(w);
                                     waitForWindowClose(w);
                                     finish.run();
@@ -1218,7 +1224,7 @@ public class AreaPicker extends Window implements Runnable {
                                         }
                                     }
                                 }
-                                if (getInvItems(selecteditemlist).size() == 0) {
+                                if (getInvItems(selecteditemlist).isEmpty()) {
                                     PBotWindowAPI.closeWindow(w);
                                     waitForWindowClose(w);
                                     finish.run();
@@ -1353,7 +1359,7 @@ public class AreaPicker extends Window implements Runnable {
         for (CheckListboxItem item : selectedflowerlist)
             if (item.selected)
                 temp.add(item.name);
-        if (temp.size() == 0) return (true);
+        if (temp.isEmpty()) return (true);
 
         pgob.doClick(3, 0);
         waitForFlowerMenu();
@@ -1648,7 +1654,7 @@ public class AreaPicker extends Window implements Runnable {
             selectedgoblbox.resize(calcWidthString(temp), selectedgoblbox.sz.y);
             selectedgobwnd.pack();
             selectedgobsearch.settext("");
-            if (selectedgoblbox.items.size() > 0) selectedgobbtn.change(Color.GREEN);
+            if (!selectedgoblbox.items.isEmpty()) selectedgobbtn.change(Color.GREEN);
             else selectedgobbtn.change(Color.RED);
 
             selectgobbtn.change(Color.GREEN);
@@ -1685,7 +1691,7 @@ public class AreaPicker extends Window implements Runnable {
             selectedstoragelbox.resize(calcWidthString(temp), selectedstoragelbox.sz.y);
             selectedstoragewnd.pack();
             selectedstoragesearch.settext("");
-            if (selectedstoragelbox.items.size() > 0) selectedstoragebtn.change(Color.GREEN);
+            if (!selectedstoragelbox.items.isEmpty()) selectedstoragebtn.change(Color.GREEN);
             else selectedstoragebtn.change(Color.RED);
 
             selectstoragebtn.change(Color.GREEN);
@@ -1782,6 +1788,15 @@ public class AreaPicker extends Window implements Runnable {
         for (CheckListboxItem item : selectedflowerlist) {
             if (item.selected)
                 temp.add(item.name);
+        }
+        return (temp);
+    }
+
+    public List<String> containsActions(List<String> flowers) {
+        final List<String> temp = new ArrayList<>();
+        for (String flower : flowers) {
+            if (flower.startsWith(ACTION_START))
+                temp.add(flower);
         }
         return (temp);
     }
@@ -1883,7 +1898,7 @@ public class AreaPicker extends Window implements Runnable {
 //                pack();
                 break;
             case "flower":
-                flowerpetalsinfolbl.settext(checkflowers().size() > 0 ? checkflowers().toString() : "[Right Click]");
+                flowerpetalsinfolbl.settext(!checkflowers().isEmpty() ? checkflowers().toString() : "[Right Click]");
                 pack();
                 break;
             case "item":
@@ -1935,25 +1950,25 @@ public class AreaPicker extends Window implements Runnable {
 
     public Coord calcDropboxSize(final List<String> list) {
         Optional<Integer> ow = list.stream().map((v) -> Text.render(v).sz().x).collect(Collectors.toList()).stream().reduce(Integer::max);
-        int w = Dropbox.drop.sz().x + 5;
-        if (ow.isPresent() && list.size() > 0)
+        int w = Dropbox.drop.sz().x + UI.scale(5);
+        if (ow.isPresent() && !list.isEmpty())
             w += ow.get();
-        int h = Math.max(list.size() > 0 ? Text.render(list.get(0)).sz().y : 0, 16);
+        int h = Math.max(!list.isEmpty() ? Text.render(list.get(0)).sz().y : 0, UI.scale(16));
         return new Coord(w, h);
     }
 
     public int calcWidthCheckListbox(final List<CheckListboxItem> list) {
         Optional<Integer> ow = list.stream().map((v) -> Text.render(v.name).sz().x).collect(Collectors.toList()).stream().reduce(Integer::max);
-        int w = Scrollbar.sflarp.sz().x + CheckListbox.chk.sz().x + 5;
-        if (ow.isPresent() && list.size() > 0)
+        int w = Scrollbar.sflarp.sz().x + CheckListbox.chk.sz().x + UI.scale(5);
+        if (ow.isPresent() && !list.isEmpty())
             w += ow.get();
         return (w);
     }
 
     public int calcWidthString(final List<String> list) {
         Optional<Integer> ow = list.stream().map((v) -> Text.render(v).sz().x).collect(Collectors.toList()).stream().reduce(Integer::max);
-        int w = Scrollbar.sflarp.sz().x + CheckListbox.chk.sz().x + 5;
-        if (ow.isPresent() && list.size() > 0)
+        int w = Scrollbar.sflarp.sz().x + CheckListbox.chk.sz().x + UI.scale(5);
+        if (ow.isPresent() && !list.isEmpty())
             w += ow.get();
         return (w);
     }

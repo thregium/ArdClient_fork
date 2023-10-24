@@ -2,6 +2,7 @@ package haven.automation;
 
 
 import haven.Coord;
+import haven.FlowerMenu;
 import haven.GameUI;
 import haven.WItem;
 import haven.purus.pbot.PBotUtils;
@@ -32,21 +33,23 @@ public class SplitLogs implements Runnable {
             PBotUtils.debugMsg(gui.ui, "No blocks found.", Color.white);
             return;
         }
-        int startID = gui.ui.next_predicted_id;
-        int iteration = 0;
+//        int startID = gui.ui.next_predicted_id;
+//        int iteration = 0;
         int freespace = PBotUtils.freeSlotsInv(gui.maininv);
         for (WItem item : blocks) {
+            FlowerMenu.setNextSelection("Split");
             item.item.wdgmsg("iact", Coord.z, -1);
-            gui.ui.wdgmsg(startID + iteration, "cl", 0, 0);
-            if (freespace >= 3)
-                iteration = iteration + 6;
-            else if (freespace == 2)
-                iteration = iteration + 5;
-            else if (freespace == 1)
-                iteration = iteration + 4;
-            else
-                iteration = iteration + 3;
-            freespace = freespace - 3;
+//            gui.ui.wdgmsg(startID + iteration, "cl", 0, 0);
+//            if (freespace >= 3)
+//                iteration = iteration + 6;
+//            else if (freespace == 2)
+//                iteration = iteration + 5;
+//            else if (freespace == 1)
+//                iteration = iteration + 4;
+//            else
+//                iteration = iteration + 3;
+//            freespace = freespace - 3;
+            PBotUtils.sleep(50);
         }
         PBotUtils.debugMsg(gui.ui, "Exiting Log Splitter", Color.white);
     }
