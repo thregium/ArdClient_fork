@@ -207,7 +207,9 @@ public abstract class MovableWidget extends Widget {
 
     @Override
     public void mousemove(final Coord mc) {
-        if (dm != null) {
+        UI.Grab dm = this.dm;
+        Coord doff = this.doff;
+        if (dm != null && doff != null) {
             //Preference to this if we're in the middle of moving the widget
             c = c.add(mc.add(doff.inv()));
         } else {
