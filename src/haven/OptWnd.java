@@ -5657,7 +5657,7 @@ public class OptWnd extends Window {
                 Utils.setprefi("combatkeys", item.b);
             }
         };
-        modes.change(combatkeys[Config.combatkeys]);
+        modes.change2(combatkeys[Config.combatkeys]);
         return modes;
     }
 

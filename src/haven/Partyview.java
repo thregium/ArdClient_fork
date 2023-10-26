@@ -64,6 +64,7 @@ public class Partyview extends MovableWidget {
 
     protected void added() {
         update();
+        super.added();
     }
 
     public static class MemberView extends Frame {

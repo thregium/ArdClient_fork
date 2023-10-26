@@ -759,7 +759,7 @@ public class Config {
         Utils.loadcollection("petalcol").forEach(petal -> flowermenus.put(petal, new CheckListboxItem(petal)));
 
         autowindows.put("Inventory", new CheckListboxItem("Inventory"));
-        autowindows.put("Belt", new CheckListboxItem("Belt"));
+//        autowindows.put("Belt", new CheckListboxItem("Belt"));
         autowindows.put("Quest Log", new CheckListboxItem("Quest Log"));
         autowindows.put("Study", new CheckListboxItem("Study"));
         autowindows.put("Equipment", new CheckListboxItem("Equipment"));

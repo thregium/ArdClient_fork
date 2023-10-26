@@ -9,10 +9,10 @@ import org.sqlite.SQLiteDataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
@@ -68,7 +68,7 @@ public class Storage {
     }
 
     private final Connection conn;
-    private final Map<String, PreparedStatement> stmts = new HashMap<>();
+    private final Map<String, PreparedStatement> stmts = Collections.synchronizedMap(new HashMap<>());
 
     private Storage(final String jdbc) throws SQLException {
         this.conn = mkcon(jdbc);
