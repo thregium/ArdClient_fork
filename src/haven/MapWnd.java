@@ -295,7 +295,7 @@ public class MapWnd extends ResizableWnd {
                     else if (item.b.equals("flg"))
                         filter = (m -> m instanceof PMarker);
                     else if (item.b.equals("qst"))
-                        filter = (m -> m instanceof SMarker && ((SMarker) m).res.name.startsWith("gfx/invobjs/small/bush") && ((SMarker) m).res.name.startsWith("gfx/invobjs/small/bumbling") && ((SMarker) m).res.name.startsWith("gfx/terobjs/mm/gianttoad"));
+                        filter = (m -> m instanceof SMarker && (((SMarker) m).res.name.startsWith("gfx/invobjs/small/bush") || ((SMarker) m).res.name.startsWith("gfx/invobjs/small/bumbling") || ((SMarker) m).res.name.startsWith("gfx/terobjs/mm/gianttoad")));
                     else
                         filter = (m -> m instanceof SMarker && ((SMarker) m).res.name.endsWith(item.b));
                     markerseq = -1;
