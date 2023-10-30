@@ -3,6 +3,7 @@ package integrations.food;
 import haven.Defer;
 import haven.ItemInfo;
 import haven.Resource;
+import haven.Utils;
 import haven.res.ui.tt.q.qbuff.QBuff;
 import haven.resutil.FoodInfo;
 import org.json.JSONArray;
@@ -35,8 +36,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
 public class FoodService {
-    public static final String API_ENDPOINT = "https://food.hearthlands.net/api/";
-    private static final String FOOD_DATA_URL = "https://food.hearthlands.net/api/data/food-info.json";
+    public static final String API_ENDPOINT = Utils.getpref("food_service_endpoint_api", "https://food.hearthlands.net/api/");
+    private static final String FOOD_DATA_URL = Utils.getpref("food_service_data_url", "https://food.hearthlands.net/api/data/food-info.json");
     private static final File FOOD_DATA_CACHE_FILE = new File("food_data.json");
     private static String token = "Purus-Pasta-the-new-2";  //Config.confid maybe ArdClient also works
 
