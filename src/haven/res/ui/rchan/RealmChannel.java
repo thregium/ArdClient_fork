@@ -91,7 +91,7 @@ public class RealmChannel extends ChatUI.MultiChat {
                     try {
                         r = ChatUI.fnd.render(text, w, TextAttribute.FOREGROUND, from.color);
                     } catch (Exception e) {
-                        dev.simpleLog(e);
+                        //dev.simpleLog(e);
                         r = ChatUI.fnd.render(RichText.Parser.quote(text), w, TextAttribute.FOREGROUND, from.color);
                     }
                     cn = nm;

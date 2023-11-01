@@ -4991,7 +4991,7 @@ public class OptWnd extends Window {
         int x = 0;
         int y = 0, my = 0;
         studydesksettings.add(new Label("Choose curios to check your studydesk for:"), x, y);
-        y += 15;
+        y += UI.scale(15);
         final CurioList list = studydesksettings.add(new CurioList(), x, y);
 
         y += list.sz.y + UI.scale(5);

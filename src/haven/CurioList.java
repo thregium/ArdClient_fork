@@ -16,7 +16,7 @@ public class CurioList extends WidgetList<CurioList.Item> {
     };
 
     public CurioList() {
-        super(new Coord(200, 25), 10);
+        super(UI.scale(200, 25), 10);
 
         for (Map.Entry<String, Boolean> entry : curioslist.entrySet()) {
             additem(new Item(entry.getKey()));
@@ -82,14 +82,14 @@ public class CurioList extends WidgetList<CurioList.Item> {
         private UI.Grab grab;
 
         public Item(String name) {
-            super(new Coord(200, 25));
+            super(UI.scale(200, 25));
             this.name = name;
 
-            cb = add(new CheckBox(name), 3, 3);
+            cb = add(new CheckBox(name), UI.scale(3, 3));
             cb.a = curioslist.get(name);
             cb.canactivate = true;
 
-            add(new Button(24, "X") {
+            add(new Button(UI.scale(24), "X") {
                 @Override
                 public void click() {
                     super.wdgmsg("activate", name);
@@ -100,7 +100,7 @@ public class CurioList extends WidgetList<CurioList.Item> {
                     //FIXME:a little hack, because WidgetList does not pass correct click coordinates if scrolled
                     return super.mouseup(Coord.z, button);
                 }
-            }, 175, 0);
+            }, UI.scale(175, 0));
         }
 
         @Override

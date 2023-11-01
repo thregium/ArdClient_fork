@@ -846,6 +846,7 @@ public class Config {
         additonalicons.put("gfx/kritter/stalagoomba/stalagoomba", Utils.cache(() -> configuration.imageToTex(configuration.modificationPath + "/gfx/icons/stalagoomba.png", Coord.of(20, 20))));
         additonalicons.put("gfx/kritter/dryad/dryad", Utils.cache(() -> configuration.imageToTex(configuration.modificationPath + "/gfx/icons/dryad.png")));
         additonalicons.put("gfx/kritter/ent/ent", Utils.cache(() -> configuration.imageToTex(configuration.modificationPath + "/gfx/icons/ent.png")));
+        additonalicons.put("gfx/kritter/midgeswarm/midgeswarm", Utils.cache(() -> configuration.imageToTex(configuration.modificationPath + "/gfx/icons/midgeswarm.png")));
 
         alarmitems.put("gfx/terobjs/herbs/flotsam", new CheckListboxItem("Peculiar Flotsam"));
         alarmitems.put("gfx/terobjs/herbs/chimingbluebell", new CheckListboxItem("Chiming Bluebell"));

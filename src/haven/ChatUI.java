@@ -213,7 +213,7 @@ public class ChatUI extends Widget {
                     else
                         t = fnd.render(text, w, TextAttribute.FOREGROUND, col);
                 } catch (Exception e) {
-                    dev.simpleLog(text, e);
+                    //dev.simpleLog(text, e);
                     if (col == null)
                         t = fnd.render(RichText.Parser.quote(text), w);
                     else
@@ -892,7 +892,7 @@ public class ChatUI extends Widget {
                     try {
                         r = fnd.render(text, w, TextAttribute.FOREGROUND, col);
                     } catch (Exception e) {
-                        dev.simpleLog(e);
+                        //dev.simpleLog(e);
                         r = fnd.render(RichText.Parser.quote(text), w, TextAttribute.FOREGROUND, col);
                     }
                     cn = nm;
@@ -1018,7 +1018,7 @@ public class ChatUI extends Widget {
                     try {
                         r = fnd.render(text, w, TextAttribute.FOREGROUND, col);
                     } catch (Exception e) {
-                        dev.simpleLog(e);
+                        //dev.simpleLog(e);
                         r = fnd.render(RichText.Parser.quote(text), w, TextAttribute.FOREGROUND, col);
                     }
                     cn = nm;

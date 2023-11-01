@@ -400,7 +400,7 @@ public class configuration {
             int h2 = chosenSize.y;
             double scale1 = (double) w2 / w;
             double scale2 = (double) h2 / h;
-            BufferedImage after = new BufferedImage(w2, h2, BufferedImage.TYPE_INT_ARGB);
+            BufferedImage after = TexI.mkbuf(Coord.of(w2, h2));
             AffineTransform scaleInstance = AffineTransform.getScaleInstance(scale1, scale2);
             AffineTransformOp scaleOp = new AffineTransformOp(scaleInstance, AffineTransformOp.TYPE_BILINEAR);
 
@@ -419,7 +419,7 @@ public class configuration {
             // Create a new image of the proper size
             int w2 = (int) (w * scale);
             int h2 = (int) (h * scale);
-            BufferedImage after = new BufferedImage(w2, h2, BufferedImage.TYPE_INT_ARGB);
+            BufferedImage after = TexI.mkbuf(Coord.of(w2, h2));
             AffineTransform scaleInstance = AffineTransform.getScaleInstance(scale, scale);
             AffineTransformOp scaleOp = new AffineTransformOp(scaleInstance, AffineTransformOp.TYPE_BILINEAR);
 
@@ -450,7 +450,7 @@ public class configuration {
     }
 
     public static BufferedImage scalingImage(BufferedImage before, Coord chosenSize, double scale1, double scale2) {
-        BufferedImage after = new BufferedImage(chosenSize.x, chosenSize.y, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage after = TexI.mkbuf(chosenSize);
         AffineTransform scaleInstance = AffineTransform.getScaleInstance(scale1, scale2);
         AffineTransformOp scaleOp = new AffineTransformOp(scaleInstance, AffineTransformOp.TYPE_BILINEAR);
 
@@ -463,7 +463,7 @@ public class configuration {
         File img = new File(name);
         in = ImageIO.read(img);
 
-        BufferedImage newImage = new BufferedImage(in.getWidth(), in.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        BufferedImage newImage = TexI.mkbuf(Coord.of(in.getWidth(), in.getHeight()));
 
         Graphics2D g = newImage.createGraphics();
         g.drawImage(in, 0, 0, null);

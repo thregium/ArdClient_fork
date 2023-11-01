@@ -419,11 +419,6 @@ Window extends MovableWidget implements DTarget {
     private static HashMap<String, Long> recentlyTakenCutlery = new HashMap<>();
 
     protected void drawframe(GOut g) {
-        // Study Table total LP and durations of curiosities
-        Collection GetCurios = new ArrayList(); //add curios from tables to this before parsing
-        Collection FinalCurios = new ArrayList(); //parsed out list for checking against the curios you should be studying from Config.curiolist
-        Collection CurioCounter = new ArrayList(); //used to see if the number of curios on the table changes to redraw the addons
-
         if (!HUDTHEME.get().equals("ardclient")) {
             g.chcolor(DefSettings.WNDCOL.get());
             //corners
@@ -529,6 +524,11 @@ Window extends MovableWidget implements DTarget {
             }
 
             if (this.cap.text.equals(Resource.getLocString(Resource.BUNDLE_WINDOW, "Study Desk"))) {
+                // Study Table total LP and durations of curiosities
+                Collection GetCurios = new ArrayList(); //add curios from tables to this before parsing
+                Collection FinalCurios = new ArrayList(); //parsed out list for checking against the curios you should be studying from Config.curiolist
+                Collection CurioCounter = new ArrayList(); //used to see if the number of curios on the table changes to redraw the addons
+
                 int offX = UI.scale(5);
                 int sizeY = UI.scale(36 * 7 + 5);
                 int totalLP = 0;
@@ -572,7 +572,6 @@ Window extends MovableWidget implements DTarget {
                             LP += c.LPGain;
                     }
                     if (entry.getValue() > Config.curiotimetarget * 3) {
-
                         g.image(Text.labelFnd.render(names.get(entry.getKey()) + ": " + sensibleTimeFormat(entry.getValue()) + " - " + sensibleLPFormat(LP), CURIOHIGH.get()).tex(), new Coord(offX, sizeY));
                         sizeY += UI.scale(15);
                         for (int i = 0; i < Curios.size(); i++) {
@@ -580,7 +579,6 @@ Window extends MovableWidget implements DTarget {
                                 FinalCurios.add(entry.getKey());
                             }
                         }
-                        GetCurios.add(entry.getKey());
                     } else if (entry.getValue() < Config.curiotimetarget) {
                         g.image(Text.labelFnd.render(names.get(entry.getKey()) + ": " + sensibleTimeFormat(entry.getValue()) + " - " + sensibleLPFormat(LP), CURIOLOW.get()).tex(), new Coord(offX, sizeY));
                         sizeY += UI.scale(15);
@@ -589,7 +587,6 @@ Window extends MovableWidget implements DTarget {
                                 FinalCurios.add(entry.getKey());
                             }
                         }
-                        GetCurios.add(entry.getKey());
 
                     } else {
                         g.image(Text.labelFnd.render(names.get(entry.getKey()) + ": " + sensibleTimeFormat(entry.getValue()) + " - " + sensibleLPFormat(LP), CURIOTARGET.get()).tex(), new Coord(offX, sizeY));
@@ -666,10 +663,10 @@ Window extends MovableWidget implements DTarget {
                     } else
                         PBotUtils.sysMsg(ui, "No Curios missing! GJ bro", Color.WHITE);
                 }
+                curiocount = CurioCounter.size(); //set this so we can only trigger the button/label redraw when the value changes.
             }
         } catch (Loading l) {
         }
-        curiocount = CurioCounter.size(); //set this so we can only trigger the button/label redraw when the value changes.
         //caption if applies
         if (cap != null) {
             g.image(cap.tex(), UI.scale(cfg.capc));
