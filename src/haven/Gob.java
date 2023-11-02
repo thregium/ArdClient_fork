@@ -436,12 +436,12 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     if (findol(-4921) == null)
                         addol(new Overlay(-4921, new SnowFall(this)));
                 }
+                if (type == Type.UNKNOWN && name.matches("gfx/terobjs/trees/[a-zA-Z\\-]+stump$"))
+                    type = Type.STUMP;
+                if (type == Type.UNKNOWN && name.matches("gfx/terobjs/trees/[a-zA-Z\\-]+log$"))
+                    type = Type.LOG;
                 if (type == Type.UNKNOWN && name.matches("gfx/terobjs/trees/[a-zA-Z\\-]+$"))
                     type = Type.TREE;
-                if (type == Type.UNKNOWN && name.endsWith("stump"))
-                    type = Type.STUMP;
-                if (type == Type.UNKNOWN && name.endsWith("log"))
-                    type = Type.LOG;
                 if (type == Type.UNKNOWN && name.matches("gfx/terobjs/plants/.*"))
                     type = Type.PLANT;
 
