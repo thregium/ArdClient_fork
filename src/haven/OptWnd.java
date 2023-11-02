@@ -2932,6 +2932,7 @@ public class OptWnd extends Window {
             }
         });
         appender.add(new CheckBox("Show server time (game time)", val -> Utils.setprefb("showservertime", Config.showservertime = val), Config.showservertime));
+        appender.add(new CheckBox("Show location info (req. server time)", val -> Utils.setprefb("showlocationinfo", configuration.showlocationinfo = val), configuration.showlocationinfo));
         appender.add(new CheckBox("Show weather info (req. server time)", val -> Utils.setprefb("showweatherinfo", configuration.showweatherinfo = val), configuration.showweatherinfo));
         appender.add(new CheckBox("Show IMeter Text") {
             {

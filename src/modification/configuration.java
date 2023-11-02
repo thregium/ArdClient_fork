@@ -291,6 +291,7 @@ public class configuration {
 
     public static boolean cachedGem = Utils.getprefb("cachedGem", false);
 
+    public static boolean showlocationinfo = Utils.getprefb("showlocationinfo", true);
     public static boolean showweatherinfo = Utils.getprefb("showweatherinfo", true);
     public static boolean keyboardkeys = Utils.getprefb("keyboardkeys", false);
 

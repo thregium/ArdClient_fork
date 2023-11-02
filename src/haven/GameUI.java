@@ -255,15 +255,13 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
                 if (c.x != umpanel.c.x - UI.scale(360))
                     c.x = umpanel.c.x - UI.scale(360);
                 if (Config.showservertime) {
+                    int y = UI.scale(10);
+                    int x = UI.scale(5);
                     Text ttime = ui.sess.glob.tservertimetex.get();
                     Text dtime = ui.sess.glob.dservertimetex.get();
                     Text ytime = ui.sess.glob.yservertimetex.get();
                     Text mtime = ui.sess.glob.mservertimetex.get();
                     Text btime = ui.sess.glob.bservertimetex.get();
-                    Text winfo = ui.sess.glob.weathertimetex.get();
-                    Text pinfo = provincetex.get();
-                    int y = UI.scale(10);
-                    int x = UI.scale(5);
                     if (ttime != null) {
                         g.aimage(ttime.tex(), new Coord(sz.x - x, y), 1, 0);
                         y += ttime.sz().y;
@@ -284,10 +282,14 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
                         g.aimage(btime.tex(), new Coord(sz.x - x, y), 1, 0);
                         y += btime.sz().y;
                     }
-                    if (pinfo != null) {
+
+                    Text pinfo = provincetex.get();
+                    if (configuration.showlocationinfo && pinfo != null) {
                         g.aimage(pinfo.tex(), new Coord(sz.x - x, y), 1, 0);
                         y += pinfo.sz().y;
                     }
+                    
+                    Text winfo = ui.sess.glob.weathertimetex.get();
                     if (configuration.showweatherinfo && winfo != null) {
                         g.aimage(winfo.tex(), new Coord(sz.x - x, y), 1, 0);
                         y += winfo.sz().y;
@@ -2076,15 +2078,15 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             BARTERCOLOR.set(val);
             if (map != null) map.refreshGobsAll();
         }));
-        wva.addRow(new CheckBox("Show player distance border", val -> Utils.setprefb("playerbordersprite", configuration.playerbordersprite = val), configuration.playerbordersprite), new ColorPreview(new Coord(20, 20), new Color(configuration.playerbordercolor, true), val -> {
+        wva.addRow(new CheckBox("Show player distance border", val -> Utils.setprefb("playerbordersprite", configuration.playerbordersprite = val), configuration.playerbordersprite), new ColorPreview(UI.scale(20, 20), new Color(configuration.playerbordercolor, true), val -> {
             configuration.playerbordercolor = val.hashCode();
             Utils.setprefi("playerbordercolor", val.hashCode());
         }));
-        wva.addRow(new CheckBox("Show player distance box", val -> Utils.setprefb("playerboxsprite", configuration.playerboxsprite = val), configuration.playerboxsprite), new ColorPreview(new Coord(20, 20), new Color(configuration.playerboxcolor, true), val -> {
+        wva.addRow(new CheckBox("Show player distance box", val -> Utils.setprefb("playerboxsprite", configuration.playerboxsprite = val), configuration.playerboxsprite), new ColorPreview(UI.scale(20, 20), new Color(configuration.playerboxcolor, true), val -> {
             configuration.playerboxcolor = val.hashCode();
             Utils.setprefi("playerboxcolor", val.hashCode());
         }));
-        wva.addRow(new CheckBox("Show grid box", val -> Utils.setprefb("gridboxsprite", configuration.gridboxsprite = val), configuration.gridboxsprite), new ColorPreview(new Coord(20, 20), new Color(configuration.gridboxcolor, true), val -> {
+        wva.addRow(new CheckBox("Show grid box", val -> Utils.setprefb("gridboxsprite", configuration.gridboxsprite = val), configuration.gridboxsprite), new ColorPreview(UI.scale(20, 20), new Color(configuration.gridboxcolor, true), val -> {
             configuration.gridboxcolor = val.hashCode();
             Utils.setprefi("gridboxcolor", val.hashCode());
         }));

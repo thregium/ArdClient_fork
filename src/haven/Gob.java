@@ -436,9 +436,11 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     if (findol(-4921) == null)
                         addol(new Overlay(-4921, new SnowFall(this)));
                 }
-                if (name.endsWith("stump"))
+                if (type == Type.UNKNOWN && name.matches("gfx/terobjs/trees/[a-zA-Z\\-]+$"))
+                    type = Type.TREE;
+                if (type == Type.UNKNOWN && name.endsWith("stump"))
                     type = Type.STUMP;
-                if (name.endsWith("log"))
+                if (type == Type.UNKNOWN && name.endsWith("log"))
                     type = Type.LOG;
                 if (type == Type.UNKNOWN && name.matches("gfx/terobjs/plants/.*"))
                     type = Type.PLANT;
@@ -1604,15 +1606,15 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 Overlay grid = findol(gridhash);
                 if (border == null && configuration.playerbordersprite)
                     addol(new Overlay(borderhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(9)), () -> new Color(configuration.playerbordercolor, true), new Coord2d(MCache.cmaps))));
-                if (border != null && !configuration.playerbordersprite)
+                else if (border != null && !configuration.playerbordersprite)
                     remol(border);
                 if (box == null && configuration.playerboxsprite)
                     addol(new Overlay(boxhash, new RectSprite(this, new Coord2d(MCache.cmaps), () -> new Color(configuration.playerboxcolor, true), new Coord2d(MCache.cmaps))));
-                if (box != null && !configuration.playerboxsprite)
+                else if (box != null && !configuration.playerboxsprite)
                     remol(box);
                 if (grid == null && configuration.gridboxsprite)
                     addol(new Overlay(gridhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(11)), () -> new Color(configuration.gridboxcolor, true), new Coord2d(MCache.cmaps.mul(11)))));
-                if (grid != null && !configuration.gridboxsprite)
+                else if (grid != null && !configuration.gridboxsprite)
                     remol(grid);
             }
         }
