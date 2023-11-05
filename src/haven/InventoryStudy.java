@@ -1,6 +1,9 @@
 package haven;
 
+import haven.res.ui.stackinv.ItemStack;
+
 import java.awt.Color;
+import java.util.Map;
 
 public class InventoryStudy extends Inventory {
     private Tex[] histtex = null;
@@ -203,7 +206,15 @@ public class InventoryStudy extends Inventory {
                         GItem ngitm = itm.item;
                         Resource nres = ngitm.resource();
                         if (nres != null && nres.name.equals(res.name)) {
-                            ngitm.wdgmsg("take", itm.c);
+                            if (ngitm.contents instanceof ItemStack) {
+                                ItemStack is = (ItemStack) ngitm.contents;
+                                for (Map.Entry<GItem, WItem> key : is.wmap.entrySet()) {
+                                    key.getKey().wdgmsg("take", key.getValue().c);
+                                    break;
+                                }
+                            } else {
+                                ngitm.wdgmsg("take", itm.c);
+                            }
                             wdgmsg("drop", c.add(sqsz.div(2)).div(invsq.sz()));
                             return true;
                         }

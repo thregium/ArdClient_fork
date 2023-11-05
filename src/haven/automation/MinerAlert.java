@@ -27,9 +27,12 @@ import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class MinerAlert extends Window {
     private int countiron, countgold, countsilver, countcopper, counttin, countlead, countleadglance, countbasaslt, countcinnabar, countdolomite, countfeldspar, countflint, countgneiss, countgranite, counthornblende;
@@ -51,11 +54,13 @@ public class MinerAlert extends Window {
     private static final Resource goldsfx = Resource.local().loadwait("sfx/Zelda");
     private static final Resource silversfx = Resource.local().loadwait("sfx/gold");
     private static final Resource supportalertsfx = Resource.local().loadwait("custom/sfx/omni/Z_OOT_Navi_WatchOut");
-    private Boolean audiomute, SupportAlertHalf = false, SupportAlertQuarter = false, MarkTileArrows = true; // quarter is 25% damage, half is 50% damage
-    private CheckBox SupportsQuarter, SupportsHalf, MarkTiles;// quarter is 25% damage, half is 50% damage
+    private Boolean audiomute; // quarter is 25% damage, half is 50% damage
+    private CheckBox SupportsQuarter, SupportsHalf, SupplortsLoose, MarkTiles;// quarter is 25% damage, half is 50% damage
     private List<String> reslist = Arrays.asList("gfx/tiles/rocks/cassiterite", "gfx/tiles/rocks/chalcopyrite", "gfx/tiles/rocks/malachite", "gfx/tiles/rocks/ilmenite", "gfx/tiles/rocks/limonite",
             "gfx/tiles/rocks/hematite", "gfx/tiles/rocks/magnetite", "gfx/tiles/rocks/galena", "gfx/tiles/rocks/argentite", "gfx/tiles/rocks/hornsilver", "gfx/tiles/rocks/petzite", "gfx/tiles/rocks/sylvanite",
             "gfx/tiles/rocks/nagyagite", "gfx/tiles/rocks/cinnabar", "gfx/tiles/rocks/leadglance");
+    private String looserock = "gfx/terobjs/looserock";
+    private Set<Long> ignoredloose = Collections.synchronizedSet(new HashSet<>());
 
     private final HashMap<String, String> smeltchance = new HashMap<String, String>(15) {{
         put("cassiterite", "30% Tin");
@@ -88,100 +93,77 @@ public class MinerAlert extends Window {
     }
 
     public MinerAlert() {
-        super(new Coord(220, 320), "Miner Alert", "Miner Alert");
-        int yvalue = 17;
-        int yvalue2 = 8;
+        super(UI.scale(220, 320), "Miner Alert", "Miner Alert");
+        int yvalue = UI.scale(17);
+        int yvalue2 = UI.scale(8);
+        int yy = UI.scale(20);
         audiomute = false;
 
         final Label labeliron = new Label("Number of Iron tiles visible.", infof);
-        add(labeliron, new Coord(10, yvalue2));
+        add(labeliron, new Coord(UI.scale(10), yvalue2));
         labelcountiron = new Label("0", Text.num12boldFnd, Color.WHITE);
-        add(labelcountiron, new Coord(65, yvalue));
+        add(labelcountiron, new Coord(UI.scale(65), yvalue));
 
         final Label labeltin = new Label("Number of Tin tiles visible.", infof);
-        add(labeltin, new Coord(10, yvalue2 += 20));
+        add(labeltin, new Coord(UI.scale(10), yvalue2 += yy));
         labelcounttin = new Label("0", Text.num12boldFnd, Color.WHITE);
-        add(labelcounttin, new Coord(65, yvalue += 20));
+        add(labelcounttin, new Coord(UI.scale(65), yvalue += yy));
 
         final Label labellead = new Label("Number of Lead tiles visible.", infof);
-        add(labellead, new Coord(10, yvalue2 += 20));
+        add(labellead, new Coord(UI.scale(10), yvalue2 += yy));
         labelcountlead = new Label("0", Text.num12boldFnd, Color.WHITE);
-        add(labelcountlead, new Coord(65, yvalue += 20));
+        add(labelcountlead, new Coord(UI.scale(65), yvalue += yy));
 
         final Label labelcopper = new Label("Number of Copper tiles visible.", infof);
-        add(labelcopper, new Coord(10, yvalue2 += 20));
+        add(labelcopper, new Coord(UI.scale(10), yvalue2 += yy));
         labelcountcopper = new Label("0", Text.num12boldFnd, Color.WHITE);
-        add(labelcountcopper, new Coord(65, yvalue += 20));
+        add(labelcountcopper, new Coord(UI.scale(65), yvalue += yy));
 
         final Label labelgold = new Label("Number of Gold tiles visible.", infof);
-        add(labelgold, new Coord(10, yvalue2 += 20));
+        add(labelgold, new Coord(UI.scale(10), yvalue2 += yy));
         labelcountgold = new Label("0", Text.num12boldFnd, Color.WHITE);
-        add(labelcountgold, new Coord(65, yvalue += 20));
+        add(labelcountgold, new Coord(UI.scale(65), yvalue += yy));
 
         final Label labelsilver = new Label("Number of Silver Tiles visible.", infof);
-        add(labelsilver, new Coord(10, yvalue2 += 20));
+        add(labelsilver, new Coord(UI.scale(10), yvalue2 += yy));
         labelcountsilver = new Label("0", Text.num12boldFnd, Color.WHITE);
-        add(labelcountsilver, new Coord(65, yvalue += 20));
+        add(labelcountsilver, new Coord(UI.scale(65), yvalue += yy));
 
         final Label labelcinnabar = new Label("Number of Cinnabar Tiles visible.", infof);
-        add(labelcinnabar, new Coord(10, yvalue2 += 20));
+        add(labelcinnabar, new Coord(UI.scale(10), yvalue2 += yy));
         labelcountcinnabar = new Label("0", Text.num12boldFnd, Color.WHITE);
-        add(labelcountcinnabar, new Coord(65, yvalue += 20));
+        add(labelcountcinnabar, new Coord(UI.scale(65), yvalue += yy));
 
         final Label labelmagnetite = new Label("Number of Black Ore Tiles visible.", infof);
-        add(labelmagnetite, new Coord(10, yvalue2 += 20));
+        add(labelmagnetite, new Coord(UI.scale(10), yvalue2 += yy));
         labelcountmagnetite = new Label("0", Text.num12boldFnd, Color.WHITE);
-        add(labelcountmagnetite, new Coord(65, yvalue += 20));
+        add(labelcountmagnetite, new Coord(UI.scale(65), yvalue += yy));
 
         final Label labelhematite = new Label("Number of Bloodstone Tiles visible.", infof);
-        add(labelhematite, new Coord(10, yvalue2 += 20));
+        add(labelhematite, new Coord(UI.scale(10), yvalue2 += yy));
         labelcounthematite = new Label("0", Text.num12boldFnd, Color.WHITE);
-        add(labelcounthematite, new Coord(65, yvalue += 20));
+        add(labelcounthematite, new Coord(UI.scale(65), yvalue += yy));
 
         final Label labelslimes = new Label("Number of Slimes Visible", infof);
-        add(labelslimes, new Coord(10, yvalue2 += 20));
+        add(labelslimes, new Coord(UI.scale(10), yvalue2 += yy));
         labelcountslimes = new Label("0", Text.num12boldFnd, Color.WHITE);
-        add(labelcountslimes, new Coord(65, yvalue += 20));
+        add(labelcountslimes, new Coord(UI.scale(65), yvalue += yy));
 
         final Label labelslimestotal = new Label("Number of Slimes Total", infof);
-        add(labelslimestotal, new Coord(10, yvalue2 += 20));
+        add(labelslimestotal, new Coord(UI.scale(10), yvalue2 += yy));
         labelcountslimestotal = new Label("0", Text.num12boldFnd, Color.WHITE);
-        add(labelcountslimestotal, new Coord(65, yvalue += 20));
+        add(labelcountslimestotal, new Coord(UI.scale(65), yvalue += yy));
 
-        SupportsQuarter = new CheckBox("Stop Mining at <25% HP Supports") {
-            {
-                a = SupportAlertQuarter;
-            }
-
-            public void set(boolean val) {
-                SupportAlertQuarter = val;
-                a = val;
-            }
-        };
-        add(SupportsQuarter, 10, yvalue += 20);
-        SupportsHalf = new CheckBox("Stop Mining at <50% HP Supports") {
-            {
-                a = SupportAlertHalf;
-            }
-
-            public void set(boolean val) {
-                SupportAlertHalf = val;
-                a = val;
-            }
-        };
-        add(SupportsHalf, 10, yvalue += 20);
-        MarkTiles = new CheckBox("Mark ore tiles with arrows above them.") {
-            {
-                a = MarkTileArrows;
-            }
-
-            public void set(boolean val) {
-                MarkTileArrows = val;
-                a = val;
-            }
-        };
-        add(MarkTiles, 10, yvalue += 20);
-        runbtn = new Button(100, "Run") {
+        SupportsQuarter = new CheckBox("Stop Mining at <25% HP Supports");
+        add(SupportsQuarter, UI.scale(10), yvalue += yy);
+        SupportsHalf = new CheckBox("Stop Mining at <50% HP Supports");
+        add(SupportsHalf, UI.scale(10), yvalue += yy);
+        SupplortsLoose = new CheckBox("Stop Mining at discover a loose rock");
+        add(SupplortsLoose, UI.scale(10), yvalue += yy);
+        MarkTiles = new CheckBox("Mark ore tiles with arrows above them.");
+        MarkTiles.set(true);
+        add(MarkTiles, UI.scale(10), yvalue += yy);
+        runbtn = new Button(UI.scale(100), "Run") {
             @Override
             public void click() {
                 terminate = false;
@@ -190,7 +172,7 @@ public class MinerAlert extends Window {
             }
         };
 
-        stopbtn = new Button(100, "Stop") {
+        stopbtn = new Button(UI.scale(100), "Stop") {
             @Override
             public void click() {
                 cbtn.show();
@@ -198,22 +180,23 @@ public class MinerAlert extends Window {
             }
         };
 
-        mutebtn = new Button(100, "Mute") {
+        mutebtn = new Button(UI.scale(100), "Mute") {
             @Override
             public void click() {
                 audiomute = !audiomute;
                 PBotUtils.debugMsg(ui, "Mute status : " + audiomute, Color.white);
             }
         };
-        add(mutebtn, new Coord(35, yvalue += 20));
+        add(mutebtn, new Coord(UI.scale(35), yvalue += yy));
         runbtn.click();
+        pack();
     }
 
     private class runner implements Runnable {
         @Override
         public void run() {
             while (ui.gui != null && ui.gui.getwnd("Miner Alert") != null) {
-                PBotUtils.sleep(5000);//sleep 5 seconds every iteration, no reason to update more than once every 5 seconds.
+                PBotUtils.sleep(3000);//sleep 5 seconds every iteration, no reason to update more than once every 5 seconds.
                 try {
                     if (ui == null || ui.gui == null)
                         break;
@@ -226,16 +209,20 @@ public class MinerAlert extends Window {
                     List<Gob> allGobs = PBotUtils.getGobs(ui);
                     List<Gob> list = new ArrayList<>();
                     List<Gob> supportlist = new ArrayList<>();
+                    List<Gob> looses = new ArrayList<>();
 
-                    for (int i = 0; i < allGobs.size(); i++) {
+                    for (Gob allGob : allGobs) {
                         try {
-                            if (allGobs.get(i).type.toString().contains("SUPPORT"))
-                                supportlist.add(allGobs.get(i));
-                            Resource res = allGobs.get(i).getres();
-                            if (res.name.endsWith("greenooze") && !allGobs.get(i).isDead()) {
-                                list.add(allGobs.get(i));
-                                if (!slimecount.contains(allGobs.get(i)))
-                                    slimecount.add(allGobs.get(i));
+                            if (allGob.type.toString().contains("SUPPORT"))
+                                supportlist.add(allGob);
+                            Resource res = allGob.getres();
+                            if (res.name.endsWith("greenooze") && !allGob.isDead()) {
+                                list.add(allGob);
+                                if (!slimecount.contains(allGob))
+                                    slimecount.add(allGob);
+                            }
+                            if (res.name.equals(looserock)) {
+                                looses.add(allGob);
                             }
                         } catch (NullPointerException | Loading e) {
                         }
@@ -245,11 +232,11 @@ public class MinerAlert extends Window {
                         PBotUtils.sleep(10); //sleep if player is null, teleporting through a road?
                     Coord pltc = new Coord((int) player.getc().x / 11, (int) player.getc().y / 11);
 
-                    if (SupportAlertHalf || SupportAlertQuarter) {//if support alerts toggled, resolve mine supports and HP
+                    if (SupportsHalf.a || SupportsQuarter.a) {//if support alerts toggled, resolve mine supports and HP
                         for (Gob support : supportlist) {
                             double distFromPlayer = support.rc.dist(PBotUtils.player(ui).rc);
                             if (distFromPlayer <= 13 * 11) {    //support is less than or equal to 13 tiles from current player position, check it's HP
-                                if (support.getattr(GobHealth.class) != null && support.getattr(GobHealth.class).hp <= 2 && SupportAlertHalf) {
+                                if (support.getattr(GobHealth.class) != null && support.getattr(GobHealth.class).hp <= 2 && SupportsHalf.a) {
                                     PBotUtils.debugMsg(ui, "Detected mine support at 50% or less HP", Color.ORANGE);
                                     support.addol(new Mark(4000));
                                     support.delattr(GobHighlight.class);
@@ -258,7 +245,7 @@ public class MinerAlert extends Window {
                                         ui.root.wdgmsg("gk", 27);
                                         Audio.play(supportalertsfx);
                                     }
-                                } else if (support.getattr(GobHealth.class) != null && support.getattr(GobHealth.class).hp <= 1 && SupportAlertQuarter) {
+                                } else if (support.getattr(GobHealth.class) != null && support.getattr(GobHealth.class).hp <= 1 && SupportsQuarter.a) {
                                     PBotUtils.debugMsg(ui, "Detected mine support at 25% or less HP less than 13 tiles away", Color.RED);
                                     support.addol(new Mark(4000));
                                     support.delattr(GobHighlight.class);
@@ -266,6 +253,25 @@ public class MinerAlert extends Window {
                                     if (PBotGobAPI.player(ui).getPoses().contains("gfx/borka/choppan") || PBotGobAPI.player(ui).getPoses().contains("gfx/borka/pickan")) {
                                         ui.root.wdgmsg("gk", 27);
                                         Audio.play(supportalertsfx);
+                                    }
+                                }
+                            }
+                        }
+                        if (SupplortsLoose.a) {
+                            boolean already = false;
+                            for (Gob loose : looses) {
+                                if (!ignoredloose.contains(loose.id)) {
+                                    PBotUtils.debugMsg(ui, "Detected loose rock. Beware!", Color.RED);
+                                    loose.addol(new Mark(4000));
+                                    loose.delattr(GobHighlight.class);
+                                    loose.setattr(new GobHighlight(loose));
+                                    ignoredloose.add(loose.id);
+                                    if (!already) {
+                                        if (PBotGobAPI.player(ui).getPoses().contains("gfx/borka/choppan") || PBotGobAPI.player(ui).getPoses().contains("gfx/borka/pickan")) {
+                                            ui.root.wdgmsg("gk", 27);
+                                            Audio.play(supportalertsfx);
+                                        }
+                                        already = true;
                                     }
                                 }
                             }
@@ -281,7 +287,7 @@ public class MinerAlert extends Window {
                                 continue;
                             String name = res.name;
 
-                            if (MarkTileArrows && reslist.contains(name) && maxmarks != 0) {
+                            if (MarkTiles.a && reslist.contains(name) && maxmarks != 0) {
                                 final Coord2d mc = player.rc.sub(new Coord2d((x - 1) * 11, (y - 1) * 11)); //no clue why i have to subtract 1 tile here to get it to line up.
                                 final Coord tc = mc.floor(MCache.tilesz);
                                 final Coord2d tcd = mc.div(MCache.tilesz);
