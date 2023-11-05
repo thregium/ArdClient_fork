@@ -8,6 +8,7 @@ import haven.RenderList;
 import haven.Resource;
 import haven.Sprite;
 import haven.Tex;
+import haven.UI;
 import haven.Utils;
 import haven.sloth.gfx.GobCombatSprite;
 
@@ -16,17 +17,23 @@ public class FloatSprite extends Sprite implements PView.Render2D {
     public Tex tex; //Our texture
     int sy; //Our location above the player
     int offset = 92;
+    int sx;
     double a = 0.0D; //How long its been.
 
     public int cury() {
         return this.sy + (int) (10.0D * this.a);
     }
 
-    public FloatSprite(Owner owner, Resource res, Tex tex, int time) {
+    public FloatSprite(Owner owner, Resource res, Tex tex, int time, int sx) {
         super(owner, res);
         this.tex = tex;
         this.ms = time;
-        this.sy = 20;
+        this.sy = UI.scale(30);
+        this.sx = sx;
+    }
+
+    public FloatSprite(Owner owner, Resource res, Tex tex, int time) {
+        this(owner, res, tex, time, 0);
     }
 
     FloatSprite(Owner owner, Resource res) {
@@ -53,7 +60,7 @@ public class FloatSprite extends Sprite implements PView.Render2D {
                 i = (int) Utils.clip(255.0D * ((1.0D - this.a) / 0.25D), 0.0D, 255.0D);
             }
             g.chcolor(255, 255, 255, i);
-            g.aimage(this.tex, sc.sub(0, cury()), 0.5, 0);
+            g.aimage(this.tex, sc.sub(0, cury()).add(sx, 0), 0.5, 0);
             g.chcolor();
         }
     }

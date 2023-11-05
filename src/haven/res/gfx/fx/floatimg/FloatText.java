@@ -19,7 +19,7 @@ public class FloatText extends FloatSprite {
     public static final Text.Foundry fnd = new Text.Foundry(Text.sans, UI.scale(16)).aa(true);
 
     public FloatText(Owner owner, Resource res, String text, Color color) {
-        super(owner, res, new TexI(PUtils.strokeImg(fnd.render(text, color))), 2000);
+        super(owner, res, new TexI(PUtils.strokeImg(fnd.render(text, color))), 2000, color.equals(shp) ? -UI.scale(30) : color.equals(armor) ? UI.scale(30) : 0);
 
         if (owner instanceof Gob) {
             final Gob gob = (Gob) owner;
