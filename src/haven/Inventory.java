@@ -440,7 +440,7 @@ public class Inventory extends Widget implements DTarget2, ItemObserver, Invento
                         sprite = it.spr();
                         if (sprite != null) {
                             Resource res = it.resource();
-                            if (res != null && res.name.equals(resname) && (name == null || name.equals(sprite.getname()))) {
+                            if (res != null && res.name.equals(resname)/* && (name == null || name.equals(sprite.getname()))*/) {
                                 if (quality) {
                                     QBuff bq = it.quality();
                                     if (bq != null) {
