@@ -371,6 +371,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
                         }
                     }
                 }
+                filtered = 0;
             } catch (Throwable e) {
                 needUpdateQuality.set(true);
             }

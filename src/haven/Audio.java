@@ -673,6 +673,8 @@ public class Audio {
                 } catch (IOException e) {
                     System.out.println("IOException");
                     e.printStackTrace();
+                } catch (Exception exc) {
+                    exc.printStackTrace();
                 }
         });
     }

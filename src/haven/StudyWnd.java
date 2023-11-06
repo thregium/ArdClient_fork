@@ -66,13 +66,13 @@ public class StudyWnd extends GameUI.Hidewnd {
             upd();
             super.draw(g);
             g.chcolor(255, 192, 255, 255);
-            g.aimage(twt.get(), new Coord(sz.x - 4, 2), 1.0, 0.0);
+            g.aimage(twt.get(), new Coord(sz.x - UI.scale(4), UI.scale(2)), 1.0, 0.0);
             g.chcolor(255, 255, 192, 255);
-            g.aimage(tenct.get(), new Coord(sz.x - 4, 18), 1.0, 0.0);
+            g.aimage(tenct.get(), new Coord(sz.x - UI.scale(4), UI.scale(18)), 1.0, 0.0);
             g.chcolor(192, 192, 255, 255);
-            g.aimage(texpt.get(), new Coord(sz.x - 4, 34), 1.0, 0.0);
+            g.aimage(texpt.get(), new Coord(sz.x - UI.scale(4), UI.scale(34)), 1.0, 0.0);
             g.chcolor(192, 192, 255, 255);
-            g.aimage(tlphr.get(), new Coord(sz.x - 4, 50), 1.0, 0.0);
+            g.aimage(tlphr.get(), new Coord(sz.x - UI.scale(4), UI.scale(50)), 1.0, 0.0);
         }
     }
 }
