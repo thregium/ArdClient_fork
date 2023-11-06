@@ -26,7 +26,6 @@
 
 package haven;
 
-import com.google.common.collect.Maps;
 import haven.error.ErrorHandler;
 import haven.purus.Iconfinder;
 import haven.sloth.util.ObservableMap;
@@ -36,11 +35,9 @@ import org.json.JSONObject;
 
 import java.awt.Color;
 import java.awt.event.KeyEvent;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -49,7 +46,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -63,21 +59,21 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static haven.Utils.getprop;
-
 public class Config {
     public static String revVersion = "1.0";
     public static String prefspec = "hafen";
+    public static final Properties jarprops = getjarprops();
+    public final Properties localprops = getlocalprops();
     public static final File HOMEDIR = new File("").getAbsoluteFile();
     public static boolean dumpcode = Utils.getprop("haven.dumpcode", "off").equals("on");
     public static final boolean iswindows = System.getProperty("os.name").startsWith("Windows");
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
-    public static String resdir = Utils.getprop("haven.resdir", System.getenv("HAFEN_RESDIR"));
-    public static String authcrt = Utils.getprop("haven.authcrt", System.getenv("HAFEN_AUTHCRT"));
+    public static String resdir = Config.Variable.prop("haven.resdir", System.getenv("HAFEN_RESDIR")).get();
+    public static String authcrt = Config.Variable.prop("haven.authcrt", System.getenv("HAFEN_AUTHCRT")).get();
     public static String authuser = null;
     public static String authserv = null;
-    public static String defserv = Utils.getprop("haven.defserv", "game.havenandhearth.com");
-    public static URL resurl = geturl("haven.resurl", "https://game.havenandhearth.com/hres/");
+    public static String defserv = Config.Variable.prop("haven.defserv", "game.havenandhearth.com").get();
+    public static URL resurl = Config.Variable.propu("haven.resurl", "https://game.havenandhearth.com/hres/").get();
     public static boolean dbtext = false;
     public static boolean profile = false;
     public static boolean par = true;
@@ -102,7 +98,7 @@ public class Config {
 //    public static boolean vendanGreenMarkers = Utils.getprefb("vendan-mapv4-green-markers", false);
 //    public static boolean enableNavigationTracking = Utils.getprefb("enableNavigationTracking", false);
 //    public static boolean sendCustomMarkers = Utils.getprefb("sendCustomMarkers", false);
-    public static URL screenurl = geturl("http://game.havenandhearth.com/mt/ss");
+    public static URL screenurl = Config.Variable.propu("haven.screenurl", "http://game.havenandhearth.com/mt/ss").get();
     public static boolean hideflocomplete = Utils.getprefb("hideflocomplete", false);
     public static boolean mapdrawparty = Utils.getprefb("mapdrawparty", false);
     public static boolean mapdrawquests = Utils.getprefb("mapdrawquests", true);
@@ -354,7 +350,7 @@ public class Config {
     public static final boolean isUpdate;
     private static String username, playername;
     public static boolean showPBot = Utils.getprefb("showPBot", true);
-//    public static boolean showPBotOld = Utils.getprefb("showPBotOld", true);
+    //    public static boolean showPBotOld = Utils.getprefb("showPBotOld", true);
     public static double alertsvol = Utils.getprefd("alertsvol", 0.8);
     public static boolean chatalarm = Utils.getprefb("chatalarm", true);
     public static double chatalarmvol = Utils.getprefd("chatalarmvol", 0.8);
@@ -1353,14 +1349,14 @@ public class Config {
     }
 
     public static void parsesvcaddr(String spec, Consumer<String> host, Consumer<Integer> port) {
-        if((spec.length() > 0) && (spec.charAt(0) == '[')) {
+        if ((spec.length() > 0) && (spec.charAt(0) == '[')) {
             int p = spec.indexOf(']');
-            if(p > 0) {
+            if (p > 0) {
                 String hspec = spec.substring(1, p);
-                if(spec.length() == p + 1) {
+                if (spec.length() == p + 1) {
                     host.accept(hspec);
                     return;
-                } else if((spec.length() > p + 1) && (spec.charAt(p + 1) == ':')) {
+                } else if ((spec.length() > p + 1) && (spec.charAt(p + 1) == ':')) {
                     host.accept(hspec);
                     port.accept(Integer.parseInt(spec.substring(p + 2)));
                     return;
@@ -1368,7 +1364,7 @@ public class Config {
             }
         }
         int p = spec.indexOf(':');
-        if(p >= 0) {
+        if (p >= 0) {
             host.accept(spec.substring(0, p));
             port.accept(Integer.parseInt(spec.substring(p + 1)));
             return;
@@ -1419,9 +1415,6 @@ public class Config {
         }
         return (ret);
     }
-
-    public static final Properties jarprops = getjarprops();
-    public final Properties localprops = getlocalprops();
 
     public String getprop(String name, String def) {
         String ret;
@@ -1483,6 +1476,7 @@ public class Config {
         public static <V> Variable<V> prop(String name, Function<String, V> parse, Supplier<V> defval) {
             return (new Variable<>(cfg -> {
                 String pv = cfg.getprop(name, null);
+                if (pv == null) pv = Utils.getpref(name, null);
                 return ((pv == null) ? defval.get() : parse.apply(pv));
             }));
         }
@@ -1625,7 +1619,7 @@ public class Config {
                     break;
             }
         }
-        if(opt.rest.length > 0)
+        if (opt.rest.length > 0)
             parsesvcaddr(opt.rest[0], s -> defserv = s, p -> mainport = p);
         if (opt.rest.length > 0) {
             int p = opt.rest[0].indexOf(':');

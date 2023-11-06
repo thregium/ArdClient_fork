@@ -186,6 +186,7 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar luaj-jse-3
             </fileset>
             <fileset dir="lib/jogl-natives" includes="*.jar"/>
         </copy>
+        <copy file="etc/ansgar-config.properties" tofile="build/haven-config.properties" />
     </target>
 
     <target name="clean-classes">
@@ -293,6 +294,7 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar luaj-jse-3
                 <include name="hafen.jar"/>
                 <include name="custom-res.jar"/>
                 <include name="l10n.jar"/>
+                <include name="haven-config.properties"/>
             </fileset>
         </copy>
         <copy todir="update">

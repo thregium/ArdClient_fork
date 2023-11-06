@@ -79,7 +79,7 @@ public class LoginScreen extends Widget {
         loginList = adda(new LoginList(UI.scale(200), 29), UI.scale(10, 10), 0, 0);
 //        statusbtn = adda(new Button(200, "Initializing..."), sz.x - 210, 80, 0, 1);
 //        StartUpdaterThread();
-        status = adda(new StatusLabel("www.havenandhearth.com", 0.5), Coord.of(sz.x - UI.scale(10), UI.scale(80)), 1, 1);
+        status = adda(new StatusLabel(Config.Variable.prop("haven.defhost", "www.havenandhearth.com").get(), 0.5), Coord.of(sz.x - UI.scale(10), UI.scale(80)), 1, 1);
     }
 
     private static boolean changeLogShowed = false;
