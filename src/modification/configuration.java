@@ -1130,7 +1130,7 @@ public class configuration {
 
     public static GobScale getItem(String name) {
         for (String n : resizablegobsstring.keySet())
-            if (name.contains(n))
+            if (name.equalsIgnoreCase(n))
                 return (resizablegobsstring.get(n));
         return (resizablegobsstring.get(name));
     }

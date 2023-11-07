@@ -47,6 +47,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Inventory extends Widget implements DTarget2, ItemObserver, InventoryListener {
@@ -421,6 +422,12 @@ public class Inventory extends Widget implements DTarget2, ItemObserver, Invento
         return items;
     }
 
+    static Pattern stackPattern = Pattern.compile("(.*)(, stack of)?");
+
+    private boolean identicalStack(String name1, String name2) {
+        return (name1.replaceAll(stackPattern.pattern(), "$1").equalsIgnoreCase(name2.replaceAll(stackPattern.pattern(), "$1")));
+    }
+
     public List<WItem> getIdenticalItems(GItem item, boolean quality) {
         List<WItem> items = new ArrayList<WItem>();
         double q0 = 0;
@@ -440,7 +447,7 @@ public class Inventory extends Widget implements DTarget2, ItemObserver, Invento
                         sprite = it.spr();
                         if (sprite != null) {
                             Resource res = it.resource();
-                            if (res != null && res.name.equals(resname)/* && (name == null || name.equals(sprite.getname()))*/) {
+                            if (res != null && res.name.equals(resname) && (name == null || identicalStack(name, sprite.getname()))) {
                                 if (quality) {
                                     QBuff bq = it.quality();
                                     if (bq != null) {
@@ -1137,7 +1144,7 @@ public class Inventory extends Widget implements DTarget2, ItemObserver, Invento
                         Coord ulc = ul.sub(wdg.c);
                         if (ccc.isect(Coord.z, wdg.sz)) {
                             if (((DTarget) wdg).iteminteract(ccc, ulc))
-                                return (true);;
+                                return (true); ;
                         }
                     } else if (wdg instanceof DTarget2) {
                         Coord ccc = cc.sub(wdg.c);
@@ -1414,12 +1421,14 @@ public class Inventory extends Widget implements DTarget2, ItemObserver, Invento
     public void initListeners(final List<InventoryListener> listeners) {
         this.listeners.addAll(listeners);
     }
+
     @Override
     public List<InventoryListener> listeners() {
         return (listeners);
     }
 
     private final List<InventoryListener> listeners2 = Collections.synchronizedList(new ArrayList<>());
+
     @Override
     public List<InventoryListener> observers() {
         return (listeners2);
