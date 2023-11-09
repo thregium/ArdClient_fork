@@ -164,7 +164,7 @@ public class MapFile {
 
     public static void warn(Throwable cause, String msg) {
         if (debug)
-            Debug.log.printf("mapfile warning: %s%n", msg);
+            Debug.printf("mapfile warning: %s%n", msg);
         new Warning(cause, msg).issue();
     }
 

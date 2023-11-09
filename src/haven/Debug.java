@@ -65,6 +65,10 @@ public class Debug {
         logs.forEach(l -> l.println(str));
     }
 
+    public static void printf(String format, Object args) {
+        logs.forEach(l -> l.printf(format, args));
+    }
+
     public static void printStackTrace(Throwable e) {
         logs.forEach(e::printStackTrace);
     }

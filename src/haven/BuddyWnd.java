@@ -49,9 +49,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static haven.PUtils.blurmask2;
-import static haven.PUtils.rasterimg;
-
 public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
     public static final int width = UI.scale(263);
     public static final int height = UI.scale(380);

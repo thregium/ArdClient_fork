@@ -2747,7 +2747,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 }
                 final Object[] gobargs = gobclickargs(inf);
                 Object[] args = {pc, mc.floor(posres), clickb, modflags};
-                args = Utils.extend(args, gobargs);
+//                args = Utils.extend(args, gobargs);
 
                 if (inf == null) {
                     if (Config.pf && clickb == 1 && curs != null && !curs.name.equals("gfx/hud/curs/study")) {

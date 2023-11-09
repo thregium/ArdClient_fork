@@ -86,8 +86,8 @@ public class PBotGob {
      * @param meshId can be a door, roasting spit etc.
      * @param olid gob overlay to click, for example roasting spit.
      */
-    public void doClick(int button, int mod, int meshId, int olid) {
-        ui.gui.map.wdgmsg("click", ui.mc.max(Coord.z), gob.rc.floor(posres), button, mod, 1, (int) gob.id, gob.rc.floor(posres), olid, meshId);
+    public void doClick(int button, int mod, int meshId, int olid) {//{pc, mc.floor(posres), clickb, modflags} + {0, (int) gob.id, gob.rc.floor(posres), 0, -1}
+        ui.gui.map.wdgmsg("click", ui.mc.max(Coord.z), gob.rc.floor(posres), button, mod, olid != 0 ? 1 : 0, (int) gob.id, gob.rc.floor(posres), olid, meshId);
         ui.gui.map.pllastcc = gob.rc;
     }
 

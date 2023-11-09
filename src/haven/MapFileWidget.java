@@ -531,11 +531,11 @@ public class MapFileWidget extends Widget implements Console.Directory {
             int col = Color.WHITE.getRGB();
             for (int x = 0; x < sz.x; x++) {
                 ret.setRGB(x, 0, col);
-                ret.setRGB(x, sz.y - 1, col);
+//                ret.setRGB(x, sz.y - 1, col);
             }
-            for (int y = 1; y < sz.y - 1; y++) {
+            for (int y = 1; y < sz.y/* - 1*/; y++) {
                 ret.setRGB(0, y, col);
-                ret.setRGB(sz.x - 1, y, col);
+//                ret.setRGB(sz.x - 1, y, col);
             }
             return (new TexI(ret));
         }));

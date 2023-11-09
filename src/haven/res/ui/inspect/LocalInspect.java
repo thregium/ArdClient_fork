@@ -84,9 +84,14 @@ public class LocalInspect extends Widget {
         return (true);
     }
 
+    long lastmmhittest = System.currentTimeMillis();
+    static long timeout = 250;
+
     public void tick(double dt) {
         super.tick(dt);
-        if ((cur != null) && cur.done) {
+        long now = System.currentTimeMillis();
+        if (now - lastmmhittest > timeout && cur != null && cur.done) {
+            lastmmhittest = now;
             last = cur;
             cur = null;
         }
