@@ -23,6 +23,7 @@ import haven.Window;
 import haven.purus.pbot.PBotGobAPI;
 import haven.purus.pbot.PBotUtils;
 import haven.sloth.gob.Mark;
+
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -195,68 +196,224 @@ public class MinerAlert extends Window {
     private class runner implements Runnable {
         @Override
         public void run() {
+            long lasttick5 = 0;
+            long lasttick500 = 0;
             while (ui.gui != null && ui.gui.getwnd("Miner Alert") != null) {
-                PBotUtils.sleep(3000);//sleep 5 seconds every iteration, no reason to update more than once every 5 seconds.
+                long curtick = System.currentTimeMillis();
+                //PBotUtils.sleep(5000);//sleep 5 seconds every iteration, no reason to update more than once every 5 seconds.
                 try {
                     if (ui == null || ui.gui == null)
                         break;
-                    maxmarks = 50;
-                    countiron = 0;
-                    countgold = 0;
-                    countsilver = 0;
-                    Glob g = ui.gui.map.glob;
-                    Gob player = ui.gui.map.player();
-                    List<Gob> allGobs = PBotUtils.getGobs(ui);
-                    List<Gob> list = new ArrayList<>();
-                    List<Gob> supportlist = new ArrayList<>();
-                    List<Gob> looses = new ArrayList<>();
+                    if (curtick - lasttick500 > 500) {
+                        lasttick500 = curtick;
 
-                    for (Gob allGob : allGobs) {
-                        try {
-                            if (allGob.type.toString().contains("SUPPORT"))
-                                supportlist.add(allGob);
-                            Resource res = allGob.getres();
-                            if (res.name.endsWith("greenooze") && !allGob.isDead()) {
-                                list.add(allGob);
-                                if (!slimecount.contains(allGob))
-                                    slimecount.add(allGob);
+                        maxmarks = 50;
+                        countiron = 0;
+                        countgold = 0;
+                        countsilver = 0;
+                        Glob g = ui.gui.map.glob;
+                        Gob player = ui.gui.map.player();
+                        List<Gob> allGobs = PBotUtils.getGobs(ui);
+                        List<Gob> list = new ArrayList<>();
+                        List<Gob> supportlist = new ArrayList<>();
+                        List<Gob> looses = new ArrayList<>();
+
+                        for (Gob allGob : allGobs) {
+                            try {
+                                if (allGob.type.toString().contains("SUPPORT"))
+                                    supportlist.add(allGob);
+                                Resource res = allGob.getres();
+                                if (res.name.endsWith("greenooze") && !allGob.isDead()) {
+                                    list.add(allGob);
+                                    if (!slimecount.contains(allGob))
+                                        slimecount.add(allGob);
+                                }
+                                if (res.name.equals(looserock)) {
+                                    looses.add(allGob);
+                                }
+                            } catch (NullPointerException | Loading e) {
                             }
-                            if (res.name.equals(looserock)) {
-                                looses.add(allGob);
-                            }
-                        } catch (NullPointerException | Loading e) {
                         }
-                    }
-                    countslimes = list.size();
-                    while (PBotUtils.player(ui) == null)
-                        PBotUtils.sleep(10); //sleep if player is null, teleporting through a road?
-                    Coord pltc = new Coord((int) player.getc().x / 11, (int) player.getc().y / 11);
 
-                    if (SupportsHalf.a || SupportsQuarter.a) {//if support alerts toggled, resolve mine supports and HP
-                        for (Gob support : supportlist) {
-                            double distFromPlayer = support.rc.dist(PBotUtils.player(ui).rc);
-                            if (distFromPlayer <= 13 * 11) {    //support is less than or equal to 13 tiles from current player position, check it's HP
-                                if (support.getattr(GobHealth.class) != null && support.getattr(GobHealth.class).hp <= 2 && SupportsHalf.a) {
-                                    PBotUtils.debugMsg(ui, "Detected mine support at 50% or less HP", Color.ORANGE);
-                                    support.addol(new Mark(4000));
-                                    support.delattr(GobHighlight.class);
-                                    support.setattr(new GobHighlight(support));
-                                    if (PBotGobAPI.player(ui).getPoses().contains("gfx/borka/choppan") || PBotGobAPI.player(ui).getPoses().contains("gfx/borka/pickan")) {
-                                        ui.root.wdgmsg("gk", 27);
-                                        Audio.play(supportalertsfx);
-                                    }
-                                } else if (support.getattr(GobHealth.class) != null && support.getattr(GobHealth.class).hp <= 1 && SupportsQuarter.a) {
-                                    PBotUtils.debugMsg(ui, "Detected mine support at 25% or less HP less than 13 tiles away", Color.RED);
-                                    support.addol(new Mark(4000));
-                                    support.delattr(GobHighlight.class);
-                                    support.setattr(new GobHighlight(support));
-                                    if (PBotGobAPI.player(ui).getPoses().contains("gfx/borka/choppan") || PBotGobAPI.player(ui).getPoses().contains("gfx/borka/pickan")) {
-                                        ui.root.wdgmsg("gk", 27);
-                                        Audio.play(supportalertsfx);
+                        if (curtick - lasttick5 > 5000) {
+                            lasttick5 = curtick;
+
+                            countslimes = list.size();
+                            while (PBotUtils.player(ui) == null)
+                                PBotUtils.sleep(10); //sleep if player is null, teleporting through a road?
+                            Coord pltc = new Coord((int) player.getc().x / 11, (int) player.getc().y / 11);
+
+                            if (SupportsHalf.a || SupportsQuarter.a) {//if support alerts toggled, resolve mine supports and HP
+                                for (Gob support : supportlist) {
+                                    double distFromPlayer = support.rc.dist(PBotUtils.player(ui).rc);
+                                    if (distFromPlayer <= 13 * 11) {    //support is less than or equal to 13 tiles from current player position, check it's HP
+                                        if (support.getattr(GobHealth.class) != null && support.getattr(GobHealth.class).hp <= 2 && SupportsHalf.a) {
+                                            PBotUtils.debugMsg(ui, "Detected mine support at 50% or less HP", Color.ORANGE);
+                                            support.addol(new Mark(4000));
+                                            support.delattr(GobHighlight.class);
+                                            support.setattr(new GobHighlight(support));
+                                            if (PBotGobAPI.player(ui).getPoses().contains("gfx/borka/choppan") || PBotGobAPI.player(ui).getPoses().contains("gfx/borka/pickan")) {
+                                                ui.root.wdgmsg("gk", 27);
+                                                Audio.play(supportalertsfx);
+                                            }
+                                        } else if (support.getattr(GobHealth.class) != null && support.getattr(GobHealth.class).hp <= 1 && SupportsQuarter.a) {
+                                            PBotUtils.debugMsg(ui, "Detected mine support at 25% or less HP less than 13 tiles away", Color.RED);
+                                            support.addol(new Mark(4000));
+                                            support.delattr(GobHighlight.class);
+                                            support.setattr(new GobHighlight(support));
+                                            if (PBotGobAPI.player(ui).getPoses().contains("gfx/borka/choppan") || PBotGobAPI.player(ui).getPoses().contains("gfx/borka/pickan")) {
+                                                ui.root.wdgmsg("gk", 27);
+                                                Audio.play(supportalertsfx);
+                                            }
+                                        }
                                     }
                                 }
                             }
+
+                            for (int x = -44; x < 44; x++) {
+                                for (int y = -44; y < 44; y++) {
+                                    int t = g.map.gettile(pltc.sub(x, y));
+                                    Resource res = g.map.tilesetr(t);
+
+                                    if (res == null)
+                                        continue;
+                                    String name = res.name;
+
+                                    if (MarkTiles.a && reslist.contains(name) && maxmarks != 0) {
+                                        final Coord2d mc = player.rc.sub(new Coord2d((x - 1) * 11, (y - 1) * 11)); //no clue why i have to subtract 1 tile here to get it to line up.
+                                        final Coord tc = mc.floor(MCache.tilesz);
+                                        final Coord2d tcd = mc.div(MCache.tilesz);
+
+                                        ui.sess.glob.map.getgridto(tc).ifPresent(grid -> {
+                                            final Coord2d offset = tcd.sub(new Coord2d(grid.ul));
+                                            ui.sess.glob.map.getgrido(grid.id).ifPresent(grid2 -> {
+                                                final Coord2d mc2 = new Coord2d(grid2.ul).add(offset.x, offset.y).mul(MCache.tilesz);
+                                                maxmarks--;
+                                                final Gob g2 = ui.sess.glob.oc.new ModdedGob(mc2, 0);
+                                                g2.addol(new Mark(4000));
+                                                g2.addol(getCachedSprite(res.basename().substring(0, 1).toUpperCase() + res.basename().substring(1) + " " + smeltchance.get(res.basename()), 4000));
+                                            });
+                                        });
+                                    }
+
+                                    if (name.equals("gfx/tiles/rocks/leadglance")) {
+                                        countlead++;
+                                        countleadglance++;
+                                    }
+                                    if (name.equals("gfx/tiles/rocks/cassiterite")) {
+                                        counttin = counttin + 1;
+                                        countcassiterite = countcassiterite + 1;
+                                    }
+                                    if (name.equals("gfx/tiles/rocks/chalcopyrite")) {
+                                        countiron = countiron + 1;
+                                        countcopper = countcopper + 1;
+                                        countchalcopyrite = countchalcopyrite + 1;
+                                    }
+                                    if (name.equals("gfx/tiles/rocks/malachite")) {
+                                        countcopper = countcopper + 1;
+                                        countmalachite = countmalachite + 1;
+                                    }
+                                    if (name.equals("gfx/tiles/rocks/ilmenite")) {
+                                        countiron = countiron + 1;
+                                        countilmenite = countilmenite + 1;
+                                    }
+                                    if (name.equals("gfx/tiles/rocks/limonite")) {
+                                        countiron = countiron + 1;
+                                        countlimonite = countlimonite + 1;
+                                    }
+                                    if (name.equals("gfx/tiles/rocks/hematite")) {
+                                        countiron = countiron + 1;
+                                        counthematite = counthematite + 1;
+                                    }
+                                    if (name.equals("gfx/tiles/rocks/magnetite")) {
+                                        countiron = countiron + 1;
+                                        countmagnetite = countmagnetite + 1;
+                                    }
+                                    if (name.equals("gfx/tiles/rocks/galena")) {
+                                        countsilver = countsilver + 1;
+                                        countgalena = countgalena + 1;
+                                    }
+                                    if (name.equals("gfx/tiles/rocks/argentite")) {
+                                        countsilver = countsilver + 1;
+                                        countargentite = countargentite + 1;
+                                    }
+                                    if (name.equals("gfx/tiles/rocks/hornsilver")) {
+                                        countsilver = countsilver + 1;
+                                        counthornsilver = counthornsilver + 1;
+                                    }
+                                    if (name.equals("gfx/tiles/rocks/petzite")) {
+                                        countgold = countgold + 1;
+                                        countpetzite = countpetzite + 1;
+                                    }
+                                    if (name.equals("gfx/tiles/rocks/sylvanite")) {
+                                        countgold = countgold + 1;
+                                        countsylvanite = countsylvanite + 1;
+                                    }
+                                    if (name.equals("gfx/tiles/rocks/nagyagite")) {
+                                        countgold = countgold + 1;
+                                        countnagyagite = countnagyagite + 1;
+                                    }
+                                    if (name.equals("gfx/tiles/rocks/cinnabar")) {
+                                        countcinnabar = countcinnabar + 1;
+                                    }
+
+                                }
+                            }
+                            labelcountiron.settext(countiron + "");
+                            labelcountcopper.settext(countcopper + "");
+                            labelcounttin.settext(counttin + "");
+                            labelcountlead.settext(countlead + "");
+                            labelcountgold.settext(countgold + "");
+                            labelcountsilver.settext(countsilver + "");
+                            labelcountmagnetite.settext(countmagnetite + "");
+                            labelcounthematite.settext(counthematite + "");
+                            labelcountslimes.settext(countslimes + "");
+                            labelcountslimestotal.settext(slimecount.size() + "");
+                            labelcountcinnabar.settext(countcinnabar + "");
+                            if (countgold > 0) {
+                                double now = Utils.rtime();
+                                if (now - lasterror > 45) {
+                                    lasterror = now;
+                                    PBotUtils.debugMsg(ui, "Gold Visible on screen!!", Color.green);
+                                    if (!audiomute)
+                                        Audio.play(goldsfx);
+                                }
+                            }
+                            if (countcinnabar > 0) {
+                                double now = Utils.rtime();
+                                if (now - lasterror > 45) {
+                                    PBotUtils.debugMsg(ui, "Cinnabar visible on screen!!", Color.green);
+                                    lasterror = now;
+                                }
+                            }
+                            if (countsilver > 0) {
+                                double now = Utils.rtime();
+                                if (now - lasterror > 15) {
+                                    PBotUtils.debugMsg(ui, "Silver visible on screen!!", Color.green);
+                                    if (!audiomute) {
+                                        Audio.play(silversfx);
+                                    }
+                                    lasterror = now;
+                                }
+                            }
+                            if (countslimes > 0) {
+                                double now = Utils.rtime();
+                                if (now - lasterror > 15) {
+                                    PBotUtils.sysLogAppend(ui, "Slime number spawned : " + list.size(), "white");
+                                    lasterror = now;
+                                }
+                            }
+                            countiron = 0;
+                            counttin = 0;
+                            countcopper = 0;
+                            countgold = 0;
+                            countsilver = 0;
+                            counthematite = 0;
+                            countmagnetite = 0;
+                            countcinnabar = 0;
+                            countslimes = 0;
                         }
+
                         if (SupplortsLoose.a) {
                             boolean already = false;
                             for (Gob loose : looses) {
@@ -277,152 +434,10 @@ public class MinerAlert extends Window {
                             }
                         }
                     }
-
-                    for (int x = -44; x < 44; x++) {
-                        for (int y = -44; y < 44; y++) {
-                            int t = g.map.gettile(pltc.sub(x, y));
-                            Resource res = g.map.tilesetr(t);
-
-                            if (res == null)
-                                continue;
-                            String name = res.name;
-
-                            if (MarkTiles.a && reslist.contains(name) && maxmarks != 0) {
-                                final Coord2d mc = player.rc.sub(new Coord2d((x - 1) * 11, (y - 1) * 11)); //no clue why i have to subtract 1 tile here to get it to line up.
-                                final Coord tc = mc.floor(MCache.tilesz);
-                                final Coord2d tcd = mc.div(MCache.tilesz);
-
-                                ui.sess.glob.map.getgridto(tc).ifPresent(grid -> {
-                                    final Coord2d offset = tcd.sub(new Coord2d(grid.ul));
-                                    ui.sess.glob.map.getgrido(grid.id).ifPresent(grid2 -> {
-                                        final Coord2d mc2 = new Coord2d(grid2.ul).add(offset.x, offset.y).mul(MCache.tilesz);
-                                        maxmarks--;
-                                        final Gob g2 = ui.sess.glob.oc.new ModdedGob(mc2, 0);
-                                        g2.addol(new Mark(4000));
-                                        g2.addol(getCachedSprite(res.basename().substring(0, 1).toUpperCase() + res.basename().substring(1) + " " + smeltchance.get(res.basename()), 4000));
-                                    });
-                                });
-                            }
-
-                            if (name.equals("gfx/tiles/rocks/leadglance")) {
-                                countlead++;
-                                countleadglance++;
-                            }
-                            if (name.equals("gfx/tiles/rocks/cassiterite")) {
-                                counttin = counttin + 1;
-                                countcassiterite = countcassiterite + 1;
-                            }
-                            if (name.equals("gfx/tiles/rocks/chalcopyrite")) {
-                                countiron = countiron + 1;
-                                countcopper = countcopper + 1;
-                                countchalcopyrite = countchalcopyrite + 1;
-                            }
-                            if (name.equals("gfx/tiles/rocks/malachite")) {
-                                countcopper = countcopper + 1;
-                                countmalachite = countmalachite + 1;
-                            }
-                            if (name.equals("gfx/tiles/rocks/ilmenite")) {
-                                countiron = countiron + 1;
-                                countilmenite = countilmenite + 1;
-                            }
-                            if (name.equals("gfx/tiles/rocks/limonite")) {
-                                countiron = countiron + 1;
-                                countlimonite = countlimonite + 1;
-                            }
-                            if (name.equals("gfx/tiles/rocks/hematite")) {
-                                countiron = countiron + 1;
-                                counthematite = counthematite + 1;
-                            }
-                            if (name.equals("gfx/tiles/rocks/magnetite")) {
-                                countiron = countiron + 1;
-                                countmagnetite = countmagnetite + 1;
-                            }
-                            if (name.equals("gfx/tiles/rocks/galena")) {
-                                countsilver = countsilver + 1;
-                                countgalena = countgalena + 1;
-                            }
-                            if (name.equals("gfx/tiles/rocks/argentite")) {
-                                countsilver = countsilver + 1;
-                                countargentite = countargentite + 1;
-                            }
-                            if (name.equals("gfx/tiles/rocks/hornsilver")) {
-                                countsilver = countsilver + 1;
-                                counthornsilver = counthornsilver + 1;
-                            }
-                            if (name.equals("gfx/tiles/rocks/petzite")) {
-                                countgold = countgold + 1;
-                                countpetzite = countpetzite + 1;
-                            }
-                            if (name.equals("gfx/tiles/rocks/sylvanite")) {
-                                countgold = countgold + 1;
-                                countsylvanite = countsylvanite + 1;
-                            }
-                            if (name.equals("gfx/tiles/rocks/nagyagite")) {
-                                countgold = countgold + 1;
-                                countnagyagite = countnagyagite + 1;
-                            }
-                            if (name.equals("gfx/tiles/rocks/cinnabar")) {
-                                countcinnabar = countcinnabar + 1;
-                            }
-
-                        }
-                    }
-                    labelcountiron.settext(countiron + "");
-                    labelcountcopper.settext(countcopper + "");
-                    labelcounttin.settext(counttin + "");
-                    labelcountlead.settext(countlead + "");
-                    labelcountgold.settext(countgold + "");
-                    labelcountsilver.settext(countsilver + "");
-                    labelcountmagnetite.settext(countmagnetite + "");
-                    labelcounthematite.settext(counthematite + "");
-                    labelcountslimes.settext(countslimes + "");
-                    labelcountslimestotal.settext(slimecount.size() + "");
-                    labelcountcinnabar.settext(countcinnabar + "");
-                    if (countgold > 0) {
-                        double now = Utils.rtime();
-                        if (now - lasterror > 45) {
-                            lasterror = now;
-                            PBotUtils.debugMsg(ui, "Gold Visible on screen!!", Color.green);
-                            if (!audiomute)
-                                Audio.play(goldsfx);
-                        }
-                    }
-                    if (countcinnabar > 0) {
-                        double now = Utils.rtime();
-                        if (now - lasterror > 45) {
-                            PBotUtils.debugMsg(ui, "Cinnabar visible on screen!!", Color.green);
-                            lasterror = now;
-                        }
-                    }
-                    if (countsilver > 0) {
-                        double now = Utils.rtime();
-                        if (now - lasterror > 15) {
-                            PBotUtils.debugMsg(ui, "Silver visible on screen!!", Color.green);
-                            if (!audiomute) {
-                                Audio.play(silversfx);
-                            }
-                            lasterror = now;
-                        }
-                    }
-                    if (countslimes > 0) {
-                        double now = Utils.rtime();
-                        if (now - lasterror > 15) {
-                            PBotUtils.sysLogAppend(ui, "Slime number spawned : " + list.size(), "white");
-                            lasterror = now;
-                        }
-                    }
-                    countiron = 0;
-                    counttin = 0;
-                    countcopper = 0;
-                    countgold = 0;
-                    countsilver = 0;
-                    counthematite = 0;
-                    countmagnetite = 0;
-                    countcinnabar = 0;
-                    countslimes = 0;
                 } catch (Exception lolloadingerrors) {
                     lolloadingerrors.printStackTrace();
                 }
+                PBotUtils.sleep(100);
             }
         }
     }
