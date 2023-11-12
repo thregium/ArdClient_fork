@@ -43,6 +43,7 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
     public Comparator<? super T> order = namecmp, torder = namecmp;
     public Column mousecol, ordercol, tordercol;
     public Label lcounter;
+    public Button selectAllBtn, selectNoneBtn, removeSelectedBtn;
 
     public CattleRoster() {
         super(new Coord(WIDTH, UI.scale(400)));
@@ -52,17 +53,16 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
                 redisplay(display);
             }
         }, sz.x, HEADH);
-        Widget prev;
-        prev = add(new Button(UI.scale(100), "Select all", false).action(() -> {
+        selectAllBtn = add(new Button(UI.scale(100), "Select all", false).action(() -> {
             for (Entry entry : this.entries.values())
                 entry.set(true);
         }), entrycont.pos("bl").adds(0, 5));
-        prev = add(new Button(UI.scale(100), "Select none", false).action(() -> {
+        selectNoneBtn = add(new Button(UI.scale(100), "Select none", false).action(() -> {
             for (Entry entry : this.entries.values())
                 entry.set(false);
-        }), prev.pos("ur").adds(5, 0));
-        lcounter = add(new Label(Integer.toString(selectedCounter.get())), prev.pos("ur").adds(5, 0));
-        adda(new Button(UI.scale(150), "Remove selected", false).action(() -> {
+        }), selectAllBtn.pos("ur").adds(5, 0));
+        lcounter = add(new Label(Integer.toString(selectedCounter.get())), selectNoneBtn.pos("ur").adds(5, 0));
+        removeSelectedBtn = adda(new Button(UI.scale(150), "Remove selected", false).action(() -> {
             Collection<Object> args = new ArrayList<>();
             for (Entry entry : this.entries.values()) {
                 if (entry.mark.a) {
@@ -114,6 +114,30 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
         for (T entry : hide)
             entry.hide();
         this.display = display;
+    }
+
+    @Override
+    public void presize() {
+        super.presize();
+//        Coord nsz = ((Window)parent).asz;
+    }
+
+    @Override
+    public void resize(final Coord sz) {
+        if (this.sz.equals(sz)) return;
+        super.resize(sz);
+        int y = 0;
+        y += selectAllBtn.sz.y + UI.scale(5) + HEADH;
+        Coord nsz = sz.sub(0, y);
+        entrycont.resize(nsz);
+        sb.resizeh(nsz.y);
+        sb.move(Coord.of(nsz.x, sb.c.y));
+        sb.reset();
+        selectAllBtn.move(entrycont.pos("bl").adds(0, 5));
+        selectNoneBtn.move(selectAllBtn.pos("ur").adds(5, 0));
+        lcounter.move(selectNoneBtn.pos("ur").adds(5, 0));
+        removeSelectedBtn.move(entrycont.pos("br").adds(0, 5), 1, 0);
+        redisplay(display);
     }
 
     public void tick(double dt) {

@@ -129,7 +129,7 @@ public class Scrollbar extends Widget {
     }
 
     public void reset() {
-        ch(min);
+        ch(min - val);
     }
 
     public void resize(int h) {

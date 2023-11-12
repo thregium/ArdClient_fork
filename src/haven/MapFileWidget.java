@@ -94,9 +94,9 @@ public class MapFileWidget extends Widget implements Console.Directory {
     //    public static final double[] scaleFactors = new double[]{1 / 8.0, 1 / 4.0, 1 / 2.0, 1, 100 / 75.0, 100 / 50.0, 100 / 25.0, 100 / 15.0, 100 / 8.0}; //FIXME that his add more scale
     private static final Tex gridred = Resource.loadtex("gfx/hud/mmap/gridred");
 
-    public static Map<String, Tex> cachedTextTex = Collections.synchronizedMap(new HashMap<>());
-    public static Map<String, Tex> cachedImageTex = Collections.synchronizedMap(new HashMap<>());
-    public static Map<String, Tex> cachedZoomImageTex = Collections.synchronizedMap(new HashMap<>());
+    public static Map<String, Tex> cachedTextTex = new HashMap<>();
+    public static Map<String, Tex> cachedImageTex = new HashMap<>();
+    public static Map<String, Tex> cachedZoomImageTex = new HashMap<>();
 
     public static Tex getCachedTextTex(String text) {
         Tex tex = cachedTextTex.get(text);
