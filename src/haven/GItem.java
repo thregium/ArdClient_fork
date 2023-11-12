@@ -657,11 +657,11 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         if (lcont != this.contents) {
             if ((this.contents != null) && (this.contentsid != null) && (contentswdg == null) && (contentswnd == null) &&
                     Utils.getprefb(String.format("cont-wndvis/%s", this.contentsid), false)) {
-                Coord c = Utils.getprefc(String.format("cont-wndc/%s", this.contentsid), null);
-                if (c != null) {
+//                Coord c = Utils.getprefc(String.format("cont-wndc/%s", this.contentsid), null);
+//                if (c != null) {
                     this.contents.unlink();
-                    contentswnd = contparent().add(new ContentsWindow(this, this.contents), c);
-                }
+                    contentswnd = contparent().add(new ContentsWindow(this, this.contents, true));
+//                }
             }
             lcont = this.contents;
         }
@@ -719,8 +719,8 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         if (show && (contentswnd == null)) {
             Widget cont = contparent();
             Coord wc = null;
-            if (this.contentsid != null)
-                wc = Utils.getprefc(String.format("cont-wndc/%s", this.contentsid), null);
+//            if (this.contentsid != null)
+//                wc = Utils.getprefc(String.format("cont-wndc/%s", this.contentsid), null);
             if (wc == null)
                 wc = cont.rootxlate(ui.mc).add(UI.scale(5, 5));
             contents.unlink();
@@ -739,7 +739,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
             contentswnd = cont.add(wnd, wc);
             if (this.contentsid != null) {
                 Utils.setprefb(String.format("cont-wndvis/%s", this.contentsid), true);
-                Utils.setprefc(String.format("cont-wndc/%s", this.contentsid), wc);
+//                Utils.setprefc(String.format("cont-wndc/%s", this.contentsid), wc);
             }
         } else if (!show && (contentswnd != null)) {
             contentswnd.reqdestroy();
@@ -933,7 +933,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
             if (!Utils.eq(inv.sz, psz))
                 resize(inv.c.add(psz = inv.sz));
             if (!Utils.eq(lc, this.c) && (cont.contentsid != null)) {
-                Utils.setprefc(String.format("cont-wndc/%s", cont.contentsid), lc = this.c);
+//                Utils.setprefc(String.format("cont-wndc/%s", cont.contentsid), lc = this.c);
                 Utils.setprefb(String.format("cont-wndvis/%s", cont.contentsid), true);
             }
         }
