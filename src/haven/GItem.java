@@ -932,10 +932,10 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
             super.tick(dt);
             if (!Utils.eq(inv.sz, psz))
                 resize(inv.c.add(psz = inv.sz));
-            if (!Utils.eq(lc, this.c) && (cont.contentsid != null)) {
+//            if (cont.contentsid != null) {
 //                Utils.setprefc(String.format("cont-wndc/%s", cont.contentsid), lc = this.c);
-                Utils.setprefb(String.format("cont-wndvis/%s", cont.contentsid), true);
-            }
+//                Utils.setprefb(String.format("cont-wndvis/%s", cont.contentsid), true);
+//            }
         }
 
         @Override

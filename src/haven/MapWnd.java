@@ -996,10 +996,11 @@ public class MapWnd extends ResizableWnd {
                 for (TempMark cm : getTempMarkList()) {
                     if (loc.seg.id == cm.loc.seg.id && check.test(cm)) {
                         Tex tex = cachedzoomtex(cm.icon, cm.name, zoom);
-                        if (!cm.gc.equals(Coord.z)) {
-                            Coord gc = hsz.sub(loc.tc).add(cm.gc.div(scalef()));
-                            if (tex != null)
+                        if (tex != null) {
+                            if (!cm.gc.equals(Coord.z)) {
+                                Coord gc = hsz.sub(loc.tc).add(cm.gc.div(scalef()));
                                 g.aimage(tex, gc, 0.5, 0.5);
+                            }
                         }
                     }
                 }
@@ -1251,15 +1252,14 @@ public class MapWnd extends ResizableWnd {
                 if (indir != null) {
                     Resource res = indir.get();
                     if (res != null) {
-                        Tex itex = cachedImageTex.get(res.name + (isdead ? "-dead" : ""));
-                        if (itex == null) {
+                        Tex itex = cachedImageTex.computeIfAbsent(res.name + (isdead ? "-dead" : ""), name -> {
                             GobIcon.Image img = icon.img();
-                            itex = isdead ? img.texgrey() : img.tex();
-                            if ((itex.sz().x > size) || (itex.sz().y > size)) {
-                                itex = img.tex(Coord.of(size), isdead);
+                            Tex tex = isdead ? img.texgrey() : img.tex();
+                            if ((tex.sz().x > size) || (tex.sz().y > size)) {
+                                tex = img.tex(Coord.of(size), isdead);
                             }
-                            cachedImageTex.put(res.name + (isdead ? "-dead" : ""), itex);
-                        }
+                            return (tex);
+                        });
                         return (itex);
                     }
                 }
@@ -1268,11 +1268,14 @@ public class MapWnd extends ResizableWnd {
         }
 
         private Tex cachedzoomtex(Tex tex, String name, int z) {
-            Tex itex = cachedZoomImageTex.get(name + "_zoom" + z);
-            if (itex == null && tex != null) {
-                Coord zoomc = new Coord2d(tex.sz()).round();
-                itex = new TexI(PUtils.uiscale(((TexI) tex).back, zoomc));
-                cachedZoomImageTex.put(name + "_zoom" + z, itex);
+            Tex itex;
+            synchronized (cachedZoomImageTex) {
+                itex = cachedZoomImageTex.get(name + "_zoom" + z);
+                if (itex == null && tex != null) {
+                    Coord zoomc = new Coord2d(tex.sz()).round();
+                    itex = new TexI(PUtils.uiscale(((TexI) tex).back, zoomc));
+                    cachedZoomImageTex.put(name + "_zoom" + z, itex);
+                }
             }
             return (itex);
         }

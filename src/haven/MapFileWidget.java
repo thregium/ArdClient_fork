@@ -94,18 +94,15 @@ public class MapFileWidget extends Widget implements Console.Directory {
     //    public static final double[] scaleFactors = new double[]{1 / 8.0, 1 / 4.0, 1 / 2.0, 1, 100 / 75.0, 100 / 50.0, 100 / 25.0, 100 / 15.0, 100 / 8.0}; //FIXME that his add more scale
     private static final Tex gridred = Resource.loadtex("gfx/hud/mmap/gridred");
 
-    public static Map<String, Tex> cachedTextTex = new HashMap<>();
-    public static Map<String, Tex> cachedImageTex = new HashMap<>();
-    public static Map<String, Tex> cachedZoomImageTex = new HashMap<>();
+    public static final Map<String, Tex> cachedTextTex = Collections.synchronizedMap(new HashMap<>());
+    public static final Map<String, Tex> cachedImageTex = Collections.synchronizedMap(new HashMap<>());
+    public static final Map<String, Tex> cachedZoomImageTex = Collections.synchronizedMap(new HashMap<>());
 
     public static Tex getCachedTextTex(String text) {
-        Tex tex = cachedTextTex.get(text);
-        if (tex == null) {
+        return (cachedTextTex.computeIfAbsent(text, key -> {
             Text.Foundry fnd = new Text.Foundry(latin.deriveFont(Font.BOLD), UI.scale(12)).aa(true);
-            tex = Text.renderstroked(text, Color.white, Color.BLACK, fnd).tex();
-            cachedTextTex.put(text, tex);
-        }
-        return (tex);
+            return (Text.renderstroked(text, Color.white, Color.BLACK, fnd).tex());
+        }));
     }
 
 
@@ -427,17 +424,16 @@ public class MapFileWidget extends Widget implements Console.Directory {
                 }
                 if (img != null) {
                     //((SMarker)m).res.name.startsWith("gfx/invobjs/small"));
-                    int size = 20;
-                    Tex itex = cachedImageTex.get(img.getres().name);
-                    if (itex == null) {
-                        itex = new TexI(img.img);
-                        if ((itex.sz().x > size) || (itex.sz().y > size)) {
+                    int size = UI.scale(20);
+                    Tex itex = cachedImageTex.computeIfAbsent(img.getres().name, name -> {
+                        Tex tex = new TexI(img.img);
+                        if ((tex.sz().x > size) || (tex.sz().y > size)) {
                             BufferedImage buf = img.img;
                             buf = PUtils.convolve(buf, new Coord(size, size), new PUtils.Hanning(1));
-                            itex = new TexI(buf);
+                            tex = new TexI(buf);
                         }
-                        cachedImageTex.put(img.getres().name, itex);
-                    }
+                        return (tex);
+                    });
                     g.aimage(itex, c, 0.5, 0.5);
 
                     if (Config.mapdrawquests) {

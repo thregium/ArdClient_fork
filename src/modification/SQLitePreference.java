@@ -76,7 +76,7 @@ public class SQLitePreference extends AbstractPreferences {
         });
     }
 
-    private final Map<String, String> map = Collections.synchronizedMap(new WeakHashMap<>());
+    private final Map<String, String> map = Collections.synchronizedMap(new HashMap<>());
     @Override
     protected String getSpi(final String key) {
         String get = map.get(key);
