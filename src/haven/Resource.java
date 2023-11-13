@@ -29,6 +29,8 @@ package haven;
 import dolda.xiphutil.VorbisStream;
 import modification.configuration;
 import modification.dev;
+import org.json.JSONObject;
+
 import javax.imageio.ImageIO;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiSystem;
@@ -48,7 +50,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -64,6 +65,7 @@ import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -84,12 +86,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Resource implements Serializable {
     private static ResCache prscache;
@@ -578,7 +580,7 @@ public class Resource implements Serializable {
                             map.put((Integer) objs[0], new Object[]{src, ret, objs[2]});
                             throw ((LoadException) objs[1]);
                         }
-                        ret.loadlayers((Message)objs[2]);
+                        ret.loadlayers((Message) objs[2]);
                         res.res = ret;
                         res.error = null;
                         break;
@@ -602,8 +604,8 @@ public class Resource implements Serializable {
                     throw (res.error);
                 map.keySet().stream().max(Comparator.comparingInt(Integer::intValue)).ifPresent(maxVer -> {
                     Object[] objs = map.get(maxVer);
-                    Resource ret = (Resource)objs[1];
-                    ret.source = (ResSource)objs[0];
+                    Resource ret = (Resource) objs[1];
+                    ret.source = (ResSource) objs[0];
                     if (!(ret.source instanceof JarSource)) {
                         ret.loadlayers((Message) objs[2]);
                         res.res = ret;
@@ -1043,30 +1045,43 @@ public class Resource implements Serializable {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static Map<String, String> l10n(String bundle, String langcode) {
-        Properties props = new Properties();
+//        Properties props = new Properties();
 
-        InputStream is = Config.class.getClassLoader().getResourceAsStream("l10n/" + bundle + "_" + langcode + ".properties");
+//        InputStream is = Config.class.getClassLoader().getResourceAsStream("l10n/" + bundle + "_" + langcode + ".properties");
+        InputStream is = Config.class.getClassLoader().getResourceAsStream("l10n/" + langcode + "/" + bundle + ".json");
         if (is == null)
             return null;
 
-        InputStreamReader isr = null;
+//        InputStreamReader isr = null;
+//        try {
+//            isr = new InputStreamReader(is, "UTF-8");
+//            props.load(isr);
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//            if (isr != null) {
+//                try {
+//                    isr.close();
+//                } catch (IOException e) { // ignored
+//                }
+//            }
+//        }
+
+        Map<String, String> map = new HashMap<>();
         try {
-            isr = new InputStreamReader(is, "UTF-8");
-            props.load(isr);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (isr != null) {
-                try {
-                    isr.close();
-                } catch (IOException e) { // ignored
-                }
+            String result = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
+            JSONObject obj = new JSONObject(result);
+            for (String key : obj.keySet()) {
+                map.put(key, obj.getString(key));
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        return props.size() > 0 ? new HashMap<>((Map) props) : null;
+//        return props.size() > 0 ? new HashMap<>((Map) props) : null;
+        return !map.isEmpty() ? map : null;
     }
 
     public interface IDLayer<T> {

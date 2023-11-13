@@ -83,6 +83,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -5545,11 +5547,7 @@ public class OptWnd extends Window {
     private Dropbox<Locale> langDropdown() {
         List<Locale> languages = enumerateLanguages();
         List<String> values = languages.stream().map(Locale::getDisplayName).collect(Collectors.toList());
-        return new Dropbox<Locale>(10, values) {
-            {
-                super.change(new Locale(Resource.language));
-            }
-
+        Dropbox<Locale> box = new Dropbox<Locale>(10, values) {
             @Override
             protected Locale listitem(int i) {
                 return languages.get(i);
@@ -5571,6 +5569,8 @@ public class OptWnd extends Window {
                 Utils.setpref("language", item.toString());
             }
         };
+        box.change2(new Locale(Resource.language));
+        return (box);
     }
 
     private Dropbox<String> makeFontsDropdown() {
@@ -5608,6 +5608,7 @@ public class OptWnd extends Window {
         Set<Locale> languages = new HashSet<>();
         languages.add(new Locale("en"));
 
+        Pattern folder = Pattern.compile("l10n/(\\w+)/");
         Enumeration<URL> en;
         try {
             en = this.getClass().getClassLoader().getResources("l10n");
@@ -5620,8 +5621,12 @@ public class OptWnd extends Window {
                         String name = entries.nextElement().getName();
                         // we assume that if tooltip localization exists then the rest exist as well
                         // up to dev to make sure that it's true
-                        if (name.startsWith("l10n/" + Resource.BUNDLE_TOOLTIP))
-                            languages.add(new Locale(name.substring(13, 15)));
+                        Matcher matcher = folder.matcher(name);
+                        if (matcher.matches()) {
+                            languages.add(new Locale(matcher.group(1)));
+                        }
+//                        if (name.startsWith("l10n/" + Resource.BUNDLE_TOOLTIP))
+//                            languages.add(new Locale(name.substring(13, 15)));
                     }
                 }
             }

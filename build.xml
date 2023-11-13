@@ -119,7 +119,8 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar luaj-jse-3
 
     <target name="l10n-jar" depends="build-env">
         <jar destfile="build/l10n.jar">
-            <fileset dir="." includes="l10n/*.properties" excludes="l10n/*_new.properties"/>
+<!--            <fileset dir="." includes="l10n/*.properties" excludes="l10n/*_new.properties"/>-->
+            <fileset dir="." includes="l10n/*/*.json"/>
         </jar>
     </target>
 
