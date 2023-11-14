@@ -54,7 +54,14 @@ public class Composite extends Drawable {
     public Composite(Gob gob, Indir<Resource> base) {
         super(gob);
         this.base = base;
-        waitforinit();
+        initlater();
+    }
+
+    private void initlater() {
+        Defer.later(() -> {
+            waitforinit();
+            return (null);
+        });
     }
 
     private void waitforinit() {
@@ -64,20 +71,26 @@ public class Composite extends Drawable {
             inited = true;
         } catch (Loading l) {
             error = l;
-            l.waitfor(this::waitforinit, waiting -> {});
+            l.waitfor(this::initlater, waiting -> {});
         }
     }
 
     private void init() {
         if (comp != null) return;
-        Resource res = base.get();
-        comp = new Composited(base.get().layer(Skeleton.Res.class).s);
-        comp.eqowner = gob;
-        if (gob.type == null) {
-            Type.getType(res.name);
-            // prevent mannequins to be recognized as players
-            if (gob.type == Type.HUMAN && gob.attr.containsKey(GobHealth.class))
-                gob.type = Type.UNKNOWN;
+        try {
+            Resource res = base.get();
+            comp = new Composited(base.get().layer(Skeleton.Res.class).s);
+            comp.eqowner = gob;
+            if (gob.type == null) {
+                Type.getType(res.name);
+                // prevent mannequins to be recognized as players
+                if (gob.type == Type.HUMAN && gob.attr.containsKey(GobHealth.class))
+                    gob.type = Type.UNKNOWN;
+            }
+        } catch (Loading l) {
+            throw l;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
