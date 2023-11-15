@@ -513,6 +513,7 @@ public class Resource implements Serializable {
                     p.boostprio(prio);
             }
 
+            private FakeResource fake;
             @Override
             public Resource get() {
                 if (!done) {
@@ -523,7 +524,9 @@ public class Resource implements Serializable {
                     if (dev.skipexceptions) {
                         dev.simpleLog("Delayed error in resource " + name + " (v" + ver + "), from " + error.src + " => " + error);
                     } else {
-                        return (new FakeResource(name, ver));
+                        if (fake == null)
+                            fake = new FakeResource(name, ver);
+                        return (fake);
 //                        throw (new RuntimeException("Delayed error in resource " + name + " (v" + ver + "), from " + error.src, error));
                     }
                 return (res);
@@ -2244,26 +2247,32 @@ public class Resource implements Serializable {
     }
 
     private void loadlayers(Message in) {
-        List<Layer> layers = new LinkedList<>();
-        List<Pair<String, Integer>> layerList = new ArrayList<>();
-        while (!in.eom()) {
-            String title = in.string();
-            LayerFactory<?> lc = ltypes.get(title);
-            int len = in.int32();
-            layerList.add(new Pair<>(title, len));
-            if (lc == null) {
-                in.skip(len);
-                continue;
+        try {
+            List<Layer> layers = new LinkedList<>();
+            List<Pair<String, Integer>> layerList = new ArrayList<>();
+            while (!in.eom()) {
+                String title = in.string();
+                LayerFactory<?> lc = ltypes.get(title);
+                int len = in.int32();
+                layerList.add(new Pair<>(title, len));
+                if (lc == null) {
+                    in.skip(len);
+                    continue;
+                }
+                Message buf = new LimitMessage(in, len);
+                layers.add(lc.cons(this, buf));
+                buf.skip();
             }
-            Message buf = new LimitMessage(in, len);
-            layers.add(lc.cons(this, buf));
-            buf.skip();
+            configuration.decodeLayers(this, layerList);
+            this.layers = layers;
+            for (Layer l : layers)
+                l.init();
+            used = false;
+        } catch (Throwable e) {
+            dev.simpleLog(String.format("Error: %s from %s:%s", this, pool, src));
+            dev.simpleLog(e);
+            throw (e);
         }
-        configuration.decodeLayers(this, layerList);
-        this.layers = layers;
-        for (Layer l : layers)
-            l.init();
-        used = false;
     }
 
     private transient Named indir = null;

@@ -15,7 +15,7 @@ public class GobSpawner extends Window {
         shortvers.addAll(defaultitems.values());
         shortvers.sort(String::compareTo);
         Coord c = new Coord(0, 0);
-        c.x += add(new Listbox<String>(200, 20, 20) {
+        c.y += add(new Listbox<String>(200, 20, 20) {
             @Override
             protected String listitem(int i) {
                 return shortvers.get(i);
@@ -47,7 +47,17 @@ public class GobSpawner extends Window {
             protected void drawitem(GOut g, String item, int i) {
                 g.text(item, new Coord(5, 1));
             }
-        }, c.copy()).sz.x + 5;
+        }, c.copy()).sz.y + 5;
+        c.y += add(new TextEntry(200, "") {
+            @Override
+            public void activate(String text) {
+                try {
+                    spawnGob(text);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, c.copy()).sz.y + 5;
         pack();
     }
 
