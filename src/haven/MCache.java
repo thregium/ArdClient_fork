@@ -75,7 +75,7 @@ public class MCache {
     public Reference<Tiler>[] tiles = new Reference[256];
     private final Waitable.Queue gridwait = new Waitable.Queue();
     final Map<Coord, Request> req = new HashMap<>();
-    final Map<Coord, Grid> grids = new HashMap<>();
+    final Map<Coord, Grid> grids = Collections.synchronizedMap(new HashMap<>());
     Session sess;
     final Set<Overlay> ols = new HashSet<>();
     public int olseq = 0;
