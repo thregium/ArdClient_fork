@@ -54,7 +54,7 @@ public class Composite extends Drawable {
     public Composite(Gob gob, Indir<Resource> base) {
         super(gob);
         this.base = base;
-        initlater();
+        waitforinit();
     }
 
     private void initlater() {
@@ -71,7 +71,7 @@ public class Composite extends Drawable {
             inited = true;
         } catch (Loading l) {
             error = l;
-            l.waitfor(this::initlater, waiting -> {});
+            l.waitfor(this::waitforinit, waiting -> {});
         }
     }
 
