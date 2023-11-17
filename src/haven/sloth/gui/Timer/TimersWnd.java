@@ -7,6 +7,7 @@ import haven.GOut;
 import haven.Glob;
 import haven.Scrollport;
 import haven.Text;
+import haven.UI;
 import haven.Widget;
 import haven.Window;
 import haven.sloth.io.TimerData;
@@ -15,7 +16,7 @@ import haven.sloth.util.ObservableListener;
 import java.util.Collection;
 
 public class TimersWnd extends Window implements ObservableListener<TimerData.Timer> {
-    public static final int width = 460;
+    public static final int width = UI.scale(460);
     public final Scrollport port;
     private Glob glob;
 
@@ -24,10 +25,10 @@ public class TimersWnd extends Window implements ObservableListener<TimerData.Ti
 
         this.glob = glob;
 
-        Button btna = new Button(100, "Add", () ->
+        Button btna = new Button(UI.scale(100), "Add", () ->
                 ui.gui.add(new TimerEditWnd("Create New Timer"),
-                        new Coord(ui.gui.sz.x / 2 - 200, ui.gui.sz.y / 2 - 200)));
-        add(btna, new Coord(0, 10));
+                        new Coord(ui.gui.sz.x / 2 - UI.scale(200), ui.gui.sz.y / 2 - UI.scale(200))));
+        add(btna, UI.scale(0, 10));
 //        Button btnl = new Button(100, "Load") {
 //            public void click() {
 //                TimerData.oldload();
@@ -40,7 +41,7 @@ public class TimersWnd extends Window implements ObservableListener<TimerData.Ti
 //        };
 //        add(btnl, new Coord(btna.c.x + btna.sz.x + 10, 10));
 
-        port = new Scrollport(new Coord(width - 20 - 15, 0), 30) {
+        port = new Scrollport(new Coord(width - UI.scale(20) - UI.scale(15), 0), 30) {
             @Override
             public void draw(GOut g) {
                 g.chcolor(0, 0, 0, 128);
@@ -49,7 +50,7 @@ public class TimersWnd extends Window implements ObservableListener<TimerData.Ti
                 super.draw(g);
             }
         };
-        add(port, btna.c.add(0, btna.sz.y + 10));
+        add(port, btna.c.add(0, btna.sz.y + UI.scale(10)));
 
         TimerData.listenTimers(this);
         pack();
@@ -106,7 +107,7 @@ public class TimersWnd extends Window implements ObservableListener<TimerData.Ti
                 y += wdg.sz.y;
             }
         }
-        int portHeight = Math.min(y, 400);
+        int portHeight = Math.min(y, UI.scale(400));
         port.resize(port.sz.x, portHeight);
         port.cont.update();
         port.bar.resize(portHeight);

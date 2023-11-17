@@ -6,6 +6,7 @@ import haven.CheckBox;
 import haven.Coord;
 import haven.Label;
 import haven.TextEntry;
+import haven.UI;
 import haven.Window;
 import haven.sloth.io.TimerData;
 
@@ -13,14 +14,14 @@ import java.awt.event.KeyEvent;
 
 public class TimerEditWnd extends Window {
     TimerEditWnd(String cap) {
-        super(new Coord(355, 100), cap, cap);
+        super(UI.scale(355, 100), cap, cap);
 
-        add(new Label("Name"), new Coord(15, 10));
-        final TextEntry txtname = new TextEntry(200, "");
-        add(txtname, new Coord(15, 30));
+        add(new Label("Name"), UI.scale(15, 10));
+        final TextEntry txtname = new TextEntry(UI.scale(200), "");
+        add(txtname, UI.scale(15, 30));
 
-        add(new Label("HH"), new Coord(225, 10));
-        final TextEntry txthours = new TextEntry(35, "") {
+        add(new Label("HH"), UI.scale(225, 10));
+        final TextEntry txthours = new TextEntry(UI.scale(35), "") {
             @Override
             public boolean keydown(KeyEvent ev) {
                 final char c = ev.getKeyChar();
@@ -29,10 +30,10 @@ public class TimerEditWnd extends Window {
                 return true;
             }
         };
-        add(txthours, new Coord(225, 30));
+        add(txthours, UI.scale(225, 30));
 
-        add(new Label("MM"), new Coord(265, 10));
-        final TextEntry txtminutes = new TextEntry(35, "") {
+        add(new Label("MM"), UI.scale(265, 10));
+        final TextEntry txtminutes = new TextEntry(UI.scale(35), "") {
             @Override
             public boolean keydown(KeyEvent ev) {
                 final char c = ev.getKeyChar();
@@ -41,10 +42,10 @@ public class TimerEditWnd extends Window {
                 return true;
             }
         };
-        add(txtminutes, new Coord(265, 30));
+        add(txtminutes, UI.scale(265, 30));
 
-        add(new Label("SS"), new Coord(305, 10));
-        final TextEntry txtseconds = new TextEntry(35, "") {
+        add(new Label("SS"), UI.scale(305, 10));
+        final TextEntry txtseconds = new TextEntry(UI.scale(35), "") {
             @Override
             public boolean keydown(KeyEvent ev) {
                 final char c = ev.getKeyChar();
@@ -53,7 +54,7 @@ public class TimerEditWnd extends Window {
                 return true;
             }
         };
-        add(txtseconds, new Coord(305, 30));
+        add(txtseconds, UI.scale(305, 30));
 
         CheckBox realtime = new CheckBox("Real time") {
             public void set(boolean val) {
@@ -72,9 +73,9 @@ public class TimerEditWnd extends Window {
                 a = val;
             }
         };
-        adda(realtime, new Coord(sz.x / 2, 70), 0.5, 0);
+        adda(realtime, new Coord(sz.x / 2, UI.scale(70)), 0.5, 0);
 
-        Button add = new Button(60, "Add", () -> {
+        Button add = new Button(UI.scale(60), "Add", () -> {
             try {
                 long hours = Long.parseLong(txthours.text().equals("") ? "0" : txthours.text());
                 long minutes = Long.parseLong(txtminutes.text().equals("") ? "0" : txtminutes.text());
@@ -87,28 +88,28 @@ public class TimerEditWnd extends Window {
                 e.printStackTrace();
             }
         });
-        add(add, new Coord(15, 70));
+        add(add, UI.scale(15, 70));
 
-        Button cancel = new Button(60, "Cancel") {
+        Button cancel = new Button(UI.scale(60), "Cancel") {
             @Override
             public void click() {
                 parent.reqdestroy();
             }
         };
-        add(cancel, new Coord(275, 70));
+        add(cancel, UI.scale(275, 70));
     }
 
     TimerEditWnd(String cap, TimerData.Timer timer) {
-        super(new Coord(355, 100), cap, cap);
+        super(UI.scale(355, 100), cap, cap);
 
-        add(new Label("Name"), new Coord(15, 10));
-        final TextEntry txtname = new TextEntry(200, timer.name);
-        add(txtname, new Coord(15, 30));
+        add(new Label("Name"), UI.scale(15, 10));
+        final TextEntry txtname = new TextEntry(UI.scale(200), timer.name);
+        add(txtname, UI.scale(15, 30));
 
         long ts = timer.duration / 3;
 
-        add(new Label("HH"), new Coord(225, 10));
-        final TextEntry txthours = new TextEntry(35, (int) (ts / 3600) == 0 ? "" : (int) (ts / 3600) + "") {
+        add(new Label("HH"), UI.scale(225, 10));
+        final TextEntry txthours = new TextEntry(UI.scale(35), (int) (ts / 3600) == 0 ? "" : (int) (ts / 3600) + "") {
             @Override
             public boolean keydown(KeyEvent ev) {
                 final char c = ev.getKeyChar();
@@ -117,10 +118,10 @@ public class TimerEditWnd extends Window {
                 return true;
             }
         };
-        add(txthours, new Coord(225, 30));
+        add(txthours, UI.scale(225, 30));
 
-        add(new Label("MM"), new Coord(265, 10));
-        final TextEntry txtminutes = new TextEntry(35, (int) ((ts % 3600) / 60) == 0 ? "" : (int) ((ts % 3600) / 60) + "") {
+        add(new Label("MM"), UI.scale(265, 10));
+        final TextEntry txtminutes = new TextEntry(UI.scale(35), (int) ((ts % 3600) / 60) == 0 ? "" : (int) ((ts % 3600) / 60) + "") {
             @Override
             public boolean keydown(KeyEvent ev) {
                 final char c = ev.getKeyChar();
@@ -129,10 +130,10 @@ public class TimerEditWnd extends Window {
                 return true;
             }
         };
-        add(txtminutes, new Coord(265, 30));
+        add(txtminutes, UI.scale(265, 30));
 
-        add(new Label("SS"), new Coord(305, 10));
-        final TextEntry txtseconds = new TextEntry(35, (int) (ts % 60) == 0 ? "" : (int) (ts % 60) + "") {
+        add(new Label("SS"), UI.scale(305, 10));
+        final TextEntry txtseconds = new TextEntry(UI.scale(35), (int) (ts % 60) == 0 ? "" : (int) (ts % 60) + "") {
             @Override
             public boolean keydown(KeyEvent ev) {
                 final char c = ev.getKeyChar();
@@ -141,7 +142,7 @@ public class TimerEditWnd extends Window {
                 return true;
             }
         };
-        add(txtseconds, new Coord(305, 30));
+        add(txtseconds, UI.scale(305, 30));
 
         CheckBox realtime = new CheckBox("Real time") {
             public void set(boolean val) {
@@ -160,9 +161,9 @@ public class TimerEditWnd extends Window {
                 a = val;
             }
         };
-        adda(realtime, new Coord(sz.x / 2, 70), 0.5, 0);
+        adda(realtime, new Coord(sz.x / 2, UI.scale(70)), 0.5, 0);
 
-        Button edit = new Button(60, "Edit", () -> {
+        Button edit = new Button(UI.scale(60), "Edit", () -> {
             try {
                 long hours = Long.parseLong(txthours.text().equals("") ? "0" : txthours.text());
                 long minutes = Long.parseLong(txtminutes.text().equals("") ? "0" : txtminutes.text());
@@ -175,15 +176,15 @@ public class TimerEditWnd extends Window {
                 e.printStackTrace();
             }
         });
-        add(edit, new Coord(15, 70));
+        add(edit, UI.scale(15, 70));
 
-        Button cancel = new Button(60, "Cancel") {
+        Button cancel = new Button(UI.scale(60), "Cancel") {
             @Override
             public void click() {
                 parent.reqdestroy();
             }
         };
-        add(cancel, new Coord(275, 70));
+        add(cancel, UI.scale(275, 70));
     }
 
     public void close() {

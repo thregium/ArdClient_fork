@@ -10,6 +10,7 @@ import haven.GOut;
 import haven.Glob;
 import haven.Label;
 import haven.Resource;
+import haven.UI;
 import haven.Widget;
 import haven.Window;
 import haven.sloth.io.TimerData;
@@ -19,10 +20,10 @@ import java.util.Collection;
 
 public class TimerWdg extends Widget implements ObservableListener<TimerData.TimerInstance> {
     private static final Resource timersfx = Resource.local().loadwait("custom/sfx/timer");
-    private final static int width = 420;
-    private final static int height = 31;
-    private final static int txty = 8;
-    private final static Coord timec = new Coord(210, txty);
+    private final static int width = UI.scale(420);
+    private final static int height = UI.scale(31);
+    private final static int txty = UI.scale(8);
+    private final static Coord timec = new Coord(UI.scale(210), txty);
 
     private class TimerInstWdg extends Widget {
         final TimerData.TimerInstance inst;
@@ -30,7 +31,7 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
 
         private TimerInstWdg(final TimerData.TimerInstance inst) {
             this.inst = inst;
-            adda(new Button(50, "Cancel", this::cancel), new Coord(width - 5, 3), 1, 0);
+            adda(new Button(UI.scale(50), "Cancel", this::cancel), new Coord(width - UI.scale(5), UI.scale(3)), 1, 0);
             pack();
         }
 
@@ -68,15 +69,15 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
         this.glob = glob;
         sz = new Coord(width, height);
         namelbl = new Label(time.name);
-        adda(namelbl, new Coord(3, sz.y / 2), 0, 0.5);
-        X = new Button(20, "X", this::delete);
-        adda(X, new Coord(sz.x - 5, sz.y / 2), 1, 0.5);
-        editbtn = new Button(50, "Edit", this::edit);
-        adda(editbtn, new Coord(X.c.x - 5, sz.y / 2), 1, 0.5);
-        startbtn = new Button(50, "Start", this::start);
-        adda(startbtn, new Coord(editbtn.c.x - 5, sz.y / 2), 1, 0.5);
+        adda(namelbl, new Coord(UI.scale(3), sz.y / 2), 0, 0.5);
+        X = new Button(UI.scale(20), "X", this::delete);
+        adda(X, new Coord(sz.x - UI.scale(5), sz.y / 2), 1, 0.5);
+        editbtn = new Button(UI.scale(50), "Edit", this::edit);
+        adda(editbtn, new Coord(X.c.x - UI.scale(5), sz.y / 2), 1, 0.5);
+        startbtn = new Button(UI.scale(50), "Start", this::start);
+        adda(startbtn, new Coord(editbtn.c.x - UI.scale(5), sz.y / 2), 1, 0.5);
         timelbl = new Label(timeFormat(time.duration / 3) + " (" + timeFormat((long) (time.duration / 3 / getGlob().getTimeFac())) + ")");
-        adda(timelbl, new Coord(startbtn.c.x - 15, sz.y / 2), 1, 0.5);
+        adda(timelbl, new Coord(startbtn.c.x - UI.scale(15), sz.y / 2), 1, 0.5);
 
         pack();
         base_height = sz.y;
@@ -100,13 +101,13 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
     }
 
     public void edit() {
-        ui.gui.add(new TimerEditWnd("Edit Timer", time), new Coord(ui.gui.sz.x / 2 - 200, ui.gui.sz.y / 2 - 200));
+        ui.gui.add(new TimerEditWnd("Edit Timer", time), new Coord(ui.gui.sz.x / 2 - UI.scale(200), ui.gui.sz.y / 2 - UI.scale(200)));
     }
 
     public void update() {
         namelbl.settext(time.name);
         timelbl.settext(timeFormat(time.duration / 3) + " (" + timeFormat((long) (time.duration / 3 / ui.sess.glob.getTimeFac())) + ")");
-        timelbl.move(new Coord(startbtn.c.x - 15, timelbl.c.y), 1, 0);
+        timelbl.move(new Coord(startbtn.c.x - UI.scale(15), timelbl.c.y), 1, 0);
     }
 
     public void delete() {
@@ -171,27 +172,27 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
 
     private class TimerDoneWindow extends Window {
         private TimerDoneWindow(String timername) {
-            super(new Coord(300, 130), "Hooray!", "Hooray!");
+            super(UI.scale(300, 130), "Hooray!", "Hooray!");
 
             Label lbltimer = new Label(timername);
-            add(lbltimer, new Coord(300 / 2 - lbltimer.sz.x / 2, 20));
+            add(lbltimer, new Coord(UI.scale(300) / 2 - lbltimer.sz.x / 2, UI.scale(20)));
 
             Label lblinf = new Label("has finished running");
-            add(lblinf, new Coord(300 / 2 - lblinf.sz.x / 2, 50));
+            add(lblinf, new Coord(UI.scale(300) / 2 - lblinf.sz.x / 2, UI.scale(50)));
 
-            adda(new Button(60, "Close") {
+            adda(new Button(UI.scale(60), "Close") {
                 @Override
                 public void click() {
                     parent.reqdestroy();
                 }
-            }, new Coord(sz.x / 4, 90), 0.5, 0);
-            adda(new Button(60, "Close & Restart") {
+            }, new Coord(sz.x / 4, UI.scale(90)), 0.5, 0);
+            adda(new Button(UI.scale(60), "Close & Restart") {
                 @Override
                 public void click() {
                     TimerWdg.this.start();
                     parent.reqdestroy();
                 }
-            }, new Coord(sz.x / 4 * 3, 90), 0.5, 0);
+            }, new Coord(sz.x / 4 * 3, UI.scale(90)), 0.5, 0);
         }
 
         public void close() {
