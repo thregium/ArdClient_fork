@@ -103,7 +103,7 @@ public class LocalMiniMap extends Widget {
     private int zIndex = 2;
     private boolean showGrid = DefSettings.MMSHOWGRID.get();
     private boolean showView = DefSettings.MMSHOWVIEW.get();
-    private float zoom = 1f; //zoom multiplier
+    private float zoom = UI.scale(1f); //zoom multiplier
     private float iconZoom = 1f; //zoom multiplier for minimap icons
     private Map<Color, Tex> xmap = new HashMap<>(6);
     private static final Coord[] tecs = {
@@ -502,7 +502,7 @@ public class LocalMiniMap extends Widget {
                     }
                 } else { // custom icons
                     Coord gc = p2c(gob.rc).add(delta);
-                    Coord sz = new Coord(18, 18);
+                    Coord sz = UI.scale(18, 18);
                     if (c.isect(gc.sub(sz.div(2)), sz)) {
                         Resource res = gob.getres();
                         KinInfo ki = gob.getattr(KinInfo.class);
@@ -726,15 +726,21 @@ public class LocalMiniMap extends Widget {
                             Coord ul = plg.ul;
                             Coord gc = plg.gc;
                             BufferedImage[] texes = new BufferedImage[ui.sess.glob.map.tiles.length];
-                            maptiles.put(gc.add(-1, -1), drawmap(ul.add(-100, -100), texes));
-                            maptiles.put(gc.add(0, -1), drawmap(ul.add(0, -100), texes));
-                            maptiles.put(gc.add(1, -1), drawmap(ul.add(100, -100), texes));
-                            maptiles.put(gc.add(-1, 0), drawmap(ul.add(-100, 0), texes));
-                            maptiles.put(gc, drawmap(ul, texes));
-                            maptiles.put(gc.add(1, 0), drawmap(ul.add(100, 0), texes));
-                            maptiles.put(gc.add(-1, 1), drawmap(ul.add(-100, 100), texes));
-                            maptiles.put(gc.add(0, 1), drawmap(ul.add(0, 100), texes));
-                            maptiles.put(gc.add(1, 1), drawmap(ul.add(100, 100), texes));
+                            Coord c = new Coord();
+                            for (c.y = -1; c.y <= 1; c.y++) {
+                                for (c.x = -1; c.x <= 1; c.x++) {
+                                    maptiles.put(gc.add(c), drawmap(ul.add(c.mul(cmaps)), texes));
+                                }
+                            }
+//                            maptiles.put(gc.add(-1, -1), drawmap(ul.add(-100, -100), texes));
+//                            maptiles.put(gc.add(0, -1), drawmap(ul.add(0, -100), texes));
+//                            maptiles.put(gc.add(1, -1), drawmap(ul.add(100, -100), texes));
+//                            maptiles.put(gc.add(-1, 0), drawmap(ul.add(-100, 0), texes));
+//                            maptiles.put(gc, drawmap(ul, texes));
+//                            maptiles.put(gc.add(1, 0), drawmap(ul.add(100, 0), texes));
+//                            maptiles.put(gc.add(-1, 1), drawmap(ul.add(-100, 100), texes));
+//                            maptiles.put(gc.add(0, 1), drawmap(ul.add(0, 100), texes));
+//                            maptiles.put(gc.add(1, 1), drawmap(ul.add(100, 100), texes));
                             return new MapTile(plg, seq);
                         });
                         cache.put(new Pair<>(plg, seq), f);
@@ -750,25 +756,20 @@ public class LocalMiniMap extends Widget {
         if (cur != null) {
             int tileSize = (int) (100 * zoom);
             Coord ts = new Coord(tileSize, tileSize);
-            int hhalf = sz.x / 2;
-            int vhalf = sz.y / 2;
-            int ht = (hhalf / tileSize) + 2;
-            int vt = (vhalf / tileSize) + 2;
-            int pox = (int) ((cur.grid.gc.x * 100 - cc.x) * zoom) + hhalf + delta.x;
-            int poy = (int) ((cur.grid.gc.y * 100 - cc.y) * zoom) + vhalf + delta.y;
-            int tox = pox / 100 - 1;
-            int toy = poy / 100 - 1;
+            Coord half = sz.div(2);
+            Coord t = half.div(ts).add(2, 2);
+            Coord po = cur.grid.gc.mul(cmaps).sub(cc).mul(zoom).add(half).add(delta);
+            Coord to = po.div(cmaps).sub(1, 1);
 
             if (maptiles.size() >= 9) {
-                for (int x = -ht; x < ht + ht; x++) {
-                    for (int y = -vt; y < vt + vt; y++) {
-                        Tex mt = maptiles.get(cur.grid.gc.add(x - tox, y - toy));
+                Coord c = new Coord();
+                for (c.x = -t.x; c.x < t.x + t.x; c.x++) {
+                    for (c.y = -t.y; c.y < t.y + t.y; c.y++) {
+                        Tex mt = maptiles.get(cur.grid.gc.add(c).sub(to));
                         if (mt != null) {
-                            int mtcx = (x - tox) * tileSize + pox;
-                            int mtcy = (y - toy) * tileSize + poy;
-                            if (mtcx + tileSize < 0 || mtcx > sz.x || mtcy + tileSize < 0 || mtcy > sz.y)
+                            Coord mtc = c.sub(to).mul(ts).add(po);
+                            if (mtc.x + ts.x < 0 || mtc.x > sz.x || mtc.y + ts.y < 0 || mtc.y > sz.y)
                                 continue;
-                            Coord mtc = new Coord(mtcx, mtcy);
                             g.image(mt, mtc, ts);
                             if (Config.mapshowgrid) {
                                 g.chcolor(Color.RED);
@@ -815,7 +816,7 @@ public class LocalMiniMap extends Widget {
                             tex = Text.renderstroked("\u2716", m.col, Color.BLACK, Text.num12boldFnd).tex();
                             xmap.put(m.col, tex);
                         }
-                        g.image(tex, ptc.sub(6, 6));
+                        g.image(tex, ptc.sub(UI.scale(6, 6)));
                         continue;
                     }
 
@@ -829,13 +830,13 @@ public class LocalMiniMap extends Widget {
 //                final Coord left = new Coord(-3, -3).rotate(angle).add(ptc);
 //                final Coord notch = new Coord(0, 0).rotate(angle).add(ptc);
 
-                final Coord coord1 = new Coord(8, 0).rotate(angle).add(ptc);
-                final Coord coord2 = new Coord(0, -5).rotate(angle).add(ptc);
-                final Coord coord3 = new Coord(0, -1).rotate(angle).add(ptc);
-                final Coord coord4 = new Coord(-8, -1).rotate(angle).add(ptc);
-                final Coord coord5 = new Coord(-8, 1).rotate(angle).add(ptc);
-                final Coord coord6 = new Coord(0, 1).rotate(angle).add(ptc);
-                final Coord coord7 = new Coord(0, 5).rotate(angle).add(ptc);
+                final Coord coord1 = UI.scale(8, 0).rotate(angle).add(ptc);
+                final Coord coord2 = UI.scale(0, -5).rotate(angle).add(ptc);
+                final Coord coord3 = UI.scale(0, -1).rotate(angle).add(ptc);
+                final Coord coord4 = UI.scale(-8, -1).rotate(angle).add(ptc);
+                final Coord coord5 = UI.scale(-8, 1).rotate(angle).add(ptc);
+                final Coord coord6 = UI.scale(0, 1).rotate(angle).add(ptc);
+                final Coord coord7 = UI.scale(0, 5).rotate(angle).add(ptc);
                 g.chcolor(m.col);
                 g.poly(coord1, coord2, coord3, coord4, coord5, coord6, coord7);
                 g.chcolor(Color.BLACK);
@@ -1042,12 +1043,12 @@ public class LocalMiniMap extends Widget {
 
     public boolean mousewheel(Coord c, int amount) {
         if (!Config.mapscale) {
-            if (amount > 0 && zoom > 1)
-                zoom = Math.round(zoom * 100 - 20) / 100f;
-            else if (amount < 0 && zoom < 3)
-                zoom = Math.round(zoom * 100 + 20) / 100f;
+            if (amount > 0 && zoom > UI.scale(1))
+                zoom = UI.scale(Math.round(zoom * 100 - 20) / 100f);
+            else if (amount < 0 && zoom < UI.scale(3))
+                zoom = UI.scale(Math.round(zoom * 100 + 20) / 100f);
 
-            iconZoom = Math.round((zoom - 1) * 100 / 2) / 100f + 1;
+            iconZoom = Math.round((UI.unscale(zoom) - 1) * 100 / 2) / 100f + 1;
 
         } else {
             if (amount == 0) {
@@ -1055,7 +1056,7 @@ public class LocalMiniMap extends Widget {
             } else {
                 zIndex = Math.max(0, Math.min(zIndex - amount, zArray.length - 1));
             }
-            zoom = zArray[zIndex];
+            zoom = UI.scale(zArray[zIndex]);
             iconZoom = ziArray[zIndex];
         }
         return true;
