@@ -35,21 +35,27 @@ public class Gemstone extends GSprite implements GSprite.ImageSprite, haven.res.
     public static Map<String, BufferedImage> cachedImg = new HashMap<>();
     public static Map<String, Tex> cachedTex = new HashMap<>();
     public static Map<String, String> cachedName = new HashMap<>();
-    public static JSONObject object = configuration.loadjson("Gemstones.json");
+    public static JSONObject object;
 
     static {
-        if (object.length() > 0) {
-            for (String sdt : object.keySet()) {
-                try {
-                    JSONObject jo = object.getJSONObject(sdt);
-                    BufferedImage bi = configuration.bytesToImage(configuration.JSONArrayToBytes(jo.getJSONArray("BufferedImage")));
-                    cachedImg.put(sdt, bi);
-                    cachedTex.put(sdt, new TexI(bi));
-                    cachedName.put(sdt, (String) jo.get("Name"));
-                } catch (Exception e) {
-                    e.printStackTrace();
+        try {
+            object = configuration.loadjson("Gemstones.json");
+            if (object.length() > 0) {
+                for (String sdt : object.keySet()) {
+                    try {
+                        JSONObject jo = object.getJSONObject(sdt);
+                        BufferedImage bi = configuration.bytesToImage(configuration.JSONArrayToBytes(jo.getJSONArray("BufferedImage")));
+                        cachedImg.put(sdt, bi);
+                        cachedTex.put(sdt, new TexI(bi));
+                        cachedName.put(sdt, (String) jo.get("Name"));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
+        } catch (Exception e) {
+            object = new JSONObject();
+            e.printStackTrace();
         }
     }
 

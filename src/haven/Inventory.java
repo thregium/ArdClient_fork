@@ -689,7 +689,7 @@ public class Inventory extends Widget implements DTarget2, ItemObserver, Invento
         final String[] t = {"reverse", "none", "normal"};
         Label ql = new Label("Quality ");
         Label qt = new Label("normal    ");
-        HSlider quality = new HSlider(50, 0, 2, 2) {
+        HSlider quality = new HSlider(UI.scale(50), 0, 2, 2) {
             @Override
             public void changed() {
                 qt.settext(t[val]);
@@ -697,7 +697,7 @@ public class Inventory extends Widget implements DTarget2, ItemObserver, Invento
         };
         Label rl = new Label("ResName ");
         Label rt = new Label("normal    ");
-        HSlider resname = new HSlider(50, 0, 2, 2) {
+        HSlider resname = new HSlider(UI.scale(50), 0, 2, 2) {
             @Override
             public void changed() {
                 rt.settext(t[val]);
@@ -705,7 +705,7 @@ public class Inventory extends Widget implements DTarget2, ItemObserver, Invento
         };
         Label nl = new Label("Name ");
         Label nt = new Label("normal    ");
-        HSlider name = new HSlider(50, 0, 2, 2) {
+        HSlider name = new HSlider(UI.scale(50), 0, 2, 2) {
             @Override
             public void changed() {
                 nt.settext(t[val]);
@@ -966,7 +966,7 @@ public class Inventory extends Widget implements DTarget2, ItemObserver, Invento
                     spr = getGItem().spr();
                     PBotUtils.sleep(sleep);
                 }
-                this.size = spr.sz().div(30);
+                this.size = spr.sz().div(UI.scale(30));
             }
             return (this.size);
         }

@@ -76,7 +76,7 @@ public class FlowerMenu extends Widget {
         private boolean h;
         private boolean clicked;
         public double ta, tr;
-        private final static double rad = 75;
+        private final double rad = UI.scale(75);
         public int num;
         public Text text;
         public double a = 1;
@@ -100,8 +100,8 @@ public class FlowerMenu extends Widget {
                     for (Petal p : opts) {
                         if (this.c.x + sz.x >= p.c.x &&
                                 (num == 7 && p.num == 1 || num == 6 && p.num == 2 || num == 5 && p.num == 3)) {
-                            p.c.x = opts[0].c.x + opts[0].sz.x / 2 + 5;
-                            this.c.x = p.c.x - sz.x - 5;
+                            p.c.x = opts[0].c.x + opts[0].sz.x / 2 + UI.scale(5);
+                            this.c.x = p.c.x - sz.x - UI.scale(5);
                             break;
                         }
                     }
@@ -325,7 +325,7 @@ public class FlowerMenu extends Widget {
                 g.chcolor(new Color(255, 255, 255, (int) (255 * a)));
             }
             FastText.print(g, UI.scale(10, 7), Integer.toString((num + 1) % 10));
-            g.image(text.tex(), sz.sub(8, 0).sub(text.sz()).div(2).add(UI.scale(8), 0));
+            g.image(text.tex(), sz.sub(UI.scale(8), 0).sub(text.sz()).div(2).add(UI.scale(8), 0));
             g.chcolor();
         }
 
@@ -353,7 +353,7 @@ public class FlowerMenu extends Widget {
                 opts[i].ta = ta;
             }
         } else {
-            int width = 80;
+            int width = UI.scale(80);
             for (Petal petal : opts)
                 width = Math.max(width, petal.sz.x);
             Coord c = new Coord(customBoxPadding);

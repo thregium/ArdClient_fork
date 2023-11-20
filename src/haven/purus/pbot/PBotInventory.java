@@ -18,6 +18,8 @@ public class PBotInventory {
     public Inventory inv;
     public final UI ui;
 
+    private final int invSize = UI.scale(33);
+
     public PBotInventory(Inventory inv) {
         this.inv = inv;
         this.ui = inv.ui;
@@ -148,7 +150,7 @@ public class PBotInventory {
         for (Widget w = inv.child; w != null; w = w.next) {
             if (w instanceof WItem) {
                 WItem itm = (WItem) w;
-                if (itm.c.div(33).x == xLoc && itm.c.div(33).y == yLoc)
+                if (itm.c.div(invSize).x == xLoc && itm.c.div(invSize).y == yLoc)
                     return new PBotItem(itm);
             }
         }
@@ -263,8 +265,8 @@ public class PBotInventory {
         for (PBotItem item : getInventoryContents()) {
             int xSize = item.gitem.size().x;
             int ySize = item.gitem.size().y;
-            int xLoc = item.witem.c.div(33).x;
-            int yLoc = item.witem.c.div(33).y;
+            int xLoc = item.witem.c.div(invSize).x;
+            int yLoc = item.witem.c.div(invSize).y;
 
             for (int i = 0; i < xSize; i++) {
                 for (int j = 0; j < ySize; j++) {

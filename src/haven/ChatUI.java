@@ -69,10 +69,10 @@ import static haven.MCache.tilesz;
 public class ChatUI extends Widget {
     private static final Resource alarmsfx = Resource.local().loadwait("sfx/Ding");
     // public static final RichText.Foundry fnd = new RichText.Foundry(new ChatParser(TextAttribute.FONT, Text.dfont.deriveFont((float)Config.fontsizechat)));
-    public static final RichText.Foundry fnd = new RichText.Foundry(new ChatParser(TextAttribute.FONT, Text.dfont.deriveFont((float) Config.fontsizechat), TextAttribute.FOREGROUND, Color.BLACK));
+    public static final RichText.Foundry fnd = new RichText.Foundry(new ChatParser(TextAttribute.FONT, Text.dfont.deriveFont((float) UI.scale(Config.fontsizechat)), TextAttribute.FOREGROUND, Color.BLACK));
     public static final Text.Foundry qfnd = new Text.Foundry(Text.dfont, UI.scale(12), new java.awt.Color(192, 255, 192));
     public static final int selw = UI.scale(130);
-    public static final Coord marg = new Coord(9, 9);
+    public static final Coord marg = UI.scale(9, 9);
     public static final Color[] urgcols = new Color[]{
             null,
             new Color(0, 128, 255),
@@ -1491,7 +1491,7 @@ public class ChatUI extends Widget {
                         g.aimage(name, Coord.of(x, my), 0.0, 0.5);
                     }
                     g.image(chandiv, Coord.of(0, y + UI.scale(18)));
-                    y += 28;
+                    y += UI.scale(28);
                     if (y >= sz.y)
                         break;
                     i++;
@@ -1531,7 +1531,7 @@ public class ChatUI extends Widget {
         }
 
         private Channel bypos(Coord c) {
-            int i = (c.y / 28) + s;
+            int i = (c.y / UI.scale(28)) + s;
             if ((i >= 0) && (i < chls.size()))
                 return (chls.get(i).chan);
             return (null);
@@ -1549,8 +1549,8 @@ public class ChatUI extends Widget {
         public boolean mousewheel(Coord c, int amount) {
             if (!ui.modshift) {
                 s += amount;
-                if (s >= chls.size() - (sz.y / 28))
-                    s = chls.size() - (sz.y / 28);
+                if (s >= chls.size() - (sz.y / UI.scale(28)))
+                    s = chls.size() - (sz.y / UI.scale(28));
                 if (s < 0)
                     s = 0;
             } else {
