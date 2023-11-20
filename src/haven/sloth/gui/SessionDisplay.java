@@ -21,7 +21,7 @@ public class SessionDisplay extends MovableWidget implements ObservableListener<
             super(Coord.z);
             this.ui = ui;
             this.nm = "Login";
-            add(this.btn = new Button(100, nm, this::click));
+            add(this.btn = new Button(UI.scale(100), nm, this::click));
             add(new Button(0, "X", this::close), new Coord(btn.sz.x, 0));
             pack();
         }
@@ -53,8 +53,8 @@ public class SessionDisplay extends MovableWidget implements ObservableListener<
     }
 
     private final Map<UI, UIDisplay> uimap = new HashMap<>();
-    private final Grouping grp = new GridGrouping("Sessions", 5, 500);
-    private final Button add = new Button(100, "New Session", this::newSession);
+    private final Grouping grp = new GridGrouping("Sessions", UI.scale(5), UI.scale(500));
+    private final Button add = new Button(UI.scale(100), "New Session", this::newSession);
 
     public SessionDisplay() {
         super(Coord.z, "Session Display");

@@ -28,7 +28,7 @@ public class CustomQualityList extends WidgetList<CustomQualityList.Item> {
     };
 
     public CustomQualityList() {
-        super(new Coord(180, 25), 10);
+        super(UI.scale(180, 25), 10);
         for (ColorQuality cq : qualityList) additem(new CustomQualityList.Item(cq.number, cq.color, cq.a));
         update();
     }
@@ -206,7 +206,7 @@ public class CustomQualityList extends WidgetList<CustomQualityList.Item> {
         private UI.Grab grab;
 
         public Item(double number, Color color, boolean a) {
-            super(new Coord(180, 25));
+            super(UI.scale(180, 25));
             oldNumber = staticNumber = number;
             staticColor = color;
             staticA = a;
@@ -223,9 +223,9 @@ public class CustomQualityList extends WidgetList<CustomQualityList.Item> {
                     oldNumber = staticNumber;
                     super.wdgmsg("ch");
                 }
-            }, 3, 3);
+            }, UI.scale(3, 3));
 
-            te = add(new TextEntry(100, staticNumber + "") {
+            te = add(new TextEntry(UI.scale(100), staticNumber + "") {
                 @Override
                 public void activate(String text) {
                     try {
@@ -237,15 +237,15 @@ public class CustomQualityList extends WidgetList<CustomQualityList.Item> {
                         settext(staticNumber + "");
                     }
                 }
-            }, 25, 1);
+            }, UI.scale(25, 1));
 
-            colorPreview = add(new ColorPreview(new Coord(17, 17), color, val -> {
+            colorPreview = add(new ColorPreview(UI.scale(17, 17), color, val -> {
                 oldNumber = staticNumber;
                 staticColor = val;
                 super.wdgmsg("ch");
-            }), 130, 4);
+            }), UI.scale(130, 4));
 
-            add(new Button(24, "X") {
+            add(new Button(UI.scale(24), "X") {
                 @Override
                 public void click() {
                     super.wdgmsg("activate", oldNumber);
@@ -256,7 +256,7 @@ public class CustomQualityList extends WidgetList<CustomQualityList.Item> {
                     //FIXME:a little hack, because WidgetList does not pass correct click coordinates if scrolled
                     return super.mouseup(Coord.z, button);
                 }
-            }, 160, 0);
+            }, UI.scale(160, 0));
         }
 
         /**

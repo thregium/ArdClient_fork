@@ -18,7 +18,7 @@ public class AutodropList extends WidgetList<AutodropList.Item> implements Obser
     };
 
     public AutodropList() {
-        super(new Coord(200, 25), 10);
+        super(UI.scale(200, 25), 10);
         autodroplist.addListener(this);
     }
 
@@ -108,14 +108,14 @@ public class AutodropList extends WidgetList<AutodropList.Item> implements Obser
         private UI.Grab grab;
 
         public Item(String name) {
-            super(new Coord(200, 25));
+            super(UI.scale(200, 25));
             this.name = name;
 
-            cb = add(new CheckBox(name), 3, 3);
+            cb = add(new CheckBox(name), UI.scale(3, 3));
             cb.a = autodroplist.get(name);
             cb.canactivate = true;
 
-            add(new Button(24, "X") {
+            add(new Button(UI.scale(24), "X") {
                 @Override
                 public void click() {
                     super.wdgmsg("activate", name);
@@ -126,7 +126,7 @@ public class AutodropList extends WidgetList<AutodropList.Item> implements Obser
                     //FIXME:a little hack, because WidgetList does not pass correct click coordinates if scrolled
                     return super.mouseup(Coord.z, button);
                 }
-            }, 175, 0);
+            }, UI.scale(175, 0));
         }
 
         @Override

@@ -2786,7 +2786,7 @@ public class OptWnd extends Window {
         });
         appender.add(new CheckBox("Keyboard keys (experimantal)", val -> Utils.setprefb("keyboardkeys", configuration.keyboardkeys = val), configuration.keyboardkeys));
         appender.add(new Label("Disable Shift Right Click for :"));
-        CheckListbox disableshiftclick = new CheckListbox(320, Math.min(8, Config.disableshiftclick.values().size()), 18 + Config.fontadd) {
+        CheckListbox disableshiftclick = new CheckListbox(UI.scale(320), Math.min(8, Config.disableshiftclick.values().size()), UI.scale(18) + UI.scale(Config.fontadd)) {
             @Override
             protected void itemclick(CheckListboxItem itm, int button) {
                 super.itemclick(itm, button);
@@ -5024,10 +5024,10 @@ public class OptWnd extends Window {
         int x = 0;
         int y = 0;
         autodropsettings.add(new Label("Choose/add inventory items to automatically drop:"), x, y);
-        y += 15;
+        y += UI.scale(15);
         final AutodropList list = autodropsettings.add(new AutodropList(), x, y);
 
-        y += list.sz.y + 5;
+        y += list.sz.y + UI.scale(5);
         final TextEntry value = autodropsettings.add(new TextEntry(UI.scale(150), "") {
             @Override
             public void activate(String text) {
@@ -5173,7 +5173,7 @@ public class OptWnd extends Window {
     }
 
     private void initchatsettings() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(chatsettings, new Coord(620, 310)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(chatsettings, UI.scale(620, 310)));
 
 //        appender.setVerticalMargin(VERTICAL_MARGIN);
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
