@@ -9,13 +9,13 @@ import haven.resutil.FoodInfo;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -86,7 +86,7 @@ public class FoodService {
             }
             if (System.currentTimeMillis() - lastModified > TimeUnit.MINUTES.toMillis(30)) {
                 try {
-                    HttpsURLConnection connection = (HttpsURLConnection) new URL(FOOD_DATA_URL).openConnection();
+                    HttpURLConnection connection = (HttpURLConnection) new URL(FOOD_DATA_URL).openConnection();
                     connection.setRequestProperty("Accept-Encoding", "gzip");
                     connection.setRequestProperty("User-Agent", "H&H Client/" + token);
                     connection.setRequestProperty("Cache-Control", "no-cache");
@@ -200,8 +200,7 @@ public class FoodService {
 
         if (!toSend.isEmpty()) {
             try {
-                HttpsURLConnection connection =
-                        (HttpsURLConnection) new URL(API_ENDPOINT + "food").openConnection();
+                HttpURLConnection connection = (HttpURLConnection) new URL(API_ENDPOINT + "food").openConnection();
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Content-Type", "application/json");
                 connection.setRequestProperty("User-Agent", "H&H Client/" + token);

@@ -61,7 +61,6 @@ public class FoodInfo extends ItemInfo.Tip {
     public final Effect[] efs;
     public final int[] types;
     public static boolean showbaseq = Utils.getprefb("showbaseq", false);
-    ;
     private final CharacterInfo.Constipation constipation;
     private final static DecimalFormat basefepfmt = new DecimalFormat("0.##");
 
