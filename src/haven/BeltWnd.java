@@ -587,10 +587,6 @@ public class BeltWnd extends MovableWidget {
         DefSettings.global.set("belt." + name + ".show", visible);
     }
 
-    private boolean altMoveHit(final Coord c, final int btn) {
-        return ui.modflags() == 0 && btn == 1;
-    }
-
     @Override
     public boolean mousedown(final Coord mc, final int button) {
         if (super.mousedown(mc, button)) {

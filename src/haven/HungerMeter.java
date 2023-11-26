@@ -1,5 +1,9 @@
 package haven;
 
+import modification.configuration;
+
+import java.awt.Color;
+
 public class HungerMeter extends IMeter {
     private final CharWnd.GlutMeter glut;
 
@@ -11,15 +15,30 @@ public class HungerMeter extends IMeter {
     @Override
     protected void drawBg(GOut g) {
         if (glut.bg == null) return;
+        boolean mini = configuration.minimalisticmeter;
         g.chcolor(glut.bg);
-        g.frect(off.mul(this.scale), msz.mul(this.scale));
+        if (!mini) {
+            g.frect(off.mul(this.scale), msz.mul(this.scale));
+        } else {
+            Coord off = miniOff.mul(this.scale);
+            g.frect(off, sz.sub(off.mul(2)));
+        }
+        g.chcolor();
     }
 
     @Override
     protected void drawMeters(GOut g) {
-        if (glut.fg == null) return;
-        g.chcolor(glut.fg);
-        g.frect(off.mul(this.scale), Coord.of((int) Math.round(msz.x * (glut.glut - Math.floor(glut.glut))), msz.y).mul(this.scale));
+        boolean mini = configuration.minimalisticmeter;
+        Color col = glut.fg;
+        if (col == null) return;
+        g.chcolor(col.darker());
+        if (!mini) {
+            g.frect(off.mul(this.scale), Coord.of((int) Math.round(msz.x * (glut.glut - Math.floor(glut.glut))), msz.y).mul(this.scale));
+        } else {
+            Coord off = miniOff.mul(this.scale);
+            g.frect(off, sz.sub(off.mul(2)));
+        }
+        g.chcolor();
     }
 
     @Override

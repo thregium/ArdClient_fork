@@ -138,12 +138,17 @@ public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pa
         }
         if (list.listitems() == 0) {
             all.stream().filter(p -> {
-                String name = p.act().name.toLowerCase();
-                Indir<Resource> parent = p.act().parent;
+                Resource.AButton ad = p.act();
+                String name = "";
                 String par = "";
-                if (parent != null) {
-                    MenuGrid.Pagina pp = p.scm.paginafor(parent);
-                    par = pp.act().name.toLowerCase();
+                if (ad != null) {
+                    name = p.act().name.toLowerCase();
+                    Indir<Resource> parent = p.act().parent;
+                    par = "";
+                    if (parent != null) {
+                        MenuGrid.Pagina pp = p.scm.paginafor(parent);
+                        par = pp.act().name.toLowerCase();
+                    }
                 }
                 return (par.contains(filter) || name.contains(filter) || itemFilter.matches(p, ui.sess));
             }).forEach(list::add);

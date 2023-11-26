@@ -401,6 +401,20 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
      * @param name The res name
      */
     private void discovered(final String name) {
+        disableAnimation1 = configuration.checkDisableAnimation1(id);
+        disableAnimation = configuration.checkDisableAnimation(name);
+        {
+            configuration.GobScale rmulti = configuration.getItem(name);
+            if (rmulti != null && rmulti.enable()) {
+                scaleMatrix = rmulti.getMatrix();
+            }
+
+            configuration.GobScale rsingle = configuration.resizablegobsid.get(this.id);
+            if (rsingle != null && rsingle.enable()) {
+                scaleMatrix1 = rsingle.getMatrix();
+            }
+        }
+
         //Don't try to discover anything until we know who the plgob is.
         final UI ui = glob.ui.get();
         if (ui != null && ui.gui != null && ui.gui.map != null && ui.gui.map.plgob != -1) {
@@ -513,7 +527,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 res().ifPresent((res) -> { //should always be present once name is discovered
                     final Hitbox[] hitbox = Hitbox.hbfor(this, true);
                     if (hitbox != null) {
-                        hitboxmesh = HitboxMesh.makehb(hitbox);
+                        hitboxmesh = HitboxMesh.makehb(this, hitbox);
                         updateHitmap();
                     }
                 });
@@ -1127,6 +1141,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     public void draw(GOut g) {
     }
 
+    public boolean disableAnimation1;
+    public boolean disableAnimation;
+    public Matrix4f scaleMatrix1;
+    public Matrix4f scaleMatrix;
     private gobText barreltext;
     private gobText treetext;
 
@@ -1149,18 +1167,13 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 rl.prepc(States.xray);
             }
             if (configuration.resizegob) {
-                if (this.res().isPresent()) {
-                    try {
-                        configuration.GobScale rmulti = configuration.getItem(this.res().get().name);
-                        if (rmulti != null && rmulti.enable()) {
-                            rl.prepc(new Location(rmulti.getMatrix()));
-                        }
-                    } catch (Exception e) {
-                    }
-
-                    configuration.GobScale rsingle = configuration.resizablegobsid.get(this.id);
-                    if (rsingle != null && rsingle.enable()) {
-                        rl.prepc(new Location(rsingle.getMatrix()));
+                Matrix4f scaleMatrix1 = this.scaleMatrix1;
+                if (scaleMatrix1 != null) {
+                    rl.prepc(new Location(scaleMatrix1));
+                } else {
+                    Matrix4f scaleMatrix = this.scaleMatrix;
+                    if (scaleMatrix != null) {
+                        rl.prepc(new Location(scaleMatrix));
                     }
                 }
             }
@@ -1432,7 +1445,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 if (d != null) {
                     if (!(hid != null && Config.hideuniquegobs)) {
                         Overlay ol = findol(GobHitbox.olid_solid);
-                        if (Config.hidegobs && ((type == Type.TREE && Config.hideTrees) || (type == Type.BUSH && Config.hideBushes) || (type == Type.BOULDER && Config.hideboulders))) {
+                        if (Config.hidegobs && ((type == Type.TREE && Config.hideTrees) || (type == Type.LOG && Config.hideLogs) || (type == Type.STUMP && Config.hideStumps) || (type == Type.BUSH && Config.hideBushes) || (type == Type.BOULDER && Config.hideboulders) || (configuration.boostspeedbox && name().equalsIgnoreCase("gfx/terobjs/boostspeed")))) {
                             if (Config.showoverlay) {
                                 if (ol == null) {
                                     try {
@@ -1443,6 +1456,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                                 }
                             } else if (ol != null)
                                 remol(ol);
+                            if (name().equalsIgnoreCase("gfx/terobjs/boostspeed")) {
+                                d.setup(rl);
+                            }
                         } else {
                             if (ol != null)
                                 remol(ol);

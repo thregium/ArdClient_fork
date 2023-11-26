@@ -145,6 +145,10 @@ public abstract class MovableWidget extends Widget {
         return ui.modflags() == UI.MOD_CTRL && btn == 3;
     }
 
+    protected boolean altMoveHit(final Coord c, final int btn) {
+        return ui.modflags() == 0 && btn == 1;
+    }
+
     @Override
     public boolean mousedown(final Coord mc, final int button) {
         if (super.mousedown(mc, button)) {

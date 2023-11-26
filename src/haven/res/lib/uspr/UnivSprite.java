@@ -20,6 +20,7 @@ import haven.Skeleton;
 import haven.Skeleton.Pose;
 import haven.Skeleton.PoseMod;
 import haven.Sprite;
+import modification.configuration;
 import modification.dev;
 
 import java.util.ArrayList;
@@ -258,7 +259,7 @@ public class UnivSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
     private Object constant = new Gob.Static();
 
     public Object staticp() {
-        if (!Config.disableAllAnimations) {
+        if (!configuration.disableAnimation(owner)) {
             if (!stat || (manims.length > 0) || (ipold > 0)) {
                 return (null);
             } else {

@@ -52,8 +52,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -80,7 +83,9 @@ public class AreaPicker extends Window implements Runnable {
     public static final String scriptname = "Area Picker";
     public static final String[] collectstates = new String[]{"Inventory", "Drop out of hand", "Storage", "Create Stockpiles (WIP)"};
     public static final String ACTION_START = "Action:";
-    public static final List<String> actions = Arrays.asList("Inspect", "Repair", "Destroy", "Lift");
+    public static final Pattern ACTION_PATTERN = Pattern.compile(ACTION_START + "(\\w+)");
+    public static final Map<String, String> actions1 = haven.Utils.<String, String>map().put("Inspect", "inspect").put("Lift", "carry").map();
+    public static final Map<String, String> actions2 = haven.Utils.<String, String>map().put("Repair", "repair").put("Destroy", "destroy").map();
     public final WidgetVerticalAppender appender = new WidgetVerticalAppender(this);
     public Thread runthread;
     public boolean block = false;
@@ -252,7 +257,8 @@ public class AreaPicker extends Window implements Runnable {
         selectedflowerwnd = new Window(Coord.z, "Selecting petals") {
             {
                 WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
-                actions.forEach(i -> selectedflowerlist.add(new CheckListboxItem(ACTION_START +i)));
+                actions1.forEach((k, v) -> selectedflowerlist.add(new CheckListboxItem(ACTION_START + k)));
+                actions2.forEach((k, v) -> selectedflowerlist.add(new CheckListboxItem(ACTION_START + k)));
                 flowermenulist.forEach(i -> selectedflowerlist.add(new CheckListboxItem(i)));
                 final List<String> temp = new ArrayList<>();
                 flowermenulist.forEach(s -> {
@@ -1075,50 +1081,91 @@ public class AreaPicker extends Window implements Runnable {
                     }
                     mark(pgob);
                     //action
-                    //List<String> actions = containsActions(flowers);
-                    if (pfRightClick(pgob)) {
-                        List<String> flowers = checkflowers();
-                        if (flowers.isEmpty()) {
-                            debugLog("flowermenu not required", Color.WHITE);
-                            if (waitForPickUp(pgob.getGobId())) {
-                                objects.remove(pgob);
-                                break;
-                            }
-                        } else {
-                            waitForFlowerMenu();
-                            if (petalExists()) {
-                                if (choosePetal()) {
-                                    if (!waitFlowermenuClose()) {
-                                        debugLog("Can't close the flowermenu", Color.WHITE);
-                                        stop();
+                    List<String> flowers = checkflowers();
+                    List<String> actions = containsActions(flowers);
+                    task:
+                    {
+                        if (!actions.isEmpty()) {
+                            if (pfLeftClick(pgob)) {
+                                String actionItem = actions.get(0);
+                                Matcher matcher = ACTION_PATTERN.matcher(actionItem);
+                                if (matcher.find()) {
+                                    String action = matcher.group(1);
+                                    String value = null;
+
+                                    if (actions1.containsKey(action)) {
+                                        value = actions1.get(action);
+                                    } else if (actions2.containsKey(action)) {
+                                        value = actions2.get(action);
                                     }
-                                    waitMoving();
-                                    byte wr = waitForHourglass();
-                                    if (wr == 1)
-                                        debugLog("hourglass is finish", Color.WHITE);
-                                    else if (wr == 0)
-                                        debugLog("hourglass timeout", Color.WHITE);
-                                    else if (wr == 2) {
-                                        debugLog("hourglass stopped. folding", Color.WHITE);
-                                        storaging(storages);
-                                    }
-                                } else {
-                                    if (!closeFlowermenu()) {
-                                        debugLog("Can't close the flowermenu", Color.WHITE);
-                                        stop();
-                                    } else {
-                                        objects.remove(pgob);
-                                        break;
+
+                                    if (value != null) {
+                                        PBotCharacterAPI.doAct(ui, value);
+                                        pgob.doClick(1, 0);
+                                        waitMoving();
+                                        PBotCharacterAPI.cancelAct(ui);
+
+                                        if (actions2.containsKey(action)) {
+                                            byte wr = waitForHourglass();
+                                            if (wr == 1)
+                                                debugLog("hourglass is finish", Color.WHITE);
+                                            else if (wr == 0)
+                                                debugLog("hourglass timeout", Color.WHITE);
+                                            else if (wr == 2) {
+                                                debugLog("hourglass stopped. folding", Color.WHITE);
+                                            }
+
+                                            break task;
+                                        }
                                     }
                                 }
-                            } else {
-                                objects.remove(pgob);
-                                break;
+                            }
+                        } else {
+                            if (pfRightClick(pgob)) {
+//                        List<String> flowers = checkflowers();
+                                if (flowers.isEmpty()) {
+                                    debugLog("flowermenu not required", Color.WHITE);
+                                    if (waitForPickUp(pgob.getGobId())) {
+                                        //remove
+                                    } else {
+                                        break task;
+                                    }
+                                } else {
+                                    waitForFlowerMenu();
+                                    if (petalExists()) {
+                                        if (choosePetal()) {
+                                            if (!waitFlowermenuClose()) {
+                                                debugLog("Can't close the flowermenu", Color.WHITE);
+                                                stop();
+                                            }
+                                            waitMoving();
+                                            byte wr = waitForHourglass();
+                                            if (wr == 1)
+                                                debugLog("hourglass is finish", Color.WHITE);
+                                            else if (wr == 0)
+                                                debugLog("hourglass timeout", Color.WHITE);
+                                            else if (wr == 2) {
+                                                debugLog("hourglass stopped. folding", Color.WHITE);
+                                                storaging(storages);
+                                            }
+                                            break task;
+                                        } else {
+                                            if (!closeFlowermenu()) {
+                                                debugLog("Can't close the flowermenu", Color.WHITE);
+                                                stop();
+                                                break task;
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
-                    } else {
-                        objects.remove(pgob);
-                        break;
+
+                        {
+                            sleep(250);
+                            objects.remove(pgob);
+                            break;
+                        }
                     }
                     sleep(250);
                 }
@@ -1319,6 +1366,76 @@ public class AreaPicker extends Window implements Runnable {
         return (false);
     }
 
+    public boolean pfLeftClick(PBotGob pgob) throws InterruptedException {
+        debugLog("pathfinding " + pgob + "...", Color.WHITE);
+        for (int i = 0; i < retry; i++) {
+            pauseCheck();
+            debugLog("try " + (i + 1) + " of " + retry + " pathfinding " + pgob + "...", Color.WHITE);
+            boolean yea = cheakHit(pgob);
+
+            //1. purus check the path
+            if (!yea) {
+                debugLog("purus path", Color.WHITE);
+                ui.gui.map.purusPfRightClick(pgob.gob, -1, 1, 0, null);
+
+                while (ui.gui.map.pastaPathfinder.isAlive() && !ui.gui.map.pastaPathfinder.isInterrupted())
+                    sleep(10);
+
+                yea = ui.gui.map.foundPath;
+
+                debugLog("purus path" + (yea ? "" : " not") + " found", yea ? Color.GREEN : Color.RED);
+            }
+
+            //2. sloth check the path
+            if (!yea) {
+                debugLog("sloth path", Color.WHITE);
+                yea = ui.gui.map.pathto(pgob.gob);
+                for (int t = 0, sleep = 10; !ui.gui.map.isclearmovequeue(); t += sleep) {
+                    sleep(10);
+                }
+
+                debugLog("sloth path" + (yea ? "" : " not ") + " found", yea ? Color.GREEN : Color.RED);
+            }
+
+            //3. amber check the path
+            if (!yea) {
+                debugLog("amber path", Color.WHITE);
+                ui.gui.map.pfRightClick(pgob.gob, -1, 1, 0, null);
+                while (!ui.gui.map.pfthread.isInterrupted() && ui.gui.map.pfthread.isAlive())
+                    sleep(10);
+
+                yea = cheakHit(pgob);
+            }
+
+            //4. without pf
+            if (!yea) {
+                debugLog("hard path", Color.WHITE);
+                Coord2d opc = PBotGobAPI.player(ui).getRcCoords();
+                pgob.doClick(1, 0);
+                waitMoving();
+                Coord2d npc = PBotGobAPI.player(ui).getRcCoords();
+                Coord2d dist = npc.div(opc);
+                double x = dist.x > 0 ? 1 : -1;
+                double y = dist.y > 0 ? 1 : -1;
+                PBotUtils.mapClick(ui, PBotGobAPI.player(ui).getRcCoords().add(x, y), 1, 0);
+                waitMoving();
+
+                yea = cheakHit(pgob);
+            }
+
+            sleep(1);
+
+            if (yea) {
+                debugLog("path found", Color.GREEN);
+//                pgob.doClick(3, 0);
+                waitMoving();
+                return (true);
+            } else
+                debugLog("path not found", Color.RED);
+        }
+        return (false);
+    }
+
     public boolean cheakHit(PBotGob pgob) {
         PBotGob player = PBotGobAPI.player(ui);
         Hitbox[] box = Hitbox.hbfor(pgob.gob);
@@ -1360,6 +1477,7 @@ public class AreaPicker extends Window implements Runnable {
             if (item.selected)
                 temp.add(item.name);
         if (temp.isEmpty()) return (true);
+        if (!containsActions(temp).isEmpty()) return (true);
 
         pgob.doClick(3, 0);
         waitForFlowerMenu();

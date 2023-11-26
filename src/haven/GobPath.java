@@ -2,6 +2,7 @@ package haven;
 
 import haven.sloth.gob.Movable;
 import haven.sloth.gob.Type;
+import modification.configuration;
 
 import javax.media.opengl.GL;
 import java.util.Iterator;
@@ -103,14 +104,16 @@ public class GobPath extends Sprite {
     boolean drawLinMove(BGL gl, MapView mv, Gob gob) {
         Moving lm = gob.getattr(Moving.class);
         if (lm != null && lm.getDest().isPresent()) {
-            final Coord3f pc = gob.getc();
-            final Coord2d coord = lm.getDest().orElse(Coord2d.of(pc));
-            double x = coord.x - pc.x;
-            double y = -(coord.y - pc.y);
-            double z = Config.disableelev || Math.sqrt(x * x + y * y) >= 44 * 11 ? 0 : gob.glob.map.getcz(coord.x, coord.y) - pc.z;
+            if (!(lm instanceof LinMove && !configuration.showlinmove)) {
+                final Coord3f pc = gob.getc();
+                final Coord2d coord = lm.getDest().orElse(Coord2d.of(pc));
+                double x = coord.x - pc.x;
+                double y = -(coord.y - pc.y);
+                double z = Config.disableelev || Math.sqrt(x * x + y * y) >= 44 * 11 ? 0 : gob.glob.map.getcz(coord.x, coord.y) - pc.z;
 
-            gl.glVertex3f(0, 0, 0);
-            gl.glVertex3f((float) x, (float) y, (float) z);
+                gl.glVertex3f(0, 0, 0);
+                gl.glVertex3f((float) x, (float) y, (float) z);
+            }
         }
         return (lm == null || lm instanceof LinMove);
     }

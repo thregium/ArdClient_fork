@@ -52,7 +52,7 @@ import static haven.glsl.Type.VEC4;
 /* >spr: ISmoke */
 public class ISmoke extends Sprite implements Gob.Overlay.CDel {
     static {
-        dev.checkFileVersion("gfx/fx/ismoke", 104);
+        dev.checkFileVersion("gfx/fx/ismoke", 106);
     }
 
     FloatBuffer posb = null, colb = null;
@@ -87,6 +87,10 @@ public class ISmoke extends Sprite implements Gob.Overlay.CDel {
     private final AtomicLong ticktime = new AtomicLong(System.currentTimeMillis());
     private int buffertime = 0;
     public boolean tick(int idt) {
+        if (configuration.disableAnimation(owner)) {
+            if (!bollar.isEmpty()) bollar.clear();
+            return (!spawn);
+        }
         if (configuration.allowAnim(ticktime)) {
             float dt = (buffertime + idt) / 1000.0f;
             de += dt;
@@ -126,7 +130,7 @@ public class ISmoke extends Sprite implements Gob.Overlay.CDel {
         }
 
         public boolean tick(float dt, Coord3f nv) {
-            if (Config.disableAllAnimations) return (false);
+            if (configuration.disableAnimation(owner)) return (true);
             float xvd = xv - nv.x, yvd = yv - nv.y, zvd = zv - nv.z;
             float xa = (-xvd * 0.2f) + ((float) rnd.nextGaussian() * 0.5f), ya = (-yvd * 0.2f) + ((float) rnd.nextGaussian() * 0.5f), za = ((-zvd + initzv) * 0.2f) + ((float) rnd.nextGaussian() * 2.0f);
             xv += dt * xa;
@@ -141,7 +145,7 @@ public class ISmoke extends Sprite implements Gob.Overlay.CDel {
     }
 
     public void draw(GOut g) {
-        if (Config.disableAllAnimations) return;
+        if (configuration.disableAnimation(owner)) return;
         updpos(g);
         if (posb == null)
             return;
@@ -163,7 +167,7 @@ public class ISmoke extends Sprite implements Gob.Overlay.CDel {
 
     private void updpos(GOut d) {
         if (configuration.allowAnim(updtime)) {
-            if (bollar.size() < 1) {
+            if (bollar.isEmpty()) {
                 posb = colb = null;
                 return;
             }

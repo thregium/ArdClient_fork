@@ -100,7 +100,7 @@ public class OCache implements Iterable<Gob> {
             cb.changed(ob);
     }
 
-    void changeAllGobs() {
+    public void changeAllGobs() {
         Collection<Gob> values = new ArrayList<>(objs.values());
         for (final Gob g : values) {
             changed(g);

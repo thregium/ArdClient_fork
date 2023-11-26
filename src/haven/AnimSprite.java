@@ -27,6 +27,7 @@
 package haven;
 
 import haven.sloth.gob.Type;
+import modification.configuration;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -91,8 +92,8 @@ public class AnimSprite extends Sprite {
 
     public Object staticp() {
         if (owner instanceof Gob)
-            return (((Config.disableAllAnimations && ((Gob) owner).type != Type.HUMAN) || anims.length == 0) ? Gob.STATIC : null);
+            return (((configuration.disableAnimation(owner) && ((Gob) owner).type != Type.HUMAN) || anims.length == 0) ? Gob.STATIC : null);
         else
-            return ((Config.disableAllAnimations || anims.length == 0) ? Gob.STATIC : null);
+            return ((configuration.disableAnimation(owner) || anims.length == 0) ? Gob.STATIC : null);
     }
 }

@@ -660,7 +660,7 @@ public class Composited implements Rendered, MapView.Clickable {
             compowner = (Gob) eqowner;
         if (eqowner instanceof Avaview.AvaOwner)
             return null;
-        if (!Config.disableAllAnimations || (compowner != null && compowner.type == Type.HUMAN)) {
+        if (!configuration.disableAnimation(compowner) || (compowner != null && compowner.type == Type.HUMAN)) {
             Object stat = poses.staticp();
             if (stat != null) {
                 for (Equ equ : this.equ) {

@@ -3928,7 +3928,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     "Custom overlays",
                     "Mark on map once",
                     "Add to custom automarks",
-                    "Resize");
+                    "Change");
             ui.root.getchilds(FlowerMenu.class).forEach(wdg -> wdg.choose(null));
             ui.root.add(modmenu, ui.mc);
         });

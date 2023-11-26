@@ -94,7 +94,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Resource implements Serializable {
-    private static ResCache prscache;
     public static ThreadGroup loadergroup = null;
     private static Map<String, LayerFactory<?>> ltypes = new TreeMap<>();
     public static Class<Image> imgc = Image.class;
@@ -272,7 +271,7 @@ public class Resource implements Serializable {
     }
 
     public static void setcache(ResCache cache) {
-        prscache = cache;
+        remote().add(new CacheSource(cache));
     }
 
     public String basename() {
@@ -514,6 +513,7 @@ public class Resource implements Serializable {
             }
 
             private FakeResource fake;
+
             @Override
             public Resource get() {
                 if (!done) {
@@ -868,8 +868,8 @@ public class Resource implements Serializable {
                 if (_remote == null) {
                     Pool remote = new Pool(local());
                     remote.add(new JarSource("res-preload"));
-                    if (prscache != null)
-                        remote.add(new CacheSource(prscache));
+//                    if (prscache != null)
+//                        remote.add(new CacheSource(prscache));
                     _remote = remote;
                 }
             }
@@ -883,9 +883,9 @@ public class Resource implements Serializable {
         }
     }
 
-    public static void addurl(URL url) {
+    public static void addurl(URL url, ResCache cache) {
         ResSource src = new HttpSource(url);
-        if (prscache != null) {
+        if (cache != null) {
             class Caching extends TeeSource {
                 private final transient ResCache cache;
 
@@ -899,7 +899,7 @@ public class Resource implements Serializable {
                     return (cache.store("res/" + name));
                 }
             }
-            src = new Caching(src, prscache);
+            src = new Caching(src, cache);
         }
         remote().add(src);
     }

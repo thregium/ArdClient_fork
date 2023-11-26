@@ -3,10 +3,12 @@ package modification;
 import haven.Callback;
 import haven.CheckBox;
 import haven.CheckListboxItem;
+import haven.ColorPreview;
 import haven.Config;
 import haven.Coord;
 import haven.Coord2d;
 import haven.Defer;
+import haven.Glob;
 import haven.Gob;
 import haven.HSliderListboxItem;
 import haven.HSliderNamed;
@@ -16,8 +18,10 @@ import haven.Matrix4f;
 import haven.OCache;
 import haven.PUtils;
 import haven.Pair;
+import haven.RadioGroup;
 import haven.Resource;
 import haven.Session;
+import haven.Sprite;
 import haven.Tex;
 import haven.TexI;
 import haven.Text;
@@ -29,6 +33,7 @@ import haven.WidgetVerticalAppender;
 import haven.Window;
 import haven.purus.pbot.PBotUtils;
 import haven.sloth.gfx.SnowFall;
+import haven.sloth.gob.Hidden;
 import haven.sloth.util.ObservableCollection;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -66,6 +71,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
@@ -73,6 +79,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 public class configuration {
     public static String modificationPath = "modification";
@@ -243,6 +250,30 @@ public class configuration {
         return (false);
     }
 
+    public static boolean checkDisableAnimation1(long id) {
+        if (animategobsid.entrySet().stream().anyMatch(e -> e.getKey() == id && e.getValue().disable())) {
+            return (true);
+        }
+        return (false);
+    }
+
+    public static boolean checkDisableAnimation(String name) {
+        if (animategobsstring.entrySet().stream().anyMatch(e -> e.getKey().equalsIgnoreCase(name) && e.getValue().disable())) {
+            return (true);
+        }
+        return (false);
+    }
+
+    public static boolean disableAnimation(Sprite.Owner owner) {
+        if (Config.disableAllAnimations) return (true);
+        if (owner instanceof Gob) {
+            Gob gob = (Gob) owner;
+            if (gob.disableAnimation1) return (true);
+            if (gob.disableAnimation) return (true);
+        }
+        return (false);
+    }
+
     public static boolean scalingmarks = Utils.getprefb("scalingmarks", false);
     public static boolean bigmapshowgrid = Utils.getprefb("bigmapshowgrid", false);
     public static boolean bigmapshowviewdist = Utils.getprefb("bigmapshowviewdist", false);
@@ -283,6 +314,9 @@ public class configuration {
     public static boolean autodroponlyplayer = Utils.getprefb("autodroponlyplayer", false);
     public static boolean pointplacing = Utils.getprefb("pointplacing", false);
     public static boolean placinginfo = Utils.getprefb("placinginfo", false);
+    public static boolean minimalisticmeter = Utils.getprefb("minimalisticmeter", false);
+    public static boolean boostspeedbox = Utils.getprefb("boostspeedbox", true);
+    public static boolean showlinmove = Utils.getprefb("showlinmove", true);
 
     public static boolean disablepavingoutlineonmap = Utils.getprefb("disablepavingoutlineonmap", false);
 
@@ -1112,15 +1146,47 @@ public class configuration {
     }
 
     public static boolean resizegob = Utils.getprefb("resizegob", false);
-    public static final Map<Long, GobScale> resizablegobsid = new HashMap<>();
+    public static final Map<Long, GobScale> resizablegobsid = Collections.synchronizedMap(new HashMap<>());
     public static JSONObject resizablegobjson = configuration.loadjson("GobResize.json");
-    public static final Map<String, GobScale> resizablegobsstring = getGobMap(resizablegobjson);
+    public static final Map<String, GobScale> resizablegobsstring = getGobMapResize(resizablegobjson);
 
-    public static Map<String, GobScale> getGobMap(JSONObject jo) {
-        Map<String, GobScale> map = new HashMap<>();
+    public static final Map<Long, GobAnimate> animategobsid = Collections.synchronizedMap(new HashMap<>());
+    public static JSONObject animategobjson = configuration.loadjson("GobAnimate.json");
+    public static final Map<String, GobAnimate> animategobsstring = getGobMapAnimate(animategobjson);
+
+    public static final Map<Long, GobColors> colorsgobsid = Collections.synchronizedMap(new HashMap<>());
+    public static JSONObject colorsgobjson = configuration.loadjson("GobColors.json");
+    public static final Map<String, GobColors> colorsgobsstring = getGobMapColors(colorsgobjson);
+
+    public static Map<String, GobScale> getGobMapResize(JSONObject jo) {
+        Map<String, GobScale> map = Collections.synchronizedMap(new HashMap<>());
         try {
             for (String name : jo.keySet()) {
                 map.put(name, new GobScale(jo.getJSONObject(name)));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return (map);
+    }
+
+    public static Map<String, GobAnimate> getGobMapAnimate(JSONObject jo) {
+        Map<String, GobAnimate> map = Collections.synchronizedMap(new HashMap<>());
+        try {
+            for (String name : jo.keySet()) {
+                map.put(name, new GobAnimate(jo.getJSONObject(name)));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return (map);
+    }
+
+    public static Map<String, GobColors> getGobMapColors(JSONObject jo) {
+        Map<String, GobColors> map = Collections.synchronizedMap(new HashMap<>());
+        try {
+            for (String name : jo.keySet()) {
+                map.put(name, new GobColors(jo.getJSONObject(name)));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -1139,8 +1205,7 @@ public class configuration {
         private final float[][] scale = new float[][]{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}};
         private boolean enable = false;
 
-        public GobScale() {
-        }
+        public GobScale() {}
 
         public GobScale(JSONObject jo) {
             try {
@@ -1155,16 +1220,33 @@ public class configuration {
             }
         }
 
-        public boolean setScale(int row, int column, float val) {
+        public boolean setScale1(int row, int column, float val, Gob gob) {
             if (row > 3 || row < 0 || column > 3 || column < 0)
                 return (false);
             scale[row][column] = val;
+            reloadGob(gob);
             save();
             return (true);
         }
 
-        public void onoff(boolean a) {
+        public boolean setScale(int row, int column, float val, Gob gob, String resname) {
+            if (row > 3 || row < 0 || column > 3 || column < 0)
+                return (false);
+            scale[row][column] = val;
+            reloadGobs(gob, resname);
+            save();
+            return (true);
+        }
+
+        public void onoff1(boolean a, Gob gob) {
             this.enable = a;
+            reloadGob(gob);
+            save();
+        }
+
+        public void onoff(boolean a, Gob gob, String resname) {
+            this.enable = a;
+            reloadGobs(gob, resname);
             save();
         }
 
@@ -1172,14 +1254,22 @@ public class configuration {
             return (enable);
         }
 
-        /*public boolean setScale(int number, float val) {
-            if (number > 15 || number < 0)
-                return (false);
-            int row = number / scale.length;
-            int column = number - (scale[row].length * row);
-            scale[row][column] = val;
-            return (true);
-        }*/
+        private void reloadGob(Gob gob) {
+            gob.scaleMatrix1 = enable() ? getMatrix() : null;
+        }
+
+        private void reloadGobs(Gob gob, String resname) {
+            OCache oc = gob.context(Glob.class).oc;
+            synchronized (oc) {
+                for (Gob g : oc) {
+                    g.resname().ifPresent(nm -> {
+                        if (nm.equalsIgnoreCase(resname)) {
+                            g.scaleMatrix = enable() ? getMatrix() : null;
+                        }
+                    });
+                }
+            }
+        }
 
         public float[][] getScale() {
             return (scale);
@@ -1211,155 +1301,331 @@ public class configuration {
 
         public void save() {
             createjson();
-            FileWriter jsonWriter = null;
-            try {
-                jsonWriter = new FileWriter("GobResize.json");
+            try (FileWriter jsonWriter = new FileWriter("GobResize.json")) {
                 jsonWriter.write(resizablegobjson.toString());
             } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
-                try {
-                    if (jsonWriter != null) {
-                        jsonWriter.flush();
-                        jsonWriter.close();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+            }
+        }
+    }
+
+    public static class GobAnimate {
+        private boolean disable = false;
+
+        public GobAnimate() {}
+
+        public GobAnimate(JSONObject jo) {
+            try {
+                disable = jo.getBoolean("disable");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void onoff1(boolean a, Gob gob) {
+            this.disable = a;
+            reloadGob(gob);
+            save();
+        }
+
+        public void onoff(boolean a, Gob gob, String resname) {
+            this.disable = a;
+            reloadGobs(gob, resname);
+            save();
+        }
+
+        private void reloadGob(Gob gob) {
+            gob.disableAnimation1 = this.disable();
+        }
+
+        private void reloadGobs(Gob gob, String resname) {
+            OCache oc = gob.context(Glob.class).oc;
+            synchronized (oc) {
+                for (Gob g : oc) {
+                    g.resname().ifPresent(nm -> {
+                        if (nm.equalsIgnoreCase(resname)) {
+                            g.disableAnimation = this.disable();
+                        }
+                    });
                 }
             }
         }
+
+        public boolean disable() {
+            return (disable);
+        }
+
+        public void createjson() {
+            JSONObject nall = new JSONObject();
+            for (Map.Entry<String, GobAnimate> entry : animategobsstring.entrySet()) {
+                JSONObject o = new JSONObject();
+                o.put("disable", entry.getValue().disable());
+                nall.put(entry.getKey(), o);
+            }
+            animategobjson = nall;
+        }
+
+        public void save() {
+            createjson();
+            try (FileWriter jsonWriter = new FileWriter("GobAnimate.json")) {
+                jsonWriter.write(animategobjson.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static class GobColors {
+        private boolean enable = false;
+        private Color color = Color.WHITE;
+
+        public GobColors() {}
+
+        public GobColors(JSONObject jo) {
+            try {
+                enable = jo.getBoolean("enable");
+                color = new Color(jo.getInt("color"), true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void onoff1(boolean a, Gob gob) {
+            this.enable = a;
+            reloadGob(gob);
+            save();
+        }
+
+        public void onoff(boolean a, Gob gob) {
+            this.enable = a;
+            reloadGobs(gob);
+            save();
+        }
+
+
+        public boolean enable() {
+            return (enable);
+        }
+
+        public final Consumer<Color> setColor(Gob gob) {
+            return (c -> {
+                color = c;
+                reloadGobs(gob);
+                save();
+            });
+        }
+
+        private void reloadGob(Gob gob) {
+            Hidden h = gob.getattr(Hidden.class);
+            if (h != null) {
+                gob.delattr(Hidden.class);
+                gob.setattr(new Hidden(gob));
+            }
+        }
+
+        private void reloadGobs(Gob gob) {
+            OCache oc = gob.context(Glob.class).oc;
+            synchronized (oc) {
+//                oc.changeAllGobs();
+                for (Gob g : oc) {
+                    reloadGob(g);
+                }
+            }
+        }
+
+        public void createjson() {
+            JSONObject nall = new JSONObject();
+            for (Map.Entry<String, GobColors> entry : colorsgobsstring.entrySet()) {
+                JSONObject o = new JSONObject();
+                o.put("enable", entry.getValue().enable());
+                o.put("color", entry.getValue().color.getRGB());
+                nall.put(entry.getKey(), o);
+            }
+            colorsgobjson = nall;
+        }
+
+        public void save() {
+            createjson();
+            try (FileWriter jsonWriter = new FileWriter("GobColors.json")) {
+                jsonWriter.write(colorsgobjson.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static Color canCustomColor(Gob gob) {
+        Optional<GobColors> entry = colorsgobsid.entrySet().stream().filter(e -> e.getKey() == gob.id && e.getValue().enable()).map(Map.Entry::getValue).findFirst();
+        if (entry.isPresent())
+            return (entry.get().color);
+        try {
+            Resource gres = gob.res().orElse(null);
+            if (gres != null) {
+                entry = colorsgobsstring.entrySet().stream().filter(e -> e.getKey().equalsIgnoreCase(gres.name) && e.getValue().enable()).map(Map.Entry::getValue).findFirst();
+                if (entry.isPresent())
+                    return (entry.get().color);
+            }
+        } catch (Exception e) {
+        }
+        return (null);
     }
 
     public static Window gobScaleWindow(Gob gob) {
         String resname = gob.getres().name;
 
-        Window window = new Window(Coord.z, "Gob Scale");
-        WidgetVerticalAppender wva1 = new WidgetVerticalAppender(window);
-        WidgetVerticalAppender wva2 = new WidgetVerticalAppender(window);
-        wva1.setY(20);
-        wva2.setY(20);
-        wva2.setX(220);
+        Window window = new Window(Coord.z, "Gob Changer");
+        Widget resizeWdg = new Widget();
+        {
+            WidgetVerticalAppender wva1 = new WidgetVerticalAppender(resizeWdg);
+            WidgetVerticalAppender wva2 = new WidgetVerticalAppender(resizeWdg);
+            wva1.setY(UI.scale(20));
+            wva2.setY(UI.scale(20));
+            wva2.setX(UI.scale(220));
 
-        GobScale singlef = resizablegobsid.get(gob.id);
-        if (singlef == null)
-            resizablegobsid.put(gob.id, singlef = new GobScale());
-        final GobScale single = singlef;
-        float[][] sscale = single.getScale();
+            final GobScale single = resizablegobsid.computeIfAbsent(gob.id, k1 -> new GobScale());
+            float[][] sscale = single.getScale();
 
-        CheckBox gobid = new CheckBox(gob.id + "") {
-            {
-                a = single.enable();
-            }
+            wva1.add(new CheckBox("Only current: " + gob.id, val -> single.onoff1(val, gob), single.enable()));
 
-            @Override
-            public void set(boolean a) {
-                single.onoff(a);
-                this.a = a;
-            }
-        };
-        wva1.add(gobid);
+            TextEntry[][] singlescale = new TextEntry[sscale.length][sscale[0].length];
+            for (int i = 0; i < singlescale.length; i++) {
+                final List<TextEntry> list = new ArrayList<>();
+                for (int j = 0; j < singlescale[i].length; j++) {
+                    int row = i;
+                    int column = j;
+                    singlescale[i][j] = new TextEntry(UI.scale(50), Float.toString(sscale[row][column])) {
+                        String backup = text();
 
-        TextEntry[][] singlescale = new TextEntry[sscale.length][sscale[0].length];
-        for (int i = 0; i < singlescale.length; i++) {
-            final List<TextEntry> list = new ArrayList<>();
-            for (int j = 0; j < singlescale[i].length; j++) {
-                int row = i;
-                int column = j;
-                singlescale[i][j] = new TextEntry(50, Float.toString(sscale[row][column])) {
-                    String backup = text();
-
-                    @Override
-                    public boolean keydown(KeyEvent e) {
-                        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                            try {
-                                float val = text().isEmpty() ? 0 : Float.parseFloat(text().replace(',', '.'));
-                                single.setScale(row, column, val);
-                                return (true);
-                            } catch (NumberFormatException ex) {
+                        @Override
+                        public boolean keydown(KeyEvent e) {
+                            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                                try {
+                                    float val = text().isEmpty() ? 0 : Float.parseFloat(text().replace(',', '.'));
+                                    single.setScale1(row, column, val, gob);
+                                    return (true);
+                                } catch (NumberFormatException ex) {
+                                }
                             }
+                            backup = text();
+                            boolean b = super.keydown(e);
+                            try {
+                                if (!text().isEmpty())
+                                    Float.parseFloat(text().replace(',', '.'));
+                            } catch (Exception ex) {
+                                settext(backup);
+                            }
+                            return (b);
                         }
-                        backup = text();
-                        boolean b = super.keydown(e);
-                        try {
-                            if (!text().isEmpty())
-                                Float.parseFloat(text().replace(',', '.'));
-                        } catch (Exception ex) {
-                            settext(backup);
-                        }
-                        return (b);
-                    }
-                };
-                list.add(singlescale[i][j]);
+                    };
+                    list.add(singlescale[i][j]);
+                }
+                wva1.addRow(list);
             }
-            wva1.addRow(list);
+
+            final GobScale multi = resizablegobsstring.computeIfAbsent(resname, k -> new GobScale());
+            float[][] mscale = multi.getScale();
+
+            wva2.add(new CheckBox("Everyone: " + resname, val -> multi.onoff(val, gob, resname), multi.enable()));
+
+            TextEntry[][] multiscale = new TextEntry[mscale.length][mscale[0].length];
+            for (int i = 0; i < multiscale.length; i++) {
+                final List<TextEntry> list = new ArrayList<>();
+                for (int j = 0; j < multiscale[i].length; j++) {
+                    int row = i;
+                    int column = j;
+                    multiscale[i][j] = new TextEntry(UI.scale(50), Float.toString(mscale[row][column])) {
+                        String backup = text();
+
+                        @Override
+                        public boolean keydown(KeyEvent e) {
+                            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                                try {
+                                    float val = text().isEmpty() ? 0 : Float.parseFloat(text().replace(',', '.'));
+                                    multi.setScale(row, column, val, gob, resname);
+                                    return (true);
+                                } catch (NumberFormatException ex) {
+                                }
+                            }
+                            backup = text();
+                            boolean b = super.keydown(e);
+                            try {
+                                if (!text().isEmpty())
+                                    Float.parseFloat(text().replace(',', '.'));
+                            } catch (Exception ex) {
+                                settext(backup);
+                            }
+                            return (b);
+                        }
+                    };
+                    list.add(multiscale[i][j]);
+                }
+                wva2.addRow(list);
+            }
+
+            resizeWdg.pack();
+            resizeWdg.adda(new CheckBox("Gob resizer", val -> Utils.setprefb("resizegob", resizegob = val), resizegob), new Coord(resizeWdg.sz.x / 2, 0), 0.5, 0);
+            resizeWdg.hide();
         }
 
-        GobScale multif = resizablegobsstring.get(resname);
-        if (multif == null)
-            resizablegobsstring.put(resname, multif = new GobScale());
-        final GobScale multi = multif;
-        float[][] mscale = multi.getScale();
+        Widget animationWdg = new Widget();
+        {
+            WidgetVerticalAppender wva = new WidgetVerticalAppender(animationWdg);
+            final GobAnimate single = animategobsid.computeIfAbsent(gob.id, k1 -> new GobAnimate());
+            wva.add(new CheckBox("Only current: " + gob.id, val -> single.onoff1(val, gob), single.disable()));
+            final GobAnimate multi = animategobsstring.computeIfAbsent(resname, k -> new GobAnimate());
+            wva.add(new CheckBox("Everyone: " + resname, val -> multi.onoff(val, gob, resname), multi.disable()));
 
-        CheckBox gobresname = new CheckBox(resname) {
-            {
-                a = multi.enable();
-            }
-
-            @Override
-            public void set(boolean a) {
-                multi.onoff(a);
-                this.a = a;
-            }
-        };
-        wva2.add(gobresname);
-
-        TextEntry[][] multiscale = new TextEntry[mscale.length][mscale[0].length];
-        for (int i = 0; i < multiscale.length; i++) {
-            final List<TextEntry> list = new ArrayList<>();
-            for (int j = 0; j < multiscale[i].length; j++) {
-                int row = i;
-                int column = j;
-                multiscale[i][j] = new TextEntry(50, Float.toString(mscale[row][column])) {
-                    String backup = text();
-
-                    @Override
-                    public boolean keydown(KeyEvent e) {
-                        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                            try {
-                                float val = text().isEmpty() ? 0 : Float.parseFloat(text().replace(',', '.'));
-                                multi.setScale(row, column, val);
-                                return (true);
-                            } catch (NumberFormatException ex) {
-                            }
-                        }
-                        backup = text();
-                        boolean b = super.keydown(e);
-                        try {
-                            if (!text().isEmpty())
-                                Float.parseFloat(text().replace(',', '.'));
-                        } catch (Exception ex) {
-                            settext(backup);
-                        }
-                        return (b);
-                    }
-                };
-                list.add(multiscale[i][j]);
-            }
-            wva2.addRow(list);
+            animationWdg.pack();
+            animationWdg.hide();
         }
 
+        Widget colorsWdg = new Widget();
+        {
+            WidgetVerticalAppender wva = new WidgetVerticalAppender(colorsWdg);
+            final GobColors single = colorsgobsid.computeIfAbsent(gob.id, k1 -> new GobColors());
+            wva.addRow(new CheckBox("Only current: " + gob.id, val -> single.onoff1(val, gob), single.enable()), new ColorPreview(UI.scale(16, 16), single.color, single.setColor(gob)));
+            final GobColors multi = colorsgobsstring.computeIfAbsent(resname, k -> new GobColors());
+            wva.addRow(new CheckBox("Everyone: " + resname, val -> multi.onoff(val, gob), multi.enable()), new ColorPreview(UI.scale(16, 16), multi.color, multi.setColor(gob)));
+
+            colorsWdg.pack();
+            colorsWdg.hide();
+        }
+
+        Widget changerWdg = new Widget();
+        RadioGroup group = new RadioGroup(changerWdg) {
+            @Override
+            public void changed(final int btn, final String lbl) {
+                super.changed(btn, lbl);
+                if (lbl.equals("Resizer")) {
+                    resizeWdg.show();
+                    animationWdg.hide();
+                    colorsWdg.hide();
+                } else if (lbl.equals("Animation")) {
+                    resizeWdg.hide();
+                    animationWdg.show();
+                    colorsWdg.hide();
+                } else if (lbl.equals("Hitboxes")) {
+                    animationWdg.hide();
+                    resizeWdg.hide();
+                    colorsWdg.show();
+                }
+                window.pack();
+            }
+        };
+        RadioGroup.RadioButton p = group.add("Resizer", new Coord());
+        p = group.add("Animation", p.pos("bl"));
+        p = group.add("Hitboxes", p.pos("bl"));
+        changerWdg.pack();
+
+        window.add(changerWdg);
         window.pack();
-        window.adda(new CheckBox("Gob resizer") {
-            {
-                a = resizegob;
-            }
 
-            public void set(boolean val) {
-                Utils.setprefb("resizegob", val);
-                resizegob = val;
-                a = val;
-            }
-        }, new Coord(window.sz.x / 2, 0), 0.5, 0);
+        window.add(resizeWdg, window.pos("ur"));
+        window.add(animationWdg, window.pos("ur"));
+        window.add(colorsWdg, window.pos("ur"));
+        window.pack();
+
+        group.check("Resizer");
         return (window);
     }
 

@@ -479,17 +479,20 @@ public class MenuGrid extends Widget {
             iter.remove();
             try {
                 AButton ad = pag.act();
-                if (ad == null)
-                    throw (new RuntimeException("Pagina in " + pag.res + " lacks action"));
-                Pagina parent = paginafor(ad.parent);
-                if ((pag.newp != 0) && (parent != null) && (parent.newp == 0)) {
-                    parent.newp = 2;
-                    parent.fstart = (parent.fstart == 0) ? pag.fstart : Math.min(parent.fstart, pag.fstart);
-                }
-                if (parent == p)
+                if (ad == null) {
+//                    throw (new RuntimeException("Pagina in " + pag.res + " lacks action"));
                     buf.add(pag.button());
-                else if ((parent != null) && !close.contains(parent) && !open.contains(parent))
-                    open.add(parent);
+                } else {
+                    Pagina parent = paginafor(ad.parent);
+                    if ((pag.newp != 0) && (parent != null) && (parent.newp == 0)) {
+                        parent.newp = 2;
+                        parent.fstart = (parent.fstart == 0) ? pag.fstart : Math.min(parent.fstart, pag.fstart);
+                    }
+                    if (parent == p)
+                        buf.add(pag.button());
+                    else if ((parent != null) && !close.contains(parent) && !open.contains(parent))
+                        open.add(parent);
+                }
                 close.add(pag);
             } catch (Loading e) {
                 ret = false;

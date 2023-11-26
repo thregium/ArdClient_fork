@@ -69,9 +69,19 @@ public class CraftHistoryBelt extends MovableWidget {
                     act(belt[slot]);
                 }
             }
-            return true;
         }
-        return false;
+        if (altMoveHit(c, button)) {
+            if (!isLock()) {
+                movableBg = true;
+                dm = ui.grabmouse(this);
+                doff = c;
+                parent.setfocus(this);
+                raise();
+            }
+            return (true);
+        } else {
+            return (false);
+        }
     }
 
     public void act(MenuGrid.Pagina act) {

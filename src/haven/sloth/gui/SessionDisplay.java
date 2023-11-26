@@ -108,4 +108,23 @@ public class SessionDisplay extends MovableWidget implements ObservableListener<
             pack();
         }
     }
+
+    @Override
+    public boolean mousedown(final Coord mc, final int button) {
+        if (super.mousedown(mc, button)) {
+            //Give preference to the Widget using this
+            return (true);
+        } else if (altMoveHit(mc, button)) {
+            if (!isLock()) {
+                movableBg = true;
+                dm = ui.grabmouse(this);
+                doff = mc;
+                parent.setfocus(this);
+                raise();
+            }
+            return (true);
+        } else {
+            return (false);
+        }
+    }
 }

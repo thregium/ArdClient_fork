@@ -27,6 +27,7 @@
 package haven;
 
 import modification.resources;
+
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.event.KeyEvent;
@@ -58,6 +59,7 @@ public class LoginScreen extends Widget {
     OptWnd opts;
     Img background;
     static Tex bg = null;
+
     static Tex bg() {
         if (bg == null)
             bg = resources.bgCheck();
@@ -232,16 +234,21 @@ public class LoginScreen extends Widget {
 
     public static class LoginList extends Listbox<LoginData> {
         private static final int ITEM_HEIGHT = UI.scale(20);
-        private static final Tex xicon = Text.render("✖", Color.RED, special).tex();
+        private static final Tex xicon = Text.render("✖", Color.WHITE, special).tex();
         private static final Tex upicon;
         private static final Tex downicon;
+
         static {
-            Text uptext = Text.render("▲", Color.RED, special);
+            Text uptext = Text.render("▲", Color.WHITE, special);
             upicon = new TexI(PUtils.uiscale(uptext.img, uptext.sz().div(2)));
-            Text downtext = Text.render("▼", Color.RED, special);
+            Text downtext = Text.render("▼", Color.WHITE, special);
             downicon = new TexI(PUtils.uiscale(downtext.img, downtext.sz().div(2)));
         }
+
         private int hover = -1;
+        private int xhover = -1;
+        private int uphover = -1;
+        private int downhover = -1;
         private Coord lastMouseDown = Coord.z;
 
         public LoginList(int w, int h) {
@@ -290,6 +297,26 @@ public class LoginScreen extends Widget {
                 hover = c.y / ITEM_HEIGHT + sb.val;
             else
                 hover = -1;
+
+            int xpos = sz.x - xicon.sz().x - UI.scale(5);
+            int cpos = sz.x - xicon.sz().x - UI.scale(5) - upicon.sz().x - UI.scale(5);
+            if (c.x >= xpos && c.x <= xpos + xicon.sz().x)
+                xhover = hover;
+            else
+                xhover = -1;
+            if (c.x >= cpos && c.x <= cpos + upicon.sz().x) {
+                if (c.y % ITEM_HEIGHT > ITEM_HEIGHT / 2)
+                    downhover = hover;
+                else
+                    downhover = -1;
+                if (c.y % ITEM_HEIGHT < ITEM_HEIGHT / 2)
+                    uphover = hover;
+                else
+                    uphover = -1;
+            } else {
+                uphover = -1;
+                downhover = -1;
+            }
         }
 
         @Override
@@ -304,9 +331,13 @@ public class LoginScreen extends Widget {
             g.chcolor();
             Tex tex = Text.render(item.name, Color.WHITE, textfs).tex();
             g.image(tex, new Coord(UI.scale(5), (ITEM_HEIGHT - tex.sz().y) / 2));
+            g.chcolor(xhover == i ? Color.YELLOW : Color.RED);
             g.aimage(xicon, new Coord(sz.x - UI.scale(5), (ITEM_HEIGHT - xicon.sz().y) / 2), 1, 0);
+            g.chcolor(uphover == i ? Color.YELLOW : Color.RED);
             g.aimage(upicon, new Coord(sz.x - xicon.sz().x - UI.scale(5) - UI.scale(5), 0), 1, 0);
+            g.chcolor(downhover == i ? Color.YELLOW : Color.RED);
             g.aimage(downicon, new Coord(sz.x - xicon.sz().x - UI.scale(5) - UI.scale(5), ITEM_HEIGHT), 1, 1);
+            g.chcolor();
         }
 
         @Override

@@ -1,5 +1,7 @@
 package haven;
 
+import modification.configuration;
+
 import java.awt.Color;
 
 public class FepMeter extends IMeter {
@@ -12,17 +14,24 @@ public class FepMeter extends IMeter {
 
     @Override
     protected void drawMeters(GOut g) {
+        boolean mini = configuration.minimalisticmeter;
         double x = 0;
-        int w = IMeter.msz.x;
+        int w = !mini ? IMeter.msz.x : sz.x;
         for (CharWnd.FoodMeter.El el : food.els) {
             int l = (int) Math.floor((x / food.cap) * w);
             int r = (int) Math.floor(((x += el.a) / food.cap) * w);
             try {
                 Color col = el.ev().col;
                 g.chcolor(new Color(col.getRed(), col.getGreen(), col.getBlue(), 255));
-                g.frect(off.add(l, 0).mul(this.scale), Coord.of(r - l, msz.y).mul(this.scale));
+                if (!mini) {
+                    g.frect(off.add(l, 0).mul(this.scale), Coord.of(r - l, msz.y).mul(this.scale));
+                } else {
+                    Coord off = miniOff.mul(this.scale);
+                    g.frect(Coord.of(l, 0).mul(this.scale).add(off), Coord.of((int) ((r - l) * this.scale), sz.y).sub(off.mul(2)));
+                }
             } catch (Loading e) {}
         }
+        g.chcolor();
     }
 
     @Override

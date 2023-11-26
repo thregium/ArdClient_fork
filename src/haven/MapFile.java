@@ -2562,7 +2562,7 @@ public class MapFile {
                 if ((pm.getClass() != mark.getClass()) || !pm.nm.equals(mark.nm) || !pm.tc.equals(mark.tc))
                     continue;
                 if (pm instanceof SMarker) {
-                    if (((SMarker) pm).oid != ((SMarker) mark).oid)
+                    if (!((SMarker)pm).res.name.equals(((SMarker)mark).res.name))
                         continue;
                 }
                 return (pm);

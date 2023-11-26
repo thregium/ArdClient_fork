@@ -45,21 +45,17 @@ public interface ResCache {
 
     default void remove(String name) throws IOException {}
 
-    ResCache global = StupidJavaCodeContainer.makeglobal();
+    /*ResCache global = StupidJavaCodeContainer.makeglobal();*/
 
     static ResCache getCache(String name) {
-        if (!DefSettings.sqlitecache.get()) {
-            return (global);
-        } else {
-            return (SQLiteCache.get(name));
-        }
+        return (SQLiteCache.get(name));
     }
 
-    class StupidJavaCodeContainer {
+    /*class StupidJavaCodeContainer {
         private static ResCache makeglobal() {
             return (HashDirCache.create());
         }
-    }
+    }*/
 
     class TestCache implements ResCache {
         public OutputStream store(final String name) {

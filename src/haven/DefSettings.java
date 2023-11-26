@@ -207,9 +207,9 @@ public class DefSettings {
     public static final IndirSetting<Integer> MINIMAPTYPE = new IndirSetting<>(global, "graphics.minimap-type");        //[Int] 0, 1, 2 = { default, blend, blend }
     public static final IndirSetting<Integer> MAPTYPE = new IndirSetting<>(global, "graphics.map-type");                //[Int] 0, 1, 2 = { default, blend, blend }
 
-    public static final IndirSetting<Boolean> sqlitecache = new IndirSetting<Boolean>(global, "sqlite.enable") {{
+    /*public static final IndirSetting<Boolean> sqlitecache = new IndirSetting<Boolean>(global, "sqlite.enable") {{
         ensure(true);
-    }};
+    }};*/
 
     /**
      * Checks out settings nad saves them if they are dirty

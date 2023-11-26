@@ -91,9 +91,9 @@ public class Hidden extends GAttrib {
         gob.res().ifPresent((res) -> {
             final Hitbox[] hb = Hitbox.hbfor(gob, true);
             if (hb != null && hb.length > 0) {
-                mesh = HitboxMesh.makehb(hb);
+                mesh = HitboxMesh.makehb(gob, hb);
             } else {
-                mesh = HitboxMesh.makehb(new Hitbox[]{new Hitbox(new Coord(11, 11), Coord.z)});
+                mesh = HitboxMesh.makehb(gob, new Hitbox[]{new Hitbox(new Coord(11, 11), Coord.z)});
             }
         });
     }

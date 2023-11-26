@@ -499,12 +499,7 @@ public class Utils {
 
     public static synchronized Preferences prefs() {
         if (prefs == null) {
-            Preferences node;
-            if (!DefSettings.sqlitecache.get()) {
-                node = Preferences.userNodeForPackage(Utils.class);
-            } else {
-                node = SQLitePreference.get("preferences");
-            }
+            Preferences node = SQLitePreference.get("preferences");//Preferences.userNodeForPackage(Utils.class);
 
 //            if (Config.prefspec != null)
 //                node = node.node(Config.prefspec);

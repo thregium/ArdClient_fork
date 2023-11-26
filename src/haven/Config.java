@@ -74,6 +74,7 @@ public class Config {
     public static String authserv = null;
     public static String defserv = Config.Variable.prop("haven.defserv", "game.havenandhearth.com").get();
     public static URL resurl = Config.Variable.propu("haven.resurl", "https://game.havenandhearth.com/hres/").get();
+    public static URL newresurl = Config.Variable.propu("haven.resurl", "https://game.havenandhearth.com/res/").get();
     public static boolean dbtext = false;
     public static boolean profile = false;
     public static boolean par = true;
@@ -335,6 +336,8 @@ public class Config {
     public static boolean hungermeter = Utils.getprefb("hungermeter", true);
     public static boolean leechdrop = Utils.getprefb("leechdrop", false);
     public static boolean hideTrees = Utils.getprefb("hideTrees", true);
+    public static boolean hideLogs = Utils.getprefb("hideLogs", true);
+    public static boolean hideStumps = Utils.getprefb("hideStumps", true);
     //hideboulders
     public static boolean hideboulders = Utils.getprefb("hideboulders", false);
     public static boolean hideCrops = Utils.getprefb("hideCrops", true);

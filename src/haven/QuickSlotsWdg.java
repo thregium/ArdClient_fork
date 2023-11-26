@@ -153,7 +153,18 @@ public class QuickSlotsWdg extends MovableWidget implements DTarget {
                 return true;
             }
         }
-        return false;
+        if (altMoveHit(c, button)) {
+            if (!isLock()) {
+                movableBg = true;
+                dm = ui.grabmouse(this);
+                doff = c;
+                parent.setfocus(this);
+                raise();
+            }
+            return (true);
+        } else {
+            return (false);
+        }
     }
 
     public void simulateclick(Coord c) {

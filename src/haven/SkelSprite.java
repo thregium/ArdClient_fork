@@ -29,6 +29,7 @@ package haven;
 import haven.MorphedMesh.Morpher;
 import haven.Skeleton.Pose;
 import haven.Skeleton.PoseMod;
+import modification.configuration;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -241,7 +242,7 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
     }
 
     public Object staticp() {
-        if (!Config.disableAllAnimations) {
+        if (!configuration.disableAnimation(owner)) {
             if (!stat || (manims.length > 0) || (ipold > 0)) {
                 return (null);
             } else {

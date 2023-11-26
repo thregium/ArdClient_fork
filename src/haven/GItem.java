@@ -144,7 +144,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         }
 
         static BufferedImage numrender(int num, Color col) {
-            String n = num + "";
+            String n = "x" + num;
             if (!Config.largeqfont)
                 return PUtils.cropImg(PUtils.strokeImg(Text.render(n, col)));
             else

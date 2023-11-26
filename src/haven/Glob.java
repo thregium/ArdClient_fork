@@ -386,7 +386,7 @@ public class Glob {
 //                dayOfMonth = Resource.getLocString(Resource.BUNDLE_LABEL, String.format("Last day of %s", seasonNames[ast.is]));
             int mp = (int) Math.round(ast.mp * mPhaseNames.length) % mPhaseNames.length;
             phaseOfMoon = String.format("$col[%s,%s,%s]{%s}", ast.mc.getRed(), ast.mc.getGreen(), ast.mc.getBlue(), Resource.getLocString(Resource.BUNDLE_LABEL, mPhaseNames[mp] + " Moon"));
-            month = Resource.getLocString(Resource.BUNDLE_LABEL, "Month") + " " + String.format("%s/%s", (int) (Math.floor(ast.ym) + 1), Math.round(ast.ym / ast.yt) + 1);
+            month = Resource.getLocString(Resource.BUNDLE_LABEL, "Month") + " " + String.format("%s/%s", (int) (Math.floor(ast.ym) + 1), Math.round(ast.ym / ast.yt));
             year = Resource.getLocString(Resource.BUNDLE_LABEL, "Year") + " " + String.format("%s (%s%%)", ((int) Math.floor(ast.years) + 1), Math.round(ast.yt * 100));
             dayTime = Resource.getLocString(Resource.BUNDLE_LABEL, ast.dt >= 0.2 && ast.dt < 0.3 ? "Dawn" : (ast.night ? "Night" : "Day"));
         }

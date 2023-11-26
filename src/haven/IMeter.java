@@ -27,6 +27,8 @@
 package haven;
 
 import haven.sloth.gui.MovableWidget;
+import modification.configuration;
+
 import java.awt.Color;
 import java.awt.font.TextAttribute;
 import java.util.Collections;
@@ -43,6 +45,7 @@ public class IMeter extends MovableWidget {
     static Coord off = UI.scale(22, 7);
     static Coord fsz = UI.scale(101, 24);
     static Coord msz = UI.scale(75, 10);
+    static Coord miniOff = UI.scale(0, 5);
     Indir<Resource> bg;
     List<Meter> meters;
     private boolean ponyalarm = true;
@@ -95,32 +98,54 @@ public class IMeter extends MovableWidget {
     }
 
     protected void drawBg(GOut g) {
+        boolean mini = configuration.minimalisticmeter;
         g.chcolor(0, 0, 0, 255);
-        g.frect(off.mul(this.scale), msz.mul(this.scale));
+        if (!mini) {
+            g.frect(off.mul(this.scale), msz.mul(this.scale));
+        } else {
+            Coord off = miniOff.mul(this.scale);
+            g.frect(off, sz.sub(off.mul(2)));
+        }
+        g.chcolor();
     }
 
     protected void drawMeters(GOut g) {
+        boolean mini = configuration.minimalisticmeter;
         for (Meter m : meters) {
             int w = msz.x;
             w = (w * m.a) / 100;
-            g.chcolor(m.c);
-            g.frect(off.mul(this.scale), Coord.of(w, msz.y).mul(this.scale));
+            if (!mini) {
+                g.chcolor(m.c);
+                g.frect(off.mul(this.scale), Coord.of(w, msz.y).mul(this.scale));
+            } else {
+                g.chcolor(m.c.darker());
+                Coord off = miniOff.mul(this.scale);
+                g.frect(off, Coord.of((sz.x * m.a) / 100, sz.y).sub(off.mul(2)));
+            }
         }
+        g.chcolor();
     }
 
     public void draw(GOut g) {
+        boolean mini = configuration.minimalisticmeter;
         drawBg(g);
         drawMeters(g);
-        g.chcolor();
         try {
-            g.image(tex(), Coord.z);
+            if (!mini) {
+                g.image(tex(), Coord.z);
+            } else {
+                g.chcolor(63, 63, 63, 255);
+                Coord off = miniOff.mul(this.scale);
+                g.rect(off, sz.sub(off.mul(2)));
+                g.chcolor();
+            }
         } catch (Loading l) {
             //Ignore
         }
         if (Config.showmetertext) {
             Text meterinfo = this.meterinfo;
             if (meterinfo != null)
-                g.aimage(meterinfo.tex(), sz.div(2).add(UI.scale(10) * this.scale, -1 * this.scale), 0.5, 0.5);
+                g.aimage(meterinfo.tex(), sz.div(2).add(UI.scale(!mini ? 10 : 0) * this.scale, (!mini ? -1 : 0) * this.scale), 0.5, 0.5);
         }
         super.draw(g);
     }
@@ -196,6 +221,24 @@ public class IMeter extends MovableWidget {
     }
 
     private static final RichText.Foundry fnd = new RichText.Foundry(TextAttribute.FAMILY, "Dialog", TextAttribute.SIZE, UI.scale(10));
+
+    @Override
+    public boolean mousedown(final Coord mc, final int button) {
+        if (super.mousedown(mc, button)) {
+            return (true);
+        } else if (altMoveHit(mc, button)) {
+            if (!isLock()) {
+                movableBg = true;
+                dm = ui.grabmouse(this);
+                doff = mc;
+                parent.setfocus(this);
+                raise();
+            }
+            return (true);
+        } else {
+            return (false);
+        }
+    }
 
     public boolean mousewheel(Coord coord, int amount) {
         if (ui.modflags() == (UI.MOD_CTRL | UI.MOD_META)) {

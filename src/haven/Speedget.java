@@ -142,8 +142,19 @@ public class Speedget extends MovableWidget {
                 }
             }
             return (true);
+        } else if (super.mousedown(c, button)) {
+            return (true);
+        } else if (altMoveHit(c, button)) {
+            if (!isLock()) {
+                movableBg = true;
+                dm = ui.grabmouse(this);
+                doff = c;
+                parent.setfocus(this);
+                raise();
+            }
+            return (true);
         } else {
-            return super.mousedown(c, button);
+            return (false);
         }
     }
 

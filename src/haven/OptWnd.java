@@ -1137,6 +1137,7 @@ public class OptWnd extends Window {
                 }
             }
         });
+        appender.add(new CheckBox("Show LinMove", val -> Utils.setprefb("showlinmove", configuration.showlinmove = val), configuration.showlinmove));
         appender.add(new IndirCheckBox("Show Your Movement Path", SHOWPLAYERPATH));
         appender.add(ColorPreWithLabel("Your path color: ", PLAYERPATHCOL, val -> Movable.playercol = new States.ColState(val)));
         appender.add(new IndirCheckBox("Show Other Player Paths - Kinned player's paths will be their kin color.", SHOWGOBPATH));
@@ -2112,7 +2113,7 @@ public class OptWnd extends Window {
 
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
 
-        appender.add(new IndirCheckBox("SQLite cache instead of default %appdata% (req. restart)", DefSettings.sqlitecache));
+//        appender.add(new CheckBox("SQLite cache instead of default %appdata% (req. restart)"));
         appender.add(new CheckBox("Show Entering/Leaving Messages in Sys Log instead of large Popup - FPS increase?") {
             {
                 a = Config.DivertPolityMessages;
@@ -2502,6 +2503,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("Show boostspeed box", val -> Utils.setprefb("boostspeedbox", configuration.boostspeedbox = val), configuration.boostspeedbox));
         /*appender.add(new CheckBox("Show attack cooldown delta") {
             {
                 a = Config.showcddelta;
@@ -2936,17 +2938,8 @@ public class OptWnd extends Window {
         appender.add(new CheckBox("Show server time (game time)", val -> Utils.setprefb("showservertime", Config.showservertime = val), Config.showservertime));
         appender.add(new CheckBox("Show location info (req. server time)", val -> Utils.setprefb("showlocationinfo", configuration.showlocationinfo = val), configuration.showlocationinfo));
         appender.add(new CheckBox("Show weather info (req. server time)", val -> Utils.setprefb("showweatherinfo", configuration.showweatherinfo = val), configuration.showweatherinfo));
-        appender.add(new CheckBox("Show IMeter Text") {
-            {
-                a = Config.showmetertext;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("showmetertext", val);
-                Config.showmetertext = val;
-                a = val;
-            }
-        });
+        appender.add(new CheckBox("Show IMeter Text", val -> Utils.setprefb("showmetertext", Config.showmetertext = val), Config.showmetertext));
+        appender.add(new CheckBox("Minimalistic Meters", val -> Utils.setprefb("minimalisticmeter", configuration.minimalisticmeter = val), configuration.minimalisticmeter));
         appender.add(new CheckBox("Show player id in Kith & Kin") {
             {
                 a = configuration.kinid;
@@ -4610,7 +4603,7 @@ public class OptWnd extends Window {
                         System.gc();
                     }
                 },
-                new Button(UI.scale(50), "Resource Cleaner") {
+                /*new Button(UI.scale(50), "Resource Cleaner") {
                     public void click() {
                         getCleaner("Resource Cleaner", "res/").start();
                     }
@@ -4627,7 +4620,7 @@ public class OptWnd extends Window {
                     public Object tooltip(Coord c0, Widget prev) {
                         return Text.render("Delete only maps excluding other files such as for example resources. After completing the game turns off").tex();
                     }
-                },
+                },*/
                 new Button("Remove old map", () -> {
                     SQLiteCache data = SQLiteCache.get("map");
                     UI ui = PBotAPI.ui();
@@ -5472,8 +5465,14 @@ public class OptWnd extends Window {
                         gui.map.refreshGobsAll();
                         gui.msg("Gobs are now" + (Config.hidegobs ? " " : " NOT ") + "hidden.", Color.WHITE);
                     }
-                }, Config.hidegobs),
+                }, Config.hidegobs)
+        );
+        appender.addRowOff(UI.scale(10, 0),
                 new CheckBox("Hide trees", val -> Utils.setprefb("hideTrees", Config.hideTrees = val), Config.hideTrees),
+                new CheckBox("Hide logs", val -> Utils.setprefb("hideLogs", Config.hideLogs = val), Config.hideLogs),
+                new CheckBox("Hide stumps", val -> Utils.setprefb("hideStumps", Config.hideStumps = val), Config.hideStumps)
+        );
+        appender.addRowOff(UI.scale(10, 0),
                 new CheckBox("Hide boulders", val -> Utils.setprefb("hideboulders", Config.hideboulders = val), Config.hideboulders),
                 new CheckBox("Hide crops", val -> Utils.setprefb("hideCrops", Config.hideCrops = val), Config.hideCrops),
                 new CheckBox("Hide bushes", val -> Utils.setprefb("hideBushes", Config.hideBushes = val), Config.hideBushes)
@@ -6565,17 +6564,7 @@ public class OptWnd extends Window {
                         }
                     }
                 });
-                appender.add(new CheckBox("Disable Animations (Big Performance Boost, makes some animations look weird.)") {
-                    {
-                        a = Config.disableAllAnimations;
-                    }
-
-                    public void set(boolean val) {
-                        Utils.setprefb("disableAllAnimations", val);
-                        Config.disableAllAnimations = val;
-                        a = val;
-                    }
-                });
+                appender.add(new CheckBox("Disable Animations (Big Performance Boost, makes some animations look weird)", val -> Utils.setprefb("disableAllAnimations", Config.disableAllAnimations = val), Config.disableAllAnimations));
                 Function<Integer, String> animtext = i -> {
                     StringBuilder sb = new StringBuilder();
                     sb.append("Animation ");
@@ -6782,7 +6771,9 @@ public class OptWnd extends Window {
         }
     }
 
-    public Thread getCleaner(String name, String part) {
+    @Deprecated
+    private Thread getCleaner(String name, String part) {
+        if (true) return null;
         return new Thread(() -> {
             Label search = new Label("", Text.num14boldFnd) {
                 public void draw(GOut g) {
@@ -6816,7 +6807,7 @@ public class OptWnd extends Window {
                     if (!success)
                         success = true;
                     try {
-                        HashDirCache.Header head;
+                        /*HashDirCache.Header head;
                         try (FileChannel fp = HashDirCache.open2(listFiles.get(i))) {
                             head = ((HashDirCache) ResCache.global).readhead(new DataInputStream(Channels.newInputStream(fp)));
                         }
@@ -6824,7 +6815,7 @@ public class OptWnd extends Window {
                             files.add(listFiles.get(i));
                             search.settext("Searching files for deleting: " + ((i + 1) + "/" + listFiles.size()) + " - " + files.size() + " added");
                             search.move(ui.root.sz.div(2), 0.5, 0.5);
-                        }
+                        }*/
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -6832,7 +6823,7 @@ public class OptWnd extends Window {
             search.reqdestroy();
             for (int i = 0; i < files.size(); i++) {
                 try {
-                    HashDirCache.Header head;
+                    /*HashDirCache.Header head;
                     try (final FileChannel fp = HashDirCache.open2(files.get(i))) {
                         head = ((HashDirCache) ResCache.global).readhead(new DataInputStream(Channels.newInputStream(fp)));
                     }
@@ -6863,7 +6854,7 @@ public class OptWnd extends Window {
                                     lbl[k].move(ui.root.sz.div(2), 0.5, 6 - k);
                                 }
                         }
-                    }
+                    }*/
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

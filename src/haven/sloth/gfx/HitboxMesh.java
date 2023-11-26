@@ -2,6 +2,7 @@ package haven.sloth.gfx;
 
 import haven.DefSettings;
 import haven.FastMesh;
+import haven.Gob;
 import haven.MapMesh;
 import haven.Material;
 import haven.RenderList;
@@ -9,6 +10,7 @@ import haven.States;
 import haven.Utils;
 import haven.VertexBuf;
 import haven.sloth.script.pathfinding.Hitbox;
+import modification.configuration;
 
 import java.awt.Color;
 import java.nio.FloatBuffer;
@@ -36,6 +38,10 @@ public class HitboxMesh extends FastMesh {
 
     public synchronized static void updateColor(final States.ColState col) {
         hiddencolor = col;
+        updateColor();
+    }
+
+    public synchronized static void updateColor() {
 //        hbs.forEach((name, mesh) -> mesh.dispose());
         for (Map.Entry<String[], HitboxMesh[]> entry : hbs.entrySet()) {
             for (HitboxMesh mesh : entry.getValue()) {
@@ -45,7 +51,7 @@ public class HitboxMesh extends FastMesh {
         hbs.clear();
     }
 
-    public synchronized static HitboxMesh[] makehb(Hitbox[] hitboxes) {
+    public synchronized static HitboxMesh[] makehb(Gob gob, Hitbox[] hitboxes) {
 //        Coord rec, Coord off
 //        size and 0
         String[] keys = new String[hitboxes.length];
@@ -70,7 +76,8 @@ public class HitboxMesh extends FastMesh {
 //                    lx = rec.x, ly = rec.y;
             hb = new HitboxMesh[hitboxes.length];
 
-            Color[] colors = new Color[]{hiddencolor.c, new Color(0, 255, 0, 150), new Color(255, 255, 0, 150)};
+            Color col = configuration.canCustomColor(gob);
+            Color[] colors = new Color[]{col != null ? col : hiddencolor.c, new Color(0, 255, 0, 150), new Color(255, 255, 0, 150)};
 
             for (int i = 0; i < hitboxes.length; i++) {
                 FloatBuffer pa = Utils.mkfbuf(hitboxes[i].points.length * 2 * 3);

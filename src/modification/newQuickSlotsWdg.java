@@ -111,22 +111,32 @@ public class newQuickSlotsWdg extends MovableWidget implements DTarget {
             return true;
         } else if (ui.modctrl && button == 1 && Config.disablequickslotdrop) {
             return true;
-        } else {
-            Equipory e = ui.gui.getequipory();
-            if (e != null) {
-                WItem w = null;
-                for (int i = 0; i < 4; ++i) {
-                    if (c.x <= (ssz.x + spz.x / 2) * items[i].slot) {
-                        w = e.quickslots[items[i].eqslot];
-                        break;
-                    }
-                }
-                if (w != null) {
-                    w.mousedown(new Coord(w.sz.x / 2, w.sz.y / 2), button);
-                    return true;
+        }
+        Equipory e = ui.gui.getequipory();
+        if (e != null) {
+            WItem w = null;
+            for (int i = 0; i < 4; ++i) {
+                if (c.x <= (ssz.x + spz.x / 2) * items[i].slot) {
+                    w = e.quickslots[items[i].eqslot];
+                    break;
                 }
             }
-            return false;
+            if (w != null) {
+                w.mousedown(new Coord(w.sz.x / 2, w.sz.y / 2), button);
+                return true;
+            }
+        }
+        if (altMoveHit(c, button)) {
+            if (!isLock()) {
+                movableBg = true;
+                dm = ui.grabmouse(this);
+                doff = c;
+                parent.setfocus(this);
+                raise();
+            }
+            return (true);
+        } else {
+            return (false);
         }
     }
 

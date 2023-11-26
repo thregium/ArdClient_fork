@@ -58,6 +58,20 @@ public class WidgetVerticalAppender {
         y += maxHeight + verticalMargin;
     }
 
+    public void addRowOff(Coord offset, Widget... children) {
+        int x = this.x + offset.x;
+        y += offset.y;
+        int maxHeight = 0;
+        for (Widget child : children) {
+            widget.add(child, new Coord(x, y));
+            x += child.sz.x + horizontalMargin;
+            if (maxHeight < child.sz.y) {
+                maxHeight = child.sz.y;
+            }
+        }
+        y += maxHeight + verticalMargin;
+    }
+
     private final Widget widget;
     private int verticalMargin;
     private int horizontalMargin;
