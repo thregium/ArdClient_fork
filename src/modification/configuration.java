@@ -317,6 +317,7 @@ public class configuration {
     public static boolean minimalisticmeter = Utils.getprefb("minimalisticmeter", false);
     public static boolean boostspeedbox = Utils.getprefb("boostspeedbox", true);
     public static boolean showlinmove = Utils.getprefb("showlinmove", true);
+    public static boolean simpledraging = Utils.getprefb("simpledraging", true);
 
     public static boolean disablepavingoutlineonmap = Utils.getprefb("disablepavingoutlineonmap", false);
 

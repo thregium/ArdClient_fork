@@ -6,6 +6,7 @@ import haven.GOut;
 import haven.UI;
 import haven.Widget;
 import haven.sloth.io.Storage;
+import modification.configuration;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -146,7 +147,7 @@ public abstract class MovableWidget extends Widget {
     }
 
     protected boolean altMoveHit(final Coord c, final int btn) {
-        return ui.modflags() == 0 && btn == 1;
+        return ui.modflags() == 0 && btn == 1 && configuration.simpledraging;
     }
 
     @Override

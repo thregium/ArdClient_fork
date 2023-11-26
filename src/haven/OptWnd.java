@@ -2651,6 +2651,7 @@ public class OptWnd extends Window {
                     }
                 }
         );
+        appender.add(new CheckBox("Simple dragging (also work with Ctrl+RMB)", val -> Utils.setprefb("simpledraging", configuration.simpledraging = val), configuration.simpledraging));
         appender.add(new CheckBox("Autoclick DiabloLike move") {
             {
                 a = configuration.autoclick;
