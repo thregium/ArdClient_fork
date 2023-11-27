@@ -812,6 +812,7 @@ public class Widget {
         private long errTime;
 
         private final long repeat = 10000;
+        private int errorTimes = 5;
 
         private ErrorWidget(Widget w, String str) {
             this.errWdg = w;
@@ -821,8 +822,9 @@ public class Widget {
 
         private boolean repeat() {
             long time = System.currentTimeMillis();
-            if (time - errTime > repeat) {
+            if (errorTimes > 0 && time - errTime > repeat) {
                 errTime = time;
+                errorTimes--;
                 return (true);
             }
             return (false);
@@ -1545,10 +1547,25 @@ public class Widget {
                 continue;
             Coord cc = xlate(wdg.c, true);
             if (c.isect(cc, wdg.sz)) {
-                Object ret = wdg.tooltip(c.add(cc.inv()), prevtt);
-                if (ret != null) {
-                    prevtt = wdg;
-                    return (ret);
+                try {
+                    Object ret = wdg.tooltip(c.add(cc.inv()), prevtt);
+                    if (ret != null) {
+                        prevtt = wdg;
+                        return (ret);
+                    }
+                } catch (Throwable e) {
+                    String strErr = "Tooltip of " + wdg.getClass().getSimpleName() + " cause a " + e;
+                    Widget finalWdg = wdg;
+                    if (errorWdgs.stream().noneMatch(w -> w.errWdg.equals(finalWdg))) {
+                        errorWdgs.add(new ErrorWidget(finalWdg, strErr));
+                        if (ui != null)
+                            PBotUtils.sysMsg(ui, strErr + DEV_STR);
+                        Debug.printStackTrace(e);
+                    } else if (errorWdgs.stream().anyMatch(w -> w.errWdg.equals(finalWdg) && w.repeat())) {
+                        if (ui != null)
+                            PBotUtils.sysMsg(ui, strErr + DEV_STR);
+                        Debug.printStackTrace(e);
+                    }
                 }
             }
         }
