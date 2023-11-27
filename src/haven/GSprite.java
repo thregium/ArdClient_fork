@@ -135,7 +135,7 @@ public abstract class GSprite implements Drawn {
 
         @Override
         public Coord sz() {
-            return (Coord.o);
+            return (Coord.o.mul(UI.scale(30)));
         }
     }
 }

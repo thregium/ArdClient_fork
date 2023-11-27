@@ -395,7 +395,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
             Resource.setcache(cache);
         if (Config.resurl != null)
             Resource.addurl(Config.resurl, cache);
-        ResCache ncache = ResCache.getCache("resourcesn");
+        ResCache ncache = ResCache.getCache("resources_new");
         if (ncache != null)
             Resource.setcache(ncache);
         if (Config.newresurl != null)

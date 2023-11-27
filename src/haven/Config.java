@@ -74,7 +74,7 @@ public class Config {
     public static String authserv = null;
     public static String defserv = Config.Variable.prop("haven.defserv", "game.havenandhearth.com").get();
     public static URL resurl = Config.Variable.propu("haven.resurl", "https://game.havenandhearth.com/hres/").get();
-    public static URL newresurl = Config.Variable.propu("haven.resurl", "https://game.havenandhearth.com/res/").get();
+    public static URL newresurl = Config.Variable.propu("haven.newresurl", "https://game.havenandhearth.com/res/").get();
     public static boolean dbtext = false;
     public static boolean profile = false;
     public static boolean par = true;
