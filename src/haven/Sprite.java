@@ -31,6 +31,7 @@ import haven.res.gfx.terobjs.dng.beedungeon.Beehive;
 import haven.res.gfx.terobjs.dng.powersplit.PowerSprite;
 import haven.res.gfx.terobjs.road.routeindicator.Route;
 import modification.Bed;
+import modification.Billpole;
 import modification.Decal;
 import modification.Fixedplob;
 import modification.dev;
@@ -162,7 +163,9 @@ public abstract class Sprite implements Rendered {
             return (new FakeSprite(owner, res, sdt));
         }
         try {
-            if (res.name.equals("gfx/terobjs/dng/beedungeon")) {
+            if (res.name.equals("gfx/terobjs/items/carrytagpole")) {
+                return (Billpole.mksprite(owner, res, sdt));
+            } else if (res.name.equals("gfx/terobjs/dng/beedungeon")) {
                 return (Beehive.mksprite(owner, res, sdt));
             } else if (res.name.equals("gfx/terobjs/dng/powermonolith")) {
                 return (PowerSprite.mksprite(owner, res, sdt));
@@ -224,6 +227,7 @@ public abstract class Sprite implements Rendered {
         public FakeSprite(Owner owner, Resource resource, Message sdt) {
             super(owner, resource);
             this.data = sdt.bytes();
+            dev.simpleLog("Fake sprite: " + resource);
         }
 
         @Override

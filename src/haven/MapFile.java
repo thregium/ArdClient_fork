@@ -467,7 +467,7 @@ public class MapFile {
         lock.writeLock().lock();
         try {
             if (markers.add(mark)) {
-                if (mark instanceof SMarker)
+                if (mark instanceof SMarker && ((SMarker) mark).oid != 0)
                     smarkers.put(((SMarker) mark).oid, (SMarker) mark);
                 defersave();
                 markerseq++;
@@ -481,7 +481,7 @@ public class MapFile {
         lock.writeLock().lock();
         try {
             if (markers.remove(mark)) {
-                if (mark instanceof SMarker) {
+                if (mark instanceof SMarker && ((SMarker) mark).oid != 0) {
                     resources.customSendMarks.remove(Long.toString(((SMarker) mark).oid));
                     smarkers.remove(((SMarker) mark).oid, mark);
                 }
@@ -2250,6 +2250,8 @@ public class MapFile {
             lock.readLock().lock();
             try {
                 seg = segments.get(sid);
+                if (seg == null)
+                    continue;
                 for (Map.Entry<Coord, Long> gd : seg.map.entrySet()) {
                     if (filter.includegrid(seg, gd.getKey(), gd.getValue()))
                         gridbuf.add(new Pair<>(gd.getKey(), gd.getValue()));
