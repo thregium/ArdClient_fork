@@ -803,6 +803,7 @@ public class Widget {
             parent.wdgmsg(sender, msg, args);
     }
 
+    private static final String DEV_STR = ". $col[255,0,0]{Details in DEBUG CHAT CHANNEL}. Please contact the developer!";
     private List<ErrorWidget> errorWdgs = new ArrayList<>();
 
     private class ErrorWidget {
@@ -820,7 +821,7 @@ public class Widget {
 
         private boolean repeat() {
             long time = System.currentTimeMillis();
-            if (errTime + repeat > time) {
+            if (time - errTime > repeat) {
                 errTime = time;
                 return (true);
             }
@@ -835,17 +836,17 @@ public class Widget {
             next = wdg.next;
             try {
                 wdg.tick(dt);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 String strErr = "Tick of " + wdg.getClass().getSimpleName() + " cause a " + e;
                 Widget finalWdg = wdg;
                 if (errorWdgs.stream().noneMatch(w -> w.errWdg.equals(finalWdg))) {
                     errorWdgs.add(new ErrorWidget(finalWdg, strErr));
                     if (ui != null)
-                        PBotUtils.sysMsg(ui, strErr + ". $col[255,0,0]{Details in DEBUG CHANNEL}. Please contact the developer!");
+                        PBotUtils.sysMsg(ui, strErr + DEV_STR);
                     Debug.printStackTrace(e);
                 } else if (errorWdgs.stream().anyMatch(w -> w.errWdg.equals(finalWdg) && w.repeat())) {
                     if (ui != null)
-                        PBotUtils.sysMsg(ui, strErr + ". $col[255,0,0]{Details in DEBUG CHANNEL}. Please contact the developer!");
+                        PBotUtils.sysMsg(ui, strErr + DEV_STR);
                     Debug.printStackTrace(e);
                 }
             }
@@ -874,17 +875,17 @@ public class Widget {
                 g2 = g.reclipl(cc, wdg.sz);
             try {
                 wdg.draw(g2);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 String strErr = "Draw of " + wdg.getClass().getSimpleName() + " cause a " + e;
                 Widget finalWdg = wdg;
                 if (errorWdgs.stream().noneMatch(w -> w.errWdg.equals(finalWdg))) {
                     errorWdgs.add(new ErrorWidget(finalWdg, strErr));
                     if (ui != null)
-                        PBotUtils.sysMsg(ui, strErr + ". $col[255,0,0]{Details in DEBUG CHANNEL}. Please contact the developer!");
+                        PBotUtils.sysMsg(ui, strErr + DEV_STR);
                     Debug.printStackTrace(e);
                 } else if (errorWdgs.stream().anyMatch(w -> w.errWdg.equals(finalWdg) && w.repeat())) {
                     if (ui != null)
-                        PBotUtils.sysMsg(ui, strErr + ". $col[255,0,0]{Details in DEBUG CHANNEL}. Please contact the developer!");
+                        PBotUtils.sysMsg(ui, strErr + DEV_STR);
                     Debug.printStackTrace(e);
                 }
             }

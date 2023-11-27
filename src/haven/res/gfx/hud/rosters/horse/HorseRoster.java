@@ -51,7 +51,7 @@ public class HorseRoster extends CattleRoster<Horse> {
 
     public Horse parse(Object... args) {
         int n = 0;
-        long id = (Long) args[n++];
+        long id = ((Number) args[n++]).longValue();
         String name = (String) args[n++];
         Horse ret = new Horse(id, name);
         ret.grp = (Integer) args[n++];

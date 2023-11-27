@@ -47,7 +47,7 @@ public class CowRoster extends CattleRoster<Ochs> {
 
     public Ochs parse(Object... args) {
         int n = 0;
-        long id = (Long) args[n++];
+        long id = ((Number) args[n++]).longValue();
         String name = (String) args[n++];
         Ochs ret = new Ochs(id, name);
         ret.grp = (Integer) args[n++];

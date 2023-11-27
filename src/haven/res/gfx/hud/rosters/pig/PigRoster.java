@@ -49,7 +49,7 @@ public class PigRoster extends CattleRoster<Pig> {
 
     public Pig parse(Object... args) {
         int n = 0;
-        long id = (Long) args[n++];
+        long id = ((Number) args[n++]).longValue();
         String name = (String) args[n++];
         Pig ret = new Pig(id, name);
         ret.grp = (Integer) args[n++];

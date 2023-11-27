@@ -52,7 +52,7 @@ public class GoatRoster extends CattleRoster<Goat> {
 
     public Goat parse(Object... args) {
         int n = 0;
-        long id = (Long) args[n++];
+        long id = ((Number) args[n++]).longValue();
         String name = (String) args[n++];
         Goat ret = new Goat(id, name);
         ret.grp = (Integer) args[n++];
