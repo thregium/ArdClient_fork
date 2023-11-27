@@ -200,7 +200,7 @@ public abstract class Sprite implements Rendered {
             }
         } catch (Loading l) {
             throw l;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             dev.simpleLog(e);
             return (new FakeSprite(owner, res, sdt));
         }

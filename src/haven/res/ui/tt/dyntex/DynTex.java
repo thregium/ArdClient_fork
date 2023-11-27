@@ -17,7 +17,7 @@ public class DynTex extends ItemInfo.Tip {
 
     public DynTex(Owner owner, long id) {
         super(owner);
-        this.img = (TexL) Resource.classres(DynTex.class).pool.dynres(id).get().layer(TexR.class).tex();
+        this.img = (TexL) Resource.remote().dynres(id).get().layer(TexR.class).tex();
     }
 
     public static ItemInfo mkinfo(Owner owner, Object... args) {
