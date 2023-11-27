@@ -333,7 +333,7 @@ public abstract class Message {
             case T_NIL:
                 return (null);
             case T_UID:
-                return (UID.of(int64()));//UID.of(int64()
+                return (Long.valueOf(int64()));//UID.of(int64()
             case T_BYTES:
                 int len = uint8();
                 if ((len & 128) != 0)
