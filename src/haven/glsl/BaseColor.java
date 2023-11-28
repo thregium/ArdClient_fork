@@ -29,6 +29,9 @@ package haven.glsl;
 import haven.GLState;
 import haven.GOut;
 import haven.States;
+import haven.Utils;
+
+import java.awt.Color;
 
 import static haven.glsl.Cons.mul;
 import static haven.glsl.Type.VEC4;
@@ -36,7 +39,8 @@ import static haven.glsl.Type.VEC4;
 public class BaseColor implements ShaderMacro {
     public static final InstancedUniform u_color = new InstancedUniform.Vec4("color", States.color) {
         public float[] forstate(GOut g, GLState.Buffer buf) {
-            return (buf.get(States.color).ca);
+            States.ColState col = buf.get(States.color);
+            return (col == null ? Utils.c2fa(Color.WHITE) : col.ca);
         }
     };
 
