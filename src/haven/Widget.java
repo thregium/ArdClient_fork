@@ -27,6 +27,8 @@
 package haven;
 
 import haven.purus.pbot.PBotUtils;
+import modification.configuration;
+
 import java.awt.Color;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -48,8 +50,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
-import modification.configuration;
-
 
 import static haven.sloth.gui.MovableWidget.VISIBLE_PER;
 
@@ -1553,6 +1553,8 @@ public class Widget {
                         prevtt = wdg;
                         return (ret);
                     }
+                } catch (Loading l) {
+                    throw (l);
                 } catch (Throwable e) {
                     String strErr = "Tooltip of " + wdg.getClass().getSimpleName() + " cause a " + e;
                     Widget finalWdg = wdg;

@@ -72,7 +72,7 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
     public final boolean admin;
     public final AttrCache<Tex> itemnum = new One(this);
     private List<ItemInfo> cinfo;
-    private Tex longtip = null, fulltip = null;
+    private ItemTip longtip = null, fulltip = null;
     private Tex pricetip = null;
     private Random rnd = null;
     private int count = 0;
@@ -187,6 +187,24 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
         return (null);
     }
 
+    public class ItemTip implements Indir<Tex>, ItemInfo.InfoTip {
+        private final List<ItemInfo> info;
+        private final TexI tex;
+
+        public ItemTip(List<ItemInfo> info, BufferedImage img) {
+            this.info = info;
+            if (img == null)
+                throw (new Loading());
+            tex = new TexI(img);
+        }
+
+        public List<ItemInfo> info() {return (info);}
+
+        public Tex get() {
+            return (tex);
+        }
+    }
+
     public Object tooltip(Coord c, Widget prev) {
         ResData res = this.res;
         if (c.isect(itemc, sqsz) && (res != null)) {
@@ -197,7 +215,7 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
                         Pagina pg = res.res.get().layer(Resource.pagina);
                         if (pg != null)
                             ti = ItemInfo.catimgs(0, ti, RichText.render("\n" + pg.text, UI.scale(200)).img);
-                        longtip = new TexI(ti);
+                        longtip = new ItemTip(info(), ti);
                     }
                     return (longtip);
                 } else {
@@ -206,7 +224,7 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
                         Pagina pg = res.res.get().layer(Resource.pagina);
                         if (pg != null)
                             ti = ItemInfo.catimgs(0, ti, RichText.render("\n" + pg.text, UI.scale(200)).img);
-                        fulltip = new TexI(ti);
+                        fulltip = new ItemTip(info(), ti);
                     }
                     return (fulltip);
                 }
