@@ -3517,6 +3517,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("Show count info (kg, l)", val -> Utils.setprefb("showcountinfo", configuration.showcountinfo = val), configuration.showcountinfo));
 
         appender.add(new CheckBox("Show wear bars") {
             {

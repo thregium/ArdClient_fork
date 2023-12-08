@@ -178,6 +178,7 @@ public class configuration {
     public static boolean showpolownersinfo = Utils.getprefb("showpolownersinfo", false);
     public static boolean oldmountbar = Utils.getprefb("oldmountbar", false);
     public static boolean newmountbar = Utils.getprefb("newmountbar", true);
+    public static boolean showcountinfo = Utils.getprefb("showcountinfo", true);
     public static boolean showtroughstatus = Utils.getprefb("showtroughstatus", false);
     public static boolean showbeehivestatus = Utils.getprefb("showbeehivestatus", false);
     public static boolean showtreeberry = Utils.getprefb("showtreeberry", false);

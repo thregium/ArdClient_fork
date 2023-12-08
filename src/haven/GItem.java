@@ -144,6 +144,50 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         }
 
         static BufferedImage numrender(int num, Color col) {
+            String n = "" + num;
+            if (!Config.largeqfont)
+                return PUtils.cropImg(PUtils.strokeImg(Text.render(n, col)));
+            else
+                return PUtils.cropImg(PUtils.strokeImg(Text.render(n, col, num12boldFnd)));
+        }
+    }
+
+    public interface TextInfo extends OverlayInfo<Tex> {
+        String itemnum();
+
+        default Color numcolor() {
+            return (Color.WHITE);
+        }
+
+        @Override
+        default Tex overlay() {
+            return (new TexI(GItem.TextInfo.numrender(itemnum(), numcolor())));
+        }
+
+        @Override
+        default void drawoverlay(GOut g, Tex tex) {
+            if (configuration.shownumeric) {
+                Coord btm = configuration.infopos(configuration.numericpos, g.sz, tex.sz());
+                g.image(tex, btm);
+            }
+        }
+
+        static BufferedImage numrender(String num, Color col) {
+            String n = "" + num;
+            if (!Config.largeqfont)
+                return PUtils.cropImg(PUtils.strokeImg(Text.render(n, col)));
+            else
+                return PUtils.cropImg(PUtils.strokeImg(Text.render(n, col, num12boldFnd)));
+        }
+    }
+
+    public interface AmountInfo extends NumberInfo {
+        @Override
+        default Tex overlay() {
+            return (new TexI(GItem.AmountInfo.numrender(itemnum(), numcolor())));
+        }
+
+        static BufferedImage numrender(int num, Color col) {
             String n = "x" + num;
             if (!Config.largeqfont)
                 return PUtils.cropImg(PUtils.strokeImg(Text.render(n, col)));
@@ -157,7 +201,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     }
 
 
-    public static class Amount extends ItemInfo implements NumberInfo {
+    public static class Amount extends ItemInfo implements AmountInfo {
         private final int num;
 
         public Amount(Owner owner, int num) {

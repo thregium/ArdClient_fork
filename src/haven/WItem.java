@@ -28,21 +28,20 @@ package haven;
 
 import haven.ItemInfo.AttrCache;
 import haven.automation.WItemDestroyCallback;
-import haven.purus.pbot.PBotWindowAPI;
 import haven.res.ui.tt.Wear;
 import haven.res.ui.tt.keypag.KeyPagina;
 import haven.res.ui.tt.q.qbuff.QBuff;
 import haven.res.ui.tt.slot.Slotted;
 import haven.resutil.Curiosity;
 import haven.resutil.FoodInfo;
+import modification.configuration;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import modification.configuration;
-
 
 import static haven.Inventory.sqsz;
 import static haven.Text.num10Fnd;
@@ -325,7 +324,28 @@ public class WItem extends Widget implements DTarget2 {
             resize(sz);
             lspr = spr;
         }
+
+        try {
+            skip:
+            {
+                if (configuration.showcountinfo) {
+                    String text = ItemInfo.getCount(info());
+                    if (text != null) {
+                        GItem.InfoOverlay<Tex> amountName = this.amountName;
+                        if (amountName == null || (amountName.inf instanceof GItem.TextInfo && !((GItem.TextInfo) (amountName.inf)).itemnum().equalsIgnoreCase(text))) {
+                            this.amountName = new GItem.InfoOverlay<>((GItem.TextInfo) () -> (text));
+                        }
+                        break skip;
+                    }
+                }
+                GItem.InfoOverlay<Tex> amountName = this.amountName;
+                if (amountName != null)
+                    this.amountName = null;
+            }
+        } catch (Loading l) {}
     }
+
+    private GItem.InfoOverlay<Tex> amountName;
 
     public void draw(GOut g) {
         GSprite spr = item.spr();
@@ -342,6 +362,10 @@ public class WItem extends Widget implements DTarget2 {
             }
             drawmain(g, spr);
             g.defstate();
+            GItem.InfoOverlay<Tex> an = amountName;
+            if (an != null) {
+                an.draw(g);
+            }
             GItem.InfoOverlay<?>[] ols = itemols.get();
             if (ols != null) {
                 for (GItem.InfoOverlay<?> ol : ols)

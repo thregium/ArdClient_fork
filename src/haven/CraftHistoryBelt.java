@@ -59,6 +59,7 @@ public class CraftHistoryBelt extends MovableWidget {
                         vertical = true;
                     }
                     Utils.setprefb("histbelt_vertical", vertical);
+                    return (true);
                 } else if (belt[slot] != null) {
                     String[] ad = belt[slot].act().ad;
                     if (ad.length > 0 && (ad[0].equals("craft") || ad[0].equals("bp"))) {
@@ -67,6 +68,7 @@ public class CraftHistoryBelt extends MovableWidget {
                     }
 //                ui.gui.act(ad);
                     act(belt[slot]);
+                    return (true);
                 }
             }
         }
