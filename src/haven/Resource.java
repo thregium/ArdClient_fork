@@ -2217,7 +2217,7 @@ public class Resource implements Serializable {
         return (o.name.equals(this.name) && (o.ver == this.ver));
     }
 
-    private static final List<String> depresList = Arrays.asList("gfx/hud/rosters/.*", "gfx/terobjs/cupboard", "gfx/terobjs/crate", "ui/inspect", "ui/croster");
+    private static final List<String> depresList = Arrays.asList("gfx/hud/rosters/.*", "gfx/terobjs/cupboard", "gfx/terobjs/crate", "ui/inspect", "ui/croster", "lib/icave");
 
     private Object[] load(InputStream st) throws IOException {
         LoadException exception = null;
