@@ -5,6 +5,7 @@ import haven.sloth.util.ResHashMap;
 import modification.configuration;
 
 import javax.media.opengl.GL2;
+import java.awt.Color;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,17 +25,18 @@ public class GobHitbox extends Sprite {
     public GobHitbox(Gob gob, BBox[] b, boolean fill) {
         super(gob, null);
 
+        Color cc = configuration.canCustomColor(gob);
         if (fill) {
             mode = GL2.GL_QUADS;
-            clrstate = fillclrstate;
+            clrstate = cc == null ? fillclrstate : new States.ColState(cc);
         } else if (gob.type != Type.WALLSEG) {
             mode = GL2.GL_LINE_LOOP;
-            clrstate = bbclrstate;
+            clrstate = cc == null ? bbclrstate : new States.ColState(cc);
         } else {
             if (Config.flatwalls)
                 wall = true;
             mode = GL2.GL_LINE_LOOP;
-            clrstate = bbclrstate;
+            clrstate = cc == null ? bbclrstate : new States.ColState(cc);
         }
 
 //        a = new Coordf(ac.x, ac.y);

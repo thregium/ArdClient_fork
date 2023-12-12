@@ -30,6 +30,8 @@ import haven.glsl.Expression;
 import haven.glsl.MiscLib;
 import haven.glsl.ShaderMacro;
 
+import java.awt.Color;
+
 import static haven.glsl.Cons.add;
 import static haven.glsl.Cons.l;
 import static haven.glsl.Cons.mul;
@@ -87,4 +89,11 @@ public class RenderedNormals extends FBConfig.RenderTarget {
             return (new RenderedNormals());
         }
     };
+
+    @Material.ResName("masknorm")
+    public static class $maskcol implements Material.ResCons {
+        public GLState cons(Resource res, Object... args) {
+            return (null);
+        }
+    }
 }

@@ -10,6 +10,7 @@ import haven.Coord2d;
 import haven.Defer;
 import haven.Glob;
 import haven.Gob;
+import haven.GobHitbox;
 import haven.HSliderListboxItem;
 import haven.HSliderNamed;
 import haven.MainFrame;
@@ -1422,6 +1423,16 @@ public class configuration {
             if (h != null) {
                 gob.delattr(Hidden.class);
                 gob.setattr(new Hidden(gob));
+            }
+
+            Gob.Overlay bh = gob.findol(GobHitbox.olid);
+            if (bh != null) {
+                gob.remol(bh);
+            }
+
+            Gob.Overlay bh2 = gob.findol(GobHitbox.olid_solid);
+            if (bh2 != null) {
+                gob.remol(bh2);
             }
         }
 

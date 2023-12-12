@@ -1410,14 +1410,14 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     } catch (Loading l) {
                     }
                 }
-                if (done && !empty && type != Type.TANTUB)
+                if (done && !empty)
                     rl.prepc(dframeDone);
-                else if (empty && type != Type.TANTUB)
+                else if (empty)
                     rl.prepc(dframeEmpty);
             }
 
 
-            if (Config.highlightpots && type == Type.GARDENPOT) {
+            if (Config.highlightpots && (type == Type.GARDENPOT || name().equalsIgnoreCase("gfx/terobjs/moundbed"))) {
                 final List<Overlay> eqOls = new ArrayList<>();
                 for (Overlay ol : ols)
                     if (ol.name().contains("gfx/fx/eq"))
