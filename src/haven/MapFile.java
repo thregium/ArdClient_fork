@@ -624,18 +624,18 @@ public class MapFile {
                     warn(e, "could not load tileset resource %s(v%d): %s", res.name, res.ver, e);
                 }
 //                synchronized (texes) {
-                    img = texes.get(res.name());
-                    if (img == null) {
-                        if (r != null) {
-                            Resource.Image ir = r.layer(Resource.imgc);
-                            if (ir != null) {
-                                img = ir.img;
-                            }
+                img = texes.get(res.name());
+                if (img == null) {
+                    if (r != null) {
+                        Resource.Image ir = r.layer(Resource.imgc);
+                        if (ir != null) {
+                            img = ir.img;
                         }
                     }
-                    if (img == null)
-                        img = EMPTY_TILE;
-                    texes.put(res.name(), img);
+                }
+                if (img == null)
+                    img = EMPTY_TILE;
+                texes.put(res.name(), img);
 //                }
             }
             return (img == EMPTY_TILE ? null : img);
@@ -653,24 +653,24 @@ public class MapFile {
                     warn("could not load tileset resource %s: %s", res, e);
                 }
 //                synchronized (texes) {
-                    img = texes.get(res);
-                    if (img == null) {
-                        if (r != null) {
-                            Resource.Image ir = r.layer(Resource.imgc);
-                            TexR tr = r.layer(TexR.class);
-                            if (ir != null) {
-                                img = ir.img;
-                                texes.put(res, img);
-                            } else if (tr != null) {
-                                img = tr.tex.fill();
-                            } else {
-                                dev.simpleLog("Not found " + res);
-                            }
+                img = texes.get(res);
+                if (img == null) {
+                    if (r != null) {
+                        Resource.Image ir = r.layer(Resource.imgc);
+                        TexR tr = r.layer(TexR.class);
+                        if (ir != null) {
+                            img = ir.img;
+                            texes.put(res, img);
+                        } else if (tr != null) {
+                            img = tr.tex.fill();
+                        } else {
+                            dev.simpleLog("Not found " + res);
                         }
                     }
-                    if (img == null)
-                        img = EMPTY_TILE;
-                    texes.put(res, img);
+                }
+                if (img == null)
+                    img = EMPTY_TILE;
+                texes.put(res, img);
 //                }
             }
             return (img == EMPTY_TILE ? null : img);
@@ -2564,7 +2564,7 @@ public class MapFile {
                 if ((pm.getClass() != mark.getClass()) || !pm.nm.equals(mark.nm) || !pm.tc.equals(mark.tc))
                     continue;
                 if (pm instanceof SMarker) {
-                    if (!((SMarker)pm).res.name.equals(((SMarker)mark).res.name))
+                    if (!((SMarker) pm).res.name.equals(((SMarker) mark).res.name))
                         continue;
                 }
                 return (pm);
@@ -2637,27 +2637,23 @@ public class MapFile {
 
     public void update(MCache map, Coord cgc) {
         Collection<MCache.Grid> grids = new ArrayList<>();
-        Loading error = null;
+        Map<Coord, Loading> errors = new HashMap<>();
         for (Coord off : inout) {
             Coord gc = cgc.add(off);
             try {
                 grids.add(map.getgrid(gc));
             } catch (Loading l) {
-                error = l;
+                errors.put(gc, l);
             }
         }
-
-        if (error != null) {
-            map.sendreqs();
-            error.waitfor(() -> update(map, cgc), w -> {
-            });
-        } else {
-            if (!grids.isEmpty()) {
-                synchronized (procmon) {
-                    updqueue.add(new Pair<>(map, grids));
-                    process();
-                }
+        if (!grids.isEmpty()) {
+            synchronized (procmon) {
+                updqueue.add(new Pair<>(map, grids));
+                process();
             }
+        }
+        if (!errors.isEmpty()) {
+            throw errors.values().iterator().next();
         }
     }
 

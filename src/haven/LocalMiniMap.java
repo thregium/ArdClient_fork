@@ -747,9 +747,14 @@ public class LocalMiniMap extends Widget {
                     }
                 }
                 if (f.done()) {
-                    cur = f.get();
-                    MapFile save = this.save;
-                    if (save != null) save.update(ui.sess.glob.map, cur.grid.gc);
+                    MCache map = ui.sess.glob.map;
+                    try {
+                        cur = f.get();
+                        MapFile save = this.save;
+                        if (save != null) save.update(map, cur.grid.gc);
+                    } catch (Loading l) {
+                        map.sendreqs();
+                    }
                 }
             }
         }
