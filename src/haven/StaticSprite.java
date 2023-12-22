@@ -26,6 +26,8 @@
 
 package haven;
 
+import modification.dev;
+
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -68,7 +70,13 @@ public class StaticSprite extends Sprite {
         }
         for (RenderLink.Res lr : res.layers(RenderLink.Res.class)) {
             if ((lr.id < 0) || (((1 << lr.id) & fl) != 0)) {
-                rl.add(lr.l.make(owner));
+                try {
+                    rl.add(lr.l.make(owner));
+                } catch (Loading e) {
+                    throw e;
+                } catch (Throwable e) {
+                    dev.simpleLog(e);
+                }
             }
         }
         if (res.layer(Resource.audio, "amb") != null)
