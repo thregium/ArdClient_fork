@@ -33,6 +33,7 @@ import haven.purus.pbot.PBotDiscord;
 import haven.purus.pbot.PBotScriptlist;
 import haven.purus.pbot.PBotUtils;
 import haven.resutil.FoodInfo;
+import haven.resutil.Ridges;
 import haven.resutil.WaterTile;
 import haven.sloth.gfx.GobSpeedSprite;
 import haven.sloth.gfx.HitboxMesh;
@@ -1157,6 +1158,18 @@ public class OptWnd extends Window {
             }
         });
         appender.addRow(new Label("Cave-in Warning Dust Duration in Minutes"), makeCaveInDropdown());
+        appender.addRow(new CheckBox("Colorize Ridge Tiles", val -> {
+            Utils.setprefb("colorizeridge", configuration.colorizeridge = val);
+            if (ui.sess != null) {
+                ui.sess.glob.map.invalidateAll();
+            }
+        }, configuration.colorizeridge), new ColorPreview(UI.scale(20, 20), new Color(configuration.colorizeridgecolor, true), val -> {
+            Utils.setprefi("colorizeridgecolor", configuration.colorizeridgecolor = val.getRGB());
+            Ridges.color = new ColorMask(val);
+            if (ui.sess != null) {
+                ui.sess.glob.map.invalidateAll();
+            }
+        }));
         final Consumer<Color> fog = val -> {
             WaterTile.updateFog();
             if (ui.sess != null && ui.sess.glob != null && ui.sess.glob.map != null) {

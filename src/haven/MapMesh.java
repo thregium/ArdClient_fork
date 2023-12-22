@@ -26,9 +26,9 @@
 
 package haven;
 
-import static haven.MCache.tilesz;
 import haven.Surface.MeshVertex;
 import haven.Surface.Vertex;
+
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+
+import static haven.MCache.tilesz;
 
 public class MapMesh implements Rendered, Disposable {
     public final Coord ul, sz;

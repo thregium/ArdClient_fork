@@ -761,6 +761,8 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
 
     public void showcontwnd(boolean show) {
         if (show && (contentswnd == null)) {
+            Widget contents = this.contents;
+            Object contentsid = this.contentsid;
             Widget cont = contparent();
             Coord wc = null;
 //            if (this.contentsid != null)
@@ -775,14 +777,14 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
             }
 
             Window anotherWnd = PBotWindowAPI.getWindow(ui, contentsnm);
-            ContentsWindow wnd = new ContentsWindow(this, this.contents, anotherWnd == null || Config.stackwindows);
+            ContentsWindow wnd = new ContentsWindow(this, contents, anotherWnd == null || Config.stackwindows);
 
             GameUI gui = getparent(GameUI.class);
             if (!Config.stackwindows && anotherWnd != null && gui != null) wc = gui.optplacement(wnd, wc);
 
             contentswnd = cont.add(wnd, wc);
-            if (this.contentsid != null) {
-                Utils.setprefb(String.format("cont-wndvis/%s", this.contentsid), true);
+            if (contentsid != null) {
+                Utils.setprefb(String.format("cont-wndvis/%s", contentsid), true);
 //                Utils.setprefc(String.format("cont-wndc/%s", this.contentsid), wc);
             }
         } else if (!show && (contentswnd != null)) {

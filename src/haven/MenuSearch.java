@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pagina> {
     private static final int WIDTH = UI.scale(200);
@@ -151,7 +152,7 @@ public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pa
                     }
                 }
                 return (par.contains(filter) || name.contains(filter) || itemFilter.matches(p, ui.sess));
-            }).forEach(list::add);
+            }).collect(Collectors.toList()).forEach(list::add);
         }
         list.sort(new ItemComparator());
         if (list.listitems() > 0) {

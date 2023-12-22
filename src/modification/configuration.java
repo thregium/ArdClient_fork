@@ -305,6 +305,8 @@ public class configuration {
     public static int distanceviewcolor = Utils.getprefi("distanceviewcolor", new Color(10, 200, 200).hashCode());
     public static int outlinecolor = Utils.getprefi("outlinecolor", Color.BLACK.hashCode());
     public static int outlineh = Utils.getprefi("outlineh", 1);
+    public static boolean colorizeridge = Utils.getprefb("colorizeridge", false);
+    public static int colorizeridgecolor = Utils.getprefi("colorizeridgecolor", Color.RED.getRGB());
 
     public static boolean showgobsoldfags = Utils.getprefb("showgobsoldfags", true);
     public static boolean showgobssemifags = Utils.getprefb("showgobssemifags", true);

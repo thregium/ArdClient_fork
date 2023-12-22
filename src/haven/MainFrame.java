@@ -494,6 +494,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
             }
         });
         ThreadGroup g = hg;
+        new DeadlockWatchdog(hg).start();
         Py4j.start();
         Thread main = new HackThread(g, () -> main2(args), "Haven main thread");
         main.start();

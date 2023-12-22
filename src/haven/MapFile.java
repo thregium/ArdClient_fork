@@ -1645,9 +1645,9 @@ public class MapFile {
     public class Segment {
         public final long id;
         public final BMap<Coord, Long> map = new HashBMap<>();
-        private final Map<Long, Cached> cache = new CacheMap<>(CacheMap.RefType.WEAK);
-        private final Map<Coord, ByCoord> ccache = new CacheMap<>(CacheMap.RefType.WEAK);
-        private final Map<ZoomCoord, ByZCoord> zcache = new CacheMap<>(CacheMap.RefType.WEAK);
+        private final Map<Long, Cached> cache = Collections.synchronizedMap(new CacheMap<>(CacheMap.RefType.WEAK));
+        private final Map<Coord, ByCoord> ccache = Collections.synchronizedMap(new CacheMap<>(CacheMap.RefType.WEAK));
+        private final Map<ZoomCoord, ByZCoord> zcache = Collections.synchronizedMap(new CacheMap<>(CacheMap.RefType.WEAK));
 
         public Segment(long id) {
             this.id = id;
@@ -2507,7 +2507,7 @@ public class MapFile {
                     }
                 }
             }
-            Segment rseg;
+            Segment rseg = null;
             if (filter.includegrid(grid, info != null)) {
                 lock.writeLock().lock();
                 try {
@@ -2539,12 +2539,14 @@ public class MapFile {
                                 if (curseg.id != seg.nseg)
                                     throw (new AssertionError());
                                 Segment nseg = segments.get(info.seg);
-                                Coord noff = seg.offs.get(info.seg);
-                                Coord soff = seg.noff.sub(noff);
-                                merge(nseg, curseg, soff);
-                                seg.nseg = nseg.id;
-                                seg.noff = noff;
-                                rseg = curseg = nseg;
+                                if (nseg != null) {
+                                    Coord noff = seg.offs.get(info.seg);
+                                    Coord soff = seg.noff.sub(noff);
+                                    merge(nseg, curseg, soff);
+                                    seg.nseg = nseg.id;
+                                    seg.noff = noff;
+                                    rseg = curseg = nseg;
+                                }
                             }
                         }
                         Coord nc = grid.sc.add(seg.noff);

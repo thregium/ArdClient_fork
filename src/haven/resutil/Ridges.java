@@ -26,6 +26,7 @@
 
 package haven.resutil;
 
+import haven.ColorMask;
 import haven.Config;
 import haven.Coord;
 import haven.Coord3f;
@@ -45,11 +46,13 @@ import haven.Surface.Vertex;
 import haven.Tiler;
 import haven.Tiler.MPart;
 import haven.Utils;
-import static haven.Utils.clip;
 import modification.configuration;
+
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.Random;
+
+import static haven.Utils.clip;
 
 public class Ridges extends MapMesh.Hooks {
     public static final float EPSILON = 0.01f;
@@ -723,10 +726,14 @@ public class Ridges extends MapMesh.Hooks {
         }
     }
 
+    public static GLState color = new ColorMask(new Color(configuration.colorizeridgecolor, true));
+
     public boolean laygnd(Coord tc, Tiler.MCons cons) {
         MPart gnd = this.gnd[ms.ts.o(tc)];
         if (gnd == null)
             return (false);
+        if (configuration.colorizeridge && this.ridge[ms.ts.o(tc)] != null)
+            gnd.mat = color;
         cons.faces(m, gnd);
         return (true);
     }

@@ -28,6 +28,7 @@ package haven;
 
 import java.util.AbstractMap;
 import java.util.AbstractSet;
+import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -47,8 +48,8 @@ public class HashBMap<K, V> extends AbstractMap<K, V> implements BMap<K, V> {
     }
 
     public HashBMap() {
-        fmap = new HashMap<K, V>();
-        rmap = new HashMap<V, K>();
+        fmap = Collections.synchronizedMap(new HashMap<K, V>());
+        rmap = Collections.synchronizedMap(new HashMap<V, K>());
         rev = new HashBMap<V, K>(rmap, fmap, this);
     }
 
