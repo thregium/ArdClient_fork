@@ -39,7 +39,18 @@ public class Hitbox {
             this.obstid = obstid;
         }
 
-        public boolean equals(Kit kit) {
+        @Override
+        public int hashCode() {
+            int result = resname != null ? resname.hashCode() : 0;
+            result = 31 * result + (overlay != null ? overlay.hashCode() : 0);
+            result = 31 * result + (obstid != null ? obstid.hashCode() : 0);
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof Kit)) return (false);
+            Kit kit = (Kit) obj;
             return (resname.equals(kit.resname) && overlay.equals(kit.overlay) && obstid.equals(kit.obstid));
         }
     }
@@ -96,6 +107,9 @@ public class Hitbox {
 //        hitboxes.put("gfx/terobjs/cupboard", new Hitbox[]{new Hitbox(new Coord(-5, -5), new Coord(5, 5))});
 
         nohitablekits.add(new Kit("gfx/terobjs/vehicle/wagon", "gfx/terobjs/vehicle/encampmentspices", "ext"));
+
+        hitboxes.put("gfx/kritter/reindeer/teimdeerbull", new Hitbox[]{new Hitbox(new Coord(-6, -2), new Coord(12, 2))});
+        hitboxes.put("gfx/kritter/reindeer/teimdeercow", new Hitbox[]{new Hitbox(new Coord(-6, -2), new Coord(12, 2))});
     }
 
     //Offset and Size with a "buffer" around it to avoid clipping

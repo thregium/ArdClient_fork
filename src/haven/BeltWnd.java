@@ -49,17 +49,15 @@ public class BeltWnd extends MovableWidget {
         }
 
         private Optional<Tex> img() {
-            if (res != null) {
-                try {
+            try {
+                if (res != null) {
                     return Optional.of(res.get().layer(Resource.imgc).tex());
-                } catch (Loading e) {
-                    return Optional.empty();
+                } else if (pag != null) {
+                    return Optional.of(pag.img.get());
+                } else if (script != null) {
+                    return Optional.of(script.getIconTex());
                 }
-            } else if (pag != null) {
-                return Optional.of(pag.img.get());
-            } else if (script != null) {
-                return Optional.of(script.getIconTex());
-            }
+            } catch (Loading l) {}
             return Optional.empty();
         }
 

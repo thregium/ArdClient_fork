@@ -120,6 +120,7 @@ public class GobHitbox extends Sprite {
     private static final BBox[] bboxBoost = new BBox[]{new BBox(new Coord(-4, -4), new Coord(4, 4))};
     //    private static final BBox[] bboxCattle = new BBox[]{new BBox(new Coord(-12, -4), new Coord(12, 4))};
     private static final BBox[] bboxHorse = new BBox[]{new BBox(new Coord(-8, -4), new Coord(8, 4))};
+    private static final BBox[] bboxTDeer = new BBox[]{new BBox(new Coord(-6, -2), new Coord(12, 2))};
 //    private static final BBox[] bboxSmelter = new BBox[]{new BBox(new Coord(-12, -12), new Coord(12, 20))};
 //    private static final BBox[] bboxWallseg = new BBox[]{new BBox(new Coord(-5, -6), new Coord(6, 5))};
 //    private static final BBox[] bboxHwall = new BBox[]{new BBox(new Coord(-1, 0), new Coord(0, 11))};
@@ -147,6 +148,8 @@ public class GobHitbox extends Sprite {
             return bboxPig;
         else if (name.startsWith("gfx/terobjs/boostspeed"))
             return bboxBoost;
+        else if (name.matches("gfx/kritter/reindeer/teimdeer(bull|cow)"))
+            return bboxTDeer;
 
         // dual state gobs
 //        if (name.endsWith("gate") && name.startsWith("gfx/terobjs/arch")) {
