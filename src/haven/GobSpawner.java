@@ -48,16 +48,21 @@ public class GobSpawner extends Window {
                 g.text(item, new Coord(5, 1));
             }
         }, c.copy()).sz.y + 5;
+        CheckBox r = new CheckBox("");
+        add(r, c.copy());
         c.y += add(new TextEntry(200, "") {
             @Override
             public void activate(String text) {
                 try {
-                    spawnGob(text);
+                    if (r.a)
+                        drawable(text);
+                    else
+                        spawnGob(text);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-        }, c.copy()).sz.y + 5;
+        }, c.copy().add(r.c.x + r.sz.x, 0)).sz.y + 5;
         pack();
     }
 
@@ -97,9 +102,15 @@ public class GobSpawner extends Window {
         }
     }
 
+    private void drawable(final String res) {
+        final Gob g = ui.sess.glob.oc.getgob(next--, 0);
+        ui.sess.glob.oc.move(g, PBotUtils.player(ui).rc, Math.toRadians(130));
+        ui.sess.glob.oc.cres(g, Resource.remote().load(res), Message.nil);
+    }
+
     @Override
     public void close() {
-        ui.destroy(this);
+        hide();
     }
 
     public final static HashMap<String, String> posemap = new HashMap<String, String>(14) {{

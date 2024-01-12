@@ -1,7 +1,6 @@
 /* Preprocessed source code */
 package haven.res.lib.uspr;
 
-import haven.Config;
 import haven.FastMesh;
 import haven.GLState;
 import haven.Gob;
@@ -31,9 +30,10 @@ import java.util.Map;
 
 /* >spr: haven.res.lib.uspr.UnivSprite */
 public class UnivSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.HasPose {
-	static {
-		dev.checkFileVersion("lib/uspr", 16);
-	}
+    static {
+        dev.checkFileVersion("lib/uspr", 16);
+    }
+
     public static final float ipollen = 0.3f;
     public final Skeleton skel;
     public final Pose pose;

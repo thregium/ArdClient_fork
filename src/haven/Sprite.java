@@ -29,6 +29,7 @@ package haven;
 import haven.res.gfx.terobjs.barterarea.BarterArea;
 import haven.res.gfx.terobjs.dng.beedungeon.Beehive;
 import haven.res.gfx.terobjs.dng.powersplit.PowerSprite;
+import haven.res.gfx.terobjs.peacebreaker.Peacebreaker;
 import haven.res.gfx.terobjs.road.routeindicator.Route;
 import modification.Bed;
 import modification.Billpole;
@@ -163,7 +164,9 @@ public abstract class Sprite implements Rendered {
             return (new FakeSprite(owner, res, sdt));
         }
         try {
-            if (res.name.equals("gfx/terobjs/items/carrytagpole")) {
+            if (res.name.equals("gfx/terobjs/peacebreaker-full")) {
+                return (Peacebreaker.mksprite(owner, res, sdt));
+            } else if (res.name.equals("gfx/terobjs/items/carrytagpole")) {
                 return (Billpole.mksprite(owner, res, sdt));
             } else if (res.name.equals("gfx/terobjs/dng/beedungeon")) {
                 return (Beehive.mksprite(owner, res, sdt));
