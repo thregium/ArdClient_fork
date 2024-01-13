@@ -31,6 +31,7 @@ import haven.res.gfx.terobjs.dng.beedungeon.Beehive;
 import haven.res.gfx.terobjs.dng.powersplit.PowerSprite;
 import haven.res.gfx.terobjs.peacebreaker.Peacebreaker;
 import haven.res.gfx.terobjs.road.routeindicator.Route;
+import haven.res.lib.tree.Tree;
 import modification.Bed;
 import modification.Billpole;
 import modification.Decal;
@@ -190,6 +191,8 @@ public abstract class Sprite implements Rendered {
             } else if (res.name.equals("gfx/terobjs/furn/bed-sturdy")) {
                 Factory f = new Bed();
                 return (f.create(owner, res, sdt));
+            } else if (res.name.matches("gfx/terobjs/trees/(pine|kingsoak)")) {
+                return (Tree.mksprite(owner, res, sdt));
             }
             {
                 Factory f = res.getcode(Factory.class, false);

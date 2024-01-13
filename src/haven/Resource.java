@@ -1811,8 +1811,11 @@ public class Resource implements Serializable {
     public <T> T getcode(Class<T> cl, boolean fail) {
         CodeEntry e = layer(CodeEntry.class);
         if (e == null) {
+            RuntimeException er = new RuntimeException("Tried to fetch non-present res-loaded class " + cl.getName() + " from " + Resource.this.name);
             if (fail)
-                throw (new RuntimeException("Tried to fetch non-present res-loaded class " + cl.getName() + " from " + Resource.this.name));
+                throw (er);
+            else
+                dev.simpleLog(er);
             return (null);
         }
         return (e.get(cl, fail));
@@ -1938,8 +1941,11 @@ public class Resource implements Serializable {
                 if (ret == null) {
                     String clnm = pe.get(entry.name());
                     if (clnm == null) {
+                        RuntimeException e = new RuntimeException("Tried to fetch non-present res-loaded class " + cl.getName() + " from " + Resource.this.name);
                         if (fail)
-                            throw (new RuntimeException("Tried to fetch non-present res-loaded class " + cl.getName() + " from " + Resource.this.name));
+                            throw (e);
+                        else
+                            dev.simpleLog(e);
                         return (null);
                     }
                     try {
