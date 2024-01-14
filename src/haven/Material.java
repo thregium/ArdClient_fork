@@ -26,6 +26,8 @@
 
 package haven;
 
+import modification.dev;
+
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import java.awt.Color;
@@ -441,13 +443,19 @@ public class Material extends GLState {
                 public void resolve(Collection<GLState> buf) {
                     if (id >= 0) {
                         Res mat = lres.get().layer(Res.class, id);
-                        if (mat == null)
-                            throw (new Resource.LoadException("No such material in " + lres.get() + ": " + id, res));
+                        if (mat == null) {
+//                            throw (new Resource.LoadException("No such material in " + lres.get() + ": " + id, res));
+                            dev.simpleLog(new Resource.LoadException("No such material in " + lres.get() + ": " + id, res));
+                            return;
+                        }
                         buf.add(mat.get());
                     } else {
                         Material mat = fromres((Owner) null, lres.get(), Message.nil);
-                        if (mat == null)
-                            throw (new Resource.LoadException("No material in " + lres.get(), res));
+                        if (mat == null) {
+//                            throw (new Resource.LoadException("No material in " + lres.get(), res));
+                            dev.simpleLog(new Resource.LoadException("No material in " + lres.get(), res));
+                            return;
+                        }
                         buf.add(mat);
                     }
                 }

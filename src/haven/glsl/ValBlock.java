@@ -27,6 +27,7 @@
 package haven.glsl;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,7 +35,7 @@ import java.util.Map;
 
 public class ValBlock {
     private static final ThreadLocal<Value> processing = new ThreadLocal<Value>();
-    private final Collection<Value> values = new LinkedList<Value>();
+    private final Collection<Value> values = Collections.synchronizedCollection(new LinkedList<Value>());
     private final Map<Object, Value> ext = new IdentityHashMap<Object, Value>();
 
     public interface Factory {
@@ -47,15 +48,17 @@ public class ValBlock {
         public boolean used;
         public LValue tgt;
         protected Expression init;
-        private final Collection<Value> deps = new LinkedList<Value>();
-        private final Collection<Value> sdeps = new LinkedList<Value>();
+        private final Collection<Value> deps = Collections.synchronizedCollection(new LinkedList<Value>());
+        private final Collection<Value> sdeps = Collections.synchronizedCollection(new LinkedList<Value>());
         private final OrderList<Macro1<Expression>> mods = new OrderList<Macro1<Expression>>();
         private boolean forced;
 
         public Value(Type type, Symbol name) {
             this.type = type;
             this.name = name;
-            values.add(this);
+            synchronized (values) {
+                values.add(this);
+            }
         }
 
         public Value(Type type) {
@@ -235,21 +238,23 @@ public class ValBlock {
     }
 
     public void cons(Block blk) {
-        for (Value val : values)
-            val.cons1();
-        for (Value val : values) {
-            if (val.forced)
-                use(val);
-        }
-        List<Value> used = new LinkedList<Value>();
-        List<Value> closed = new LinkedList<Value>();
-        for (Value val : values) {
-            if (val.used)
-                add(used, closed, val);
-        }
-        for (Value val : used) {
-            val.used = true;
-            val.cons2(blk);
+        synchronized (values) {
+            for (Value val : values)
+                val.cons1();
+            for (Value val : values) {
+                if (val.forced)
+                    use(val);
+            }
+            List<Value> used = new LinkedList<Value>();
+            List<Value> closed = new LinkedList<Value>();
+            for (Value val : values) {
+                if (val.used)
+                    add(used, closed, val);
+            }
+            for (Value val : used) {
+                val.used = true;
+                val.cons2(blk);
+            }
         }
     }
 
