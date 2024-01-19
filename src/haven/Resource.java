@@ -1941,7 +1941,7 @@ public class Resource implements Serializable {
                     String clnm = pe.get(entry.name());
                     if (clnm == null) {
                         if (fail)
-                            throw (new RuntimeException("Tried to fetch non-present res-loaded class " + cl.getName() + " from " + Resource.this.name));
+                            throw (new RuntimeException("Tried to fetch non-present res-loaded class " + cl.getName() + "(" + entry.name() + ") from " + Resource.this.name));
 //                        else
 //                            dev.simpleLog(new RuntimeException("Tried to fetch non-present res-loaded class " + cl.getName() + " from " + Resource.this.name));
                         return (null);
