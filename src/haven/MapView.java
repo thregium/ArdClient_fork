@@ -2315,8 +2315,12 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         partyHighlight.update();
 
         Loader.Future<Plob> placing = this.placing;
-        if ((placing != null) && placing.done())
-            placing.get().ctick((int) (dt * 1000));
+        if ((placing != null) && placing.done()) {
+            Plob ob = placing.get();
+            synchronized(ob) {
+                ob.ctick((int) (dt * 1000));
+            }
+        }
         if (fakeGob != null)
             fakeGob.ctick((int) (dt * 1000));
     }
