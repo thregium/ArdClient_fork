@@ -29,6 +29,7 @@ package haven;
 import haven.MorphedMesh.MorphedBuf;
 import haven.MorphedMesh.Morpher;
 import haven.Skeleton.Pose;
+import haven.render.NumberFormat;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -132,65 +133,97 @@ public class PoseMorph implements Morpher.Factory {
         }
     }
 
-    @VertexBuf.ResName("bones")
+    @VertexBuf.ResName("bones2")
     public static class $Res implements VertexBuf.ArrayCons {
         public void cons(Collection<VertexBuf.AttribArray> dst, Resource res, Message buf, int nv) {
-            int mba = buf.uint8();
-            IntBuffer ba = Utils.wibuf(nv * mba);
-            for (int i = 0; i < nv * mba; i++)
-                ba.put(i, -1);
-            FloatBuffer bw = Utils.wfbuf(nv * mba);
-            byte[] na = new byte[nv];
-            List<String> bones = new LinkedList<String>();
-            while (true) {
-                String bone = buf.string();
-                if (bone.length() == 0)
+            int ver = buf.uint8();
+            if(ver == 1) {
+                NumberFormat fmt;
+                String fnm = buf.string();
+                switch(fnm) {
+                    case "f4": fmt = NumberFormat.FLOAT32; break;
+                    case "un2": fmt = NumberFormat.UNORM16; break;
+                    case "un1": fmt = NumberFormat.UNORM8; break;
+                    default: throw(new Resource.LoadException("Unknown bone-weight format: " + fnm, res));
+                }
+                read(dst, buf, nv, buf.uint8(), fmt);
+            } else {
+                throw(new Resource.LoadException("Unknown bone-data version: " + ver, res));
+            }
+        }
+    }
+
+    private static void read(Collection<VertexBuf.AttribArray> dst, Message buf, int nv, int mba, NumberFormat fmt) {
+        IntBuffer ba = Utils.wibuf(nv * mba);
+        for(int i = 0; i < nv * mba; i++)
+            ba.put(i, -1);
+        FloatBuffer bw = Utils.wfbuf(nv * mba);
+        byte[] na = new byte[nv];
+        List<String> bones = new LinkedList<String>();
+        while(true) {
+            String bone = buf.string();
+            if(bone.length() == 0)
+                break;
+            int bidx = bones.size();
+            bones.add(bone);
+            while(true) {
+                int run = buf.uint16();
+                int vn = buf.uint16();
+                if(run == 0)
                     break;
-                int bidx = bones.size();
-                bones.add(bone);
-                while (true) {
-                    int run = buf.uint16();
-                    int vn = buf.uint16();
-                    if (run == 0)
-                        break;
-                    for (int i = 0; i < run; i++, vn++) {
-                        float w = buf.float32();
-                        int cna = na[vn]++;
-                        if (cna >= mba)
-                            continue;
-                        bw.put(vn * mba + cna, w);
-                        ba.put(vn * mba + cna, bidx);
+                for(int i = 0; i < run; i++, vn++) {
+                    float w;
+                    switch(fmt) {
+                        case FLOAT32: w = buf.float32(); break;
+                        case UNORM16: w = buf.unorm16(); break;
+                        case UNORM8: w = buf.unorm8(); break;
+                        default: throw(new AssertionError());
                     }
+                    if(w == 0)
+                        continue;
+                    int cna = na[vn]++;
+                    if(cna >= mba)
+                        continue;
+                    bw.put(vn * mba + cna, w);
+                    ba.put(vn * mba + cna, bidx);
                 }
             }
-//            int tbn = 4;
-//            if(mba > tbn) {
-//                sortweights(bw, ba, mba);
-//                IntBuffer tba = Utils.wibuf(nv * tbn);
-//                FloatBuffer tbw = Utils.wfbuf(nv * tbn);
-//                for(int i = 0, off = 0, toff = 0; i < nv; i++, off += mba, toff += tbn) {
-//                    for(int o = 0; o < tbn; o++) {
-//                        tbw.put(toff + o, bw.get(off + o));
-//                        tba.put(toff + o, ba.get(off + o));
-//                    }
-//                }
-//                ba = tba; bw = tbw; mba = tbn;
-//            } else if(mba < tbn) {
-//                IntBuffer tba = Utils.wibuf(nv * tbn);
-//                FloatBuffer tbw = Utils.wfbuf(nv * tbn);
-//                for(int i = 0, off = 0, toff = 0; i < nv; i++, off += mba, toff += tbn) {
-//                    for(int o = 0; o < mba; o++) {
-//                        tbw.put(toff + o, bw.get(off + o));
-//                        tba.put(toff + o, ba.get(off + o));
-//                    }
-//                    for(int o = mba; o < tbn; o++)
-//                        tba.put(toff + o, -1);
-//                }
-//                ba = tba; bw = tbw; mba = tbn;
-//            }
-            normweights(bw, ba, mba);
-            dst.add(new BoneArray(mba, ba, bones.toArray(new String[0])));
-            dst.add(new WeightArray(mba, bw));
+        }
+        sortweights(bw, ba, mba);
+        int tbn = 4;
+        if(mba > tbn) {
+            IntBuffer tba = Utils.wibuf(nv * tbn);
+            FloatBuffer tbw = Utils.wfbuf(nv * tbn);
+            for(int i = 0, off = 0, toff = 0; i < nv; i++, off += mba, toff += tbn) {
+                for(int o = 0; o < tbn; o++) {
+                    tbw.put(toff + o, bw.get(off + o));
+                    tba.put(toff + o, ba.get(off + o));
+                }
+            }
+            ba = tba; bw = tbw; mba = tbn;
+        } else if(mba < tbn) {
+            IntBuffer tba = Utils.wibuf(nv * tbn);
+            FloatBuffer tbw = Utils.wfbuf(nv * tbn);
+            for(int i = 0, off = 0, toff = 0; i < nv; i++, off += mba, toff += tbn) {
+                for(int o = 0; o < mba; o++) {
+                    tbw.put(toff + o, bw.get(off + o));
+                    tba.put(toff + o, ba.get(off + o));
+                }
+                for(int o = mba; o < tbn; o++)
+                    tba.put(toff + o, -1);
+            }
+            ba = tba; bw = tbw; mba = tbn;
+        }
+        String[] bnames = bones.toArray(new String[0]);
+        normweights(bw, ba, mba);
+        dst.add(new BoneArray(mba, ba, bnames));
+        dst.add(new WeightArray(mba, bw));
+    }
+
+    @VertexBuf.ResName("bones")
+    public static class Old$Res implements VertexBuf.ArrayCons {
+        public void cons(Collection<VertexBuf.AttribArray> dst, Resource res, Message buf, int nv) {
+            read(dst, buf, nv, buf.uint8(), NumberFormat.FLOAT32);
         }
     }
 

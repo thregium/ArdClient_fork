@@ -526,7 +526,51 @@ public class FastMesh implements FRendered, Rendered.Instanced, Disposable {
         public final Map<String, String> rdat;
         private transient short[] tmp;
         public final int id, ref;
-        private int matid;
+        private int vbufid, matid;
+
+        private static int decdelta(Message buf, boolean[] pickp) {
+            int b = buf.uint8();
+            if (pickp != null)
+                pickp[0] = (b & 0x80) != 0;
+            int ret = b & 0x3f;
+            int bits = 6;
+            boolean c = (b & 0x40) != 0;
+            while (c) {
+                b = buf.uint8();
+                c = (b & 0x80) != 0;
+                ret |= (b & 0x7f) << bits;
+                bits += 7;
+            }
+            ret = Utils.sb(ret, bits);
+            return ((ret >= 0) ? ret + 1 : ret);
+        }
+
+        private static void unstrip(Message buf, short[] ind) {
+            int f = 0, o = 0, n = ind.length / 3;
+            int[] face = new int[3], nface = new int[3];
+            boolean[] pick = {false};
+            while (f < n) {
+                ind[o++] = (short) (face[0] = buf.uint16());
+                ind[o++] = (short) (face[1] = face[0] + decdelta(buf, null));
+                ind[o++] = (short) (face[2] = face[1] + decdelta(buf, null));
+                f++;
+                int rn = buf.uint8();
+                for (int ri = 0; ri < rn; ri++) {
+                    nface[2] = face[2] + decdelta(buf, pick);
+                    if (!pick[0]) {
+                        nface[0] = face[0];
+                        nface[1] = face[2];
+                    } else {
+                        nface[0] = face[2];
+                        nface[1] = face[1];
+                    }
+                    int[] t = face; face = nface; nface = t;
+                    for (int i = 0; i < 3; i++)
+                        ind[o++] = (short) face[i];
+                    f++;
+                }
+            }
+        }
 
         public MeshRes(Resource res, Message buf) {
             res.super();
@@ -553,16 +597,25 @@ public class FastMesh implements FRendered, Rendered.Instanced, Disposable {
                 }
             }
             this.rdat = Collections.unmodifiableMap(rdat);
-            if ((fl & ~15) != 0)
+            if ((fl & 16) != 0)
+                vbufid = buf.int16();
+            else
+                vbufid = 0;
+            boolean stripped = (fl & 32) != 0;
+            if ((fl & ~63) != 0)
                 throw (new Resource.LoadException("Unsupported flags in fastmesh: " + fl, getres()));
             short[] ind = new short[num * 3];
-            for (int i = 0; i < num * 3; i++)
-                ind[i] = (short) buf.uint16();
+            if (stripped) {
+                unstrip(buf, ind);
+            } else {
+                for (int i = 0; i < num * 3; i++)
+                    ind[i] = (short) buf.uint16();
+            }
             this.tmp = ind;
         }
 
         public void init() {
-            VertexBuf v = getres().layer(VertexBuf.VertexRes.class).b;
+            VertexBuf v = getres().layer(VertexBuf.VertexRes.class, vbufid).b;
             this.m = new ResourceMesh(v, this.tmp, this);
             this.tmp = null;
             if (matid >= 0) {

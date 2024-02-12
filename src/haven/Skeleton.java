@@ -36,6 +36,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 public class Skeleton {
     public final Map<String, Bone> bones = new HashMap<>();
@@ -607,21 +608,46 @@ public class Skeleton {
     public static class Res extends Resource.Layer {
         public final transient Skeleton s;
 
+        private void read(Map<String, Bone> bones, Map<Bone, String> pm, Message buf, int ver) {
+            if (ver == 0) {
+                while (!buf.eom()) {
+                    String bnm = buf.string();
+                    if ((bnm.length() == 1) && (((int) bnm.charAt(0)) < 32)) {
+                        read(bones, pm, buf, (int) bnm.charAt(0));
+                        return;
+                    }
+                    Coord3f pos = new Coord3f((float) buf.cpfloat(), (float) buf.cpfloat(), (float) buf.cpfloat());
+                    Coord3f rax = new Coord3f((float) buf.cpfloat(), (float) buf.cpfloat(), (float) buf.cpfloat()).norm();
+                    float rang = (float) buf.cpfloat();
+                    String bp = buf.string();
+                    Bone b = new Bone(bnm, pos, rax, rang);
+                    if (bones.put(bnm, b) != null)
+                        throw (new RuntimeException("Duplicate bone name: " + b.name));
+                    pm.put(b, bp);
+                }
+            } else if (ver == 1) {
+                while (!buf.eom()) {
+                    String bnm = buf.string();
+                    String bp = buf.string();
+                    Coord3f pos = new Coord3f(buf.float32(), buf.float32(), buf.float32());
+                    float rang = buf.mnorm16() * 2 * (float) Math.PI;
+                    float[] rax = new float[3];
+                    Utils.oct2uvec(rax, buf.snorm16(), buf.snorm16());
+                    Bone b = new Bone(bnm, pos, new Coord3f(rax[0], rax[1], rax[2]), rang);
+                    if (bones.put(bnm, b) != null)
+                        throw (new RuntimeException("Duplicate bone name: " + b.name));
+                    pm.put(b, bp);
+                }
+            } else {
+                throw (new AssertionError());
+            }
+        }
+
         public Res(Resource res, Message buf) {
             res.super();
             Map<String, Bone> bones = new HashMap<>();
             Map<Bone, String> pm = new HashMap<>();
-            while (!buf.eom()) {
-                String bnm = buf.string();
-                Coord3f pos = new Coord3f((float) buf.cpfloat(), (float) buf.cpfloat(), (float) buf.cpfloat());
-                Coord3f rax = new Coord3f((float) buf.cpfloat(), (float) buf.cpfloat(), (float) buf.cpfloat()).norm();
-                float rang = (float) buf.cpfloat();
-                String bp = buf.string();
-                Bone b = new Bone(bnm, pos, rax, rang);
-                if (bones.put(bnm, b) != null)
-                    throw (new RuntimeException("Duplicate bone name: " + b.name));
-                pm.put(b, bp);
-            }
+            read(bones, pm, buf, 0);
             for (Bone b : bones.values()) {
                 String bp = pm.get(b);
                 if (bp.length() == 0) {
@@ -634,8 +660,7 @@ public class Skeleton {
             s = new ResourceSkeleton(bones.values(), this);
         }
 
-        public void init() {
-        }
+        public void init() {}
 
         public String toString() {
             StringBuilder sb = new StringBuilder();
@@ -740,6 +765,7 @@ public class Skeleton {
             } else {
                 for (FxTrack t : effects) {
                     for (FxTrack.Event ev : t.events) {
+                        if (ev == null) continue;
                         if ((ev.time >= ot) && (ev.time < nt)) {
                             for (FxTrack.EventListener l : cbl)
                                 l.event(ev);
@@ -756,7 +782,10 @@ public class Skeleton {
             float nt = time + (back ? -dt : dt);
             switch (mode) {
                 case LOOP:
-                    nt %= len;
+                    if (len == 0)
+                        nt = 0;
+                    else
+                        nt %= len;
                     break;
                 case ONCE:
                     if (nt > len) {
@@ -890,11 +919,11 @@ public class Skeleton {
                         return (new Coord3f(fc));
                     }
 
-//                    public boolean setup(RenderList rl) {
-//                        if (SpawnSprite.this.loc != null)
-//                            rl.prepc(SpawnSprite.this.loc);
-//                        return (super.setup(rl));
-//                    }
+                    public boolean setup(RenderList rl) {
+                        if (SpawnSprite.this.loc != null)
+                            rl.prepc(SpawnSprite.this.loc);
+                        return (super.setup(rl));
+                    }
                 };
                 n.ols.add(new Gob.Overlay(-1, res, new MessageBuf(sdt)));
             }
@@ -942,7 +971,7 @@ public class Skeleton {
                     float[] trans = new float[3];
                     for (int o = 0; o < 3; o++)
                         trans[o] = Utils.hfdec((short) buf.int16());
-                    float rang = buf.unorm16() * 2 * (float) Math.PI;
+                    float rang = buf.mnorm16() * 2 * (float) Math.PI;
                     float[] rax = new float[3];
                     Utils.oct2uvec(rax, buf.snorm16(), buf.snorm16());
                     frames[i] = new Track.Frame(tm, trans, rotasq(new float[4], rax, rang));
@@ -956,21 +985,66 @@ public class Skeleton {
             for (int i = 0; i < events.length; i++) {
                 float tm = (fmt == 0) ? (float) buf.cpfloat() : (buf.unorm16() * len);
                 int t = buf.uint8();
+                Message sub = buf;
+                boolean exhaust = false;
+                if ((t & 0x80) != 0) {
+                    sub = new MessageBuf(buf.bytes(buf.uint16()));
+                    t &= 0x7f;
+                    exhaust = true;
+                }
                 switch (t) {
-                    case 0: case 2:
-                        String resnm = buf.string();
-                        int resver = buf.uint16();
-                        byte[] sdt = buf.bytes(buf.uint8());
+                    case 0:
+                    case 2: {
+                        String resnm = sub.string();
+                        int resver = sub.uint16();
+                        byte[] sdt = sub.bytes(sub.uint8());
+                        int fl = (t == 2) ? sub.uint8() : 0;
                         Indir<Resource> res = getres().pool.load(resnm, resver);
+                        /*Function<ModOwner, Pipe.Op> ploc = null;
+                        if ((fl & 1) != 0) {
+                            String eqnm = sub.string();
+                            Indir<Resource> src = ((fl & 2) == 0) ? getres().indir() : res;
+                            ploc = new Function<ModOwner, Pipe.Op>() {
+                                BoneOffset eqp = null;
+
+                                public Pipe.Op apply(ModOwner owner) {
+                                    if (eqp == null)
+                                        eqp = src.get().flayer(BoneOffset.class, eqnm);
+                                    return (eqp.from(owner.context(EquipTarget.class)).get());
+                                }
+                            };
+                        }*/
                         events[i] = new FxTrack.SpawnSprite(tm, res, sdt, null);
                         break;
-                    case 1:
-                        String id = buf.string();
+                    }
+                    case 1: {
+                        String id = sub.string();
                         events[i] = new FxTrack.Trigger(tm, id);
                         break;
+                    }
+                    case 3: {
+                        int fl = sub.uint8();
+                        String id = sub.string();
+                        String resnm = sub.string();
+                        int resver = sub.uint16();
+                        byte[] sdt = sub.bytes(sub.uint8());
+                        Indir<Resource> res = getres().pool.load(resnm, resver);
+                        events[i] = null;//new FxTrack.MkOverlay(tm, id, res, sdt);
+                        break;
+                    }
+                    case 4: {
+                        String id = sub.string();
+                        events[i] = null;//new FxTrack.RmOverlay(tm, id);
+                        break;
+                    }
                     default:
-                        throw (new Resource.LoadException("Illegal control event: " + t, getres()));
+                        if (exhaust)
+                            Warning.warn("unknown animation control event: %d", t);
+                        else
+                            throw (new Resource.LoadException("Illegal control event: " + t, getres()));
                 }
+                if (exhaust)
+                    sub.skip();
             }
             return (new FxTrack(events));
         }
@@ -1096,11 +1170,7 @@ public class Skeleton {
                 });
             };
             opcodes[3] = buf -> {
-                float rx1 = (float) buf.cpfloat();
-                float ry1 = (float) buf.cpfloat();
-                float rz1 = (float) buf.cpfloat();
-                float l = (float) Math.sqrt((rx1 * rx1) + (ry1 * ry1) + (rz1 * rz1));
-                final Coord3f ref = new Coord3f(rx1 / l, ry1 / l, rz1 / l);
+                final Coord3f ref = Coord3f.of((float) buf.cpfloat(), (float) buf.cpfloat(), (float) buf.cpfloat()).norm();
                 final String orignm = buf.string();
                 final String tgtnm = buf.string();
                 return (pose -> {
@@ -1115,7 +1185,7 @@ public class Skeleton {
             opcodes[5] = buf -> {
                 final float scale = buf.float32();
                 Location loc = Location.scale(scale);
-                return(post -> loc);
+                return (post -> loc);
             };
             opcodes[16] = buf -> {
                 final float x = buf.float32();
@@ -1128,6 +1198,17 @@ public class Skeleton {
                 float[] ax = new float[3];
                 Utils.oct2uvec(ax, buf.snorm16(), buf.snorm16());
                 return (pose -> (Location.rot(new Coord3f(ax[0], ax[1], ax[2]), ang)));
+            };
+            opcodes[19] = buf -> {
+                Coord3f ref = Utils.oct2uvec(buf.snorm16(), buf.snorm16());
+                final String orignm = buf.string();
+                final String tgtnm = buf.string();
+                return (equ -> {
+                    Pose pose = (Pose) equ;
+                    Bone orig = pose.skel().bones.get(orignm);
+                    Bone tgt = pose.skel().bones.get(tgtnm);
+                    return (pose.new BoneAlign(ref, orig, tgt));
+                });
             };
         }
 
@@ -1153,6 +1234,16 @@ public class Skeleton {
         }
 
         public void init() {
+        }
+
+        @SuppressWarnings("unchecked")
+        public GLState from(Pose equ) {
+            if (prog.length == 1)
+                return (prog[0].make(equ));
+            GLState[] ls = new GLState[prog.length];
+            for (int i = 0; i < prog.length; i++)
+                ls[i] = prog[i].make(equ);
+            return (GLState.compose(ls));
         }
 
         public GLState forpose(Pose pose) {

@@ -640,7 +640,7 @@ public class VertexBuf {
     }
 
     @Resource.LayerName("vbuf2")
-    public static class VertexRes extends Resource.Layer {
+    public static class VertexRes extends Resource.Layer implements Resource.IDLayer<Integer>{
         public transient final VertexBuf b;
         public final int id;
 
@@ -680,8 +680,9 @@ public class VertexBuf {
             this.b = new VertexBuf(bufs.toArray(new AttribArray[0]));
         }
 
-        public void init() {
-        }
+        public void init() {}
+
+        public Integer layerid() {return(id);}
 
         public String toString() {
             StringBuilder sb = new StringBuilder();
