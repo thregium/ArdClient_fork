@@ -206,10 +206,10 @@ public class SteelRefueler extends Window implements GobSelectCallback {
                     if (vm == null)
                         continue;
 
-                    if (vm.amount > (100 - fuelticks))
+                    if (vm.meters.stream().allMatch(m -> m.a > (100 - fuelticks)))
                         continue;
 
-                    int fueltoload = (100 - vm.amount) / fuelticks;
+                    int fueltoload = (100 - vm.meters.get(0).a) / fuelticks;
 
                     // take fuel
                     if (fuel == null) {//this shouldn't happen, assume the worst and just close.

@@ -749,7 +749,8 @@ public class Fightsess extends Widget {
                     return;
                 }
 
-                if (buff.ameter >= 0) {
+                Double ameter = (buff.ameter >= 0) ? Double.valueOf(buff.ameter / 100.0) : buff.ameteri.get();
+                if (ameter != null) {
                     g.image(buff.cframe, bc);
                     g.chcolor(Color.BLACK);
                     g.frect(bc.add(buff.ameteroff), buff.ametersz);
@@ -767,7 +768,7 @@ public class Fightsess extends Widget {
 
                 g.chcolor(Color.WHITE);
                 if (buff.atex == null)
-                    buff.atex = Text.renderstroked(buff.ameter + "", Color.WHITE, Color.BLACK, Text.num12boldFnd).tex();
+                    buff.atex = Text.renderstroked((ameter != null ? (int) (ameter * 100) : "") + "", Color.WHITE, Color.BLACK, Text.num12boldFnd).tex();
                 Tex atex = buff.atex;
                 bc.x = bc.x + simpleOpeningSz.x / 2 - atex.sz().x / 2;
                 bc.y = bc.y + simpleOpeningSz.y / 2 - atex.sz().y / 2;
@@ -791,7 +792,8 @@ public class Fightsess extends Widget {
                 return;
             }
 
-            if (buff.ameter >= 0) {
+            Double ameter = (buff.ameter >= 0) ? Double.valueOf(buff.ameter / 100.0) : buff.ameteri.get();
+            if (ameter != null) {
                 g.chcolor(Color.BLACK);
                 g.frect(bc.add(Buff.ameteroff), metSz);
                 g.chcolor(Color.WHITE);
@@ -804,7 +806,7 @@ public class Fightsess extends Widget {
             g.frect(bc, smalSz);
             g.chcolor(Color.WHITE);
             if (buff.atex == null) {
-                buff.atex = Text.renderstroked(buff.ameter + "", Color.WHITE, Color.BLACK, Text.num12boldFnd).tex();
+                buff.atex = Text.renderstroked((ameter != null ? (int) (ameter * 100) : "") + "", Color.WHITE, Color.BLACK, Text.num12boldFnd).tex();
             }
 
             Tex atex = buff.atex;

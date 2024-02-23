@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -93,7 +94,7 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
         if (info == null) {
             info = ItemInfo.buildinfo(this, rawinfo);
             Resource.Pagina pag = res.get().layer(Resource.pagina);
-            if(pag != null)
+            if (pag != null)
                 info.add(new ItemInfo.Pagina(this, pag.text));
         }
         return (info);
@@ -128,7 +129,7 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
         }
     }
 
-    private final AttrCache<Double> ameteri = new AttrCache<>(this::info, AttrCache.map1(AMeterInfo.class, minf -> minf::ameter));
+    public final AttrCache<Double> ameteri = new AttrCache<>(this::info, AttrCache.map1(AMeterInfo.class, minf -> minf::ameter));
     private final AttrCache<Tex> nmeteri = new AttrCache<>(this::info, AttrCache.map1s(GItem.NumberInfo.class, ninf -> new TexI(GItem.NumberInfo.numrender(ninf.itemnum(), ninf.numcolor()))));
     private final AttrCache<Double> cmeteri = new AttrCache<>(this::info, AttrCache.map1(GItem.MeterInfo.class, minf -> minf::meter));
 
@@ -205,8 +206,9 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
                 g.chcolor(new Color(64, 64, 64, 215));
                 g.rect(Coord.z, sz.mul(scale));
                 g.chcolor();
-                if (this.ameter > 0) {
-                    final Coord size = FastText.size(this.ameter + "");
+                Double ameter = (this.ameter >= 0) ? Double.valueOf(this.ameter / 100.0) : this.ameteri.get();
+                if (ameter != null) {
+                    final Coord size = FastText.size((int) (ameter * 100) + "");
                     final Coord c = sz.mul(scale).div(2);
                     g.chcolor(new Color(64, 64, 64, 215));
                     g.frect(c.sub(size.div(2)), size.sub(0, 1));
@@ -302,6 +304,17 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
                 g.chcolor(255, 255, 255, a);
                 g.atextstroked(Utils.odformat2((1 - cmeter) * 100, 2), Coord.of(sz.div(2).x, 0), 0.5, 0, Color.WHITE, Color.BLACK, Button.tf);
             }
+            if (ameter != null) {
+                final int a = (int) (ameter * 100);
+                final int width = FastText.textw(a + "");
+                final Coord c = new Coord(sz.x / 2 - width / 2, sz.y / 2 - 5);
+                final Coord tsz = new Coord(width, 10);
+                g.chcolor(new Color(64, 64, 64, 215));
+                g.frect(c, c.add(tsz.x, 0), c.add(tsz), c.add(0, tsz.y));
+                g.chcolor();
+                FastText.aprintf(g, sz.div(2), 0.5, 0.5, "%s", a);
+//            g.atextstroked(Utils.odformat2(this.ameter, 2), Coord.of(sz.div(2).x, sz.y - 7), 0.5, 1, Color.WHITE, Color.BLACK, Button.tf);
+            }
         } catch (Loading e) {
         } catch (Exception e) {
             if (!error) {
@@ -311,16 +324,6 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
                 dev.simpleLog("Buff got error: " + res);
                 dev.simpleLog(e);
             }
-        }
-        if (this.ameter >= 0) {
-            final int width = FastText.textw(this.ameter + "");
-            final Coord c = new Coord(sz.x / 2 - width / 2, sz.y / 2 - 5);
-            final Coord tsz = new Coord(width, 10);
-            g.chcolor(new Color(64, 64, 64, 215));
-            g.frect(c, c.add(tsz.x, 0), c.add(tsz), c.add(0, tsz.y));
-            g.chcolor();
-            FastText.aprintf(g, sz.div(2), 0.5, 0.5, "%s", this.ameter);
-//            g.atextstroked(Utils.odformat2(this.ameter, 2), Coord.of(sz.div(2).x, sz.y - 7), 0.5, 1, Color.WHITE, Color.BLACK, Button.tf);
         }
     }
 
@@ -355,8 +358,9 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
         if (tt != null)
             return (Text.render(tt).img);
         String ret = res.get().layer(Resource.tooltip).t;
-        if (ameter >= 0)
-            ret = ret + " (" + ameter + "%)";
+        Double ameter = (this.ameter >= 0) ? Double.valueOf(this.ameter / 100.0) : ameteri.get();
+        if (ameter != null)
+            ret = ret + " (" + ameter * 100 + "%)";
         return (Text.render(ret).img);
     }
 
@@ -456,6 +460,9 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
             info = null;
             rawinfo = new ItemInfo.Raw(args);
             shorttip = longtip = null;
+            if (atex != null)
+                atex.dispose();
+            atex = null;
         } else if (msg == "tip") {
             String tt = (String) args[0];
             this.tt = tt.isEmpty() ? null : tt;

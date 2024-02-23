@@ -407,7 +407,7 @@ public class PepperBotProRun extends Window implements Runnable {
                             //System.out.println("after Clicking craft");
                             PBotUtils.sleep(2000);
 
-                            if (vm.amount < 30)
+                            if (vm.meters.stream().allMatch(m -> m.a > 30))
                                 RefillCauldron(ui.gui);
 
                             while (ui.gui.prog >= 0) {

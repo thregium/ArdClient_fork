@@ -1735,6 +1735,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     }
 
     private static final ClassResolver<Gob> ctxr = new ClassResolver<Gob>()
+            .add(Gob.class, g -> g)
             .add(Glob.class, g -> g.glob)
             .add(Session.class, g -> g.glob.sess);
 

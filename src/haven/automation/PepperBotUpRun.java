@@ -487,7 +487,7 @@ public class PepperBotUpRun extends Window implements Runnable {
                 PBotUtils.craftItem(ui, "boiledpepper", 1);
                 PBotUtils.sleep(2000);
 
-                while (vm.amount < 30) {
+                while (vm.meters.stream().allMatch(m -> m.a > 30)) {
                     RefillCauldron();
                     PBotUtils.waitForWindow(ui, "Cauldron", 2000);
                     cwnd = ui.gui.getwnd("Cauldron");

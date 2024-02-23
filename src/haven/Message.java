@@ -173,6 +173,10 @@ public abstract class Message {
         return (Utils.int64d(rbuf, off));
     }
 
+    public UID uniqid() {
+        return (UID.of(int64()));
+    }
+
     public String string() {
         int l = 0;
         while (true) {

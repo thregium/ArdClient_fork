@@ -30,14 +30,16 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class VMeter extends Widget implements ItemInfo.Owner {
     static Tex bg = Theme.tex("vm", 0);
     static Tex fg = Theme.tex("vm", 1);
-    Color cl;
-    public int amount;
+    //    Color cl;
+//    public int amount;
     private ItemInfo.Raw rawinfo = null;
     private List<ItemInfo> info = Collections.emptyList();
     private static final Map<String, Integer> levels = new HashMap<String, Integer>(3) {{
@@ -73,6 +75,7 @@ public class VMeter extends Widget implements ItemInfo.Owner {
             add(new TypeLimit(new Color(255, 128, 0), 18f, "ticks", TypeLimit.Tooltip.crucible, "$b{$col[255,128,0]{\n84 ticks to steel}}"));
         }}));
     }};
+    public List<IMeter.Meter> meters;
 
     public static class Kit {
         public final String windowName;
@@ -145,36 +148,30 @@ public class VMeter extends Widget implements ItemInfo.Owner {
     @RName("vm")
     public static class $_ implements Factory {
         public Widget create(UI ui, Object[] args) {
-            Color cl;
-            if (args.length > 4) {
-                cl = new Color((Integer) args[1],
-                        (Integer) args[2],
-                        (Integer) args[3],
-                        (Integer) args[4]);
-            } else if (args.length > 3) {
-                cl = new Color((Integer) args[1],
-                        (Integer) args[2],
-                        (Integer) args[3]);
-            } else {
-                cl = (Color) args[1];
-            }
-            return (new VMeter((Integer) args[0], cl));
+            return (new VMeter(decmeters(args, 0)));
         }
     }
 
-    public VMeter(int amount, Color cl) {
+    /*public VMeter(int amount, Color cl) {
         super(bg.sz());
         this.amount = amount;
         this.cl = cl;
+    }*/
+
+    public VMeter(List<IMeter.Meter> meters) {
+        super(bg.sz());
+        set(meters);
     }
 
     public void draw(GOut g) {
-        g.image(bg, Coord.z);
-        g.chcolor(cl);
         int hm = (sz.y - 6);
-        int h = (hm * amount) / 100;
-        g.image(fg, new Coord(0, 0), new Coord(0, sz.y - 3 - h), sz.add(0, h));
-        g.chcolor();
+        g.image(bg, Coord.z);
+        for (IMeter.Meter m : meters) {
+            g.chcolor(m.c);
+            int h = (hm * m.a) / 100;
+            g.image(fg, new Coord(0, 0), new Coord(0, sz.y - 3 - h), sz.add(0, h));
+            g.chcolor();
+        }
 
         Widget p = this.parent;
         if (p instanceof Window) {
@@ -210,19 +207,21 @@ public class VMeter extends Widget implements ItemInfo.Owner {
         if (ui.modctrl) {
             Widget p = this.parent;
             if (p instanceof Window) {
-                for (Kit kit : kits) {
-                    if (((Window) p).origcap.equals(kit.windowName)) {
-                        for (TypeLimit tl : kit.typeLimit) {
-                            if (cl.equals(tl.color)) {
-                                String ca = (tl.limit * amount / 100 % 1 == 0 ? String.format("%.0f", tl.limit * amount / 100) : tl.limit * amount / 100) + "";
-                                String cl = (tl.limit % 1 == 0 ? String.format("%.0f", tl.limit) : tl.limit) + "";
-                                String stt = "$b{$col[255,223,5]{" + ca + " / " + cl + " " + tl.subText + " (" + amount + "%)}}";
-                                return (RichText.render(stt + tl.tooltip + INGAME_TIME + tl.addTooltip, -1).tex());
+                for (IMeter.Meter m : meters) {
+                    for (Kit kit : kits) {
+                        if (((Window) p).origcap.equals(kit.windowName)) {
+                            for (TypeLimit tl : kit.typeLimit) {
+                                if (m.c.equals(tl.color)) {
+                                    String ca = (tl.limit * m.a / 100 % 1 == 0 ? String.format("%.0f", tl.limit * m.a / 100) : tl.limit * m.a / 100) + "";
+                                    String cl = (tl.limit % 1 == 0 ? String.format("%.0f", tl.limit) : tl.limit) + "";
+                                    String stt = "$b{$col[255,223,5]{" + ca + " / " + cl + " " + tl.subText + " (" + m.a + "%)}}";
+                                    return (RichText.render(stt + tl.tooltip + INGAME_TIME + tl.addTooltip, -1).tex());
+                                }
                             }
                         }
                     }
                 }
-                return (RichText.render("$b{$col[255,223,5]{" + amount + "%}}", -1).tex());
+                return (RichText.render("$b{$col[255,223,5]{" + meters.stream().map(meter -> meter.a).collect(Collectors.toList()) + "%}}", -1).tex());
             }
         }
         if (rawinfo == null) {
@@ -246,13 +245,56 @@ public class VMeter extends Widget implements ItemInfo.Owner {
         }
     }
 
+    public void set(List<IMeter.Meter> meters) {
+        this.meters = meters;
+    }
+
+    public void set(double a, Color c) {
+        set(Collections.singletonList(new IMeter.Meter(a, c)));
+    }
+
+    private static double av(Object arg) {
+        if (arg instanceof Integer)
+            return (((Integer) arg).doubleValue() * 0.01);
+        else
+            return (((Number) arg).doubleValue());
+    }
+
+    public static List<IMeter.Meter> decmeters(Object[] args, int s) {
+        if (args.length == s)
+            return (Collections.emptyList());
+        ArrayList<IMeter.Meter> buf = new ArrayList<>();
+        if (args[s] instanceof Number) {
+            for (int a = s; a < args.length; a += 2)
+                buf.add(new IMeter.Meter(av(args[a]), (Color) args[a + 1]));
+        } else {
+            /* XXX: To be considered deprecated, but is was the
+             * traditional argument layout of IMeter, so let clients
+             * with the newer convention spread before converting the
+             * server. */
+            for (int a = s; a < args.length; a += 2)
+                buf.add(new IMeter.Meter(av(args[a + 1]), (Color) args[a]));
+        }
+        buf.trimToSize();
+        return (buf);
+    }
+
     public void uimsg(String msg, Object... args) {
         if (msg == "set") {
-            amount = (Integer) args[0];
-            if (args.length > 1)
-                cl = (Color) args[1];
-        } else if (msg == "col") {
-            cl = (Color) args[0];
+            List<IMeter.Meter> meters = new LinkedList<>();
+            if (args.length == 1) {
+                set(av(args[0]), meters.isEmpty() ? Color.WHITE : meters.get(0).c);
+            } else {
+                set(decmeters(args, 0));
+//                for (int i = 0; i < args.length; i += 2)
+//                    meters.add(new Meter((Color) args[i], (Integer) args[i + 1]));
+//                this.meters = meters;
+            }
+//            amount = (Integer) args[0];
+//            if (args.length > 1)
+//                cl = (Color) args[1];
+//        } else if (msg == "col") {
+//            cl = (Color) args[0];
         } else if (msg == "tip") {
             if (args[0] instanceof Object[]) {
                 rawinfo = new ItemInfo.Raw((Object[]) args[0]);

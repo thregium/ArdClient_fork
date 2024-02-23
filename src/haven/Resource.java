@@ -1912,21 +1912,33 @@ public class Resource implements Serializable {
                         ClassLoader ret = Resource.class.getClassLoader();
                         if (overridedResources.contains(Resource.this.name))
                             ret = new CustomClassLoader(ret);
-                        if (classpath.size() > 0) {
+                        if (!classpath.isEmpty()) {
                             Collection<ClassLoader> loaders = new LinkedList<>();
                             for (Indir<Resource> res : classpath) {
                                 loaders.add(res.get().layer(CodeEntry.class).loader());
                             }
                             ret = new LibClassLoader(ret, loaders);
                         }
-                        if (clmap.size() > 0) {
+                        if (!clmap.isEmpty()) {
                             ret = new ResClassLoader(ret) {
                                 @Override
                                 public Class<?> findClass(String name) throws ClassNotFoundException {
                                     Code c = clmap.get(name);
                                     if (c == null)
                                         throw (new ResourceClassNotFoundException(name, Resource.this));
-                                    return (defineClass(name, c.data, 0, c.data.length));
+                                    try {
+                                        return (defineClass(name, c.data, 0, c.data.length));
+                                    } catch (Throwable e) {
+                                        String point = ".";
+                                        String text = name;
+                                        String res = getres().name.replace("/", point);
+                                        int p = name.lastIndexOf(point);
+                                        String resname = res + point + (p < 0 ? name : name.substring(p + 1));
+                                        if (!name.startsWith("haven")) {
+                                            text = (p < 0 ? String.format("haven%sres%s%s", point, point, resname) : name).replace("-", "_").replaceAll("[.](\\d)(.*)", "._$1$2");
+                                        }
+                                        return (defineClass(text, c.data, 0, c.data.length));
+                                    }
                                 }
                             };
                         }
@@ -2227,11 +2239,11 @@ public class Resource implements Serializable {
         return (o.name.equals(this.name) && (o.ver == this.ver));
     }
 
-    private static final List<String> depresList = Arrays.asList("gfx/hud/rosters/.*", "gfx/terobjs/cupboard", "gfx/terobjs/crate", "ui/inspect", "ui/croster", "lib/icave");
+    private static final List<String> depresList = Arrays.asList("gfx/hud/rosters/.*", "gfx/terobjs/cupboard", "gfx/terobjs/crate", "ui/inspect", "ui/croster", "lib/icave", "gfx/terobjs/", "gfx/terobjs/consobj", "gfx/terobjs/consobj-pv");
 
     private Object[] load(InputStream st) throws IOException {
         LoadException exception = null;
-        Message in = new StreamMessage(st);
+        MessageBuf in = new MessageBuf(new StreamMessage(st));
         if (in.eom()) throw new Message.EOF("Empty stream of " + this);
         byte[] sig = "Haven Resource 1".getBytes(Utils.ascii);
         if (!Arrays.equals(sig, in.bytes(sig.length))) {
@@ -2252,6 +2264,7 @@ public class Resource implements Serializable {
 //            if (depresList.stream().noneMatch(name::matches))
 //                throw (exception);
         }
+        configuration.saveResource(this, in.clone());
         //to load layers
         return (new Object[]{ver, exception, in});
     }

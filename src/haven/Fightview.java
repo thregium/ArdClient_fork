@@ -601,7 +601,8 @@ public class Fightview extends MovableWidget {
                     if (!(wdg instanceof Buff))
                         continue;
                     final Buff buf = (Buff) wdg;
-                    if (buf.ameter >= 0 && buf.isOpening()) {
+                    Double ameter = (buf.ameter >= 0) ? Double.valueOf(buf.ameter / 100.0) : buf.ameteri.get();
+                    if (ameter != null && buf.isOpening()) {
                         buf.fightdraw(g.reclip(c.copy(), Buff.scframe.sz()));
                         c.x += Buff.scframe.sz().x + UI.scale(2);
                     }

@@ -360,7 +360,7 @@ public class PepperBotRun extends Window implements Runnable {
                         PBotUtils.craftItem(ui, "boiledpepper", 1);
                         //System.out.println("after Clicking craft");
                         PBotUtils.sleep(2000);
-                        if (vm.amount < 30) {
+                        if (vm.meters.stream().allMatch(m -> m.a > 30)) {
                             try {
                                 List<Gob> allgobs = PBotUtils.getGobs(ui);
                                 for (Gob gobz : allgobs) {

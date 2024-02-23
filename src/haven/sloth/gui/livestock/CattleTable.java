@@ -43,8 +43,8 @@ public class CattleTable extends AnimalTable {
 
         final VMeter satietym = (VMeter) animal.lchild.prev;
         final VMeter fednessm = (VMeter) animal.lchild;
-        final IndirLabel satiety = new IndirLabel(() -> satietym.amount + "", Text.std);
-        final IndirLabel fedness = new IndirLabel(() -> fednessm.amount + "", Text.std);
+        final IndirLabel satiety = new IndirLabel(() -> /*satietym.meters + */"", Text.std);
+        final IndirLabel fedness = new IndirLabel(() -> /*fednessm.amount + */"", Text.std);
 
         ava.resize(new Coord(24, 24));
         final double q = Double.parseDouble(quality.texts);

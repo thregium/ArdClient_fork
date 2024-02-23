@@ -16,6 +16,7 @@ import haven.HSliderNamed;
 import haven.MainFrame;
 import haven.MapFile;
 import haven.Matrix4f;
+import haven.Message;
 import haven.OCache;
 import haven.PUtils;
 import haven.Pair;
@@ -1004,6 +1005,27 @@ public class configuration {
 
 
                 }, "decode " + " layers " + file).start();
+            }
+        }
+    }
+
+    public static void saveResource(Resource res, Message msg) {
+        if (dev.decodeCode) {
+            int hash = msg.hashCode();
+            Path dir = Paths.get("decode" + File.separator + res.toString().replace("/", File.separator));
+            String filename = res.name.substring(res.name.lastIndexOf('/') + 1) + "_" + hash + ".res";
+            Path file = dir.resolve(filename);
+            if (!Files.exists(file)) {
+                new Thread(() -> {
+                    try {
+                        Files.createDirectories(dir);
+                        Files.write(file, msg.bytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+
+                        dev.resourceLog("resource", file, "CREATED");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }, "save " + " res " + file).start();
             }
         }
     }

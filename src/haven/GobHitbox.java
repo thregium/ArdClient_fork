@@ -1,5 +1,6 @@
 package haven;
 
+import haven.res.lib.obst.Obstacle;
 import haven.sloth.gob.Type;
 import haven.sloth.util.ResHashMap;
 import modification.configuration;
@@ -8,8 +9,10 @@ import javax.media.opengl.GL2;
 import java.awt.Color;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class GobHitbox extends Sprite {
     public static final int olid_solid = "overlay_hitbox_solid_id".hashCode();
@@ -183,7 +186,9 @@ public class GobHitbox extends Sprite {
             ResDrawable rd = gob.getattr(ResDrawable.class);
             if (rd != null && rd.sdt.rbuf.length >= 4) {
                 MessageBuf buf = rd.sdt.clone();
-                return (new BBox[]{new BBox(new Coord(buf.rbuf[0], buf.rbuf[1]), new Coord(buf.rbuf[2], buf.rbuf[3]))});
+                Obstacle obst = Obstacle.parse(buf);
+//                return (new BBox[]{new BBox(new Coord(buf.rbuf[0], buf.rbuf[1]), new Coord(buf.rbuf[2], buf.rbuf[3]))});
+                return (Arrays.stream(obst.p).map(BBox::new).toArray(BBox[]::new));
             }
         }
 

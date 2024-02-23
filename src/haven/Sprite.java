@@ -51,7 +51,7 @@ public abstract class Sprite implements Rendered {
     public static final int GOB_TEXT_ID = -1005;
     public final Resource res;
     public final Owner owner;
-    public static List<Factory> factories = new LinkedList<Factory>();
+    public static List<Factory> factories = new LinkedList<>();
 
     static {
         factories.add(SpriteLink.sfact);
@@ -116,18 +116,8 @@ public abstract class Sprite implements Rendered {
         Sprite create(Owner owner, Resource res, Message sdt);
     }
 
-    public static Factory mkdynfact(Class<? extends Sprite> cl) {
-        try {
-            final Constructor<? extends Sprite> cons = cl.getConstructor(Owner.class, Resource.class);
-            return ((owner, res, sdt) -> (Utils.construct(cons, owner, res)));
-        } catch (NoSuchMethodException e) {
-        }
-        try {
-            final Constructor<? extends Sprite> cons = cl.getConstructor(Owner.class, Resource.class, Message.class);
-            return ((owner, res, sdt) -> (Utils.construct(cons, owner, res, sdt)));
-        } catch (NoSuchMethodException e) {
-        }
-        throw (new RuntimeException("Could not find any suitable constructor for dynamic sprite"));
+    public interface Mill<S extends Sprite> {
+        S create(Owner owner);
     }
 
     public static class ResourceException extends RuntimeException {

@@ -61,7 +61,8 @@ public class GobCombatSprite extends Sprite {
                 if (!(wdg instanceof Buff))
                     continue;
                 final Buff buf = (Buff) wdg;
-                if (buf.ameter >= 0 && buf.isOpening()) {
+                Double ameter = (buf.ameter >= 0) ? Double.valueOf(buf.ameter / 100.0) : buf.ameteri.get();
+                if (ameter != null && buf.isOpening()) {
                     count++;
                 }
             }
@@ -70,7 +71,8 @@ public class GobCombatSprite extends Sprite {
                 if (!(wdg instanceof Buff))
                     continue;
                 final Buff buf = (Buff) wdg;
-                if (buf.ameter >= 0 && buf.isOpening()) {
+                Double ameter = (buf.ameter >= 0) ? Double.valueOf(buf.ameter / 100.0) : buf.ameteri.get();
+                if (ameter != null && buf.isOpening()) {
                     buf.fightdraw(g.reclip(bc.copy(), Buff.scframe.sz()), scale);
                     bc.x += (int) (Buff.scframe.sz().x * scale) + 2;
                 }

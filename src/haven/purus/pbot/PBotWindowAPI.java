@@ -1,5 +1,6 @@
 package haven.purus.pbot;
 
+import haven.IMeter;
 import haven.ISBox;
 import haven.Inventory;
 import haven.Text;
@@ -250,7 +251,7 @@ public class PBotWindowAPI {
         if (vm == null)
             return -1;
         else
-            return vm.amount;
+            return vm.meters.stream().findFirst().map(m -> m.a).orElse(-1);
     }
 
     /**
@@ -261,7 +262,8 @@ public class PBotWindowAPI {
     public static ArrayList<Integer> getAmounts(Window window) {
         ArrayList<Integer> amounts = new ArrayList<>();
         for (VMeter vm : window.getchilds(VMeter.class)) {
-            amounts.add(vm.amount);
+            for (IMeter.Meter m : vm.meters)
+                amounts.add(m.a);
         }
         return amounts;
     }
