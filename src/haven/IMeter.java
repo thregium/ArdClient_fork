@@ -31,6 +31,7 @@ import modification.configuration;
 
 import java.awt.Color;
 import java.awt.font.TextAttribute;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -91,6 +92,11 @@ public class IMeter extends MovableWidget {
             this.c = c;
             this.a = a;
         }
+
+        public Meter(double a, Color c) {
+            this.a = (int) (a * 100);
+            this.c = c;
+        }
     }
 
     protected Tex tex() {
@@ -150,12 +156,51 @@ public class IMeter extends MovableWidget {
         super.draw(g);
     }
 
+    public void set(List<Meter> meters) {
+        this.meters = meters;
+    }
+
+    public void set(double a, Color c) {
+        set(Collections.singletonList(new Meter(a, c)));
+    }
+
+    private static double av(Object arg) {
+        if (arg instanceof Integer)
+            return (((Integer) arg).doubleValue() * 0.01);
+        else
+            return (((Number) arg).doubleValue());
+    }
+
+    public static List<Meter> decmeters(Object[] args, int s) {
+        if (args.length == s)
+            return (Collections.emptyList());
+        ArrayList<Meter> buf = new ArrayList<>();
+        if (args[s] instanceof Number) {
+            for (int a = s; a < args.length; a += 2)
+                buf.add(new Meter(av(args[a]), (Color) args[a + 1]));
+        } else {
+            /* XXX: To be considered deprecated, but is was the
+             * traditional argument layout of IMeter, so let clients
+             * with the newer convention spread before converting the
+             * server. */
+            for (int a = s; a < args.length; a += 2)
+                buf.add(new Meter(av(args[a + 1]), (Color) args[a]));
+        }
+        buf.trimToSize();
+        return (buf);
+    }
+
     public void uimsg(String msg, Object... args) {
         if (msg == "set") {
             List<Meter> meters = new LinkedList<>();
-            for (int i = 0; i < args.length; i += 2)
-                meters.add(new Meter((Color) args[i], (Integer) args[i + 1]));
-            this.meters = meters;
+            if (args.length == 1) {
+                set(av(args[0]), meters.isEmpty() ? Color.WHITE : meters.get(0).c);
+            } else {
+                set(decmeters(args, 0));
+//                for (int i = 0; i < args.length; i += 2)
+//                    meters.add(new Meter((Color) args[i], (Integer) args[i + 1]));
+//                this.meters = meters;
+            }
 
             if (ponyalarm) {
                 try {

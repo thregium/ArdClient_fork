@@ -26,6 +26,7 @@
 
 package haven;
 
+import haven.res.gfx.hud.buffs.travelwar.Weariness;
 import haven.res.lib.tspec.Spec;
 import haven.res.ui.tt.ArmorFactory;
 import haven.res.ui.tt.WearFactory;
@@ -509,6 +510,12 @@ public abstract class ItemInfo {
         customFactories.put("ui/tt/wear", new WearFactory());
         customFactories.put("ui/tt/attrmod", new AttrMod.Fac());
         customFactories.put("ui/tt/wpn/dmg", new Damage.Fac());
+        customFactories.put("gfx/hud/buffs/travelwear", new ItemInfo.InfoFactory() {
+            @Override
+            public ItemInfo build(final Owner owner, final Object... args) {
+                return (Weariness.mkinfo(owner, args));
+            }
+        });
     }
 
     public static List<ItemInfo> buildinfo(Owner owner, Raw raw) {
@@ -519,15 +526,16 @@ public abstract class ItemInfo {
                     Object[] a = (Object[]) o;
                     Resource ttres = null;
                     InfoFactory f = null;
-                    if (a[0] instanceof Integer) {
-                        ttres = owner.glob().sess.getres((Integer) a[0]).get();
+                    if (a[0] instanceof InfoFactory) {
+                        f = (InfoFactory) a[0];
+                    } else if (a[0] instanceof Integer) {
+                        Resource.Resolver rr = owner.context(Resource.Resolver.class);
+                        ttres = rr.getres((Integer) a[0]).get();
                     } else if (a[0] instanceof Resource) {
                         ttres = (Resource) a[0];
                     } else if (a[0] instanceof Indir) {
                         ttres = (Resource) ((Indir) a[0]).get();
-                    } else if (a[0] instanceof InfoFactory) {
-                        f = (InfoFactory) a[0];
-                    } else {
+                    } else  {
                         throw (new ClassCastException("Unexpected info specification " + a[0].getClass()));
                     }
 
@@ -536,12 +544,11 @@ public abstract class ItemInfo {
                             f = customFactories.get(ttres.name);
                         if (f == null)
                             f = ttres.getcode(InfoFactory.class, true);
-
-                        if (f != null) {
-                            ItemInfo inf = f.build(owner, raw, a);
-                            if (inf != null)
-                                ret.add(inf);
-                        }
+                    }
+                    if (f != null) {
+                        ItemInfo inf = f.build(owner, raw, a);
+                        if (inf != null)
+                            ret.add(inf);
                     }
                     if (ttres == null || f == null)
                         System.err.printf("ItemInfo for %s %s %s %s %s failed!%n", ttres, f, owner, raw, Arrays.toString(a));

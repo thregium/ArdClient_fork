@@ -902,6 +902,26 @@ public class Utils {
         }
     }
 
+    public static int iv(Object arg) {
+        return(((Number)arg).intValue());
+    }
+
+    public static long uiv(Object arg) {
+        return(uint32(iv(arg)));
+    }
+
+    public static float fv(Object arg) {
+        return(((Number)arg).floatValue());
+    }
+
+    public static double dv(Object arg) {
+        return(((Number)arg).doubleValue());
+    }
+
+    public static boolean bv(Object arg) {
+        return(iv(arg) != 0);
+    }
+
     public static int sb(int n, int b) {
         return ((n << (32 - b)) >> (32 - b));
     }

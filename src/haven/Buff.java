@@ -90,8 +90,12 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
     }
 
     public List<ItemInfo> info() {
-        if (info == null)
+        if (info == null) {
             info = ItemInfo.buildinfo(this, rawinfo);
+            Resource.Pagina pag = res.get().layer(Resource.pagina);
+            if(pag != null)
+                info.add(new ItemInfo.Pagina(this, pag.text));
+        }
         return (info);
     }
 
@@ -257,22 +261,23 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
         }
     }
 
+    private boolean error = false;
     public void draw(GOut g) {
         if (TexGL.disableall)
             return;
         g.chcolor(255, 255, 255, a);
-        Double ameter = (this.ameter >= 0) ? Double.valueOf(this.ameter / 100.0) : ameteri.get();
-        if (ameter != null) {
-            g.image(cframe, Coord.z);
-            g.chcolor(0, 0, 0, a);
-            g.frect(ameteroff, ametersz);
-            g.chcolor(255, 255, 255, a);
-            g.frect(ameteroff, new Coord((int) Math.floor(ameter * ametersz.x), ametersz.y));
-        } else {
-            g.image(frame, Coord.z);
-        }
         try {
-            Tex img = res.get().layer(Resource.imgc).tex();
+            Double ameter = (this.ameter >= 0) ? Double.valueOf(this.ameter / 100.0) : ameteri.get();
+            if (ameter != null) {
+                g.image(cframe, Coord.z);
+                g.chcolor(0, 0, 0, a);
+                g.frect(ameteroff, ametersz);
+                g.chcolor(255, 255, 255, a);
+                g.frect(ameteroff, new Coord((int) Math.floor(ameter * ametersz.x), ametersz.y));
+            } else {
+                g.image(frame, Coord.z);
+            }
+            Tex img = res.get().flayer(Resource.imgc).tex();
             g.image(img, imgoff);
             Tex nmeter = (this.nmeter >= 0) ? nmeter() : nmeteri.get();
             if (nmeter != null)
@@ -298,6 +303,14 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
                 g.atextstroked(Utils.odformat2((1 - cmeter) * 100, 2), Coord.of(sz.div(2).x, 0), 0.5, 0, Color.WHITE, Color.BLACK, Button.tf);
             }
         } catch (Loading e) {
+        } catch (Exception e) {
+            if (!error) {
+                error = true;
+                Debug.println("Buff got error: " + res);
+                Debug.printStackTrace(e);
+                dev.simpleLog("Buff got error: " + res);
+                dev.simpleLog(e);
+            }
         }
         if (this.ameter >= 0) {
             final int width = FastText.textw(this.ameter + "");
@@ -348,6 +361,7 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
     }
 
     private Pattern ezFix = Pattern.compile("(.*\\$img\\[)([A-Za-z\\/]+)(].*)");
+
     private BufferedImage longtip() {
         BufferedImage img;
         if (rawinfo != null)

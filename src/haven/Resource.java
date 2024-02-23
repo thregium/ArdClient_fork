@@ -208,6 +208,18 @@ public class Resource implements Serializable {
     public interface Resolver {
         Indir<Resource> getres(int id);
 
+        default Indir<Resource> getresv(Object desc) {
+            if (desc == null)
+                return (null);
+            if (desc instanceof Number) {
+                int id = ((Number) desc).intValue();
+                if (id < 0)
+                    return (null);
+                return (this.getres(((Number) desc).intValue()));
+            }
+            throw (new ClassCastException("unknown type for resource id: " + desc));
+        }
+
         class ResourceMap implements Resource.Resolver {
             public final Resource.Resolver bk;
             public final Map<Integer, Integer> map;
@@ -1646,13 +1658,7 @@ public class Resource implements Serializable {
                 }
             }
 
-            Instancer<Object> simple = (cl, res, args) -> {
-                try {
-                    Constructor<?> cons = cl.getConstructor(Object[].class);
-                    return (Utils.construct(cons, args));
-                } catch (NoSuchMethodException e) {}
-                return (Utils.construct(cl));
-            };
+            Instancer<Object> simple = (cl, res, args) -> (stdmake(Object.class, cl, res, args));
         }
 
         Map<PublishedCode, Instancer> instancers = new WeakHashMap<>();
