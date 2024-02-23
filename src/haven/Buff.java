@@ -179,12 +179,13 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
                 g.chcolor();
 
                 if (ameter != null) {
-                    final Coord size = FastText.size(this.ameter + "");
+                    final int a = (int) (ameter * 100);
+                    final Coord size = FastText.size(a + "");
                     final Coord c = sz.mul(scale).div(2);
                     g.chcolor(new Color(64, 64, 64, 215));
                     g.frect(c.sub(size.div(2)), size.sub(0, 1));
                     g.chcolor();
-                    FastText.aprintf(g, c, 0.5, 0.5, "%d", this.ameter);
+                    FastText.aprintf(g, c, 0.5, 0.5, "%d", a);
                 }
             }
         } catch (Loading l) {

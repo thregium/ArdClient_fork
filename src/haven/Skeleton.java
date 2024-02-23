@@ -1000,11 +1000,11 @@ public class Skeleton {
                         byte[] sdt = sub.bytes(sub.uint8());
                         int fl = (t == 2) ? sub.uint8() : 0;
                         Indir<Resource> res = getres().pool.load(resnm, resver);
-                        /*Function<ModOwner, Pipe.Op> ploc = null;
+//                        Function<ModOwner, Pipe.Op> ploc = null;
                         if ((fl & 1) != 0) {
                             String eqnm = sub.string();
                             Indir<Resource> src = ((fl & 2) == 0) ? getres().indir() : res;
-                            ploc = new Function<ModOwner, Pipe.Op>() {
+                            /*ploc = new Function<ModOwner, Pipe.Op>() {
                                 BoneOffset eqp = null;
 
                                 public Pipe.Op apply(ModOwner owner) {
@@ -1012,8 +1012,8 @@ public class Skeleton {
                                         eqp = src.get().flayer(BoneOffset.class, eqnm);
                                     return (eqp.from(owner.context(EquipTarget.class)).get());
                                 }
-                            };
-                        }*/
+                            };*/
+                        }
                         events[i] = new FxTrack.SpawnSprite(tm, res, sdt, null);
                         break;
                     }

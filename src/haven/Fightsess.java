@@ -538,7 +538,7 @@ public class Fightsess extends Widget {
                 if (fv.current != null) {
                     for (Buff buff : fv.current.buffs.children(Buff.class)) {
 //                        Coord dc = Config.altfightui ? new Coord(cx + buff.c.x + 80, 180) : pcc.add(buff.c.x + 20, buff.c.y + pho - Buff.cframe.sz().y);
-                        Coord dc = new Coord(cx + buff.c.x + 80, cy);
+                        Coord dc = new Coord(cx + buff.c.x + UI.scale(80), cy);
                         if (c.isect(dc, buff.sz)) {
                             Object ret = buff.tooltip(c.sub(dc), prevtt);
                             if (ret != null) {
@@ -751,17 +751,17 @@ public class Fightsess extends Widget {
 
                 Double ameter = (buff.ameter >= 0) ? Double.valueOf(buff.ameter / 100.0) : buff.ameteri.get();
                 if (ameter != null) {
-                    g.image(buff.cframe, bc);
+                    g.image(Buff.cframe, bc);
                     g.chcolor(Color.BLACK);
-                    g.frect(bc.add(buff.ameteroff), buff.ametersz);
+                    g.frect(bc.add(Buff.ameteroff), Buff.ametersz);
                     g.chcolor(Color.WHITE);
-                    g.frect(bc.add(buff.ameteroff), new Coord((buff.ameter * buff.ametersz.x) / 100, buff.ametersz.y));
+                    g.frect(bc.add(Buff.ameteroff), new Coord((int) Math.floor(ameter * Buff.ametersz.x), Buff.ametersz.y));
                 } else {
-                    g.image(buff.frame, bc);
+                    g.image(Buff.frame, bc);
                 }
 
-                bc.x += 3;
-                bc.y += 3;
+                bc.x += UI.scale(3);
+                bc.y += UI.scale(3);
 
                 g.chcolor(clr);
                 g.frect(bc, simpleOpeningSz);

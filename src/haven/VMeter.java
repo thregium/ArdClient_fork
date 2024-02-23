@@ -281,7 +281,6 @@ public class VMeter extends Widget implements ItemInfo.Owner {
 
     public void uimsg(String msg, Object... args) {
         if (msg == "set") {
-            List<IMeter.Meter> meters = new LinkedList<>();
             if (args.length == 1) {
                 set(av(args[0]), meters.isEmpty() ? Color.WHITE : meters.get(0).c);
             } else {

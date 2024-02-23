@@ -192,7 +192,6 @@ public class IMeter extends MovableWidget {
 
     public void uimsg(String msg, Object... args) {
         if (msg == "set") {
-            List<Meter> meters = new LinkedList<>();
             if (args.length == 1) {
                 set(av(args[0]), meters.isEmpty() ? Color.WHITE : meters.get(0).c);
             } else {
