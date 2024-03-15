@@ -29,7 +29,6 @@ package haven;
 import dolda.xiphutil.VorbisStream;
 import modification.configuration;
 import modification.dev;
-import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import javax.sound.midi.InvalidMidiDataException;
@@ -98,6 +97,7 @@ public class Resource implements Serializable {
     private static Map<String, LayerFactory<?>> ltypes = new TreeMap<>();
     public static Class<Image> imgc = Image.class;
     public static Class<Neg> negc = Neg.class;
+    public static Class<Props> props = Props.class;
     public static Class<Obstacle> obst = Obstacle.class;
     public static Class<Anim> animc = Anim.class;
     public static Class<Pagina> pagina = Pagina.class;
@@ -1390,37 +1390,59 @@ public class Resource implements Serializable {
         }
     }
 
+    @LayerName("props")
+    public class Props extends Layer {
+        public final Map<String, Object> props = new HashMap<>();
+
+        public Props(Message buf) {
+            int ver = buf.uint8();
+            if (ver != 1)
+                throw (new LoadException("Unknown property layer version: " + ver, getres()));
+            Object[] raw = buf.list();
+            for (int a = 0; a < raw.length - 1; a += 2)
+                props.put((String) raw[a], raw[a + 1]);
+        }
+
+        public Object get(String nm) {
+            return (props.get(nm));
+        }
+
+        public void init() {}
+    }
+
     @LayerName("obst")
-    public class Obstacle extends Layer {
+    public class Obstacle extends Layer implements IDLayer<String> {
         public int vc;
         public Coord2d[][] ep;
         public String id;
 
         public Obstacle(Message buf) {
             int ver = buf.uint8();
-            if (ver >= 2) {
-                id = buf.string();
-            }
-
-            int points = buf.uint8();
-            int[] boxes = new int[points];
-            ep = new Coord2d[points][];
-            for (int i = 0; i < points; i++) {
-                boxes[i] = buf.uint8();
-                ep[i] = new Coord2d[boxes[i]];
-            }
-            for (int i = 0; i < points; i++) {
-                for (int j = 0; j < boxes[i]; j++) {
-                    ep[i][j] = new Coord2d(buf.float16() * 11, buf.float16() * 11);
+            if ((ver >= 1) && (ver <= 2)) {
+                this.id = (ver >= 2) ? buf.string() : "";
+                int points = buf.uint8();
+                int[] boxes = new int[points];
+                ep = new Coord2d[points][];
+                for (int i = 0; i < points; i++) {
+                    boxes[i] = buf.uint8();
+                    ep[i] = new Coord2d[boxes[i]];
                 }
-                vc += boxes[i];
+                for (int i = 0; i < points; i++) {
+                    for (int o = 0; o < boxes[i]; o++)
+                        ep[i][o] = Coord2d.of(buf.float16(), buf.float16()).mul(MCache.tilesz);
+                    vc += boxes[i];
+                }
+            } else {
+                this.id = "#";
+                this.ep = new Coord2d[0][];
             }
-
 //            dev.resourceLog("Obst", name, vc, id, Arrays.toString(vertices));
         }
 
         @Override
         public void init() {}
+
+        public String layerid() {return (id);}
 
         public String toString() {
             StringBuilder sb = new StringBuilder();
@@ -1667,7 +1689,7 @@ public class Resource implements Serializable {
     @LayerName("code")
     public class Code extends Layer {
         public final String name;
-        transient public final byte[] data;
+        public final transient byte[] data;
 
         public Code(Message buf) {
             name = buf.string();

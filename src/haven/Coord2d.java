@@ -220,6 +220,14 @@ public class Coord2d implements Comparable<Coord2d>, java.io.Serializable {
         return (Math.hypot(x, y));
     }
 
+    public Coord2d norm(double n) {
+        return(mul(n / abs()));
+    }
+
+    public Coord2d norm() {
+        return(norm(1.0));
+    }
+
     public Coord2d rotate(double angle) {
         double cos = Math.cos(angle);
         double sin = Math.sin(angle);
@@ -227,8 +235,13 @@ public class Coord2d implements Comparable<Coord2d>, java.io.Serializable {
                 y * cos + x * sin);
     }
 
+    public Coord2d rot(double a) {
+        double s = Math.sin(a), c = Math.cos(a);
+        return (of((x * c) - (y * s), (y * c) + (x * s)));
+    }
+
     public static Coord2d sc(double a, double r) {
-        return (new Coord2d(Math.cos(a) * r, Math.sin(a) * r));
+        return (of(Math.cos(a) * r, Math.sin(a) * r));
     }
 
     public String toString() {

@@ -127,31 +127,60 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     }
 
     public static class Overlay implements Rendered {
+        public final int id;
+        public final Gob gob;
         public Indir<Resource> res;
         public MessageBuf sdt;
         public Sprite spr;
-        public int id;
         public boolean delign = false;
+        private boolean added = false;
 
-        public Overlay(int id, Indir<Resource> res, Message sdt) {
+        public Overlay(Gob gob, int id, Indir<Resource> res, Message sdt) {
+            this.gob = gob;
             this.id = id;
             this.res = res;
             this.sdt = new MessageBuf(sdt);
             spr = null;
         }
 
-        public Overlay(int id, Sprite spr) {
+        public Overlay(int id, Indir<Resource> res, Message sdt) {
+            this(null, id, res, sdt);
+        }
+
+        public Overlay(Gob gob, int id, Sprite spr) {
+            this.gob = gob;
             this.id = id;
             this.res = null;
             this.sdt = null;
             this.spr = spr;
         }
 
-        public Overlay(Sprite spr) {
+        public Overlay(int id, Sprite spr) {
+            this(null, id, spr);
+        }
+
+        public Overlay(Gob gob, Sprite spr) {
+            this.gob = gob;
             this.id = -1;
             this.res = null;
             this.sdt = null;
             this.spr = spr;
+        }
+
+        public Overlay(Sprite spr) {
+            this(null, spr);
+        }
+
+        private void init() {
+            if (spr == null) {
+                spr = Sprite.create(gob, res.get(), sdt);
+            }
+        }
+
+        private void add0() {
+            if (added)
+                throw (new IllegalStateException());
+            added = true;
         }
 
         public String name() {
@@ -179,7 +208,33 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             public void setupmain(RenderList rl);
         }
 
-        public void draw(GOut g) {
+        public void draw(GOut g) {}
+
+        private void remove0() {
+            if (!added)
+                throw (new IllegalStateException());
+//            if(slots != null) {
+//                RUtils.multirem(new ArrayList<>(slots));
+//                slots = null;
+//            }
+//            if (spr instanceof SetupMod) {
+//                if ((!delign || (spr instanceof Overlay.CDel)) && done)
+//                    ols.remove(ol);
+//            }
+            added = false;
+        }
+
+        public void remove(boolean async) {
+            if (async) {
+                gob.defer(() -> remove(false));
+                return;
+            }
+            remove0();
+            gob.ols.remove(this);
+        }
+
+        public void remove() {
+            remove(true);
         }
 
         public boolean setup(RenderList rl) {
@@ -201,6 +256,283 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 
         public Object staticp() {
             return ((spr == null) ? null : spr.staticp());
+        }
+    }
+
+    public static interface Placer {
+        /* XXX: *Quite* arguably, the distinction between getc and
+         * getr should be abolished and a single transform matrix
+         * should be used instead, but that requires first abolishing
+         * the distinction between the gob/gobx location IDs. */
+        public Coord3f getc(Coord2d rc, double ra);
+
+        public Matrix4f getr(Coord2d rc, double ra);
+    }
+
+    public static interface Placing {
+        public Placer placer();
+    }
+
+    public static class DefaultPlace implements Placer {
+        public final MCache map;
+        public final MCache.SurfaceID surf;
+
+        public DefaultPlace(MCache map, MCache.SurfaceID surf) {
+            this.map = map;
+            this.surf = surf;
+        }
+
+        public Coord3f getc(Coord2d rc, double ra) {
+            return (map.getzp(surf, rc));
+        }
+
+        public Matrix4f getr(Coord2d rc, double ra) {
+            return (Transform.makerot(new Matrix4f(), Coord3f.zu, -(float) ra));
+        }
+    }
+
+    public static class InclinePlace extends DefaultPlace {
+        public InclinePlace(MCache map, MCache.SurfaceID surf) {
+            super(map, surf);
+        }
+
+        public Matrix4f getr(Coord2d rc, double ra) {
+            Matrix4f ret = super.getr(rc, ra);
+            Coord3f norm = map.getnorm(surf, rc);
+            norm.y = -norm.y;
+            Coord3f rot = Coord3f.zu.cmul(norm);
+            float sin = rot.abs();
+            if (sin > 0) {
+                Matrix4f incl = Transform.makerot(new Matrix4f(), rot.mul(1 / sin), sin, (float) Math.sqrt(1 - (sin * sin)));
+                ret = incl.mul(ret);
+            }
+            return (ret);
+        }
+    }
+
+    public static class BasePlace extends DefaultPlace {
+        public final Coord2d[][] obst;
+        private Coord2d cc;
+        private double ca;
+        private int seq = -1;
+        private float z;
+
+        public BasePlace(MCache map, MCache.SurfaceID surf, Coord2d[][] obst) {
+            super(map, surf);
+            this.obst = obst;
+        }
+
+        public BasePlace(MCache map, MCache.SurfaceID surf, Resource res, String id) {
+            this(map, surf, res.flayer(Resource.obst, id).ep);
+        }
+
+        public BasePlace(MCache map, MCache.SurfaceID surf, Resource res) {
+            this(map, surf, res, "");
+        }
+
+        private float getz(Coord2d rc, double ra) {
+            Coord2d[][] no = this.obst, ro = new Coord2d[no.length][];
+            {
+                double s = Math.sin(ra), c = Math.cos(ra);
+                for (int i = 0; i < no.length; i++) {
+                    ro[i] = new Coord2d[no[i].length];
+                    for (int o = 0; o < ro[i].length; o++)
+                        ro[i][o] = Coord2d.of((no[i][o].x * c) - (no[i][o].y * s), (no[i][o].y * c) + (no[i][o].x * s)).add(rc);
+                }
+            }
+            float ret = Float.NaN;
+            for (int i = 0; i < no.length; i++) {
+                for (int o = 0; o < ro[i].length; o++) {
+                    Coord2d a = ro[i][o], b = ro[i][(o + 1) % ro[i].length];
+                    for (Coord2d c : new Line2d.GridIsect(a, b, MCache.tilesz, false)) {
+                        double z = map.getz(surf, c);
+                        if (Float.isNaN(ret) || (z < ret))
+                            ret = (float) z;
+                    }
+                }
+            }
+            return (ret);
+        }
+
+        public Coord3f getc(Coord2d rc, double ra) {
+            int mseq = map.chseq;
+            if ((mseq != this.seq) || !Utils.eq(rc, cc) || (ra != ca)) {
+                this.z = getz(rc, ra);
+                this.seq = mseq;
+                this.cc = rc;
+                this.ca = ra;
+            }
+            return (Coord3f.of((float) rc.x, (float) rc.y, this.z));
+        }
+    }
+
+    public static class LinePlace extends DefaultPlace {
+        public final double max, min;
+        public final Coord2d k;
+        private Coord3f c;
+        private Matrix4f r = Matrix4f.id;
+        private int seq = -1;
+        private Coord2d cc;
+        private double ca;
+
+        public LinePlace(MCache map, MCache.SurfaceID surf, Coord2d[][] points, Coord2d k) {
+            super(map, surf);
+            Line2d l = Line2d.from(Coord2d.z, k);
+            double max = 0, min = 0;
+            for (int i = 0; i < points.length; i++) {
+                for (int o = 0; o < points[i].length; o++) {
+                    int p = (o + 1) % points[i].length;
+                    Line2d edge = Line2d.twixt(points[i][o], points[i][p]);
+                    Coord2d t = l.cross(edge);
+                    if ((t.y >= 0) && (t.y <= 1)) {
+                        max = Math.max(t.x, max);
+                        min = Math.min(t.x, min);
+                    }
+                }
+            }
+            if ((max == 0) || (min == 0))
+                throw (new RuntimeException("illegal bounds for LinePlace"));
+            this.k = k;
+            this.max = max;
+            this.min = min;
+        }
+
+        public LinePlace(MCache map, MCache.SurfaceID surf, Resource res, String id, Coord2d k) {
+            this(map, surf, res.flayer(Resource.obst, id).ep, k);
+        }
+
+        public LinePlace(MCache map, MCache.SurfaceID surf, Resource res, Coord2d k) {
+            this(map, surf, res, "", k);
+        }
+
+        private void recalc(Coord2d rc, double ra) {
+            Coord2d rk = k.rot(ra);
+            double maxz = map.getz(surf, rc.add(rk.mul(max)));
+            double minz = map.getz(surf, rc.add(rk.mul(min)));
+            Coord3f rax = Coord3f.of((float) -rk.y, (float) -rk.x, 0);
+            float dz = (float) (maxz - minz);
+            float dx = (float) (max - min);
+            float hyp = (float) Math.sqrt((dx * dx) + (dz * dz));
+            float sin = dz / hyp, cos = dx / hyp;
+            c = Coord3f.of((float) rc.x, (float) rc.y, (float) minz + (dz * (float) (-min / (max - min))));
+            r = Transform.makerot(new Matrix4f(), rax, sin, cos).mul(super.getr(rc, ra));
+        }
+
+        private void check(Coord2d rc, double ra) {
+            int mseq = map.chseq;
+            if ((mseq != this.seq) || !Utils.eq(rc, cc) || (ra != ca)) {
+                recalc(rc, ra);
+                this.seq = mseq;
+                this.cc = rc;
+                this.ca = ra;
+            }
+        }
+
+        public Coord3f getc(Coord2d rc, double ra) {
+            check(rc, ra);
+            return (c);
+        }
+
+        public Matrix4f getr(Coord2d rc, double ra) {
+            check(rc, ra);
+            return (r);
+        }
+    }
+
+    public static class PlanePlace extends DefaultPlace {
+        public final Coord2d[] points;
+        private Coord3f c;
+        private Matrix4f r = Matrix4f.id;
+        private int seq = -1;
+        private Coord2d cc;
+        private double ca;
+
+        public static Coord2d[] flatten(Coord2d[][] points) {
+            int n = 0;
+            for (int i = 0; i < points.length; i++)
+                n += points[i].length;
+            Coord2d[] ret = new Coord2d[n];
+            for (int i = 0, o = 0; i < points.length; o += points[i++].length)
+                System.arraycopy(points[i], 0, ret, o, points[i].length);
+            return (ret);
+        }
+
+        public PlanePlace(MCache map, MCache.SurfaceID surf, Coord2d[] points) {
+            super(map, surf);
+            this.points = points;
+        }
+
+        public PlanePlace(MCache map, MCache.SurfaceID surf, Coord2d[][] points) {
+            this(map, surf, flatten(points));
+        }
+
+        public PlanePlace(MCache map, MCache.SurfaceID surf, Resource res, String id) {
+            this(map, surf, res.flayer(Resource.obst, id).ep);
+        }
+
+        public PlanePlace(MCache map, MCache.SurfaceID surf, Resource res) {
+            this(map, surf, res, "");
+        }
+
+        private void recalc(Coord2d rc, double ra) {
+            double s = Math.sin(ra), c = Math.cos(ra);
+            Coord3f[] pp = new Coord3f[points.length];
+            for (int i = 0; i < pp.length; i++) {
+                Coord2d rv = Coord2d.of((points[i].x * c) - (points[i].y * s), (points[i].y * c) + (points[i].x * s));
+                pp[i] = map.getzp(surf, rv.add(rc));
+            }
+            int I = 0, O = 1, U = 2;
+            Coord3f mn = Coord3f.zu;
+            double ma = 0;
+            for (int i = 0; i < pp.length - 2; i++) {
+                for (int o = i + 1; o < pp.length - 1; o++) {
+                    plane:
+                    for (int u = o + 1; u < pp.length; u++) {
+                        Coord3f n = pp[o].sub(pp[i]).cmul(pp[u].sub(pp[i])).norm();
+                        for (int p = 0; p < pp.length; p++) {
+                            if ((p == i) || (p == o) || (p == u))
+                                continue;
+                            float pz = (((n.x * (pp[i].x - pp[p].x)) + (n.y * (pp[i].y - pp[p].y))) / n.z) + pp[i].z;
+                            if (pz < pp[p].z - 0.01)
+                                continue plane;
+                        }
+                        double a = n.cmul(Coord3f.zu).abs();
+                        if (a > ma) {
+                            mn = n;
+                            ma = a;
+                            I = i; O = o; U = u;
+                        }
+                    }
+                }
+            }
+            this.c = Coord3f.of((float) rc.x, (float) rc.y, (((mn.x * (pp[I].x - (float) rc.x)) + (mn.y * (pp[I].y - (float) rc.y))) / mn.z) + pp[I].z);
+            this.r = Transform.makerot(new Matrix4f(), Coord3f.zu, -(float) ra);
+            mn.y = -mn.y;
+            Coord3f rot = Coord3f.zu.cmul(mn);
+            float sin = rot.abs();
+            if (sin > 0) {
+                Matrix4f incl = Transform.makerot(new Matrix4f(), rot.mul(1 / sin), sin, (float) Math.sqrt(1 - (sin * sin)));
+                this.r = incl.mul(this.r);
+            }
+        }
+
+        private void check(Coord2d rc, double ra) {
+            int mseq = map.chseq;
+            if ((mseq != this.seq) || !Utils.eq(rc, cc) || (ra != ca)) {
+                recalc(rc, ra);
+                this.seq = mseq;
+                this.cc = rc;
+                this.ca = ra;
+            }
+        }
+
+        public Coord3f getc(Coord2d rc, double ra) {
+            check(rc, ra);
+            return (this.c);
+        }
+
+        public Matrix4f getr(Coord2d rc, double ra) {
+            return (this.r);
         }
     }
 
@@ -354,6 +686,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     public double a;
     public boolean virtual = false;
     int clprio = 0;
+    public boolean removed = false;
     public long id;
     public int frame;
     public final Glob glob;
@@ -383,16 +716,16 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     private boolean discovered = false;
     public Type type;
 
-    public Gob(Glob glob, Coord2d c, long id, int frame) {
+    public Gob(Glob glob, Coord2d c, long id) {
         this.glob = glob;
         this.rc = c;
         this.id = id;
-        this.frame = frame;
-        loc.tick();
+        if (id < 0)
+            virtual = true;
     }
 
     public Gob(Glob glob, Coord2d c) {
-        this(glob, c, -1, 0);
+        this(glob, c, -1);
     }
 
     /**
@@ -534,7 +867,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             } else {
                 //We don't care about these gobs, tell OCache to start the removal process
                 dispose();
-                glob.oc.remove(id);
+                glob.oc.remove(this);
             }
             discovered = true;
         }
@@ -623,10 +956,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 
             for (Overlay ol : new ArrayList<>(ols)) {
                 if (ol.spr == null) {
-                    try {
-                        ol.spr = Sprite.create(this, ol.res.get(), ol.sdt.clone());
-                    } catch (Loading e) {
-                    }
+//                    try {
+//                        ol.spr = Sprite.create(this, ol.res.get(), ol.sdt.clone());
+//                    } catch (Loading e) {
+//                    }
                 } else {
                     boolean done = ol.spr.tick(dt);
                     if ((!ol.delign || (ol.spr instanceof Overlay.CDel)) && done)
@@ -639,7 +972,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 dols.remove(ol);
             }
             if (virtual && ols.isEmpty())
-                glob.oc.remove(id);
+                glob.oc.remove(this);
         }
     }
 
@@ -816,19 +1149,61 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         return "";
     }
 
-    /* Intended for local code. Server changes are handled via OCache. */
-    public void addol(Overlay ol) {
-        synchronized (ols) {
-            ols.add(ol);
+    private final LinkedList<Runnable> deferred = new LinkedList<>();
+    private Loader.Future<?> deferral = null;
+
+    private void deferred() {
+        while (true) {
+            Runnable task;
+            synchronized (deferred) {
+                task = deferred.peek();
+                if (task == null) {
+                    deferral = null;
+                    return;
+                }
+            }
+            synchronized (this) {
+                if (!removed)
+                    task.run();
+            }
+            if (task instanceof Disposable)
+                ((Disposable) task).dispose();
+            synchronized (deferred) {
+                if (deferred.poll() != task)
+                    throw (new RuntimeException());
+            }
         }
     }
 
+    public void defer(Runnable task) {
+        synchronized (deferred) {
+            deferred.add(task);
+            if (deferral == null)
+                deferral = glob.loader.defer(this::deferred, null);
+        }
+    }
+
+    /* Intended for local code. Server changes are handled via OCache. */
+    public void addol(Overlay ol, boolean async) {
+        if (async) {
+            defer(() -> addol(ol, false));
+            return;
+        }
+        ol.init();
+        ol.add0();
+        ols.add(ol);
+    }
+
+    public void addol(Overlay ol) {
+        addol(ol, true);
+    }
+
     public void addol(Sprite ol) {
-        addol(new Overlay(ol));
+        addol(new Overlay(this, ol));
     }
 
     public void addol(Indir<Resource> res, Message sdt) {
-        addol(new Overlay(-1, res, sdt));
+        addol(new Overlay(this, -1, res, sdt));
     }
 
     public boolean hasOverlay(Class<?> cl) {
@@ -1928,5 +2303,54 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 mc = map.get(-1);
             return (mc == null ? Optional.empty() : Optional.ofNullable(mc.get()));
         }
+    }
+
+    public static class DataLoading extends Loading {
+        public final transient Gob gob;
+        public final int updseq;
+
+        /* It would be assumed that the caller has synchronized on gob
+         * while creating this exception. */
+        public DataLoading(Gob gob, String message) {
+            super(message);
+            this.gob = gob;
+            this.updseq = gob.updateseq;
+        }
+
+        public void waitfor(Runnable callback, Consumer<Waitable.Waiting> reg) {
+            synchronized (gob) {
+                if (gob.updateseq != this.updseq) {
+                    reg.accept(Waitable.Waiting.dummy);
+                    callback.run();
+                } else {
+                    gob.updwait(callback, reg);
+                }
+            }
+        }
+    }
+
+    public int updateseq = 0;
+    private Waitable.Queue updwait = null;
+
+    void updated() {
+        synchronized (this) {
+            updateseq++;
+            if (updwait != null)
+                updwait.wnotify();
+        }
+    }
+
+    public void updwait(Runnable callback, Consumer<Waitable.Waiting> reg) {
+        /* Caller should probably synchronize on this already for a
+         * call like this to even be meaningful, but just in case. */
+        synchronized (this) {
+            if (updwait == null)
+                updwait = new Waitable.Queue();
+            reg.accept(updwait.add(callback));
+        }
+    }
+
+    void removed() {
+        removed = true;
     }
 }

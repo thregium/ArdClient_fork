@@ -88,4 +88,24 @@ public class Speaking extends GAttrib {
                 Speaking.this.draw(g, gob.sc.add(new Coord(gob.sczu.mul(zo))).add(3, 0));
         }
     };
+
+    @OCache.DeltaType(OCache.OD_SPEECH)
+    public static class $speak implements OCache.Delta {
+        @Override
+        public void apply(Gob g, OCache.AttrDelta msg) {
+            float zo = msg.int16() / 100.0f;
+            String text = msg.string();
+            if (text.isEmpty()) {
+                g.delattr(Speaking.class);
+            } else {
+                Speaking m = g.getattr(Speaking.class);
+                if (m == null) {
+                    g.setattr(new Speaking(g, zo, text));
+                } else {
+                    m.zo = zo;
+                    m.update(text);
+                }
+            }
+        }
+    }
 }

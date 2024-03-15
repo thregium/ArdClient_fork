@@ -62,8 +62,8 @@ public class GobHealthSprite extends Sprite {
         final Gob g = (Gob) owner;
         final GobHealth hp = g.getattr(GobHealth.class);
         if (hp != null) {
-            if (hp.hp < 4) {
-                tex = gobhp[hp.hp - 1];
+            if (hp.hp < 1) {
+                tex = gobhp[(int)(hp.hp * 4) - 1];
             } else {
                 tex = null;
             }

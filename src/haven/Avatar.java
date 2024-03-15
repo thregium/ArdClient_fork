@@ -28,6 +28,7 @@ package haven;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Avatar extends GAttrib {
@@ -56,6 +57,26 @@ public class Avatar extends GAttrib {
                 images = nimg;
             }
             return (images);
+        }
+    }
+
+    @OCache.DeltaType(OCache.OD_AVATAR)
+    public static class $avatar implements OCache.Delta {
+        @Override
+        public void apply(Gob g, OCache.AttrDelta msg) {
+            List<Indir<Resource>> layers = new LinkedList<>();
+            while (true) {
+                int layer = msg.uint16();
+                if (layer == 65535)
+                    break;
+                layers.add(OCache.Delta.getres(g, layer));
+            }
+            Avatar ava = g.getattr(Avatar.class);
+            if (ava == null) {
+                ava = new Avatar(g);
+                g.setattr(ava);
+            }
+            ava.setlayers(layers);
         }
     }
 }

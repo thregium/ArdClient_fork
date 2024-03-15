@@ -36,7 +36,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 public class Skeleton {
     public final Map<String, Bone> bones = new HashMap<>();
@@ -218,7 +217,7 @@ public class Skeleton {
         return (p);
     }
 
-    public class Pose {
+    public class Pose implements EquipTarget {
         public float[][] lpos, gpos;
         public float[][] lrot, grot;
         private Pose from = null;
@@ -298,6 +297,13 @@ public class Skeleton {
                     return (super.fin(p));
                 }
             });
+        }
+
+        public Location eqpoint(String name, Message dat) {
+            Bone bone = bones.get(name);
+            if (bone == null)
+                return (null);
+            return (bonetrans(bone.idx));
         }
 
         public Location bonetrans2(final int bone) {
@@ -1155,6 +1161,12 @@ public class Skeleton {
                 final float z = (float) buf.cpfloat();
                 return (pose -> (Location.xlate(new Coord3f(x, y, z))));
             };
+            opcodes[16] = buf -> {
+                final float x = buf.float32();
+                final float y = buf.float32();
+                final float z = buf.float32();
+                return (pose -> (Location.xlate(new Coord3f(x, y, z))));
+            };
             opcodes[1] = buf -> {
                 final float ang = (float) buf.cpfloat();
                 final float ax = (float) buf.cpfloat();
@@ -1162,18 +1174,33 @@ public class Skeleton {
                 final float az = (float) buf.cpfloat();
                 return (pose -> (Location.rot(new Coord3f(ax, ay, az), ang)));
             };
+            opcodes[17] = buf -> {
+                final float ang = buf.unorm16() * 2 * (float) Math.PI;
+                float[] ax = new float[3];
+                Utils.oct2uvec(ax, buf.snorm16(), buf.snorm16());
+                return (pose -> (Location.rot(new Coord3f(ax[0], ax[1], ax[2]), ang)));
+            };
             opcodes[2] = buf -> {
                 final String bonenm = buf.string();
-                return (pose -> {
-                    Bone bone = pose.skel().bones.get(bonenm);
-                    return (pose.bonetrans(bone.idx));
-                });
+                return (pose -> pose.eqpoint(bonenm, Message.nil));
             };
             opcodes[3] = buf -> {
-                final Coord3f ref = Coord3f.of((float) buf.cpfloat(), (float) buf.cpfloat(), (float) buf.cpfloat()).norm();
+                Coord3f ref = Coord3f.of((float)buf.cpfloat(), (float)buf.cpfloat(), (float)buf.cpfloat()).norm();
                 final String orignm = buf.string();
                 final String tgtnm = buf.string();
-                return (pose -> {
+                return (equ -> {
+                    Pose pose = (Pose) equ;
+                    Bone orig = pose.skel().bones.get(orignm);
+                    Bone tgt = pose.skel().bones.get(tgtnm);
+                    return (pose.new BoneAlign(ref, orig, tgt));
+                });
+            };
+            opcodes[19] = buf -> {
+                Coord3f ref = Utils.oct2uvec(buf.snorm16(), buf.snorm16());
+                final String orignm = buf.string();
+                final String tgtnm = buf.string();
+                return (equ -> {
+                    Pose pose = (Pose) equ;
                     Bone orig = pose.skel().bones.get(orignm);
                     Bone tgt = pose.skel().bones.get(tgtnm);
                     return (pose.new BoneAlign(ref, orig, tgt));
@@ -1187,33 +1214,10 @@ public class Skeleton {
                 Location loc = Location.scale(scale);
                 return (post -> loc);
             };
-            opcodes[16] = buf -> {
-                final float x = buf.float32();
-                final float y = buf.float32();
-                final float z = buf.float32();
-                return (pose -> (Location.xlate(new Coord3f(x, y, z))));
-            };
-            opcodes[17] = buf -> {
-                final float ang = buf.unorm16() * 2 * (float) Math.PI;
-                float[] ax = new float[3];
-                Utils.oct2uvec(ax, buf.snorm16(), buf.snorm16());
-                return (pose -> (Location.rot(new Coord3f(ax[0], ax[1], ax[2]), ang)));
-            };
-            opcodes[19] = buf -> {
-                Coord3f ref = Utils.oct2uvec(buf.snorm16(), buf.snorm16());
-                final String orignm = buf.string();
-                final String tgtnm = buf.string();
-                return (equ -> {
-                    Pose pose = (Pose) equ;
-                    Bone orig = pose.skel().bones.get(orignm);
-                    Bone tgt = pose.skel().bones.get(tgtnm);
-                    return (pose.new BoneAlign(ref, orig, tgt));
-                });
-            };
         }
 
         public interface Command {
-            GLState make(Pose pose);
+            GLState make(EquipTarget pose);
         }
 
         public interface HatingJava {
@@ -1251,6 +1255,19 @@ public class Skeleton {
             for (int i = 0; i < prog.length; i++)
                 ls[i] = prog[i].make(pose);
             return (GLState.compose(ls));
+        }
+
+        @SuppressWarnings("unchecked")
+        public GLState from(EquipTarget equ) {
+            if (prog.length == 1)
+                return (prog[0].make(equ));
+            GLState[] ls = new GLState[prog.length];
+            for (int i = 0; i < prog.length; i++)
+                ls[i] = prog[i].make(equ);
+            GLState[] buf = new GLState[ls.length];
+            for (int i = 0; i < ls.length; i++)
+                buf[i] = ls[i];
+            return (GLState.compose(buf));
         }
     }
 }

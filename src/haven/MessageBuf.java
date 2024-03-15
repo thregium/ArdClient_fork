@@ -47,9 +47,11 @@ public class MessageBuf extends Message implements Serializable {
     public MessageBuf() {
         this.oh = 0;
     }
+
     public MessageBuf(Message from, int len) {
-	this(from.bytes(len));
+        this(from.bytes(len));
     }
+
     public MessageBuf(Message from) {
         if (from instanceof MessageBuf) {
             MessageBuf fb = (MessageBuf) from;

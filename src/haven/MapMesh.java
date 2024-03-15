@@ -474,8 +474,7 @@ public class MapMesh implements Rendered, Disposable {
             mesh.dispose();
         }
 
-        public void draw(GOut g) {
-        }
+        public void draw(GOut g) {}
 
         public boolean setup(RenderList rl) {
             rl.prepc(gmorder);
@@ -483,6 +482,17 @@ public class MapMesh implements Rendered, Disposable {
             rl.add(mesh, null);
             return (false);
         }
+    }
+
+    private Map<Pair<MCache.SurfaceID, Tiler>, MCache.ZSurface> zsurfaces = new HashMap<>();
+    public MCache.ZSurface getsurf(MCache.SurfaceID id, Tiler tile) {
+        MCache.ZSurface ret = zsurfaces.get(new Pair<>(id, tile));
+        if(ret == null) {
+            Map<Pair<MCache.SurfaceID, Tiler>, MCache.ZSurface> n = new HashMap<>(zsurfaces);
+            n.put(new Pair<>(id, tile), ret = tile.getsurf(this, id));
+            zsurfaces = n;
+        }
+        return(ret);
     }
 
     public static class OLOrder extends Order<Rendered> {
@@ -702,8 +712,10 @@ public class MapMesh implements Rendered, Disposable {
         }
     }
 
-    public void draw(GOut g) {
-    }
+    public void draw(GOut g) {}
+
+    public static Order clickmain = Rendered.deflt;
+    public static Order clickpost = new Order.Default(100);
 
     private void consflat() {
         class Buf implements Tiler.MCons {

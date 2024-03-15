@@ -39,27 +39,21 @@ public class GobHealth extends GAttrib {
             PUtils.strokeTex(Gob.gobhpf.render("2/4", Color.WHITE)),
             PUtils.strokeTex(Gob.gobhpf.render("3/4", Color.WHITE))
     };
-    public int hp;
+    public float hp;
     Material.Colors fx;
     public PView.Draw2D hpfx;
 
-    public GobHealth(Gob g, int hp) {
+    public GobHealth(Gob g, float hp) {
         super(g);
         this.hp = hp;
-        this.fx = new Material.Colors(new Color(255, 0, 0, 128 - ((hp * 128) / 4)));
+        this.fx = new Material.Colors(new Color(255, 0, 0, (int) (128 - (hp * 128))));
         hpfx = new PView.Draw2D() {
             public void draw2d(GOut g) {
-                if (gob.sc != null && hp < 4) {
-                    g.image(gobhp[hp - 1], gob.sc.sub(15, 10));
+                if (gob.sc != null && hp < 1) {
+                    g.image(gobhp[(int) (hp * 4) - 1], gob.sc.sub(15, 10));
                 }
             }
         };
-    }
-
-    public GLState getfx() {
-        if (hp >= 4)
-            return (GLState.nullstate);
-        return (fx);
     }
 
     public double asfloat() {
@@ -71,5 +65,14 @@ public class GobHealth extends GAttrib {
             return super.staticp();
         else
             return SEMISTATIC;
+    }
+
+    @OCache.DeltaType(OCache.OD_HEALTH)
+    public static class $health implements OCache.Delta {
+        @Override
+        public void apply(Gob g, OCache.AttrDelta msg) {
+            int hp = msg.uint8();
+            g.setattr(new GobHealth(g, hp / 4.0f));
+        }
     }
 }

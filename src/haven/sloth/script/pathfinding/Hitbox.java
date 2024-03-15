@@ -230,29 +230,29 @@ public class Hitbox {
             }
 
             try {
-                List<Resource.Neg> negs = new ArrayList<>(res.layers(Resource.negc));
-                List<Resource.Obstacle> obsts = new ArrayList<>(res.layers(Resource.obst));
+                List<Resource.Neg> negs = new ArrayList<>(res.layers(Resource.Neg.class));
+                List<Resource.Obstacle> obsts = new ArrayList<>(res.layers(Resource.Obstacle.class));
                 for (RenderLink.Res link : res.layers(RenderLink.Res.class)) {
                     RenderLink l = link.l;
                     if (l instanceof RenderLink.MeshMat) {
                         RenderLink.MeshMat mm = (RenderLink.MeshMat) l;
-                        addIf(negs, getLayer(Resource.negc, mm.srcres.indir(), mm.mesh));
-                        addIf(obsts, getLayer(Resource.obst, mm.srcres.indir(), mm.mesh));
+                        addIf(negs, getLayer(Resource.Neg.class, mm.srcres.indir(), mm.mesh));
+                        addIf(obsts, getLayer(Resource.Obstacle.class, mm.srcres.indir(), mm.mesh));
                     }
                     if (l instanceof RenderLink.AmbientLink) {
                         RenderLink.AmbientLink al = (RenderLink.AmbientLink) l;
-                        addIf(negs, getLayer(Resource.negc, al.res));
-                        addIf(obsts, getLayer(Resource.obst, al.res));
+                        addIf(negs, getLayer(Resource.Neg.class, al.res));
+                        addIf(obsts, getLayer(Resource.Obstacle.class, al.res));
                     }
                     if (l instanceof RenderLink.Collect) {
                         RenderLink.Collect cl = (RenderLink.Collect) l;
-                        addIf(negs, getLayer(Resource.negc, cl.from));
-                        addIf(obsts, getLayer(Resource.obst, cl.from));
+                        addIf(negs, getLayer(Resource.Neg.class, cl.from));
+                        addIf(obsts, getLayer(Resource.Obstacle.class, cl.from));
                     }
                     if (l instanceof RenderLink.Parameters) {
                         RenderLink.Parameters pl = (RenderLink.Parameters) l;
-                        addIf(negs, getLayer(Resource.negc, pl.res));
-                        addIf(obsts, getLayer(Resource.obst, pl.res));
+                        addIf(negs, getLayer(Resource.Neg.class, pl.res));
+                        addIf(obsts, getLayer(Resource.Obstacle.class, pl.res));
                     }
                 }
 

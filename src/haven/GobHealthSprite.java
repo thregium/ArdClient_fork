@@ -7,7 +7,7 @@ public class GobHealthSprite extends Sprite {
     private static final Tex hlt0 = PUtils.strokeTex(Text.num12Fnd.render("1/4", new Color(255, 0, 0)));
     private static final Tex hlt1 = PUtils.strokeTex(Text.num12Fnd.render("2/4", new Color(255, 128, 0)));
     private static final Tex hlt2 = PUtils.strokeTex(Text.num12Fnd.render("3/4", new Color(255, 255, 0)));
-    public int val;
+    public float val;
     private Tex tex;
     private static Matrix4f mv = new Matrix4f();
     private Projection proj;
@@ -15,7 +15,7 @@ public class GobHealthSprite extends Sprite {
     private Location.Chain loc;
     private Camera camp;
 
-    public GobHealthSprite(int val) {
+    public GobHealthSprite(float val) {
         super(null, null);
         update(val);
     }
@@ -38,9 +38,9 @@ public class GobHealthSprite extends Sprite {
         return true;
     }
 
-    public void update(int val) {
+    public void update(float val) {
         this.val = val;
-        switch (val - 1) {
+        switch ((int) (val * 4) - 1) {
             case 0:
                 tex = hlt0;
                 break;

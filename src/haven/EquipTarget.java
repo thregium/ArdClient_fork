@@ -26,25 +26,10 @@
 
 package haven;
 
-public class Lumin extends GAttrib {
-    Coord off;
-    int sz, str;
+import java.util.function.Supplier;
 
-    public Lumin(Gob g, Coord off, int sz, int str) {
-        super(g);
-        this.off = off;
-        this.sz = sz;
-        this.str = str;
-    }
+public interface EquipTarget {
+    public final Supplier<GLState> nil = () -> GLState.nullstate;
 
-    @OCache.DeltaType(OCache.OD_LUMIN)
-    public static class $lumin implements OCache.Delta {
-        @Override
-        public void apply(Gob g, OCache.AttrDelta msg) {
-            Coord off = msg.coord();
-            int sz = msg.uint16();
-            int str = msg.uint8();
-            g.setattr(new Lumin(g, off, sz, str));
-        }
-    }
+    public Location eqpoint(String nm, Message dat);
 }

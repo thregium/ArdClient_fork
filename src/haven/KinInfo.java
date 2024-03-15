@@ -109,4 +109,24 @@ public class KinInfo extends GAttrib {
     public Object staticp() {
         return null;
     }
+
+    @OCache.DeltaType(OCache.OD_BUDDY)
+    public static class $buddy implements OCache.Delta {
+        @Override
+        public void apply(Gob g, OCache.AttrDelta msg) {
+            String name = msg.string();
+            if (name.length() > 0) {
+                int group = msg.uint8();
+                int btype = msg.uint8();
+                KinInfo b = g.getattr(KinInfo.class);
+                if (b == null) {
+                    g.setattr(new KinInfo(g, name, group, btype));
+                } else {
+                    b.update(name, group, btype);
+                }
+            } else {
+                g.delattr(KinInfo.class);
+            }
+        }
+    }
 }

@@ -1139,7 +1139,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         public final Set<Gob> changed = Collections.synchronizedSet(new HashSet<>());
         public final Set<Gob> removed = Collections.synchronizedSet(new HashSet<>());
 
-        public void changed(Gob ob) {
+        public void added(Gob ob) {
             changed.add(ob);
         }
 
@@ -1341,7 +1341,11 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         Gobs() {
             oc.callback(changed);
             for (Gob ob : oc.getallgobs())
-                changed.changed(ob);
+                changed.added(ob);
+        }
+
+        public void destroy() {
+            oc.uncallback(changed);
         }
 
         void update() {
@@ -1349,7 +1353,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             Collection<Gob> keys = new ArrayList<>(parts.keySet());
 
             keys.stream().filter(g -> !values.contains(g)).collect(Collectors.toList()).forEach(changed::removed);
-            values.stream().filter(g -> !keys.contains(g)).collect(Collectors.toList()).forEach(changed::changed);
+            values.stream().filter(g -> !keys.contains(g)).collect(Collectors.toList()).forEach(changed::added);
 
             for (Gob ob : changed.removed.toArray(new Gob[0]))
                 remove(ob);
@@ -1399,7 +1403,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
     }
 
-    private final Rendered gobs;
+    private final Gobs gobs;
 
     public String toString() {
         String cc;
@@ -4027,5 +4031,11 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             lastMouseClick.set(null);
         }
         return (last);
+    }
+
+    @Override
+    public void reqdestroy() {
+        gobs.destroy();
+        super.reqdestroy();
     }
 }
