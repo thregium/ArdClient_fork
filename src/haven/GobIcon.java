@@ -46,16 +46,25 @@ public class GobIcon extends GAttrib {
     public static final PUtils.Convolution filter = new PUtils.Hanning(1);
     private static final Map<Indir<Resource>, Image> cache = new WeakHashMap<>();
     public final Indir<Resource> res;
+    public final byte[] sdt;
     protected Image img;
 
     public GobIcon(Gob g) {
         super(g);
         this.res = null;
+        this.sdt = null;
     }
 
     public GobIcon(Gob g, Indir<Resource> res) {
         super(g);
         this.res = res;
+        this.sdt = null;
+    }
+
+    public GobIcon(Gob g, Indir<Resource> res, byte[] sdt) {
+        super(g);
+        this.res = res;
+        this.sdt = sdt;
     }
 
     public TexI tex() {

@@ -958,24 +958,24 @@ public class OCache implements Iterable<Gob> {
         }
     }
 
-    public void icon(Gob g, Indir<Resource> res) {
+    public void icon(Gob g, Indir<Resource> res, byte[] sdt) {
         if (res == null)
             g.delattr(GobIcon.class);
         else
-            g.setattr(new GobIcon(g, res));
+            g.setattr(new GobIcon(g, res, sdt));
         changed(g);
     }
 
     public void icon(Gob gob, Message msg) {
         int resid = msg.uint16();
-        Indir<Resource> res;
         if (resid == 65535) {
             if (gob != null)
-                icon(gob, (Indir<Resource>) null);
+                icon(gob, null, null);
         } else {
             int ifl = msg.uint8();
+            byte[] sdt = msg.bytes();
             if (gob != null)
-                icon(gob, getres(resid));
+                icon(gob, getres(resid), sdt);
         }
     }
 

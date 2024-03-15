@@ -27,8 +27,8 @@
 package haven;
 
 import haven.sloth.script.SessionDetails;
-import integrations.mapv4.MappingClient;
 import modification.dev;
+
 import java.io.IOException;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -332,7 +332,7 @@ public class Session implements Resource.Resolver {
                     gob.frame = frame;
                     gob.virtual = ((fl & 2) != 0);
                 }
-                while (true) {
+                while (!msg.eom()) {
                     int type = msg.uint8();
                     if (type == OCache.OD_REM) {
                         oc.remove(id, frame - 1);
