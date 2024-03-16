@@ -110,7 +110,7 @@ public class KinInfo extends GAttrib {
         return null;
     }
 
-    @OCache.DeltaType(OCache.OD_BUDDY)
+//    @OCache.DeltaType(OCache.OD_BUDDY)
     public static class $buddy implements OCache.Delta {
         @Override
         public void apply(Gob g, OCache.AttrDelta msg) {
