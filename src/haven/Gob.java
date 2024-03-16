@@ -177,7 +177,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 
         private void add0() {
             if (added)
-                throw (new IllegalStateException());
+                return;
             added = true;
         }
 
@@ -210,7 +210,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 
         private void remove0() {
             if (!added)
-                throw (new IllegalStateException());
+                return;
 //            if(slots != null) {
 //                RUtils.multirem(new ArrayList<>(slots));
 //                slots = null;
@@ -966,7 +966,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 } else {
                     boolean done = ol.spr.tick(dt);
                     if ((!ol.delign || (ol.spr instanceof Overlay.CDel) || (ol.spr instanceof Sprite.CDel)) && done)
-                        ol.remove();
+                        ol.remove(this);
                 }
             }
 
