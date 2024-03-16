@@ -4,8 +4,10 @@ import haven.Composite;
 import haven.DefSettings;
 import haven.Drawable;
 import haven.GAttrib;
+import haven.GOut;
 import haven.Gob;
 import haven.RenderList;
+import haven.Rendered;
 import haven.ResData;
 import haven.sloth.gfx.GobDirMesh;
 
@@ -19,10 +21,11 @@ public class Halo extends GAttrib implements Rendered {
         show = false;
     }
 
-    public void setup(RenderList rl) {
+    public boolean setup(RenderList rl) {
         if (show) {
             rl.add(mesh, null);
         }
+        return (false);
     }
 
     private boolean isHearthingOrKnocked() {
@@ -53,4 +56,7 @@ public class Halo extends GAttrib implements Rendered {
             show = false;
         }
     }
+
+    @Override
+    public void draw(final GOut g) {}
 }

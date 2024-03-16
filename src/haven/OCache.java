@@ -851,4 +851,63 @@ public class OCache implements Iterable<Gob> {
             return (ng);
         }
     }
+
+    //OLD
+    public void move(Gob g, Coord2d c, double a) {
+        g.move(c, a);
+        changed(g);
+    }
+
+    public void composite(Gob g, Indir<Resource> base) {
+        Drawable dr = g.getattr(Drawable.class);
+        Composite cmp = (dr instanceof Composite) ? (Composite) dr : null;
+        if ((cmp == null) || !cmp.base.equals(base)) {
+            cmp = new Composite(g, base);
+            g.setattr(cmp);
+            g.remol(g.findol(GobHitbox.olid_solid));
+            g.remol(g.findol(GobHitbox.olid));
+        }
+        changed(g);
+    }
+
+    public void cmpmod(Gob g, List<Composited.MD> mod) {
+        Composite cmp = (Composite) g.getattr(Drawable.class);
+        if (cmp == null)
+            return;
+//            throw (new RuntimeException(String.format("cmpmod on non-composed object: %s", mod)));
+        cmp.chmod(mod);
+        changed(g);
+    }
+
+    public void cmppose(Gob g, int pseq, List<ResData> poses, List<ResData> tposes, boolean interp, float ttime) {
+        Composite cmp = (Composite) g.getattr(Drawable.class);
+        if (cmp == null) {
+            System.out.println(String.format("cmppose on non-composed object: %s %s %s %s", poses, tposes, interp, ttime));
+            return;
+        }
+        if (cmp.pseq != pseq) {
+            cmp.pseq = pseq;
+//                if (poses != null)
+            cmp.chposes(poses, interp);
+//                if (tposes != null)
+            cmp.tposes(tposes, WrapMode.ONCE, ttime);
+        }
+        changed(g);
+    }
+
+    public void cres(Gob g, Indir<Resource> res, Message dat) {
+        MessageBuf sdt = new MessageBuf(dat);
+        Drawable dr = g.getattr(Drawable.class);
+        ResDrawable d = (dr instanceof ResDrawable) ? (ResDrawable) dr : null;
+        if ((d != null) && (d.res == res) && !d.sdt.equals(sdt) && (d.spr != null) && (d.spr instanceof Gob.Overlay.CUpd)) {
+            ((Gob.Overlay.CUpd) d.spr).update(sdt);
+            d.sdt = sdt;
+            g.updsdt();
+        } else if ((d == null) || (d.res != res) || !d.sdt.equals(sdt)) {
+            g.setattr(new ResDrawable(g, res, sdt));
+            g.remol(g.findol(GobHitbox.olid_solid));
+            g.remol(g.findol(GobHitbox.olid));
+        }
+        changed(g);
+    }
 }

@@ -29,22 +29,26 @@ package haven;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class GobIcon extends GAttrib {
     private static final int size = UI.scale(20);
     public static final PUtils.Convolution filter = new PUtils.Hanning(1);
-    private static final Map<Indir<Resource>, Image> cache = new WeakHashMap<>();
     public final Indir<Resource> res;
     public final byte[] sdt;
     protected Image img;
@@ -52,19 +56,57 @@ public class GobIcon extends GAttrib {
     public GobIcon(Gob g) {
         super(g);
         this.res = null;
-        this.sdt = null;
+        this.sdt = new byte[0];
     }
 
     public GobIcon(Gob g, Indir<Resource> res) {
         super(g);
         this.res = res;
-        this.sdt = null;
+        this.sdt = new byte[0];
     }
 
     public GobIcon(Gob g, Indir<Resource> res, byte[] sdt) {
         super(g);
         this.res = res;
         this.sdt = sdt;
+    }
+
+    public abstract static class Icon {
+        public static final Object[] nilid = new Object[0];
+        public final OwnerContext owner;
+        public final Resource res;
+
+        public Icon(OwnerContext owner, Resource res) {
+            this.owner = owner;
+            this.res = res;
+        }
+
+        public enum Markable {
+            UNMARKABLE, NONDEFAULT, DEFAULT
+        }
+
+        public abstract String name();
+
+        public abstract BufferedImage image();
+
+        public abstract Image img();
+
+        public abstract void draw(GOut g, Coord cc);
+
+        public abstract boolean checkhit(Coord c);
+
+        public Object[] id() {return (nilid);}
+
+        public int z() {return (0);}
+
+        public Markable markable() {return (Markable.UNMARKABLE);}
+
+        @Resource.PublishedCode(name = "mapicon")
+        public interface Factory {
+            Icon create(OwnerContext owner, Resource res, Message sdt);
+
+            Collection<? extends Icon> enumerate(OwnerContext owner, Resource res, Message sdt);
+        }
     }
 
     public TexI tex() {
@@ -75,21 +117,8 @@ public class GobIcon extends GAttrib {
         return (img().texgrey());
     }
 
-    public Image img() {
-        if (this.img == null) {
-            synchronized (cache) {
-                Image img = cache.get(res);
-                if (img == null) {
-                    img = new Image(res.get().layer(Resource.imgc));
-                    cache.put(res, img);
-                }
-                this.img = img;
-            }
-        }
-        return (this.img);
-    }
-
     public static class Image {
+        private static final Map<Resource, Image> cache = new WeakHashMap<>();
         protected Resource.Image rimg;
         protected TexI tex, texgrey;
         public Coord cc;
@@ -98,6 +127,10 @@ public class GobIcon extends GAttrib {
         public int z;
 
         public Image() {}
+
+        public Image(Resource res) {
+            this(res.layer(Resource.imgc));
+        }
 
         public Image(Resource.Image rimg) {
             this.rimg = rimg;
@@ -142,6 +175,137 @@ public class GobIcon extends GAttrib {
         public TexI tex() {
             return tex;
         }
+
+        public static Image get(Resource res) {
+            synchronized (cache) {
+                Image img = cache.get(res);
+                if (img == null) {
+                    img = new Image(res);
+                    cache.put(res, img);
+                }
+                return (img);
+            }
+        }
+    }
+
+    public static class ImageIcon extends Icon {
+        public final Image img;
+        private final Gob gob = owner.fcontext(Gob.class, false);
+
+        public ImageIcon(OwnerContext owner, Resource res, Image img) {
+            super(owner, res);
+            this.img = img;
+        }
+
+        public String name() {
+            Resource.Tooltip name = res.layer(Resource.tooltip);
+            return (name == null ? "???" : name.t);
+        }
+
+        public BufferedImage image() {
+            return (img().rimg.img);//res.flayer(Resource.imgc).img
+        }
+
+        public Image img() {
+            return (img);
+        }
+
+        public void draw(GOut g, Coord cc) {
+            if (!img.rot)
+                g.image(img.tex, cc.sub(img.cc));
+            else
+                g.rotimage(img.tex, cc, img.cc, ((gob == null) ? 0 : -gob.a) + img.ao);
+        }
+
+        public boolean checkhit(Coord c) {
+            Coord oc = c.add(img.cc);
+            if (!oc.isect(Coord.z, PUtils.imgsz(img.rimg.img)))
+                return (false);
+            if (img.rimg.img.getRaster().getNumBands() < 4)
+                return (true);
+            return (img.rimg.img.getRaster().getSample(oc.x, oc.y, 3) >= 128);
+        }
+
+        public int z() {
+            return (img.z);
+        }
+
+        private int markdata() {
+            byte[] data = res.flayer(Resource.imgc).kvdata.get("mm/mark");
+            if (data == null)
+                return (0);
+            return (Utils.intvard(data, 0));
+        }
+
+        public Markable markable() {
+            switch (markdata()) {
+                case 1:
+                    return (Markable.NONDEFAULT);
+                case 2:
+                    return (Markable.DEFAULT);
+                default:
+                    return (Markable.UNMARKABLE);
+            }
+        }
+
+        public static final Factory factory = new Factory() {
+            public ImageIcon create(OwnerContext owner, Resource res, Message sdt) {
+                return (new ImageIcon(owner, res, Image.get(res)));
+            }
+
+            public Collection<ImageIcon> enumerate(OwnerContext owner, Resource res, Message sdt) {
+                return (Collections.singletonList(new ImageIcon(owner, res, Image.get(res))));
+            }
+        };
+    }
+
+    public static Icon.Factory getfac(Resource res) {
+        Icon.Factory fac = res.getcode(Icon.Factory.class, false);
+        if (fac != null)
+            return (fac);
+        return (ImageIcon.factory);
+    }
+
+    public Image img() {
+        if (this.img == null) {
+            Resource res = this.res.get();
+            this.img = getfac(res).create(gob, res, new MessageBuf(sdt)).img();
+        }
+        return (this.img);
+    }
+
+    private static Consumer<UI> resnotif(String nm) {
+        return (ui -> {
+            Indir<Resource> resid = Resource.local().load(nm);
+            ui.sess.glob.loader.defer(() -> {
+                Resource res;
+                try {
+                    res = resid.get();
+                } catch (Loading l) {
+                    throw (l);
+                } catch (RuntimeException e) {
+                    ui.error("Could not play " + nm);
+                    return;
+                }
+                Audio.CS clip = Audio.fromres(res);
+                ui.sfx(clip);
+            }, null);
+        });
+    }
+
+    private static final Map<Object, Double> lastnotifs = new HashMap<>();
+
+    private static Consumer<UI> notiflimit(Consumer<UI> bk, Object id) {
+        return (ui -> {
+            double now = Utils.rtime();
+            synchronized (lastnotifs) {
+                Double last = lastnotifs.get(id);
+                if ((last != null) && (now - last < 0.5))
+                    return;
+                lastnotifs.put(id, now);
+            }
+            bk.accept(ui);
+        });
     }
 
     public static class Setting implements Serializable {
@@ -676,7 +840,8 @@ public class GobIcon extends GAttrib {
                 g.delattr(GobIcon.class);
             } else {
                 int ifl = msg.uint8();
-                g.setattr(new GobIcon(g, OCache.Delta.getres(g, resid)));
+                byte[] sdt = msg.bytes();
+                g.setattr(new GobIcon(g, OCache.Delta.getres(g, resid), sdt));
             }
         }
     }

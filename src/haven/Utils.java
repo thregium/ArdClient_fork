@@ -903,23 +903,23 @@ public class Utils {
     }
 
     public static int iv(Object arg) {
-        return(((Number)arg).intValue());
+        return (((Number) arg).intValue());
     }
 
     public static long uiv(Object arg) {
-        return(uint32(iv(arg)));
+        return (uint32(iv(arg)));
     }
 
     public static float fv(Object arg) {
-        return(((Number)arg).floatValue());
+        return (((Number) arg).floatValue());
     }
 
     public static double dv(Object arg) {
-        return(((Number)arg).doubleValue());
+        return (((Number) arg).doubleValue());
     }
 
     public static boolean bv(Object arg) {
-        return(iv(arg) != 0);
+        return (iv(arg) != 0);
     }
 
     public static int sb(int n, int b) {
@@ -1776,6 +1776,11 @@ public class Utils {
                 ((x.getGreen() * f2) + (y.getGreen() * f1)) / 255,
                 ((x.getBlue() * f2) + (y.getBlue() * f1)) / 255,
                 ((x.getAlpha() * f2) + (y.getAlpha() * f1)) / 255));
+    }
+
+    public static Color colmul(Color a, Color b) {
+        return (new Color((a.getRed() * b.getRed()) / 255, (a.getGreen() * b.getGreen()) / 255,
+                (a.getBlue() * b.getBlue()) / 255, (a.getAlpha() * b.getAlpha()) / 255));
     }
 
     public static Color preblend(Color c1, Color c2) {

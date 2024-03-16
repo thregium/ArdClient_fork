@@ -36,6 +36,7 @@ import haven.res.lib.vmat.Materials;
 import haven.res.lib.vmat.VarSprite;
 import haven.res.ui.croster.CattleId;
 import haven.res.ui.croster.CattleIdSprite;
+import haven.res.ui.obj.buddy.Info;
 import haven.resutil.BPRadSprite;
 import haven.resutil.RectSprite;
 import haven.resutil.WaterTile;
@@ -692,7 +693,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     public final Glob glob;
     public int quality = 0;
     public final Map<Class<? extends GAttrib>, GAttrib> attr = Collections.synchronizedMap(new HashMap<>());
-    private final Set<haven.sloth.gob.Rendered> renderedattrs = Collections.synchronizedSet(new HashSet<>());
+    private final Set<haven.Rendered> renderedattrs = Collections.synchronizedSet(new HashSet<>());
     public final Collection<Overlay> ols = Collections.synchronizedCollection(new LinkedList<Overlay>() {
         public boolean add(Overlay item) {
             /* XXX: Remove me once local code is changed to use addol(). */
@@ -983,7 +984,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         sb.append(" [").append(id).append("][").append(frame).append("]\n");
         final GobIcon icon = getattr(GobIcon.class);
         if (icon != null) {
-            sb.append("Icon: ").append(icon.res.get()).append("\n");
+            sb.append("Icon: ").append(icon.res.get()).append(Arrays.toString(icon.sdt)).append("\n");
         }
         sb.append("Type: ").append(type).append("\n");
         sb.append("staticp: ").append(staticp() != null ? "static" : "dynamic").append("\n");
@@ -1376,8 +1377,8 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     }
 
     public void setattr(GAttrib a) {
-        if (a instanceof haven.sloth.gob.Rendered)
-            renderedattrs.add((haven.sloth.gob.Rendered) a);
+        if (a instanceof haven.Rendered)
+            renderedattrs.add((haven.Rendered) a);
         Class<? extends GAttrib> ac = attrclass(a.getClass());
         attr.put(ac, a);
 //        if (DefSettings.SHOWPLAYERPATH.get() && gobpath == null && a instanceof LinMove) {
@@ -1513,8 +1514,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         return 0;
     }
 
-    public void draw(GOut g) {
-    }
+    public void draw(GOut g) {}
 
     public boolean disableAnimation1;
     public boolean disableAnimation;
@@ -1802,7 +1802,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             }
 
 
-            for (final haven.sloth.gob.Rendered rattr : new ArrayList<>(renderedattrs)) {
+            for (final haven.Rendered rattr : new ArrayList<>(renderedattrs)) {
                 rattr.setup(rl);
             }
 
@@ -1965,9 +1965,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             Speaking sp = getattr(Speaking.class);
             if (sp != null)
                 rl.add(sp.fx, null);
-            KinInfo ki = getattr(KinInfo.class);
-            if (ki != null)
-                rl.add(ki.fx, null);
+            for (GAttrib a : attr) {
+                if (a instanceof Rendered)
+                    rl.add((Rendered) a, null);
+            }
 
             if (DefSettings.SHOWHITBOX.get() && hitboxmesh != null && hitboxmesh.length != 0) {
                 for (HitboxMesh mesh : hitboxmesh)
@@ -1996,15 +1997,15 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 Overlay box = findol(boxhash);
                 Overlay grid = findol(gridhash);
                 if (border == null && configuration.playerbordersprite)
-                    addol(new Overlay(borderhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(9)), () -> new Color(configuration.playerbordercolor, true), new Coord2d(MCache.cmaps))));
+                    addol(new Overlay(borderhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(9)), () -> new Color(configuration.playerbordercolor, true), new Coord2d(MCache.cmaps))), false);
                 else if (border != null && !configuration.playerbordersprite)
                     remol(border);
                 if (box == null && configuration.playerboxsprite)
-                    addol(new Overlay(boxhash, new RectSprite(this, new Coord2d(MCache.cmaps), () -> new Color(configuration.playerboxcolor, true), new Coord2d(MCache.cmaps))));
+                    addol(new Overlay(boxhash, new RectSprite(this, new Coord2d(MCache.cmaps), () -> new Color(configuration.playerboxcolor, true), new Coord2d(MCache.cmaps))), false);
                 else if (box != null && !configuration.playerboxsprite)
                     remol(box);
                 if (grid == null && configuration.gridboxsprite)
-                    addol(new Overlay(gridhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(11)), () -> new Color(configuration.gridboxcolor, true), new Coord2d(MCache.cmaps.mul(11)))));
+                    addol(new Overlay(gridhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(11)), () -> new Color(configuration.gridboxcolor, true), new Coord2d(MCache.cmaps.mul(11)))), false);
                 else if (grid != null && !configuration.gridboxsprite)
                     remol(grid);
             }

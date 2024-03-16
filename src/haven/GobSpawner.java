@@ -103,7 +103,7 @@ public class GobSpawner extends Window {
     }
 
     private void drawable(final String res) {
-        final Gob g = ui.sess.glob.oc.getgob(next--, 0);
+        final Gob g = ui.sess.glob.oc.getgob(next--);
         ui.sess.glob.oc.move(g, PBotUtils.player(ui).rc, Math.toRadians(130));
         ui.sess.glob.oc.cres(g, Resource.remote().load(res), Message.nil);
     }

@@ -4,12 +4,14 @@ import haven.BuddyWnd;
 import haven.Coord2d;
 import haven.DefSettings;
 import haven.GAttrib;
+import haven.GOut;
 import haven.Gob;
 import haven.GobPath;
 import haven.KinInfo;
 import haven.Loading;
 import haven.Moving;
 import haven.RenderList;
+import haven.Rendered;
 import haven.States;
 import haven.sloth.gfx.GobPathSprite;
 import haven.sloth.io.Storage;
@@ -69,7 +71,7 @@ public class Movable extends GAttrib implements Rendered {
     private GobPathSprite pathol = null;
     private GobPath path = null;
 
-    public void setup(RenderList rl) {
+    public boolean setup(RenderList rl) {
         if (gob.isMoving()) {
             if ((DefSettings.SHOWPLAYERPATH.get() && gob.isplayer()) || (!gob.isplayer() && (gob.type == Type.HUMAN || gob.type == Type.VEHICLE || gob.type == Type.WATERVEHICLE) && DefSettings.SHOWGOBPATH.get()) || ((gob.type == Type.ANIMAL || gob.type == Type.SMALLANIMAL || gob.type == Type.TAMEDANIMAL || gob.type == Type.DANGANIMAL) && DefSettings.SHOWANIMALPATH.get())) {
                 if (path == null)
@@ -84,6 +86,7 @@ public class Movable extends GAttrib implements Rendered {
         } else if (path != null) {
             path = null;
         }
+        return (true);
     }
 
     @Override
@@ -162,4 +165,7 @@ public class Movable extends GAttrib implements Rendered {
             pathol.dispose();
         pathol = null;
     }
+
+    @Override
+    public void draw(final GOut g) {}
 }

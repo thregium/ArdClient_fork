@@ -802,7 +802,7 @@ public class GOut {
         usestate(States.color);
     }
 
-    Color getcolor() {
+    public Color getcolor() {
         States.ColState color = curstate(States.color);
         return ((color == null) ? Color.WHITE : color.c);
     }

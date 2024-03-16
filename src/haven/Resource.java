@@ -29,6 +29,7 @@ package haven;
 import dolda.xiphutil.VorbisStream;
 import modification.configuration;
 import modification.dev;
+import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import javax.sound.midi.InvalidMidiDataException;
@@ -1786,7 +1787,7 @@ public class Resource implements Serializable {
         public Class<?> loadClass(String name) throws ClassNotFoundException {
             char point = '.';
             int p = name.lastIndexOf(point);
-            String res = getres().name.replace('/', point);
+            String res = getres().name.replace('/', point).replace("-", "_");
             String resname = res + point + (p < 0 ? name : name.substring(name.lastIndexOf(point) + 1));
             String text = "haven.res" + point + resname;
             Class<?> cl = super.loadClass(text);

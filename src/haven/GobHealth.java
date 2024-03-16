@@ -33,31 +33,36 @@ import static haven.Gob.SEMISTATIC;
 /**
  * TODO: Think of a way to represent the stage in 3D to avoid static/semistatic mess.
  */
-public class GobHealth extends GAttrib {
-    private static final Tex[] gobhp = new Tex[]{
-            PUtils.strokeTex(Gob.gobhpf.render("1/4", Color.WHITE)),
-            PUtils.strokeTex(Gob.gobhpf.render("2/4", Color.WHITE)),
-            PUtils.strokeTex(Gob.gobhpf.render("3/4", Color.WHITE))
-    };
+public class GobHealth extends GAttrib implements PView.Render2D {
     public float hp;
-    Material.Colors fx;
-    public PView.Draw2D hpfx;
 
     public GobHealth(Gob g, float hp) {
         super(g);
         this.hp = hp;
-        this.fx = new Material.Colors(new Color(255, 0, 0, (int) (128 - (hp * 128))));
-        hpfx = new PView.Draw2D() {
-            public void draw2d(GOut g) {
-                if (gob.sc != null && hp < 1) {
-                    g.image(gobhp[(int) (hp * 4) - 1], gob.sc.sub(15, 10));
-                }
-            }
-        };
+        update(hp);
     }
 
     public double asfloat() {
         return (((double) hp) / 4.0);
+    }
+
+    public float val;
+    private Tex tex;
+    private static Matrix4f mv = new Matrix4f();
+    private Projection proj;
+    private Coord wndsz;
+    private Location.Chain loc;
+    private Camera camp;
+
+    @Override
+    public boolean setup(final RenderList r) {
+        r.prepo(last);
+        GLState.Buffer buf = r.state();
+        proj = buf.get(PView.proj);
+        wndsz = buf.get(PView.wnd).sz();
+        loc = buf.get(PView.loc);
+        camp = buf.get(PView.cam);
+        return (true);
     }
 
     public Object staticp() {
@@ -65,6 +70,40 @@ public class GobHealth extends GAttrib {
             return super.staticp();
         else
             return SEMISTATIC;
+    }
+
+    @Override
+    public void draw(final GOut g) {}
+
+    @Override
+    public void draw2d(final GOut g) {
+        if (tex != null) {
+            float[] c = mv.load(camp.fin(Matrix4f.id)).mul1(loc.fin(Matrix4f.id)).homoc();
+            Coord sc = proj.get2dCoord(c, wndsz);
+//        sc.x -= 15;
+//        sc.y -= 20;
+            g.aimage(tex, sc, 0.5, 0.5);
+        }
+    }
+
+    private static final Tex hlt0 = PUtils.strokeTex(Text.num12Fnd.render("1/4", new Color(255, 0, 0)));
+    private static final Tex hlt1 = PUtils.strokeTex(Text.num12Fnd.render("2/4", new Color(255, 128, 0)));
+    private static final Tex hlt2 = PUtils.strokeTex(Text.num12Fnd.render("3/4", new Color(255, 255, 0)));
+
+    public void update(float val) {
+        this.val = val;
+        int v = (int) (val * 4) - 1;
+        switch (v) {
+            case 0:
+                tex = hlt0;
+                break;
+            case 1:
+                tex = hlt1;
+                break;
+            case 2:
+                tex = hlt2;
+                break;
+        }
     }
 
     @OCache.DeltaType(OCache.OD_HEALTH)

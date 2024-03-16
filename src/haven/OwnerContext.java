@@ -32,9 +32,9 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public interface OwnerContext {
-    public <T> T context(Class<T> cl);
+    <T> T context(Class<T> cl);
 
-    public default <T> T context(Class<T> cl, boolean fail) {
+    default <T> T fcontext(Class<T> cl, boolean fail) {
         try {
             return (context(cl));
         } catch (NoContext e) {
@@ -44,11 +44,11 @@ public interface OwnerContext {
         }
     }
 
-    public default <T> Optional<T> ocontext(Class<T> cl) {
-        return (Optional.ofNullable(context(cl, false)));
+    default <T> Optional<T> ocontext(Class<T> cl) {
+        return (Optional.ofNullable(fcontext(cl, false)));
     }
 
-    public static class NoContext extends RuntimeException {
+    class NoContext extends RuntimeException {
         public final Class<?> requested;
 
         public NoContext(String message, Throwable cause, Class<?> requested) {
@@ -66,7 +66,7 @@ public interface OwnerContext {
         }
     }
 
-    public static class ClassResolver<T> {
+    class ClassResolver<T> {
         private final Map<Class<?>, Function<T, ?>> reg = new HashMap<>();
 
         public <C> ClassResolver<T> add(Class<C> cl, Function<T, ? extends C> p) {
@@ -116,7 +116,7 @@ public interface OwnerContext {
         }
     }
 
-    public static <C> C orparent(Class<C> cl, C val, OwnerContext parent) {
+    static <C> C orparent(Class<C> cl, C val, OwnerContext parent) {
         if (val != null)
             return (val);
         if (parent == null)
@@ -124,7 +124,7 @@ public interface OwnerContext {
         return (parent.context(cl));
     }
 
-    public static final ClassResolver<UI> uictx = new ClassResolver<UI>()
+    ClassResolver<UI> uictx = new ClassResolver<UI>()
             .add(Glob.class, ui -> ui.sess.glob)
             .add(Session.class, ui -> ui.sess);
 }
