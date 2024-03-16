@@ -1112,12 +1112,12 @@ public class OptWnd extends Window {
                 Config.showgobhp = val;
                 a = val;
 
-                if (ui.gui != null && ui.gui.map != null) {
+                /*if (ui.gui != null && ui.gui.map != null) {
                     if (val)
                         ui.gui.map.addHealthSprites();
                     else
                         ui.gui.map.removeCustomSprites(Sprite.GOB_HEALTH_ID);
-                }
+                }*/
             }
         });
         appender.add(new CheckBox("Show inspected qualities of objects - only until the object unloads.") {

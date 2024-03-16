@@ -30,8 +30,10 @@ import haven.Waitable.Waiting;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -54,6 +56,7 @@ public class Loader {
         private Loading curload = null;
         private Thread running = null;
         private boolean done = false, cancelled = false, restarted = false;
+        public final List<Runnable> onDone = Collections.synchronizedList(new ArrayList<>());
 
         private Future(Supplier<T> task, boolean capex) {
             this.task = task;
@@ -78,8 +81,14 @@ public class Loader {
                             synchronized (this) {
                                 this.val = val;
                                 done = true;
+                                onDone.forEach(Runnable::run);
                             }
                         } catch (Loading l) {
+                            /*if (counter++ >= 10000) {
+                                dev.simpleLog("Skip Loading Exception 100 times");
+                                dev.simpleLog(l);
+                                return;
+                            }*/
                             curload = l;
                             l.waitfor(() -> {
                                         synchronized (queue) {

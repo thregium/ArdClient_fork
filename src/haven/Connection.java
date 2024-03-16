@@ -37,6 +37,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -55,6 +56,7 @@ public class Connection {
     private Worker worker;
     private int tseq;
     private boolean alive = true;
+    public final List<Runnable> onClose = Collections.synchronizedList(new ArrayList<>());
 
     public Connection(SocketAddress server, String username) {
         this.server = server;
@@ -116,6 +118,7 @@ public class Connection {
                 while (task != null)
                     task = task.run();
             } finally {
+                onClose.forEach(Runnable::run);
                 try {
                     alive = false;
                     for (Callback cb : cbs)

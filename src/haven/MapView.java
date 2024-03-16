@@ -3752,7 +3752,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
     }
 
-    public void addHealthSprites() {
+    /*public void addHealthSprites() {
         OCache oc = glob.oc;
         for (Gob gob : oc.getallgobs()) {
             final GobHealth hlt = gob.getattr(GobHealth.class);
@@ -3765,7 +3765,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 oc.changed(gob);
             }
         }
-    }
+    }*/
 
     public void addQualitySprites() {
         OCache oc = glob.oc;

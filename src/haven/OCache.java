@@ -755,6 +755,9 @@ public class OCache implements Iterable<Gob> {
                 if (applier == null) {
                     if (nremoved ? (added && !gremoved) : (!added || !pending.isEmpty())) {
                         applier = glob.loader.defer(this::apply, null);
+                        Runnable r = () -> applier.cancel();
+                        glob.sess.conn.onClose.add(r);
+                        applier.onDone.add(() -> glob.sess.conn.onClose.remove(r));
                     }
                 } else if (interrupt) {
                     applier.restart();

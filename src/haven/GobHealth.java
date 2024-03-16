@@ -56,12 +56,14 @@ public class GobHealth extends GAttrib implements PView.Render2D {
 
     @Override
     public boolean setup(final RenderList r) {
-        r.prepo(last);
-        GLState.Buffer buf = r.state();
-        proj = buf.get(PView.proj);
-        wndsz = buf.get(PView.wnd).sz();
-        loc = buf.get(PView.loc);
-        camp = buf.get(PView.cam);
+        if (Config.showgobhp) {
+            r.prepo(last);
+            GLState.Buffer buf = r.state();
+            proj = buf.get(PView.proj);
+            wndsz = buf.get(PView.wnd).sz();
+            loc = buf.get(PView.loc);
+            camp = buf.get(PView.cam);
+        }
         return (true);
     }
 
@@ -77,7 +79,7 @@ public class GobHealth extends GAttrib implements PView.Render2D {
 
     @Override
     public void draw2d(final GOut g) {
-        if (tex != null) {
+        if (Config.showgobhp && tex != null) {
             float[] c = mv.load(camp.fin(Matrix4f.id)).mul1(loc.fin(Matrix4f.id)).homoc();
             Coord sc = proj.get2dCoord(c, wndsz);
 //        sc.x -= 15;

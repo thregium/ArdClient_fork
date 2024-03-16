@@ -16,12 +16,13 @@ import haven.Utils;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 @FromResource(name = "ui/obj/buddy", version = 2, override = true)
 public class Info extends GAttrib implements Rendered, PView.Render2D {
-    public final List<InfoPart> parts = new ArrayList<>();
+    public final List<InfoPart> parts = Collections.synchronizedList(new ArrayList<>());
     private Tex rend = null;
     private boolean dirty;
     private double seen = 0;

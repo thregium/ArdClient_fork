@@ -1412,7 +1412,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     }
 
     public void delattr(Class<? extends GAttrib> c) {
-        attr.remove(attrclass(c));
+        GAttrib at = attr.remove(attrclass(c));
+        if (at != null)
+            at.dispose();
     }
 
     private Class<? extends ResAttr> rattrclass(Class<? extends ResAttr> cl) {
@@ -1975,7 +1977,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     rl.add(mesh, null);
             }
 
-            if (type == Type.TAMEDANIMAL) {
+            /*if (type == Type.TAMEDANIMAL) {
                 CattleId cattleId = getattr(CattleId.class);
                 if (cattleId != null) {
                     Overlay co = findol(CattleIdSprite.id);
@@ -1987,7 +1989,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                         cattleId.sprite = (CattleIdSprite) co.spr;
                     }
                 }
-            }
+            }*/
 
             if (name().equals("gfx/borka/body") && isplayer()) {
                 int borderhash = Arrays.hashCode("playerborder".getBytes());
