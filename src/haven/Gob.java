@@ -34,9 +34,6 @@ import haven.res.gfx.fx.floatimg.DamageText;
 import haven.res.lib.tree.Tree;
 import haven.res.lib.vmat.Materials;
 import haven.res.lib.vmat.VarSprite;
-import haven.res.ui.croster.CattleId;
-import haven.res.ui.croster.CattleIdSprite;
-import haven.res.ui.obj.buddy.Info;
 import haven.resutil.BPRadSprite;
 import haven.resutil.RectSprite;
 import haven.resutil.WaterTile;
@@ -129,7 +126,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 
     public static class Overlay implements Rendered {
         public final int id;
-        public final Gob gob;
+        public Gob gob;
         public Indir<Resource> res;
         public MessageBuf sdt;
         public Sprite spr;
@@ -195,18 +192,18 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             }
         }
 
-        public static interface CDel {
-            public void delete();
+        public interface CDel {
+            void delete();
         }
 
-        public static interface CUpd {
-            public void update(Message sdt);
+        public interface CUpd {
+            void update(Message sdt);
         }
 
-        public static interface SetupMod {
-            public void setupgob(GLState.Buffer buf);
+        public interface SetupMod {
+            void setupgob(GLState.Buffer buf);
 
-            public void setupmain(RenderList rl);
+            void setupmain(RenderList rl);
         }
 
         public void draw(GOut g) {}
@@ -238,6 +235,11 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             remove(true);
         }
 
+        public void remove(Gob gob) {
+            this.gob = gob;
+            remove(true);
+        }
+
         public boolean setup(RenderList rl) {
             if (spr != null) {
                 if (name().matches("gfx/terobjs/trees/yulestar-.*")) {
@@ -260,18 +262,18 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         }
     }
 
-    public static interface Placer {
+    public interface Placer {
         /* XXX: *Quite* arguably, the distinction between getc and
          * getr should be abolished and a single transform matrix
          * should be used instead, but that requires first abolishing
          * the distinction between the gob/gobx location IDs. */
-        public Coord3f getc(Coord2d rc, double ra);
+        Coord3f getc(Coord2d rc, double ra);
 
-        public Matrix4f getr(Coord2d rc, double ra);
+        Matrix4f getr(Coord2d rc, double ra);
     }
 
-    public static interface Placing {
-        public Placer placer();
+    public interface Placing {
+        Placer placer();
     }
 
     public static class DefaultPlace implements Placer {
@@ -578,8 +580,8 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         }
 
         @Resource.PublishedCode(name = "gattr", instancer = FactMaker.class)
-        public static interface Factory {
-            public ResAttr mkattr(Gob gob, Message dat);
+        public interface Factory {
+            ResAttr mkattr(Gob gob, Message dat);
         }
 
         public static class FactMaker extends Resource.PublishedCode.Instancer.Chain<Factory> {
@@ -592,8 +594,8 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     }
 
 
-    public static interface ANotif<T extends GAttrib> {
-        public void ch(T n);
+    public interface ANotif<T extends GAttrib> {
+        void ch(T n);
     }
 
     public class Save extends GLState.Abstract {
@@ -963,8 +965,8 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 //                    }
                 } else {
                     boolean done = ol.spr.tick(dt);
-                    if ((!ol.delign || (ol.spr instanceof Overlay.CDel)) && done)
-                        ols.remove(ol);
+                    if ((!ol.delign || (ol.spr instanceof Overlay.CDel) || (ol.spr instanceof Sprite.CDel)) && done)
+                        ol.remove();
                 }
             }
 
@@ -1196,7 +1198,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     }
 
     public void addol(Overlay ol) {
-        addol(ol, true);
+        addol(ol, false);
     }
 
     public void addol(Sprite ol) {
@@ -1219,9 +1221,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 
     public void remol(Overlay ol) {
         if (ol == null) return;
-        synchronized (ols) {
+        ol.remove(this);
+        /*synchronized (ols) {
             ols.remove(ol);
-        }
+        }*/
     }
 
     public Overlay daddol(final Overlay ol) {
@@ -1380,7 +1383,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         if (a instanceof haven.Rendered)
             renderedattrs.add((haven.Rendered) a);
         Class<? extends GAttrib> ac = attrclass(a.getClass());
-        attr.put(ac, a);
+        GAttrib at = attr.put(ac, a);
+        if (at != null)
+            at.dispose();
 //        if (DefSettings.SHOWPLAYERPATH.get() && gobpath == null && a instanceof LinMove) {
 //            final UI ui = glob.ui.get();
 //            if (ui != null) {
@@ -1999,15 +2004,15 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 Overlay box = findol(boxhash);
                 Overlay grid = findol(gridhash);
                 if (border == null && configuration.playerbordersprite)
-                    addol(new Overlay(borderhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(9)), () -> new Color(configuration.playerbordercolor, true), new Coord2d(MCache.cmaps))), false);
+                    addol(new Overlay(borderhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(9)), () -> new Color(configuration.playerbordercolor, true), new Coord2d(MCache.cmaps))));
                 else if (border != null && !configuration.playerbordersprite)
                     remol(border);
                 if (box == null && configuration.playerboxsprite)
-                    addol(new Overlay(boxhash, new RectSprite(this, new Coord2d(MCache.cmaps), () -> new Color(configuration.playerboxcolor, true), new Coord2d(MCache.cmaps))), false);
+                    addol(new Overlay(boxhash, new RectSprite(this, new Coord2d(MCache.cmaps), () -> new Color(configuration.playerboxcolor, true), new Coord2d(MCache.cmaps))));
                 else if (box != null && !configuration.playerboxsprite)
                     remol(box);
                 if (grid == null && configuration.gridboxsprite)
-                    addol(new Overlay(gridhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(11)), () -> new Color(configuration.gridboxcolor, true), new Coord2d(MCache.cmaps.mul(11)))), false);
+                    addol(new Overlay(gridhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(11)), () -> new Color(configuration.gridboxcolor, true), new Coord2d(MCache.cmaps.mul(11)))));
                 else if (grid != null && !configuration.gridboxsprite)
                     remol(grid);
             }
@@ -2115,6 +2120,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     private static final ClassResolver<Gob> ctxr = new ClassResolver<Gob>()
             .add(Gob.class, g -> g)
             .add(Glob.class, g -> g.glob)
+            .add(OCache.class, g -> g.glob.oc)
             .add(Session.class, g -> g.glob.sess);
 
     public <T> T context(Class<T> cl) {

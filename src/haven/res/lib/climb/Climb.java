@@ -10,7 +10,7 @@ import haven.RenderList;
 import haven.Resource;
 import haven.Sprite;
 
-public class Climb extends Sprite implements Gob.Overlay.SetupMod, Sprite.CDel {
+public class Climb extends Sprite implements Gob.Overlay.SetupMod, Gob.Overlay.CDel {
     public final Composited comp;
     public final Composited.Poses op;
     public Composited.Poses mp;
@@ -28,30 +28,29 @@ public class Climb extends Sprite implements Gob.Overlay.SetupMod, Sprite.CDel {
     }
 
     @Override
-    public boolean setup(final RenderList d) {
-        return false;
-    }
-
-    @Override
-    public void setupmain(final RenderList rl) {}
-
-    @Override
-    public void setupgob(final GLState.Buffer buf) {
-        if (loc != null) {
-            loc.prep(buf);
-        }
-    }
-
-    public GLState placestate() {
-        return (loc);
-    }
-
-    public boolean tick(double dt) {
-        if (del)
-            return (true);
+    public boolean setup(RenderList rl) {
         return (false);
     }
 
+    @Override
+    public void setupmain(RenderList rl) {}
+
+    @Override
+    public void setupgob(final GLState.Buffer buf) {
+        if (loc != null)
+            loc.prep(buf);
+    }
+
+    @Override
+    public boolean tick(int dt) {
+        if (del)
+            return (true);
+        if (comp.poses != mp)
+            mp.set(Composite.ipollen);
+        return (false);
+    }
+
+    @Override
     public void delete() {
         if (comp.poses == mp)
             op.set(Composite.ipollen);

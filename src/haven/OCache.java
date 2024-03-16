@@ -66,7 +66,7 @@ public class OCache implements Iterable<Gob> {
     public static final int OD_OVERLAY = 12;
     /* public static final int OD_AUTH = 13; -- Removed */
     public static final int OD_HEALTH = 14;
-    public static final int OD_BUDDY = 15;
+    /* public static final int OD_BUDDY = 15; -- Removed */
     public static final int OD_CMPPOSE = 16;
     public static final int OD_CMPMOD = 17;
     public static final int OD_CMPEQU = 18;
@@ -336,6 +336,20 @@ public class OCache implements Iterable<Gob> {
         }
     }
 
+    public static class OlSprite implements Sprite.Mill<Sprite> {
+        public final Indir<Resource> res;
+        public Message sdt;
+
+        public OlSprite(Indir<Resource> res, Message sdt) {
+            this.res = res;
+            this.sdt = sdt;
+        }
+
+        public Sprite create(Sprite.Owner owner) {
+            return (Sprite.create(owner, res.get(), sdt));
+        }
+    }
+
     @DeltaType(OD_OVERLAY)
     public static class $overlay implements Delta {
         public void apply(Gob g, AttrDelta msg) {
@@ -363,19 +377,21 @@ public class OCache implements Iterable<Gob> {
                 sdt = new MessageBuf(sdt);
                 Gob.Overlay nol = null;
                 if (ol == null) {
-                    g.addol(nol = new Gob.Overlay(g, olid, res, sdt), false);
+                    g.addol(nol = new Gob.Overlay(g, olid, res, sdt), true);
                     if (sdt.rt == 7 && oc.isfight && Config.showdmgop)
                         oc.setdmgoverlay(g, res, new MessageBuf(sdt));
-                } else if (!ol.sdt.equals(sdt)) {
-                    if (ol.spr instanceof Sprite.CUpd) {
-                        MessageBuf copy = new MessageBuf(sdt);
-                        ((Sprite.CUpd) ol.spr).update(copy);
-                        ol.sdt = copy;
-                    } else {
-                        g.addol(nol = new Gob.Overlay(g, olid, res, sdt), false);
-                        ol.remove(false);
-                        if (sdt.rt == 7 && oc.isfight && Config.showdmgop)
-                            oc.setdmgoverlay(g, res, new MessageBuf(sdt));
+                } else {
+                    if (!ol.sdt.equals(sdt)) {
+                        if (ol.spr instanceof Sprite.CUpd) {
+                            MessageBuf copy = new MessageBuf(sdt);
+                            ((Sprite.CUpd) ol.spr).update(copy);
+                            ol.sdt = copy;
+                        } else {
+                            g.addol(nol = new Gob.Overlay(g, olid, res, sdt), true);
+                            ol.remove(false);
+                            if (sdt.rt == 7 && oc.isfight && Config.showdmgop)
+                                oc.setdmgoverlay(g, res, new MessageBuf(sdt));
+                        }
                     }
                 }
                 if (nol != null)
@@ -384,8 +400,9 @@ public class OCache implements Iterable<Gob> {
                 if (ol != null) {
                     if (ol.spr instanceof Sprite.CDel)
                         ((Sprite.CDel) ol.spr).delete();
-                    else
-                        ol.remove(false);
+                    else if (ol.spr instanceof Gob.Overlay.CDel)
+                        ((Gob.Overlay.CDel) ol.spr).delete();
+                    else ol.remove(false);
                 }
             }
         }
@@ -399,7 +416,7 @@ public class OCache implements Iterable<Gob> {
             Message dat = (len > 0) ? new MessageBuf(msg.bytes(len)) : null;
 //            resid.get().getcode(GAttrib.Parser.class, true).apply(g, dat);
 
-            if (resid.toString().contains(configuration.crosterresid + "") || resid.toString().contains("ui/croster")) {
+            /*if (resid.toString().contains(configuration.crosterresid + "") || resid.toString().contains("ui/croster")) {
                 try {
                     if (resid.toString().contains("ui/croster")) {
                         int id = g.glob.sess.getresid(resid.get());
@@ -410,26 +427,19 @@ public class OCache implements Iterable<Gob> {
                     }
                 } catch (Loading le) {
                 }
-            }
-            g.defer(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Resource res = resid.get();
-                        GAttrib.Parser parser = res.getcode(GAttrib.Parser.class, false);
-                        if (parser != null) {
-                            parser.apply(g, dat);
-                        }
-                    } catch (Loading le) {
-                        g.defer(this);
-                    }
+            }*/
+            g.defer(() -> {
+                Resource res = resid.get();
+                GAttrib.Parser parser = res.getcode(GAttrib.Parser.class, false);
+                if (parser != null) {
+                    parser.apply(g, dat);
                 }
+                if (dat != null)
+                    g.setrattr(resid, dat);
+                else
+                    g.delrattr(resid);
+                g.ocontext(OCache.class).ifPresent(oc -> oc.changed(g));
             });
-            if (dat != null)
-                g.setrattr(resid, dat);
-            else
-                g.delrattr(resid);
-//            changed(g);
         }
     }
 
@@ -651,7 +661,7 @@ public class OCache implements Iterable<Gob> {
     }
 
     public void resattr(Gob g, Indir<Resource> resid, Message dat) {
-        if (resid.toString().contains(configuration.crosterresid + "") || resid.toString().contains("ui/croster")) {
+        /*if (resid.toString().contains(configuration.crosterresid + "") || resid.toString().contains("ui/croster")) {
             try {
                 if (resid.toString().contains("ui/croster")) {
                     int id = getUI().sess.getresid(resid.get());
@@ -662,26 +672,19 @@ public class OCache implements Iterable<Gob> {
                 }
             } catch (Loading le) {
             }
-        }
-        glob.loader.defer(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Resource res = resid.get();
-                    GAttrib.Parser parser = res.getcode(GAttrib.Parser.class, false);
-                    if (parser != null) {
-                        parser.apply(g, dat);
-                    }
-                } catch (Loading le) {
-                    glob.loader.defer(this, null);
-                }
+        }*/
+        glob.loader.defer(() -> {
+            Resource res = resid.get();
+            GAttrib.Parser parser = res.getcode(GAttrib.Parser.class, false);
+            if (parser != null) {
+                parser.apply(g, dat);
             }
+            if (dat != null)
+                g.setrattr(resid, dat);
+            else
+                g.delrattr(resid);
+            changed(g);
         }, null);
-        if (dat != null)
-            g.setrattr(resid, dat);
-        else
-            g.delrattr(resid);
-        changed(g);
     }
 
     public void resattr(Gob gob, Message msg) {
@@ -754,10 +757,11 @@ public class OCache implements Iterable<Gob> {
             synchronized (this) {
                 if (applier == null) {
                     if (nremoved ? (added && !gremoved) : (!added || !pending.isEmpty())) {
-                        applier = glob.loader.defer(this::apply, null);
-                        Runnable r = () -> applier.cancel();
+                        Loader.Future<?> f = applier = glob.loader.deferWait(this::apply, null);
+                        Runnable r = f::cancel;
                         glob.sess.conn.onClose.add(r);
-                        applier.onDone.add(() -> glob.sess.conn.onClose.remove(r));
+                        f.onDone.add(() -> glob.sess.conn.onClose.remove(r));
+                        glob.loader.startTask(f);
                     }
                 } else if (interrupt) {
                     applier.restart();

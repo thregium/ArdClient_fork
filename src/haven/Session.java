@@ -155,7 +155,7 @@ public class Session implements Resource.Resolver {
                     throw (new LoadingIndir(CachedRes.this));
                 if (res == null) {
                     try {
-                        res = Resource.remote().load(resnm, resver, 0).get();
+                        res = Resource.remote().load(resnm, resver, prio).get();
                     } catch (Loading l) {
                         throw (l);
                     } catch (RuntimeException e) {
@@ -329,15 +329,14 @@ public class Session implements Resource.Resolver {
             double vol = ((double) msg.uint16()) / 256.0;
             double spd = ((double) msg.uint16()) / 256.0;
 //                Audio.play(res);
-            Defer.later(() -> {
+            glob.loader.defer(() -> {
                 Audio.CS clip = Audio.fromres(res.get());
                 if (spd != 1.0)
                     clip = new Audio.Resampler(clip).sp(spd);
                 if (vol != 1.0)
                     clip = new Audio.VolAdjust(clip, vol);
                 Audio.play(clip);
-                return (null);
-            }); ;
+            }, null); ;
         } else if (msg.type == RMessage.RMSG_MUSIC) {
             String resnm = msg.string();
             int resver = msg.uint16();

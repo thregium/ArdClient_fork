@@ -53,8 +53,17 @@ public class Materials extends Mapping {
         this.mats = decode(gob.context(Resource.Resolver.class), dat);
     }
 
-//    public static void parse(Gob gob, Message dat) {
+    public Materials(Gob gob, Map<Integer, Material> mats) {
+        this.mats = mats;
+    }
+
+    public static void parse(Gob gob, Message dat) {
 //        gob.setattr(new Materials(gob, decode(gob.context(Resource.Resolver.class), dat)));
-//    }
+//        Materials mat = new Materials(gob, decode(gob.context(Resource.Resolver.class);
+//        if (dat != null)
+//            gob.setrattr(mat, dat);
+//        else
+//            gob.delrattr(mat);
+    }
 }
 

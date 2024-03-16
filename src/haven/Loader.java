@@ -242,6 +242,11 @@ public class Loader {
         return (ret);
     }
 
+    public <T> Future<T> deferWait(Supplier<T> task, boolean capex) {
+        Future<T> ret = new Future<>(task, capex);
+        return (ret);
+    }
+
     public <T> Future<T> defer(Supplier<T> task) {
         return (defer(task, true));
     }
@@ -251,6 +256,21 @@ public class Loader {
             task.run();
             return (result);
         }, false));
+    }
+
+    public <T> Future<T> deferWait(Runnable task, T result) {
+        return (deferWait(() -> {
+            task.run();
+            return (result);
+        }, false));
+    }
+
+    public <T> void startTask(Future<T> ret) {
+        synchronized (queue) {
+            queue.add(ret);
+            queue.notify();
+        }
+        check();
     }
 
     public String stats() {

@@ -81,9 +81,13 @@ public class Connection {
 
     public interface Callback {
         default void closed() {}
+
         default void handle(PMessage msg) {}
+
         default void handle(OCache.ObjDelta delta) {}
+
         default void mapdata(Message msg) {}
+
         Callback dump = new Callback() {
             public void closed() {
                 System.err.println("closed");
@@ -215,7 +219,12 @@ public class Connection {
         private Connect(byte[] cookie, Object... args) {
             msg = new PMessage(Session.MSG_SESS);
             msg.adduint16(2);
-            msg.addstring("Hafen");
+            String protocol = "Hafen";
+            if (!Config.confid.isEmpty())
+                protocol += "/" + Config.confid;
+            protocol += "/OS-" + System.getProperty("os.arch");
+            protocol += "/Java-" + System.getProperty("java.version");
+            msg.addstring(protocol);
             msg.adduint16(Session.PVER);
             msg.addstring(username);
             msg.adduint16(cookie.length);
