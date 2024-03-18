@@ -34,6 +34,8 @@ import haven.res.gfx.fx.floatimg.DamageText;
 import haven.res.lib.tree.Tree;
 import haven.res.lib.vmat.Materials;
 import haven.res.lib.vmat.VarSprite;
+import haven.res.ui.obj.buddy.Buddy;
+import haven.res.ui.obj.buddy.Info;
 import haven.resutil.BPRadSprite;
 import haven.resutil.RectSprite;
 import haven.resutil.WaterTile;
@@ -503,7 +505,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                         if (a > ma) {
                             mn = n;
                             ma = a;
-                            I = i; O = o; U = u;
+                            I = i;
+                            O = o;
+                            U = u;
                         }
                     }
                 }
@@ -2055,7 +2059,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     break;
                 }
             }
-            if (getattr(KinInfo.class) != null) {
+            if (getattr(Info.class) != null) {
                 rs = 2; //I want to see the names above fires/players without it being screwed up
             }
             switch (rs) {
@@ -2188,8 +2192,8 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             }
         }
 
-        KinInfo kininfo = getattr(KinInfo.class);
-        if (kininfo == null || kininfo.group == 2 /*red*/)
+        Buddy buddy = getattr(Buddy.class);
+        if (buddy == null || buddy.group() == 2 /*red*/)
             return false;
 
         return true;

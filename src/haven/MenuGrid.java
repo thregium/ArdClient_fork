@@ -80,6 +80,7 @@ import java.awt.event.KeyEvent;
 import java.awt.font.TextAttribute;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -89,7 +90,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
 
@@ -100,6 +100,7 @@ public class MenuGrid extends Widget {
     public final ObservableCollection<Pagina> paginae = new ObservableCollection<>(new HashSet<>());
     public static Coord gsz = configuration.getMenuGrid();
     public Pagina cur, dragging;
+    public Map<Object, Pagina> pmap = Collections.synchronizedMap(new WeakHashMap<>());
     private Collection<PagButton> curbtns = null;
     public PagButton pressed, layout[][] = new PagButton[configuration.getMenuGrid().x][configuration.getMenuGrid().y];
     private UI.Grab grab;
@@ -116,6 +117,179 @@ public class MenuGrid extends Widget {
     public static class $_ implements Factory {
         public Widget create(UI ui, Object[] args) {
             return (new MenuGrid());
+        }
+    }
+
+    public static class Pagina implements ItemInfo.Owner {
+        public final MenuGrid scm;
+        public final Object id;
+        public Indir<Resource> res;
+        public byte[] sdt = null;
+        public State st;
+        public double meter, gettime, dtime, fstart;
+        public Indir<Tex> img;
+        public int newp;
+        public int anew, tnew;
+        public Object[] rawinfo = {};
+        //        private final Consumer<Pagina> onUse;
+        private final Map<Integer, Consumer<Pagina>> onUseMap = new HashMap<>();
+
+        public static enum State {
+            ENABLED, DISABLED {
+                public Indir<Tex> img(Pagina pag) {
+                    return (Utils.cache(() -> new TexI(PUtils.monochromize(pag.button().img(), Color.LIGHT_GRAY))));
+                }
+            };
+
+            public Indir<Tex> img(Pagina pag) {
+                return (Utils.cache(() -> new TexI(pag.button().img())));
+            }
+        }
+
+        public Pagina(MenuGrid scm, Indir<Resource> res) {
+            this(scm, null, res);
+        }
+
+        public Pagina(MenuGrid scm, Object id, Indir<Resource> res) {
+            this.scm = scm;
+            this.id = id;
+            this.res = res;
+            state(State.ENABLED);
+//            this.onUse = (me) -> scm.wdgmsg("act", (Object[]) res().layer(Resource.action).ad);
+            onUseMap.put(0, (me) -> scm.wdgmsg("act", (Object[]) res().layer(Resource.action).ad));
+        }
+
+        public Pagina(MenuGrid scm, Indir<Resource> res, final Consumer<Pagina> onUse) {
+            this(scm, res, res, onUse);
+        }
+
+        public Pagina(MenuGrid scm, Object id, Indir<Resource> res, final Consumer<Pagina> onUse) {
+            this.scm = scm;
+            this.id = id;
+            this.res = res;
+            state(State.ENABLED);
+//            this.onUse = onUse;
+            onUseMap.put(0, onUse);
+        }
+
+        public Pagina(MenuGrid scm, Indir<Resource> res, final Map<Integer, Consumer<Pagina>> onUseMap) {
+            this(scm, res, res, onUseMap);
+        }
+
+        public Pagina(MenuGrid scm, Object id, Indir<Resource> res, final Map<Integer, Consumer<Pagina>> onUseMap) {
+            this.scm = scm;
+            this.id = id;
+            this.res = res;
+            state(State.ENABLED);
+            this.onUseMap.putAll(onUseMap);
+        }
+
+
+        public Resource res() {
+            return (res.get());
+        }
+
+        public Message data() {
+            return ((sdt == null) ? Message.nil : new MessageBuf(sdt));
+        }
+
+        private void invalidate() {
+            button = null;
+        }
+
+        public Resource.AButton act() {
+            return (res().layer(Resource.action));
+        }
+
+        int fix = 0;
+
+        public void use() {
+//            onUse.accept(this);
+            use(fix);
+        }
+
+        public void use(Interaction iact) {
+//            use(iact.modflags);
+            fix = iact.modflags;
+            use();
+            fix = 0;
+        }
+
+        public void use(int i) {
+            Consumer<Pagina> onUse = onUseMap.get(i);
+            if (onUse != null)
+                onUse.accept(this);
+        }
+
+        private PagButton button = null;
+
+        public PagButton button() {
+            if (button == null) {
+                Resource res = res();
+                PagButton.Factory f = null;
+                if (res.name.equals("paginae/act/croster")) {
+                    f = new RosterButton.Fac();
+                }
+                if (f == null)
+                    f = res.getcode(PagButton.Factory.class, false);
+                if (f == null)
+                    button = new PagButton(this);
+                else
+                    button = f.make(this);
+            }
+            return (button);
+        }
+
+        public Pagina parent() {
+            return (button().parent());
+        }
+
+        public void state(State st) {
+            this.st = st;
+            this.img = st.img(this);
+        }
+
+        public void button(PagButton btn) {
+            button = btn;
+        }
+
+        private List<ItemInfo> info = null;
+
+        public List<ItemInfo> info() {
+            if (info == null)
+                info = ItemInfo.buildinfo(this, rawinfo);
+            return (info);
+        }
+
+        private static final OwnerContext.ClassResolver<Pagina> ctxr = new OwnerContext.ClassResolver<Pagina>()
+                .add(Glob.class, p -> p.scm.ui.sess.glob)
+                .add(Session.class, p -> p.scm.ui.sess)
+                .add(UI.class, p -> p.scm.ui);
+
+        public <T> T context(Class<T> cl) {
+            return (ctxr.context(cl, this));
+        }
+
+        public boolean isAction() {
+            Resource.AButton act = act();
+            if (act == null) {
+                return false;
+            }
+            String[] ad = act.ad;
+            return ad != null && ad.length > 0;
+        }
+
+        public static String name(Pagina p) {
+            String name = "";
+            if (p.res instanceof Resource.Named) {
+                name = ((Resource.Named) p.res).name;
+            } else {
+                try {
+                    name = p.res.get().name;
+                } catch (Loading ignored) {
+                }
+            }
+            return name;
         }
     }
 
@@ -143,12 +317,26 @@ public class MenuGrid extends Widget {
     public static class PagButton implements ItemInfo.Owner {
         public final Pagina pag;
         public final Resource res;
+        private AButton act;
 
         public PagButton(Pagina pag) {
             this.pag = pag;
             this.res = pag.res();
         }
 
+        public AButton act() {
+            if (act == null)
+                act = res.flayer(Resource.action);
+            return (act);
+        }
+
+        private Pagina parent;
+
+        public Pagina parent() {
+            if (parent == null)
+                parent = pag.scm.paginafor(act().parent);
+            return (parent);
+        }
 
         public BufferedImage img() {
             return (res.layer(Resource.imgc).img);
@@ -236,7 +424,18 @@ public class MenuGrid extends Widget {
             return (ret);
         }
 
-        @Resource.PublishedCode(name = "pagina")
+        public static class FactMaker extends Resource.PublishedCode.Instancer.Chain<Factory> {
+            public FactMaker() {
+                super(Factory.class);
+                add(new Direct<>(Factory.class));
+                add(new StaticCall<>(Factory.class, "mkpagina", PagButton.class, new Class<?>[]{Pagina.class},
+                        (make) -> (pagina) -> make.apply(new Object[]{pagina})));
+                add(new Construct<>(Factory.class, PagButton.class, new Class<?>[]{Pagina.class},
+                        (cons) -> (pagina) -> cons.apply(new Object[]{pagina})));
+            }
+        }
+
+        @Resource.PublishedCode(name = "pagina", instancer = FactMaker.class)
         public interface Factory {
             public PagButton make(Pagina info);
         }
@@ -261,7 +460,7 @@ public class MenuGrid extends Widget {
             if ((curoff - cap) >= 0)
                 curoff -= cap;
             else {
-                pag.scm.cur = paginafor(pag.scm.cur.act().parent);
+                pag.scm.change(pag.scm.cur.parent());
                 curoff = 0;
             }
         }
@@ -271,175 +470,25 @@ public class MenuGrid extends Widget {
         }
     };
 
-    public static class Pagina implements ItemInfo.Owner {
-        public final MenuGrid scm;
-        public final Indir<Resource> res;
-        public State st;
-        public double meter, gettime, dtime, fstart;
-        public Indir<Tex> img;
-        public int newp;
-        public Object[] rawinfo = {};
-        //        private final Consumer<Pagina> onUse;
-        private final Map<Integer, Consumer<Pagina>> onUseMap = new HashMap<>();
-
-        public static enum State {
-            ENABLED, DISABLED {
-                public Indir<Tex> img(Pagina pag) {
-                    return (Utils.cache(() -> new TexI(PUtils.monochromize(pag.button().img(), Color.LIGHT_GRAY))));
-                }
-            };
-
-            public Indir<Tex> img(Pagina pag) {
-                return (Utils.cache(() -> new TexI(pag.button().img())));
-            }
-        }
-
-        public Pagina(MenuGrid scm, Indir<Resource> res) {
-            this.scm = scm;
-            this.res = res;
-            state(State.ENABLED);
-//            this.onUse = (me) -> scm.wdgmsg("act", (Object[]) res().layer(Resource.action).ad);
-            onUseMap.put(0, (me) -> scm.wdgmsg("act", (Object[]) res().layer(Resource.action).ad));
-        }
-
-        public Pagina(MenuGrid scm, Indir<Resource> res, final Consumer<Pagina> onUse) {
-            this.scm = scm;
-            this.res = res;
-            state(State.ENABLED);
-//            this.onUse = onUse;
-            onUseMap.put(0, onUse);
-        }
-
-        public Pagina(MenuGrid scm, Indir<Resource> res, final Map<Integer, Consumer<Pagina>> onUseMap) {
-            this.scm = scm;
-            this.res = res;
-            state(State.ENABLED);
-            this.onUseMap.putAll(onUseMap);
-        }
-
-
-        public Resource res() {
-            return (res.get());
-        }
-
-        public Resource.AButton act() {
-            return (res().layer(Resource.action));
-        }
-
-        int fix = 0;
-
-        public void use() {
-//            onUse.accept(this);
-            use(fix);
-        }
-
-        public void use(Interaction iact) {
-//            use(iact.modflags);
-            fix = iact.modflags;
-            use();
-            fix = 0;
-        }
-
-        public void use(int i) {
-            Consumer<Pagina> onUse = onUseMap.get(i);
-            if (onUse != null)
-                onUse.accept(this);
-        }
-
-        private PagButton button = null;
-
-        public PagButton button() {
-            if (button == null) {
-                Resource res = res();
-                PagButton.Factory f = null;
-                if (res.name.equals("paginae/act/croster")) {
-                    f = new RosterButton.Fac();
-                }
-                if (f == null)
-                    f = res.getcode(PagButton.Factory.class, false);
-                if (f == null)
-                    button = new PagButton(this);
-                else
-                    button = f.make(this);
-            }
-            return (button);
-        }
-
-        public void state(State st) {
-            this.st = st;
-            this.img = st.img(this);
-        }
-
-        public void button(PagButton btn) {
-            button = btn;
-        }
-
-        private List<ItemInfo> info = null;
-
-        public List<ItemInfo> info() {
-            if (info == null)
-                info = ItemInfo.buildinfo(this, rawinfo);
-            return (info);
-        }
-
-        private static final OwnerContext.ClassResolver<Pagina> ctxr = new OwnerContext.ClassResolver<Pagina>()
-                .add(Glob.class, p -> p.scm.ui.sess.glob)
-                .add(Session.class, p -> p.scm.ui.sess)
-                .add(UI.class, p -> p.scm.ui);
-
-        public <T> T context(Class<T> cl) {
-            return (ctxr.context(cl, this));
-        }
-
-        public boolean isAction() {
-            Resource.AButton act = act();
-            if (act == null) {
-                return false;
-            }
-            String[] ad = act.ad;
-            return ad != null && ad.length > 0;
-        }
-
-        public static String name(Pagina p) {
-            String name = "";
-            if (p.res instanceof Resource.Named) {
-                name = ((Resource.Named) p.res).name;
-            } else {
-                try {
-                    name = p.res.get().name;
-                } catch (Loading ignored) {
-                }
-            }
-            return name;
-        }
-    }
-
-    public Map<Indir<Resource>, Pagina> pmap = Collections.synchronizedMap(new WeakHashMap<Indir<Resource>, Pagina>());
-
     public Pagina paginafor(Indir<Resource> res) {
         if (res == null)
             return (null);
         synchronized (pmap) {
             Pagina p = pmap.get(res);
             if (p == null)
-                pmap.put(res, p = new Pagina(this, res));
+                pmap.put(res, p = new Pagina(this, res, res));
             return (p);
         }
     }
 
-    public Pagina paginafor(Resource res) {
-        if (res != null) {
-            synchronized (pmap) {
-                for (Indir<Resource> key : pmap.keySet()) {
-                    if (Objects.equals(key.get().name, res.name)) {
-                        return pmap.get(key);
-                    }
-                }
-            }
+    public Pagina paginafor(Object id, Indir<Resource> res) {
+        synchronized (pmap) {
+            Pagina p = pmap.get(id);
+            if ((p == null) && (res != null))
+                pmap.put(id, p = new Pagina(this, id, res));
+            return (p);
         }
-        return null;
     }
-
 
     public Pagina paginafor(String name) {
         return paginafor(Resource.remote().load(name));
@@ -457,19 +506,21 @@ public class MenuGrid extends Widget {
 
     public boolean cons(Pagina p, Collection<PagButton> buf) {
         Collection<Pagina> open = new LinkedList<>(), close = new HashSet<>();
-        synchronized (paginae) {
-            for (Pagina pag : paginae) {
-                if (pag.newp == 2) {
-                    pag.newp = 0;
-                    pag.fstart = 0;
-                }
-                open.add(pag);
-            }
+        synchronized (pmap) {
+            for (Pagina pag : pmap.values())
+                pag.tnew = 0;
         }
-        for (Pagina pag : new ArrayList<>(pmap.values())) {
-            if (pag.newp == 2) {
-                pag.newp = 0;
-                pag.fstart = 0;
+        synchronized (paginae) {
+            open = new LinkedList<Pagina>();
+            for (Pagina pag : paginae) {
+                open.add(pag);
+                if (pag.anew > 0) {
+                    try {
+                        for (Pagina npag = pag; npag != null; npag = npag.parent())
+                            npag.tnew = Math.max(npag.tnew, pag.anew);
+                    } catch (Loading l) {
+                    }
+                }
             }
         }
         boolean ret = true;
@@ -478,21 +529,11 @@ public class MenuGrid extends Widget {
             Pagina pag = iter.next();
             iter.remove();
             try {
-                AButton ad = pag.act();
-                if (ad == null) {
-//                    throw (new RuntimeException("Pagina in " + pag.res + " lacks action"));
+                Pagina parent = pag.parent();
+                if (parent == p)
                     buf.add(pag.button());
-                } else {
-                    Pagina parent = paginafor(ad.parent);
-                    if ((pag.newp != 0) && (parent != null) && (parent.newp == 0)) {
-                        parent.newp = 2;
-                        parent.fstart = (parent.fstart == 0) ? pag.fstart : Math.min(parent.fstart, pag.fstart);
-                    }
-                    if (parent == p)
-                        buf.add(pag.button());
-                    else if ((parent != null) && !close.contains(parent) && !open.contains(parent))
-                        open.add(parent);
-                }
+                else if ((parent != null) && !close.contains(parent) && !open.contains(parent))
+                    open.add(parent);
                 close.add(pag);
             } catch (Loading e) {
                 ret = false;
@@ -1427,6 +1468,12 @@ public class MenuGrid extends Widget {
         }
     }
 
+    public void change(Pagina dst) {
+        this.cur = dst;
+        curoff = 0;
+        updlayout();
+    }
+
     public void use(PagButton r, boolean reset) {
         use(r, new Interaction(), reset);
     }
@@ -1436,14 +1483,12 @@ public class MenuGrid extends Widget {
         cons(r.pag, sub);
         selectCraft(r.pag);
         if (!sub.isEmpty()) {
-            this.cur = r.pag;
-            curoff = 0;
+            change(r.pag);
         } else if (r.pag == bk.pag) {
             if ((curoff - cap) >= 0)
                 curoff -= cap;
             else {
-                this.cur = paginafor(this.cur.act().parent);
-                curoff = 0;
+                change(this.cur.parent());
             }
             selectCraft(this.cur);
         } else {
@@ -1615,42 +1660,42 @@ public class MenuGrid extends Widget {
     public void uimsg(String msg, Object... args) {
         if (msg == "goto") {
             if (args[0] == null)
-                cur = null;
+                change(null);
             else
-                cur = paginafor(ui.sess.getres((Integer) args[0]));
-            curoff = 0;
-            updlayout();
+                change(paginafor(ui.sess.getresv(args[0])));
         } else if (msg == "fill") {
             synchronized (paginae) {
                 int a = 0;
                 while (a < args.length) {
-                    int fl = (Integer) args[a++];
-                    Pagina pag = paginafor(ui.sess.getres((Integer) args[a++]));
+                    int fl = Utils.iv(args[a++]);
+                    Pagina pag;
+                    Object id;
+                    if ((fl & 2) != 0)
+                        pag = paginafor(id = args[a++], null);
+                    else
+                        id = (pag = paginafor(ui.sess.getres((Integer) args[a++], -2))).res;
                     if ((fl & 1) != 0) {
-                        pag.state(Pagina.State.ENABLED);
-                        pag.meter = 0;
-                        if ((fl & 2) != 0)
-                            pag.state(Pagina.State.DISABLED);
-                        if ((fl & 4) != 0) {
-                            pag.meter = ((Number) args[a++]).doubleValue() / 1000.0;
-                            pag.gettime = Utils.rtime();
-                            pag.dtime = ((Number) args[a++]).doubleValue() / 1000.0;
+                        if ((fl & 2) != 0) {
+                            Indir<Resource> res = ui.sess.getres((Integer) args[a++], -2);
+                            if (pag == null) {
+                                pag = paginafor(id, res);
+                            } else if (pag.res != res) {
+                                pag.res = res;
+                                pag.invalidate();
+                            }
+                        }
+                        byte[] data = ((fl & 4) != 0) ? (byte[]) args[a++] : null;
+                        if (!Arrays.equals(pag.sdt, data)) {
+                            pag.sdt = data;
+                            pag.invalidate();
                         }
                         if ((fl & 8) != 0)
-                            pag.newp = 1;
-                        if ((fl & 16) != 0)
-                            pag.rawinfo = (Object[]) args[a++];
-                        else
-                            pag.rawinfo = new Object[0];
-
-                        // this is very crappy way to do this. needs to be redone probably
-                        /*try {
-                            Resource res = pag.res.get();
-                            if (res.name.equals("ui/tt/q/quality"))
-                                continue;
-                        } catch (Loading l) {
-                        }*/
-
+                            pag.anew = 2;
+                        Object[] rawinfo = ((fl & 16) != 0) ? (Object[]) args[a++] : new Object[0];
+                        if (!Arrays.deepEquals(pag.rawinfo, rawinfo)) {
+                            pag.rawinfo = rawinfo;
+                            pag.invalidate();
+                        }
                         paginae.add(pag);
                     } else {
                         paginae.remove(pag);
@@ -1669,7 +1714,7 @@ public class MenuGrid extends Widget {
             return (false);
         if (ev.isShiftDown() || ev.isAltDown()) {
             return (false);
-        } else if ((k == 27) && (this.cur != null)) {
+        } else if ((k == KeyEvent.VK_ESCAPE) && (this.cur != null)) {
             this.cur = null;
             curoff = 0;
             updlayout();

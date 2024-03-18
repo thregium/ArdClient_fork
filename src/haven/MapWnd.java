@@ -36,6 +36,7 @@ import haven.MapFileWidget.SpecLocator;
 import haven.purus.pbot.PBotGob;
 import haven.purus.pbot.PBotGobAPI;
 import haven.purus.pbot.PBotUtils;
+import haven.res.ui.obj.buddy.Buddy;
 import haven.sloth.gob.Type;
 import haven.sloth.gui.DowseWnd;
 import haven.sloth.gui.ResizableWnd;
@@ -793,21 +794,19 @@ public class MapWnd extends ResizableWnd {
 
         private void drawTracking(GOut g) {
             final double dist = 90000.0D;
-            synchronized (ui.gui.dowsewnds) {
-                for (final DowseWnd wnd : ui.gui.dowsewnds) {
-                    if (wnd.mapc == null || wnd.mapc.equals(Coord.z))
-                        wnd.mapc = getRealCoord(new Coord2d(wnd.startc).floor(tilesz));
-                    Location loc = this.curloc;
-                    if (loc != null && wnd.mapc != null && !wnd.mapc.equals(Coord.z)) {
-                        Coord hsz = sz.div(2);
-                        final Coord gc = hsz.sub(loc.tc).add(wnd.mapc.div(scalef()));
-                        final Coord mlc = gc.add((int) (Math.cos(Math.toRadians(wnd.a1())) * dist), (int) (Math.sin(Math.toRadians(wnd.a1())) * dist));
-                        final Coord mrc = gc.add((int) (Math.cos(Math.toRadians(wnd.a2())) * dist), (int) (Math.sin(Math.toRadians(wnd.a2())) * dist));
-                        g.chcolor(new Color(configuration.dowsecolor, true));
-                        g.dottedline(gc, mlc, 1);
-                        g.dottedline(gc, mrc, 1);
-                        g.chcolor();
-                    }
+            for (final DowseWnd wnd : new ArrayList<>(ui.gui.dowsewnds)) {
+                if (wnd.mapc == null || wnd.mapc.equals(Coord.z))
+                    wnd.mapc = getRealCoord(new Coord2d(wnd.startc).floor(tilesz));
+                Location loc = this.curloc;
+                if (loc != null && wnd.mapc != null && !wnd.mapc.equals(Coord.z)) {
+                    Coord hsz = sz.div(2);
+                    final Coord gc = hsz.sub(loc.tc).add(wnd.mapc.div(scalef()));
+                    final Coord mlc = gc.add((int) (Math.cos(Math.toRadians(wnd.a1())) * dist), (int) (Math.sin(Math.toRadians(wnd.a1())) * dist));
+                    final Coord mrc = gc.add((int) (Math.cos(Math.toRadians(wnd.a2())) * dist), (int) (Math.sin(Math.toRadians(wnd.a2())) * dist));
+                    g.chcolor(new Color(configuration.dowsecolor, true));
+                    g.dottedline(gc, mlc, 1);
+                    g.dottedline(gc, mrc, 1);
+                    g.chcolor();
                 }
             }
         }
@@ -856,13 +855,13 @@ public class MapWnd extends ResizableWnd {
                             final Coord right = UI.scale(-5, 5).rotate(angle).add(gc);
                             final Coord left = UI.scale(-5, -5).rotate(angle).add(gc);
                             final Coord notch = UI.scale(-2, 0).rotate(angle).add(gc);
-                            KinInfo kin = gob.getattr(KinInfo.class);
+                            Buddy buddy = gob.getattr(Buddy.class);
 
                             Tex tex = namemap.get(m.gobid);
-                            if (tex == null && kin != null) { //if we don't already have this nametex in memory, set one up.
-                                System.out.println("tex null kin not null");
-                                tex = Text.renderstroked(kin.name, Color.WHITE, Color.BLACK, Text.delfnd2).tex();
-                                // tex = kin.rendered();
+                            if (tex == null && buddy != null) { //if we don't already have this nametex in memory, set one up.
+                                System.out.println("tex null buddy not null");
+                                tex = Text.renderstroked(buddy.name(), Color.WHITE, Color.BLACK, Text.delfnd2).tex();
+                                // tex = buddy.rendered();
                                 namemap.put(m.gobid, tex);
                             }
                             if (tex != null) { //apply texture if it's been successfully setup.
@@ -1292,10 +1291,10 @@ public class MapWnd extends ResizableWnd {
                         continue;
                     Gob gob = m.getgob();
                     if (gob != null) {
-                        KinInfo kin = gob.getattr(KinInfo.class);
+                        Buddy buddy = gob.getattr(Buddy.class);
                         Tex tex = namemap.get(m.gobid);
-                        if (tex == null && kin != null) { //if we don't already have this nametex in memory, set one up.
-                            tex = Text.renderstroked(kin.name, Color.WHITE, Color.BLACK, Text.delfnd2).tex();
+                        if (tex == null && buddy != null) { //if we don't already have this nametex in memory, set one up.
+                            tex = Text.renderstroked(buddy.name(), Color.WHITE, Color.BLACK, Text.delfnd2).tex();
                             namemap.put(m.gobid, tex);
                         }
                     }

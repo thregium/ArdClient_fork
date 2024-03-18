@@ -26,17 +26,15 @@
 
 package haven;
 
-import static haven.DefSettings.MINIMAPTYPE;
-import static haven.MCache.cmaps;
-import static haven.MCache.tilesz;
-import static haven.OCache.posres;
 import haven.purus.Iconfinder;
 import haven.purus.pbot.PBotDiscord;
 import haven.purus.pbot.PBotUtils;
+import haven.res.ui.obj.buddy.Buddy;
 import haven.resutil.Ridges;
 import haven.sloth.gob.Type;
 import haven.sloth.gui.DowseWnd;
 import modification.configuration;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -49,6 +47,11 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import static haven.DefSettings.MINIMAPTYPE;
+import static haven.MCache.cmaps;
+import static haven.MCache.tilesz;
+import static haven.OCache.posres;
 
 public class LocalMiniMap extends Widget {
     public final static Tex roadicn = Resource.loadtex("gfx/icons/milestone");
@@ -403,11 +406,11 @@ public class LocalMiniMap extends Widget {
 
                     Coord pc = p2c(gob.rc).add(delta);
 
-                    KinInfo kininfo = gob.getattr(KinInfo.class);
+                    Buddy buddy = gob.getattr(Buddy.class);
                     if (pc.x >= 0 && pc.x <= sz.x && pc.y >= 0 && pc.y < sz.y) {
 //                            g.chcolor(Color.BLACK);
 //                            g.fcircle(pc.x, pc.y, 5, 16);
-//                            g.chcolor(kininfo != null ? BuddyWnd.gc[kininfo.group] : Color.WHITE);
+//                            g.chcolor(buddy != null ? BuddyWnd.gc[buddy.group] : Color.WHITE);
 //                            g.fcircle(pc.x, pc.y, 4, 16);
 //                            g.chcolor();
 
@@ -424,7 +427,7 @@ public class LocalMiniMap extends Widget {
                         final Coord coord5 = UI.scale(-8, 1).rotate(angle).add(pc);
                         final Coord coord6 = UI.scale(0, 1).rotate(angle).add(pc);
                         final Coord coord7 = UI.scale(0, 5).rotate(angle).add(pc);
-                        g.chcolor(kininfo != null ? BuddyWnd.gc[kininfo.group] : Color.WHITE);
+                        g.chcolor(buddy != null ? BuddyWnd.gc[buddy.group()] : Color.WHITE);
                         g.poly(coord1, coord2, coord3, coord4, coord5, coord6, coord7);
                         g.chcolor(Color.BLACK);
                         g.polyline(1, coord1, coord2, coord3, coord4, coord5, coord6, coord7);
@@ -435,7 +438,7 @@ public class LocalMiniMap extends Widget {
                         continue;
 
 //                        boolean enemy = false;
-//                        if (!Config.alarmunknownplayer.equals("None") && kininfo == null) {
+//                        if (!Config.alarmunknownplayer.equals("None") && buddy == null) {
 //                            sgobs.add(gob.id);
 //                            Audio.play(Resource.local().loadwait(Config.alarmunknownplayer), Config.alarmunknownvol);
 //                            if (Config.discordplayeralert) {
@@ -448,7 +451,7 @@ public class LocalMiniMap extends Widget {
 //                                }
 //                            }
 //                            enemy = true;
-//                        } else if (!Config.alarmredplayer.equals("None") && kininfo != null && kininfo.group == 2) {
+//                        } else if (!Config.alarmredplayer.equals("None") && buddy != null && buddy.group == 2) {
 //                            sgobs.add(gob.id);
 //                            Audio.play(Resource.local().loadwait(Config.alarmredplayer), Config.alarmredvol);
 //                            if (Config.discorduser) {
@@ -505,8 +508,8 @@ public class LocalMiniMap extends Widget {
                     Coord sz = UI.scale(18, 18);
                     if (c.isect(gc.sub(sz.div(2)), sz)) {
                         Resource res = gob.getres();
-                        KinInfo ki = gob.getattr(KinInfo.class);
-                        if (ki != null) {
+                        Buddy buddy = gob.getattr(Buddy.class);
+                        if (buddy != null) {
                             if (gob.type == Type.HUMAN)
                                 return gob;
                         } else if (gob.type == Type.TREE) {
@@ -543,16 +546,17 @@ public class LocalMiniMap extends Widget {
             Resource res = gob.getres();
             try {
                 GobIcon icon = gob.getattr(GobIcon.class);
-                KinInfo ki = gob.getattr(KinInfo.class);
-                if (ki != null)
-                    return ki.name;
+                Buddy buddy = gob.getattr(Buddy.class);
+                if (buddy != null)
+                    return buddy.name();
                 else if (icon != null)
                     return pretty(gob.getres().name);
                 else { // custom icons
                     /*if (res != null && Config.additonalicons.containsKey(res.name)) {
                         CheckListboxItem itm = Config.icons.get(res.basename());
                         return pretty(itm.name);
-                    } else */if (gob.type == Type.BOULDER)
+                    } else */
+                    if (gob.type == Type.BOULDER)
                         return pretty(res.basename().substring(0, res.basename().length() - 1));
                     else
                         return pretty(gob.getres().basename());
@@ -616,13 +620,13 @@ public class LocalMiniMap extends Widget {
                 if (ui.sess.glob.party.memb.containsKey(gob.id))
                     continue;
 
-                KinInfo kininfo = gob.getattr(KinInfo.class);
+                Buddy buddy = gob.getattr(Buddy.class);
 
                 if (sgobs.contains(gob.id))
                     continue;
 
                 boolean enemy = false;
-                if (!Config.alarmunknownplayer.equals("None") && kininfo == null) {
+                if (!Config.alarmunknownplayer.equals("None") && buddy == null) {
                     sgobs.add(gob.id);
                     Defer.later(() -> {
                         Audio.play(Resource.local().loadwait(Config.alarmunknownplayer), Config.alarmunknownvol);
@@ -643,7 +647,7 @@ public class LocalMiniMap extends Widget {
                         }
                     }
                     enemy = true;
-                } else if (!Config.alarmredplayer.equals("None") && kininfo != null && kininfo.group == 2) {
+                } else if (!Config.alarmredplayer.equals("None") && buddy != null && buddy.group() == 2) {
                     sgobs.add(gob.id);
                     Defer.later(() -> {
                         Audio.play(Resource.local().loadwait(Config.alarmredplayer), Config.alarmredvol);
@@ -873,16 +877,14 @@ public class LocalMiniMap extends Widget {
 
     private void drawTracking(GOut g) {
         final double dist = 90000.0D;
-        synchronized (ui.gui.dowsewnds) {
-            for (final DowseWnd wnd : ui.gui.dowsewnds) {
-                final Coord mc = p2c(wnd.startc).add(delta);
-                final Coord lc = mc.add((int) (Math.cos(Math.toRadians(wnd.a1())) * dist), (int) (Math.sin(Math.toRadians(wnd.a1())) * dist));
-                final Coord rc = mc.add((int) (Math.cos(Math.toRadians(wnd.a2())) * dist), (int) (Math.sin(Math.toRadians(wnd.a2())) * dist));
-                g.chcolor(new Color(configuration.dowsecolor, true));
-                g.dottedline(mc, lc, 1);
-                g.dottedline(mc, rc, 1);
-                g.chcolor();
-            }
+        for (final DowseWnd wnd : new ArrayList<>(ui.gui.dowsewnds)) {
+            final Coord mc = p2c(wnd.startc).add(delta);
+            final Coord lc = mc.add((int) (Math.cos(Math.toRadians(wnd.a1())) * dist), (int) (Math.sin(Math.toRadians(wnd.a1())) * dist));
+            final Coord rc = mc.add((int) (Math.cos(Math.toRadians(wnd.a2())) * dist), (int) (Math.sin(Math.toRadians(wnd.a2())) * dist));
+            g.chcolor(new Color(configuration.dowsecolor, true));
+            g.dottedline(mc, lc, 1);
+            g.dottedline(mc, rc, 1);
+            g.chcolor();
         }
     }
 
@@ -1127,9 +1129,9 @@ public class LocalMiniMap extends Widget {
                                 else disp = new DisplayIcon(icon);
                             }
                             disp.update(gob.rc, gob.a);
-                            KinInfo kin = gob.getattr(KinInfo.class);
-                            if ((kin != null) && (kin.group < BuddyWnd.gc.length))
-                                disp.col = BuddyWnd.gc[kin.group];
+                            Buddy buddy = gob.getattr(Buddy.class);
+                            if ((buddy != null) && (buddy.group() < BuddyWnd.gc.length))
+                                disp.col = BuddyWnd.gc[buddy.group()];
                             ret.add(disp);
                         }
                     }

@@ -39,6 +39,7 @@ public class Buddy extends GAttrib implements InfoPart {
             gob.delattr(Buddy.class);
     }
 
+    @Override
     public void dispose() {
         super.dispose();
         info.remove(this);
@@ -48,6 +49,15 @@ public class Buddy extends GAttrib implements InfoPart {
         return (b);
     }
 
+    public String name() {
+        return (rnm);
+    }
+
+    public int group() {
+        return (rgrp);
+    }
+
+    @Override
     public void draw(CompImage cmp, PView.RenderContext ctx) {
         BuddyWnd.Buddy b = null;
         if (bw == null) {
@@ -79,7 +89,9 @@ public class Buddy extends GAttrib implements InfoPart {
         }
     }
 
+    @Override
     public boolean auto() {return (true);}
 
+    @Override
     public int order() {return (-10);}
 }

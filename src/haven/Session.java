@@ -42,7 +42,7 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 
 public class Session implements Resource.Resolver {
-    public static final int PVER = 27;
+    public static final int PVER = 28;
 
     public static final int MSG_SESS = 0;
     public static final int MSG_REL = 1;
@@ -336,7 +336,8 @@ public class Session implements Resource.Resolver {
                 if (vol != 1.0)
                     clip = new Audio.VolAdjust(clip, vol);
                 Audio.play(clip);
-            }, null); ;
+            }, null);
+            ;
         } else if (msg.type == RMessage.RMSG_MUSIC) {
             String resnm = msg.string();
             int resver = msg.uint16();

@@ -1,6 +1,7 @@
 package haven;
 
 import haven.purus.pbot.PBotUtils;
+import haven.res.ui.obj.buddy.Buddy;
 
 import java.awt.Color;
 
@@ -79,9 +80,9 @@ public class DamageSprite extends Sprite implements PView.Render2D {
             this.armtex = afrn.render(this.arm + "").tex();
         } else {
             if (Config.logcombatactions) {
-                KinInfo kininfo = gob.getattr(KinInfo.class);
-                if (kininfo != null)
-                    PBotUtils.sysLogAppend(ui, "Hit " + kininfo.name + " For " + dmg + " Damage.", "green");
+                Buddy buddy = gob.getattr(Buddy.class);
+                if (buddy != null)
+                    PBotUtils.sysLogAppend(ui, "Hit " + buddy.name() + " For " + dmg + " Damage.", "green");
                 else if (gob.isplayer())
                     PBotUtils.sysLogAppend(ui, "I got hit for " + dmg + " Damage.", "red");
                 else if (gob.getres().basename().contains("Body"))

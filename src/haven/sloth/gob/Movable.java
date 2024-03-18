@@ -7,12 +7,12 @@ import haven.GAttrib;
 import haven.GOut;
 import haven.Gob;
 import haven.GobPath;
-import haven.KinInfo;
 import haven.Loading;
 import haven.Moving;
 import haven.RenderList;
 import haven.Rendered;
 import haven.States;
+import haven.res.ui.obj.buddy.Buddy;
 import haven.sloth.gfx.GobPathSprite;
 import haven.sloth.io.Storage;
 
@@ -111,9 +111,9 @@ public class Movable extends GAttrib implements Rendered {
                                 col = animalpathcol;
                             } else {
                                 //Humans, based off kin
-                                final KinInfo kin = gob.getattr(KinInfo.class);
+                                final Buddy kin = gob.getattr(Buddy.class);
                                 if (kin != null) {
-                                    col = buddycol[kin.group];
+                                    col = buddycol[kin.group()];
                                 } else {
                                     col = unknowngobcol;
                                 }

@@ -87,6 +87,10 @@ public class Info extends GAttrib implements Rendered, PView.Render2D {
         dirty = true;
     }
 
+    public Tex rendered() {
+        return (rend);
+    }
+
     public static Info add(Gob gob, InfoPart part) {
         Info info = gob.getattr(Info.class);
         if (info == null)
@@ -110,5 +114,8 @@ public class Info extends GAttrib implements Rendered, PView.Render2D {
             ctx = r.cstate().get(PView.ctx);
         return (true);
     }
+
+    @Override
+    public Object staticp() {return (null);}
 }
 

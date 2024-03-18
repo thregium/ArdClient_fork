@@ -5,7 +5,6 @@ import haven.Coord;
 import haven.Coord2d;
 import haven.Glob;
 import haven.Gob;
-import haven.KinInfo;
 import haven.Loading;
 import haven.MCache;
 import haven.MCache.LoadingMap;
@@ -14,6 +13,7 @@ import haven.MapFile.Marker;
 import haven.MapFile.PMarker;
 import haven.MapFile.SMarker;
 import haven.WebBrowser;
+import haven.res.ui.obj.buddy.Buddy;
 import haven.sloth.gob.Type;
 import modification.dev;
 import org.json.JSONArray;
@@ -460,13 +460,13 @@ public class MappingClient {
                                     j.put("name", playerName);
                                     j.put("type", "player");
                                 } else {
-                                    KinInfo ki = gob.getattr(KinInfo.class);
+                                    Buddy ki = gob.getattr(Buddy.class);
                                     if (ki == null) {
                                         j.put("name", "???");
                                         j.put("type", "unknown");
                                     } else {
-                                        j.put("name", ki.name);
-                                        j.put("type", Integer.toHexString(BuddyWnd.gc[ki.group].getRGB()));
+                                        j.put("name", ki.name());
+                                        j.put("type", Integer.toHexString(BuddyWnd.gc[ki.group()].getRGB()));
                                     }
                                 }
                                 MCache.Grid grid = Glob.getByReference(username).map.getgrid(toGC(gob.rc));

@@ -29,6 +29,7 @@ package haven;
 
 import haven.overlays.TextOverlay;
 import haven.purus.pbot.PBotUtils;
+import haven.res.ui.obj.buddy.Buddy;
 import haven.sloth.gob.Hidden;
 import modification.configuration;
 
@@ -475,11 +476,11 @@ public class OCache implements Iterable<Gob> {
                             DamageSprite dmgspr = gobdmgs.get(g.id);
                             if (dmgspr == null) {
                                 if (Config.logcombatactions) {
-                                    KinInfo kininfo = g.getattr(KinInfo.class);
+                                    Buddy buddy = g.getattr(Buddy.class);
                                     if (g.isplayer())
                                         PBotUtils.sysLogAppend(getUI(), "I got hit for " + dmg + " Damage.", "white");
-                                    else if (kininfo != null)
-                                        PBotUtils.sysLogAppend(getUI(), "Hit " + kininfo.name + " For " + dmg + " Damage.", "green");
+                                    else if (buddy != null)
+                                        PBotUtils.sysLogAppend(getUI(), "Hit " + buddy.name() + " For " + dmg + " Damage.", "green");
                                     else if (g.getres().basename().contains("Body"))
                                         PBotUtils.sysLogAppend(getUI(), "Hit Unknown player For " + dmg + " Damage.", "green");
                                     else

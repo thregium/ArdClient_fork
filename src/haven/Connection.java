@@ -122,7 +122,6 @@ public class Connection {
                 while (task != null)
                     task = task.run();
             } finally {
-                onClose.forEach(Runnable::run);
                 try {
                     alive = false;
                     for (Callback cb : cbs)
@@ -135,6 +134,7 @@ public class Connection {
                         throw (new RuntimeException(e));
                     }
                 }
+                onClose.forEach(Runnable::run);
             }
         }
     }

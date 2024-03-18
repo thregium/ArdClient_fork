@@ -1,5 +1,6 @@
 package haven;
 
+import haven.res.ui.obj.buddy.Buddy;
 import haven.sloth.gob.Movable;
 import haven.sloth.gob.Type;
 import modification.configuration;
@@ -21,9 +22,9 @@ public class GobPath extends Sprite {
             clrst = Movable.animalpathcol;
         } else {
             //Humans, based off kin
-            final KinInfo kin = gob.getattr(KinInfo.class);
-            if (kin != null) {
-                clrst = Movable.buddycol[kin.group];
+            final Buddy buddy = gob.getattr(Buddy.class);
+            if (buddy != null) {
+                clrst = Movable.buddycol[buddy.group()];
             } else {
                 clrst = Movable.unknowngobcol;
             }

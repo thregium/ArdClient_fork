@@ -27,6 +27,7 @@
 package haven;
 
 
+import haven.res.ui.obj.buddy.Buddy;
 import haven.sloth.gfx.GobCombatSprite;
 import haven.sloth.gob.AggroMark;
 import haven.sloth.gui.MovableWidget;
@@ -174,9 +175,9 @@ public class Fightview extends MovableWidget {
                     }
                     OCache oc = ui.gui.map.glob.oc;
                     Gob gob = oc.getgob(gobid);
-                    KinInfo kininfo = gob.getattr(KinInfo.class);
-                    if (kininfo != null)
-                        ui.gui.syslog.append(String.format("%s, %s, ip %d - %d", kininfo.name, tt.t, ip, oip), combatLogOpClr);
+                    Buddy buddy = gob.getattr(Buddy.class);
+                    if (buddy != null)
+                        ui.gui.syslog.append(String.format("%s, %s, ip %d - %d", buddy.name(), tt.t, ip, oip), combatLogOpClr);
                     else if (gob.getres().basename().contains("body"))
                         ui.gui.syslog.append(String.format("Enemy Player, %s, ip %d - %d", tt.t, ip, oip), combatLogOpClr);
                     else

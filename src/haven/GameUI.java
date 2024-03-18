@@ -178,7 +178,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
     public CraftDBWnd craftwnd = null;
     private TimersWnd timers;
 
-    public final List<DowseWnd> dowsewnds = new ArrayList<>();
+    public final List<DowseWnd> dowsewnds = Collections.synchronizedList(new ArrayList<>());
     public ForageHelperWnd foragehelper;
     public ForageWizardWnd forageWzrWnd;
     public SkillnCredoWnd scwnd;
@@ -288,7 +288,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
                         g.aimage(pinfo.tex(), new Coord(sz.x - x, y), 1, 0);
                         y += pinfo.sz().y;
                     }
-                    
+
                     Text winfo = ui.sess.glob.weathertimetex.get();
                     if (configuration.showweatherinfo && winfo != null) {
                         g.aimage(winfo.tex(), new Coord(sz.x - x, y), 1, 0);
@@ -1641,6 +1641,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
     }
 
     public final AtomicReference<Text> provincetex = new AtomicReference<>(null);
+
     public void notifyProvince(Object... cargs) {
         if (map != null) {
             try {
@@ -2319,17 +2320,13 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
     }
 
     public DowseWnd makeDowseWnd(final Coord2d startc, final double a1, final double a2, final Consumer<Color> changeCol, final Runnable onClose) {
-        synchronized (dowsewnds) {
-            DowseWnd dwnd = new DowseWnd(startc, a1, a2, changeCol, onClose);
-            dowsewnds.add(add(dwnd));
-            return (dwnd);
-        }
+        DowseWnd dwnd = new DowseWnd(startc, a1, a2, changeCol, onClose);
+        dowsewnds.add(add(dwnd));
+        return (dwnd);
     }
 
     public void remDowseWnd(final DowseWnd wnd) {
-        synchronized (dowsewnds) {
-            dowsewnds.removeIf(wdg -> wdg == wnd);
-        }
+        dowsewnds.removeIf(wdg -> wdg == wnd);
     }
 
     @Override

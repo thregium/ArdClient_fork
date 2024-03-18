@@ -27,7 +27,9 @@
 package haven;
 
 import haven.Party.Member;
+import haven.res.ui.obj.buddy.Buddy;
 import haven.sloth.gui.MovableWidget;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -94,10 +96,10 @@ public class Partyview extends MovableWidget {
             Gob gob = m.getgob();
             if (gob == null)
                 return (tooltip);
-            KinInfo ki = gob.getattr(KinInfo.class);
-            if (ki == null)
+            Buddy buddy = gob.getattr(Buddy.class);
+            if (buddy == null)
                 return (null);
-            return (tooltip = ki.rendered());
+            return (tooltip = buddy.info.rendered());
         }
     }
 
