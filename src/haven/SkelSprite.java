@@ -75,7 +75,7 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
             pose = null;
             pmorph = null;
         }
-        update(fl, true);
+        update(fl);
     }
 
     public SkelSprite(Owner owner, Resource res) {
@@ -121,7 +121,7 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
     }
 
     private void chparts(int mask) {
-        Collection<Rendered> rl = new LinkedList<Rendered>();
+        Collection<Rendered> rl = new LinkedList<>();
         for (FastMesh.MeshRes mr : res.layers(FastMesh.MeshRes.class)) {
             if ((mr.mat != null) && ((mr.id < 0) || (((1 << mr.id) & mask) != 0)))
                 rl.add(animwrap(mr.mat.get().apply(mr.m)));
@@ -149,7 +149,7 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
     }
 
     private void chmanims(int mask) {
-        Collection<MeshAnim.Anim> anims = new LinkedList<MeshAnim.Anim>();
+        Collection<MeshAnim.Anim> anims = new LinkedList<>();
         for (MeshAnim.Res ar : res.layers(MeshAnim.Res.class)) {
             if ((ar.id < 0) || (((1 << ar.id) & mask) != 0))
                 anims.add(ar.make());
@@ -158,48 +158,49 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
         this.mmorph = MorphedMesh.combine(this.manims);
     }
 
-    private Map<Skeleton.ResPose, PoseMod> modids = new HashMap<Skeleton.ResPose, PoseMod>();
+    private static final Map<Skeleton.ResPose, PoseMod> initmodids = new HashMap<>();
+    private Map<Skeleton.ResPose, PoseMod> modids = initmodids;
 
-    private void chposes(int mask, boolean old) {
+    private void chposes(int mask) {
         chmanims(mask);
-        if (!old) {
+        /*if (!old) {
             this.oldpose = skel.new Pose(pose);
             this.ipold = 1.0f;
-        }
-        Collection<PoseMod> poses = new LinkedList<PoseMod>();
+        }*/
+        Collection<PoseMod> poses = new LinkedList<>();
         stat = true;
         Skeleton.ModOwner mo = (owner instanceof Skeleton.ModOwner) ? (Skeleton.ModOwner) owner : Skeleton.ModOwner.nil;
-        Map<Skeleton.ResPose, PoseMod> newids = new HashMap<Skeleton.ResPose, PoseMod>();
+        Map<Skeleton.ResPose, PoseMod> newids = new HashMap<>();
         for (Skeleton.ResPose p : res.layers(Skeleton.ResPose.class)) {
             if ((p.id < 0) || ((mask & (1 << p.id)) != 0)) {
                 Skeleton.PoseMod mod;
                 if ((mod = modids.get(p)) == null) {
                     mod = p.forskel(mo, skel, p.defmode);
-                    if (old)
-                        mod.age();
+//                    if (old)
+//                        mod.age();
                 }
-                if (p.id >= 0)
-                    newids.put(p, mod);
+//                if (p.id >= 0)
+                newids.put(p, mod);
                 if (!mod.stat())
                     stat = false;
                 poses.add(mod);
             }
         }
         this.mods = poses.toArray(new PoseMod[0]);
+        if ((modids != initmodids) && !modids.equals(newids)) {
+            this.oldpose = skel.new Pose(pose);
+            this.ipold = 1.0f;
+        }
         this.modids = newids;
         rebuild();
     }
 
-    private void update(int fl, boolean old) {
+    public void update(int fl) {
         chmanims(fl);
         if (skel != null)
-            chposes(fl, old);
+            chposes(fl);
         chparts(fl);
         this.curfl = fl;
-    }
-
-    public void update(int fl) {
-        update(fl, false);
     }
 
     public void update() {

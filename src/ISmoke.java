@@ -86,6 +86,7 @@ public class ISmoke extends Sprite implements Gob.Overlay.CDel {
 
     private final AtomicLong ticktime = new AtomicLong(System.currentTimeMillis());
     private int buffertime = 0;
+    @Override
     public boolean tick(int idt) {
         if (configuration.disableAnimation(owner)) {
             if (!bollar.isEmpty()) bollar.clear();
@@ -144,6 +145,7 @@ public class ISmoke extends Sprite implements Gob.Overlay.CDel {
         }
     }
 
+    @Override
     public void draw(GOut g) {
         if (configuration.disableAnimation(owner)) return;
         updpos(g);
@@ -198,6 +200,7 @@ public class ISmoke extends Sprite implements Gob.Overlay.CDel {
                 code.add(new Return(div(pick(vec, "x"), pick(vec, "w"))));
             }};
 
+            @Override
             public Expression expand(Expression in) {
                 return (mul(sub(pdiv.call(prog.vctx.projxf(add(prog.vctx.eyev.depref(), vec4(bollsz.ref(), l(0.0), l(0.0), l(0.0))))),
                         pdiv.call(prog.vctx.posv.depref())),
@@ -208,16 +211,19 @@ public class ISmoke extends Sprite implements Gob.Overlay.CDel {
     };
 
     private final GLState projsz = new States.ProgPointSize(prog) {
+        @Override
         public void reapply(GOut g) {
             g.gl.glUniform1f(g.st.prog.uniform(bollsz), sz);
         }
 
+        @Override
         public void apply(GOut g) {
             super.apply(g);
             reapply(g);
         }
     };
 
+    @Override
     public boolean setup(RenderList r) {
         r.prepo(mat);
         r.prepo(States.presdepth);
@@ -230,6 +236,7 @@ public class ISmoke extends Sprite implements Gob.Overlay.CDel {
         return (true);
     }
 
+    @Override
     public void delete() {
         spawn = false;
     }

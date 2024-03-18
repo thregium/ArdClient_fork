@@ -209,8 +209,15 @@ public abstract class Sprite implements Rendered {
 
     public abstract boolean setup(RenderList d);
 
+    public boolean tick(double dt) {
+        return(false);
+    }
+
     public boolean tick(int dt) {
         return (false);
+    }
+
+    public void age() {
     }
 
     public void dispose() {
