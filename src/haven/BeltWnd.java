@@ -27,8 +27,8 @@ public class BeltWnd extends MovableWidget {
         //Server slot id
         private int slot;
         //What to render, either a Pagina or a Resource, never both
-        private MenuGrid.Pagina pag;
-        private Indir<Resource> res;
+//        private MenuGrid.Pagina pag;
+        private GameUI.BeltSlot belt;
         private PBotScriptlistItem script;
         //For dragging this btn if it has anything
         private boolean dragging = false;
@@ -50,11 +50,12 @@ public class BeltWnd extends MovableWidget {
 
         private Optional<Tex> img() {
             try {
-                if (res != null) {
-                    return Optional.of(res.get().layer(Resource.imgc).tex());
-                } else if (pag != null) {
-                    return Optional.of(pag.img.get());
-                } else if (script != null) {
+//                if (res != null) {
+//                    return Optional.of(res.get().layer(Resource.imgc).tex());
+//                } else if (pag != null) {
+//                    return Optional.of(pag.img.get());
+                /*} else */
+                if (script != null) {
                     return Optional.of(script.getIconTex());
                 }
             } catch (Loading l) {}
@@ -67,13 +68,16 @@ public class BeltWnd extends MovableWidget {
                 return;
             g.image(Inventory.invsq, Coord.z);
             //if we have something draw it
-            img().ifPresent(tex -> {
-                if (!dragging) {
-                    g.image(tex, offc);
-                } else {
-                    ui.drawafter(g2 -> g2.image(tex, ui.mc.sub(tex.sz().div(2))));
-                }
-            });
+            if (belt != null)
+                belt.draw(g);
+            else
+                img().ifPresent(tex -> {
+                    if (!dragging) {
+                        g.image(tex, offc);
+                    } else {
+                        ui.drawafter(g2 -> g2.image(tex, ui.mc.sub(tex.sz().div(2))));
+                    }
+                });
             //always show our hotkey key
             final Coord tkeyc = sz.sub(tkey.sz());
             g.chcolor(new java.awt.Color(128, 128, 128, 128));
@@ -84,8 +88,8 @@ public class BeltWnd extends MovableWidget {
 
         private void reset() {
             data.remove(slot);
-            res = null;
-            pag = null;
+            belt = null;
+//            pag = null;
             tt = null;
             script = null;
         }
@@ -93,13 +97,13 @@ public class BeltWnd extends MovableWidget {
         private void setSlot(final int slot) {
             this.slot = slot;
             tt = null;
-            res = null;
-            pag = null;
+            belt = null;
+//            pag = null;
             script = null;
             if (ui.gui != null) {
                 if (ui.gui.belt[slot] != null) {
-                    res = ui.gui.belt[slot];
-                    pag = ui.gui.menu.paginafor(res);
+                    belt = ui.gui.belt[slot];
+//                    pag = ui.gui.menu.paginafor(res);
                     data.remove(slot);
                 } else {
                     //Check for any pagina int his slot from db
@@ -108,16 +112,16 @@ public class BeltWnd extends MovableWidget {
                             if (key.startsWith("script:"))
                                 script = ui.gui.PBotScriptlist.getScript(key.substring("script:".length()));
                             else
-                                pag = ui.gui.menu.specialpag.get(key);
+                                belt = new GameUI.PagBeltSlot(slot, ui.gui.menu.specialpag.get(key));
                         });
                 }
             }
         }
 
-        private void setPag(final MenuGrid.SpecialPagina pag) {
+        private void setPag(final MenuGrid.SpecialPagina pag, String key) {
             data.add(slot, pag.key);
-            this.pag = pag;
-            res = null;
+//            this.pag = pag;
+            belt = new GameUI.PagBeltSlot(slot, ui.gui.menu.specialpag.get(key));
             tt = null;
             script = null;
         }
@@ -125,7 +129,7 @@ public class BeltWnd extends MovableWidget {
         private void setScript(PBotScriptlistItem script) {
             try {
                 data.add(slot, "script:" + script.scriptFile.toFile().getCanonicalPath().substring(System.getProperty("user.dir").length() + 1));
-                res = null;
+                belt = null;
                 tt = null;
                 this.script = script;
             } catch (IOException e) {
@@ -137,12 +141,13 @@ public class BeltWnd extends MovableWidget {
             if (tt != null) {
                 //cached tt
                 return tt;
-            } else if (pag != null) {
-                if (pag.act() != null) {
-                    tt = pag.button().rendertt(true);
-                } else {
-                    tt = Text.render(res.get().layer(Resource.tooltip).t).tex();
-                }
+            } else if (belt != null) {
+//                if (pag.act() != null) {
+//                    tt = pag.button().rendertt(true);
+//                } else {
+//                    tt = Text.render(belt.get().layer(Resource.tooltip).t).tex();
+//                }
+                tt = belt.rendertt(true);
                 return tt;
             } else if (script != null) {
                 tt = script.getNameTex();
@@ -168,69 +173,71 @@ public class BeltWnd extends MovableWidget {
         }
 
         private void use() {
-            Resource resource = res == null ? null : res.get();
-            if (resource != null) {
-                GameUI gui = getparent(GameUI.class);
-                MenuGrid.Pagina pag = gui.menu.paginafor(res);
-                try {
-                    MenuGrid.PagButton btn = pag.button();
-                    MenuGrid.Interaction iact = new MenuGrid.Interaction(1, ui.modflags());
-                    if (btn != null && resource.layer(Resource.action) != null) {
-                        if (Config.confirmmagic && resource.name.startsWith("paginae/seid/") && !resource.name.equals("paginae/seid/rawhide")) {
-                            Window confirmwnd = new Window(new Coord(225, 100), "Confirm") {
-                                @Override
-                                public void wdgmsg(Widget sender, String msg, Object... args) {
-                                    if (sender == cbtn)
-                                        reqdestroy();
-                                    else
-                                        super.wdgmsg(sender, msg, args);
-                                }
+//            Resource resource = belt == null ? null : belt.get();
+            if (belt != null) {
+                belt.use(new MenuGrid.Interaction(1, ui.modflags()));
 
-                                @Override
-                                public boolean type(char key, KeyEvent ev) {
-                                    if (key == 27) {
-                                        reqdestroy();
-                                        return true;
-                                    }
-                                    return super.type(key, ev);
-                                }
-                            };
-
-                            confirmwnd.add(new Label(Resource.getLocString(Resource.BUNDLE_LABEL, "Using magic costs experience points. Are you sure you want to proceed?")),
-                                    new Coord(10, 20));
-                            confirmwnd.pack();
-                            Button yesbtn = new Button(70, "Yes") {
-                                @Override
-                                public void click() {
-                                    gui.menu.use(btn, iact, false);
-                                    parent.reqdestroy();
-                                }
-                            };
-                            confirmwnd.add(yesbtn, new Coord(confirmwnd.sz.x / 2 - 60 - yesbtn.sz.x, 60));
-                            Button nobtn = new Button(70, "No") {
-                                @Override
-                                public void click() {
-                                    parent.reqdestroy();
-                                }
-                            };
-                            confirmwnd.add(nobtn, new Coord(confirmwnd.sz.x / 2 + 20, 60));
-                            confirmwnd.pack();
-
-                            ui.gui.add(confirmwnd, new Coord(ui.gui.sz.x / 2 - confirmwnd.sz.x / 2, ui.gui.sz.y / 2 - 200));
-                            confirmwnd.show();
-                        } else {
-                            gui.menu.use(btn, iact, false);
-                        }
-                    } else {
-                        Object[] args = {slot, iact.btn, iact.modflags};
-                        gui.wdgmsg("belt", args);
-                    }
-                } catch (Exception l) {
-                    l.printStackTrace();
-                }
-            } else if (pag != null) {
-                MenuGrid.Interaction iact = new MenuGrid.Interaction(1, ui.modflags());
-                pag.scm.use(pag.button(), iact, false);
+//                GameUI gui = getparent(GameUI.class);
+//                MenuGrid.Pagina pag = gui.menu.paginafor(belt);
+//                try {
+//                    MenuGrid.PagButton btn = pag.button();
+//                    MenuGrid.Interaction iact = new MenuGrid.Interaction(1, ui.modflags());
+//                    if (btn != null && resource.layer(Resource.action) != null) {
+//                        if (Config.confirmmagic && resource.name.startsWith("paginae/seid/") && !resource.name.equals("paginae/seid/rawhide")) {
+//                            Window confirmwnd = new Window(new Coord(225, 100), "Confirm") {
+//                                @Override
+//                                public void wdgmsg(Widget sender, String msg, Object... args) {
+//                                    if (sender == cbtn)
+//                                        reqdestroy();
+//                                    else
+//                                        super.wdgmsg(sender, msg, args);
+//                                }
+//
+//                                @Override
+//                                public boolean type(char key, KeyEvent ev) {
+//                                    if (key == 27) {
+//                                        reqdestroy();
+//                                        return true;
+//                                    }
+//                                    return super.type(key, ev);
+//                                }
+//                            };
+//
+//                            confirmwnd.add(new Label(Resource.getLocString(Resource.BUNDLE_LABEL, "Using magic costs experience points. Are you sure you want to proceed?")),
+//                                    new Coord(10, 20));
+//                            confirmwnd.pack();
+//                            Button yesbtn = new Button(70, "Yes") {
+//                                @Override
+//                                public void click() {
+//                                    gui.menu.use(btn, iact, false);
+//                                    parent.reqdestroy();
+//                                }
+//                            };
+//                            confirmwnd.add(yesbtn, new Coord(confirmwnd.sz.x / 2 - 60 - yesbtn.sz.x, 60));
+//                            Button nobtn = new Button(70, "No") {
+//                                @Override
+//                                public void click() {
+//                                    parent.reqdestroy();
+//                                }
+//                            };
+//                            confirmwnd.add(nobtn, new Coord(confirmwnd.sz.x / 2 + 20, 60));
+//                            confirmwnd.pack();
+//
+//                            ui.gui.add(confirmwnd, new Coord(ui.gui.sz.x / 2 - confirmwnd.sz.x / 2, ui.gui.sz.y / 2 - 200));
+//                            confirmwnd.show();
+//                        } else {
+//                            gui.menu.use(btn, iact, false);
+//                        }
+//                    } else {
+//                        Object[] args = {slot, iact.btn, iact.modflags};
+//                        gui.wdgmsg("belt", args);
+//                    }
+//                } catch (Exception l) {
+//                    l.printStackTrace();
+//                }
+//            } else if (pag != null) {
+//                MenuGrid.Interaction iact = new MenuGrid.Interaction(1, ui.modflags());
+//                pag.scm.use(pag.button(), iact, false);
             } else if (script != null) {
                 script.runScript();
             }
@@ -248,7 +255,8 @@ public class BeltWnd extends MovableWidget {
 
         @Override
         public boolean mousedown(Coord c, int button) {
-            if ((res != null && res.get() != null) || pag != null || script != null) {
+//            if ((belt != null && belt.get() != null) || pag != null || script != null) {
+            if (belt != null || script != null) {
                 if (button == 1) {
                     dm = ui.grabmouse(this);
                     return true;
@@ -265,16 +273,16 @@ public class BeltWnd extends MovableWidget {
                 dm.remove();
                 dm = null;
                 if (dragging) {
-                    if (res != null) {
-                        if (!locked() && ui.dropthing(ui.root, ui.mc, res.get())) {
+                    if (belt != null) {
+                        if (!locked() && ui.dropthing(ui.root, ui.mc, belt)) {
                             reset();
                             //delete anything that might already belong to this slot
                             ui.gui.wdgmsg("setbelt", slot, 1);
                         }
-                    } else if (pag != null) {
-                        if (!locked() && ui.dropthing(ui.root, ui.mc, pag)) {
-                            reset();
-                        }
+//                    } else if (pag != null) {
+//                        if (!locked() && ui.dropthing(ui.root, ui.mc, pag)) {
+//                            reset();
+//                        }
                     } else if (script != null) {
                         if (!locked() && ui.dropthing(ui.root, ui.mc, script)) {
                             reset();
@@ -286,7 +294,7 @@ public class BeltWnd extends MovableWidget {
                 }
                 return true;
             } else {
-                 if (!locked() && button == 3 && ui.modflags() == 0) {
+                if (!locked() && button == 3 && ui.modflags() == 0) {
                     ui.gui.wdgmsg("setbelt", slot, 1);
                     reset();
                     return true;
@@ -333,7 +341,8 @@ public class BeltWnd extends MovableWidget {
                         return true;
                     } else if (thing instanceof MenuGrid.SpecialPagina) {
                         //Not normal stuff.
-                        setPag((MenuGrid.SpecialPagina) thing);
+                        MenuGrid.SpecialPagina pag = (MenuGrid.SpecialPagina) thing;
+                        setPag(pag, pag.key);
                         //delete anything that might already belong to this slot
                         ui.gui.wdgmsg("setbelt", slot, 1);
                         return true;

@@ -90,6 +90,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
 
@@ -314,9 +315,10 @@ public class MenuGrid extends Widget {
         }
     }
 
-    public static class PagButton implements ItemInfo.Owner {
+    public static class PagButton implements ItemInfo.Owner, GSprite.Owner {
         public final Pagina pag;
         public final Resource res;
+        private GSprite spr;
         private AButton act;
 
         public PagButton(Pagina pag) {
@@ -336,6 +338,12 @@ public class MenuGrid extends Widget {
             if (parent == null)
                 parent = pag.scm.paginafor(act().parent);
             return (parent);
+        }
+
+        public GSprite spr() {
+            if(spr == null)
+                spr = GSprite.create(this, res, Message.nil);
+            return(spr);
         }
 
         public BufferedImage img() {
@@ -369,6 +377,40 @@ public class MenuGrid extends Widget {
             }
         }
 
+        public final ItemInfo.AttrCache<GItem.InfoOverlay<?>[]> ols = new ItemInfo.AttrCache<>(this::info, info -> {
+            ArrayList<GItem.InfoOverlay<?>> buf = new ArrayList<>();
+            for(ItemInfo inf : info) {
+                if(inf instanceof GItem.OverlayInfo)
+                    buf.add(GItem.InfoOverlay.create((GItem.OverlayInfo<?>)inf));
+            }
+            GItem.InfoOverlay<?>[] ret = buf.toArray(new GItem.InfoOverlay<?>[0]);
+            return(() -> ret);
+        });
+
+        public final ItemInfo.AttrCache<Double> meter = new ItemInfo.AttrCache<>(this::info, ItemInfo.AttrCache.map1(GItem.MeterInfo.class, minf -> minf::meter));
+
+        public void drawmain(GOut g, GSprite spr) {
+            spr.draw(g);
+        }
+        public void draw(GOut g, GSprite spr) {
+//            if(rstate.get() != null)
+//                g.usestate(rstate.get());
+            drawmain(g, spr);
+            g.defstate();
+            GItem.InfoOverlay<?>[] ols = this.ols.get();
+            if(ols != null) {
+                for(GItem.InfoOverlay<?> ol : ols)
+                    ol.draw(g);
+            }
+            Double meter = this.meter.get();
+            if((meter != null) && (meter > 0)) {
+                g.chcolor(255, 255, 255, 64);
+                Coord half = spr.sz().div(2);
+                g.prect(half, half.inv(), half, meter * Math.PI * 2);
+                g.chcolor();
+            }
+        }
+
         public String sortkey() {
             AButton ai = pag.act();
             if (ai.ad.length == 0) {
@@ -383,6 +425,11 @@ public class MenuGrid extends Widget {
         }
 
         private List<ItemInfo> info = null;
+
+        @Override
+        public Glob glob() {
+            return ItemInfo.Owner.super.glob();
+        }
 
         public List<ItemInfo> info() {
             if (info == null)
@@ -399,6 +446,9 @@ public class MenuGrid extends Widget {
         public <T> T context(Class<T> cl) {
             return (ctxr.context(cl, this));
         }
+
+        public Random mkrandoom() {return(new Random());}
+        public Resource getres() {return(res);}
 
         public BufferedImage rendertt(boolean withpg) {
             Resource.AButton ad = res.layer(Resource.action);

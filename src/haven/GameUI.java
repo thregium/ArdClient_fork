@@ -72,6 +72,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -144,7 +145,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
     public double prog = -1;
     private boolean afk = false;
     @SuppressWarnings("unchecked")
-    public Indir<Resource>[] belt = new Indir[144];
+    public BeltSlot[] belt = new BeltSlot[144];
     public final Map<Integer, String> polowners = new HashMap<Integer, String>();
     public Bufflist buffs;
     public LocalMiniMap mmap;
@@ -184,6 +185,131 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
     public SkillnCredoWnd scwnd;
     public LivestockManager lm;
     public long inspectedgobid = 0;//used for attaching inspected qualities to gobs.
+
+
+    public static abstract class BeltSlot {
+        public final int idx;
+
+        public BeltSlot(int idx) {
+            this.idx = idx;
+        }
+
+        public abstract void draw(GOut g);
+
+        public abstract void use(MenuGrid.Interaction iact);
+
+        public Object rendertt(boolean a) {
+            return (null);
+        }
+    }
+
+    private static final OwnerContext.ClassResolver<ResBeltSlot> beltctxr = new OwnerContext.ClassResolver<ResBeltSlot>()
+            .add(GameUI.class, slot -> slot.wdg())
+            .add(Glob.class, slot -> slot.wdg().ui.sess.glob)
+            .add(Session.class, slot -> slot.wdg().ui.sess);
+
+    public class ResBeltSlot extends BeltSlot implements GSprite.Owner {
+        public final ResData rdt;
+
+        public ResBeltSlot(int idx, ResData rdt) {
+            super(idx);
+            this.rdt = rdt;
+        }
+
+        private GSprite spr = null;
+
+        public GSprite spr() {
+            GSprite ret = this.spr;
+            if (ret == null)
+                ret = this.spr = GSprite.create(this, rdt.res.get(), new MessageBuf(rdt.sdt));
+            return (ret);
+        }
+
+        public void draw(GOut g) {
+            try {
+                spr().draw(g);
+            } catch (Loading l) {}
+        }
+
+        public void use(MenuGrid.Interaction iact) {
+            Object[] args = {idx, iact.btn, iact.modflags};
+            if (iact.mc != null) {
+                args = Utils.extend(args, iact.mc.floor(OCache.posres));
+                if (iact.click != null)
+                    args = Utils.extend(args, MapView.gobclickargs(iact.click));
+            }
+            GameUI.this.wdgmsg("belt", args);
+        }
+
+        public Resource getres() {return (rdt.res.get());}
+
+        public Random mkrandoom() {return (new Random(System.identityHashCode(this)));}
+
+        public <T> T context(Class<T> cl) {return (beltctxr.context(cl, this));}
+
+        private GameUI wdg() {return (GameUI.this);}
+
+        @Override
+        public Object rendertt(final boolean a) {
+            return (Text.render(getres().layer(Resource.tooltip).t).tex());
+        }
+    }
+
+    public static class PagBeltSlot extends BeltSlot {
+        public final MenuGrid.Pagina pag;
+
+        public PagBeltSlot(int idx, MenuGrid.Pagina pag) {
+            super(idx);
+            this.pag = pag;
+        }
+
+        public void draw(GOut g) {
+            try {
+                MenuGrid.PagButton btn = pag.button();
+                btn.draw(g, btn.spr());
+            } catch (Loading l) {
+            }
+        }
+
+        public void use(MenuGrid.Interaction iact) {
+            try {
+                pag.scm.use(pag.button(), iact, false);
+            } catch (Loading l) {
+            }
+        }
+
+        public static MenuGrid.Pagina resolve(MenuGrid scm, Indir<Resource> resid) {
+            Resource res = resid.get();
+            Resource.AButton act = res.layer(Resource.action);
+            /* XXX: This is quite a hack. Is there a better way? */
+            if ((act != null) && (act.ad.length == 0))
+                return (scm.paginafor(res.indir()));
+            return (scm.paginafor(resid));
+        }
+
+        @Override
+        public Object rendertt(final boolean a) {
+            Object tt = null;
+            if (pag.act() != null) {
+                tt = pag.button().rendertt(a);
+            } else {
+                tt = Text.render(pag.res().layer(Resource.tooltip).t).tex();
+            }
+            return (tt);
+        }
+    }
+
+    /* XXX: Remove me */
+    public BeltSlot mkbeltslot(int idx, ResData rdt) {
+        Resource res = rdt.res.get();
+        Resource.AButton act = res.layer(Resource.action);
+        if (act != null) {
+            if (act.ad.length == 0)
+                return (new PagBeltSlot(idx, menu.paginafor(res.indir())));
+            return (new PagBeltSlot(idx, menu.paginafor(rdt.res)));
+        }
+        return (new ResBeltSlot(idx, rdt));
+    }
 
     @RName("gameui")
     public static class $_ implements Factory {
@@ -1550,11 +1676,52 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             else
                 prog = -1;
         } else if (msg == "setbelt") {
-            int slot = (Integer) args[0];
+            int slot = Utils.iv(args[0]);
             if (args.length < 2) {
                 belt[slot] = null;
             } else {
-                belt[slot] = ui.sess.getres((Integer) args[1]);
+                Indir<Resource> res = ui.sess.getresv(args[1]);
+                Message sdt = Message.nil;
+                if (args.length > 2)
+                    sdt = new MessageBuf((byte[]) args[2]);
+                ResData rdt = new ResData(res, sdt);
+                ui.sess.glob.loader.defer(() -> {
+                    belt[slot] = mkbeltslot(slot, rdt);
+                }, null);
+            }
+            if (slot <= 49)
+                nbelt.update(slot);
+            else if (slot <= 99)
+                fbelt.update(slot);
+            else
+                npbelt.update(slot);
+        } else if (msg == "setbelt2") {
+            int slot = Utils.iv(args[0]);
+            if (args.length < 2) {
+                belt[slot] = null;
+            } else {
+                switch ((String) args[1]) {
+                    case "p": {
+                        Object id = args[2];
+                        belt[slot] = new PagBeltSlot(slot, menu.paginafor(id, null));
+                        break;
+                    }
+                    case "r": {
+                        Indir<Resource> res = ui.sess.getresv(args[2]);
+                        ui.sess.glob.loader.defer(() -> {
+                            belt[slot] = new PagBeltSlot(slot, PagBeltSlot.resolve(menu, res));
+                        }, null);
+                        break;
+                    }
+                    case "d": {
+                        Indir<Resource> res = ui.sess.getresv(args[2]);
+                        Message sdt = Message.nil;
+                        if (args.length > 2)
+                            sdt = new MessageBuf((byte[]) args[3]);
+                        belt[slot] = new ResBeltSlot(slot, new ResData(res, sdt));
+                        break;
+                    }
+                }
             }
             if (slot <= 49)
                 nbelt.update(slot);
@@ -1584,7 +1751,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             }
             polowners.put(id, o);
         } else if (msg == "showhelp") {
-            Indir<Resource> res = ui.sess.getres((Integer) args[0]);
+            Indir<Resource> res = ui.sess.getresv(args[0]);
             if (help == null)
                 help = adda(new HelpWnd(res), 0.5, 0.25);
             else
@@ -1592,15 +1759,15 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         } else if (msg == "map-mark") {
             dev.sysPrintStackTrace("map-mark");
             dev.sysLog("map-mark", this, -1, msg, args);
-            long gobid = ((Integer) args[0]) & 0xffffffff;
+            long gobid = Utils.uiv(args[0]);
             long oid = ((Number) args[1]).longValue();
-            Indir<Resource> res = ui.sess.getres((Integer) args[2]);
+            Indir<Resource> res = ui.sess.getresv(args[2]);
             String nm = (String) args[3];
             if (mapfile != null)
                 mapfile.markobj(gobid, oid, res, nm);
         } else if (msg == "map-icons") {
             GobIcon.Settings conf = this.iconconf;
-            int tag = (Integer) args[0];
+            int tag = Utils.iv(args[0]);
             if (args.length < 2) {
                 if (conf.tag != tag)
                     wdgmsg("map-icons", conf.tag);
