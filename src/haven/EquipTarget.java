@@ -29,7 +29,7 @@ package haven;
 import java.util.function.Supplier;
 
 public interface EquipTarget {
-    public final Supplier<GLState> nil = () -> GLState.nullstate;
+    Supplier<GLState> nil = () -> GLState.nullstate;
 
-    public Location eqpoint(String nm, Message dat);
+    Location eqpoint(String nm, Message dat);
 }

@@ -75,7 +75,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.DoubleUnaryOperator;
 
-public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.HasPose {
+public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.HasPose, EquipTarget {
     public int cropstgmaxval = 0;
     private Overlay bowvector = null;
     public static final Text.Foundry gobhpf = new Text.Foundry(Text.serif, UI.scale(14)).aa(true);
@@ -173,7 +173,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 
         private void init() {
             if (spr == null) {
-                spr = Sprite.create(gob, res.get(), sdt);
+                spr = Sprite.create(gob, res.get(), new MessageBuf(sdt).clone());
             }
         }
 
@@ -208,6 +208,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             void setupmain(RenderList rl);
         }
 
+        @Override
         public void draw(GOut g) {}
 
         private void remove0() {
@@ -242,6 +243,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             remove(true);
         }
 
+        @Override
         public boolean setup(RenderList rl) {
             if (spr != null) {
                 if (name().matches("gfx/terobjs/trees/yulestar-.*")) {
@@ -259,6 +261,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             return (false);
         }
 
+        @Override
         public Object staticp() {
             return ((spr == null) ? null : spr.staticp());
         }
@@ -287,10 +290,12 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             this.surf = surf;
         }
 
+        @Override
         public Coord3f getc(Coord2d rc, double ra) {
             return (map.getzp(surf, rc));
         }
 
+        @Override
         public Matrix4f getr(Coord2d rc, double ra) {
             return (Transform.makerot(new Matrix4f(), Coord3f.zu, -(float) ra));
         }
@@ -301,6 +306,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             super(map, surf);
         }
 
+        @Override
         public Matrix4f getr(Coord2d rc, double ra) {
             Matrix4f ret = super.getr(rc, ra);
             Coord3f norm = map.getnorm(surf, rc);
@@ -359,6 +365,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             return (ret);
         }
 
+        @Override
         public Coord3f getc(Coord2d rc, double ra) {
             int mseq = map.chseq;
             if ((mseq != this.seq) || !Utils.eq(rc, cc) || (ra != ca)) {
@@ -433,11 +440,13 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             }
         }
 
+        @Override
         public Coord3f getc(Coord2d rc, double ra) {
             check(rc, ra);
             return (c);
         }
 
+        @Override
         public Matrix4f getr(Coord2d rc, double ra) {
             check(rc, ra);
             return (r);
@@ -533,11 +542,13 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             }
         }
 
+        @Override
         public Coord3f getc(Coord2d rc, double ra) {
             check(rc, ra);
             return (this.c);
         }
 
+        @Override
         public Matrix4f getr(Coord2d rc, double ra) {
             return (this.r);
         }
@@ -608,6 +619,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         public Projection proj = null;
         boolean debug = false;
 
+        @Override
         public void prep(Buffer buf) {
             mv.load(cam.load(buf.get(PView.cam).fin(Matrix4f.id))).mul1(wxf.load(buf.get(PView.loc).fin(Matrix4f.id)));
             Projection proj = buf.get(PView.proj);
@@ -648,6 +660,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             }
         }
 
+        @Override
         public void prep(Buffer buf) {
             xl.prep(buf);
             rot.prep(buf);
@@ -667,12 +680,15 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     public final Save save = new Save();
     public final GobLocation loc = new GobLocation();
     public final GLState olmod = new GLState() {
+        @Override
         public void apply(GOut g) {
         }
 
+        @Override
         public void unapply(GOut g) {
         }
 
+        @Override
         public void prep(Buffer buf) {
             for (Overlay ol : new ArrayList<>(ols)) {
                 if (ol.spr instanceof Overlay.SetupMod) {
@@ -701,6 +717,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     public final Map<Class<? extends GAttrib>, GAttrib> attr = Collections.synchronizedMap(new HashMap<>());
     private final Set<haven.Rendered> renderedattrs = Collections.synchronizedSet(new HashSet<>());
     public final Collection<Overlay> ols = Collections.synchronizedCollection(new LinkedList<Overlay>() {
+        @Override
         public boolean add(Overlay item) {
             /* XXX: Remove me once local code is changed to use addol(). */
             if (glob.oc.getgob(id) != null) {
@@ -1519,6 +1536,18 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         }
     }
 
+    @Override
+    public Location eqpoint(String nm, Message dat) {
+        for (GAttrib attr : this.attr.values()) {
+            if (attr instanceof EquipTarget) {
+                Location ret = ((EquipTarget) attr).eqpoint(nm, dat);
+                if (ret != null)
+                    return (ret);
+            }
+        }
+        return (null);
+    }
+
     public int sdt() {
         ResDrawable dw = getattr(ResDrawable.class);
         if (dw != null)
@@ -1526,6 +1555,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         return 0;
     }
 
+    @Override
     public void draw(GOut g) {}
 
     public boolean disableAnimation1;
@@ -1535,6 +1565,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     private gobText barreltext;
     private gobText treetext;
 
+    @Override
     public boolean setup(RenderList rl) {
         loc.tick();
         final Hidden hid = getattr(Hidden.class);
@@ -2030,6 +2061,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     private static final Object DYNAMIC = new Object();
     private Object seq = null;
 
+    @Override
     public Object staticp() {
         if (type == Type.HUMAN)
             seq = DYNAMIC;
@@ -2085,6 +2117,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         seq = null;
     }
 
+    @Override
     public Random mkrandoom() {
         return (Utils.mkrandoom(id));
     }
@@ -2108,6 +2141,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         return Optional.of(res);
     }
 
+    @Override
     public Resource getres() {
         Drawable d = getattr(Drawable.class);
         if (d != null)
@@ -2115,6 +2149,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         return (null);
     }
 
+    @Override
     public Skeleton.Pose getpose() {
         Drawable d = getattr(Drawable.class);
         if (d != null)
@@ -2128,21 +2163,29 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             .add(OCache.class, g -> g.glob.oc)
             .add(Session.class, g -> g.glob.sess);
 
+    @Override
     public <T> T context(Class<T> cl) {
         return (ctxr.context(cl, this));
     }
 
+    @Override
     @Deprecated
     public Glob glob() {
         return (context(Glob.class));
     }
 
     /* Because generic functions are too nice a thing for Java. */
+    @Override
     public double getv() {
         Moving m = getattr(Moving.class);
         if (m == null)
             return (0);
         return (m.getv());
+    }
+
+    @Override
+    public Collection<Location.Chain> getloc() {
+        return (null);
     }
 
     public boolean isplayer() {
@@ -2331,6 +2374,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             this.updseq = gob.updateseq;
         }
 
+        @Override
         public void waitfor(Runnable callback, Consumer<Waitable.Waiting> reg) {
             synchronized (gob) {
                 if (gob.updateseq != this.updseq) {

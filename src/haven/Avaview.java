@@ -31,6 +31,7 @@ import haven.Composited.Desc;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -114,7 +115,7 @@ public class Avaview extends PView {
             if (args[0] == null)
                 this.avagob = -1;
             else
-                this.avagob = Utils.uint32((Integer) args[0]);
+                this.avagob = Utils.uiv(args[0]);
             this.avadesc = null;
         } else if (msg == "pop") {
             pop(Desc.decode(ui.sess, args));
@@ -178,8 +179,7 @@ public class Avaview extends PView {
         @Override
         public double getv() {return (0);}
 
-        @Override
-        public Coord3f getc() {return (new Coord3f(0, 0, 0));}
+        public Collection<Location.Chain> getloc() {return(Collections.emptyList());}
     }
 
     private final AvaOwner avaowner = new AvaOwner();

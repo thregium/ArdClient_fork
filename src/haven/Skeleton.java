@@ -29,6 +29,7 @@ package haven;
 import javax.media.opengl.GL2;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,6 +37,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 public class Skeleton {
     public final Map<String, Bone> bones = new HashMap<>();
@@ -284,6 +286,7 @@ public class Skeleton {
             return (new Location(Matrix4f.identity()) {
                 private int cseq = -1;
 
+                @Override
                 public Matrix4f fin(Matrix4f p) {
                     if (cseq != seq) {
                         Matrix4f xf = Transform.makexlate(new Matrix4f(), new Coord3f(gpos[bone][0], gpos[bone][1], gpos[bone][2]));
@@ -299,6 +302,7 @@ public class Skeleton {
             });
         }
 
+        @Override
         public Location eqpoint(String name, Message dat) {
             Bone bone = bones.get(name);
             if (bone == null)
@@ -311,6 +315,7 @@ public class Skeleton {
                 private int cseq = -1;
                 private float[] pos = new float[3], rot = new float[4];
 
+                @Override
                 public Matrix4f fin(Matrix4f p) {
                     if (cseq != seq) {
                         rot = qqmul(rot, grot[bone], qinv(rot, bindpose.grot[bone]));
@@ -340,6 +345,7 @@ public class Skeleton {
                 this.tgt = tgt.idx;
             }
 
+            @Override
             public Matrix4f fin(Matrix4f p) {
                 if (cseq != seq) {
                     Coord3f cur = new Coord3f(gpos[tgt][0] - gpos[orig][0], gpos[tgt][1] - gpos[orig][1], gpos[tgt][2] - gpos[orig][2]).norm();
@@ -387,6 +393,7 @@ public class Skeleton {
         }
 
         public final Rendered debug = new Rendered() {
+            @Override
             public void draw(GOut g) {
                 BGL gl = g.gl;
                 g.st.put(Light.lighting, null);
@@ -405,6 +412,7 @@ public class Skeleton {
                 gl.glEnd();
             }
 
+            @Override
             public boolean setup(RenderList rl) {
                 rl.prepo(States.vertexcolor);
                 rl.prepo(States.xray);
@@ -426,25 +434,14 @@ public class Skeleton {
     public interface ModOwner extends OwnerContext {
         double getv();
 
-        Coord3f getc();
-
-        @Deprecated
-        default Glob glob() {
-            return (context(Glob.class));
-        }
+        Collection<Location.Chain> getloc();
 
         ModOwner nil = new ModOwner() {
-            public double getv() {
-                return (0);
-            }
+            public double getv() {return (0);}
 
-            public Coord3f getc() {
-                return (Coord3f.o);
-            }
+            public Collection<Location.Chain> getloc() {return (Collections.emptyList());}
 
-            public <T> T context(Class<T> cl) {
-                throw (new NoContext(cl));
-            }
+            public <T> T context(Class<T> cl) {throw (new NoContext(cl));}
         };
     }
 
@@ -452,6 +449,7 @@ public class Skeleton {
     public abstract class PoseMod {
         public final ModOwner owner;
         public float[][] lpos, lrot;
+        protected final Collection<FxTrack.EventListener> cbl = new ArrayList<>(0);
 
         public PoseMod(ModOwner owner) {
             this.owner = owner;
@@ -460,11 +458,6 @@ public class Skeleton {
             lrot = new float[nb][4];
             for (int i = 0; i < nb; i++)
                 lrot[i][0] = 1;
-        }
-
-        @Deprecated
-        public PoseMod() {
-            this(ModOwner.nil);
         }
 
         public Skeleton skel() {
@@ -502,6 +495,19 @@ public class Skeleton {
         public void age() {
         }
 
+        public void listen(FxTrack.EventListener l) {
+            cbl.add(l);
+        }
+
+        public void remove(FxTrack.EventListener l) {
+            cbl.remove(l);
+        }
+
+        public void callback(FxTrack.Event ev) {
+            for (FxTrack.EventListener l : cbl)
+                l.event(ev);
+        }
+
         public abstract boolean stat();
 
         public abstract boolean done();
@@ -509,10 +515,12 @@ public class Skeleton {
 
     public PoseMod nilmod() {
         return (new PoseMod(ModOwner.nil) {
+            @Override
             public boolean stat() {
                 return (true);
             }
 
+            @Override
             public boolean done() {
                 return (false);
             }
@@ -531,11 +539,13 @@ public class Skeleton {
                 stat = s;
             }
 
+            @Override
             public void apply(Pose p) {
                 for (PoseMod m : mods)
                     m.apply(p);
             }
 
+            @Override
             public boolean tick(float dt) {
                 boolean ret = false;
                 for (PoseMod m : mods) {
@@ -545,15 +555,18 @@ public class Skeleton {
                 return (ret);
             }
 
+            @Override
             public void age() {
                 for (PoseMod m : mods)
                     m.age();
             }
 
+            @Override
             public boolean stat() {
                 return (stat);
             }
 
+            @Override
             public boolean done() {
                 for (PoseMod m : mods) {
                     if (m.done())
@@ -569,6 +582,7 @@ public class Skeleton {
         PoseMod create(Skeleton skel, ModOwner owner, Resource res, Message sdt);
 
         ModFactory def = new ModFactory() {
+            @Override
             public PoseMod create(Skeleton skel, ModOwner owner, Resource res, Message sdt) {
                 int mask = Sprite.decnum(sdt);
                 Collection<PoseMod> poses = new ArrayList<>(16);
@@ -666,6 +680,7 @@ public class Skeleton {
             s = new ResourceSkeleton(bones.values(), this);
         }
 
+        @Override
         public void init() {}
 
         public String toString() {
@@ -679,7 +694,6 @@ public class Skeleton {
     public class TrackMod extends PoseMod {
         public final Track[] tracks;
         public final FxTrack[] effects;
-        private final Collection<FxTrack.EventListener> cbl = new ArrayList<>(0);
         public final float len;
         public final WrapMode mode;
         private final boolean stat;
@@ -757,14 +771,12 @@ public class Skeleton {
             }
         }
 
+        @Override
         public void listen(FxTrack.EventListener l) {
             cbl.add(l);
         }
 
         private void playfx(float ot, float nt) {
-            if (!(owner instanceof Gob))
-                return;
-            Gob gob = (Gob) owner;
             if (ot > nt) {
                 playfx(Math.min(ot, len), len);
                 playfx(0, Math.max(0, nt));
@@ -773,15 +785,17 @@ public class Skeleton {
                     for (FxTrack.Event ev : t.events) {
                         if (ev == null) continue;
                         if ((ev.time >= ot) && (ev.time < nt)) {
-                            for (FxTrack.EventListener l : cbl)
-                                l.event(ev);
-                            ev.trigger(gob);
+                            callback(ev);
+                            ev.trigger((Gob) owner);
                         }
                     }
                 }
+                if (!cbl.isEmpty())
+                    callback(new FxTrack.Tick(nt));
             }
         }
 
+        @Override
         public boolean tick(float dt) {
             if (speedmod)
                 dt *= owner.getv() / nspeed;
@@ -832,6 +846,7 @@ public class Skeleton {
             }
         }
 
+        @Override
         public void age() {
             switch (mode) {
                 case PONGLOOP:
@@ -850,10 +865,12 @@ public class Skeleton {
             aupdate(time);
         }
 
+        @Override
         public boolean stat() {
             return (stat);
         }
 
+        @Override
         public boolean done() {
             return (done);
         }
@@ -904,9 +921,9 @@ public class Skeleton {
         public static class SpawnSprite extends Event {
             public final Indir<Resource> res;
             public final byte[] sdt;
-            public final Location loc;
+            public final Function<ModOwner, GLState> loc;
 
-            public SpawnSprite(float time, Indir<Resource> res, byte[] sdt, Location loc) {
+            public SpawnSprite(float time, Indir<Resource> res, byte[] sdt, Function<ModOwner, GLState> loc) {
                 super(time);
                 this.res = res;
                 this.sdt = (sdt == null) ? new byte[0] : sdt;
@@ -921,13 +938,15 @@ public class Skeleton {
                     return;
                 }
                 Gob n = gob.glob.oc.new Virtual(gob.rc, gob.a) {
+                    @Override
                     public Coord3f getc() {
                         return (new Coord3f(fc));
                     }
 
+                    @Override
                     public boolean setup(RenderList rl) {
                         if (SpawnSprite.this.loc != null)
-                            rl.prepc(SpawnSprite.this.loc);
+                            rl.prepc(SpawnSprite.this.loc.apply(gob));
                         return (super.setup(rl));
                     }
                 };
@@ -945,6 +964,14 @@ public class Skeleton {
 
             public void trigger(Gob gob) {
             }
+        }
+
+        public static class Tick extends Event {
+            public Tick(float time) {
+                super(time);
+            }
+
+            public void trigger(Gob gob) {}
         }
     }
 
@@ -1140,10 +1167,12 @@ public class Skeleton {
             return (forskel(gob, skel, mode));
         }
 
+        @Override
         public Integer layerid() {
             return (id);
         }
 
+        @Override
         public void init() {
         }
     }
@@ -1185,7 +1214,7 @@ public class Skeleton {
                 return (pose -> pose.eqpoint(bonenm, Message.nil));
             };
             opcodes[3] = buf -> {
-                Coord3f ref = Coord3f.of((float)buf.cpfloat(), (float)buf.cpfloat(), (float)buf.cpfloat()).norm();
+                Coord3f ref = Coord3f.of((float) buf.cpfloat(), (float) buf.cpfloat(), (float) buf.cpfloat()).norm();
                 final String orignm = buf.string();
                 final String tgtnm = buf.string();
                 return (equ -> {
@@ -1233,10 +1262,12 @@ public class Skeleton {
             this.prog = cbuf.toArray(new Command[0]);
         }
 
+        @Override
         public String layerid() {
             return (nm);
         }
 
+        @Override
         public void init() {
         }
 

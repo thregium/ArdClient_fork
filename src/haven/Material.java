@@ -51,10 +51,12 @@ public class Material extends GLState {
     public final GLState[] states;
 
     public static final GLState nofacecull = new GLState.StandAlone(Slot.Type.GEOM, PView.proj) {
+        @Override
         public void apply(GOut g) {
             g.gl.glDisable(GL.GL_CULL_FACE);
         }
 
+        @Override
         public void unapply(GOut g) {
             g.gl.glEnable(GL.GL_CULL_FACE);
         }
@@ -62,6 +64,7 @@ public class Material extends GLState {
 
     @ResName("nofacecull")
     public static class $nofacecull implements ResCons {
+        @Override
         public GLState cons(Resource res, Object... args) {
             return (nofacecull);
         }
@@ -72,7 +75,7 @@ public class Material extends GLState {
     public static final float[] defspc = {0.0f, 0.0f, 0.0f, 1.0f};
     public static final float[] defemi = {0.0f, 0.0f, 0.0f, 1.0f};
 
-    public static final GLState.Slot<Colors> colors = new GLState.Slot<Colors>(Slot.Type.DRAW, Colors.class);
+    public static final GLState.Slot<Colors> colors = new GLState.Slot<>(Slot.Type.DRAW, Colors.class);
 
     @ResName("col")
     public static class Colors extends GLState {
@@ -126,6 +129,7 @@ public class Material extends GLState {
             this((Color) args[0], (Color) args[1], (Color) args[2], (Color) args[3], (Float) args[4]);
         }
 
+        @Override
         public void apply(GOut g) {
             BGL gl = g.gl;
             gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT, amb, 0);
@@ -135,6 +139,7 @@ public class Material extends GLState {
             gl.glMaterialf(GL.GL_FRONT_AND_BACK, GL2.GL_SHININESS, shine);
         }
 
+        @Override
         public void unapply(GOut g) {
             BGL gl = g.gl;
             gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT, defamb, 0);
@@ -144,17 +149,20 @@ public class Material extends GLState {
             gl.glMaterialf(GL.GL_FRONT_AND_BACK, GL2.GL_SHININESS, 0.0f);
         }
 
+        @Override
         public int capplyfrom(GLState from) {
             if (from instanceof Colors)
                 return (5);
             return (-1);
         }
 
+        @Override
         public void applyfrom(GOut g, GLState from) {
             if (from instanceof Colors)
                 apply(g);
         }
 
+        @Override
         public void prep(Buffer buf) {
             Colors p = buf.get(colors);
             if (p != null)
@@ -178,12 +186,15 @@ public class Material extends GLState {
 
     @ResName("order")
     public static class $order implements ResCons {
+        @Override
         public GLState cons(Resource res, Object... args) {
             String nm = (String) args[0];
             if (nm.equals("first")) {
                 return (Rendered.first);
             } else if (nm.equals("last")) {
                 return (Rendered.last);
+            } else if (nm.equals("def")) {
+                return (Rendered.deflt);
             } else if (nm.equals("pfx")) {
                 return (Rendered.postpfx);
             } else if (nm.equals("eye")) {
@@ -200,11 +211,11 @@ public class Material extends GLState {
         }
     }
 
-    public void apply(GOut g) {
-    }
+    @Override
+    public void apply(GOut g) {}
 
-    public void unapply(GOut g) {
-    }
+    @Override
+    public void unapply(GOut g) {}
 
     public Material(GLState... states) {
         this.states = states;
@@ -230,6 +241,7 @@ public class Material extends GLState {
         return (Arrays.asList(states).toString());
     }
 
+    @Override
     public void prep(Buffer buf) {
         for (GLState st : states)
             st.prep(buf);
@@ -239,19 +251,8 @@ public class Material extends GLState {
     }
 
     @Resource.PublishedCode(name = "mat")
-    public static interface Factory {
-        public default Material create(Owner owner, Resource res, Message sdt) {
-            try {
-                return (create(owner.context(Glob.class), res, sdt));
-            } catch (OwnerContext.NoContext e) {
-                return (create((Glob) null, res, sdt));
-            }
-        }
-
-        @Deprecated
-        public default Material create(Glob glob, Resource res, Message sdt) {
-            throw (new AbstractMethodError("material factory missing either create method"));
-        }
+    public interface Factory {
+        Material create(Owner owner, Resource res, Message sdt);
     }
 
     public static Material fromres(Owner owner, Resource res, Message sdt) {
@@ -276,6 +277,7 @@ public class Material extends GLState {
                 .add(Glob.class, o -> o.glob)
                 .add(Session.class, o -> o.glob.sess);
 
+        @Override
         public <T> T context(Class<T> cl) {
             return (ctxr.context(cl, this));
         }
@@ -288,8 +290,8 @@ public class Material extends GLState {
 
     public static class Res extends Resource.Layer implements Resource.IDLayer<Integer> {
         public final int id;
-        private transient List<GLState> states = new LinkedList<GLState>();
-        private transient List<Resolver> left = new LinkedList<Resolver>();
+        private transient List<GLState> states = new LinkedList<>(), dynstates = new LinkedList<>();
+        private transient List<Resolver> left = new LinkedList<>();
         private transient Material m;
         private boolean mipmap = false, linear = false;
 
@@ -332,6 +334,7 @@ public class Material extends GLState {
             }
         }
 
+        @Override
         public void init() {
             for (Resource.Image img : getres().layers(Resource.imgc)) {
                 TexGL tex = (TexGL) img.tex();
@@ -342,104 +345,27 @@ public class Material extends GLState {
             }
         }
 
+        @Override
         public Integer layerid() {
             return (id);
         }
     }
 
-    @Resource.LayerName("mat")
-    public static class OldMat implements Resource.LayerFactory<Res> {
-        private static Color col(Message buf) {
-            return (new Color((int) (buf.cpfloat() * 255.0),
-                    (int) (buf.cpfloat() * 255.0),
-                    (int) (buf.cpfloat() * 255.0),
-                    (int) (buf.cpfloat() * 255.0)));
-        }
-
-        public Res cons(final Resource res, Message buf) {
-            int id = buf.uint16();
-            Res ret = new Res(res, id);
-            GLState light = Light.deflight;
-            while (!buf.eom()) {
-                String thing = buf.string().intern();
-                if (thing == "col") {
-                    Color amb = col(buf);
-                    Color dif = col(buf);
-                    Color spc = col(buf);
-                    double shine = buf.cpfloat();
-                    Color emi = col(buf);
-                    ret.states.add(new Colors(amb, dif, spc, emi, (float) shine));
-                } else if (thing == "linear") {
-                    ret.linear = true;
-                } else if (thing == "mipmap") {
-                    ret.mipmap = true;
-                } else if (thing == "nofacecull") {
-                    ret.states.add(nofacecull);
-                } else if (thing == "tex") {
-                    final int tid = buf.uint16();
-                    ret.left.add(new Res.Resolver() {
-                        public void resolve(Collection<GLState> buf) {
-                            for (Resource.Image img : res.layers(Resource.imgc)) {
-                                if (img.id == tid) {
-                                    buf.add(img.tex().draw());
-                                    buf.add(img.tex().clip());
-                                    return;
-                                }
-                            }
-                            throw (new RuntimeException(String.format("Specified texture %d not found in %s", tid, res)));
-                        }
-                    });
-                } else if (thing == "texlink") {
-                    final String nm = buf.string();
-                    final int ver = buf.uint16();
-                    final int tid = buf.uint16();
-                    ret.left.add(new Res.Resolver() {
-                        public void resolve(Collection<GLState> buf) {
-                            Indir<Resource> tres = res.pool.load(nm, ver);
-                            for (Resource.Image img : tres.get().layers(Resource.imgc)) {
-                                if (img.id == tid) {
-                                    buf.add(img.tex().draw());
-                                    buf.add(img.tex().clip());
-                                    return;
-                                }
-                            }
-                            throw (new RuntimeException(String.format("Specified texture %d for %s not found in %s", tid, res, tres)));
-                        }
-                    });
-                } else if (thing == "light") {
-                    String l = buf.string();
-                    if (l.equals("pv")) {
-                        light = Light.vlights;
-                    } else if (l.equals("pp")) {
-                        light = Light.plights;
-                    } else if (l.equals("n")) {
-                        light = null;
-                    } else {
-                        throw (new Resource.LoadException("Unknown lighting type: " + thing, res));
-                    }
-                } else {
-                    throw (new Resource.LoadException("Unknown material part: " + thing, res));
-                }
-            }
-            if (light != null)
-                ret.states.add(light);
-            return (ret);
-        }
-    }
-
     @ResName("mlink")
     public static class $mlink implements ResCons2 {
+        @Override
         public Res.Resolver cons(final Resource res, Object... args) {
             final Indir<Resource> lres;
             final int id;
             if (args[0] instanceof String) {
-                lres = res.pool.load((String) args[0], (Integer) args[1]);
-                id = (args.length > 2) ? (Integer) args[2] : -1;
+                lres = res.pool.load((String) args[0], Utils.iv(args[1]));
+                id = (args.length > 2) ? Utils.iv(args[2]) : -1;
             } else {
                 lres = res.indir();
                 id = (Integer) args[0];
             }
             return (new Res.Resolver() {
+                @Override
                 public void resolve(Collection<GLState> buf) {
                     if (id >= 0) {
                         Res mat = lres.get().layer(Res.class, id);
@@ -467,35 +393,31 @@ public class Material extends GLState {
     @Target(ElementType.TYPE)
     @Retention(RetentionPolicy.RUNTIME)
     public @interface ResName {
-        public String value();
+        String value();
     }
 
     public interface ResCons {
-        public GLState cons(Resource res, Object... args);
+        GLState cons(Resource res, Object... args);
     }
 
     public interface ResCons2 {
-        public Res.Resolver cons(Resource res, Object... args);
+        Res.Resolver cons(Resource res, Object... args);
     }
 
-    private static final Map<String, ResCons2> rnames = new TreeMap<String, ResCons2>();
+    private static final Map<String, ResCons2> rnames = new TreeMap<>();
 
     static {
         for (Class<?> cl : dolda.jglob.Loader.get(ResName.class).classes()) {
             String nm = cl.getAnnotation(ResName.class).value();
             if (ResCons.class.isAssignableFrom(cl)) {
                 final ResCons scons;
-                try {
-                    scons = cl.asSubclass(ResCons.class).newInstance();
-                } catch (InstantiationException e) {
-                    throw (new Error(e));
-                } catch (IllegalAccessException e) {
-                    throw (new Error(e));
-                }
+                scons = Utils.construct(cl.asSubclass(ResCons.class));
                 rnames.put(nm, new ResCons2() {
+                    @Override
                     public Res.Resolver cons(Resource res, Object... args) {
                         final GLState ret = scons.cons(res, args);
                         return (new Res.Resolver() {
+                            @Override
                             public void resolve(Collection<GLState> buf) {
                                 if (ret != null)
                                     buf.add(ret);
@@ -504,23 +426,19 @@ public class Material extends GLState {
                     }
                 });
             } else if (ResCons2.class.isAssignableFrom(cl)) {
-                try {
-                    rnames.put(nm, cl.asSubclass(ResCons2.class).newInstance());
-                } catch (InstantiationException e) {
-                    throw (new Error(e));
-                } catch (IllegalAccessException e) {
-                    throw (new Error(e));
-                }
+                rnames.put(nm, Utils.construct(cl.asSubclass(ResCons2.class)));
             } else if (GLState.class.isAssignableFrom(cl)) {
-                final Constructor<? extends GLState> cons;
+                Constructor<? extends GLState> cons;
                 try {
                     cons = cl.asSubclass(GLState.class).getConstructor(Resource.class, Object[].class);
                 } catch (NoSuchMethodException e) {
                     throw (new Error("No proper constructor for res-consable GL state " + cl.getName(), e));
                 }
                 rnames.put(nm, new ResCons2() {
+                    @Override
                     public Res.Resolver cons(final Resource res, final Object... args) {
                         return (new Res.Resolver() {
+                            @Override
                             public void resolve(Collection<GLState> buf) {
                                 buf.add(Utils.construct(cons, res, args));
                             }
@@ -535,10 +453,10 @@ public class Material extends GLState {
 
     @Resource.LayerName("mat2")
     public static class NewMat implements Resource.LayerFactory<Res> {
+        @Override
         public Res cons(Resource res, Message buf) {
             int id = buf.uint16();
             Res ret = new Res(res, id);
-            boolean l_ok = false;
             while (!buf.eom()) {
                 String nm = buf.string();
                 Object[] args = buf.list();
@@ -550,19 +468,13 @@ public class Material extends GLState {
                 } else if (nm.equals("mipmap")) {
                     ret.mipmap = true;
                 } else {
-                    if ("light".equals(nm))
-                        l_ok = true;
                     ResCons2 cons = rnames.get(nm);
-//                    if (cons == null)
-//                        throw (new Resource.LoadException("Unknown material part name: " + nm, res));
-//                    ret.left.add(cons.cons(res, args));
                     if (cons != null)
                         ret.left.add(cons.cons(res, args));
                     else
                         new Resource.LoadWarning(res, "unknown material part name in %s: %s", res.name, nm).issue();
                 }
             }
-//            if (!l_ok && res.name.contains("overlay")) ret.states.add(Light.deflight);
             return (ret);
         }
     }

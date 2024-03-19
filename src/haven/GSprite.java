@@ -26,6 +26,8 @@
 
 package haven;
 
+import haven.res.gfx.invobjs.parchment_decal.DecalItem;
+
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -81,7 +83,7 @@ public abstract class GSprite implements Drawn {
             return (new FakeGSprite(owner, res, sdt));
         }
         if (res.name.equals("gfx/invobjs/parchment-decal")) {
-            return (new modification.DecalItem(owner, res, sdt));
+            return (new DecalItem(owner, res, sdt));
         }
         {
             Factory f = res.getcode(Factory.class, false);

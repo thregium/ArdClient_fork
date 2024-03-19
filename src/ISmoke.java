@@ -66,7 +66,14 @@ public class ISmoke extends Sprite implements Gob.Overlay.CDel {
 
     public ISmoke(Owner owner, Resource res, Message sdt) {
         super(owner, res);
-        mat = res.layer(Material.Res.class, sdt.uint8()).get();
+        Material mat1;
+        try {
+            mat1 = res.layer(Material.Res.class, sdt.uint8()).get();
+        } catch (Throwable e) {
+            dev.simpleLog(e);
+            mat1 = null;
+        }
+        mat = mat1;
         sz = sdt.uint8() / 10.0f;
         String locn = sdt.string();
         if (locn.equals(""))
@@ -225,7 +232,8 @@ public class ISmoke extends Sprite implements Gob.Overlay.CDel {
 
     @Override
     public boolean setup(RenderList r) {
-        r.prepo(mat);
+        if (mat != null)
+            r.prepo(mat);
         r.prepo(States.presdepth);
         if (loc != null)
             r.prepo(loc);

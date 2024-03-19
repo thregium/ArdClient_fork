@@ -525,8 +525,11 @@ public class Composited implements Rendered, MapView.Clickable {
                         equ.matched = true;
                         i.remove();
                         continue outer;
-                    } else if ((equ instanceof SpriteEqu) && (((SpriteEqu) equ).spr instanceof Gob.Overlay.CUpd) && equ.desc.equals2(ed)) {
-                        ((Gob.Overlay.CUpd) ((SpriteEqu) equ).spr).update(ed.res.sdt.clone());
+                    } else if ((equ instanceof SpriteEqu) && (((SpriteEqu) equ).spr instanceof Gob.Overlay.CUpd || ((SpriteEqu) equ).spr instanceof Sprite.CUpd) && equ.desc.equals2(ed)) {
+                        if (((SpriteEqu) equ).spr instanceof Sprite.CUpd)
+                            ((Sprite.CUpd) ((SpriteEqu) equ).spr).update(ed.res.sdt.clone());
+                        else if (((SpriteEqu) equ).spr instanceof Gob.Overlay.CUpd)
+                            ((Gob.Overlay.CUpd) ((SpriteEqu) equ).spr).update(ed.res.sdt.clone());
                         equ.desc.res.sdt = ed.res.sdt;
                         equ.matched = true;
                         i.remove();

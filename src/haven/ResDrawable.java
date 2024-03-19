@@ -213,8 +213,11 @@ public class ResDrawable extends Drawable {
             Indir<Resource> res = OCache.Delta.getres(g, resid);
             Drawable dr = g.getattr(Drawable.class);
             ResDrawable d = (dr instanceof ResDrawable) ? (ResDrawable) dr : null;
-            if ((d != null) && (d.res == res) && !d.sdt.equals(sdt) && (d.spr != null) && (d.spr instanceof Sprite.CUpd)) {
-                ((Sprite.CUpd) d.spr).update(sdt);
+            if ((d != null) && (d.res == res) && !d.sdt.equals(sdt) && (d.spr != null) && (d.spr instanceof Sprite.CUpd || d.spr instanceof Gob.Overlay.CUpd)) {
+                if (d.spr instanceof Sprite.CUpd)
+                    ((Sprite.CUpd) d.spr).update(sdt);
+                else if (d.spr instanceof Gob.Overlay.CUpd)
+                    ((Gob.Overlay.CUpd) d.spr).update(sdt);
                 d.sdt = sdt;
                 g.updsdt();
             } else if ((d == null) || (d.res != res) || !d.sdt.equals(sdt)) {

@@ -1,6 +1,7 @@
 package haven.res.gfx.terobjs.peacebreaker;
 
 import haven.Coord3f;
+import haven.Gob;
 import haven.Indir;
 import haven.Location;
 import haven.Message;
@@ -8,7 +9,7 @@ import haven.RenderList;
 import haven.Resource;
 import haven.Sprite;
 
-public class Peacebreaker extends Sprite implements Sprite.CUpd {
+public class Peacebreaker extends Sprite implements Gob.Overlay.CUpd {
     public static final Coord3f fstart = Coord3f.o;
     public static final Coord3f fend = new Coord3f(0.00f, 0.00f, 18.00f);
     public static final Indir<Resource> pres = Resource.remote().load("gfx/terobjs/peacebreaker", 1);
@@ -29,6 +30,7 @@ public class Peacebreaker extends Sprite implements Sprite.CUpd {
         return (ret);
     }
 
+    @Override
     public void update(Message sdt) {
         this.a = sdt.eom() ? 0 : sdt.unorm8();
     }

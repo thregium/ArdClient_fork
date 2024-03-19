@@ -14,6 +14,7 @@ import haven.Text;
 import haven.Utils;
 
 import java.awt.Color;
+import java.util.Optional;
 
 @FromResource(name = "ui/obj/buddy", version = 2, override = true)
 public class Buddy extends GAttrib implements InfoPart {
@@ -51,6 +52,10 @@ public class Buddy extends GAttrib implements InfoPart {
 
     public String name() {
         return (rnm);
+    }
+
+    public Optional<String> oname() {
+        return (Optional.ofNullable(name()));
     }
 
     public int group() {

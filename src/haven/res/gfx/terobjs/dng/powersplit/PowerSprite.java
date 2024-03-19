@@ -35,6 +35,7 @@ public class PowerSprite extends SkelSprite {
         return (ret);
     }
 
+    @Override
     public void update(Message sdt) {
         float a = sdt.eom() ? 0.5f : sdt.unorm8();
         top.update(a);

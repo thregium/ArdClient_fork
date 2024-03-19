@@ -56,6 +56,7 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
     private Rendered[] parts;
 
     public static final Factory fact = new Factory() {
+        @Override
         public Sprite create(Owner owner, Resource res, Message sdt) {
             if (res.layer(Skeleton.Res.class) == null)
                 return (null);
@@ -75,7 +76,7 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
             pose = null;
             pmorph = null;
         }
-        update(fl);
+        update(fl, true);
     }
 
     public SkelSprite(Owner owner, Resource res) {
@@ -161,12 +162,12 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
     private static final Map<Skeleton.ResPose, PoseMod> initmodids = new HashMap<>();
     private Map<Skeleton.ResPose, PoseMod> modids = initmodids;
 
-    private void chposes(int mask) {
+    private void chposes(int mask, boolean old) {
         chmanims(mask);
-        /*if (!old) {
+        if (!old) {
             this.oldpose = skel.new Pose(pose);
             this.ipold = 1.0f;
-        }*/
+        }
         Collection<PoseMod> poses = new LinkedList<>();
         stat = true;
         Skeleton.ModOwner mo = (owner instanceof Skeleton.ModOwner) ? (Skeleton.ModOwner) owner : Skeleton.ModOwner.nil;
@@ -176,10 +177,10 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
                 Skeleton.PoseMod mod;
                 if ((mod = modids.get(p)) == null) {
                     mod = p.forskel(mo, skel, p.defmode);
-//                    if (old)
-//                        mod.age();
+                    if (old)
+                        mod.age();
                 }
-//                if (p.id >= 0)
+                if (p.id >= 0)
                 newids.put(p, mod);
                 if (!mod.stat())
                     stat = false;
@@ -195,23 +196,29 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
         rebuild();
     }
 
-    public void update(int fl) {
+    public void update(int fl, boolean old) {
         chmanims(fl);
         if (skel != null)
-            chposes(fl);
+            chposes(fl, old);
         chparts(fl);
         this.curfl = fl;
+    }
+
+    public void update(int fl) {
+        update(fl, false);
     }
 
     public void update() {
         update(curfl);
     }
 
+    @Override
     public void update(Message sdt) {
         int fl = sdt.eom() ? 0xffff0000 : decnum(sdt);
         update(fl);
     }
 
+    @Override
     public boolean setup(RenderList rl) {
         for (Rendered p : parts)
             rl.add(p, null);
@@ -219,6 +226,16 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
         return (false);
     }
 
+    public void age() {
+        for (PoseMod mod : mods)
+            mod.age();
+        for (MeshAnim.Anim anim : manims)
+            anim.age();
+        this.ipold = 0.0f;
+        this.oldpose = null;
+    }
+
+    @Override
     public boolean tick(int idt) {
         float dt = idt / 1000.0f;
         if (!stat || (ipold > 0)) {
@@ -242,6 +259,7 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
         return (false);
     }
 
+    @Override
     public Object staticp() {
         if (!configuration.disableAnimation(owner)) {
             if (!stat || (manims.length > 0) || (ipold > 0)) {
@@ -254,12 +272,14 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
         }
     }
 
+    @Override
     public Pose getpose() {
         return (pose);
     }
 
     static {
         Console.setscmd("bonedb", new Console.Command() {
+            @Override
             public void run(Console cons, String[] args) {
                 bonedb = Utils.parsebool(args[1], false);
             }

@@ -860,9 +860,11 @@ public class MapWnd extends ResizableWnd {
                             Tex tex = namemap.get(m.gobid);
                             if (tex == null && buddy != null) { //if we don't already have this nametex in memory, set one up.
                                 System.out.println("tex null buddy not null");
-                                tex = Text.renderstroked(buddy.name(), Color.WHITE, Color.BLACK, Text.delfnd2).tex();
-                                // tex = buddy.rendered();
-                                namemap.put(m.gobid, tex);
+                                tex = buddy.oname().map(name -> {
+                                    Tex tex1 = Text.renderstroked(name, Color.WHITE, Color.BLACK, Text.delfnd2).tex();
+                                    namemap.put(m.gobid, tex1);
+                                    return (tex1);
+                                }).orElse(null);
                             }
                             if (tex != null) { //apply texture if it's been successfully setup.
                                 g.chcolor(Color.WHITE);
@@ -1294,8 +1296,11 @@ public class MapWnd extends ResizableWnd {
                         Buddy buddy = gob.getattr(Buddy.class);
                         Tex tex = namemap.get(m.gobid);
                         if (tex == null && buddy != null) { //if we don't already have this nametex in memory, set one up.
-                            tex = Text.renderstroked(buddy.name(), Color.WHITE, Color.BLACK, Text.delfnd2).tex();
-                            namemap.put(m.gobid, tex);
+                            tex = buddy.oname().map(name -> {
+                                Tex tex1 = Text.renderstroked(name, Color.WHITE, Color.BLACK, Text.delfnd2).tex();
+                                namemap.put(m.gobid, tex1);
+                                return (tex1);
+                            }).orElse(null);
                         }
                     }
                 }

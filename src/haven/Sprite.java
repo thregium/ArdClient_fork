@@ -29,12 +29,12 @@ package haven;
 import haven.res.gfx.terobjs.barterarea.BarterArea;
 import haven.res.gfx.terobjs.dng.beedungeon.Beehive;
 import haven.res.gfx.terobjs.dng.powersplit.PowerSprite;
+import haven.res.gfx.terobjs.items.decal.Decal;
 import haven.res.gfx.terobjs.peacebreaker.Peacebreaker;
 import haven.res.gfx.terobjs.road.routeindicator.Route;
 import haven.res.lib.tree.Tree;
 import modification.Bed;
 import modification.Billpole;
-import modification.Decal;
 import modification.Fixedplob;
 import modification.dev;
 

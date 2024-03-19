@@ -375,23 +375,26 @@ public class OCache implements Iterable<Gob> {
             Gob.Overlay ol = g.findol(olid);
             OCache oc = g.glob.oc;
             if (res != null) {
-                sdt = new MessageBuf(sdt);
+                sdt = new MessageBuf(sdt).clone();
                 Gob.Overlay nol = null;
                 if (ol == null) {
                     g.addol(nol = new Gob.Overlay(g, olid, res, sdt), true);
                     if (sdt.rt == 7 && oc.isfight && Config.showdmgop)
-                        oc.setdmgoverlay(g, res, new MessageBuf(sdt));
+                        oc.setdmgoverlay(g, res, new MessageBuf(sdt).clone());
                 } else {
                     if (!ol.sdt.equals(sdt)) {
-                        if (ol.spr instanceof Sprite.CUpd) {
-                            MessageBuf copy = new MessageBuf(sdt);
-                            ((Sprite.CUpd) ol.spr).update(copy);
+                        if (ol.spr instanceof Sprite.CUpd || ol.spr instanceof Gob.Overlay.CUpd) {
+                            MessageBuf copy = new MessageBuf(sdt).clone();
+                            if (ol.spr instanceof Sprite.CUpd)
+                                ((Sprite.CUpd) ol.spr).update(copy);
+                            else if (ol.spr instanceof Gob.Overlay.CUpd)
+                                ((Gob.Overlay.CUpd) ol.spr).update(copy);
                             ol.sdt = copy;
                         } else {
                             g.addol(nol = new Gob.Overlay(g, olid, res, sdt), true);
                             ol.remove(false);
                             if (sdt.rt == 7 && oc.isfight && Config.showdmgop)
-                                oc.setdmgoverlay(g, res, new MessageBuf(sdt));
+                                oc.setdmgoverlay(g, res, new MessageBuf(sdt).clone());
                         }
                     }
                 }
@@ -907,8 +910,11 @@ public class OCache implements Iterable<Gob> {
         MessageBuf sdt = new MessageBuf(dat);
         Drawable dr = g.getattr(Drawable.class);
         ResDrawable d = (dr instanceof ResDrawable) ? (ResDrawable) dr : null;
-        if ((d != null) && (d.res == res) && !d.sdt.equals(sdt) && (d.spr != null) && (d.spr instanceof Gob.Overlay.CUpd)) {
-            ((Gob.Overlay.CUpd) d.spr).update(sdt);
+        if ((d != null) && (d.res == res) && !d.sdt.equals(sdt) && (d.spr != null) && ((d.spr instanceof Gob.Overlay.CUpd) || (d.spr instanceof Sprite.CUpd))) {
+            if (d.spr instanceof Sprite.CUpd)
+                ((Sprite.CUpd) d.spr).update(sdt);
+            else if (d.spr instanceof Gob.Overlay.CUpd)
+                ((Gob.Overlay.CUpd) d.spr).update(sdt);
             d.sdt = sdt;
             g.updsdt();
         } else if ((d == null) || (d.res != res) || !d.sdt.equals(sdt)) {
