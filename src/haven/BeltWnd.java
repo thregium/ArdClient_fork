@@ -67,6 +67,7 @@ public class BeltWnd extends MovableWidget {
             if (TexGL.disableall)
                 return;
             g.image(Inventory.invsq, Coord.z);
+            g.atextstroked(slot + "", sz.div(2), 0.5,0.5, new Color(255, 255, 255, 100), new Color(0, 0, 0, 100), Text.num10Fnd);
             //if we have something draw it
             if (belt != null)
                 belt.draw(g);

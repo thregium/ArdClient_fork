@@ -30,7 +30,7 @@ import haven.sloth.gob.Type;
 
 import java.util.function.Supplier;
 
-public class ResDrawable extends Drawable {
+public class ResDrawable extends Drawable implements EquipTarget {
     public final Indir<Resource> res;
     public Sprite spr = null;
     public MessageBuf sdt;
@@ -191,7 +191,7 @@ public class ResDrawable extends Drawable {
 
     public GLState eqpoint(String nm, Message dat) {
         if (spr instanceof EquipTarget) {
-            Location ret = ((EquipTarget) spr).eqpoint(nm, dat);
+            GLState ret = ((EquipTarget) spr).eqpoint(nm, dat);
             if (ret != null)
                 return (ret);
         }

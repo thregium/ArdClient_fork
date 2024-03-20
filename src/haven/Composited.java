@@ -39,8 +39,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 
-public class Composited implements Rendered, MapView.Clickable {
+public class Composited implements Rendered, MapView.Clickable, EquipTarget {
     public final Skeleton skel;
     public final Pose pose;
     private final PoseMorph morph;
@@ -155,6 +156,7 @@ public class Composited implements Rendered, MapView.Clickable {
     }
 
     private static final Rendered.Order modorder = new Rendered.Order<Model.Layer>() {
+        @Override
         public int mainz() {
             return (1);
         }
@@ -165,6 +167,7 @@ public class Composited implements Rendered, MapView.Clickable {
             return (a.z2 - b.z2);
         };
 
+        @Override
         public Rendered.RComparator<Model.Layer> cmp() {
             return (cmp);
         }
@@ -189,15 +192,18 @@ public class Composited implements Rendered, MapView.Clickable {
                 this.z2 = z2;
             }
 
+            @Override
             public void draw(GOut g) {
                 m.draw(g);
             }
 
+            @Override
             public void drawflat(GOut g) {
                 if (z2 == 0)
                     m.drawflat(g);
             }
 
+            @Override
             public boolean setup(RenderList r) {
                 r.prepo(modorder);
                 r.prepo(mat);
@@ -214,8 +220,10 @@ public class Composited implements Rendered, MapView.Clickable {
             lay.add(new Layer(mat, z, lz++));
         }
 
+        @Override
         public void draw(GOut g) {}
 
+        @Override
         public boolean setup(RenderList r) {
             m.setup(r);
             for (Layer lay : this.lay) {
@@ -251,14 +259,17 @@ public class Composited implements Rendered, MapView.Clickable {
             this.spr = Sprite.create(eqowner, ed.res.res.get(), ed.res.sdt.clone());
         }
 
+        @Override
         public void draw(GOut g) {
         }
 
+        @Override
         public boolean setup(RenderList rl) {
             rl.add(spr, null);
             return (false);
         }
 
+        @Override
         public void tick(int dt) {
             spr.tick(dt);
         }
@@ -277,9 +288,11 @@ public class Composited implements Rendered, MapView.Clickable {
             this.l = ed.res.res.get().layer(Light.Res.class).make();
         }
 
+        @Override
         public void draw(GOut g) {
         }
 
+        @Override
         public boolean setup(RenderList rl) {
             rl.add(l, null);
             return (false);
@@ -330,6 +343,7 @@ public class Composited implements Rendered, MapView.Clickable {
 
         public void tick(int dt) {}
 
+        @Override
         public Object staticp() {
             return Gob.STATIC;
         }
@@ -353,6 +367,7 @@ public class Composited implements Rendered, MapView.Clickable {
             return (mod.equals(m.mod) && tex.equals(m.tex));
         }
 
+        @Override
         public MD clone() {
             try {
                 MD ret = (MD) super.clone();
@@ -399,6 +414,7 @@ public class Composited implements Rendered, MapView.Clickable {
             return ((t == e.t) && at.equals(e.at) && res.res.equals(e.res.res) && off.equals(e.off));
         }
 
+        @Override
         public ED clone() {
             try {
                 ED ret = (ED) super.clone();
@@ -430,14 +446,14 @@ public class Composited implements Rendered, MapView.Clickable {
 
         public static Desc decode(Session sess, Object[] args) {
             Desc ret = new Desc();
-            ret.base = sess.getres((Integer) args[0]);
+	    ret.base = sess.getresv(args[0]);
             Object[] ma = (Object[]) args[1];
             for (int i = 0; i < ma.length; i += 2) {
                 List<ResData> tex = new ArrayList<ResData>();
-                Indir<Resource> mod = sess.getres((Integer) ma[i]);
+		Indir<Resource> mod = sess.getresv(ma[i]);
                 Object[] ta = (Object[]) ma[i + 1];
                 for (int o = 0; o < ta.length; o++) {
-                    Indir<Resource> tr = sess.getres((Integer) ta[o]);
+		    Indir<Resource> tr = sess.getresv(ta[o]);
                     Message sdt = Message.nil;
                     if ((ta.length > o + 1) && (ta[o + 1] instanceof byte[]))
                         sdt = new MessageBuf((byte[]) ta[++o]);
@@ -449,18 +465,19 @@ public class Composited implements Rendered, MapView.Clickable {
             for (int i = 0; i < ea.length; i++) {
                 Object[] qa = (Object[]) ea[i];
                 int n = 0;
-                int t = (Integer) qa[n++];
+		int t = Utils.iv(qa[n++]);
                 String at = (String) qa[n++];
-                Indir<Resource> res = sess.getres((Integer) qa[n++]);
+		Indir<Resource> res = sess.getresv(qa[n++]);
                 Message sdt = Message.nil;
                 if (qa[n] instanceof byte[])
                     sdt = new MessageBuf((byte[]) qa[n++]);
-                Coord3f off = new Coord3f(((Number) qa[n + 0]).floatValue(), ((Number) qa[n + 1]).floatValue(), ((Number) qa[n + 2]).floatValue());
+		Coord3f off = new Coord3f(Utils.fv(qa[n + 0]), Utils.fv(qa[n + 1]), Utils.fv(qa[n + 2]));
                 ret.equ.add(new ED(t, at, new ResData(res, sdt), off));
             }
             return (ret);
         }
 
+        @Override
         public Desc clone() {
             Desc ret = new Desc(base);
             for (MD mod : this.mod)
@@ -493,6 +510,8 @@ public class Composited implements Rendered, MapView.Clickable {
                     if (mr == null)
                         throw (new Sprite.ResourceException("Model resource contains no mesh", md.mod.get()));
                     md.real = new Model(mr.m, md.id);
+                    if(mr.rdat.containsKey("cz"))
+                        md.real.z = Integer.parseInt(mr.rdat.get("cz"));
                     /* This is really ugly, but I can't really think of
                      * anything less ugly right now. */
                     if (md.mod.get().name.equals("gfx/borka/male") || md.mod.get().name.equals("gfx/borka/female"))
@@ -568,6 +587,7 @@ public class Composited implements Rendered, MapView.Clickable {
         changes(false);
     }
 
+    @Override
     public Object[] clickargs(ClickInfo inf) {
         Rendered[] st = inf.array();
         for (int g = 0; g < st.length; g++) {
@@ -628,6 +648,7 @@ public class Composited implements Rendered, MapView.Clickable {
     }
     */
 
+    @Override
     public boolean setup(RenderList rl) {
 //        try {
         changes();
@@ -639,8 +660,13 @@ public class Composited implements Rendered, MapView.Clickable {
         return (false);
     }
 
-    public void draw(GOut g) {
+    @Override
+    public GLState eqpoint(String nm, Message dat) {
+        return(pose.eqpoint(nm, dat));
     }
+
+    @Override
+    public void draw(GOut g) {}
 
     private final AtomicLong ticktime = new AtomicLong(System.currentTimeMillis());
     private int buffertime = 0;
@@ -657,6 +683,7 @@ public class Composited implements Rendered, MapView.Clickable {
         }
     }
 
+    @Override
     public Object staticp() {
         Gob compowner = null;
         if (eqowner instanceof Gob)

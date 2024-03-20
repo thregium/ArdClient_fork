@@ -303,7 +303,7 @@ public class Skeleton {
         }
 
         @Override
-        public Location eqpoint(String name, Message dat) {
+        public GLState eqpoint(String name, Message dat) {
             Bone bone = bones.get(name);
             if (bone == null)
                 return (null);

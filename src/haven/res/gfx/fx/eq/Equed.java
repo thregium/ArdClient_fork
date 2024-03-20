@@ -94,4 +94,9 @@ public class Equed extends Sprite {
     public void age() {
         espr.age();
     }
+
+    @Override
+    public Object staticp() {
+        return (null);
+    }
 }

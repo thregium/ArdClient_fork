@@ -31,5 +31,5 @@ import java.util.function.Supplier;
 public interface EquipTarget {
     Supplier<GLState> nil = () -> GLState.nullstate;
 
-    Location eqpoint(String nm, Message dat);
+    GLState eqpoint(String nm, Message dat);
 }

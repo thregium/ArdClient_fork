@@ -1666,6 +1666,15 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         }
     }
 
+    private void updateSlot(int slot) {
+        if (slot <= 49)
+            nbelt.update(slot);
+        else if (slot <= 99)
+            fbelt.update(slot);
+        else
+            npbelt.update(slot);
+    }
+
     @Override
     public void uimsg(String msg, Object... args) {
         if (msg == "err") {
@@ -1679,6 +1688,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
             int slot = Utils.iv(args[0]);
             if (args.length < 2) {
                 belt[slot] = null;
+                updateSlot(slot);
             } else {
                 Indir<Resource> res = ui.sess.getresv(args[1]);
                 Message sdt = Message.nil;
@@ -1687,29 +1697,27 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
                 ResData rdt = new ResData(res, sdt);
                 ui.sess.glob.loader.defer(() -> {
                     belt[slot] = mkbeltslot(slot, rdt);
+                    updateSlot(slot);
                 }, null);
             }
-            if (slot <= 49)
-                nbelt.update(slot);
-            else if (slot <= 99)
-                fbelt.update(slot);
-            else
-                npbelt.update(slot);
         } else if (msg == "setbelt2") {
             int slot = Utils.iv(args[0]);
             if (args.length < 2) {
                 belt[slot] = null;
+                updateSlot(slot);
             } else {
                 switch ((String) args[1]) {
                     case "p": {
                         Object id = args[2];
                         belt[slot] = new PagBeltSlot(slot, menu.paginafor(id, null));
+                        updateSlot(slot);
                         break;
                     }
                     case "r": {
                         Indir<Resource> res = ui.sess.getresv(args[2]);
                         ui.sess.glob.loader.defer(() -> {
                             belt[slot] = new PagBeltSlot(slot, PagBeltSlot.resolve(menu, res));
+                            updateSlot(slot);
                         }, null);
                         break;
                     }
@@ -1719,16 +1727,11 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
                         if (args.length > 2)
                             sdt = new MessageBuf((byte[]) args[3]);
                         belt[slot] = new ResBeltSlot(slot, new ResData(res, sdt));
+                        updateSlot(slot);
                         break;
                     }
                 }
             }
-            if (slot <= 49)
-                nbelt.update(slot);
-            else if (slot <= 99)
-                fbelt.update(slot);
-            else
-                npbelt.update(slot);
         } else if (msg == "polowner") {
             int id = (Integer) args[0];
             String o = (String) args[1];

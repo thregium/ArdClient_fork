@@ -36,8 +36,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
-public class Composite extends Drawable {
+public class Composite extends Drawable implements EquipTarget {
     public static final float ipollen = 0.2f;
     public final Indir<Resource> base;
     public Composited comp;
@@ -96,6 +97,7 @@ public class Composite extends Drawable {
         }
     }
 
+    @Override
     public void setup(RenderList rl) {
         if (!inited) return;
         rl.add(comp, null);
@@ -147,6 +149,7 @@ public class Composite extends Drawable {
 
     private int delay = 0;
 
+    @Override
     public void ctick(int dt) {
         if (comp == null) {
             delay += dt;
@@ -164,6 +167,7 @@ public class Composite extends Drawable {
                 try {
                     final Composited.Poses cp = comp.poses;
                     Composited.Poses np = comp.new Poses(loadposes(tposes, comp.skel, tpmode)) {
+                        @Override
                         protected void done() {
                             cp.set(ipollen);
                             updequ();
@@ -183,10 +187,20 @@ public class Composite extends Drawable {
         }
     }
 
+    @Override
     public Resource getres() {
         return (base.get());
     }
 
+    @Override
+    public GLState eqpoint(String nm, Message dat) {
+        Skeleton.BoneOffset bo = getres().layer(Skeleton.BoneOffset.class, nm);
+        if(bo != null)
+            return(bo.from(comp));
+        return(comp.eqpoint(nm, dat));
+    }
+
+    @Override
     public Pose getpose() {
         if (!inited && error != null) throw (error);
         return (comp.pose);
@@ -229,12 +243,14 @@ public class Composite extends Drawable {
     //TODO: Should inherit from `comp`, this composite could very well be static. Ex: dead animals
 //      OCache already calls changed anytime it changes equ/poses.. so this should ONLY be dynamic
 //      If one of the equ/poses are an animation and `Show Animations` is on
+    @Override
     public Object staticp() {
         return comp != null ? comp.staticp() : null;
     }
 
     @OCache.DeltaType(OCache.OD_COMPOSE)
     public static class $composite implements OCache.Delta {
+        @Override
         public void apply(Gob g, OCache.AttrDelta msg) {
             Indir<Resource> base = OCache.Delta.getres(g, msg.uint16());
             Drawable dr = g.getattr(Drawable.class);
@@ -248,6 +264,7 @@ public class Composite extends Drawable {
 
     @OCache.DeltaType(OCache.OD_CMPPOSE)
     public static class $cmppose implements OCache.Delta {
+        @Override
         public void apply(Gob g, OCache.AttrDelta msg) {
             List<ResData> poses = null, tposes = null;
             int pfl = msg.uint8();
@@ -300,6 +317,7 @@ public class Composite extends Drawable {
 
     @OCache.DeltaType(OCache.OD_CMPMOD)
     public static class $cmpmod implements OCache.Delta {
+        @Override
         public void apply(Gob g, OCache.AttrDelta msg) {
             List<Composited.MD> mod = new LinkedList<Composited.MD>();
             int mseq = 0;
@@ -333,6 +351,7 @@ public class Composite extends Drawable {
 
     @OCache.DeltaType(OCache.OD_CMPEQU)
     public static class $cmpequ implements OCache.Delta {
+        @Override
         public void apply(Gob g, OCache.AttrDelta msg) {
             List<Composited.ED> equ = new LinkedList<Composited.ED>();
             int eseq = 0;

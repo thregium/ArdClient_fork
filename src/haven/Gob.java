@@ -1537,10 +1537,10 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
     }
 
     @Override
-    public Location eqpoint(String nm, Message dat) {
+    public GLState eqpoint(String nm, Message dat) {
         for (GAttrib attr : this.attr.values()) {
             if (attr instanceof EquipTarget) {
-                Location ret = ((EquipTarget) attr).eqpoint(nm, dat);
+                GLState ret = ((EquipTarget) attr).eqpoint(nm, dat);
                 if (ret != null)
                     return (ret);
             }
