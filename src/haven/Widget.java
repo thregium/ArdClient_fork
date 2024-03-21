@@ -40,6 +40,7 @@ import java.util.AbstractSequentialList;
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -1631,8 +1632,8 @@ public class Widget {
         return (true);
     }
 
-    public final Collection<Anim> anims = new LinkedList<Anim>();
-    public final Collection<Anim> nanims = new LinkedList<Anim>();
+    public final Collection<Anim> anims = Collections.synchronizedList(new LinkedList<Anim>());
+    public final Collection<Anim> nanims = Collections.synchronizedList(new LinkedList<Anim>());
 
     public <T extends Anim> void clearanims(Class<T> type) {
         for (Iterator<Anim> i = nanims.iterator(); i.hasNext(); ) {
@@ -1649,16 +1650,12 @@ public class Widget {
 
     public abstract class Anim {
         public Anim() {
-            synchronized (ui) {
-                nanims.add(this);
-            }
+            nanims.add(this);
         }
 
         public void clear() {
-            synchronized (ui) {
                 nanims.remove(this);
                 anims.remove(this);
-            }
         }
 
         public abstract boolean tick(double dt);

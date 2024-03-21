@@ -158,28 +158,20 @@ public class Avaview extends PView {
             .add(Session.class, v -> v.ui.sess)
             .add(Resource.Resolver.class, v -> (v.resmap == null ? v.ui.sess : v.resmap));
 
-    public class AvaOwner implements Sprite.Owner, Skeleton.ModOwner {
+    public class AvaOwner implements Sprite.Owner, Skeleton.ModOwner, RandomSource {
         @Override
-        public Random mkrandoom() {
-            return (new Random());
-        }
-
+        public Random mkrandoom() {return (new Random());}
         @Override
+        public <T> T context(Class<T> cl) {return (ctxr.context(cl, Avaview.this));}
+        @Deprecated @Override
         public Resource getres() {return (null);}
-
         @Override
-        public <T> T context(Class<T> cl) {
-            return (ctxr.context(cl, Avaview.this));
-        }
-
+        public Collection<Location.Chain> getloc() {return(Collections.emptyList());}
+        @Override
+        public double getv() {return (0);}
         @Override
         @Deprecated
         public Glob glob() {return (context(Glob.class));}
-
-        @Override
-        public double getv() {return (0);}
-
-        public Collection<Location.Chain> getloc() {return(Collections.emptyList());}
     }
 
     private final AvaOwner avaowner = new AvaOwner();

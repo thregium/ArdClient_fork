@@ -123,23 +123,23 @@ public abstract class Tiler {
         }
     }
 
-    public static interface MCons {
-        public void faces(MapMesh m, MPart desc);
+    public interface MCons {
+        void faces(MapMesh m, MPart desc);
 
-        public static final MCons nil = new MCons() {
+        MCons nil = new MCons() {
             public void faces(MapMesh m, MPart desc) {
             }
         };
     }
 
-    public static interface CTrans {
-        public MCons tcons(int z, int bmask, int cmask);
+    public interface CTrans {
+        MCons tcons(int z, int bmask, int cmask);
     }
 
-    public static interface VertFactory {
-        public MeshVertex make(MeshBuf buf, MPart d, int i);
+    public interface VertFactory {
+        MeshVertex make(MeshBuf buf, MPart d, int i);
 
-        public static final VertFactory id = new VertFactory() {
+        VertFactory id = new VertFactory() {
             public MeshVertex make(MeshBuf buf, MPart d, int i) {
                 return (new MeshVertex(buf, d.v[i]));
             }
@@ -264,29 +264,24 @@ public abstract class Tiler {
     }
 
     @Resource.PublishedCode(name = "tile", instancer = FactMaker.class)
-    public static interface Factory {
-        public Tiler create(int id, Tileset set);
+    public interface Factory {
+        Tiler create(int id, Tileset set);
     }
 
     @dolda.jglob.Discoverable
     @Target(ElementType.TYPE)
     @Retention(RetentionPolicy.RUNTIME)
     public @interface ResName {
-        public String value();
+        String value();
     }
 
     private static final Map<String, Factory> rnames = new TreeMap<>();
 
     static {
-        java.security.AccessController.doPrivileged(new java.security.PrivilegedAction<Object>() {
-            public Object run() {
-                for (Class<?> cl : dolda.jglob.Loader.get(ResName.class).classes()) {
-                    String nm = cl.getAnnotation(ResName.class).value();
-                    rnames.put(nm, Utils.construct(cl.asSubclass(Factory.class)));
-                }
-                return (null);
-            }
-        });
+        for(Class<?> cl : dolda.jglob.Loader.get(ResName.class).classes()) {
+            String nm = cl.getAnnotation(ResName.class).value();
+            rnames.put(nm, Utils.construct(cl.asSubclass(Factory.class)));
+        }
     }
 
     public static Factory byname(String name) {

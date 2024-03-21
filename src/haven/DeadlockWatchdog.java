@@ -1,11 +1,14 @@
 package haven;
 
+import modification.dev;
+
 import java.io.Serializable;
 import java.lang.management.LockInfo;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MonitorInfo;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.util.Arrays;
 
 public class DeadlockWatchdog extends HackThread {
     private boolean running = true;
@@ -55,6 +58,7 @@ public class DeadlockWatchdog extends HackThread {
         ThreadState[] states = new ThreadState[threads.length];
         for (int i = 0; i < threads.length; i++)
             states[i] = new ThreadState(threads[i]);
+        dev.simpleLog(Arrays.toString(threads));
         throw (new DeadlockException(states));
     }
 

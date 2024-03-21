@@ -786,7 +786,8 @@ public class Skeleton {
                         if (ev == null) continue;
                         if ((ev.time >= ot) && (ev.time < nt)) {
                             callback(ev);
-                            ev.trigger((Gob) owner);
+                            if (owner instanceof Gob)
+                                ev.trigger((Gob) owner);
                         }
                     }
                 }

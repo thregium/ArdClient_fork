@@ -45,7 +45,7 @@ public class Info extends GAttrib implements Rendered, PView.Render2D {
             CompImage cmp = new CompImage();
             dirty = false;
             auto = false;
-            for (InfoPart part : parts) {
+            for (InfoPart part : new ArrayList<>(parts)) {
                 try {
                     part.draw(cmp, ctx);
                     auto |= part.auto();

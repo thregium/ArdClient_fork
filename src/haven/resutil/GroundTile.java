@@ -60,6 +60,26 @@ public class GroundTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
         this.set = set;
     }
 
+    public static float tcx(Tex t, int x) {
+        if (t instanceof TexGL)
+            return ((float) x / (float) ((TexGL) t).tcx(x));
+        if (t instanceof TexSI) {
+            TexSI si = (TexSI) t;
+            return (tcx(si.parent, si.ul.x + x));
+        }
+        throw (new RuntimeException("Cannot use texture for ground-tile rendering: " + t));
+    }
+
+    public static float tcy(Tex t, int y) {
+        if (t instanceof TexGL)
+            return ((float) y / (float) ((TexGL) t).tcy(y));
+        if (t instanceof TexSI) {
+            TexSI si = (TexSI) t;
+            return (tcy(si.parent, si.ul.y + y));
+        }
+        throw (new RuntimeException("Cannot use texture for ground-tile rendering: " + t));
+    }
+
     private static GLState stfor(Tex tex, int z, boolean clip) {
         TexGL gt;
         if (tex instanceof TexGL)

@@ -89,8 +89,8 @@ public class Tileset extends Resource.Layer {
         public void init() {}
     }
 
-    public static interface Flavor {
-        public static class Obj extends Gob {
+    public interface Flavor {
+        class Obj extends Gob {
             private final long seed;
 
             public Obj(Buffer buf, Coord2d c, double a) {
@@ -108,7 +108,7 @@ public class Tileset extends Resource.Layer {
             }
         }
 
-        public static class Buffer {
+        class Buffer {
             public final Glob glob;
             public final Area area;
             public final long seed;
@@ -155,7 +155,7 @@ public class Tileset extends Resource.Layer {
             }
         }
 
-        public static class Terrain implements MapSource {
+        class Terrain implements MapSource {
             public final MapSource grid, map;
             public final int tile;
             public final Area area;
@@ -230,14 +230,14 @@ public class Tileset extends Resource.Layer {
             public Tiler tiler(int t) {return (grid.tiler(t));}
         }
 
-        public void flavor(Buffer buf, Terrain trn, Random seed);
+        void flavor(Buffer buf, Terrain trn, Random seed);
 
         @Resource.PublishedCode(name = "flavor", instancer = FactMaker.class)
-        public static interface Factory {
-            public Flavor make(Tileset trn, Object... args);
+        interface Factory {
+            Flavor make(Tileset trn, Object... args);
         }
 
-        public static class FactMaker extends Resource.PublishedCode.Instancer.Chain<Factory> {
+        class FactMaker extends Resource.PublishedCode.Instancer.Chain<Factory> {
             public FactMaker() {super(Factory.class);}
 
             {
@@ -267,7 +267,7 @@ public class Tileset extends Resource.Layer {
         }
 
         @Resource.LayerName("flavobj")
-        public static class Res extends Resource.Layer implements Indir<Flavor> {
+        class Res extends Resource.Layer implements Indir<Flavor> {
             public final Indir<Resource> res;
             public final Object[] args;
             private Flavor flav;
@@ -448,7 +448,7 @@ public class Tileset extends Resource.Layer {
                 throw (new Resource.LoadException("Could not pack tiles into calculated minimum texture", getres()));
             order[n] = t;
             place[n] = new Coord(x, y);
-            t.tex = new TexSI(packbuf, place[n], place[n].add(tsz));
+            t.tex = new TexSI(packbuf, place[n], tsz);
             n++;
             if ((x += tsz.x) > (minw - tsz.x)) {
                 x = 0;

@@ -45,6 +45,7 @@ import haven.TexSI;
 import haven.Tiler;
 import haven.Tileset;
 import haven.Tileset.Tile;
+import haven.Utils;
 
 import java.awt.Color;
 import java.util.Collection;
@@ -53,16 +54,21 @@ import java.util.Map;
 import java.util.Random;
 import java.util.WeakHashMap;
 
+import static haven.resutil.GroundTile.tcx;
+import static haven.resutil.GroundTile.tcy;
+
 public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
     public final GLState base;
     public final SNoise3 noise;
     public final Var[] var;
     public final Tileset transset;
+    public final GLState draw;
 
     public static class Var {
         public GLState mat;
         public double thrl, thrh;
         public double nz;
+        public GLState draw;
 
         public Var(GLState mat, double thrl, double thrh, double nz) {
             this.mat = mat;
@@ -263,13 +269,13 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
                 String p = (String) desc[0];
                 if (p.equals("common-mat")) {
                     if (desc[1] instanceof Integer) {
-                        int mid = (Integer) desc[1];
+                        int mid = Utils.iv(desc[1]);
                         commat = res.flayer(Material.Res.class, mid).get();
                     } else if (desc[1] instanceof String) {
                         String mnm = (String) desc[1];
-                        int mver = (Integer) desc[2];
+                        int mver = Utils.iv(desc[2]);
                         if (desc.length > 3) {
-                            commat = res.pool.load(mnm, mver).get().flayer(Material.Res.class, (Integer) desc[3]).get();
+                            commat = res.pool.load(mnm, mver).get().flayer(Material.Res.class, Utils.iv(desc[3])).get();
                         } else {
                             commat = Material.fromres((Material.Owner) null, res.pool.load(mnm, mver).get(), Message.nil);
                         }
@@ -280,23 +286,23 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
                 Object[] desc = (Object[]) rdesc;
                 String p = (String) desc[0];
                 if (p.equals("base")) {
-                    int mid = (Integer) desc[1];
+                    int mid = Utils.iv(desc[1]);
                     base = GLState.compose(commat, res.flayer(Material.Res.class, mid).get());
                 } else if (p.equals("var")) {
-                    int mid = (Integer) desc[1];
+                    int mid = Utils.iv(desc[1]);
                     double thrl, thrh;
                     if (desc[2] instanceof Object[]) {
-                        thrl = (Float) ((Object[]) desc[2])[0];
-                        thrh = (Float) ((Object[]) desc[2])[1];
+                        thrl = Utils.fv(((Object[]) desc[2])[0]);
+                        thrh = Utils.fv(((Object[]) desc[2])[1]);
                     } else {
-                        thrl = (Float) desc[2];
+                        thrl = Utils.fv(desc[2]);
                         thrh = Double.MAX_VALUE;
                     }
                     double nz = (res.name.hashCode() * mid * 8129) % 10000;
-                    GLState mat = GLState.compose(commat, res.layer(Material.Res.class, mid).get());
+                    GLState mat = GLState.compose(commat, res.flayer(Material.Res.class, mid).get());
                     var.add(new Var(mat, thrl, thrh, nz));
                 } else if (p.equals("trans")) {
-                    Resource tres = set.getres().pool.load((String) desc[1], (Integer) desc[2]).get();
+                    Resource tres = set.getres().pool.load((String) desc[1], Utils.iv(desc[2])).get();
                     trans = tres.layer(Tileset.class);
                 }
             }
@@ -312,9 +318,10 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
         super(id);
         this.noise = noise;
         int z = 0;
-        this.base = GLState.compose(base, new MapMesh.MLOrder(0, z++), States.vertexcolor);
+        this.base = base;
+        this.draw = GLState.compose(base, new MapMesh.MLOrder(0, z++), States.vertexcolor);
         for (Var v : this.var = var)
-            v.mat = GLState.compose(v.mat, new MapMesh.MLOrder(0, z++), States.vertexcolor);
+            v.draw = GLState.compose(v.mat, new MapMesh.MLOrder(0, z++), States.vertexcolor);
         this.transset = transset;
     }
 
@@ -329,8 +336,9 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
         Surface.MeshVertex[] mv = new Surface.MeshVertex[d.v.length];
         for (int i = 0; i < var.length + 1; i++) {
             if (b.en[i][b.es.o(d.lc)]) {
-                GLState mat = d.mcomb((i == 0) ? base : (var[i - 1].mat));
-                SModel buf = SModel.get(m, mat, b.lvfac[i]);
+                GLState mat = (i == 0) ? this.base : (var[i - 1].mat);
+                GLState draw = d.mcomb((i == 0) ? this.draw : (var[i - 1].draw));
+                SModel buf = SModel.get(m, GLState.compose(mat, draw), b.lvfac[i]);
                 for (int o = 0; o < d.v.length; o++)
                     mv[o] = buf.get(d, o);
                 for (int fi = 0; fi < d.f.length; fi += 3)
@@ -346,7 +354,7 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
      * distinction. */
     public void _faces(MapMesh m, int z, Tile trans, MPart d) {
         Tex ttex = trans.tex();
-        float tl = ttex.tcx(0), tt = ttex.tcy(0), tw = ttex.tcx(ttex.sz().x) - tl, th = ttex.tcy(ttex.sz().y) - tt;
+        float tl = tcx(ttex, 0), tt = tcy(ttex, 0), tw = tcx(ttex, ttex.sz().x) - tl, th = tcy(ttex, ttex.sz().y) - tt;
         TexGL gt;
         if (ttex instanceof TexGL)
             gt = (TexGL) ttex;
@@ -363,9 +371,10 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
         Surface.MeshVertex[] mv = new Surface.MeshVertex[d.v.length];
         for (int i = 0; i < var.length + 1; i++) {
             if (b.en[i][b.es.o(d.lc)]) {
-                GLState mat = (i == 0) ? base : (var[i - 1].mat);
-                mat = d.mcomb(GLState.compose(mat, new MapMesh.MLOrder(z, i), alpha));
-                MeshBuf buf = MapMesh.Model.get(m, mat);
+                GLState mat = (i == 0) ? this.base : (var[i - 1].mat);
+                GLState draw = (i == 0) ? this.draw : (var[i - 1].draw);
+                draw = d.mcomb(GLState.compose(draw, new MapMesh.MLOrder(z, i), alpha));
+                MeshBuf buf = MapMesh.Model.get(m, GLState.compose(mat, draw));
                 MeshBuf.Vec2Layer cc = buf.layer(AlphaTex.lclip);
                 for (int o = 0; o < d.v.length; o++) {
                     mv[o] = b.lvfac[i].make(buf, d, o);
@@ -422,12 +431,12 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
                     Object[] desc = (Object[]) rdesc;
                     String p = (String) desc[0];
                     if (p.equals("rmat")) {
-                        Resource mres = set.getres().pool.load((String) desc[1], (Integer) desc[2]).get();
+                        Resource mres = set.getres().pool.load((String) desc[1], Utils.iv(desc[2])).get();
                         mat = mres.flayer(Material.Res.class).get();
                         if (desc.length > 3)
-                            texh = (Float) desc[3];
+                            texh = Utils.fv(desc[3]);
                     } else if (p.equals("rthres")) {
-                        rth = ((Number) desc[1]).doubleValue();
+                        rth = Utils.dv(desc[1]);
                     }
                 }
                 if (mat == null)

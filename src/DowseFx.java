@@ -53,11 +53,13 @@ public class DowseFx extends Sprite {
             final Gob g = (Gob) owner;
             final UI ui = g.glob.ui.get();
             if (ui != null && ui.gui != null) {
-                ui.gui.makeDowseWnd(g.rc, a1, a2, col -> {
-                    this.col = col;
-                    hidden = false;
-                    start = System.currentTimeMillis();
-                    }, this::delete);
+                g.defer(() ->
+                        ui.gui.makeDowseWnd(g.rc, a1, a2, col -> {
+                            this.col = col;
+                            hidden = false;
+                            start = System.currentTimeMillis();
+                        }, this::delete)
+                );
             }
         }
     }
