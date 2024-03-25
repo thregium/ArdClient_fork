@@ -15,7 +15,7 @@ import haven.res.ui.obj.buddy.InfoPart;
 
 import java.awt.Color;
 
-@FromResource(name = "ui/obj/buddy-n", version = 2, override = true)
+@FromResource(name = "ui/obj/buddy-n", version = 3, override = true)
 public class Named extends GAttrib implements InfoPart {
     public final Info info;
     public final String nm;

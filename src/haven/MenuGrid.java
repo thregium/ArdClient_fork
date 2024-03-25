@@ -157,7 +157,14 @@ public class MenuGrid extends Widget {
             this.res = res;
             state(State.ENABLED);
 //            this.onUse = (me) -> scm.wdgmsg("act", (Object[]) res().layer(Resource.action).ad);
-            onUseMap.put(0, (me) -> scm.wdgmsg("act", (Object[]) res().layer(Resource.action).ad));
+            onUseMap.put(0, (me) -> {
+//                scm.wdgmsg("act", (Object[]) res().layer(Resource.action).ad);
+                Object[] eact = new Object[]{scm.ui.modflags()};
+                if (id instanceof Indir)
+                    scm.wdgmsg("act", Utils.extend(Utils.extend(new Object[0], act().ad), eact));
+                else
+                    scm.wdgmsg("use", Utils.extend(new Object[]{id}, eact));
+            });
         }
 
         public Pagina(MenuGrid scm, Indir<Resource> res, final Consumer<Pagina> onUse) {

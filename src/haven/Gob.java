@@ -1568,6 +1568,7 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
     @Override
     public boolean setup(RenderList rl) {
         loc.tick();
+        lastChain = Collections.singleton(Location.goback(rl.state(), "gobx")); //FIXME may need change to GobLocation loc
         final Hidden hid = getattr(Hidden.class);
         if (hid != null && Config.hideuniquegobs) {
             if (Config.showoverlay) {
@@ -2057,6 +2058,8 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
         return (false);
     }
 
+    private Collection<Location.Chain> lastChain = null;
+
 
     private static final Object DYNAMIC = new Object();
     private Object seq = null;
@@ -2185,7 +2188,7 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
 
     @Override
     public Collection<Location.Chain> getloc() {
-        return (null);
+        return (lastChain);
     }
 
     public boolean isplayer() {

@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-@FromResource(name = "ui/obj/buddy", version = 2, override = true)
+@FromResource(name = "ui/obj/buddy", version = 3, override = true)
 public class Info extends GAttrib implements Rendered, PView.Render2D {
     public final List<InfoPart> parts = Collections.synchronizedList(new ArrayList<>());
     private Tex rend = null;

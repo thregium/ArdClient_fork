@@ -786,8 +786,7 @@ public class Skeleton {
                         if (ev == null) continue;
                         if ((ev.time >= ot) && (ev.time < nt)) {
                             callback(ev);
-                            if (owner instanceof Gob)
-                                ev.trigger((Gob) owner);
+                            ev.trigger(owner, this);
                         }
                     }
                 }
@@ -912,7 +911,7 @@ public class Skeleton {
                 this.time = time;
             }
 
-            public abstract void trigger(Gob gob);
+            public abstract void trigger(ModOwner owner, PoseMod mod);
         }
 
         public FxTrack(Event[] events) {
@@ -953,6 +952,42 @@ public class Skeleton {
                 };
                 n.ols.add(new Gob.Overlay(-1, res, new MessageBuf(sdt)));
             }
+
+            @Override
+            public void trigger(ModOwner owner, PoseMod mod) {
+                Glob glob = owner.context(Glob.class);
+                Collection<Location.Chain> locs = owner.getloc();
+                if (locs == null)
+                    return;
+                Loader l = glob.loader;
+                l.defer(() -> {
+                    GLState ploc = (this.loc != null) ? this.loc.apply(owner) : null;
+                    for (Location.Chain loc : locs) {
+                        Coord3f o = loc.fin(Matrix4f.id).mul4(Coord3f.o);
+                        Location lxf = new Location(loc.fin(Location.makexlate(new Matrix4f(), o.inv())));
+                        l.defer(() -> {
+                            Gob n = glob.oc.new FixedPlace(o.invy(), 0) {
+                                @Override
+                                public Coord3f getc() {
+                                    return (new Coord3f(fc));
+                                }
+
+                                @Override
+                                public boolean setup(RenderList rl) {
+                                    rl.prepc(lxf);
+                                    if (ploc != null)
+                                        rl.prepc(ploc);
+                                    return (super.setup(rl));
+                                }
+                            };
+
+//                            n.ols.add(new Gob.Overlay(-1, res, new MessageBuf(sdt)));
+                            n.addol(new Gob.Overlay(n, -1, res, new MessageBuf(sdt)), false);
+                            glob.oc.add(n);
+                        }, null);
+                    }
+                }, null);
+            }
         }
 
         public static class Trigger extends Event {
@@ -963,8 +998,8 @@ public class Skeleton {
                 this.id = id.intern();
             }
 
-            public void trigger(Gob gob) {
-            }
+            @Override
+            public void trigger(ModOwner owner, PoseMod mod) {}
         }
 
         public static class Tick extends Event {
@@ -972,7 +1007,8 @@ public class Skeleton {
                 super(time);
             }
 
-            public void trigger(Gob gob) {}
+            @Override
+            public void trigger(ModOwner owner, PoseMod mod) {}
         }
     }
 

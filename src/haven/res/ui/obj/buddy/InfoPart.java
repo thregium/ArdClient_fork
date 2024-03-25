@@ -4,7 +4,7 @@ import haven.CompImage;
 import haven.FromResource;
 import haven.PView;
 
-@FromResource(name = "ui/obj/buddy", version = 2, override = true)
+@FromResource(name = "ui/obj/buddy", version = 3, override = true)
 public interface InfoPart {
     void draw(CompImage cmp, PView.RenderContext ctx);
 
