@@ -54,9 +54,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.WeakHashMap;
 
-import static haven.resutil.GroundTile.tcx;
-import static haven.resutil.GroundTile.tcy;
-
 public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
     public final GLState base;
     public final SNoise3 noise;
@@ -354,7 +351,7 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
      * distinction. */
     public void _faces(MapMesh m, int z, Tile trans, MPart d) {
         Tex ttex = trans.tex();
-        float tl = tcx(ttex, 0), tt = tcy(ttex, 0), tw = tcx(ttex, ttex.sz().x) - tl, th = tcy(ttex, ttex.sz().y) - tt;
+        float tl = ttex.tcx(0), tt = ttex.tcy(0), tw = ttex.tcx(ttex.sz().x) - tl, th = ttex.tcy(ttex.sz().y) - tt;
         TexGL gt;
         if (ttex instanceof TexGL)
             gt = (TexGL) ttex;

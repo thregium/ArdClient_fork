@@ -121,7 +121,7 @@ public class OCache implements Iterable<Gob> {
         Collection<ChangeCallback> cbs;
         synchronized (this) {
             old = objs.remove(ob.id, ob);
-            if ((old != null) && (old != ob))
+            if (ob.id != -1 && (old != null) && (old != ob))
                 throw (new RuntimeException(String.format("object %d removed wrong object", ob.id)));
             cbs = new ArrayList<>(this.cbs);
         }

@@ -424,7 +424,7 @@ public class Tileset extends Resource.Layer {
 
             @Override
             public BufferedImage fill() {
-                BufferedImage buf = TexI.mkbuf(sz());
+                BufferedImage buf = TexI.mkbuf(dim);
                 Graphics g = buf.createGraphics();
                 for (int i = 0; i < nt; i++)
                     g.drawImage(order[i].img, place[i].x, place[i].y, null);
