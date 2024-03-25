@@ -1,3 +1,4 @@
+import haven.Defer;
 import haven.GOut;
 import haven.Gob;
 import haven.Light;
@@ -53,7 +54,7 @@ public class DowseFx extends Sprite {
             final Gob g = (Gob) owner;
             final UI ui = g.glob.ui.get();
             if (ui != null && ui.gui != null) {
-                g.defer(() ->
+                Defer.later(() ->
                         ui.gui.makeDowseWnd(g.rc, a1, a2, col -> {
                             this.col = col;
                             hidden = false;

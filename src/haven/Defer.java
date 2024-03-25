@@ -54,6 +54,10 @@ public class Defer extends ThreadGroup {
         public T call() throws InterruptedException;
     }
 
+    public interface CRunnable {
+        public void run() throws InterruptedException;
+    }
+
     public static class CancelledException extends RuntimeException {
         public CancelledException() {
             super("Execution cancelled");
@@ -334,6 +338,15 @@ public class Defer extends ThreadGroup {
         return (f);
     }
 
+    public <T> Future<T> defer(CRunnable task) {
+        Future<T> f = new Future<T>(() -> {
+            task.run();
+            return (null);
+        });
+        defer(f);
+        return (f);
+    }
+
     private static Defer getgroup() {
         return (AccessController.doPrivileged(new PrivilegedAction<Defer>() {
             public Defer run() {
@@ -351,6 +364,11 @@ public class Defer extends ThreadGroup {
     }
 
     public static <T> Future<T> later(Callable<T> task) {
+        Defer d = getgroup();
+        return (d.defer(task));
+    }
+
+    public static <T> Future<T> later(CRunnable task) {
         Defer d = getgroup();
         return (d.defer(task));
     }
