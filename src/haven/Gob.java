@@ -1402,8 +1402,8 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
     }
 
     public void setattr(GAttrib a) {
-        if (a instanceof haven.Rendered)
-            renderedattrs.add((haven.Rendered) a);
+//        if (a instanceof haven.Rendered)
+//            renderedattrs.add((haven.Rendered) a);
         Class<? extends GAttrib> ac = attrclass(a.getClass());
         GAttrib at = attr.put(ac, a);
         if (at != null)
@@ -1846,9 +1846,9 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
             }
 
 
-            for (final haven.Rendered rattr : new ArrayList<>(renderedattrs)) {
-                rattr.setup(rl);
-            }
+//            for (final haven.Rendered rattr : new ArrayList<>(renderedattrs)) {
+//                rattr.setup(rl);
+//            }
 
             GobHighlight highlight = getattr(GobHighlight.class);
             if (highlight != null) {
@@ -2010,8 +2010,11 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
             if (sp != null)
                 rl.add(sp.fx, null);
             for (GAttrib a : attr) {
-                if (a instanceof Rendered)
+                if (a instanceof PView.Render2D) {
                     rl.add((Rendered) a, null);
+                } else if (a instanceof Rendered) {
+                    ((Rendered) a).setup(rl);
+                }
             }
 
             if (DefSettings.SHOWHITBOX.get() && hitboxmesh != null && hitboxmesh.length != 0) {

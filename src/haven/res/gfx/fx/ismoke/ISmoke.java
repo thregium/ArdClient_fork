@@ -1,3 +1,5 @@
+package haven.res.gfx.fx.ismoke;
+
 import haven.BGL;
 import haven.Coord3f;
 import haven.Drawable;
@@ -120,7 +122,6 @@ public class ISmoke extends Sprite implements Gob.Overlay.CDel {
 
     private final AtomicLong ticktime = new AtomicLong(System.currentTimeMillis());
     private int buffertime = 0;
-
     @Override
     public boolean tick(int idt) {
         if (configuration.disableAnimation(owner)) {
@@ -238,7 +239,7 @@ public class ISmoke extends Sprite implements Gob.Overlay.CDel {
             @Override
             public Expression expand(Expression in) {
                 return (mul(sub(pdiv.call(prog.vctx.projxf(add(prog.vctx.eyev.depref(), vec4(bollsz.ref(), l(0.0), l(0.0), l(0.0))))),
-                                pdiv.call(prog.vctx.posv.depref())),
+                        pdiv.call(prog.vctx.posv.depref())),
                         pick(MiscLib.screensize.ref(), "x")));
             }
         }, 0);
