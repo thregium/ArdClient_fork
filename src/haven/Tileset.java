@@ -335,6 +335,10 @@ public class Tileset extends Resource.Layer {
 
     public Tileset(Resource res, Message buf) {
         res.super();
+        newParsing(res, new MessageBuf(buf));
+    }
+
+    private void newParsing(Resource res, Message buf) {
         while (!buf.eom()) {
             int p = buf.uint8();
             switch (p) {
@@ -362,6 +366,41 @@ public class Tileset extends Resource.Layer {
                         Indir<Resource> fres = flr.get(i);
                         int w = flw.get(i);
                         flavors.add(Utils.cache(() -> new SpriteFlavor(fres, (double) w / (double) (flavprob * tw))));
+                        flavobjs.add(fres, w);
+                    }
+                    break;
+                case 2:
+                    tags = new String[buf.int8()];
+                    for (int i = 0; i < tags.length; i++)
+                        tags[i] = buf.string();
+                    Arrays.sort(tags);
+                    break;
+                default:
+                    throw (new Resource.LoadException("Invalid tileset part " + p + "  in " + res.name, res));
+            }
+        }
+    }
+
+    private void oldParsing(Resource res, Message buf) {
+        while (!buf.eom()) {
+            int p = buf.uint8();
+            switch (p) {
+                case 0:
+                    tn = buf.string();
+                    ta = buf.list();
+                    break;
+                case 1:
+                    int flnum = buf.uint16();
+                    flavprob = buf.uint16();
+                    for (int i = 0; i < flnum; i++) {
+                        String fln = buf.string();
+                        int flv = buf.uint16();
+                        int flw = buf.uint8();
+                        try {
+                            flavobjs.add(res.pool.load(fln, flv), flw);
+                        } catch (RuntimeException e) {
+                            throw (new Resource.LoadException("Illegal resource dependency", e, res));
+                        }
                     }
                     break;
                 case 2:

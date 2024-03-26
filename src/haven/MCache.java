@@ -205,13 +205,14 @@ public class MCache {
     @Resource.LayerName("overlay")
     public static class ResOverlay extends Resource.Layer implements OverlayInfo {
         public final Collection<String> tags;
-        private final int matid;
+        private final int matid, omatid;
 
         public ResOverlay(Resource res, Message buf) {
             res.super();
             int ver = buf.uint8();
             if (ver == 1) {
                 int matid = 0;
+                int omatid = 0;
                 Collection<String> tags = Collections.emptyList();
                 Object[] data = buf.list();
                 for (Object argp : data) {
@@ -226,12 +227,17 @@ public class MCache {
                             break;
                         }
                         case "mat": {
-                            matid = (Integer) arg[1];
+                            matid = Utils.iv(arg[1]);
+                            break;
+                        }
+                        case "omat": {
+                            omatid = Utils.iv(arg[1]);
                             break;
                         }
                     }
                 }
                 this.matid = matid;
+                this.omatid = omatid;
                 this.tags = tags;
             } else {
                 throw (new Resource.LoadException("unknown overlay version: " + ver, res));
@@ -246,7 +252,13 @@ public class MCache {
         }
 
         public Material mat() {
-            return (getres().layer(Material.Res.class, matid).get());
+            return (getres().flayer(Material.Res.class, matid).get());
+        }
+
+        public Material omat() {
+            if(omatid < 0)
+                return(null);
+            return(getres().flayer(Material.Res.class, omatid).get());
         }
 
         public String toString() {
@@ -420,30 +432,65 @@ public class MCache {
                 fo[i] = new LinkedList<Gob>();
             Coord c = new Coord(0, 0);
             Coord tc = gc.mul(cmaps);
-            int i = 0;
-            Random rnd = new Random(id);
-            for (c.y = 0; c.y < cmaps.x; c.y++) {
-                for (c.x = 0; c.x < cmaps.y; c.x++, i++) {
-                    Tileset set = tileset(tiles[i]);
-                    int fp = rnd.nextInt();
-                    int rp = rnd.nextInt();
-                    double a = rnd.nextDouble();
-                    if (set.flavobjs.size() > 0) {
-                        if ((fp % set.flavprob) == 0) {
-                            Indir<Resource> r = set.flavobjs.pick(rp % set.flavobjs.tw);
-                            if (Config.hideflovisual) {
-                                Resource res = r.get();
-                                if (res != null && res.name.startsWith("gfx/tiles/"))
-                                    continue;
+            {
+                int i = 0;
+                Random rnd = new Random(id);
+                for (c.y = 0; c.y < cmaps.x; c.y++) {
+                    for (c.x = 0; c.x < cmaps.y; c.x++, i++) {
+                        Tileset set = tileset(tiles[i]);
+                        int fp = rnd.nextInt();
+                        int rp = rnd.nextInt();
+                        double a = rnd.nextDouble();
+                        if (set.flavobjs.size() > 0) {
+                            if ((fp % set.flavprob) == 0) {
+                                Indir<Resource> r = set.flavobjs.pick(rp % set.flavobjs.tw);
+                                if (Config.hideflovisual) {
+                                    Resource res = r.get();
+                                    if (res != null && res.name.startsWith("gfx/tiles/"))
+                                        continue;
+                                }
+                                Gob g = new Flavobj(c.add(tc).mul(tilesz).add(tilesz.div(2)), a * 2 * Math.PI);
+                                g.setattr(new Flavdraw(g, r, Message.nil, set.flavobjmat));
+                                Coord cc = c.div(cutsz);
+                                fo[cc.x + (cc.y * cutn.x)].add(g);
                             }
-                            Gob g = new Flavobj(c.add(tc).mul(tilesz).add(tilesz.div(2)), a * 2 * Math.PI);
-                            g.setattr(new Flavdraw(g, r, Message.nil, set.flavobjmat));
-                            Coord cc = c.div(cutsz);
-                            fo[cc.x + (cc.y * cutn.x)].add(g);
                         }
                     }
                 }
             }
+
+//            Area area = Area.sized(cutc.mul(cutsz), cutsz);
+//            Area garea = area.xl(gc.mul(cmaps));
+//            Random rnd = new Random(id + cutc.x + (cutc.y * cutn.x));
+//            Tileset.Flavor.Buffer buf = new Tileset.Flavor.Buffer(sess.glob, garea, rnd.nextLong());
+//
+//            int[] ids = new int[16];
+//            int nids = 0;
+//            {
+//                boolean[] uids = new boolean[nsets.length];
+//                int i = area.ul.x + (area.ul.y * cmaps.x);
+//                for(int y = 0; y < cutsz.y; y++, i += (cmaps.x - cutsz.x)) {
+//                    for(int x = 0; x < cutsz.x; x++, i++) {
+//                        int id = tiles[i];
+//                        if(!uids[id]) {
+//                            uids[id] = true;
+//                            if(nids >= ids.length)
+//                                ids = Arrays.copyOf(ids, ids.length * 2);
+//                            ids[nids++] = id;
+//                        }
+//                    }
+//                }
+//            }
+//            for(int i = 0; i < nids; i++) {
+//                Tileset.Flavor.Terrain trn = new Tileset.Flavor.Terrain(this, MCache.this, ids[i], garea, area.ul.sub(garea.ul));
+//                Tileset set = trn.tileset(ids[i]);
+//                int o = 0;
+//                for(Indir<Tileset.Flavor> flp : set.flavors) {
+//                    rnd.setSeed(buf.seed ^ (ids[i] << 16) ^ o);
+//                    flp.get().flavor(buf, trn, rnd);
+//                    o++;
+//                }
+//            }
             this.fo = fo;
         }
 
@@ -1176,7 +1223,7 @@ public class MCache {
         Grid g = getgridt(tc);
         MapMesh cut = g.getcut(tc.sub(g.ul).div(cutsz));
         Tiler t = tiler(g.gettile(tc.sub(g.ul)));
-        return(cut.getsurf(id, t).getnorm(pc));
+        return (cut.getsurf(id, t).getnorm(pc));
     }
 
     public Coord3f getzp_old(Coord2d pc) {
@@ -1326,7 +1373,7 @@ public class MCache {
                     g.fill(msg);
                     req.remove(c);
                     olseq++;
-		    chseq++;
+                    chseq++;
                     gridwait.wnotify();
                 }
             }
