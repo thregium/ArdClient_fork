@@ -348,9 +348,9 @@ public class MenuGrid extends Widget {
         }
 
         public GSprite spr() {
-            if(spr == null)
+            if (spr == null)
                 spr = GSprite.create(this, res, Message.nil);
-            return(spr);
+            return (spr);
         }
 
         public BufferedImage img() {
@@ -386,12 +386,12 @@ public class MenuGrid extends Widget {
 
         public final ItemInfo.AttrCache<GItem.InfoOverlay<?>[]> ols = new ItemInfo.AttrCache<>(this::info, info -> {
             ArrayList<GItem.InfoOverlay<?>> buf = new ArrayList<>();
-            for(ItemInfo inf : info) {
-                if(inf instanceof GItem.OverlayInfo)
-                    buf.add(GItem.InfoOverlay.create((GItem.OverlayInfo<?>)inf));
+            for (ItemInfo inf : info) {
+                if (inf instanceof GItem.OverlayInfo)
+                    buf.add(GItem.InfoOverlay.create((GItem.OverlayInfo<?>) inf));
             }
             GItem.InfoOverlay<?>[] ret = buf.toArray(new GItem.InfoOverlay<?>[0]);
-            return(() -> ret);
+            return (() -> ret);
         });
 
         public final ItemInfo.AttrCache<Double> meter = new ItemInfo.AttrCache<>(this::info, ItemInfo.AttrCache.map1(GItem.MeterInfo.class, minf -> minf::meter));
@@ -399,18 +399,19 @@ public class MenuGrid extends Widget {
         public void drawmain(GOut g, GSprite spr) {
             spr.draw(g);
         }
+
         public void draw(GOut g, GSprite spr) {
 //            if(rstate.get() != null)
 //                g.usestate(rstate.get());
             drawmain(g, spr);
             g.defstate();
             GItem.InfoOverlay<?>[] ols = this.ols.get();
-            if(ols != null) {
-                for(GItem.InfoOverlay<?> ol : ols)
+            if (ols != null) {
+                for (GItem.InfoOverlay<?> ol : ols)
                     ol.draw(g);
             }
             Double meter = this.meter.get();
-            if((meter != null) && (meter > 0)) {
+            if ((meter != null) && (meter > 0)) {
                 g.chcolor(255, 255, 255, 64);
                 Coord half = spr.sz().div(2);
                 g.prect(half, half.inv(), half, meter * Math.PI * 2);
@@ -419,12 +420,12 @@ public class MenuGrid extends Widget {
         }
 
         public String sortkey() {
-            AButton ai = pag.act();
-            if (ai.ad.length == 0) {
+            AButton ai = act();
+            if ((ai.ad.length == 0) && (pag.id instanceof Indir)) {
                 return ("\0" + name());
             }
 
-            if (ai.ad[0].contains("!")) {
+            if (ai.ad.length > 0 && ai.ad[0].contains("!")) {
                 return ("\0\0" + ai.ad[0] + name());
             }
 
@@ -454,8 +455,9 @@ public class MenuGrid extends Widget {
             return (ctxr.context(cl, this));
         }
 
-        public Random mkrandoom() {return(new Random());}
-        public Resource getres() {return(res);}
+        public Random mkrandoom() {return (new Random());}
+
+        public Resource getres() {return (res);}
 
         public BufferedImage rendertt(boolean withpg) {
             Resource.AButton ad = res.layer(Resource.action);
@@ -1690,11 +1692,11 @@ public class MenuGrid extends Widget {
         PagButton h = bhit(c);
         if ((button == 1) && (grab != null)) {
             if (dragging != null) {
-                if (!(dragging instanceof SpecialPagina)) {
-                    ui.dropthing(ui.root, ui.mc, dragging.res());
-                } else {
+//                if (!(dragging instanceof SpecialPagina)) {
+//                    ui.dropthing(ui.root, ui.mc, dragging.res());
+//                } else {
                     ui.dropthing(ui.root, ui.mc, dragging);
-                }
+//                }
                 pressed = null;
                 dragging = null;
             } else if (pressed != null) {

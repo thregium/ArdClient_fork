@@ -67,7 +67,7 @@ public class BeltWnd extends MovableWidget {
             if (TexGL.disableall)
                 return;
             g.image(Inventory.invsq, Coord.z);
-            g.atextstroked(slot + "", sz.div(2), 0.5,0.5, new Color(255, 255, 255, 100), new Color(0, 0, 0, 100), Text.num10Fnd);
+            g.atextstroked(slot + "", sz.div(2), 0.5, 0.5, new Color(255, 255, 255, 100), new Color(0, 0, 0, 100), Text.num10Fnd);
             //if we have something draw it
             if (belt != null)
                 belt.draw(g);
@@ -335,7 +335,7 @@ public class BeltWnd extends MovableWidget {
                 //Dropping "things" on us, mainly menugrid items
                 if (!locked()) {
                     if (thing instanceof Resource) {
-                        //Normal server-side menu items
+                        //Old normal server-side menu items
                         ui.gui.wdgmsg("setbelt", slot, ((Resource) thing).name);
                         //reset for now and wait for server to send us uimsg if this was valid drop
                         reset();
@@ -346,6 +346,16 @@ public class BeltWnd extends MovableWidget {
                         setPag(pag, pag.key);
                         //delete anything that might already belong to this slot
                         ui.gui.wdgmsg("setbelt", slot, 1);
+                        return true;
+                    } else if (thing instanceof MenuGrid.Pagina) {
+                        //Normal server-side menu items
+                        MenuGrid.Pagina pag = (MenuGrid.Pagina) thing;
+                        if (pag.id instanceof Indir)
+                            ui.gui.wdgmsg("setbelt", slot, "res", pag.res().name);
+                        else
+                            ui.gui.wdgmsg("setbelt", slot, "pag", pag.id);
+                        //reset for now and wait for server to send us uimsg if this was valid drop
+                        reset();
                         return true;
                     } else if (thing instanceof PBotScriptlistItem) {
                         //Not normal stuff.
