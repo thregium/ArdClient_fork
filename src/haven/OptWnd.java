@@ -32,6 +32,8 @@ import haven.purus.pbot.PBotAPI;
 import haven.purus.pbot.PBotDiscord;
 import haven.purus.pbot.PBotScriptlist;
 import haven.purus.pbot.PBotUtils;
+import haven.res.gfx.fx.floatimg.FloatSprite;
+import haven.res.gfx.fx.floatimg.FloatText;
 import haven.res.gfx.terobjs.items.decal.Decal;
 import haven.resutil.FoodInfo;
 import haven.resutil.Ridges;
@@ -2594,6 +2596,20 @@ public class OptWnd extends Window {
             }
         });
         appender.addRow(new Label("Combat key bindings:"), combatkeysDropdown());
+
+        appender.addRow(new Label("Display damage duration:"), new HSlider(UI.scale(100), 1, 5000, FloatText.duration) {
+            @Override
+            public void changed() {
+                Utils.setprefi("combatdamageduration", FloatText.duration = val);
+            }
+        });
+        appender.addRow(new Label("Display damage height:"), new HSlider(UI.scale(100), 0, 200, Utils.getprefi("combatdamageheight", 30)) {
+            @Override
+            public void changed() {
+                FloatSprite.OY = UI.scale(val);
+                Utils.setprefi("combatdamageheight", val);
+            }
+        });
 
         combat.add(new PButton(UI.scale(200), "Back", 27, main), UI.scale(210, 360));
         combat.pack();

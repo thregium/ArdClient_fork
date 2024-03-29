@@ -17,9 +17,10 @@ public class FloatText extends FloatSprite {
             armor = new Color(136, 255, 136);
     private static final Object lock = new Object();
     public static final Text.Foundry fnd = new Text.Foundry(Text.sans, UI.scale(16)).aa(true);
+    public static int duration = Utils.getprefi("combatdamageduration", 2000);
 
     public FloatText(Owner owner, Resource res, String text, Color color) {
-        super(owner, res, new TexI(PUtils.strokeImg(fnd.render(text, color))), 2000, color.equals(shp) ? -UI.scale(30) : color.equals(armor) ? UI.scale(30) : 0);
+        super(owner, res, new TexI(PUtils.strokeImg(fnd.render(text, color))), duration, 0);//color.equals(shp) ? -UI.scale(30) : color.equals(armor) ? UI.scale(30) : 0
 
         if (owner instanceof Gob) {
             final Gob gob = (Gob) owner;

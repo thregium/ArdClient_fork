@@ -1,19 +1,11 @@
 package haven.sloth.gfx;
 
 import haven.Buff;
-import haven.Camera;
 import haven.Coord;
-import haven.Coord3f;
-import haven.FightWnd;
 import haven.Fightview;
-import haven.GLState;
 import haven.GOut;
 import haven.Gob;
-import haven.Location;
-import haven.Matrix4f;
 import haven.PUtils;
-import haven.PView;
-import haven.Projection;
 import haven.RenderList;
 import haven.Resource;
 import haven.RichText;
@@ -21,6 +13,7 @@ import haven.Sprite;
 import haven.Tex;
 import haven.TexI;
 import haven.Text;
+import haven.UI;
 import haven.Utils;
 import haven.Widget;
 
@@ -32,13 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class GobCombatSprite extends Sprite {
     public static final int id = -244942;
-    private final Matrix4f mv = new Matrix4f();
     private Fightview.Relation rel;
-    private Projection proj;
-    private Coord wndsz;
-    private Location.Chain loc;
-    private Camera camp;
-    private Coord3f sc, sczu;
 
     public GobCombatSprite(final Gob g, final Fightview.Relation relation) {
         super(g, null);
@@ -47,10 +34,12 @@ public class GobCombatSprite extends Sprite {
 
     public void draw(GOut g) {
         if (rel != null) {
-            mv.load(camp.fin(Matrix4f.id)).mul1(loc.fin(Matrix4f.id));
-            sc = proj.toscreen(mv.mul4(Coord3f.o), wndsz);
-            sczu = proj.toscreen(mv.mul4(Coord3f.zu), wndsz).sub(sc);
-            final Coord c = new Coord(sc.add(sczu.mul(16))).sub(0, 40);
+            final Gob gob = (Gob) owner;
+            if (gob.sc == null) {
+                return;
+            }
+//            final Coord c = new Coord(sc.add(sczu.mul(16))).sub(0, UI.scale(40));
+            final Coord c = gob.sc.add(new Coord(gob.sczu.mul(15))).add(0, UI.scale(10));
             final Coord bc = c.copy();
             final Coord sc = c.copy();
             float scale = 0.8f;
@@ -83,7 +72,7 @@ public class GobCombatSprite extends Sprite {
                     continue;
                 final Buff buf = (Buff) wdg;
                 if (!buf.isOpening()) {
-                    buf.stancedraw(g.reclip(sc.copy().add(-(int) (Buff.scframe.sz().x * scale / 2.0), (int) (Buff.scframe.sz().y * scale) + 20), Buff.scframe.sz()), scale);
+                    buf.stancedraw(g.reclip(sc.copy().add(-(int) (Buff.scframe.sz().x * scale / 2.0), (int) (Buff.scframe.sz().y * scale)), Buff.scframe.sz()), scale);
                 }
             }
 
@@ -143,11 +132,6 @@ public class GobCombatSprite extends Sprite {
 
     public boolean setup(RenderList rl) {
         rl.prepo(last);
-        GLState.Buffer buf = rl.state();
-        proj = buf.get(PView.proj);
-        wndsz = buf.get(PView.wnd).sz();
-        loc = buf.get(PView.loc);
-        camp = buf.get(PView.cam);
         return true;
     }
 

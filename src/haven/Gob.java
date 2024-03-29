@@ -223,6 +223,8 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
 //                    ols.remove(ol);
 //            }
             added = false;
+            if (spr != null)
+                spr.dispose();
         }
 
         public void remove(boolean async) {
@@ -1568,7 +1570,13 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
     @Override
     public boolean setup(RenderList rl) {
         loc.tick();
-        lastChain = Collections.singleton(Location.goback(rl.state(), "gobx")); //FIXME may need change to GobLocation loc
+        try {
+            Collection<Location.Chain> ret = new ArrayList<>();
+            Location.Chain loc = rl.state().get(PView.loc);
+            if (loc != null)
+                ret.add(loc);
+            lastChain = ret;//Collections.singleton(Location.goback(rl.state(), "gobx")); //FIXME may need change to GobLocation loc
+        } catch (Throwable e) {}
         final Hidden hid = getattr(Hidden.class);
         if (hid != null && Config.hideuniquegobs) {
             if (Config.showoverlay) {

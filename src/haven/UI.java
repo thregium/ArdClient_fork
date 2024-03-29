@@ -796,7 +796,7 @@ public class UI {
 
     public void destroy() {
         audio.clear();
-        removeid(root);
+        destroy(root);
         if (cons.out != null) {
             Debug.remove(cons.out);
             cons.out.close();

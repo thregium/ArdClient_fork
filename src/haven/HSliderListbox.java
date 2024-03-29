@@ -1,13 +1,14 @@
 package haven;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 public class HSliderListbox extends Listbox<HSliderNamed> {
-    public final List<HSliderNamed> items = new ArrayList<>();
+    public final List<HSliderNamed> items = Collections.synchronizedList(new ArrayList<>());
     public boolean filter = false;
-    public final List<HSliderNamed> filtered = new ArrayList<>();
+    public final List<HSliderNamed> filtered = Collections.synchronizedList(new ArrayList<>());
 
     public HSliderListbox(int w, int h) {
         super(w, h, UI.scale(18));
@@ -114,18 +115,14 @@ public class HSliderListbox extends Listbox<HSliderNamed> {
     @Override
     public void tick(double dt) {
         super.tick(dt);
-        synchronized (items) {
-            items.forEach(h -> {
-                if (h.slider.ui == null)
-                    h.slider.attach(ui);
-            });
-        }
-        synchronized (filtered) {
-            filtered.forEach(h -> {
-                if (h.slider.ui == null)
-                    h.slider.attach(ui);
-            });
-        }
+        items.forEach(h -> {
+            if (h.slider.ui == null)
+                h.slider.attach(ui);
+        });
+        filtered.forEach(h -> {
+            if (h.slider.ui == null)
+                h.slider.attach(ui);
+        });
     }
 
     protected Object itemtooltip(Coord c, HSliderNamed itm) {

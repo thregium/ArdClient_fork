@@ -319,7 +319,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
                 new RemoteUI(sess).run(lui);
                 //Remove this UI once done
                 p.removeUI(lui);
-                lui.root.reqdestroy();
+//                lui.root.reqdestroy();
                 lui.destroy();
             } catch (InterruptedException e) {
             } finally {
@@ -342,8 +342,8 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
         Thread ui = new HackThread(p, "Haven UI thread");
         ui.start();
         try {
-            final UI lui = p.newui(null);
             try {
+                UI lui = p.newui(null);
                 Session sess = null;
                 while (true) {
                     UI.Runner fun;
@@ -368,7 +368,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
                             setTitle(/*sess.username + " \u2013 " + */TITLE);
                     }
                     sess = fun.run(lui);
-                    lui.root.reqdestroy();
+//                    lui.root.reqdestroy();
                     lui.destroy();
                 }
             } catch (InterruptedException e) {
