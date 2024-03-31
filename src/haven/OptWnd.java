@@ -1843,17 +1843,17 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender2.add(new CheckBox("Map Scale") {
-            {
-                a = Config.mapscale;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("mapscale", val);
-                Config.mapscale = val;
-                a = val;
-            }
-        });
+//        appender2.add(new CheckBox("Map Scale") {
+//            {
+//                a = Config.mapscale;
+//            }
+//
+//            public void set(boolean val) {
+//                Utils.setprefb("mapscale", val);
+//                Config.mapscale = val;
+//                a = val;
+//            }
+//        });
         appender2.add(new CheckBox("Trollex Map Binds") {
             {
                 a = Config.trollexmap;

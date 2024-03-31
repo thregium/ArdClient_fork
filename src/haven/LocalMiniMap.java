@@ -1049,13 +1049,13 @@ public class LocalMiniMap extends Widget {
     }
 
     public boolean mousewheel(Coord c, int amount) {
-        if (!Config.mapscale) {
-            if (amount > 0 && zoom > UI.scale(1))
-                zoom = UI.scale(Math.round(zoom * 100 - 20) / 100f);
-            else if (amount < 0 && zoom < UI.scale(3))
-                zoom = UI.scale(Math.round(zoom * 100 + 20) / 100f);
+        /*if (!Config.mapscale) {
+            if (amount > 0 && zoom > 1)
+                zoom = Math.round(zoom * 100 - 20) / 100f;
+            else if (amount < 0 && zoom < 3)
+                zoom = Math.round(zoom * 100 + 20) / 100f;
 
-            iconZoom = Math.round((UI.unscale(zoom) - 1) * 100 / 2) / 100f + 1;
+            iconZoom = Math.round((zoom - 1) * 100 / 2) / 100f + 1;
 
         } else {
             if (amount == 0) {
@@ -1063,10 +1063,15 @@ public class LocalMiniMap extends Widget {
             } else {
                 zIndex = Math.max(0, Math.min(zIndex - amount, zArray.length - 1));
             }
-            zoom = UI.scale(zArray[zIndex]);
+            zoom = zArray[zIndex];
             iconZoom = ziArray[zIndex];
-        }
-        return true;
+        }*/
+        if (amount == 0)
+            return (false);
+        zIndex = Math.max(0, Math.min(zIndex - amount, zArray.length - 1));
+        zoom = zArray[zIndex];
+        iconZoom = ziArray[zIndex];
+        return (true);
     }
 
     public void drawnewicons(GOut g) {
