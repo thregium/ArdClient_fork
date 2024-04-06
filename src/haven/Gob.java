@@ -2013,10 +2013,6 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
                     remol(ol);
             }
 
-
-            Speaking sp = getattr(Speaking.class);
-            if (sp != null)
-                rl.add(sp.fx, null);
             for (GAttrib a : attr) {
                 if (a instanceof PView.Render2D) {
                     rl.add((Rendered) a, null);

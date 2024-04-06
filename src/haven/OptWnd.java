@@ -5268,6 +5268,13 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.addRow(new Label("Chat clound offset:"), new HSlider(UI.scale(100), 0, 200, Utils.getprefi("speakingoffset", 25)) {
+            @Override
+            public void changed() {
+                Speaking.OY = UI.scale(val);
+                Utils.setprefi("speakingoffset", val);
+            }
+        });
 //        appender.addRow(new Label("Enter Village name for Chat Alert sound, and village chat relay."),
 //                new TextEntry(UI.scale(150), Config.chatalert) {
 //                    @Override

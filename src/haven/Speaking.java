@@ -31,7 +31,8 @@ import modification.dev;
 import java.awt.Color;
 import java.awt.font.TextAttribute;
 
-public class Speaking extends GAttrib {
+public class Speaking extends GAttrib implements PView.Render2D {
+    public static int OY = UI.scale(Utils.getprefi("speakingoffset", 25));
     float zo;
     Text text;
     static IBox sb = null;
@@ -58,6 +59,12 @@ public class Speaking extends GAttrib {
         this.text = temp;
     }
 
+    @Override
+    public void draw2d(final GOut g) {
+        if (gob.sc != null)
+            draw(g, gob.sc.add(new Coord(gob.sczu.mul(zo))).add(sx, -OY));
+    }
+
     public void draw(GOut g, Coord c) {
         Coord sz = fixSize(text.tex());
         if (sz.x < 10)
@@ -82,12 +89,11 @@ public class Speaking extends GAttrib {
         return (sz);
     }
 
-    final PView.Draw2D fx = new PView.Draw2D() {
-        public void draw2d(GOut g) {
-            if (gob.sc != null)
-                Speaking.this.draw(g, gob.sc.add(new Coord(gob.sczu.mul(zo))).add(3, 0));
-        }
-    };
+    @Override
+    public boolean setup(final RenderList r) {return (true);}
+
+    @Override
+    public void draw(final GOut g) {}
 
     @OCache.DeltaType(OCache.OD_SPEECH)
     public static class $speak implements OCache.Delta {
