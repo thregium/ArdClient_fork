@@ -134,6 +134,8 @@ public abstract class Listbox<T> extends ListWidget<T> {
     }
 
     public void change(final int idx) {
+        if (idx == -1)
+            selindex = idx;
         if (idx >= 0 && idx < listitems()) {
             sel = listitem(idx);
             selindex = idx;
@@ -206,6 +208,7 @@ public abstract class Listbox<T> extends ListWidget<T> {
 
     // ensures that selected element is visible
     public void showsel() {
+        fixScrollbar();
         if (sb.val + h - 1 < selindex)
             sb.val = Math.max(0, selindex - h + 1);
         if (sb.val > selindex)
@@ -213,6 +216,7 @@ public abstract class Listbox<T> extends ListWidget<T> {
     }
 
     public void display(int idx) {
+        fixScrollbar();
         if (idx < sb.val) {
             sb.val = idx;
         } else if (idx >= sb.val + h) {

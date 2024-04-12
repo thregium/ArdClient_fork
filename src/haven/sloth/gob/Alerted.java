@@ -6,7 +6,6 @@ import haven.Config;
 import haven.Gob;
 import haven.Resource;
 import haven.UI;
-import haven.Utils;
 import haven.purus.pbot.PBotDiscord;
 import haven.sloth.io.Storage;
 import haven.sloth.util.ObservableCollection;
@@ -18,22 +17,24 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 //TODO: Idealy all the sounds we allow should be stored locally and separate from jorb's names to avoid issues in the future
 public class Alerted {
     private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-    public static final HashMap<String, Boolean> customsort = new HashMap<>();
+    public static final Map<String, Boolean> customsort = Collections.synchronizedMap(new HashMap<>());
     public static final ObservableCollection<ConnectSound> connectList = new ObservableCollection<>(new HashSet<>());
 
     //    private static final ObservableMap<String, String> soundmap = new ObservableMap<>(new TreeMap<>());
 //    private static final ObservableMap<String, String> sfxmap = new ObservableMap<>(new TreeMap<>());
 //    public static ObservableMap<String, Double> volmap = new ObservableMap<>(new TreeMap<>());
-    public static final List<String> custom = new ArrayList<>();
-    public static final List<String> sounds = new ArrayList<>();
-    public static List<String> localsounds = new ArrayList<>();
+    public static final List<String> custom = Collections.synchronizedList(new ArrayList<>());
+    public static final List<String> sounds = Collections.synchronizedList(new ArrayList<>());
+    public static List<String> localsounds = Collections.synchronizedList(new ArrayList<>());
     private static HashSet<Long> sgobs = new HashSet<Long>();
     private static HashMap<Long, Long> alertedmap = new HashMap<>(); //map for the purposes of tracking gobs/alerts to ensure alerts only first with a minimum of a 1 second delay
 

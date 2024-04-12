@@ -48,7 +48,7 @@ public abstract class ListWidget<T> extends Widget {
 
     public int find(T item) {
         for (int i = 0; i < listitems(); i++) {
-            if (listitem(i) == item)
+            if (Utils.eq(listitem(i),item))
                 return (i);
         }
         return (-1);
@@ -75,8 +75,8 @@ public abstract class ListWidget<T> extends Widget {
 
     public int indexof(T item) {
         for (int i = 0; i < listitems(); i++)
-            if (listitem(i) == item)
-                return i;
-        return -1;
+            if (Utils.eq(listitem(i),item))
+                return (i);
+        return (-1);
     }
 }

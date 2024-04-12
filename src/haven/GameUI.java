@@ -2424,7 +2424,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
     }
 
     public void fixAlarms() { //this is to fix me being a retard and relabeling previously boolean values as strings
-        if (Config.alarmunknownplayer.toLowerCase().equals("true") || Config.alarmunknownplayer.toLowerCase().equals("false")) {
+        /*if (Config.alarmunknownplayer.toLowerCase().equals("true") || Config.alarmunknownplayer.toLowerCase().equals("false")) {
             Utils.setpref("alarmunknownplayer", "sfx/OhShitItsAGuy");
             Config.alarmunknownplayer = "sfx/OhShitItsAGuy";
         }
@@ -2439,7 +2439,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         if (Config.cleavesfx.toLowerCase().equals("true") || Config.cleavesfx.toLowerCase().equals("false")) {
             Utils.setpref("cleavesfx", "sfx/oof");
             Config.cleavesfx = "sfx/oof";
-        }
+        }*/
     }
 
     public void toggleres() {

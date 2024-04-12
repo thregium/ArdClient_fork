@@ -190,6 +190,8 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
             try {
                 if (res != null)
                     return res.get().name;
+                else if (spr != null && spr.res != null)
+                    return spr.res.name;
                 else
                     return "";
             } catch (Loading l) {
@@ -248,15 +250,17 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
             remove(true);
         }
 
+        private final AtomicReference<SavedMatches> matches = new AtomicReference<>();
+
         @Override
         public boolean setup(RenderList rl) {
             if (spr != null) {
-                if (matches(this, this::name,"gfx/terobjs/trees/yulestar-.*")) {
-                    if (matches(this, this::name,".*fir")) {
+                if (matches(matches, this::name,"gfx/terobjs/trees/yulestar-.*")) {
+                    if (matches(matches, this::name,".*fir")) {
                         rl.prepc(Location.xlate(Coord3f.of((float) -0.655989, (float) 0.183716, (float) 48.3776)));
-                    } else if (matches(this, this::name,".*spruce")) {
+                    } else if (matches(matches, this::name,".*spruce")) {
                         rl.prepc(Location.xlate(Coord3f.of(0f, (float) -3.055197, (float) 62.988228)));
-                    } else if (matches(this, this::name,".*silverfir")) {
+                    } else if (matches(matches, this::name,".*silverfir")) {
                         rl.prepc(Location.xlate(Coord3f.of((float) -0.649652, (float) -0.030299, (float) 92.28412)));
                     }
                     rl.prepc(Location.rot(Coord3f.of(0f, 1f, 0f), (float) 1.570796));
@@ -812,17 +816,17 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
                     if (findol(-4921) == null)
                         addol(new Overlay(-4921, new SnowFall(this)));
                 }
-                if (type == Type.UNKNOWN && matches(this, () -> name,"gfx/terobjs/trees/[a-zA-Z\\-]+stump$"))
+                if (type == Type.UNKNOWN && matches(matches, () -> name,"gfx/terobjs/trees/[a-zA-Z\\-]+stump$"))
                     type = Type.STUMP;
-                if (type == Type.UNKNOWN && matches(this, () -> name,"gfx/terobjs/trees/[a-zA-Z\\-]+log$"))
+                if (type == Type.UNKNOWN && matches(matches, () -> name,"gfx/terobjs/trees/[a-zA-Z\\-]+log$"))
                     type = Type.LOG;
-                if (type == Type.UNKNOWN && matches(this, () -> name,"gfx/terobjs/trees/[a-zA-Z\\-]+$"))
+                if (type == Type.UNKNOWN && matches(matches, () -> name,"gfx/terobjs/trees/[a-zA-Z\\-]+$"))
                     type = Type.TREE;
-                if (type == Type.UNKNOWN && matches(this, () -> name,"gfx/terobjs/plants/(?!trellis).*"))
+                if (type == Type.UNKNOWN && matches(matches, () -> name,"gfx/terobjs/plants/(?!trellis).*"))
                     type = Type.PLANT;
 
                 String customIcon = null;
-                if ((type == Type.TREE || type == Type.BUSH || type == Type.STUMP || type == Type.LOG) && (!matches(this, () -> name,".*trees/old(stump|trunk)"))) {
+                if ((type == Type.TREE || type == Type.BUSH || type == Type.STUMP || type == Type.LOG) && (!matches(matches, () -> name,".*trees/old(stump|trunk)"))) {
                     String fistname1 = name.substring(0, name.lastIndexOf('/'));
                     String fistname = fistname1.substring(0, fistname1.lastIndexOf('/'));
                     String lastname = name.replace(fistname, "");
@@ -1570,23 +1574,23 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
     private gobText barreltext;
     private gobText treetext;
 
-    private static final Map<Object, WeakReference<SavedMatches>> matchesMap = Collections.synchronizedMap(new HashMap<>());
-    private static class SavedMatches {
+//    private static final Map<Object, WeakReference<SavedMatches>> matchesMap = Collections.synchronizedMap(new HashMap<>());
+    private final AtomicReference<SavedMatches> matches = new AtomicReference<>();
+    static class SavedMatches {
         String name;
         Map<String, Boolean> matches = Collections.synchronizedMap(new HashMap<>());
     }
     
-    static boolean matches(Object obj, Supplier<String> getter, String regex) {
-        synchronized (matchesMap) {
-            WeakReference<SavedMatches> wrm = matchesMap.get(obj);
-            SavedMatches saved = wrm == null ? null : wrm.get();
+    static boolean matches(AtomicReference<SavedMatches> matches, Supplier<String> getter, String regex) {
+        synchronized (matches) {
+            SavedMatches saved = matches.get();
             String name = getter.get();
             if (saved == null) {
                 saved = new SavedMatches();
                 saved.name = name;
                 boolean result = name.matches(regex);
                 saved.matches.put(regex, result);
-                matchesMap.put(obj, new WeakReference<>(saved));
+                matches.set(saved);
                 return (result);
             } else {
                 if (!Objects.equals(name, saved.name)) {
@@ -1594,7 +1598,7 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
                     saved.name = name;
                     boolean result = name.matches(regex);
                     saved.matches.put(regex, result);
-                    matchesMap.put(obj, new WeakReference<>(saved));
+                    matches.set(saved);
                     return (result);
                 } else {
                     return (saved.matches.computeIfAbsent(regex, name::matches));
@@ -1645,15 +1649,15 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
             boolean barrelRet = true;
             for (Overlay ol : ols) {
                 String olname = ol.name();
-                if (matches(ol, () -> olname,"gfx/terobjs/trees/yulestar-.*")) {
-                    if (ol.spr == null || ol.spr.res == null || matches(ol.spr, () -> ol.spr.res.name,"gfx/terobjs/trees/yulestar-.*"))
+                if (matches(ol.matches, () -> olname,"gfx/terobjs/trees/yulestar-.*")) {
+                    if (ol.spr == null || ol.spr.res == null || matches(ol.matches, () -> olname,"gfx/terobjs/trees/yulestar-.*"))
                         ol.spr = Sprite.create(this, Resource.remote().loadwait("gfx/terobjs/items/yulestar"), ol.sdt);
                 }
-                if (matches(this, this::name,"gfx/terobjs/barrel")) {
-                    if (Config.showbarreltext && barrelText == null && matches(ol, () -> olname,"gfx/terobjs/barrel-.*")) {
+                if (matches(matches, this::name,"gfx/terobjs/barrel")) {
+                    if (Config.showbarreltext && barrelText == null && matches(ol.matches, () -> olname,"gfx/terobjs/barrel-.*")) {
                         barrelText = olname.substring(olname.lastIndexOf("-") + 1);
                     }
-                    if (Config.showbarrelstatus && barrelRet && matches(ol, () -> olname,"gfx/terobjs/barrel-.*")) {
+                    if (Config.showbarrelstatus && barrelRet && matches(ol.matches, () -> olname,"gfx/terobjs/barrel-.*")) {
                         barrelRet = false;
                     }
                 }
@@ -1663,7 +1667,7 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
                 if (ol.spr instanceof Overlay.SetupMod)
                     ((Overlay.SetupMod) ol.spr).setupmain(rl);
             }
-            if (Config.showbarreltext && matches(this, this::name,"gfx/terobjs/barrel") && !ols.isEmpty()) {
+            if (Config.showbarreltext && matches(matches, this::name,"gfx/terobjs/barrel") && !ols.isEmpty()) {
                 if (barrelText != null) {
                     if (barreltext == null) barreltext = new gobText(this, barrelText, Color.GREEN, 50);
                     else barreltext.update(barrelText);
@@ -1674,7 +1678,7 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
             } else {
                 if (barreltext != null) barreltext = null;
             }
-            if (Config.showbarrelstatus && matches(this, this::name,"gfx/terobjs/barrel")) {
+            if (Config.showbarrelstatus && matches(matches, this::name,"gfx/terobjs/barrel")) {
                 if (barrelRet) rl.prepc(barrelemptycolormaterial.get());
             }
             for (Map.Entry<Long, String> entry : configuration.treesMap.entrySet()) {

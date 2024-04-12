@@ -48,6 +48,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -361,18 +362,50 @@ public class Config {
     public static boolean alarmonce = Utils.getprefb("alarmonce", false);
     public static boolean timersort = Utils.getprefb("timersort", false);
     public static double timersalarmvol = Utils.getprefd("timersalarmvol", 0.8);
-    public static String alarmunknownplayer = Utils.getpref("alarmunknownplayer", "sfx/OhShitItsAGuy");
-    public static double alarmunknownvol = Utils.getprefd("alarmunknownvol", 0.32);
-    public static String alarmredplayer = Utils.getpref("alarmredplayer", "sfx/Siren");
-    public static double alarmredvol = Utils.getprefd("alarmredvol", 0.32);
-    public static String alarmstudy = Utils.getpref("alarmstudy", "sfx/Study");
-    public static double studyalarmvol = Utils.getprefd("studyalarmvol", 0.8);
     public static boolean discordplayeralert = Utils.getprefb("discordplayeralert", false);
     public static boolean discordalarmalert = Utils.getprefb("discordalarmalert", false);
-    public static String cleavesfx = Utils.getpref("cleavesfx", "sfx/oof");
-    public static double cleavesoundvol = Utils.getprefd("cleavesoundvol", 0.8);
-    public static String attackedsfx = Utils.getpref("attackedsfx", "None");
-    public static double attackedvol = Utils.getprefd("attackedvol", 0.8);
+    public static Map<String, String> alarmsfxlist = Collections.synchronizedMap(new HashMap<String, String>() {
+        @Override
+        public String put(final String key, final String value) {
+            String ret = super.put(key, value);
+            Utils.setpref(key + "sfx", value);
+            return (ret);
+        }
+
+        @Override
+        public String get(final Object key) {
+            String ret = super.get(key);
+            if (ret == null)
+                ret = Utils.getpref(key + "sfx", "None");
+            return (ret);
+        }
+    });
+    static {
+        alarmsfxlist.putAll(Utils.<String, String>map()
+                .put("alarmunknown", Utils.getpref("alarmunknownsfx", "custom/sfx/omni/OhShitItsAGuy"))
+                .put("alarmred", Utils.getpref("alarmredsfx", "custom/sfx/omni/Siren"))
+                .put("alarmstudy", Utils.getpref("alarmstudysfx", "custom/sfx/omni/Study"))
+                .put("alarmcleave", Utils.getpref("alarmcleavesfx", "custom/sfx/omni/oof"))
+                .put("alarmattacked", Utils.getpref("alarmattackedsfx", "None"))
+                .map()
+        );
+    }
+    public static Map<String, Double> alarmvollist = Collections.synchronizedMap(new HashMap<String, Double>() {
+        @Override
+        public Double put(final String key, final Double value) {
+            Double ret = super.put(key, value);
+            Utils.setprefd(key + "vol", value);
+            return (ret);
+        }
+
+        @Override
+        public Double get(final Object key) {
+            Double ret = super.get(key);
+            if (ret == null)
+                ret = Utils.getprefd(key + "vol", 0.8);
+            return (ret);
+        }
+    });
     public static Map<String, Boolean> curioslist = null;
     public static ObservableMap<String, Boolean> autodroplist = null;
 

@@ -30,6 +30,7 @@ package haven;
 import haven.purus.pbot.PBotUtils;
 import haven.res.gfx.fx.floatimg.DamageText;
 import haven.res.ui.tt.wpn.Armpen;
+import haven.sloth.gob.Alerted;
 import haven.sloth.gui.MovableWidget;
 import haven.sloth.gui.fight.Attack;
 import haven.sloth.gui.fight.Card;
@@ -152,11 +153,12 @@ public class Fightsess extends Widget {
                 }
             }
 
-            if (!Config.attackedsfx.equals("None"))
-                Defer.later(() -> {
-                    Audio.play(Resource.local().loadwait(Config.attackedsfx), Config.attackedvol);
-                    return (null);
-                });
+            String aitem = "None";
+            if (!Utils.eq(aitem = Config.alarmsfxlist.get("alarmattacked"), "None")) {
+                Double vol = Config.alarmvollist.get("alarmattacked");
+                if (Alerted.customsort.get(aitem)) Audio.play(aitem, vol);
+                else Audio.play(Resource.local().load(aitem), vol);
+            }
             return (new Fightsess(nact));
         }
     }

@@ -12,8 +12,8 @@ import haven.Sprite;
 public class Peacebreaker extends Sprite implements Gob.Overlay.CUpd {
     public static final Coord3f fstart = Coord3f.o;
     public static final Coord3f fend = new Coord3f(0.00f, 0.00f, 18.00f);
-    public static final Indir<Resource> pres = Resource.remote().load("gfx/terobjs/peacebreaker", 1);
-    public static final Indir<Resource> sres = Resource.remote().load("gfx/terobjs/peacebreaker-skull", 1);
+    public static final Indir<Resource> pres = Resource.remote().load("gfx/terobjs/peacebreaker");
+    public static final Indir<Resource> sres = Resource.remote().load("gfx/terobjs/peacebreaker-skull");
     private Sprite pole;
     private Sprite flag;
     private float a = 0;

@@ -30,6 +30,7 @@ package haven;
 import haven.res.ui.obj.buddy.Buddy;
 import haven.sloth.gfx.GobCombatSprite;
 import haven.sloth.gob.AggroMark;
+import haven.sloth.gob.Alerted;
 import haven.sloth.gui.MovableWidget;
 import haven.sloth.gui.fight.Attack;
 import haven.sloth.gui.fight.Attacks;
@@ -158,10 +159,12 @@ public class Fightview extends MovableWidget {
                 if (lastact != null)
                     if (lastact.get().basename().contains("cleave") && Config.cleavesound) {
                         try {
-                            Defer.later(() -> {
-                                Audio.play(Resource.local().loadwait(Config.cleavesfx), Config.cleavesoundvol);
-                                return (null);
-                            });
+                            String aitem = "None";
+                            if (!Utils.eq(aitem = Config.alarmsfxlist.get("alarmcleave"), "None")) {
+                                Double vol = Config.alarmvollist.get("alarmcleave");
+                                if (Alerted.customsort.get(aitem)) Audio.play(aitem, vol);
+                                else Audio.play(Resource.local().load(aitem), vol);
+                            }
                         } catch (Exception e) {
                         }//ignore because a crash here would prob get someone killed
                     }
@@ -365,10 +368,12 @@ public class Fightview extends MovableWidget {
         if (lastact != null)
             if (lastact.get().basename().contains("cleave") && Config.cleavesound) {
                 try {
-                    Defer.later(() -> {
-                        Audio.play(Resource.local().loadwait(Config.cleavesfx), Config.cleavesoundvol);
-                        return (null);
-                    });
+                    String aitem = "None";
+                    if (!Utils.eq(aitem = Config.alarmsfxlist.get("alarmcleave"), "None")) {
+                        Double vol = Config.alarmvollist.get("alarmcleave");
+                        if (Alerted.customsort.get(aitem)) Audio.play(aitem, vol);
+                        else Audio.play(Resource.local().load(aitem), vol);
+                    }
                 } catch (Exception e) {
                 }//ignore because a crash here would prob get someone killed
             }

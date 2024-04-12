@@ -31,6 +31,7 @@ import haven.purus.pbot.PBotDiscord;
 import haven.purus.pbot.PBotUtils;
 import haven.res.ui.obj.buddy.Buddy;
 import haven.resutil.Ridges;
+import haven.sloth.gob.Alerted;
 import haven.sloth.gob.Type;
 import haven.sloth.gui.DowseWnd;
 import modification.configuration;
@@ -568,10 +569,10 @@ public class LocalMiniMap extends Widget {
     }
 
     static {
-        if (!Config.alarmunknownplayer.equals("None"))
-            Resource.local().loadwait(Config.alarmunknownplayer);
-        if (!Config.alarmredplayer.equals("None"))
-            Resource.local().loadwait(Config.alarmredplayer);
+//        if (!Config.alarmunknownplayer.equals("None"))
+//            Resource.local().loadwait(Config.alarmunknownplayer);
+//        if (!Config.alarmredplayer.equals("None"))
+//            Resource.local().loadwait(Config.alarmredplayer);
     }
 
     public void tick(double dt) {
@@ -626,12 +627,12 @@ public class LocalMiniMap extends Widget {
                     continue;
 
                 boolean enemy = false;
-                if (!Config.alarmunknownplayer.equals("None") && buddy == null) {
+                String item = "None";
+                if (!Utils.eq(item = Config.alarmsfxlist.get("alarmunknown"), "None") && buddy == null) {
                     sgobs.add(gob.id);
-                    Defer.later(() -> {
-                        Audio.play(Resource.local().loadwait(Config.alarmunknownplayer), Config.alarmunknownvol);
-                        return (null);
-                    });
+                    Double vol = Config.alarmvollist.get("alarmunknown");
+                    if (Alerted.customsort.get(item)) Audio.play(item, vol);
+                    else Audio.play(Resource.local().load(item), vol);
                     if (Config.discordplayeralert) {
                         if (!configuration.endpoint.isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                             if (!ui.gui.chrid.isEmpty()) {
@@ -647,12 +648,11 @@ public class LocalMiniMap extends Widget {
                         }
                     }
                     enemy = true;
-                } else if (!Config.alarmredplayer.equals("None") && buddy != null && buddy.group() == 2) {
+                } else if (!Utils.eq(item = Config.alarmsfxlist.get("alarmred"), "None") && buddy != null && buddy.group() == 2) {
                     sgobs.add(gob.id);
-                    Defer.later(() -> {
-                        Audio.play(Resource.local().loadwait(Config.alarmredplayer), Config.alarmredvol);
-                        return (null);
-                    });
+                    Double vol = Config.alarmvollist.get("alarmred");
+                    if (Alerted.customsort.get(item)) Audio.play(item, vol);
+                    else Audio.play(Resource.local().load(item), vol);
                     if (Config.discordplayeralert) {
                         if (!configuration.endpoint.isEmpty() && ui.sess != null && ui.sess.alive() && ui.sess.username != null && ui.gui != null) {
                             if (!ui.gui.chrid.isEmpty()) {

@@ -41,6 +41,7 @@ import haven.resutil.WaterTile;
 import haven.sloth.gfx.GobSpeedSprite;
 import haven.sloth.gfx.HitboxMesh;
 import haven.sloth.gfx.SnowFall;
+import haven.sloth.gob.Alerted;
 import haven.sloth.gob.Movable;
 import haven.sloth.gob.Type;
 import haven.sloth.util.ObservableListener;
@@ -58,7 +59,6 @@ import java.awt.Color;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -66,8 +66,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.JarURLConnection;
 import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -709,50 +707,9 @@ public class OptWnd extends Window {
             }
         });
         appender.setVerticalMargin(0);
-        appender.addRow(new Label("Unknown Player Alarm"), makeAlarmDropdownUnknown());
-        appender.setVerticalMargin(0);
-        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.alarmunknownvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.alarmunknownvol = vol;
-                Utils.setprefd("alarmunknownvol", vol);
-            }
-        });
-        appender.setVerticalMargin(0);
-        appender.addRow(new Label("Red Player Alarm"), makeAlarmDropdownRed());
-        appender.setVerticalMargin(0);
-        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.alarmredvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.alarmredvol = vol;
-                Utils.setprefd("alarmredvol", vol);
-            }
-        });
-        appender.addRow(new CheckBox("Cleave sound", val -> Utils.setprefb("cleavesound", Config.cleavesound = val), Config.cleavesound), makeDropdownCleave());
-        appender.setVerticalMargin(0);
-        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.cleavesoundvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.cleavesoundvol = vol;
-                Utils.setprefd("cleavesoundvol", vol);
-            }
-        });
-        appender.setVerticalMargin(0);
+        appender.addRow(new Label("Unknown Player Alarm"), customAlarmWnd("alarmunknown"));
+        appender.addRow(new Label("Red Player Alarm"), customAlarmWnd("alarmred"));
+        appender.addRow(new CheckBox("Cleave sound", val -> Utils.setprefb("cleavesound", Config.cleavesound = val), Config.cleavesound), customAlarmWnd("alarmcleave"));
         appender.add(new CheckBox("Alarm on new private/party chat") {
             {
                 a = Config.chatalarm;
@@ -764,7 +721,6 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.setVerticalMargin(0);
         appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
             protected void added() {
                 super.added();
@@ -777,24 +733,8 @@ public class OptWnd extends Window {
                 Utils.setprefd("chatalarmvol", vol);
             }
         });
-        appender.setVerticalMargin(0);
-        appender.addRow(new Label("Study Finish Alarm"), makeAlarmDropdownStudy());
-        appender.setVerticalMargin(0);
-        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.studyalarmvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.studyalarmvol = vol;
-                Utils.setprefd("studyalarmvol", vol);
-            }
-        });
-        appender.setVerticalMargin(0);
+        appender.addRow(new Label("Study Finish Alarm"), customAlarmWnd("alarmstudy"));
         appender.add(new Label("Timers alarm volume"));
-        appender.setVerticalMargin(0);
         appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
             protected void added() {
                 super.added();
@@ -807,9 +747,7 @@ public class OptWnd extends Window {
                 Utils.setprefd("timersalarmvol", vol);
             }
         });
-        appender.setVerticalMargin(0);
         appender.add(new Label("Alerted gobs sound volume"));
-        appender.setVerticalMargin(0);
         appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
             protected void added() {
                 super.added();
@@ -823,7 +761,6 @@ public class OptWnd extends Window {
             }
         });
         appender.add(new Label("'Ding' sound volume"));
-        appender.setVerticalMargin(0);
         appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
             protected void added() {
                 super.added();
@@ -836,9 +773,7 @@ public class OptWnd extends Window {
                 Utils.setprefd("sfxdingvol", vol);
             }
         });
-        appender.setVerticalMargin(0);
         appender.add(new Label("'Whip' sound volume"));
-        appender.setVerticalMargin(0);
         appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
             protected void added() {
                 super.added();
@@ -851,7 +786,6 @@ public class OptWnd extends Window {
                 Utils.setprefd("sfxwhipvol", vol);
             }
         });
-
         appender.setVerticalMargin(0);
 //        appender.add(new Label("Fireplace sound volume (req. restart)"));
 //        appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
@@ -2471,20 +2405,8 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.addRow(new Label("Combat Start Sound"), makeDropdownCombat());
+        appender.addRow(new Label("Combat Start Sound"), customAlarmWnd("alarmattacked"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
-        appender.add(new HSlider(UI.scale(200), 0, 1000, 0) {
-            protected void added() {
-                super.added();
-                val = (int) (Config.attackedvol * 1000);
-            }
-
-            public void changed() {
-                double vol = val / 1000.0;
-                Config.attackedvol = vol;
-                Utils.setprefd("attackedvol", vol);
-            }
-        });
         appender.add(new CheckBox("Highlight current opponent") {
             {
                 a = Config.hlightcuropp;
@@ -5987,169 +5909,70 @@ public class OptWnd extends Window {
         log.pack();
     }
 
-    private Dropbox<String> makeAlarmDropdownUnknown() {
-        final List<String> alarms = Config.alarms.values().stream().map(String::toString).collect(Collectors.toList());
-        return new Dropbox<String>(Config.alarms.size(), alarms) {
-            {
-                super.change(Config.alarmunknownplayer);
-            }
-
-            @Override
-            protected String listitem(int i) {
-                return alarms.get(i);
-            }
-
-            @Override
-            protected int listitems() {
-                return alarms.size();
-            }
-
-            @Override
-            protected void drawitem(GOut g, String item, int i) {
-                g.text(item, Coord.z);
-            }
-
-            @Override
-            public void change(String item) {
-                super.change(item);
-                Config.alarmunknownplayer = item;
-                Utils.setpref("alarmunknownplayer", item);
-                if (!item.equals("None"))
-                    Audio.play(Resource.local().loadwait(item), Config.alarmunknownvol);
-            }
+    private Button customAlarmWnd(String saving) {
+        Function<String, String> replace = (str) -> {
+            if (str.startsWith("custom/sfx/")) str = str.replace("custom/sfx/", "Res:");
+            if (str.startsWith("modification/sound\\")) str = str.replace("modification/sound\\", "Wav:");
+            return (str);
         };
-    }
+        Button btn = new Button("");
+        String sitem = Config.alarmsfxlist.get(saving);
+        btn.change(replace.apply(sitem), Utils.eq(sitem, "None") ? Color.RED : Color.GREEN);
+        btn.pack();
+        btn.action(() -> {
+            Window w = new Window(Coord.z, "Custom Alert for " + saving);
+            WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
+            String citem = Config.alarmsfxlist.get(saving);
+            Listbox<String> list = new Listbox<String>(UI.scale(200), 20, UI.scale(20)) {
+                @Override
+                protected String listitem(int i) {return (Alerted.custom.get(i));}
 
-    private Dropbox<String> makeAlarmDropdownRed() {
-        final List<String> alarms = Config.alarms.values().stream().map(String::toString).collect(Collectors.toList());
-        return new Dropbox<String>(Config.alarms.size(), alarms) {
-            {
-                super.change(Config.alarmredplayer);
-            }
+                @Override
+                protected int listitems() {return (Alerted.custom.size());}
 
-            @Override
-            protected String listitem(int i) {
-                return alarms.get(i);
+                @Override
+                protected void drawitem(GOut g, String item, int i) {
+                    g.text(replace.apply(item), UI.scale(5, 1));
+                }
+            };
+            if (!Utils.eq(citem, "None")) {
+                list.change(citem);
+                list.display();
             }
+            wva.add(list);
+            Double v = Config.alarmvollist.get(saving);
+            HSlider volume = new HSlider(UI.scale(200), 0, 1000, (int) (Math.max(Math.min(1, v == null ? 0.8 : v), 0) * 1000));
+            wva.add(volume);
+            wva.addRow(new Button(UI.scale(45), "Play", () -> {
+                String item = list.sel;
+                if (item != null) {
+                    if (Alerted.customsort.get(item)) {
+                        Audio.play(item, volume.val / 1000.0);
+                    } else {
+                        Audio.play(Resource.local().load(item), volume.val / 1000.0);
+                    }
+                }
+            }), new Button(UI.scale(45), "Select", () -> {
+                String item = list.sel;
+                if (item != null) {
+                    Config.alarmsfxlist.put(saving, item);
+                    Config.alarmvollist.put(saving, volume.val / 1000.0);
+                    btn.change(replace.apply(item), Utils.eq(item, "None") ? Color.RED : Color.GREEN);
+                    btn.pack();
+                }
+            }), new Button("X", () -> {
+                String item = "None";
+                Config.alarmsfxlist.put(saving, item);
+                Config.alarmvollist.remove(saving);
+                btn.change(replace.apply(item), Utils.eq(item, "None") ? Color.RED : Color.GREEN);
+                btn.pack();
+            }));
+            w.pack();
+            w.z(1);
 
-            @Override
-            protected int listitems() {
-                return alarms.size();
-            }
-
-            @Override
-            protected void drawitem(GOut g, String item, int i) {
-                g.text(item, Coord.z);
-            }
-
-            @Override
-            public void change(String item) {
-                super.change(item);
-                Config.alarmredplayer = item;
-                Utils.setpref("alarmredplayer", item);
-                if (!item.equals("None"))
-                    Audio.play(Resource.local().loadwait(item), Config.alarmredvol);
-            }
-        };
-    }
-
-    private Dropbox<String> makeAlarmDropdownStudy() {
-        final List<String> alarms = Config.alarms.values().stream().map(String::toString).collect(Collectors.toList());
-        return new Dropbox<String>(Config.alarms.size(), alarms) {
-            {
-                super.change(Config.alarmstudy);
-            }
-
-            @Override
-            protected String listitem(int i) {
-                return alarms.get(i);
-            }
-
-            @Override
-            protected int listitems() {
-                return alarms.size();
-            }
-
-            @Override
-            protected void drawitem(GOut g, String item, int i) {
-                g.text(item, Coord.z);
-            }
-
-            @Override
-            public void change(String item) {
-                super.change(item);
-                Config.alarmstudy = item;
-                Utils.setpref("alarmstudy", item);
-                if (!item.equals("None"))
-                    Audio.play(Resource.local().loadwait(item), Config.studyalarmvol);
-            }
-        };
-    }
-
-    private Dropbox<String> makeDropdownCleave() {
-        final List<String> alarms = Config.alarms.values().stream().map(String::toString).collect(Collectors.toList());
-        return new Dropbox<String>(Config.alarms.size(), alarms) {
-            {
-                super.change(Config.cleavesfx);
-            }
-
-            @Override
-            protected String listitem(int i) {
-                return alarms.get(i);
-            }
-
-            @Override
-            protected int listitems() {
-                return alarms.size();
-            }
-
-            @Override
-            protected void drawitem(GOut g, String item, int i) {
-                g.text(item, Coord.z);
-            }
-
-            @Override
-            public void change(String item) {
-                super.change(item);
-                Config.cleavesfx = item;
-                Utils.setpref("cleavesfx", item);
-                if (!item.equals("None"))
-                    Audio.play(Resource.local().loadwait(item), Config.cleavesoundvol);
-            }
-        };
-    }
-
-    private Dropbox<String> makeDropdownCombat() {
-        final List<String> alarms = Config.alarms.values().stream().map(String::toString).collect(Collectors.toList());
-        return new Dropbox<String>(Config.alarms.size(), alarms) {
-            {
-                super.change(Config.attackedsfx);
-            }
-
-            @Override
-            protected String listitem(int i) {
-                return alarms.get(i);
-            }
-
-            @Override
-            protected int listitems() {
-                return alarms.size();
-            }
-
-            @Override
-            protected void drawitem(GOut g, String item, int i) {
-                g.text(item, Coord.z);
-            }
-
-            @Override
-            public void change(String item) {
-                super.change(item);
-                Config.attackedsfx = item;
-                Utils.setpref("attackedsfx", item);
-                if (!item.equals("None"))
-                    Audio.play(Resource.local().loadwait(item), Config.attackedvol);
-            }
-        };
+            ui.root.adda(w, ui.root.sz.div(2), 0.5, 0.5);
+        });
+        return (btn);
     }
 
     private Dropbox<String> makePictureChoiseDropdown() {

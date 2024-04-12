@@ -196,6 +196,11 @@ public class Button extends SIWidget {
         redraw();
     }
 
+    @Override
+    public void pack() {
+        sz = new Coord(cont.getWidth() + ul.getWidth() + ur.getWidth(), ul.getHeight());
+    }
+
     public void click() {
         if (action != null) {
             try {

@@ -1,6 +1,7 @@
 package haven;
 
 import haven.res.ui.stackinv.ItemStack;
+import haven.sloth.gob.Alerted;
 
 import java.awt.Color;
 import java.util.Map;
@@ -148,11 +149,12 @@ public class InventoryStudy extends Inventory {
                     if (tt != null)
                         ui.gui.syslog.append(tt.t + " LP: " + ci.exp, Color.LIGHT_GRAY);
 
-                    if (!Config.alarmstudy.equals("None"))
-                        Defer.later(() -> {
-                            Audio.play(Resource.local().loadwait(Config.alarmstudy), Config.studyalarmvol);
-                            return (null);
-                        });
+                    String aitem = "None";
+                    if (!Utils.eq(aitem = Config.alarmsfxlist.get("alarmstudy"), "None")) {
+                        Double vol = Config.alarmvollist.get("alarmstudy");
+                        if (Alerted.customsort.get(aitem)) Audio.play(aitem, vol);
+                        else Audio.play(Resource.local().load(aitem), vol);
+                    }
 
                     if (Config.autostudy) {
                         Window invwnd = ui.gui.getwnd("Inventory");

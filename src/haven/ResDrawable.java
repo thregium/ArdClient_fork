@@ -28,7 +28,7 @@ package haven;
 
 import haven.sloth.gob.Type;
 
-import java.util.function.Supplier;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ResDrawable extends Drawable implements EquipTarget {
     public final Indir<Resource> res;
@@ -124,16 +124,18 @@ public class ResDrawable extends Drawable implements EquipTarget {
         spr = Sprite.create(gob, res, stdCopy);
     }
 
+    private final AtomicReference<Gob.SavedMatches> matches = new AtomicReference<>();
+
     public void setup(RenderList rl) {
         if (!inited) return;
         try {
             String name = getres().name;
-            if (Gob.matches(this, () -> name, "gfx/terobjs/trees/yulestar-.*")) {
-                if (Gob.matches(this, () -> name, ".*fir")) {
+            if (Gob.matches(matches, () -> name, "gfx/terobjs/trees/yulestar-.*")) {
+                if (Gob.matches(matches, () -> name, ".*fir")) {
                     rl.prepc(Location.xlate(Coord3f.of((float) -0.655989, (float) 0.183716, (float) 48.3776)));
-                } else if (Gob.matches(this, () -> name, ".*spruce")) {
+                } else if (Gob.matches(matches, () -> name, ".*spruce")) {
                     rl.prepc(Location.xlate(Coord3f.of(0f, (float) -3.055197, (float) 62.988228)));
-                } else if (Gob.matches(this, () -> name, ".*silverfir")) {
+                } else if (Gob.matches(matches, () -> name, ".*silverfir")) {
                     rl.prepc(Location.xlate(Coord3f.of((float) -0.649652, (float) -0.030299, (float) 92.28412)));
                 }
                 rl.prepc(Location.rot(Coord3f.of(0f, 1f, 0f), (float) 1.570796));
