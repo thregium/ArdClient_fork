@@ -121,7 +121,7 @@ public class Session implements Resource.Resolver {
         public void waitfor() throws InterruptedException {
             synchronized (res) {
                 while (res.resnm == null)
-                    res.wait();
+                    res.wait(1000);
             }
         }
 
@@ -204,6 +204,7 @@ public class Session implements Resource.Resolver {
                 this.resver = ver;
                 get().reset();
                 wq.wnotify();
+                notifyAll();
             }
         }
 
@@ -213,6 +214,7 @@ public class Session implements Resource.Resolver {
                 this.resver = res.ver;
                 ind = new WeakReference<>(new SRef(res));
                 wq.wnotify();
+                notifyAll();
             }
         }
     }

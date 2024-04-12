@@ -341,14 +341,15 @@ public class MapWnd extends ResizableWnd {
             add(new IButton("gfx/hud/worldmap/plus", "", "", "") {
                 @Override
                 public void click() {
-                    if (view.zoom > MapFileWidget.zoommin) {
+                    MapFileWidget.Location loc = view.curloc;
+                    if (loc != null && view.zoom > MapFileWidget.zoommin) {
                         zoomtex = null;
-                        Coord tc = view.curloc.tc.mul(view.scalef());
+                        Coord tc = loc.tc.mul(view.scalef());
                         view.zoom--;
                         Utils.setprefi("zoomlmap", view.zoom);
                         tc = tc.div(view.scalef());
-                        view.curloc.tc.x = tc.x;
-                        view.curloc.tc.y = tc.y;
+                        loc.tc.x = tc.x;
+                        loc.tc.y = tc.y;
                     }
                 }
             }, new Coord(btnsz + UI.scale(20), 0));

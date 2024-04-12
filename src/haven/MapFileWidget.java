@@ -35,6 +35,7 @@ import haven.MapFile.SMarker;
 import haven.MapFile.Segment;
 import integrations.mapv4.MappingClient;
 import modification.configuration;
+import modification.dev;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
@@ -735,8 +736,9 @@ public class MapFileWidget extends Widget implements Console.Directory {
 
                     file.updategrids(ui.sess.glob.map, ui.sess.glob.map.grids.values());
                     refreshDisplayGrid();
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (Throwable e) {
+                    dev.simpleLog(e);
+                    throw (e);
                 } finally {
                     file.lock.writeLock().unlock();
                 }

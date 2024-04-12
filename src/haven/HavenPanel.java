@@ -29,6 +29,7 @@ package haven;
 import com.jogamp.opengl.util.awt.Screenshot;
 import haven.sloth.util.ObservableCollection;
 import modification.configuration;
+import modification.dev;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -858,7 +859,7 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        dev.simpleLog(e);
                         closeCurrentSession();
                     }
                 }

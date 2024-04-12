@@ -79,13 +79,15 @@ public class MapFile {
 
     public void removeSegment(MapFileWidget.Location loc) {
         lock.writeLock().lock();
-        segments.remove(loc.seg.id);
-        Path mf = Utils.pj(HashDirCache.findbase(), mangle(String.format("seg-%x", loc.seg.id)));
         try {
+            segments.remove(loc.seg.id);
+            Path mf = Utils.pj(HashDirCache.findbase(), mangle(String.format("seg-%x", loc.seg.id)));
             Files.deleteIfExists(mf);
-        } catch (Exception ignored) {
+        } catch (Throwable e) {
+            dev.simpleLog(e);
+        } finally {
+            lock.writeLock().unlock();
         }
-        lock.writeLock().unlock();
     }
 
     @Deprecated
@@ -292,6 +294,9 @@ public class MapFile {
             lock.lock();
             try {
                 r.run();
+            } catch (Throwable e) {
+                dev.simpleLog(e);
+                throw (e);
             } finally {
                 lock.unlock();
             }
@@ -303,6 +308,9 @@ public class MapFile {
             lock.lock();
             try {
                 return (f.apply(v));
+            } catch (Throwable e) {
+                dev.simpleLog(e);
+                throw (e);
             } finally {
                 lock.unlock();
             }
@@ -488,6 +496,9 @@ public class MapFile {
                 defersave();
                 markerseq++;
             }
+        } catch (Throwable e) {
+            dev.simpleLog(e);
+            throw (e);
         } finally {
             lock.writeLock().unlock();
         }
@@ -2160,6 +2171,9 @@ public class MapFile {
                     merge(dst, src, soff);
                 }
             }
+        } catch (Throwable e) {
+            dev.simpleLog(e);
+            throw (e);
         } finally {
             lock.writeLock().unlock();
         }
@@ -2555,6 +2569,9 @@ public class MapFile {
                             gridinfo.put(rgrid.id, new GridInfo(rgrid.id, rseg.id, nc));
                         }
                     }
+                } catch (Throwable e) {
+                    dev.simpleLog(e);
+                    throw (e);
                 } finally {
                     lock.writeLock().unlock();
                 }

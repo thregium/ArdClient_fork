@@ -40,6 +40,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Scanner;
@@ -319,6 +322,8 @@ public class LoginScreen extends Widget {
             }
         }
 
+        private final Map<String, Tex> cached = Collections.synchronizedMap(new HashMap<>());
+
         @Override
         protected void drawitem(GOut g, LoginData item, int i) {
             if (hover == i) {
@@ -329,7 +334,7 @@ public class LoginScreen extends Widget {
             g.chcolor(68, 68, 68, 128);
             g.rect(Coord.z, g.sz);
             g.chcolor();
-            Tex tex = Text.render(item.name, Color.WHITE, textfs).tex();
+            Tex tex = cached.computeIfAbsent(item.name, (text) -> Text.render(text, Color.WHITE, textfs).tex());
             g.image(tex, new Coord(UI.scale(5), (ITEM_HEIGHT - tex.sz().y) / 2));
             g.chcolor(xhover == i ? Color.YELLOW : Color.RED);
             g.aimage(xicon, new Coord(sz.x - UI.scale(5), (ITEM_HEIGHT - xicon.sz().y) / 2), 1, 0);
