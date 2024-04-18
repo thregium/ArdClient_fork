@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 //TODO: Idealy all the sounds we allow should be stored locally and separate from jorb's names to avoid issues in the future
 public class Alerted {
@@ -35,8 +36,8 @@ public class Alerted {
     public static final List<String> custom = Collections.synchronizedList(new ArrayList<>());
     public static final List<String> sounds = Collections.synchronizedList(new ArrayList<>());
     public static List<String> localsounds = Collections.synchronizedList(new ArrayList<>());
-    private static HashSet<Long> sgobs = new HashSet<Long>();
-    private static HashMap<Long, Long> alertedmap = new HashMap<>(); //map for the purposes of tracking gobs/alerts to ensure alerts only first with a minimum of a 1 second delay
+    private static Set<Long> sgobs = new HashSet<Long>();
+    private static Map<Long, Long> alertedmap = new HashMap<>(); //map for the purposes of tracking gobs/alerts to ensure alerts only first with a minimum of a 1 second delay
 
     public static void init(final Storage internal) {
         Storage.dynamic.ensure((sql) -> {

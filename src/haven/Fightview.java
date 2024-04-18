@@ -41,6 +41,7 @@ import haven.sloth.gui.fight.Maneuver;
 import modification.configuration;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -314,27 +315,29 @@ public class Fightview extends MovableWidget {
     @Override
     public void tick(double dt) {
         super.tick(dt);
-        synchronized (lsrel) {
-            for (Relation rel : lsrel) {
-                rel.tick();
-                Widget inf = obinfo(rel.gobid, false);
-                if (inf != null)
-                    inf.tick(dt);
-                final Gob gob = ui.sess.glob.oc.getgob(rel.gobid);
-                if (gob != null) {
-                    final Gob.Overlay ol = gob.findol(GobCombatSprite.id);
-                    if (ol != null) {
-                        if (Config.showothercombatinfo) {
-                            if (rel.equals(current) && !configuration.showcurrentenemieinfo)
-                                gob.ols.remove(ol);
-                            else
-                                ((GobCombatSprite) ol.spr).update(rel);
-                        } else {
+        List<Relation> lsrel;
+        synchronized (this.lsrel) {
+            lsrel = new ArrayList<>(this.lsrel);
+        }
+        for (Relation rel : lsrel) {
+            rel.tick();
+            Widget inf = obinfo(rel.gobid, false);
+            if (inf != null)
+                inf.tick(dt);
+            final Gob gob = ui.sess.glob.oc.getgob(rel.gobid);
+            if (gob != null) {
+                final Gob.Overlay ol = gob.findol(GobCombatSprite.id);
+                if (ol != null) {
+                    if (Config.showothercombatinfo) {
+                        if (rel.equals(current) && !configuration.showcurrentenemieinfo)
                             gob.ols.remove(ol);
-                        }
-                    } else if (Config.showothercombatinfo && (configuration.showcurrentenemieinfo || !rel.equals(current))) {
-                        gob.addol(new Gob.Overlay(GobCombatSprite.id, new GobCombatSprite(gob, rel)));
+                        else
+                            ((GobCombatSprite) ol.spr).update(rel);
+                    } else {
+                        gob.ols.remove(ol);
                     }
+                } else if (Config.showothercombatinfo && (configuration.showcurrentenemieinfo || !rel.equals(current))) {
+                    gob.addol(new Gob.Overlay(GobCombatSprite.id, new GobCombatSprite(gob, rel)));
                 }
             }
         }
