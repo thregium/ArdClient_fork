@@ -46,9 +46,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 public class Inventory extends Widget implements DTarget2, ItemObserver, InventoryListener {
     public static final Coord sqsz = UI.scale(33, 33);
@@ -1196,8 +1199,10 @@ public class Inventory extends Widget implements DTarget2, ItemObserver, Invento
             private final String resname;
             private int count;
             private double q;
+            private boolean nq;
             private GSprite spr;
             private final List<WItem> items = Collections.synchronizedList(new ArrayList<>());
+            private static final Tex qimg = Resource.remote().loadwait("ui/tt/q/quality").layer(Resource.imgc, 0).tex();
 
             public Group(final String name, final String resname) {
                 this.name = name;
@@ -1212,11 +1217,13 @@ public class Inventory extends Widget implements DTarget2, ItemObserver, Invento
             }
 
             public void calcQuality() {
-                double sum = items.stream().mapToDouble(i -> {
+                List<Double> stream = items.stream().mapToDouble(i -> {
                     QBuff qb = ItemInfo.find(QBuff.class, i.item.info());
                     return (qb == null ? 0 : qb.q);
-                }).sum();
+                }).boxed().collect(Collectors.toList());
+                double sum = stream.stream().mapToDouble(d -> d).sum();
                 q = sum / items.size();
+                nq = stream.stream().allMatch(d -> d != q);
             }
 
             private WItem takeFirst() {
@@ -1241,6 +1248,56 @@ public class Inventory extends Widget implements DTarget2, ItemObserver, Invento
             @Override
             public boolean mousewheel(final Coord c, final int amount) {
                 return (takeFirst().mousewheel(c, amount));
+            }
+
+            private static final Map<String, Tex> TEX = Collections.synchronizedMap(new WeakHashMap<>());
+            private static Tex create(String text) {
+                return (TEX.computeIfAbsent(text, s -> Text.render(s).tex()));
+            }
+
+            private final Text.UTex<String> ucount = new Text.UTex<>(() -> "x" + count, s -> Text.render(s).tex());
+            private final Text.UTex<String> uq = new Text.UTex<>(() -> (nq ? "~" : "") + Utils.odformat2(q, 2), s -> Text.render(s).tex());
+
+            public void draw(final GOut g, final Coord sz) {
+                int x = 0;
+                GSprite spr = this.spr;
+                if (spr != null) {
+                    Coord ssz = spr.sz();
+                    double sy = 1.0 * ssz.y / sz.y;
+                    ssz = ssz.div(sy);
+                    spr.draw(g, ssz);
+                    x += ssz.x;
+                }
+                int count = this.count;
+                if (count > 0) {
+                    Tex tex = ucount.get();
+                    g.image(tex, Coord.of(x, (sz.y - tex.sz().y) / 2));
+                    x += tex.sz().x;
+                }
+                int right = 0;
+                int w = sz.x;
+                double q = this.q;
+                if (q > 0) {
+                    Tex tex = uq.get();
+                    g.image(tex, Coord.of(w - tex.sz().x, (sz.y - tex.sz().y) / 2));
+                    g.aimage(qimg, Coord.of(w - tex.sz().x, (sz.y - tex.sz().y) / 2), 1, 0.05);
+                    right = tex.sz().x + qimg.sz().x;
+                }
+                String name = this.name;
+                if (!name.isEmpty()) {
+                    x += 5;
+                    int max = w - x - right - 5;
+                    for (int j = 0; j < name.length(); j++) {
+                        if (j != 0) {
+                            name = name.substring(0, name.length() - 1 - j).concat("...");
+                        }
+                        if (Text.std.strsize(name).x <= max)
+                            break;
+                    }
+                    Tex tex = create(name);
+                    g.image(tex, Coord.of(x, (sz.y - tex.sz().y) / 2));
+                    x += tex.sz().x;
+                }
             }
         }
 
@@ -1270,34 +1327,7 @@ public class Inventory extends Widget implements DTarget2, ItemObserver, Invento
                 g.chcolor(((i % 2) == 0) ? even : odd);
                 g.frect(Coord.z, g.sz());
                 g.chcolor();
-                int x = 0;
-                GSprite spr = item.spr;
-                if (spr != null) {
-                    Coord sz = spr.sz();
-                    double sy = 1.0 * sz.y / itemh;
-                    sz = sz.div(sy);
-                    spr.draw(g, sz);
-                    x += sz.x;
-                }
-                int count = item.count;
-                if (count > 0) {
-                    Tex tex = Text.render("x" + count).tex();
-                    g.image(tex, Coord.of(x, (itemh - tex.sz().y) / 2));
-                    x += tex.sz().x;
-                }
-                String name = item.name;
-                if (!name.isEmpty()) {
-                    x += 5;
-                    Tex tex = Text.render(name).tex();
-                    g.image(tex, Coord.of(x, (itemh - tex.sz().y) / 2));
-                    x += tex.sz().x;
-                }
-                double q = item.q;
-                if (q > 0) {
-                    x += 5;
-                    Tex tex = Text.render("(" + (count > 0 ? "~" : "") + "q" + Utils.odformat2(q, 2) + ")").tex();
-                    g.image(tex, Coord.of(x, (itemh - tex.sz().y) / 2));
-                }
+                item.draw(g, Coord.of(sz.x - (sb.vis() ? sb.sz.x : 0), itemh));
             }
 
             @Override
