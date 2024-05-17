@@ -26,6 +26,9 @@
 
 package haven;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 public class RemoteUI implements UI.Receiver, UI.Runner {
     public final Session sess;
     private Session ret;
@@ -41,6 +44,15 @@ public class RemoteUI implements UI.Receiver, UI.Runner {
         msg.addstring(name);
         msg.addlist(args);
         sess.queuemsg(msg);
+    }
+
+    public static class Return extends PMessage {
+        public final Session ret;
+
+        public Return(Session ret) {
+            super(-1);
+            this.ret = ret;
+        }
     }
 
     public void ret(Session sess) {
@@ -78,6 +90,24 @@ public class RemoteUI implements UI.Receiver, UI.Runner {
                             ui.addwidget(id, parent, pargs);
                         } else if (msg.type == RMessage.RMSG_WDGBAR) {
                             /* Ignore for now. */
+                            Collection<Integer> deps = new ArrayList<>();
+                            while (!msg.eom()) {
+                                int dep = msg.int32();
+                                if (dep == -1)
+                                    break;
+                                deps.add(dep);
+                            }
+                            Collection<Integer> bars = deps;
+                            if (!msg.eom()) {
+                                bars = new ArrayList<>();
+                                while (!msg.eom()) {
+                                    int bar = msg.int32();
+                                    if (bar == -1)
+                                        break;
+                                    bars.add(bar);
+                                }
+                            }
+                            System.out.println("RMSG_WDGBAR: " + deps + " " + bars);
                         }
                     } catch (InterruptedException e) {
                         throw e;
@@ -99,7 +129,7 @@ public class RemoteUI implements UI.Receiver, UI.Runner {
             sess.close();
             synchronized (sess) {
                 while (sess.alive())
-                    sess.wait();
+                    sess.wait(1000);
             }
         }
     }

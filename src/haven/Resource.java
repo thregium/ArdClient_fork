@@ -2348,6 +2348,10 @@ public class Resource implements Serializable {
         return (remote().loadwait(name).layer(imgc));
     }
 
+    public static BufferedImage loadimgraw(String name) {
+        return (remote().loadwait(name).layer(imgc).rawimage);
+    }
+
     public static BufferedImage loadimg(String name) {
         return (remote().loadwait(name).layer(imgc).scaled());
     }

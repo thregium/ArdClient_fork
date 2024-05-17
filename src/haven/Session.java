@@ -363,6 +363,9 @@ public class Session implements Resource.Resolver {
                 closed = true;
                 uimsgs.notifyAll();
             }
+            synchronized (Session.this) {
+                Session.this.notifyAll();
+            }
         }
 
         public void handle(PMessage msg) {

@@ -167,7 +167,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     public static final Set<Long> markedGobs = new HashSet<>();
     public static final Material.Colors markedFx = new Material.Colors(new Color(21, 127, 208, 255));
     public Object[] lastItemactClickArgs;
-    private static TexCube sky = new TexCube(Resource.loadimg("skycube"));
+    private static TexCube sky = new TexCube(Resource.loadimgraw("skycube"));
     private static DropSky skydrop = new DropSky(sky);
     public boolean farmSelect = false;
     public boolean PBotAPISelect = false;
