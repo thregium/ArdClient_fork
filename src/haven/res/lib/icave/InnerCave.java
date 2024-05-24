@@ -7,6 +7,7 @@ import haven.MapMesh;
 import haven.MapMesh.Scan;
 import haven.Material;
 import haven.MeshBuf;
+import haven.Resource;
 import haven.SNoise3;
 import haven.Surface;
 import haven.Surface.Vertex;
@@ -57,6 +58,7 @@ public class InnerCave extends TerrainTile.RidgeTile {
         public Tiler create(int id, Tileset set) {
             TerrainTile.RidgeTile base = (TerrainTile.RidgeTile) new TerrainTile.RidgeTile.RFactory().create(id, set);
             Material wtex = null;
+            Resource res = set.getres();
             for (Object rdesc : set.ta) {
                 Object[] desc = (Object[]) rdesc;
                 String p = (String) desc[0];
@@ -65,12 +67,12 @@ public class InnerCave extends TerrainTile.RidgeTile {
                 }
             }
             Ridges.TexCons rtex = (Ridges.TexCons) base.rcons;
-            return (new InnerCave(id, base.noise, base.base, base.var, base.transset, base.rth, rtex.mat, rtex.texh, wtex));
+            return (new InnerCave(res, id, base.noise, base.base, base.var, base.transset, base.rth, rtex.mat, rtex.texh, wtex));
         }
     }
 
-    public InnerCave(int id, SNoise3 noise, GLState base, Var[] var, Tileset transset, int rth, GLState rmat, float texh, Material wtex) {
-        super(id, noise, base, var, transset, rth, rmat, texh);
+    public InnerCave(Resource res, int id, SNoise3 noise, GLState base, Var[] var, Tileset transset, int rth, GLState rmat, float texh, Material wtex) {
+        super(res, id, noise, base, var, transset, rth, rmat, texh);
         this.wtex = wtex;
     }
 
