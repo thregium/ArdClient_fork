@@ -307,12 +307,12 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
              * that. Also arguably nice to be able to set terrain and
              * flavobj materials in one go. */
             set.flavobjmat = commat;
-            return (new TerrainTile(id, new SNoise3(res.name.hashCode()), base, var.toArray(new Var[0]), trans));
+            return (new TerrainTile(res, id, new SNoise3(res.name.hashCode()), base, var.toArray(new Var[0]), trans));
         }
     }
 
-    public TerrainTile(int id, SNoise3 noise, GLState base, Var[] var, Tileset transset) {
-        super(id);
+    public TerrainTile(Resource res, int id, SNoise3 noise, GLState base, Var[] var, Tileset transset) {
+        super(res, id);
         this.noise = noise;
         int z = 0;
         this.base = base;
@@ -438,12 +438,12 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
                 }
                 if (mat == null)
                     throw (new RuntimeException("Ridge-tiles must be given a ridge material, in " + set.getres().name));
-                return (new RidgeTile(base.id, base.noise, base.base, base.var, base.transset, (int) rth, mat, texh));
+                return (new RidgeTile(base.res, base.id, base.noise, base.base, base.var, base.transset, (int) rth, mat, texh));
             }
         }
 
-        public RidgeTile(int id, SNoise3 noise, GLState base, Var[] var, Tileset transset, int rth, GLState rmat, float texh) {
-            super(id, noise, base, var, transset);
+        public RidgeTile(Resource res, int id, SNoise3 noise, GLState base, Var[] var, Tileset transset, int rth, GLState rmat, float texh) {
+            super(res, id, noise, base, var, transset);
             this.rth = rth;
             this.rcons = new Ridges.TexCons(rmat, texh);
         }

@@ -101,6 +101,7 @@ public class CaveTile extends Tiler {
         public Tiler create(int id, Tileset set) {
             Material wtex = null;
             Tiler ground = null;
+            Resource res = set.getres();
             for (Object rdesc : set.ta) {
                 Object[] desc = (Object[]) rdesc;
                 String p = (String) desc[0];
@@ -113,20 +114,20 @@ public class CaveTile extends Tiler {
                 }
             }
             if (Config.flatcaves)
-                return (new CaveTile(id, wtex, ground));
+                return (new CaveTile(res, id, wtex, ground));
             else
-                return (new CaveTile(id, set, wtex, ground));
+                return (new CaveTile(res, id, set, wtex, ground));
         }
     }
 
-    public CaveTile(int id, Tileset set, Material wtex, Tiler ground) {
-        super(id);
+    public CaveTile(Resource res, int id, Tileset set, Material wtex, Tiler ground) {
+        super(res, id);
         this.wtex = wtex;
         this.ground = ground;
     }
 
-    public CaveTile(int id, Material wtex, Tiler ground) {
-        super(id);
+    public CaveTile(Resource res, int id, Material wtex, Tiler ground) {
+        super(res, id);
         this.wtex = wtex;
         this.ground = ground;
     }

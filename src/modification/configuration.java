@@ -1,5 +1,7 @@
 package modification;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import haven.Callback;
 import haven.CheckBox;
 import haven.CheckListboxItem;
@@ -37,6 +39,7 @@ import haven.purus.pbot.PBotUtils;
 import haven.sloth.gfx.SnowFall;
 import haven.sloth.gob.Hidden;
 import haven.sloth.util.ObservableCollection;
+import haven.sloth.util.ObservableMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -1737,6 +1740,26 @@ public class configuration {
     public static int fogOfWarColor = Utils.getprefi("fogofwarcolor", new Color(255, 255, 0, 100).getRGB());
     public static int fogOfWarColorTemp = Utils.getprefi("fogofwarcolorTemp", new Color(0, 255, 0, 100).getRGB());
     public static int mapgridcolor = Utils.getprefi("mapgridcolor", new Color(255, 100, 100, 150).getRGB());
+
+    public static boolean showcolortiles = Utils.getprefb("showcolortiles", false);
+    public static final JsonElement customTiles = Utils.loadCustomElement("CustomColorTiles");
+    public static Integer getTileColor(String tileResName) {
+        synchronized (customTiles) {
+            JsonObject obj = customTiles.getAsJsonObject();
+            JsonElement tileEl = obj.get(tileResName);
+            if (tileEl != null) {
+                JsonObject tileObj = tileEl.getAsJsonObject();
+                boolean a = tileObj.get("a").getAsBoolean();
+                int c = tileObj.get("c").getAsInt();
+                if (a) {
+                    return (c);
+                }
+            }
+            return (null);
+        }
+    }
+
+    //new JsonParser().parse("{}")
 
     public static boolean openStacksOnAlt = Utils.getprefb("altstacks", false);
 

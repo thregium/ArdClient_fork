@@ -28,19 +28,25 @@ package haven;
 
 import haven.Surface.MeshVertex;
 import haven.Surface.Vertex;
+import modification.configuration;
 
+import java.awt.Color;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
 public abstract class Tiler {
+    public final Resource res;
     public final int id;
 
-    public Tiler(int id) {
+    public Tiler(Resource res, int id) {
+        this.res = res;
         this.id = id;
     }
 
@@ -222,9 +228,18 @@ public abstract class Tiler {
         flatmodel(m, lc);
     }
 
+    public static final Map<Integer, GLState> colorMap = Collections.synchronizedMap(new HashMap<>());
+
     public void lay(MapMesh m, Coord lc, Coord gc, MCons cons, boolean cover) {
         MapMesh.MapSurface s = m.data(MapMesh.gnd);
-        cons.faces(m, MPart.splitquad(lc, gc, s.fortilea(lc), s.split[s.ts.o(lc)]));
+        MPart part = MPart.splitquad(lc, gc, s.fortilea(lc), s.split[s.ts.o(lc)]);
+        if (configuration.showcolortiles) {
+            Integer clr = configuration.getTileColor(res.name);
+            if (clr != null) {
+                part.mat = colorMap.computeIfAbsent(clr, i -> new ColorMask(new Color(clr, true)));
+            }
+        }
+        cons.faces(m, part);
     }
 
     public abstract void lay(MapMesh m, Random rnd, Coord lc, Coord gc);

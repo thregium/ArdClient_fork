@@ -28,6 +28,9 @@ package haven;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import haven.purus.pbot.PBotAPI;
 import haven.sloth.util.ObservableMap;
@@ -744,6 +747,10 @@ public class Utils {
         return loadCustomList(defaultlist, jsonname, false);
     }
 
+    public static ObservableMap<String, Boolean> loadCustomList(String jsonname) {
+        return loadCustomList(Collections.emptyList(), jsonname, false);
+    }
+
     public static ObservableMap<String, Boolean> loadCustomList(List<String> defaultlist, String jsonname, boolean init) {
         String json = Config.loadFile(jsonname + ".json");
         ObservableMap<String, Boolean> list = new ObservableMap<>(new HashMap<>());
@@ -756,10 +763,30 @@ public class Utils {
             } catch (Exception ignored) {
             }
         }
-        if (list.size() == 0) {
+        if (list.size() == 0 && !defaultlist.isEmpty()) {
             defaultlist.forEach(k -> list.put(k, init));
         }
         return list;
+    }
+
+    public static JsonElement loadCustomElement(String jsonname) {
+        return loadCustomElement(Collections.emptyList(), jsonname);
+    }
+
+    public static JsonElement loadCustomElement(List<String> defaultlist, String jsonname) {
+        String json = Config.loadFile(jsonname + ".json");
+        JsonElement obj = new JsonObject();
+        if (json != null) {
+            try {
+                obj = new JsonParser().parse(json);
+            } catch (Exception ignored) {
+            }
+        }
+        return obj;
+    }
+
+    public static void saveCustomElement(JsonElement element, String jsonname) {
+        Config.saveFile(jsonname + ".json", element.toString());
     }
 
     public static JSONObject[] getprefjsona(String prefname, JSONObject[] def) {

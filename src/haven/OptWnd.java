@@ -1818,9 +1818,9 @@ public class OptWnd extends Window {
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Automatically places markrs on the map: caves, dungeons, tarpits.").tex();
             }
-        }, new Button(UI.scale(50), "Configurate") {
+        }, new Button(UI.scale(50), "Configure") {
             public void click() {
-                Window w = new Window(Coord.z, "Map Marks Configurate");
+                Window w = new Window(Coord.z, "Map Marks Configure");
                 WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
                 final CustomWidgetList list = new CustomWidgetList(resources.customMarks, "CustomMarks", true) {
                     public void wdgmsg(Widget sender, String msg, Object... args) {
@@ -3659,7 +3659,7 @@ public class OptWnd extends Window {
 
         appender.add(new Label(""));
 
-        appender.addRow(new Label("Broken hat replacer"), new Button(UI.scale(50), "Configurate") {
+        appender.addRow(new Label("Broken hat replacer"), new Button(UI.scale(50), "Configure") {
             public void click() {
                 Window w = new Window(Coord.z, "Hat wardrobe");
                 WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
@@ -3740,7 +3740,7 @@ public class OptWnd extends Window {
                 resources.paintcloth = val;
                 a = val;
             }
-        }, new Button(UI.scale(50), "Configurate") {
+        }, new Button(UI.scale(50), "Configure") {
             public void click() {
                 Window w = new Window(Coord.z, "Cloth Painter") {{
                     WidgetVerticalAppender wva = new WidgetVerticalAppender(this);

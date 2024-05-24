@@ -33,6 +33,7 @@ import haven.Light;
 import haven.MapMesh;
 import haven.Material;
 import haven.MeshBuf;
+import haven.Resource;
 import haven.Surface;
 import haven.Surface.MeshVertex;
 import haven.Tex;
@@ -51,12 +52,12 @@ public class GroundTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
     @ResName("gnd")
     public static class Fac implements Factory {
         public Tiler create(int id, Tileset set) {
-            return (new GroundTile(id, set));
+            return (new GroundTile(set.getres(), id, set));
         }
     }
 
-    public GroundTile(int id, Tileset set) {
-        super(id);
+    public GroundTile(Resource res, int id, Tileset set) {
+        super(res, id);
         this.set = set;
     }
 

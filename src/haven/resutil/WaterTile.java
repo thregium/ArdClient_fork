@@ -468,7 +468,8 @@ public class WaterTile extends Tiler {
             //int depth = id == 172 ? 60 : (Integer)set.ta[a];
             //a++
             int depth = (Integer) set.ta[a++];
-            Tiler.MCons bottom = new GroundTile(id, set);
+            Resource res = set.getres();
+            Tiler.MCons bottom = new GroundTile(res, id, set);
             while (a < set.ta.length) {
                 Object[] desc = (Object[]) set.ta[a++];
                 String p = (String) desc[0];
@@ -479,15 +480,19 @@ public class WaterTile extends Tiler {
                     bottom = (Tiler.MCons) b;
                 }
             }
-            return (new WaterTile(id, set.getres(), bottom, depth));
+            return (new WaterTile(res, id, bottom, depth));
         }
     }
 
     private GLState mat;
     private final GLState fog;
 
-    public WaterTile(int id, Resource res, Tiler.MCons bottom, int depth) {
-        this(id, bottom, depth);
+    public WaterTile(Resource res, int id, Tiler.MCons bottom, int depth) {
+        super(res, id);
+        this.bottom = bottom;
+        this.depth = depth;
+        this.mat = GLState.compose(waterfog, boff);
+        this.fog = obfog;
         switch (res.name) {
             case "gfx/tiles/deep":
                 this.mat = GLState.compose(wfog, boff);
@@ -507,17 +512,9 @@ public class WaterTile extends Tiler {
         }
     }
 
-    public WaterTile(int id, Tiler.MCons bottom, int depth) {
-        super(id);
-        this.bottom = bottom;
-        this.depth = depth;
-        this.mat = GLState.compose(waterfog, boff);
-        this.fog = obfog;
-    }
-
     @Deprecated
-    public WaterTile(int id, Tileset set, int depth) {
-        this(id, new GroundTile(0, set), depth);
+    public WaterTile(Resource res, int id, Tileset set, int depth) {
+        this(res, id, new GroundTile(res, 0, set), depth);
     }
 
     public void lay(MapMesh m, Random rnd, Coord lc, Coord gc) {

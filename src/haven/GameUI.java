@@ -26,6 +26,9 @@
 
 package haven;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import haven.automation.Discord;
 import haven.automation.ErrorSysMsgCallback;
 import haven.automation.PickForageable;
@@ -2200,7 +2203,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         wva.addRow(new CheckBox("Show Animal Radius", val -> {
             Utils.setprefb("showanimalrad", Config.showanimalrad = val);
             msg("Animal Radius " + (val ? "on" : "off"), Color.white);
-        }, Config.showanimalrad), new ColorPreview(Coord.of(16), ANIMALDANGERCOLOR.get(), val -> {
+        }, Config.showanimalrad), new ColorPreview(UI.scale(20, 20), ANIMALDANGERCOLOR.get(), val -> {
             BPRadSprite.smatDanger = new States.ColState(val);
             ANIMALDANGERCOLOR.set(val);
             if (ui.gui.map != null) ui.gui.map.refreshGobsAll();
@@ -2212,15 +2215,15 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         wva.addRow(new CheckBox("Show Mine Support", val -> {
             Utils.setprefb("showminerad", Config.showminerad = val);
             msg("Mine support " + (val ? "on" : "off"), Color.white);
-        }, Config.showminerad), new ColorPreview(Coord.of(16), SUPPORTDANGERCOLOR.get(), val -> {
+        }, Config.showminerad), new ColorPreview(UI.scale(20, 20), SUPPORTDANGERCOLOR.get(), val -> {
             BPRadSprite.smatSupports = new States.ColState(val);
             SUPPORTDANGERCOLOR.set(val);
             if (map != null) map.refreshGobsAll();
-        }, "Radius mine radius color"), new ColorPreview(Coord.of(16), MSRad.getColor1(), MSRad::changeColor1, "Vanilla mine radius first color"), new ColorPreview(Coord.of(16), MSRad.getColor2(), MSRad::changeColor2, "Vanilla mine radius second color"));
+        }, "Radius mine radius color"), new ColorPreview(UI.scale(20, 20), MSRad.getColor1(), MSRad::changeColor1, "Vanilla mine radius first color"), new ColorPreview(UI.scale(20, 20), MSRad.getColor2(), MSRad::changeColor2, "Vanilla mine radius second color"));
         wva.addRow(new CheckBox("Show Trough Radius", val -> {
             Utils.setprefb("showTroughrad", Config.showTroughrad = val);
             msg("Troughs " + (val ? "on" : "off"), Color.white);
-        }, Config.showTroughrad), new ColorPreview(Coord.of(16), TROUGHCOLOR.get(), val -> {
+        }, Config.showTroughrad), new ColorPreview(UI.scale(20, 20), TROUGHCOLOR.get(), val -> {
             BPRadSprite.smatTrough = new States.ColState(val);
             TROUGHCOLOR.set(val);
             if (map != null) map.refreshGobsAll();
@@ -2228,7 +2231,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         wva.addRow(new CheckBox("Show Beehive Radius", val -> {
             Utils.setprefb("showBeehiverad", Config.showBeehiverad = val);
             msg("Beehives " + (val ? "on" : "off"), Color.white);
-        }, Config.showBeehiverad), new ColorPreview(Coord.of(16), BEEHIVECOLOR.get(), val -> {
+        }, Config.showBeehiverad), new ColorPreview(UI.scale(20, 20), BEEHIVECOLOR.get(), val -> {
             BPRadSprite.smatBeehive = new States.ColState(val);
             BEEHIVECOLOR.set(val);
             if (map != null) map.refreshGobsAll();
@@ -2236,7 +2239,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         wva.addRow(new CheckBox("Show Mound Bed Radius", val -> {
             Utils.setprefb("showMoundbedrad", Config.showMoundbedrad = val);
             msg("Mound Beds " + (val ? "on" : "off"), Color.white);
-        }, Config.showMoundbedrad), new ColorPreview(Coord.of(16), MOUNDBEDCOLOR.get(), val -> {
+        }, Config.showMoundbedrad), new ColorPreview(UI.scale(20, 20), MOUNDBEDCOLOR.get(), val -> {
             BPRadSprite.smatMoundbed = new States.ColState(val);
             MOUNDBEDCOLOR.set(val);
             if (map != null) map.refreshGobsAll();
@@ -2244,7 +2247,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         wva.addRow(new CheckBox("Show Barter Hand Radius", val -> {
             Utils.setprefb("showBarterrad", Config.showBarterrad = val);
             msg("Barter Hands " + (val ? "on" : "off"), Color.white);
-        }, Config.showBarterrad), new ColorPreview(Coord.of(16), BARTERCOLOR.get(), val -> {
+        }, Config.showBarterrad), new ColorPreview(UI.scale(20, 20), BARTERCOLOR.get(), val -> {
             BPRadSprite.smatBarter = new States.ColState(val);
             BARTERCOLOR.set(val);
             if (map != null) map.refreshGobsAll();
@@ -2260,6 +2263,136 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         wva.addRow(new CheckBox("Show grid box", val -> Utils.setprefb("gridboxsprite", configuration.gridboxsprite = val), configuration.gridboxsprite), new ColorPreview(UI.scale(20, 20), new Color(configuration.gridboxcolor, true), val -> {
             configuration.gridboxcolor = val.hashCode();
             Utils.setprefi("gridboxcolor", val.hashCode());
+        }));
+        wva.addRow(new CheckBox("Show color tiles", val -> {
+            Utils.setprefb("showcolortiles", configuration.showcolortiles = val);
+            if (ui.sess != null) {
+                ui.sess.glob.map.invalidateAll();
+            }
+        }, configuration.showcolortiles), new Button("Configure", () -> {
+            new Object() {
+                Coord itemsz = UI.scale(180, 20);
+                final JsonElement element = configuration.customTiles;
+                Widget addNew(String name, WidgetList<Widget> list) {
+                    Widget item = new Widget(itemsz);
+                    WidgetVerticalAppender itemwva = new WidgetVerticalAppender(item);
+                    itemwva.setHorizontalMargin(3);
+                    itemwva.addRow(new CheckBox(name, val -> edit(name, val), false), new ColorPreview(UI.scale(20, 20), Color.WHITE, val -> edit(name, val)), new Button("X", () -> {
+                        list.removeitem(item, true);
+                        remove(name);
+                    }));
+                    return (item);
+                }
+                Widget loadWidget(String name, JsonObject obj, WidgetList<Widget> list) {
+                    Widget item = new Widget(itemsz);
+                    WidgetVerticalAppender itemwva = new WidgetVerticalAppender(item);
+                    itemwva.setHorizontalMargin(3);
+                    itemwva.addRow(new CheckBox(name, val -> edit(name, val), obj.get("a").getAsBoolean()), new ColorPreview(UI.scale(20, 20), new Color(obj.get("c").getAsInt(), true), val -> edit(name, val)), new Button("X", () -> {
+                        list.removeitem(item, true);
+                        remove(name);
+                    }));
+                    return (item);
+                }
+                List<Widget> load(WidgetList<Widget> list) {
+                    JsonObject obj;
+                    synchronized (element) {
+                        obj = element.getAsJsonObject();
+                    }
+                    return (obj.keySet().stream().map(item -> loadWidget(item, obj.get(item).getAsJsonObject(), list)).collect(Collectors.toList()));
+                }
+                void createNew(String name) {
+                    JsonObject obj = new JsonObject();
+                    obj.addProperty("a", false);
+                    obj.addProperty("c", Color.WHITE.getRGB());
+                    synchronized (element) {
+                        element.getAsJsonObject().add(name, obj);
+                        save();
+                    }
+                }
+                JsonObject object(String item) {
+                    synchronized (element) {
+                        JsonElement itemEl = element.getAsJsonObject().get(item);
+                        if (itemEl != null) {
+                            return (itemEl.getAsJsonObject());
+                        }
+                        return (null);
+                    }
+                }
+                void save() {
+                    synchronized (element) {
+                        Utils.saveCustomElement(element, "CustomColorTiles");
+                    }
+                }
+                void remove(String item) {
+                    JsonElement itemEl = object(item);
+                    if (itemEl != null) {
+                        element.getAsJsonObject().remove(item);
+                        save();
+                        invalidate();
+                    }
+                }
+                void edit(String item, boolean a) {
+                    boolean yes = false;
+                    synchronized (element) {
+                        JsonElement itemEl = object(item);
+                        if (itemEl != null) {
+                            JsonObject itemObj = itemEl.getAsJsonObject();
+                            boolean old = itemObj.get("a").getAsBoolean();
+                            if (old != a) {
+                                itemObj.addProperty("a", a);
+                                save();
+                                yes = true;
+                            }
+                        }
+                    }
+                    if (yes) invalidate();
+                }
+                void edit(String item, Color c) {
+                    boolean yes = false;
+                    synchronized (element) {
+                        JsonElement itemEl = object(item);
+                        if (itemEl != null) {
+                            JsonObject itemObj = itemEl.getAsJsonObject();
+                            int old = itemObj.get("c").getAsInt();
+                            int n = c.getRGB();
+                            if (old != n) {
+                                itemObj.addProperty("c", n);
+                                save();
+                                yes = true;
+                            }
+                        }
+                    }
+                    if (yes) invalidate();
+                }
+                void invalidate() {
+                    if (ui.sess != null) {
+                        ui.sess.glob.map.invalidateAll();
+                    }
+                }
+                {
+                    Window w = new Window(Coord.z, "Tiles Highlighting Configure");
+                    WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
+                    final WidgetList<Widget> list = new WidgetList<>(itemsz, 10);
+                    load(list).forEach(list::additem);
+                    final TextEntry value = new TextEntry(UI.scale(150), "") {
+                        @Override
+                        public void activate(String text) {
+                            if (!text.isEmpty()) {
+                                if (object(text) == null) {
+                                    list.additem(addNew(text, list));
+                                    createNew(text);
+                                }
+                                settext("");
+                            }
+                        }
+                    };
+                    wva.add(list);
+                    wva.addRow(value, new Button("Add", () -> value.activate(value.text())));
+                    w.pack();
+
+                    ui.root.adda(w, ui.root.sz.div(2), 0.5, 0.5);
+                }
+            };
         }));
         Label text = new Label(configuration.radiusheight + "");
         wva.addRow(new Label("Height:"), new HSlider(100, 0, 5000, (int) (configuration.radiusheight * 100f)) {
