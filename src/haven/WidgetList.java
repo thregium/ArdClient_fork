@@ -138,11 +138,19 @@ public class WidgetList<T extends Widget> extends ListWidget<T> {
     }
 
     @Override
-    public boolean mousedown(Coord c0, int button) {
-        Coord c = (c0.x < sb.c.x) ? c0.add(0, sb.val * itemh) : c0;
+    public Coord xlate(Coord c, boolean in) {
+        if (in)
+            return (c.add(0, -sb.val * itemh));
+        else
+            return (c.add(0, sb.val * itemh));
+    }
+
+    @Override
+    public boolean mousedown(Coord c, int button) {
+//        Coord c = (c0.x < sb.c.x) ? c0.add(0, sb.val * itemh) : c0;
         if (super.mousedown(c, button))
             return (true);
-        T item = itemat(c0);
+        T item = itemat(c);
         if ((item == null) && (button == 1))
             change(null);
         else if (item != null)
