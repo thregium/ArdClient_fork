@@ -5083,33 +5083,35 @@ public class OptWnd extends Window {
 
     private void initkeybindsettings() {
         WidgetList<KeyBinder.ShortcutWidget> list = keybindsettings.add(new WidgetList<KeyBinder.ShortcutWidget>(UI.scale(300, 24), 16) {
-            @Override
-            public boolean mousedown(Coord c0, int button) {
-                boolean result = super.mousedown(c0, button);
-                KeyBinder.ShortcutWidget item = itemat(c0);
+            /*@Override
+            public boolean mousedown(Coord c, int button) {
+                boolean result = super.mousedown(c, button);
+                KeyBinder.ShortcutWidget item = itemat(c);
                 if (item != null) {
-                    c0 = c0.add(0, sb.val * itemsz.y);
-                    item.mousedown(c0.sub(item.parentpos(this)), button);
+                    c = xlate(item.c, true);
+                    item.mousedown(c, button);
+                    //c = c.add(0, sb.val * itemsz.y);
+                    //item.mousedown(c.sub(item.parentpos(this)), button);
                 }
-                return result;
-            }
+                return (result);
+            }*/
 
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                KeyBinder.ShortcutWidget item = itemat(c0);
+            /*@Override
+            public Object tooltip(Coord c, Widget prev) {
+                KeyBinder.ShortcutWidget item = itemat(c);
                 if (item != null) {
-                    c0 = c0.add(0, sb.val * itemsz.y);
-                    return item.tooltip(c0, prev);
+                    c = xlate(item.c, true);//c = c.add(0, sb.val * itemsz.y);
+                    return (item.tooltip(c, prev));
                 }
-                return super.tooltip(c, prev);
-            }
+                return (super.tooltip(c, prev));
+            }*/
         });
         list.canselect = false;
         KeyBinder.makeWidgets(() -> {
             for (int i = 0; i < list.listitems(); i++) {
                 list.listitem(i).update();
             }
-            return null;
+            return (null);
         }).forEach(list::additem);
 
 

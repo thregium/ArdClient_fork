@@ -28,6 +28,8 @@ public class WidgetList<T extends Widget> extends ListWidget<T> {
     public T additem(T item) {
         list.add(item);
         add(item, itempos(listitems() - 1));
+        sb.resize(contentsz().y);
+//        sb.max = Math.max(0, contentsz().y - sz.y);
         return item;
     }
 
@@ -39,6 +41,8 @@ public class WidgetList<T extends Widget> extends ListWidget<T> {
             } else {
                 item.unlink();
             }
+            sb.resize(contentsz().y);
+//            sb.max = Math.max(0, contentsz().y - sz.y);
         }
         return removed;
     }
@@ -51,6 +55,8 @@ public class WidgetList<T extends Widget> extends ListWidget<T> {
                 item.unlink();
             }
         }
+        sb.resize(contentsz().y);
+//        sb.max = Math.max(0, contentsz().y - sz.y);
         list.clear();
     }
 
@@ -113,15 +119,17 @@ public class WidgetList<T extends Widget> extends ListWidget<T> {
     }
 
     public T itemat(Coord c) {
-        int idx = (c.y / itemsz.y) + sb.val;
+        int idx = c.x > itemsz.x ? -1 : (c.y / itemsz.y) + sb.val;
         if (idx >= listitems() || idx < 0)
             return (null);
         return (listitem(idx));
     }
 
     protected void itemclick(T item, int button) {
-        if (button == 1)
+        if (button == 1) {
             change(item);
+            item.mousedown(xlate(item.c, true), button);
+        }
     }
 
     @Override
@@ -151,10 +159,11 @@ public class WidgetList<T extends Widget> extends ListWidget<T> {
         if (super.mousedown(c, button))
             return (true);
         T item = itemat(c);
-        if ((item == null) && (button == 1))
+        if ((item == null) && (button == 1)) {
             change(null);
-        else if (item != null)
+        } else if (item != null) {
             itemclick(item, button);
+        }
         return (true);
     }
 
@@ -172,5 +181,19 @@ public class WidgetList<T extends Widget> extends ListWidget<T> {
     public boolean mousewheel(Coord c, int amount) {
         sb.ch(amount);
         return (true);
+    }
+
+    protected Object itemtooltip(Coord c, T item) {
+        return (item.tooltip(xlate(item.c, true), null));
+    }
+
+    @Override
+    public Object tooltip(Coord c, Widget prev) {
+        final T item = itemat(c);
+        if (item != null) {
+            return (itemtooltip(c, item));
+        } else {
+            return (super.tooltip(c, prev));
+        }
     }
 }

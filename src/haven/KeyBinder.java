@@ -307,11 +307,11 @@ public class KeyBinder {
                               ui.root.add(new ShortcutSelectorWdg(keyBind, ShortcutWidget.this), ui.mc.sub(50, 20));
                           }
 
-                          @Override
+                          /*@Override
                           public boolean mouseup(Coord c, int button) {
                               //FIXME:a little hack, because WidgetList does not pass correct click coordinates if scrolled
                               return super.mouseup(Coord.z, button);
-                          }
+                          }*/
                       },
                     UI.scale(225, 0));
             this.keyBind = bind;
@@ -322,6 +322,7 @@ public class KeyBinder {
             btn.autosize(true);
             btn.c.x = UI.scale(300) - btn.sz.x;
             add(new Label(bind.action.name), UI.scale(5, 5));
+//            pack();
         }
 
         @Override
