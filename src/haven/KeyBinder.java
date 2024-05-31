@@ -322,7 +322,7 @@ public class KeyBinder {
             btn.autosize(true);
             btn.c.x = UI.scale(300) - btn.sz.x;
             add(new Label(bind.action.name), UI.scale(5, 5));
-//            pack();
+            pack();
         }
 
         @Override

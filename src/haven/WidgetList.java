@@ -128,7 +128,7 @@ public class WidgetList<T extends Widget> extends ListWidget<T> {
     protected void itemclick(T item, int button) {
         if (button == 1) {
             change(item);
-            item.mousedown(xlate(item.c, true), button);
+//            item.mousedown(xlate(item.c, true), button);
         }
     }
 
