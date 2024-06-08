@@ -10,11 +10,14 @@ import haven.SkelSprite;
 import haven.Utils;
 
 import java.awt.Color;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class Mark extends SkelSprite implements Gob.Overlay.SetupMod {
     public static final String CHAT_FMT = "$Mark{%d,%d}";
-    public static final String CHAT_TILE_FMT = "$MarkTile{%d,%f,%f}";
+    public static final String CHAT_TILE_FMT = "$MarkTile{%d,%s,%s}";
     public static final Pattern CHAT_FMT_PAT = Pattern.compile("\\$Mark\\{([0-9]+),([0-9]+)}");
     public static final Pattern CHAT_TILE_FMT_PAT = Pattern.compile("\\$MarkTile\\{(-?[0-9]+),([0-9]+\\.[0-9]+),([0-9]+\\.[0-9]+)}");
     private static final Resource tgtfx = Resource.local().loadwait("custom/fx/partytgt");
@@ -31,9 +34,15 @@ public class Mark extends SkelSprite implements Gob.Overlay.SetupMod {
         haslife = life != -1;
     }
 
+    private static final Map<Double, GLState> stateMap = Collections.synchronizedMap(new HashMap<>());
+
     private GLState getfx() {
-        emi[3] = clr[3] = (float) (1 + Math.sin(2 * Math.PI * time / 3000f));
-        return new Material.Colors(clr, clr, clr, emi, 128);
+        return (stateMap.computeIfAbsent(Math.sin(2 * Math.PI * time / 3000f), sin -> {
+            float f = (float) (1 + sin);
+            float[] emi = {this.emi[0], this.emi[1], this.emi[2], f};
+            float[] clr = {this.clr[0], this.clr[1], this.clr[2], f};
+            return (new Material.Colors(clr, clr, clr, emi, 128));
+        }));
     }
 
     public void setLife(final int life) {
@@ -60,8 +69,7 @@ public class Mark extends SkelSprite implements Gob.Overlay.SetupMod {
     }
 
     @Override
-    public void setupgob(GLState.Buffer buf) {
-    }
+    public void setupgob(GLState.Buffer buf) {}
 
     @Override
     public void setupmain(RenderList rl) {

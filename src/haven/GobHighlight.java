@@ -1,6 +1,10 @@
 package haven;
 
 import java.awt.Color;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class GobHighlight extends GAttrib {
     private float[] emi = {1.0f, 0.0f, 1.0f, 0.0f};
@@ -15,6 +19,8 @@ public class GobHighlight extends GAttrib {
         super(g);
     }
 
+    private static final Map<Long, Material.Colors> stateMap = Collections.synchronizedMap(new HashMap<>());
+    private final AtomicLong atomicLong = new AtomicLong();
     public GLState getfx() {
         if (cycle <= 0)
             return GLState.nullstate;
@@ -37,9 +43,10 @@ public class GobHighlight extends GAttrib {
                     inc = true;
                 }
             }
+            atomicLong.incrementAndGet();
         }
 
-        return new Material.Colors(clr, clr, clr, emi, 128);
+        return (stateMap.computeIfAbsent(atomicLong.get(), t -> (new Material.Colors(clr, clr, clr, emi, 128))));
     }
 
     public Object staticp() {

@@ -810,8 +810,8 @@ public class MenuGrid extends Widget {
                 Resource.local().load("paginae/amber/livestock"),
                 (pag) -> {
                     if (ui.gui != null) {
-                        ui.gui.livestockwnd.show(!ui.gui.livestockwnd.visible);
-                        ui.gui.livestockwnd.raise();
+                        ui.gui.livestockwnd().show(!ui.gui.livestockwnd().visible);
+                        ui.gui.livestockwnd().raise();
                     }
                 }
         ));

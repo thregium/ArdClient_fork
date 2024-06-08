@@ -337,7 +337,7 @@ public class Fightview extends MovableWidget {
                         gob.ols.remove(ol);
                     }
                 } else if (Config.showothercombatinfo && (configuration.showcurrentenemieinfo || !rel.equals(current))) {
-                    gob.addol(new Gob.Overlay(GobCombatSprite.id, new GobCombatSprite(gob, rel)));
+                    gob.addol(new Gob.Overlay(gob, GobCombatSprite.id, new GobCombatSprite(gob, rel)));
                 }
             }
         }

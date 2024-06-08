@@ -108,6 +108,7 @@ import static haven.DefSettings.SHOWPCLAIM;
 import static haven.DefSettings.SHOWVCLAIM;
 import static haven.DefSettings.SYMMETRICOUTLINES;
 import static haven.Gob.createBPRadSprite;
+import static haven.MCache.cmapsd;
 import static haven.MCache.tilesz;
 import static haven.OCache.posres;
 
@@ -2321,7 +2322,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         Loader.Future<Plob> placing = this.placing;
         if ((placing != null) && placing.done()) {
             Plob ob = placing.get();
-            synchronized(ob) {
+            synchronized (ob) {
                 ob.ctick((int) (dt * 1000));
             }
         }
@@ -2708,7 +2709,10 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     }
                     if (target != null)
                         showSpecialMenu(target);
-                }
+                    else
+                        showSpecialMenu(mc);
+                } else
+                    showSpecialMenu(mc);
             } else {
                 lastItemactClickArgs = null;
                 // reset alt so we could walk with alt+lmb while having item on the cursor
@@ -3774,7 +3778,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             if (hlt != null && hlt.quality > 0) {
                 Gob.Overlay ol = gob.findol(Sprite.GOB_QUALITY_ID);
                 if (ol == null)
-                    gob.addol(new Gob.Overlay(Sprite.GOB_QUALITY_ID, new GobQualitySprite(hlt.quality)));
+                    gob.addol(new Gob.Overlay(gob, Sprite.GOB_QUALITY_ID, new GobQualitySprite(hlt.quality)));
                 else if (((GobQualitySprite) ol.spr).val != hlt.quality)
                     ((GobQualitySprite) ol.spr).update(hlt.quality);
                 oc.changed(gob);
@@ -3942,6 +3946,33 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         });
     }
 
+    public void showSpecialMenu(Coord2d mc) {
+        final FlowerMenu modmenu = new FlowerMenu((selection) -> {
+            switch (selection) {
+                case 0: //Mark for party
+                    ui.sess.glob.map.getgridto(mc.floor(tilesz)).ifPresent(grid -> {
+                        final Coord2d off = mc.div(tilesz).mod(cmapsd);
+                        final Coord2d mc1 = new Coord2d(grid.ul).add(off).mul(tilesz);
+                        final Gob g = ui.sess.glob.oc.new ModdedGob(mc1, 0);
+
+                        boolean sent = false;
+                        for (Widget wdg = ui.gui.chat.lchild; wdg != null; wdg = wdg.prev) {
+                            if (wdg instanceof ChatUI.PartyChat) {
+                                final ChatUI.PartyChat chat = (ChatUI.PartyChat) wdg;
+                                chat.send(String.format(Mark.CHAT_TILE_FMT, grid.id, off.x, off.y));
+                                sent = true;
+                            }
+                        }
+                        if (!sent)
+                            g.daddol(Mark.id, new Mark(20000));
+                    });
+                    break;
+            }
+        }, "Mark for party");
+        ui.root.getchilds(FlowerMenu.class).forEach(wdg -> wdg.choose(null));
+        ui.root.add(modmenu, ui.mc);
+    }
+
     private Optional<Gob> gobFromClick(final ClickInfo inf) {
         if (inf == null)
             return Optional.empty();
@@ -3967,7 +3998,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 CustomFakeGrid box = CustomFakeGrid.boxList.get(i);
                 int fakeid = ("fakegrid" + i).hashCode();
                 if (gob.findol(fakeid) == null) {
-                    gob.ols.add(new Gob.Overlay(fakeid, box));
+                    gob.ols.add(new Gob.Overlay(gob, fakeid, box));
                 }
             }
         }

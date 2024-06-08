@@ -174,7 +174,8 @@ public class OCache implements Iterable<Gob> {
             ResDrawable resDrawable = g.getattr(ResDrawable.class);
             if (resDrawable != null) {
 //                resDrawable.refresh();
-//                g.delattr(ResDrawable.class);
+                g.delattr(ResDrawable.class);
+                g.setattr(new ResDrawable(g, resDrawable.res, resDrawable.backup));
             }
         }
     }
@@ -272,6 +273,7 @@ public class OCache implements Iterable<Gob> {
             super(OCache.this.glob, c, nextvirt.getAndDecrement());
             this.a = a;
             virtual = true;
+            add(this);
         }
     }
 
@@ -525,7 +527,7 @@ public class OCache implements Iterable<Gob> {
         Gob.Overlay ol = g.findol(Sprite.GOB_QUALITY_ID);
         if (quality > 0) {
             if (ol == null)
-                g.addol(new Gob.Overlay(Sprite.GOB_QUALITY_ID, new GobQualitySprite(quality)));
+                g.addol(new Gob.Overlay(g, Sprite.GOB_QUALITY_ID, new GobQualitySprite(quality)));
             else if (((GobQualitySprite) ol.spr).val != quality)
                 ((GobQualitySprite) ol.spr).update(quality);
         } else {
@@ -541,7 +543,7 @@ public class OCache implements Iterable<Gob> {
         Gob.Overlay ol = g.findol(Sprite.GOB_CUSTOM_ID);
         if (!attr.equals("")) {
             if (ol == null)
-                g.addol(new Gob.Overlay(Sprite.GOB_CUSTOM_ID, new GobCustomSprite(attr, life)));
+                g.addol(new Gob.Overlay(g, Sprite.GOB_CUSTOM_ID, new GobCustomSprite(attr, life)));
             else if (!((GobCustomSprite) ol.spr).val.equals(attr))
                 ((GobCustomSprite) ol.spr).update(attr);
         } else {
@@ -578,7 +580,7 @@ public class OCache implements Iterable<Gob> {
         for (final Gob g : values) {
             g.resname().ifPresent(name -> {
                 if (gname.equals(name)) {
-                    g.addol(new Gob.Overlay(Sprite.GOB_TEXT_ID, new TextOverlay(g)));
+                    g.addol(new Gob.Overlay(g, Sprite.GOB_TEXT_ID, new TextOverlay(g)));
                 }
             });
         }

@@ -167,7 +167,7 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
     public CraftHistoryBelt histbelt;
     private ErrorSysMsgCallback errmsgcb;
     public StudyWnd studywnd;
-    public haven.livestock.LivestockManager livestockwnd;
+    private haven.livestock.LivestockManager livestockwnd;
     public ItemClickCallback itemClickCallback;
     public PetalClickCallback petalClickCallback;
     public boolean drinkingWater, lastDrinkingSucessful;
@@ -519,8 +519,6 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         debuglog = chat.add(new ChatUI.DebugChat());
         opts.c = sz.sub(opts.sz).div(2);
         pointer = add(new MapPointer());
-        livestockwnd = add(new haven.livestock.LivestockManager(), new Coord(0, sz.y - 200));
-        livestockwnd.hide();
         foragehelper = add(new ForageHelperWnd());
         foragehelper.hide();
         timers = add(new TimersWnd(ui.sess.glob));
@@ -589,6 +587,14 @@ public class GameUI extends ConsoleHost implements Console.Directory, UI.Message
         if (configuration.autorunscriptsenable) {
             configuration.autorunscripts.forEach(name -> PBotScriptlist.getScript(name.replace(":", File.separator)).runScript());
         }
+    }
+
+    public haven.livestock.LivestockManager livestockwnd() {
+        if (livestockwnd == null) {
+            livestockwnd = add(new haven.livestock.LivestockManager(), new Coord(0, sz.y - 200));
+            livestockwnd.hide();
+        }
+        return (livestockwnd);
     }
 
     @Override

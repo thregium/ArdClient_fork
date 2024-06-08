@@ -377,13 +377,13 @@ public class UI {
 
     private void processWindowContent(long wndid, GameUI gui, Window pwdg, Widget wdg) {
         String cap = pwdg.origcap;
-        if (gui != null && gui.livestockwnd.pendingAnimal != null && gui.livestockwnd.pendingAnimal.wndid == wndid) {
+        if (gui != null && gui.livestockwnd().pendingAnimal != null && gui.livestockwnd().pendingAnimal.wndid == wndid) {
             if (wdg instanceof TextEntry)
-                gui.livestockwnd.applyName(wdg);
+                gui.livestockwnd().applyName(wdg);
             else if (wdg instanceof Label)
-                gui.livestockwnd.applyAttr(cap, wdg);
+                gui.livestockwnd().applyAttr(cap, wdg);
             else if (wdg instanceof ProxyFrame && ((ProxyFrame)wdg).ch instanceof Avaview)
-                gui.livestockwnd.applyId(((ProxyFrame)wdg).ch);
+                gui.livestockwnd().applyId(((ProxyFrame)wdg).ch);
         } else if (wdg instanceof ISBox && cap.equals("Stockpile")) {
             TextEntry entry = new TextEntry(40, "") {
                 String backup = text();
@@ -464,8 +464,8 @@ public class UI {
 //                //wdg.add(new CharterList(150, 20), new Coord(0, 50));
 //                wdg.presize();
 //            }
-        } else if (gui != null && gui.livestockwnd != null && gui.livestockwnd.getAnimalPanel(cap) != null) {
-            gui.livestockwnd.initPendingAnimal(wdgid, cap);
+        } else if (gui != null && gui.livestockwnd() != null && gui.livestockwnd().getAnimalPanel(cap) != null) {
+            gui.livestockwnd().initPendingAnimal(wdgid, cap);
         }
     }
 

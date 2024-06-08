@@ -1268,7 +1268,7 @@ public class OptWnd extends Window {
                     for (Gob g : ui.sess.glob.oc.getallgobs()) {
                         if (val) {
                             if (g.findol(GobSpeedSprite.id) == null && (g.type == Type.HUMAN || g.type == Type.ANIMAL || g.name().startsWith("gfx/kritter/")))
-                                g.addol(new Gob.Overlay(GobSpeedSprite.id, new GobSpeedSprite(g)));
+                                g.addol(new Gob.Overlay(g, GobSpeedSprite.id, new GobSpeedSprite(g)));
                         } else {
                             Gob.Overlay speed = g.findol(GobSpeedSprite.id);
                             if (speed != null)
@@ -1297,7 +1297,7 @@ public class OptWnd extends Window {
                     if (player != null) {
                         if (val) {
                             if (player.findol(-4921) == null)
-                                player.addol(new Gob.Overlay(-4921, new SnowFall(player)));
+                                player.addol(new Gob.Overlay(player, -4921, new SnowFall(player)));
                         } else {
                             Gob.Overlay snow = player.findol(-4921);
                             if (snow != null)

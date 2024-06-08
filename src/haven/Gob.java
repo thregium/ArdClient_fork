@@ -105,24 +105,24 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
     public static Overlay createBPRadSprite(Gob gob, String name) {
         switch (name) {
             case "animalradius":
-                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 100.0F, -10.0F, BPRadSprite.smatDanger));
+                return new Overlay(gob, BPRadSprite.getId(name), new BPRadSprite(gob, 100.0F, -10.0F, BPRadSprite.smatDanger));
             case "doubleanimalradius":
-                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 200.0F, -20.0F, BPRadSprite.smatDanger));
+                return new Overlay(gob, BPRadSprite.getId(name), new BPRadSprite(gob, 200.0F, -20.0F, BPRadSprite.smatDanger));
             case "rovlsupport":
-                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 100.03125F, 0, BPRadSprite.smatSupports));
+                return new Overlay(gob, BPRadSprite.getId(name), new BPRadSprite(gob, 100.03125F, 0, BPRadSprite.smatSupports));
             case "rovlcolumn":
-                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 125.0F, 0, BPRadSprite.smatSupports));
+                return new Overlay(gob, BPRadSprite.getId(name), new BPRadSprite(gob, 125.0F, 0, BPRadSprite.smatSupports));
             case "rovlbeam":
-                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 149.96094F, 0, BPRadSprite.smatSupports));
+                return new Overlay(gob, BPRadSprite.getId(name), new BPRadSprite(gob, 149.96094F, 0, BPRadSprite.smatSupports));
             case "rovltrough":
-                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 200.0625F, -10.0F, BPRadSprite.smatTrough));
+                return new Overlay(gob, BPRadSprite.getId(name), new BPRadSprite(gob, 200.0625F, -10.0F, BPRadSprite.smatTrough));
             case "rovlbeehive":
-                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 149.96094F, -10.0F, BPRadSprite.smatBeehive));
+                return new Overlay(gob, BPRadSprite.getId(name), new BPRadSprite(gob, 149.96094F, -10.0F, BPRadSprite.smatBeehive));
             case "rovlbarterhand": {
-                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 55.0f, -10.0F, BPRadSprite.smatBarter));
+                return new Overlay(gob, BPRadSprite.getId(name), new BPRadSprite(gob, 55.0f, -10.0F, BPRadSprite.smatBarter));
             }
             case "rovlmoundbed": {
-                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 225.5F, -10.0F, BPRadSprite.smatMoundbed));
+                return new Overlay(gob, BPRadSprite.getId(name), new BPRadSprite(gob, 225.5F, -10.0F, BPRadSprite.smatMoundbed));
             }
             default:
                 return (null);
@@ -806,7 +806,7 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
                     type = Type.UNKNOWN;
 
                 if (configuration.gobspeedsprite && (type == Type.HUMAN || type == Type.ANIMAL || name.startsWith("gfx/kritter/")) && !isDead()) {
-                    addol(new Overlay(GobSpeedSprite.id, new GobSpeedSprite(this)));
+                    addol(new Overlay(this, GobSpeedSprite.id, new GobSpeedSprite(this)));
                     //if(id == ui.gui.map.rlplgob) {
                     //    addol(new Overlay(-4921, new SnowFall(this)));
                     //}
@@ -814,7 +814,7 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
 
                 if (configuration.snowfalloverlay && type == Type.HUMAN && isplayer()) {
                     if (findol(-4921) == null)
-                        addol(new Overlay(-4921, new SnowFall(this)));
+                        addol(new Overlay(this, -4921, new SnowFall(this)));
                 }
                 if (type == Type.UNKNOWN && matches(matches, () -> name,"gfx/terobjs/trees/[a-zA-Z\\-]+stump$"))
                     type = Type.STUMP;
@@ -1264,7 +1264,7 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
     }
 
     public Overlay daddol(int id, Sprite spr) {
-        final Overlay ol = new Overlay(id, spr);
+        final Overlay ol = new Overlay(this, id, spr);
         daddol(ol);
         return ol;
     }
@@ -1918,7 +1918,7 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
                                     try {
                                         GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
                                         if (bbox != null)
-                                            addol(new Overlay(GobHitbox.olid_solid, new GobHitbox(this, bbox, true)));
+                                            addol(new Overlay(this, GobHitbox.olid_solid, new GobHitbox(this, bbox, true)));
                                     } catch (Loading l) {}
                                 }
                             } else if (ol != null)
@@ -1968,7 +1968,7 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
                     try {
                         GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
                         if (bbox != null) {
-                            addol(new Overlay(GobHitbox.olid, new GobHitbox(this, bbox, false)));
+                            addol(new Overlay(this, GobHitbox.olid, new GobHitbox(this, bbox, false)));
                         }
                     } catch (Loading l) {}
                 }
@@ -1996,9 +1996,9 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
                     }
                     if (plantOl == null && (stage == cropstgmaxval || (Config.showfreshcropstage ? stage >= 0 : stage > 0) && stage < 6)) {
                         if (configuration.newCropStageOverlay)
-                            addol(new Gob.Overlay(Sprite.GROWTH_STAGE_ID, new newPlantStageSprite(stage, cropstgmaxval, type == Type.MULTISTAGE_PLANT, (res.basename().contains("turnip") || res.basename().contains("leek") || res.basename().contains("carrot")))));
+                            addol(new Gob.Overlay(this, Sprite.GROWTH_STAGE_ID, new newPlantStageSprite(stage, cropstgmaxval, type == Type.MULTISTAGE_PLANT, (res.basename().contains("turnip") || res.basename().contains("leek") || res.basename().contains("carrot")))));
                         else
-                            addol(new Gob.Overlay(Sprite.GROWTH_STAGE_ID, new PlantStageSprite(stage, cropstgmaxval, type == Type.MULTISTAGE_PLANT, (res.basename().contains("turnip") || res.basename().contains("leek")))));
+                            addol(new Gob.Overlay(this, Sprite.GROWTH_STAGE_ID, new PlantStageSprite(stage, cropstgmaxval, type == Type.MULTISTAGE_PLANT, (res.basename().contains("turnip") || res.basename().contains("leek")))));
                     } else if (plantOl != null && !Config.showfreshcropstage && stage == 0 || (stage != cropstgmaxval && stage >= 6)) {
                         remol(plantOl);
                     } else if (plantOl != null && configuration.newCropStageOverlay && plantOl.spr instanceof newPlantStageSprite && ((newPlantStageSprite) plantOl.spr).stg != stage) {
@@ -2024,7 +2024,7 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
                             int minStage = (type == Type.TREE ? 10 : 30);
                             int growPercents = (int) Math.ceil((float) (fscale - minStage) / (float) (100 - minStage) * 100f);
                             if (plantOl == null) {
-                                addol(new Gob.Overlay(Sprite.GROWTH_STAGE_ID, new TreeStageSprite(growPercents)));
+                                addol(new Gob.Overlay(this, Sprite.GROWTH_STAGE_ID, new TreeStageSprite(growPercents)));
                             } else if (((TreeStageSprite) plantOl.spr).val != growPercents) {
                                 ((TreeStageSprite) plantOl.spr).update(growPercents);
                             }
@@ -2088,15 +2088,15 @@ public class Gob implements Rendered, Sprite.Owner, Skeleton.ModOwner, Skeleton.
                 Overlay box = findol(boxhash);
                 Overlay grid = findol(gridhash);
                 if (border == null && configuration.playerbordersprite)
-                    addol(new Overlay(borderhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(9)), () -> new Color(configuration.playerbordercolor, true), new Coord2d(MCache.cmaps))));
+                    addol(new Overlay(this, borderhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(9)), () -> new Color(configuration.playerbordercolor, true), new Coord2d(MCache.cmaps))));
                 else if (border != null && !configuration.playerbordersprite)
                     remol(border);
                 if (box == null && configuration.playerboxsprite)
-                    addol(new Overlay(boxhash, new RectSprite(this, new Coord2d(MCache.cmaps), () -> new Color(configuration.playerboxcolor, true), new Coord2d(MCache.cmaps))));
+                    addol(new Overlay(this, boxhash, new RectSprite(this, new Coord2d(MCache.cmaps), () -> new Color(configuration.playerboxcolor, true), new Coord2d(MCache.cmaps))));
                 else if (box != null && !configuration.playerboxsprite)
                     remol(box);
                 if (grid == null && configuration.gridboxsprite)
-                    addol(new Overlay(gridhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(11)), () -> new Color(configuration.gridboxcolor, true), new Coord2d(MCache.cmaps.mul(11)))));
+                    addol(new Overlay(this, gridhash, new RectSprite(this, new Coord2d(MCache.cmaps.mul(11)), () -> new Color(configuration.gridboxcolor, true), new Coord2d(MCache.cmaps.mul(11)))));
                 else if (grid != null && !configuration.gridboxsprite)
                     remol(grid);
             }

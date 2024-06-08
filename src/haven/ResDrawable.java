@@ -34,6 +34,7 @@ public class ResDrawable extends Drawable implements EquipTarget {
     public final Indir<Resource> res;
     public Sprite spr = null;
     public MessageBuf sdt;
+    public MessageBuf backup;
     private int delay = 0;
     protected boolean inited;
     protected Loading error;
@@ -42,6 +43,7 @@ public class ResDrawable extends Drawable implements EquipTarget {
         super(gob);
         this.res = res;
         this.sdt = new MessageBuf(sdt);
+        backup = new MessageBuf(sdt);
         waitforinit();
     }
 

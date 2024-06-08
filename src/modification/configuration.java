@@ -661,7 +661,7 @@ public class configuration {
         while (configuration.getCurrentsnow(oc) < configuration.blizzarddensity) {
             Gob g = getRandom(gobs);
             if (g.findol(-4921) != null || g.isplayer()) continue;
-            g.addol(new Gob.Overlay(-4921, new SnowFall(g)));
+            g.addol(new Gob.Overlay(g, -4921, new SnowFall(g)));
         }
     }
 
