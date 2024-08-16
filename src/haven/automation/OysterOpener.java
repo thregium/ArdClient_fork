@@ -5,6 +5,7 @@ import haven.Coord;
 import haven.GameUI;
 import haven.WItem;
 import haven.purus.pbot.PBotUtils;
+import haven.purus.pbot.PBotItem;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -23,6 +24,13 @@ public class OysterOpener implements Runnable {
         List<WItem> oysters = new ArrayList<>();
         try {
             oysters.addAll(PBotUtils.getPlayerInvContentsExact(gui.ui, "Oyster"));
+            for(PBotItem item : PBotUtils.playerInventory(gui.ui).getInventoryContents()) {
+                if(item.isStack()) {
+                    for(PBotItem ItemInStack : item.getStackContents()) {
+                        if(ItemInStack.getName().equals("Oyster")) oysters.add(ItemInStack.witem);
+                    }
+                }
+            }
             startsize = oysters.size();
         } catch (Exception q) {
         }
