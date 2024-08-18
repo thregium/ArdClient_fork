@@ -32,6 +32,7 @@ import haven.automation.AddCoalToSmelter;
 import haven.automation.AddWoodToSmokeShed;
 import haven.automation.AggroAll;
 import haven.automation.AreaPicker;
+import haven.automation.ButcherAnimal;
 import haven.automation.ButcherFish;
 import haven.automation.CoalToSmelters;
 import haven.automation.Coracleslol;
@@ -791,6 +792,14 @@ public class MenuGrid extends Widget {
                 (pag) -> {
                     if (ui.gui != null) {
                         new Thread(new ButcherFish(ui.gui), "ButcherFish").start();
+                    }
+                }
+        ));
+        addSpecial(new SpecialPagina(this, "paginae::amber::fish",
+                Resource.local().load("paginae/amber/fish"),
+                (pag) -> {
+                    if (ui.gui != null) {
+                        new Thread(new ButcherAnimal(ui.gui), "ButcherAnimal").start();
                     }
                 }
         ));
