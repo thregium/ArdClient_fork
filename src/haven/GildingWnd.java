@@ -93,6 +93,8 @@ public class GildingWnd extends Window {
     }
 
     private Pair<Double, BufferedImage> findMatches() {
+        //k = 1 - 2^(-sqrt(sum(matched attr^2)) / 100)
+        //if(match = 1) k = 1 - 2^(-(matched attr) / 100)
         try {
             CharWnd charWnd = ui.gui.chrwdg;
 

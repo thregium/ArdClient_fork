@@ -132,9 +132,11 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     private MCache.Overlay miningOverlay;
     private Coord3f camoff = new Coord3f(Coord3f.o);
     public double shake = 0.0;
-    public static double plobpgran = Utils.getprefd("plobpgran", 8);
+    public static double plobpgran = Utils.getprefd("plobpgran", 44);
+    //쉬프트 누르고 건설시 움직일때 이동 단위(1 / plobpgran)칸
     public static int plobgran = (int) plobpgran;
     public static double plobagran = Utils.getprefd("plobagran", 16);
+    //쉬프트 누르고 건설시 이동 각도
     private static final Map<String, Class<? extends Camera>> camtypes = new HashMap<>();
     public String tooltip;
     private boolean showgrid = Config.showgridlines;
