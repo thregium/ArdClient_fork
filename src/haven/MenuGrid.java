@@ -65,6 +65,7 @@ import haven.automation.TakeTrays;
 import haven.automation.TrellisDestroy;
 import haven.automation.TrellisHarvest;
 import haven.automation.farmer.FarmerBots;
+import haven.management.ManagementWindow;
 import haven.purus.Farmer;
 import haven.purus.Farmer2;
 import haven.purus.FlowerPicker;
@@ -795,8 +796,8 @@ public class MenuGrid extends Widget {
                     }
                 }
         ));
-        addSpecial(new SpecialPagina(this, "paginae::amber::fish",
-                Resource.local().load("paginae/amber/fish"),
+        addSpecial(new SpecialPagina(this, "paginae::academy::butcher",
+                Resource.local().load("paginae/academy/butcher"),
                 (pag) -> {
                     if (ui.gui != null) {
                         new Thread(new ButcherAnimal(ui.gui), "ButcherAnimal").start();
@@ -1370,6 +1371,15 @@ public class MenuGrid extends Widget {
                     put(0, (pag) -> CustomFakeGrid.toggle(ui.gui));
                     put(1, (pag) -> CustomFakeGrid.options(ui.gui));
                 }}));
+        addSpecial(new SpecialPagina(this, "management",
+                Resource.local().load("paginae/academy/management"),
+                (pag) -> {
+                    if (ui.gui != null) {
+                        ManagementWindow m = new ManagementWindow();
+                        Window w = m;
+                        ui.gui.add(w, new Coord(ui.gui.sz.x / 2 - w.sz.x / 2, ui.gui.sz.y / 2 - w.sz.y / 2 - 200));
+                    }
+                }));
     }
 
     protected void updlayout() {
