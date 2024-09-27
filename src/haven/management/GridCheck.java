@@ -1,13 +1,12 @@
 package haven.management;
 
-import haven.Config;
-import haven.Utils;
+import haven.*;
 
 import com.google.gson.*;
 
 public class GridCheck {
 
-    static void saveGridAdj(long id) {
+    static void saveGridAdj(UI ui, long id) {
         String s = "academy/grids/" + id;
         JsonObject adjGrid = new JsonObject();
         try {
@@ -26,9 +25,14 @@ public class GridCheck {
             while(adjArr.size() < 9) adjArr.add(0);
             for(int i = -1; i <= 1; i++) {
                 for(int j = -1; j <= 1; j++) {
-                    if(i == 0 && j == 0) continue;
+                    //if(i == 0 && j == 0) continue;
                     try {
-                        adjArr.set((i + 1) * 3 + (j + 1), new JsonPrimitive(-1));
+                        final Glob glob;
+                        Coord rc = new Coord(ui.gui.map.player().rc);
+                        rc.x += 1100 * i;
+                        rc.y += 1100 * j;
+                        long gridid = ui.gui.map.glob.map.getgrid(rc).id;
+                        adjArr.set((i + 1) * 3 + (j + 1), new JsonPrimitive(gridid));
                     }
                     catch(Exception e) {
 

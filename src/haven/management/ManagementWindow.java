@@ -12,7 +12,7 @@ public class ManagementWindow extends Window {
         add(new Button(200, "Register") {
             @Override
             public void click() {
-                GridCheck.saveGridAdj(-1);
+                GridCheck.saveGridAdj(ui, ui.gui.map.glob.map.getgrid(new Coord(ui.gui.map.player().rc)).id);
             }
         }, 50, 50);
     }

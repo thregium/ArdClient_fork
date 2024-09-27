@@ -1377,7 +1377,7 @@ public class MenuGrid extends Widget {
                     if (ui.gui != null) {
                         ManagementWindow m = new ManagementWindow();
                         Window w = m;
-                        ui.gui.add(w, new Coord(ui.gui.sz.x / 2 - w.sz.x / 2, ui.gui.sz.y / 2 - w.sz.y / 2 - 200));
+                        ui.gui.add(w, new Coord(ui.gui.sz.x / 2 - w.sz.x / 2, ui.gui.sz.y / 2 - w.sz.y / 2 - 300));
                     }
                 }));
     }
